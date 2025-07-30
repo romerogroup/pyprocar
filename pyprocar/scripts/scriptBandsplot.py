@@ -5,6 +5,7 @@ __date__ = "March 31, 2020"
 
 import logging
 import os
+from enum import Enum
 from typing import List
 
 import matplotlib.pyplot as plt
@@ -19,6 +20,56 @@ from pyprocar.utils.log_utils import set_verbose_level
 
 user_logger = logging.getLogger("user")
 logger = logging.getLogger(__name__)
+
+
+
+class BandStructureMode(Enum):
+    """
+    An enumeration for defining the modes of Band Structure representations.
+
+    Attributes
+    ----------
+    PLAIN : str
+        Represents the band structure in a simple, where the colors are the different bands.
+    PARAMETRIC : str
+        Represents the band structure in a parametric form, summing over the projections.
+    SACATTER : str
+        Represents the band structure in a scatter plot, where the colors are the different bands.
+    ATOMIC : str
+        Represents the band structure in an atomic level plot, plots singlr kpoint bands.
+    OVERLAY : str
+        Represents the band structure in an overlay plot, where the colors are the selected projections
+    OVERLAY_SPECIES : str
+        Represents the band structure in an overlay plot, where the colors are 
+        the different projection of the species.
+    OVERLAY_ORBITALS : str
+        Represents the band structure in an overlay plot, where  the colors are 
+        the different projection of the orbitals.
+    """
+    PLAIN = "plain"
+    PARAMETRIC = "parametric"
+    SACATTER = "scatter"
+    ATOMIC = "atomic"
+    OVERLAY = "overlay"
+    OVERLAY_SPECIES = "overlay_species"
+    OVERLAY_ORBITALS = "overlay_orbitals"
+    IPR = "ipr"
+    
+    @classmethod
+    def from_str(cls, mode: str):
+        try:
+            return cls[mode.upper()]
+        except KeyError:
+            raise ValueError(f"Invalid mode: {mode}. The modes available are: {cls.to_list()}")
+    
+    @classmethod
+    def to_list(cls):
+        return [mode.value for mode in cls]
+
+    @classmethod
+    def get_overlay_modes(cls):
+        return [cls.OVERLAY, cls.OVERLAY_SPECIES, cls.OVERLAY_ORBITALS]
+
 
 
 def bandsplot(
@@ -109,18 +160,21 @@ def bandsplot(
     """
 
     set_verbose_level(verbose)
+    
+    if quiet_welcome:
+        user_logger.setLevel(logging.ERROR)
 
     user_logger.info(f"If you want more detailed logs, set verbose to 2 or more")
     user_logger.info("_" * 100)
 
-    if not quiet_welcome:
-        welcome()
+
+    welcome()
 
     default_config = ConfigFactory.create_config(PlotType.BAND_STRUCTURE)
     config = ConfigManager.merge_configs(default_config, kwargs)
 
     user_logger.info("_" * 100)
-    modes_txt = " , ".join(config.modes)
+    modes_txt = " , ".join(BandStructureMode.to_list())
     message = f"""
             There are additional plot options that are defined in the configuration file. 
             You can change these configurations by passing the keyword argument to the function.
@@ -128,8 +182,6 @@ def bandsplot(
 
             Here is a list modes : {modes_txt}
             """
-    if not quiet_welcome:
-        user_logger.info(message)
 
     if print_plot_opts:
         for key, value in default_config.as_dict().items():
@@ -173,11 +225,13 @@ def bandsplot(
 
     projection_labels = []
     labels = []
-    if mode == "plain":
+    mode = BandStructureMode.from_str(mode)
+    
+    if mode == BandStructureMode.PLAIN:
         user_logger.info("Plotting bands in plain mode")
         ebs_plot.plot_bands()
 
-    elif mode == "ipr":
+    elif mode == BandStructureMode.IPR:
         user_logger.info("Plotting bands in IPR mode")
         weights = ebs_plot.ebs.ebs_ipr
         if config.weighted_color:
@@ -201,9 +255,9 @@ def bandsplot(
         )
         ebs_plot.set_colorbar_title(title="Inverse Participation Ratio")
 
-    elif mode in ["overlay", "overlay_species", "overlay_orbitals"]:
+    elif mode in BandStructureMode.get_overlay_modes():
         weights = []
-        if mode == "overlay_species":
+        if mode == BandStructureMode.OVERLAY_SPECIES:
             if orbitals is None:
                 orbitals = list(np.arange(len(ebs_plot.ebs.projected[0][0]), dtype=int))
 
@@ -222,7 +276,7 @@ def bandsplot(
                     spins=spins,
                 )
                 weights.append(w)
-        if mode == "overlay_orbitals":
+        elif mode == BandStructureMode.OVERLAY_ORBITALS:
             user_logger.info("Plotting bands in overlay orbitals mode")
             for iorb, orb in enumerate(["s", "p", "d", "f"]):
                 if orb == "f" and not ebs_plot.ebs.n_orbitals > 9:
@@ -244,7 +298,7 @@ def bandsplot(
 
                 weights.append(w)
 
-        elif mode == "overlay":
+        elif mode == BandStructureMode.OVERLAY:
             user_logger.info("Plotting bands in overlay mode")
             if isinstance(items, dict):
                 items = [items]
@@ -281,7 +335,7 @@ def bandsplot(
         ebs_plot.plot_parameteric_overlay(
             spins=spins, weights=weights, labels=projection_labels
         )
-    else:
+    elif mode in [BandStructureMode.PARAMETRIC, BandStructureMode.SACATTER, BandStructureMode.ATOMIC]:
 
         if atoms is not None and isinstance(atoms[0], str):
             atoms_str = atoms
@@ -326,7 +380,7 @@ def bandsplot(
             width_weights = None
         color_mask = projection_mask
         width_mask = projection_mask
-        if mode == "parametric":
+        if mode == BandStructureMode.PARAMETRIC:
             user_logger.info("Plotting bands in parametric mode")
             ebs_plot.plot_parameteric(
                 color_weights=color_weights,
@@ -337,7 +391,7 @@ def bandsplot(
                 labels=projection_labels,
             )
             ebs_plot.set_colorbar_title()
-        elif mode == "scatter":
+        elif mode == BandStructureMode.SACATTER:
             user_logger.info("Plotting bands in scatter mode")
             ebs_plot.plot_scatter(
                 color_weights=color_weights,
@@ -348,7 +402,7 @@ def bandsplot(
                 labels=projection_labels,
             )
             ebs_plot.set_colorbar_title()
-        elif mode == "atomic":
+        elif mode == BandStructureMode.ATOMIC:
             user_logger.info("Plotting bands in atomic mode")
             if ebs.kpoints.shape[0] != 1:
                 raise Exception("Must use a single kpoint")
@@ -366,12 +420,6 @@ def bandsplot(
 
             ebs_plot.set_xlabel(label=config.x_label)
             ebs_plot.set_colorbar_title()
-
-        else:
-            user_logger.warning(
-                f"Selected mode {mode} not valid. Please check the spelling"
-            )
-            raise ValueError(f"Selected mode {mode} not valid. Please check the spelling")
 
     ebs_plot.set_xticks(kticks, knames)
     ebs_plot.set_yticks(interval=elimit)
