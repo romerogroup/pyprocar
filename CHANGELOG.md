@@ -1,6 +1,50 @@
 
 ___
 
+# v6.5.0 (06-20-2025)
+
+##### Bugs
+- Fixed documentation link for Read the Docs
+- Updated publication links in getting started documentation
+- Updated license inclusion method in authors.rst
+- Refactored reciprocal lattice vector extraction logic
+- Increased max_distance in _keep_points_near_subset
+- Handled empty Fermi surfaces in FermiDataHandler
+- Updated download function import in __init__.py
+- Renamed dir parameter to dirpath in extract_ideal_test_data
+
+##### New Features
+- Added GitHub workflow scripts for release management
+- Revised README structure and added installation instructions
+- Enhanced documentation with new showcase images and sections
+- Added architecture overview and new image to documentation
+- Enhanced download_test_data function with threading
+- Improved tests and test data management
+- Added Read the Docs configuration file for documentation build
+- Enhanced merge message generation for pull requests
+- Implemented commit message summarization with previous context
+- Added PR summarization script and workflow
+
+##### Documentation
+- Updated documentation theme options and styling
+- Revised contributing guidelines for clarity and completeness
+- Added contributing guide to enhance community engagement
+- Updated Sphinx configuration and added Monokai color style
+- Updated commit message generation guidelines
+- Added myst_parser to documentation dependencies
+
+##### Maintenance
+- Moved to Read the Docs; removed built docs and moved Sphinx source to docs directory
+- Removed update_merge_commit.py script and associated workflow
+- Organized test structure and updated dependencies
+- Consolidated and reorganized import statements
+- Cleaned up import statements and improved formatting
+- Updated file handling to use Path objects in various classes
+
+___
+
+___
+
 # v6.4.6 (06-07-2025)
 
 ##### Bugs

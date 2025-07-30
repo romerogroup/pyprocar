@@ -18,11 +18,6 @@ from matplotlib import colors as mpcolors
 from pyprocar.core import FermiSurface
 from pyprocar.plotter import FermiSlicePlotter
 from pyprocar.utils import ROOT, data_utils, welcome
-from pyprocar.utils.log_utils import set_verbose_level
-
-with open(os.path.join(ROOT, "pyprocar", "cfg", "fermi_surface_2d.yml"), "r") as file:
-    plot_opt = yaml.safe_load(file)
-
 
 user_logger = logging.getLogger("user")
 logger = logging.getLogger(__name__)
@@ -62,16 +57,30 @@ def fermi2D(
     dpi: int = 100,
     ax: plt.Axes = None,
 ):
-    """This function plots the 2d fermi surface in the z = 0 plane
+    """Plot the 2D Fermi surface in a constant k_z plane.
+
+    This function generates 2D Fermi surface plots by slicing the 3D Fermi surface
+    at a specified k_z plane. It supports multiple visualization modes including
+    plain contours, parametric coloring, and spin texture analysis.
 
     Parameters
     ----------
-    code : str,
-        This parameter sets the code to parse, by default "vasp"
-    dirname : str, optional
-        This parameter is the directory of the calculation, by default ''
+    code : str
+        The DFT code used for the calculation. Options include 'vasp', 'qe', 'elk', 
+        'abinit', 'siesta', 'lobster', etc.
+    dirname : str
+        The directory path containing the DFT calculation files.
+    mode : str, optional
+        The plotting mode. Options are 'plain', 'plain_bands', 'parametric', or 
+        'spin_texture', by default 'plain'
+    use_cache : bool, optional
+        Whether to use cached EBS data if available, by default False
+    spin_projection : SpinProjection or str, optional
+        The spin projection component for spin texture mode. Options include 
+        'x', 'y', 'z', 'x^2', 'y^2', 'z^2', by default 'z^2'
     fermi : float, optional
-        The fermi energy. If none is given, the fermi energy in the directory will be used, by default None
+        The Fermi energy in eV. If None, the Fermi energy from the calculation 
+        will be used, by default None
     fermi_shift : float, optional
         The fermi energy shift, by default 0.0
     band_indices : List[List]
@@ -80,23 +89,74 @@ def fermi2D(
         A list of list that contains colors for the band index
         corresponding the band_indices for a given spin (Not implemented in new version)
     spins : List[int], optional
-        List of spins, by default [0]
+        List of spin indices to include. For non-collinear calculations, 
+        use [0], by default None (all spins)
     atoms : List[int], optional
-        List of atoms, by default None
+        List of atom indices for atomic projections, by default None (all atoms)
     orbitals : List[int], optional
-        List of orbitals, by default None
+        List of orbital indices for orbital projections, by default None (all orbitals)
     energy : float, optional
-        The energy to generate the iso surface.
-        When energy is None the 0 is used by default, which is the fermi energy,
-        by default None
+        The energy level (relative to Fermi) at which to generate the iso-surface.
+        When None, uses 0 (Fermi energy), by default None
     k_z_plane : float, optional
-        Which K_z plane to generate 2d fermi surface, by default 0.0
+        The k_z coordinate of the plane to slice for the 2D surface, by default 0.0
+    k_z_plane_tol : float, optional
+        Tolerance for selecting k-points near the k_z plane, by default 0.01
     rot_symm : int, optional
-        _description_, by default 1
+        Rotational symmetry factor to apply around the z-axis, by default 1
     translate : List[int], optional
-        Matrix to translate the kpoints, by default [0, 0, 0]
+        Translation vector [x, y, z] to apply to k-points, by default [0, 0, 0]
     rotation : List[int], optional
-         Matrix to rotate the kpoints, by default [0, 0, 0, 1]
+        Rotation parameters [angle, x, y, z] where angle is in degrees and 
+        [x, y, z] is the rotation axis, by default [0, 0, 0, 1]
+    point_density : int, optional
+        Density of points for spin texture interpolation, by default 10
+    interpolation : int, optional
+        Number of interpolation points for generating smooth contours, by default 300
+    linecollection_kwargs : dict, optional
+        Additional keyword arguments for matplotlib LineCollection, by default None
+    linestyles : tuple[str, str], optional
+        Line styles for different spin channels, by default ('solid', 'dashed')
+    colors : tuple[str, str], optional
+        Colors for different spin channels, by default None
+    linewidths : tuple[float, float], optional
+        Line widths for different spin channels, by default (0.2, 0.2)
+    alphas : tuple[float, float], optional
+        Alpha values (transparency) for different spin channels, by default (1.0, 1.0)
+    plot_scatter : bool, optional
+        Whether to plot scatter points in spin texture mode, by default True
+    plot_scatter_kwargs : dict, optional
+        Additional keyword arguments for scatter plot, by default None
+    plot_contours : bool, optional
+        Whether to plot contour lines, by default True
+    plot_contours_kwargs : dict, optional
+        Additional keyword arguments for contour plots, by default None
+    plot_arrows : bool, optional
+        Whether to plot spin direction arrows in spin texture mode, by default True
+    plot_arrows_kwargs : dict, optional
+        Additional keyword arguments for arrow plots, by default None
+    arrow_scale : float or None, optional
+        Scaling factor for arrow size in spin texture mode, by default 1.0
+    show_colorbar : bool, optional
+        Whether to display the colorbar, by default True
+    cmap : str, optional
+        Colormap name for the plot, by default 'plasma'
+    norm : matplotlib.colors.Normalize, optional
+        Normalization for the colormap, by default None
+    clim : tuple, optional
+        Color limits (vmin, vmax) for the colormap, by default (None, None)
+    colorbar_kwargs : dict, optional
+        Additional keyword arguments for colorbar creation, by default None
+    colorbar_tick_kwargs : dict, optional
+        Additional keyword arguments for colorbar tick formatting, by default None
+    colorbar_tick_params_kwargs : dict, optional
+        Additional keyword arguments for colorbar tick parameters, by default None
+    colorbar_label_kwargs : dict, optional
+        Additional keyword arguments for colorbar label formatting, by default None
+    add_legend : bool, optional
+        Whether to add a legend to the plot, by default False
+    show : bool, optional
+        Whether to display the plot immediately, by default True
     savefig : str, optional
         The filename to save the plot as., by default None
     spin_texture : bool, optional
@@ -128,9 +188,26 @@ def fermi2D(
     Raises
     ------
     RuntimeError
-        invalid option --translate
+        If the translate option is invalid (not length 1 or 3)
+    ValueError
+        If an invalid mode is specified
+
+    Examples
+    --------
+    Basic usage with VASP calculation:
+
+    >>> fermi2D(code='vasp', dirname='calculation_dir')
+
+    Plot with parametric coloring for specific atoms and orbitals:
+
+    >>> fermi2D(code='vasp', dirname='calculation_dir', mode='parametric',
+    ...         atoms=[0, 1], orbitals=[0, 1, 2])
+
+    Generate spin texture plot:
+
+    >>> fermi2D(code='vasp', dirname='calculation_dir', mode='spin_texture',
+    ...         spin_projection='z', plot_arrows=True)
     """
-    set_verbose_level(verbose)
 
     user_logger.info(f"If you want more detailed logs, set verbose to 2 or more")
     user_logger.info("_" * 100)
@@ -142,6 +219,7 @@ def fermi2D(
     user_logger.info("_" * 100)
     user_logger.info("### Parameters ###")
     user_logger.info(f"dirname         : {dirname}")
+    user_logger.info(f"mode            : {mode.value}")
     user_logger.info(f"bands           : {band_indices}")
     user_logger.info(f"atoms           : {atoms}")
     user_logger.info(f"orbitals        : {orbitals}")

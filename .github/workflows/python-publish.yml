@@ -5,15 +5,21 @@ on:
     branches:
       - main
 
+  push:
+    branches:
+      - main
+
 
 permissions:
   contents: write  # This allows the workflow to push changes
 
 jobs:
   build:
+  build:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
+      
       
       with:
         fetch-depth: 0  # Fetch all history so we can access all commit logs
@@ -31,7 +37,9 @@ jobs:
     - name: Test Build 
       run: |
         python -m setuptools_scm
+        python -m setuptools_scm
         python -m build
+        python -m setuptools_scm
         python -m setuptools_scm
 
     - name: Publish package

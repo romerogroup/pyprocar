@@ -49,7 +49,6 @@ class Structure:
         lattice=None,
         rotations=None,
     ):
-
         if fractional_coordinates is not None:
             self.fractional_coordinates = np.array(fractional_coordinates)
             self.cartesian_coordinates = np.dot(fractional_coordinates, lattice)
@@ -63,6 +62,15 @@ class Structure:
             self.fractional_coordinates = None
         self.atoms = np.array(atoms)
         self.lattice = np.array(lattice)
+    
+        if self.atoms.shape[0] == 0:
+            raise ValueError("atoms must be a non-empty list")
+        if self.fractional_coordinates.shape[0] == 0:
+            raise ValueError("fractional_coordinates must be a non-empty list")
+        if self.lattice.shape[0] == 0:
+            raise ValueError("lattice must be a non-empty list")
+        if self.atoms.shape[0] != self.fractional_coordinates.shape[0]:
+            raise ValueError("atoms and fractional_coordinates must have the same length")
 
         if (
             self.lattice is not None
@@ -370,9 +378,16 @@ class Structure:
             The wyckoff positions
         """
         wyckoff_positions = np.empty(shape=(self.natoms), dtype="<U4")
-        wyckoffs_temp = np.array(
-            spglib.get_symmetry_dataset(self._spglib_cell, symprec).wyckoffs
-        )
+        
+        spglib_dataset = spglib.get_symmetry_dataset(self._spglib_cell, symprec)
+        
+        if hasattr(spglib_dataset, "wyckoffs"):
+            wyckoffs_temp = np.array(spglib_dataset.wyckoffs)
+        elif isinstance(spglib_dataset, dict):
+            wyckoffs_temp = np.array(spglib_dataset["wyckoffs"])
+        else:
+            return None
+  
         group = np.zeros(shape=(self.natoms), dtype=int)
         counter = 0
         for iwyckoff in np.unique(wyckoffs_temp):

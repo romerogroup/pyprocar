@@ -79,7 +79,7 @@ logging_config = {
             "handlers": ["file"],
             "propagate": False,
         },
-        "user": {"level": "DEBUG", "handlers": ["user_console"], "propagate": False},
+        "user": {"level": "ERROR", "handlers": ["user_console"], "propagate": False},
         "tests": {"level": "DEBUG", "handlers": ["console"], "propagate": False},
     },
 }
