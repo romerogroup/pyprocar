@@ -12,7 +12,8 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 import numpy as np
 from numpy import array
 
-from pyprocar.core import DensityOfStates, Structure, get_ebs_from_data, kpoints
+from pyprocar.core import DensityOfStates, Structure, get_ebs_from_data
+from pyprocar.core import kpoints as kpoints_core
 from pyprocar.io.base import BaseParser
 from pyprocar.utils.strings import remove_comment
 
@@ -2134,7 +2135,7 @@ class VaspParser(BaseParser):
         if self.kpoints.knames is None:
             return None
 
-        return kpoints.KPath(
+        return kpoints_core.KPath(
             kpoints=kpoints,
             segment_names=self.kpoints.knames,
             n_grids=self.kpoints.ngrids,
