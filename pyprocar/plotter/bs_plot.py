@@ -5,6 +5,7 @@ __date__ = "March 31, 2020"
 
 import json
 import logging
+from dataclasses import dataclass
 from typing import Any, Dict, List
 
 import matplotlib as mpl
@@ -18,10 +19,13 @@ from matplotlib.ticker import MultipleLocator
 from pyvista import ColorLike
 
 from pyprocar.core import BandStructure2D, ElectronicBandStructurePath
+from pyprocar.core import kpoints as kpts
 
 logger = logging.getLogger(__name__)
 user_logger = logging.getLogger("user")
 
+
+    
 class BandStructurePlotter:
     """
     A plotter class for band structure using matplotlib.
@@ -34,7 +38,7 @@ class BandStructurePlotter:
         Figure resolution in dots per inch, by default 100
     """
 
-    def __init__(self, figsize=(8, 6), dpi=100, ax=None):
+    def __init__(self, figsize=(8, 6), dpi=100, ax=None, zero_fermi:bool=True):
         self.figsize = figsize
         self.dpi = dpi
 
@@ -43,30 +47,91 @@ class BandStructurePlotter:
             self.fig, self.ax = plt.subplots(figsize=figsize, dpi=dpi)
 
         self.ebs_store = {}
+        self.handles = {}
         self.kpath=None
+        self.shift_to_fermi = zero_fermi
+        self.fermi = 0.0
+        
+    def get_bands_limits(self):
+        """A method to get the default y tick interval"""
+        emin = 0
+        emax = 0
+        for ebs_name, ebs in self.ebs_store.items():
+            emin = min(emin, ebs.bands.min())
+            emax = max(emax, ebs.bands.max())
+        return (emin, emax)
 
-        self.set_plot_settings()
-        
-        
-    def _initiate_plot_args(self):
+
+    def set_plot_settings(self):
         """Helper method to initialize the plot options"""
-        self.set_xticks()
-        self.set_yticks()
-        self.set_xlabel()
-        self.set_ylabel()
-        self.set_xlim()
-        self.set_ylim()
+        if len(self.ebs_store) > 0:
+            self.set_xlim()
+            self.set_ylim()
+            self.set_xticks()
+            self.set_yticks()
+            self.set_xlabel()
+            self.set_ylabel()
+        else:
+            raise ValueError("No EBS objects added to the plotter")
         
     def add_ebs(self, ebs: ElectronicBandStructurePath, name=None):
         """A method to add an ElectronicBandStructure object to the plot"""
         n_ebs = len(self.ebs_store)
         if name is None:
             name = f"ebs-{n_ebs}"
+            
+        if self.shift_to_fermi:
+            ebs.shift_bands(-1*ebs.fermi, inplace=True)
+            
         self.ebs_store[name] = ebs
         self.kpath = ebs.kpath
         self.x = self.kpath.get_distances(as_segments=False)
+        self.set_plot_settings()
         
+    def get_plain_bands_data(self, ebs:ElectronicBandStructurePath):
+        return {
+            "distances": self.x,
+            "tick_names": self.kpath.tick_names,
+            "energies": ebs.bands,
+        }
         
+    def get_projected_bands_data(self, ebs:ElectronicBandStructurePath, 
+                                 atoms:List[int]=None, 
+                                 orbitals:List[int]=None, 
+                                 spins:List[int]=None):
+        weights = ebs.ebs_sum(
+            atoms=atoms, orbitals=orbitals, spins=spins
+        )
+        return {
+            "distances": self.x,
+            "tick_names": self.kpath.tick_names,
+            "energies": ebs.bands,
+            "projected_weights": weights,
+            "atoms": atoms,
+            "orbitals": orbitals,
+            "spins": spins,
+        }
+        
+    
+    
+    def plot_plain_bands(self, 
+                         color:str=None, 
+                         linestyle:str=None, 
+                         linewidth:float=None):
+        """A method to plot the plain bands"""
+        
+        plot_kwargs = {}
+        plot_kwargs["color"] = color
+        for ebs_name, ebs in self.ebs_store.items():
+            bands_data = self.get_plain_bands_data(ebs)
+ 
+            for ispin in ebs.spin_channels:
+                self.ax.plot(bands_data["distances"], bands_data["energies"][..., ispin], 
+                             label=f"{ebs_name} - {ispin}", 
+                             color=color)
+            # for i_spin in range(n_spins):
+            #     for i_band in range(n_bands):
+            #         self.handles[ebs_name] = self.ax.plot(self.x, ebs.bands[:, i_band, i_spin], label=f"{ebs_name} - {i_band} - {i_spin}")
         
     def draw_fermi(
         self,
@@ -95,7 +160,6 @@ class BandStructurePlotter:
         """A method to check if the ebs store is empty"""
         return len(self.ebs_store) == 0
         
-        
     def set_xticks(
         self,
         tick_positions: List[int] = None,
@@ -113,10 +177,9 @@ class BandStructurePlotter:
         color : str, optional
             A color for the ticks, by default "black"
         """
-        if self.kpath is not None and self.tick_positions is None:
-            self.tick_positions = self.kpath.tick_positions
-        if self.kpath is not None and self.tick_names is None:
-            self.tick_names = self.kpath.tick_names
+        if self.kpath is not None:
+            tick_positions = self.kpath.tick_positions
+            tick_names = self.kpath.tick_names
             
         if tick_positions is not None:
             for ipos in tick_positions:
@@ -126,11 +189,6 @@ class BandStructurePlotter:
         if tick_names is not None:
             logger.debug(f"tick_names: {tick_names}")
             self.ax.set_xticklabels(tick_names)
-
-        
-    def set_tick_params(self, **kwargs):
-        """A method to set the tick parameters"""
-        self.ax.tick_params(**kwargs)
 
     def set_yticks(
         self, 
@@ -153,6 +211,17 @@ class BandStructurePlotter:
         interval : List[float], optional
             The interval of the ticks, by default None
         """
+        
+        minor_y_tick_params = {} if minor_y_tick_params is None else minor_y_tick_params
+        major_y_tick_params = {} if major_y_tick_params is None else major_y_tick_params
+        
+        if interval is None:
+            bands_lim = self.get_bands_limits()
+            interval = (
+                bands_lim[0] - abs(bands_lim[0]) * 0.1,
+                bands_lim[1] * 1.1,
+            )
+            
         interval = abs(interval[1] - interval[0])
         if interval < 30 and interval >= 20:
             major = 5
@@ -199,7 +268,7 @@ class BandStructurePlotter:
 
         self.ax.set_xlim(interval)
 
-    def set_ylim(self, interval: List[float] = None):
+    def set_ylim(self, interval: List[float] = (-5,5)):
         """A method to set the y limit
 
         Parameters
@@ -207,14 +276,9 @@ class BandStructurePlotter:
         interval : List[float], optional
             A list containing the begining and the end of the interval, by default None
         """
-        if interval is None:
-            interval = (
-                self.ebs.bands.min() - abs(self.ebs.bands.min()) * 0.1,
-                self.ebs.bands.max() * 1.1,
-            )
         self.ax.set_ylim(interval)
 
-    def set_xlabel(self, label: str = None):
+    def set_xlabel(self, label: str = "K-path", **kwargs):
         """A method to set the x label
 
         Parameters
@@ -222,9 +286,7 @@ class BandStructurePlotter:
         label : str, optional
             String fo the x label name, by default "K vector"
         """
-        if label is None:
-            label = self.config.x_label
-            self.ax.set_xlabel(label, **self.config.x_label_params)
+        self.ax.set_xlabel(label, **kwargs)
 
     def set_ylabel(self, label: str = None, 
                    shifted_by_fermi: bool = True,
@@ -253,7 +315,10 @@ class BandStructurePlotter:
             String for the title, by default "Band Structure"
         """
         self.ax.set_title(label=label, **kwargs)
-
+        
+    def show(self):
+        """A method to show the plot"""
+        plt.show()
 
 
 
