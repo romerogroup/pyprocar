@@ -1068,7 +1068,7 @@ class ElectronicBandStructure:
         return IPR
 
     def ebs_ipr_atom(self):
-        """
+        r"""
         It returns the atom-resolved , pIPR:
 
         pIPR_j =  \\frac{\|c_j\|^4}{(\\sum_i \|c_i^2\|)^2}
