@@ -1557,7 +1557,13 @@ class VaspXML(collections.abc.Mapping):
         """
         Returns the fermi energy
         """
-        return self.data["general"]["dos"]["fermi"]
+        
+        if "fermi" in self.data["general"]["dos"]:
+            return self.data["general"]["dos"]["fermi"]
+        elif "efermi" in self.data["general"]["dos"]:
+            return self.data["general"]["dos"]["efermi"]
+        else:
+            return None
 
     @property
     def species(self):
@@ -2198,14 +2204,20 @@ class VaspParser(BaseParser):
 
     @property
     def structure(self):
-        if self.poscar is None:
+        if self.poscar is not None:
+            logger.info("Using poscar structure")
+            return Structure(
+                atoms=self.poscar.atoms,
+                fractional_coordinates=self.poscar.coordinates,
+                lattice=self.poscar.lattice,
+                rotations=self.outcar.rotations,
+            )
+
+        elif self.vasprun is not None and self.vasprun.structure is not None:
+            logger.info("Using vasprun structure")
+            return self.vasprun.structure
+        else:
             user_logger.warning(
                 "Issue with poscar file. Either it was not found or there is an issue with the parser"
             )
             return None
-        return Structure(
-            atoms=self.poscar.atoms,
-            fractional_coordinates=self.poscar.coordinates,
-            lattice=self.poscar.lattice,
-            rotations=self.outcar.rotations,
-        )
