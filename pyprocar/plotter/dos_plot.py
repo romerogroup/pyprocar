@@ -452,13 +452,17 @@ class DOSPlot:
         self, atoms, orbitals, spin_projections, principal_q_numbers
     ):
         dos_total = np.array(self.dos.total)
-        dos_total_projected = self.dos.dos_sum()
+        if self.dos.n_spins == 4:
+            dos_total_projected = self.dos.dos_sum(spins=spin_projections)
+        else:
+            dos_total_projected = self.dos.dos_sum()
         dos_projected = self.dos.dos_sum(
             atoms=atoms,
             principal_q_numbers=principal_q_numbers,
             orbitals=orbitals,
             spins=spin_projections,
         )
+            
         return dos_total, dos_total_projected, dos_projected
 
     def _get_spins_projections_and_channels(self, spins):
@@ -716,10 +720,17 @@ class DOSPlot:
         dos_total = dos_total[spin_channel, :]
         dos_projected = dos_projected[spin_channel, :]
         dos_total_projected = dos_total_projected[spin_channel, :]
+
+        # Should be between 0 and 1
         normalized_dos_projected = dos_projected / dos_total_projected
-
+        
+        # assert normalized_dos_projected.min() >= 0 and normalized_dos_projected.max() <= 1, "Issue with the normalization of the projected DOS"
+        # Removing issues points due to divisions by zero
         normalized_dos_projected = np.nan_to_num(normalized_dos_projected, 0)
-
+        threshold = max(abs(dos_total)) + 1
+        normalized_dos_projected[np.abs(normalized_dos_projected) > threshold] = 0
+        
+    
         if ispin > 0 and len(self.dos.total) > 1:
             dos_total *= -1
             dos_projected *= -1
