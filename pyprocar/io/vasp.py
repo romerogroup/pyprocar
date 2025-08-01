@@ -2113,7 +2113,6 @@ class VaspParser:
         if procar_filepath.exists():
             self.procar = Procar(procar)
         if kpoints_filepath.exists():
-            print(f"Parsing KPOINTS file: {kpoints_filepath}")
             self.kpoints = Kpoints(kpoints)
         if poscar_filepath.exists():
             self.poscar = Poscar(poscar)
@@ -2143,6 +2142,11 @@ class VaspParser:
         if self.outcar is None:
             user_logger.warning(
                 "Issue with outcar file. Either it was not found or there is an issue with the parser"
+            )
+            return None
+        if self.kpoints is None:
+            user_logger.warning(
+                "Issue with kpoints file. Either it was not found or there is an issue with the parser"
             )
             return None
         kgrid = self.kpoints.get("kgrid", None)
@@ -2177,14 +2181,20 @@ class VaspParser:
 
     @property
     def structure(self):
-        if self.poscar is None:
+        if self.poscar is not None:
+            logger.info("Using poscar structure")
+            return Structure(
+                atoms=self.poscar.atoms,
+                fractional_coordinates=self.poscar.coordinates,
+                lattice=self.poscar.lattice,
+                rotations=self.outcar.rotations,
+            )
+
+        elif self.vasprun is not None and self.vasprun.structure is not None:
+            logger.info("Using vasprun structure")
+            return self.vasprun.structure
+        else:
             user_logger.warning(
                 "Issue with poscar file. Either it was not found or there is an issue with the parser"
             )
             return None
-        return Structure(
-            atoms=self.poscar.atoms,
-            fractional_coordinates=self.poscar.coordinates,
-            lattice=self.poscar.lattice,
-            rotations=self.outcar.rotations,
-        )
