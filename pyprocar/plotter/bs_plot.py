@@ -5,40 +5,304 @@ __date__ = "March 31, 2020"
 
 import json
 import logging
-from dataclasses import dataclass
-from typing import Any, Dict, List
+from abc import ABC, abstractmethod
+from dataclasses import dataclass, field
+from typing import Any, Dict, List, Optional, Union
 
 import matplotlib as mpl
 import matplotlib.patches as mpatches
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import pyvista as pv
 from matplotlib.collections import LineCollection
 from matplotlib.ticker import MultipleLocator
-from pyvista import ColorLike
 
-from pyprocar.core import BandStructure2D, ElectronicBandStructurePath
-from pyprocar.core import kpoints as kpts
+from pyprocar.core import ElectronicBandStructure, KPath
+from pyprocar.core.ebs import ElectronicBandStructurePath
 
 logger = logging.getLogger(__name__)
-user_logger = logging.getLogger("user")
 
+# Base styling that all modes inherit
+@dataclass  
+class BasePlotStyle:
+    """Base styling configuration that all plot modes inherit"""
+    color: Union[str, List[str], Dict[int, str]] = None
+    linestyle: Union[str, List[str], Dict[int, str]] = None  
+    linewidth: Union[float, List[float], Dict[int, float]] = None
+    alpha: Union[float, List[float], Dict[int, float]] = None
+    label: Union[str, List[str], Dict[int, str]] = None
+    extra_kwargs: Dict[str, Union[Any, List[Any], Dict[int, Any]]] = field(default_factory=dict)
 
+# Mode-specific configurations
+@dataclass
+class PlainBandStyle(BasePlotStyle):
+    """Configuration for plain band plotting"""
+    pass
+
+@dataclass
+class ScatterPlotStyle(BasePlotStyle):
+    """Configuration for scatter plot mode"""
+    marker: Union[str, List[str], Dict[int, str]] = None
+    markersize: Union[float, List[float], Dict[int, float]] = None
+    markeredgecolor: Union[str, List[str], Dict[int, str]] = None
+    markerfacecolor: Union[str, List[str], Dict[int, str]] = None
+
+@dataclass
+class ParametricPlotStyle(BasePlotStyle):
+    """Configuration for parametric plot mode"""
+    cmap: Union[str, List[str], Dict[int, str]] = None
+    vmin: Union[float, List[float], Dict[int, float]] = None
+    vmax: Union[float, List[float], Dict[int, float]] = None
+
+@dataclass
+class OverlayPlotStyle(BasePlotStyle):
+    """Configuration for overlay plot mode"""
+    fill_alpha: Union[float, List[float], Dict[int, float]] = None
+    edge_alpha: Union[float, List[float], Dict[int, float]] = None
+
+# Strategy pattern with local defaults
+class PlotModeStrategy(ABC):
+    """Abstract base class for plot mode strategies"""
     
+    @abstractmethod
+    def get_default_style(self, n_spin_channels: int) -> BasePlotStyle:
+        """Get default styling for this mode based on number of spin channels"""
+        pass
+    
+    @abstractmethod
+    def plot(self, plotter: 'BandStructurePlotter', ebs_name: str, 
+             ebs: 'ElectronicBandStructurePath', style: BasePlotStyle, **kwargs) -> None:
+        """Execute the plotting strategy"""
+        pass
+
+class PlainBandStrategy(PlotModeStrategy):
+    def get_default_style(self, n_spin_channels: int) -> PlainBandStyle:
+        """Get default styling for plain bands"""
+        if n_spin_channels == 1:
+            return PlainBandStyle(
+                color=["#1f77b4"],           # Blue
+                linestyle=["-"],             # Solid
+                linewidth=[1.5],
+                alpha=[1.0]
+            )
+        elif n_spin_channels == 2:
+            return PlainBandStyle(
+                color=["#1f77b4", "#ff7f0e"],    # Blue, Orange  
+                linestyle=["-", "--"],            # Solid, Dashed
+                linewidth=[1.5, 1.5],
+                alpha=[1.0, 0.8]                 # Spin-down slightly transparent
+            )
+        else:
+            # Fallback for unexpected cases
+            return PlainBandStyle(
+                color=["#1f77b4"] * n_spin_channels,
+                linestyle=["-"] * n_spin_channels,
+                linewidth=[1.5] * n_spin_channels,
+                alpha=[1.0] * n_spin_channels
+            )
+    
+    def plot(self, plotter, data, style: PlainBandStyle, **kwargs):
+        
+        # Merge user style with defaults
+        default_style = self.get_default_style(data.n_spin_channels)
+        final_style = plotter._merge_styles(style, default_style)
+        
+        # Prepare per-spin plot kwargs
+        spin_kwargs = plotter._prepare_plot_kwargs(final_style, ebs.n_spin_channels, **kwargs)
+        
+        for ispin in ebs.spin_channels:
+            plot_kwargs = spin_kwargs[ispin].copy()
+            if "label" not in plot_kwargs or plot_kwargs["label"] is None:
+                plot_kwargs["label"] = plotter._generate_label(ebs_name, ebs, ispin)
+            
+            plotter.ax.plot(
+                bands_data["distances"], 
+                bands_data["energies"][..., ispin], 
+                **plot_kwargs
+            )
+
+class ScatterStrategy(PlotModeStrategy):
+    def get_default_style(self, n_spin_channels: int) -> ScatterPlotStyle:
+        """Get default styling for scatter plots"""
+        if n_spin_channels == 1:
+            return ScatterPlotStyle(
+                color=["#1f77b4"],
+                marker=["o"],
+                markersize=[20],
+                alpha=[0.7],
+                markeredgecolor=["black"],
+                linewidth=[0.5]  # For marker edges
+            )
+        elif n_spin_channels == 2:
+            return ScatterPlotStyle(
+                color=["#1f77b4", "#ff7f0e"],
+                marker=["o", "s"],               # Circle, Square
+                markersize=[20, 18],
+                alpha=[0.8, 0.6],               # Spin-down more transparent
+                markeredgecolor=["darkblue", "darkorange"],
+                linewidth=[0.5, 0.5]
+            )
+        else:
+            # Fallback for unexpected cases
+            default_markers = ["o", "s", "^", "D"]  # Circle, square, triangle, diamond
+            return ScatterPlotStyle(
+                color=["#1f77b4"] * n_spin_channels,
+                marker=[default_markers[i % len(default_markers)] for i in range(n_spin_channels)],
+                markersize=[20] * n_spin_channels,
+                alpha=[0.7] * n_spin_channels
+            )
+    
+    def plot(self, plotter, ebs_name, ebs, style: ScatterPlotStyle, 
+             atoms: List[int] = None, orbitals: List[int] = None,
+             width_mask: np.ndarray = None, color_mask: np.ndarray = None,
+             width_weights: np.ndarray = None, color_weights: np.ndarray = None,
+             **kwargs):
+        
+        bands_data = plotter.get_projected_bands_data(ebs, atoms=atoms, orbitals=orbitals)
+        
+        # Apply masks if provided
+        if width_mask is not None or color_mask is not None:
+            # Handle masking logic (from old ebs_plot.py)
+            pass
+        
+        # Merge user style with defaults
+        default_style = self.get_default_style(ebs.n_spin_channels)
+        final_style = plotter._merge_styles(style, default_style)
+        
+        spin_kwargs = plotter._prepare_plot_kwargs(final_style, ebs.n_spin_channels, **kwargs)
+        
+        for ispin in ebs.spin_channels:
+            plot_kwargs = spin_kwargs[ispin].copy()
+            
+            # Handle weight-based sizing and coloring
+            sizes = width_weights[..., ispin] if width_weights is not None else plot_kwargs.get('markersize', 20)
+            colors = color_weights[..., ispin] if color_weights is not None else plot_kwargs.get('color')
+            
+            # Remove conflicting keys for scatter
+            scatter_kwargs = {k: v for k, v in plot_kwargs.items() 
+                            if k not in ['color', 'markersize']}
+            
+            plotter.ax.scatter(
+                bands_data["distances"],
+                bands_data["energies"][..., ispin],
+                s=sizes,
+                c=colors,
+                **scatter_kwargs
+            )
+
+class ParametricStrategy(PlotModeStrategy):
+    def get_default_style(self, n_spin_channels: int) -> ParametricPlotStyle:
+        """Get default styling for parametric plots"""
+        if n_spin_channels == 1:
+            return ParametricPlotStyle(
+                cmap=["viridis"],
+                linewidth=[2.0],
+                alpha=[0.8]
+            )
+        elif n_spin_channels == 2:
+            return ParametricPlotStyle(
+                cmap=["viridis", "plasma"],     # Different colormaps per spin
+                linewidth=[2.0, 1.8],
+                alpha=[0.9, 0.7]
+            )
+        else:
+            default_cmaps = ["viridis", "plasma", "inferno", "magma"]
+            return ParametricPlotStyle(
+                cmap=[default_cmaps[i % len(default_cmaps)] for i in range(n_spin_channels)],
+                linewidth=[2.0] * n_spin_channels,
+                alpha=[0.8] * n_spin_channels
+            )
+    
+    def plot(self, plotter, ebs_name, ebs, style: ParametricPlotStyle,
+             atoms: List[int] = None, orbitals: List[int] = None,
+             width_weights: np.ndarray = None, color_weights: np.ndarray = None,
+             elimit: List[float] = None, **kwargs):
+        
+        from matplotlib.collections import LineCollection
+        
+        bands_data = plotter.get_projected_bands_data(ebs, atoms=atoms, orbitals=orbitals)
+        
+        # Merge user style with defaults
+        default_style = self.get_default_style(ebs.n_spin_channels)
+        final_style = plotter._merge_styles(style, default_style)
+        
+        spin_kwargs = plotter._prepare_plot_kwargs(final_style, ebs.n_spin_channels, **kwargs)
+        
+        for ispin in ebs.spin_channels:
+            plot_kwargs = spin_kwargs[ispin].copy()
+            
+            # Create line segments for LineCollection
+            points = np.array([bands_data["distances"], bands_data["energies"][..., ispin]]).T
+            segments = np.array([points[:-1], points[1:]]).transpose(1, 0, 2)
+            
+            # Color data
+            colors = color_weights[..., ispin] if color_weights is not None else None
+            
+            lc = LineCollection(segments, 
+                              cmap=plot_kwargs.get('cmap', 'viridis'),
+                              linewidths=plot_kwargs.get('linewidth', 2.0),
+                              alpha=plot_kwargs.get('alpha', 0.8))
+            
+            if colors is not None:
+                lc.set_array(colors)
+                
+            plotter.ax.add_collection(lc)
+
+class OverlayStrategy(PlotModeStrategy):
+    def get_default_style(self, n_spin_channels: int) -> OverlayPlotStyle:
+        """Get default styling for overlay plots"""
+        if n_spin_channels == 1:
+            return OverlayPlotStyle(
+                color=["#1f77b4"],
+                fill_alpha=[0.3],
+                edge_alpha=[0.8],
+                linewidth=[1.0]
+            )
+        elif n_spin_channels == 2:
+            return OverlayPlotStyle(
+                color=["#1f77b4", "#ff7f0e"],
+                fill_alpha=[0.3, 0.2],
+                edge_alpha=[0.8, 0.6],
+                linewidth=[1.0, 1.0]
+            )
+        else:
+            return OverlayPlotStyle(
+                color=["#1f77b4"] * n_spin_channels,
+                fill_alpha=[0.3] * n_spin_channels,
+                edge_alpha=[0.8] * n_spin_channels,
+                linewidth=[1.0] * n_spin_channels
+            )
+    
+    def plot(self, plotter, ebs_name, ebs, style: OverlayPlotStyle,
+             weights: np.ndarray = None, **kwargs):
+        
+        bands_data = plotter.get_projected_bands_data(ebs)
+        
+        # Merge user style with defaults
+        default_style = self.get_default_style(ebs.n_spin_channels)
+        final_style = plotter._merge_styles(style, default_style)
+        
+        spin_kwargs = plotter._prepare_plot_kwargs(final_style, ebs.n_spin_channels, **kwargs)
+        
+        for ispin in ebs.spin_channels:
+            plot_kwargs = spin_kwargs[ispin].copy()
+            
+            # Fill between logic for overlay
+            if weights is not None:
+                width = weights[..., ispin]
+                plotter.ax.fill_between(
+                    bands_data["distances"],
+                    bands_data["energies"][..., ispin] - width/2,
+                    bands_data["energies"][..., ispin] + width/2,
+                    alpha=plot_kwargs.get('fill_alpha', 0.3),
+                    color=plot_kwargs.get('color'),
+                    **{k: v for k, v in plot_kwargs.items() 
+                       if k not in ['fill_alpha', 'color']}
+                )
+
+# Simplified main plotter class
 class BandStructurePlotter:
-    """
-    A plotter class for band structure using matplotlib.
-
-    Parameters
-    ----------
-    figsize : tuple, optional
-        Figure size (width, height) in inches, by default (8, 6)
-    dpi : int, optional
-        Figure resolution in dots per inch, by default 100
-    """
-
-    def __init__(self, figsize=(8, 6), dpi=100, ax=None, zero_fermi:bool=True):
+    def __init__(self, figsize=(8, 6), dpi=100, ax=None):
         self.figsize = figsize
         self.dpi = dpi
 
@@ -46,370 +310,123 @@ class BandStructurePlotter:
         if self.ax is None:
             self.fig, self.ax = plt.subplots(figsize=figsize, dpi=dpi)
 
-        self.ebs_store = {}
-        self.handles = {}
-        self.kpath=None
-        self.shift_to_fermi = zero_fermi
-        self.fermi = 0.0
+        self.data_store = {}
         
-    def get_bands_limits(self):
-        """A method to get the default y tick interval"""
-        emin = 0
-        emax = 0
-        for ebs_name, ebs in self.ebs_store.items():
-            emin = min(emin, ebs.bands.min())
-            emax = max(emax, ebs.bands.max())
-        return (emin, emax)
-
-
-    def set_plot_settings(self):
-        """Helper method to initialize the plot options"""
-        if len(self.ebs_store) > 0:
-            self.set_xlim()
-            self.set_ylim()
-            self.set_xticks()
-            self.set_yticks()
-            self.set_xlabel()
-            self.set_ylabel()
-        else:
-            raise ValueError("No EBS objects added to the plotter")
-        
-    def add_ebs(self, ebs: ElectronicBandStructurePath, name=None):
-        """A method to add an ElectronicBandStructure object to the plot"""
-        n_ebs = len(self.ebs_store)
-        if name is None:
-            name = f"ebs-{n_ebs}"
-            
-        if self.shift_to_fermi:
-            ebs.shift_bands(-1*ebs.fermi, inplace=True)
-            
-        self.ebs_store[name] = ebs
-        self.kpath = ebs.kpath
-        self.x = self.kpath.get_distances(as_segments=False)
-        self.set_plot_settings()
-        
-    def get_plain_bands_data(self, ebs:ElectronicBandStructurePath):
-        return {
-            "distances": self.x,
-            "tick_names": self.kpath.tick_names,
-            "energies": ebs.bands,
+        # Strategy registry - defaults handled by strategies themselves
+        self.strategies = {
+            'plain': PlainBandStrategy(),
+            'scatter': ScatterStrategy(), 
+            'parametric': ParametricStrategy(),
+            'overlay': OverlayStrategy()
         }
         
-    def get_projected_bands_data(self, ebs:ElectronicBandStructurePath, 
-                                 atoms:List[int]=None, 
-                                 orbitals:List[int]=None, 
-                                 spins:List[int]=None):
-        weights = ebs.ebs_sum(
-            atoms=atoms, orbitals=orbitals, spins=spins
-        )
-        return {
-            "distances": self.x,
-            "tick_names": self.kpath.tick_names,
-            "energies": ebs.bands,
-            "projected_weights": weights,
-            "atoms": atoms,
-            "orbitals": orbitals,
-            "spins": spins,
-        }
         
-    
-    
-    def plot_plain_bands(self, 
-                         color:str=None, 
-                         linestyle:str=None, 
-                         linewidth:float=None):
-        """A method to plot the plain bands"""
+    def plot(self, kpath: KPath, bands: np.ndarray, scalars: np.ndarray = None, **kwargs):
+        x = kpath.get_distances(as_segments=False)
         
-        plot_kwargs = {}
-        plot_kwargs["color"] = color
-        for ebs_name, ebs in self.ebs_store.items():
-            bands_data = self.get_plain_bands_data(ebs)
- 
-            for ispin in ebs.spin_channels:
-                self.ax.plot(bands_data["distances"], bands_data["energies"][..., ispin], 
-                             label=f"{ebs_name} - {ispin}", 
-                             color=color)
-            # for i_spin in range(n_spins):
-            #     for i_band in range(n_bands):
-            #         self.handles[ebs_name] = self.ax.plot(self.x, ebs.bands[:, i_band, i_spin], label=f"{ebs_name} - {i_band} - {i_spin}")
+        logger.info(f"kpath shape: {x.shape}")
+        logger.info(f"bands shape: {bands.shape}")
+        logger.info(f"scalars shape: {scalars.shape}")
         
-    def draw_fermi(
-        self,
-        level: float = 0,
-        color: str = "grey",
-        linestyle: str = "--",
-        linewidth: float = 1.0,
-        **kwargs
-        ):
-        """A method to draw the fermi line
 
-        Parameters
-        ----------
-        fermi_level : str, optional
-            The energy level to draw the line
-        """
-        self.ax.axhline(
-            y=level,
-            color=color,
-            linestyle=linestyle,
-            linewidth=linewidth,
-            **kwargs
-        )
-        
-    def is_ebs_store_empty(self):
-        """A method to check if the ebs store is empty"""
-        return len(self.ebs_store) == 0
-        
-    def set_xticks(
-        self,
-        tick_positions: List[int] = None,
-        tick_names: List[str] = None,
-        color: str = "black",
-    ):
-        """A method to set the x ticks
+        n_spin_channels = bands.shape[-1]
 
-        Parameters
-        ----------
-        tick_positions : List[int], optional
-            A list of tick positions, by default None
-        tick_names : List[str], optional
-            A list of tick names, by default None
-        color : str, optional
-            A color for the ticks, by default "black"
-        """
-        if self.kpath is not None:
-            tick_positions = self.kpath.tick_positions
-            tick_names = self.kpath.tick_names
+        if scalars is not None and scalars.ndim != bands.ndim:
+            error_message = "scalars must have the same number of dimensions as bands"
+            error_message += f"bands has {bands.ndim} dimensions, scalars has {scalars.ndim} dimensions"
+            error_message += f"Use a built in method in ElectronicBandStructurePath to get the scalars"
+            raise ValueError(error_message)
+        elif scalars is not None and scalars.ndim == bands.ndim and scalars.shape[-1] != n_spin_channels:
+            error_message = "scalars must have the same number of spin channels as bands."
+            error_message += f"bands has {n_spin_channels} spin channels, scalars has {scalars.shape[-1]} spin channels\n"
+            error_message += f"This error is likely due to a non-colinear calculation where the scalars can have spin components\n"
+            raise ValueError(error_message)
+
+        # if scalars is not None and scalars.ndim == 3 and scalars.shape[-1] == 2:
+        #     raise ValueError("scalars must be a 2D array. Plot spin channels seperately")
+        
+        # elif scalars is not None and scalars.ndim == 3 and scalars.shape[-1] == 1:
+        #     scalars = scalars[..., 0]
+        # else:
+        #     raise ValueError("scalars must be a 2D/3D array. Use a built in method in ElectronicBandStructurePath to get the scalars")
+        
+        for ispin in range(n_spin_channels):
+            data=None
+            if scalars is not None:
+                data = scalars[..., ispin]
+                
+            self.ax.scatter(x, bands[..., ispin], c=data, linestyle="--", **kwargs)
             
-        if tick_positions is not None:
-            for ipos in tick_positions:
-                self.ax.axvline(self.x[ipos], color=color)
-            self.ax.set_xticks(self.x[tick_positions])
-
-        if tick_names is not None:
-            logger.debug(f"tick_names: {tick_names}")
-            self.ax.set_xticklabels(tick_names)
-
-    def set_yticks(
-        self, 
-        interval: List[float] = None,
-        major: float = None, 
-        minor: float = None, 
-        minor_y_tick_params: Dict[str, Any] = None,
-        major_y_tick_params: Dict[str, Any] = None,
-        major_locator = None,
-        minor_locator = None,
-    ):
-        """A method to set the y ticks
-
-        Parameters
-        ----------
-        major : float, optional
-            A float to set the major tick locator, by default None
-        minor : float, optional
-            A float to set the the minor tick Locator, by default None
-        interval : List[float], optional
-            The interval of the ticks, by default None
-        """
-        
-        minor_y_tick_params = {} if minor_y_tick_params is None else minor_y_tick_params
-        major_y_tick_params = {} if major_y_tick_params is None else major_y_tick_params
-        
-        if interval is None:
-            bands_lim = self.get_bands_limits()
-            interval = (
-                bands_lim[0] - abs(bands_lim[0]) * 0.1,
-                bands_lim[1] * 1.1,
-            )
-            
-        interval = abs(interval[1] - interval[0])
-        if interval < 30 and interval >= 20:
-            major = 5
-            minor = 1
-        elif interval < 20 and interval >= 10:
-            major = 4
-            minor = 0.5
-        elif interval < 10 and interval >= 5:
-            major = 2
-            minor = 0.2
-        elif interval < 5 and interval >= 3:
-            major = 1
-            minor = 0.1
-        elif interval < 3 and interval >= 1:
-            major = 0.5
-            minor = 0.1
-        else:
-            pass
-
-        if major is not None:
-            self.ax.yaxis.set_major_locator(MultipleLocator(major))
-        if minor is not None:
-            self.ax.yaxis.set_minor_locator(MultipleLocator(minor))
-
-        self.ax.tick_params(**major_y_tick_params)
-        self.ax.tick_params(**minor_y_tick_params)
-
-    def set_xlim(
-        self, interval: List[float] = None, ktick_interval: List[float] = None
-    ):
-        """A method to set the x limit
-
-        Parameters
-        ----------
-        interval : List[float], optional
-            A list containing the begining and the end of the interval, by default None
-        """
-        if interval is None:
-            interval = (self.x[0], self.x[-1])
-        if ktick_interval:
-            ktick_start = ktick_interval[0]
-            ktick_end = ktick_interval[1]
-            interval = (self.x[ktick_start], self.x[ktick_end])
-
-        self.ax.set_xlim(interval)
-
-    def set_ylim(self, interval: List[float] = (-5,5)):
-        """A method to set the y limit
-
-        Parameters
-        ----------
-        interval : List[float], optional
-            A list containing the begining and the end of the interval, by default None
-        """
-        self.ax.set_ylim(interval)
-
-    def set_xlabel(self, label: str = "K-path", **kwargs):
-        """A method to set the x label
-
-        Parameters
-        ----------
-        label : str, optional
-            String fo the x label name, by default "K vector"
-        """
-        self.ax.set_xlabel(label, **kwargs)
-
-    def set_ylabel(self, label: str = None, 
-                   shifted_by_fermi: bool = True,
-                   **kwargs
-                   ):
-        """A method to set the y label
-
-        Parameters
-        ----------
-        label : str, optional
-            String fo the y label name, by default r"E - E$ (eV)"
-        """
-        if label is None and shifted_by_fermi:
-            label = r"E - E$_F$ (eV)"
-        elif label is None and not shifted_by_fermi:
-            label = "E (eV)"
-
-        self.ax.set_ylabel(label, **kwargs)
-
-    def set_title(self, label: str, **kwargs):
-        """A method to set the title
-
-        Parameters
-        ----------
-        label : str, optional
-            String for the title, by default "Band Structure"
-        """
-        self.ax.set_title(label=label, **kwargs)
-        
     def show(self):
-        """A method to show the plot"""
         plt.show()
-
-
-
-
-class BandStructure2DPlotter(pv.Plotter):
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self._meshes = []
-        
-    def add_brillouin_zone(
-        self,
-        brillouin_zone: pv.PolyData = None,
-        style: str = "wireframe",
-        line_width: float = 2.0,
-        color: ColorLike = "black",
-        opacity: float = 1.0,
-    ):
-        self.add_mesh(
-            brillouin_zone,
-            style=style,
-            line_width=line_width,
-            color=color,
-            opacity=opacity,
-        )
-        
-    def add_surface(
-        self,
-        bs2d: BandStructure2D,
-        normalize: bool = False,
-        add_texture_args: dict = None,
-        add_active_vectors: bool = False,
-        show_scalar_bar: bool = True,
-        add_mesh_args: dict = None,
-        **kwargs,
-    ):
-        logger.info(f"____Adding Surface to Plotter____")
-
-        if add_texture_args is None:
-            add_texture_args = {}
-        add_texture_args["name"] = add_texture_args.get("name", "vectors")
-
-        if add_mesh_args is None:
-            add_mesh_args = {}
+    
+    # def add_ebs(self, ebs: ElectronicBandStructurePath, name=None):
+    #     """A method to add an ElectronicBandStructure object to the plot"""
+    #     n_ebs = len(self.ebs_store)
+    #     if name is None:
+    #         name = f"ebs-{n_ebs}"
             
-        
-        self.add_mesh(bs2d, **add_mesh_args)
-
-        # if show_scalar_bar:
-        #     active_scalar_name = fermi_surface.active_scalars_name
-        #     if "norm" in active_scalar_name:
-        #         active_scalar_name = active_scalar_name.replace("-norm", "")
-        #     add_mesh_args["show_scalar_bar"] = add_mesh_args.get(
-        #         "show_scalar_bar", True
-        #     )
-        #     add_mesh_args["scalar_bar_args"] = add_mesh_args.get("scalar_bar_args", {})
-        #     add_mesh_args["scalar_bar_args"]["title"] = add_mesh_args.get(
-        #         "scalar_bar_args", {}
-        #     ).get("title", active_scalar_name)
-
-        # add_mesh_args["cmap"] = add_mesh_args.get("cmap", "plasma")
-        # add_mesh_args["clim"] = add_mesh_args.get("clim", None)
-        # add_mesh_args["name"] = add_mesh_args.get("name", "surface")
-        # add_mesh_args.update(kwargs)
-
-        # clim = add_mesh_args.get("clim", None)
-        # cmap = add_mesh_args.get("cmap", "plasma")
-
-        # if normalize:
-        #     scalars = normalize_to_range(fermi_surface.active_scalars, clim=clim)
-        #     add_mesh_args["scalars"] = scalars
-        # add_mesh_args["scalars"] = add_mesh_args.get("scalars", None)
-
-        # self.add_mesh(fermi_surface, **add_mesh_args)
-
-        # if add_active_vectors:
-        #     # aligning the texture colors with the surface colors
-        #     add_texture_args["cmap"] = add_texture_args.get("cmap", cmap)
-        #     add_texture_args["clim"] = add_texture_args.get("clim", clim)
-
-        #     self.add_texture(fermi_surface, **add_texture_args)
-
-    def add_bounds(self, bs2d: BandStructure2D, ulim=None, vlim=None, elim=None, elim_offset=1, **kwargs):
-        current_bounds = bs2d.bounds
-        if ulim is None:
-            ulim = (current_bounds[0], current_bounds[1])
-        if vlim is None:
-            vlim = (current_bounds[2], current_bounds[3])
-        if elim is None:
-            elim = (bs2d.ebs.fermi - elim_offset, bs2d.ebs.fermi + elim_offset)
-        
-        bounds = (*ulim, *vlim, *elim)
+    #     if self.zero_fermi:
+    #         ebs.shift_bands(-1*ebs.fermi, inplace=True)
             
-        self.show_bounds(bs2d, bounds=bounds, **kwargs)
+    #     self.ebs_store[name] = ebs
+    #     self.kpath = ebs.kpath
+    #     self.x = self.kpath.get_distances(as_segments=False)
+    
+    # def plot(self, mode: str = 'plain', style: BasePlotStyle = None, **kwargs):
+    #     """
+    #     Universal plotting interface that delegates to appropriate strategy.
         
+    #     Parameters
+    #     ----------
+    #     mode : str
+    #         Plot mode: 'plain', 'scatter', 'parametric', 'overlay'
+    #     style : mode-specific style object
+    #         Styling configuration appropriate for the mode
+    #     **kwargs : dict
+    #         Mode-specific parameters and matplotlib parameters
+    #     """
+    #     if mode not in self.strategies:
+    #         raise ValueError(f"Unknown plot mode: {mode}. Available: {list(self.strategies.keys())}")
+        
+    #     strategy = self.strategies[mode]
+        
+    #     for ebs_name, ebs in self.ebs_store.items():
+    #         # If no style provided, strategy will use its defaults
+    #         if style is None:
+    #             style = strategy.get_default_style(ebs.n_spin_channels)
+            
+    #         strategy.plot(self, ebs_name, ebs, style, **kwargs)
+    
+    # # Convenience methods with mode-specific signatures
+    # def plot_plain_bands(self, style: PlainBandStyle = None, **kwargs):
+    #     """Plot plain bands"""
+    #     self.plot('plain', style, **kwargs)
+    
+    # def plot_scatter(self, style: ScatterPlotStyle = None, 
+    #                  atoms: List[int] = None, orbitals: List[int] = None,
+    #                  width_mask: np.ndarray = None, color_mask: np.ndarray = None,
+    #                  width_weights: np.ndarray = None, color_weights: np.ndarray = None,
+    #                  **kwargs):
+    #     """Plot scatter with projections"""
+    #     self.plot('scatter', style, atoms=atoms, orbitals=orbitals,
+    #              width_mask=width_mask, color_mask=color_mask,
+    #              width_weights=width_weights, color_weights=color_weights, **kwargs)
+    
+    # def plot_parametric(self, style: ParametricPlotStyle = None,
+    #                    atoms: List[int] = None, orbitals: List[int] = None,
+    #                    width_weights: np.ndarray = None, color_weights: np.ndarray = None,
+    #                    elimit: List[float] = None, **kwargs):
+    #     """Plot parametric with projections"""
+    #     self.plot('parametric', style, atoms=atoms, orbitals=orbitals,
+    #              width_weights=width_weights, color_weights=color_weights,
+    #              elimit=elimit, **kwargs)
+    
+    # def plot_overlay(self, style: OverlayPlotStyle = None,
+    #                 weights: np.ndarray = None, **kwargs):
+    #     """Plot overlay"""
+    #     self.plot('overlay', style, weights=weights, **kwargs)
+    
+    # def register_plot_mode(self, name: str, strategy: PlotModeStrategy):
+    #     """Register a new plot mode - strategy includes its own defaults"""
+    #     self.strategies[name] = strategy
