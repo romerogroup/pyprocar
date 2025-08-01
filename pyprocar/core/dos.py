@@ -10,6 +10,7 @@ __maintainer__ = "Logan Lang, Pedram Tavadze"
 __email__ = "petavazohi@mix.wvu.edu"
 __status__ = "Production"
 
+import logging
 from pathlib import Path
 from typing import List
 
@@ -21,8 +22,7 @@ from sympy.physics.quantum.cg import CG
 
 from pyprocar.core.serializer import get_serializer
 
-# TODO When PEP 646 is introduced in numpy. need to update the python typing.
-
+logger = logging.getLogger(__name__)
 
 class DensityOfStates:
     """A class that contains density of states calculated by the a density
@@ -214,10 +214,18 @@ class DensityOfStates:
         principal_q_numbers = np.array(principal_q_numbers)
         if atoms is None:
             atoms = np.arange(len(projected), dtype=int)
-        if spins is None:
+            
+        if spins is None and self.n_spins == 4:
+            raise ValueError("Spins must be provided for non-colinear calculations. This is because the spin projections cannot be summed over")
+        elif spins is None and self.n_spins != 4:
             spins = np.arange(len(projected[0][0][0]), dtype=int)
+        
         if orbitals is None:
             orbitals = np.arange(len(projected[0][0]), dtype=int)
+            
+        logger.debug(f"Summing over orbitals: {orbitals}")
+        logger.debug(f"Summing over spins: {spins}")
+        
         # print(orbitals)
         # Adjusting for spin type calculation
         if self.n_spins == 2:
@@ -227,7 +235,7 @@ class DensityOfStates:
                     for ispin in spins:
                         temp = np.array(projected[iatom][iprinc])
                         ret[ispin, :] += temp[orbitals, ispin].sum(axis=0)
-        # This else covers colinear and non-colinear calcualtions
+
         else:
             ret = np.zeros(shape=(1, self.n_dos))
             for iatom in atoms:

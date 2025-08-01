@@ -79,7 +79,7 @@ class DOSPlot:
 
         return None
 
-    def plot_dos(self, spins: List[int] = None):
+    def plot_dos(self, spins: List[int] = None, **kwargs):
         values_dict = {}
         spin_projections, spin_channels = self._get_spins_projections_and_channels(
             spins
@@ -105,6 +105,7 @@ class DOSPlot:
         orbitals: List[int] = None,
         spins: List[int] = None,
         principal_q_numbers: List[int] = [-1],
+        **kwargs
     ):
         values_dict = {}
         spin_projections, spin_channels = self._get_spins_projections_and_channels(
@@ -126,7 +127,8 @@ class DOSPlot:
         for ispin, spin_channel in enumerate(spin_channels):
             energies, dos_spin_total, normalized_dos_spin_projected = (
                 self._prepare_parametric_spin_data(
-                    spin_channel, ispin, dos_total, dos_projected, dos_total_projected
+                    spin_channel, ispin, dos_total, dos_projected, dos_total_projected,
+                    scale=kwargs.get("scale", False)
                 )
             )
 
@@ -156,6 +158,7 @@ class DOSPlot:
         orbitals: List[int] = None,
         spins: List[int] = None,
         principal_q_numbers: List[int] = [-1],
+        **kwargs
     ):
         values_dict = {}
         spin_projections, spin_channels = self._get_spins_projections_and_channels(
@@ -178,7 +181,8 @@ class DOSPlot:
 
             energies, dos_spin_total, normalized_dos_spin_projected = (
                 self._prepare_parametric_spin_data(
-                    spin_channel, ispin, dos_total, dos_projected, dos_total_projected
+                    spin_channel, ispin, dos_total, dos_projected, dos_total_projected,
+                    scale=kwargs.get("scale", False)
                 )
             )
 
@@ -205,6 +209,7 @@ class DOSPlot:
         orbitals: List[int] = None,
         spins: List[int] = None,
         overlay_mode: bool = False,
+        **kwargs
     ):
         values_dict = {}
         spin_projections, spin_channels = self._get_spins_projections_and_channels(
@@ -241,7 +246,7 @@ class DOSPlot:
                         dos_total,
                         dos_projected,
                         dos_total_projected,
-                        scale=True,
+                        scale=kwargs.get("scale", False),
                     )
                 )
 
@@ -283,6 +288,7 @@ class DOSPlot:
         atoms: List[int] = None,
         spins: List[int] = None,
         overlay_mode: bool = False,
+        **kwargs
     ):
         values_dict = {}
         spin_projections, spin_channels = self._get_spins_projections_and_channels(
@@ -319,7 +325,7 @@ class DOSPlot:
                         dos_total,
                         dos_projected,
                         dos_total_projected,
-                        scale=True,
+                        scale=kwargs.get("scale", True),
                     )
                 )
 
@@ -361,6 +367,7 @@ class DOSPlot:
         principal_q_numbers: List[int] = [-1],
         spins: List[int] = None,
         overlay_mode: bool = False,
+        **kwargs
     ):
         values_dict = {}
         if len(items) is None:
@@ -412,7 +419,7 @@ class DOSPlot:
                         dos_total,
                         dos_projected,
                         dos_total_projected,
-                        scale=True,
+                        scale=kwargs.get("scale", False),
                     )
                 )
 
@@ -452,13 +459,17 @@ class DOSPlot:
         self, atoms, orbitals, spin_projections, principal_q_numbers
     ):
         dos_total = np.array(self.dos.total)
-        dos_total_projected = self.dos.dos_sum()
+        if self.dos.n_spins == 4:
+            dos_total_projected = self.dos.dos_sum(spins=spin_projections)
+        else:
+            dos_total_projected = self.dos.dos_sum()
         dos_projected = self.dos.dos_sum(
             atoms=atoms,
             principal_q_numbers=principal_q_numbers,
             orbitals=orbitals,
             spins=spin_projections,
         )
+            
         return dos_total, dos_total_projected, dos_projected
 
     def _get_spins_projections_and_channels(self, spins):
@@ -716,10 +727,17 @@ class DOSPlot:
         dos_total = dos_total[spin_channel, :]
         dos_projected = dos_projected[spin_channel, :]
         dos_total_projected = dos_total_projected[spin_channel, :]
+
+        # Should be between 0 and 1
         normalized_dos_projected = dos_projected / dos_total_projected
-
+        
+        # assert normalized_dos_projected.min() >= 0 and normalized_dos_projected.max() <= 1, "Issue with the normalization of the projected DOS"
+        # Removing issues points due to divisions by zero
         normalized_dos_projected = np.nan_to_num(normalized_dos_projected, 0)
-
+        threshold = max(abs(dos_total)) + 1
+        normalized_dos_projected[np.abs(normalized_dos_projected) > threshold] = 0
+        
+    
         if ispin > 0 and len(self.dos.total) > 1:
             dos_total *= -1
             dos_projected *= -1
