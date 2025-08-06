@@ -7,9 +7,11 @@ import json
 import logging
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import matplotlib as mpl
+import matplotlib.cm as cm
+import matplotlib.colors as mpcolors
 import matplotlib.patches as mpatches
 import matplotlib.pyplot as plt
 import numpy as np
@@ -302,6 +304,7 @@ class OverlayStrategy(PlotModeStrategy):
 
 # Simplified main plotter class
 class BandStructurePlotter:
+    
     def __init__(self, figsize=(8, 6), dpi=100, ax=None):
         self.figsize = figsize
         self.dpi = dpi
@@ -311,7 +314,7 @@ class BandStructurePlotter:
             self.fig, self.ax = plt.subplots(figsize=figsize, dpi=dpi)
 
         self.data_store = {}
-        
+
         # Strategy registry - defaults handled by strategies themselves
         self.strategies = {
             'plain': PlainBandStrategy(),
@@ -320,8 +323,25 @@ class BandStructurePlotter:
             'overlay': OverlayStrategy()
         }
         
+    def plot(self, 
+             kpath: KPath, 
+             bands: np.ndarray,  **kwargs):
+        x = kpath.get_distances(as_segments=False)
         
-    def plot(self, kpath: KPath, bands: np.ndarray, scalars: np.ndarray = None, **kwargs):
+        logger.info(f"kpath shape: {x.shape}")
+        logger.info(f"bands shape: {bands.shape}")
+
+        n_spin_channels = bands.shape[-1]
+        for ispin in range(n_spin_channels):
+       
+            self.ax.plot(x, bands[..., ispin], linestyle="--", **kwargs)
+            
+        
+        
+    def plot_scatter(self, 
+             kpath: KPath, 
+             bands: np.ndarray, 
+             scalars: np.ndarray = None, **kwargs):
         x = kpath.get_distances(as_segments=False)
         
         logger.info(f"kpath shape: {x.shape}")
@@ -342,14 +362,6 @@ class BandStructurePlotter:
             error_message += f"This error is likely due to a non-colinear calculation where the scalars can have spin components\n"
             raise ValueError(error_message)
 
-        # if scalars is not None and scalars.ndim == 3 and scalars.shape[-1] == 2:
-        #     raise ValueError("scalars must be a 2D array. Plot spin channels seperately")
-        
-        # elif scalars is not None and scalars.ndim == 3 and scalars.shape[-1] == 1:
-        #     scalars = scalars[..., 0]
-        # else:
-        #     raise ValueError("scalars must be a 2D/3D array. Use a built in method in ElectronicBandStructurePath to get the scalars")
-        
         for ispin in range(n_spin_channels):
             data=None
             if scalars is not None:
@@ -357,6 +369,213 @@ class BandStructurePlotter:
                 
             self.ax.scatter(x, bands[..., ispin], c=data, linestyle="--", **kwargs)
             
+            
+    def plot_parametric(self, 
+             kpath: KPath, 
+             bands: np.ndarray, 
+             scalars: np.ndarray = None, 
+             cmap: str = "plasma",
+             norm: mpcolors.Normalize = None,
+             clim:tuple = (None, None),
+             linewidth:float = 2.0,
+             **kwargs):
+        
+        if not hasattr(self, "norm") or not hasattr(self, "clim") or not hasattr(self, "cmap"):
+            self.set_scalar_mappable(norm=norm, clim=clim, cmap=cmap)
+            
+        x = kpath.get_distances(as_segments=False)
+        
+        logger.info(f"kpath shape: {x.shape}")
+        logger.info(f"bands shape: {bands.shape}")
+        logger.info(f"scalars shape: {scalars.shape}")
+        
+
+        n_spin_channels = bands.shape[-1]
+        n_bands = bands.shape[1]
+        
+        if scalars is not None and scalars.ndim != bands.ndim:
+            error_message = "scalars must have the same number of dimensions as bands"
+            error_message += f"bands has {bands.ndim} dimensions, scalars has {scalars.ndim} dimensions"
+            error_message += f"Use a built in method in ElectronicBandStructurePath to get the scalars"
+            raise ValueError(error_message)
+        elif scalars is not None and scalars.ndim == bands.ndim and scalars.shape[-1] != n_spin_channels:
+            error_message = "scalars must have the same number of spin channels as bands."
+            error_message += f"bands has {n_spin_channels} spin channels, scalars has {scalars.shape[-1]} spin channels\n"
+            error_message += f"This error is likely due to a non-colinear calculation where the scalars can have spin components\n"
+            raise ValueError(error_message)
+        
+        # if width_weights is None:
+        #     width_weights = np.ones_like(bands)
+        #     linewidth = 2.0
+        
+        width_weights = np.ones_like(bands)
+      
+        mbands = np.ma.masked_array(bands, False)
+        # if width_weights is not None:
+        #     logger.info(f"___Applying width mask___")
+        #     mbands = np.ma.masked_array(
+        #         bands,
+        #         np.abs(width_weights) < width_mask,
+        #     )
+        # if color_mask is not None:
+        #     logger.info(f"___Applying color mask___")
+        #     mbands = np.ma.masked_array(
+        #         self.ebs.bands,
+        #         np.abs(color_weights) < color_mask,
+        #     )
+        
+        for ispin_channel in range(n_spin_channels):
+            for iband in range(n_bands):
+                points = np.array([x, mbands[:, iband, ispin_channel]]).T.reshape(-1, 1, 2)
+                segments = np.concatenate([points[:-1], points[1:]], axis=1)
+
+                # segments = np.delete(
+                #     segments, np.where(x[1:] == x[:-1])[0], axis=0)
+                
+                lc = LineCollection(segments,  **kwargs)
+                
+                # Handle colors
+                if len(scalars) > 0:
+                    lc.set_array(scalars[:, iband, ispin_channel])
+                    lc.set_cmap(self.cmap)
+                    lc.set_norm(self.norm)
+                    
+                lc.set_linewidth(width_weights[:, iband, ispin_channel] * linewidth)
+                handle = self.ax.add_collection(lc)
+
+                # else:
+                #     lc.set_color(color)
+                #     if i_segment == 0:
+                #         lc.set_label(label)
+                # if color_weights is None:
+                #     lc = LineCollection(
+                #         segments, colors=color, linestyle=self.config.linestyle[ispin]
+                #     )
+                # else:
+                #     lc = LineCollection(
+                #         segments, cmap=plt.get_cmap(self.config.cmap), norm=norm
+                #     )
+                #     lc.set_array(color_weights[:, iband, ispin])
+                # lc.set_linewidth(width_weights[:, iband, ispin] * linewidth[ispin])
+                # lc.set_linestyle(self.config.linestyle[ispin])
+                # handle = self.ax.add_collection(lc)
+
+                # band_name = f"band-{iband}_spinChannel-{str(ispin)}"
+                # projection_name = labels[0]
+                # values_dict[f"bands__{band_name}"] = self.ebs.bands[:, iband, ispin]
+                # if color_weights is not None:
+                #     values_dict[f"projections__{projection_name}__{band_name}"] = (
+                #         color_weights[:, iband, ispin]
+                #     )
+            # if color_weights is not None:
+            #     handle.set_color(color_map[iweight][:-1].lower())
+            # handle.set_linewidth(linewidth)
+
+            # mpatches.Patch(color='red', label='The red data')
+            # self.handles.append(mpatches.Patch(color="red", label="The red data"))
+
+            
+    def plot_quiver(self, 
+            kpath: KPath, 
+            bands: np.ndarray, 
+            vectors: np.ndarray = None,
+            skip:int=1,
+            angles:str='uv',
+            scale=None,
+            scale_units:str='inches',
+            units:str='inches',
+            color=None,
+            **kwargs):
+        x = kpath.get_distances(as_segments=False)
+        
+        logger.info(f"kpath shape: {x.shape}")
+        logger.info(f"bands shape: {bands.shape}")
+        logger.info(f"vectors shape: {vectors.shape}")
+        if bands.ndim == 2:
+            bands = bands[...,np.newaxis]
+        if vectors.ndim == 2:
+            vectors = vectors[...,np.newaxis]
+
+        n_spin_channels = bands.shape[-1]
+        n_bands = bands.shape[1]
+        
+        if vectors is not None and vectors.ndim != bands.ndim:
+            error_message = "vectors must have the same number of dimensions as bands"
+            error_message += f"bands has {bands.ndim} dimensions, vectors has {vectors.ndim} dimensions"
+            error_message += f"Use a built in method in ElectronicBandStructurePath to get the scalars"
+            raise ValueError(error_message)
+        elif vectors is not None and vectors.ndim == bands.ndim and vectors.shape[-1] != n_spin_channels:
+            error_message = "vectors must have the same number of spin channels as bands."
+            error_message += f"bands has {n_spin_channels} spin channels, vectors has {vectors.shape[1]} spin channels\n"
+            error_message += f"This error is likely due to a non-colinear calculation where the vectors can have spin components\n"
+            raise ValueError(error_message)
+        
+        
+        
+        for ispin_channel in range(n_spin_channels):
+            u = vectors[...,ispin_channel]                # Arrow y-component
+            v = np.ones_like(vectors[...,ispin_channel])  # Arrow x-component
+            current_bands = bands[...,ispin_channel]
+        
+            for iband in range(n_bands):
+                band_u = u[...,iband]
+                band_v = v[...,iband]
+                band_current_bands = current_bands[...,iband]
+    
+                quiver_args = []
+                quiver_args.append(x[::skip])
+                quiver_args.append(band_current_bands[::skip])
+                quiver_args.append(band_u[::skip])
+                quiver_args.append(band_v[::skip])
+                if color is None:
+                    quiver_args.append(band_u)
+                    
+                self.ax.quiver(
+                    *quiver_args,
+                    angles=angles,
+                    scale=scale,
+                    scale_units=scale_units,
+                    units = units,
+                    color=color,
+                    **kwargs)
+                
+    def set_scalar_mappable(self, 
+                            norm:mpcolors.Normalize = None, 
+                            clim:tuple = (None, None), 
+                            cmap:str = "plasma"):
+        
+        vmin = clim[0]
+        vmax = clim[1]
+        if vmin is None:
+            vmin=-0.5
+        if vmax is None:
+            vmax=0.5
+        if norm is None:
+            norm = mpcolors.Normalize
+            
+        norm = norm(vmin, vmax)
+        self.norm = norm
+        self.clim = clim
+        self.cmap = cmap
+
+        self.cm = cm.ScalarMappable(norm=norm, cmap=cmap)
+            
+    def set_xlim(self, xlim:tuple = (None, None), **kwargs):
+        if xlim[0] is None:
+            xlim[0] = self.ax.get_xlim()[0]
+        if xlim[1] is None:
+            xlim[1] = self.ax.get_xlim()[1]
+            
+        
+        self.ax.set_xlim(xlim, **kwargs)
+        
+    def set_ylim(self, ylim:tuple = (None, None), **kwargs):
+        if ylim[0] is None:
+            ylim[0] = self.y.min()
+        if ylim[1] is None:
+            ylim[1] = self.y.max()
+        self.ax.set_ylim(ylim, **kwargs)
+        
     def show(self):
         plt.show()
     
