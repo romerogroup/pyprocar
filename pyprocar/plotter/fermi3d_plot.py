@@ -265,6 +265,7 @@ class FermiDataHandler:
             else:
                 fermi_surface.merge(surface, merge_points=False, inplace=True)
 
+        fermi_surface.point_data["spin_index"] = np.array(spins_index)
         return fermi_surface
 
     def process_data(
