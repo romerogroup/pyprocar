@@ -32,6 +32,7 @@ from pyprocar.core.property_store import PointSet, Property
 from pyprocar.core.serializer import get_serializer
 from pyprocar.core.structure import Structure
 from pyprocar.utils import math, physics
+from pyprocar.utils.info import orbital_index_name_map, orbital_names
 from pyprocar.utils.unfolder import Unfolder
 
 pv.global_theme.allow_empty_mesh = True
@@ -1107,6 +1108,175 @@ class ElectronicBandStructurePath(ElectronicBandStructure, DifferentiablePropert
             return self.compute_avg_inv_effective_mass(**kwargs)
         else:
             return super().compute_property(name, **kwargs)
+
+    # ------------------------------------------------------------------
+    # Overlay weight builders
+    # ------------------------------------------------------------------
+    def build_overlay_species_weights(
+        self,
+        spins: list[int] | None = None,
+        orbitals: list[int] | None = None,
+    ) -> tuple[list[np.ndarray], list[str]]:
+        """Build per-species overlay weights for plot overlays.
+
+        For each species present in the structure, this computes the summed
+        orbital projections over all atoms of that species and returns a list
+        of weight arrays and matching labels.
+
+        Parameters
+        ----
+        spins : list of int, optional
+            Spin channels to include in the sum. Default includes all spins.
+        orbitals : list of int, optional
+            Orbital indices to include. Defaults to all orbitals.
+
+        Returns
+        ----
+        (weights, labels) : (list of ndarray, list of str)
+            Weights have shape compatible with bands: (n_k, n_bands, n_spins).
+        """
+        if self.structure is None:
+            raise ValueError("Structure is required to build species weights")
+
+        if orbitals is None:
+            orbitals = list(np.arange(self.n_orbitals, dtype=int))
+
+        weights_list: list[np.ndarray] = []
+        labels_list: list[str] = []
+
+        # Prefer explicit species list if available; otherwise derive from atoms
+        species_iterable = getattr(self.structure, "species", None)
+        if species_iterable is None:
+            species_iterable = np.unique(self.structure.atoms)
+
+        for species_name in species_iterable:
+            atom_indices = np.where(self.structure.atoms == species_name)[0]
+            if atom_indices.size == 0:
+                continue
+            summed = self.ebs_sum(atoms=atom_indices.tolist(), orbitals=orbitals, spins=spins)
+            weights_list.append(summed)
+            labels_list.append(str(species_name))
+
+        return weights_list, labels_list
+
+    def build_overlay_orbitals_weights(
+        self,
+        atoms: list[int] | None = None,
+        spins: list[int] | None = None,
+    ) -> tuple[list[np.ndarray], list[str]]:
+        """Build per-orbital-group overlay weights for plot overlays.
+
+        Iterates over orbital groups (s, p, d, f when available) and computes
+        weights for each group, optionally restricted to given atoms.
+
+        Parameters
+        ----
+        atoms : list of int, optional
+            Atom indices to include. Defaults to all atoms.
+        spins : list of int, optional
+            Spin channels to include. Default includes all spins.
+
+        Returns
+        ----
+        (weights, labels) : (list of ndarray, list of str)
+            Weights have shape compatible with bands: (n_k, n_bands, n_spins).
+        """
+        if atoms is not None and len(atoms) == 0:
+            atoms = None
+
+        weights_list: list[np.ndarray] = []
+        labels_list: list[str] = []
+
+        for orb_name in ["s", "p", "d", "f"]:
+            if orb_name == "f" and not (self.n_orbitals > 9):
+                continue
+            orb_indices = orbital_names[orb_name]
+            summed = self.ebs_sum(atoms=atoms, orbitals=orb_indices, spins=spins)
+            weights_list.append(summed)
+            labels_list.append(orb_name)
+
+        return weights_list, labels_list
+
+    def build_overlay_weights(
+        self,
+        items: dict | list[dict],
+        spins: list[int] | None = None,
+        orbitals_as_names: bool = False,
+        mathtext: bool = True,
+    ) -> tuple[list[np.ndarray], list[str]]:
+        """Build overlay weights from a mapping of species to orbital sets.
+
+        The input mirrors the previous script interface where `items` is either
+        a dict mapping species strings to lists of orbitals (names like 's','p',
+        or integer orbital indices), or a list of such dicts to build multiple
+        overlay series.
+
+        Parameters
+        ----
+        items : dict or list of dict
+            Mapping like { 'Fe': ['d'], 'O': ['p'] } or { 'Fe': [4,5,6] }.
+        spins : list of int, optional
+            Spin channels to include. Default includes all spins.
+        orbitals_as_names : bool, optional
+            If True, label orbitals by their names using the mapping in
+            `pyprocar.utils.info.orbital_index_name_map`. If False, use indices.
+            Default is False.
+        mathtext : bool, optional
+            When `orbitals_as_names` is True, wrap labels with `$...$` so
+            matplotlib renders subscripts/superscripts correctly. Default True.
+
+        Returns
+        ----
+        (weights, labels) : (list of ndarray, list of str)
+            Weights have shape compatible with bands: (n_k, n_bands, n_spins).
+        """
+        if self.structure is None:
+            raise ValueError("Structure is required to build overlay weights from items")
+
+        if isinstance(items, dict):
+            items_iter = [items]
+        else:
+            items_iter = items
+
+        weights_list: list[np.ndarray] = []
+        labels_list: list[str] = []
+
+        for mapping in items_iter:
+            for species_name, orbital_spec in mapping.items():
+                atom_indices = np.where(self.structure.atoms == species_name)[0]
+                if atom_indices.size == 0:
+                    continue
+
+                # Resolve orbital indices from names or pass integers directly
+                if len(orbital_spec) > 0 and isinstance(orbital_spec[0], str):
+                    resolved: list[int] = []
+                    for orb_token in orbital_spec:
+                        resolved = np.append(resolved, orbital_names[orb_token]).astype(int).tolist()
+                    orbitals = resolved
+                    if orbitals_as_names:
+                        # Use group name string directly
+                        label_suffix = "".join(orbital_spec)
+                    else:
+                        label_suffix = "".join(orbital_spec)
+                else:
+                    orbitals = [int(x) for x in orbital_spec]
+                    if orbitals_as_names:
+                        pretty_parts: list[str] = []
+                        for idx in orbitals:
+                            name = orbital_index_name_map.get(int(idx), str(idx))
+                            if mathtext:
+                                name = f"${name}$"
+                            pretty_parts.append(name)
+                        label_suffix = ",".join(pretty_parts)
+                    else:
+                        label_suffix = ",".join(str(x) for x in orbital_spec)
+
+                label = f"{species_name}-({label_suffix})"
+                summed = self.ebs_sum(atoms=atom_indices.tolist(), orbitals=orbitals, spins=spins)
+                weights_list.append(summed)
+                labels_list.append(label)
+
+        return weights_list, labels_list
     
     def as_kdist(self, as_segments=True):
         kdistances = self.kpath.get_distances(as_segments=False, cumlative_across_segments=True)
