@@ -323,10 +323,12 @@ class BandStructurePlotter:
             'overlay': OverlayStrategy()
         }
         
+        self.x = None
+        
     def plot(self, 
              kpath: KPath, 
              bands: np.ndarray,  **kwargs):
-        x = kpath.get_distances(as_segments=False)
+        self.x = kpath.get_distances(as_segments=False)
         
         logger.info(f"kpath shape: {x.shape}")
         logger.info(f"bands shape: {bands.shape}")
@@ -334,7 +336,7 @@ class BandStructurePlotter:
         n_spin_channels = bands.shape[-1]
         for ispin in range(n_spin_channels):
        
-            self.ax.plot(x, bands[..., ispin], linestyle="--", **kwargs)
+            self.ax.plot(self.x, bands[..., ispin], linestyle="--", **kwargs)
             
         
         
@@ -342,9 +344,9 @@ class BandStructurePlotter:
              kpath: KPath, 
              bands: np.ndarray, 
              scalars: np.ndarray = None, **kwargs):
-        x = kpath.get_distances(as_segments=False)
+        self.x = kpath.get_distances(as_segments=False)
         
-        logger.info(f"kpath shape: {x.shape}")
+        logger.info(f"kpath shape: {self.x.shape}")
         logger.info(f"bands shape: {bands.shape}")
         logger.info(f"scalars shape: {scalars.shape}")
         
@@ -367,7 +369,7 @@ class BandStructurePlotter:
             if scalars is not None:
                 data = scalars[..., ispin]
                 
-            self.ax.scatter(x, bands[..., ispin], c=data, linestyle="--", **kwargs)
+            self.ax.scatter(self.x, bands[..., ispin], c=data, linestyle="--", **kwargs)
             
             
     def plot_parametric(self, 
@@ -383,9 +385,9 @@ class BandStructurePlotter:
         if not hasattr(self, "norm") or not hasattr(self, "clim") or not hasattr(self, "cmap"):
             self.set_scalar_mappable(norm=norm, clim=clim, cmap=cmap)
             
-        x = kpath.get_distances(as_segments=False)
+        self.x = kpath.get_distances(as_segments=False)
         
-        logger.info(f"kpath shape: {x.shape}")
+        logger.info(f"kpath shape: {self.x.shape}")
         logger.info(f"bands shape: {bands.shape}")
         logger.info(f"scalars shape: {scalars.shape}")
         
@@ -426,12 +428,9 @@ class BandStructurePlotter:
         
         for ispin_channel in range(n_spin_channels):
             for iband in range(n_bands):
-                points = np.array([x, mbands[:, iband, ispin_channel]]).T.reshape(-1, 1, 2)
+                points = np.array([self.x, mbands[:, iband, ispin_channel]]).T.reshape(-1, 1, 2)
                 segments = np.concatenate([points[:-1], points[1:]], axis=1)
 
-                # segments = np.delete(
-                #     segments, np.where(x[1:] == x[:-1])[0], axis=0)
-                
                 lc = LineCollection(segments,  **kwargs)
                 
                 # Handle colors
@@ -442,37 +441,6 @@ class BandStructurePlotter:
                     
                 lc.set_linewidth(width_weights[:, iband, ispin_channel] * linewidth)
                 handle = self.ax.add_collection(lc)
-
-                # else:
-                #     lc.set_color(color)
-                #     if i_segment == 0:
-                #         lc.set_label(label)
-                # if color_weights is None:
-                #     lc = LineCollection(
-                #         segments, colors=color, linestyle=self.config.linestyle[ispin]
-                #     )
-                # else:
-                #     lc = LineCollection(
-                #         segments, cmap=plt.get_cmap(self.config.cmap), norm=norm
-                #     )
-                #     lc.set_array(color_weights[:, iband, ispin])
-                # lc.set_linewidth(width_weights[:, iband, ispin] * linewidth[ispin])
-                # lc.set_linestyle(self.config.linestyle[ispin])
-                # handle = self.ax.add_collection(lc)
-
-                # band_name = f"band-{iband}_spinChannel-{str(ispin)}"
-                # projection_name = labels[0]
-                # values_dict[f"bands__{band_name}"] = self.ebs.bands[:, iband, ispin]
-                # if color_weights is not None:
-                #     values_dict[f"projections__{projection_name}__{band_name}"] = (
-                #         color_weights[:, iband, ispin]
-                #     )
-            # if color_weights is not None:
-            #     handle.set_color(color_map[iweight][:-1].lower())
-            # handle.set_linewidth(linewidth)
-
-            # mpatches.Patch(color='red', label='The red data')
-            # self.handles.append(mpatches.Patch(color="red", label="The red data"))
 
             
     def plot_quiver(self, 
@@ -486,9 +454,9 @@ class BandStructurePlotter:
             units:str='inches',
             color=None,
             **kwargs):
-        x = kpath.get_distances(as_segments=False)
+        self.x = kpath.get_distances(as_segments=False)
         
-        logger.info(f"kpath shape: {x.shape}")
+        logger.info(f"kpath shape: {self.x.shape}")
         logger.info(f"bands shape: {bands.shape}")
         logger.info(f"vectors shape: {vectors.shape}")
         if bands.ndim == 2:
@@ -523,7 +491,7 @@ class BandStructurePlotter:
                 band_current_bands = current_bands[...,iband]
     
                 quiver_args = []
-                quiver_args.append(x[::skip])
+                quiver_args.append(self.x[::skip])
                 quiver_args.append(band_current_bands[::skip])
                 quiver_args.append(band_u[::skip])
                 quiver_args.append(band_v[::skip])
@@ -560,20 +528,16 @@ class BandStructurePlotter:
 
         self.cm = cm.ScalarMappable(norm=norm, cmap=cmap)
             
-    def set_xlim(self, xlim:tuple = (None, None), **kwargs):
-        if xlim[0] is None:
-            xlim[0] = self.ax.get_xlim()[0]
-        if xlim[1] is None:
-            xlim[1] = self.ax.get_xlim()[1]
+    def set_xlim(self, xlim:List[float] = None, **kwargs):
+        if xlim is None:
+            xlim = (self.x[0], self.x[-1])
             
-        
         self.ax.set_xlim(xlim, **kwargs)
         
-    def set_ylim(self, ylim:tuple = (None, None), **kwargs):
-        if ylim[0] is None:
-            ylim[0] = self.y.min()
-        if ylim[1] is None:
-            ylim[1] = self.y.max()
+    def set_ylim(self, ylim:List[float] = None, **kwargs):
+        if ylim is None:
+            ylim = (self.flefffy.min(), self.y.max())
+            
         self.ax.set_ylim(ylim, **kwargs)
         
     def show(self):
