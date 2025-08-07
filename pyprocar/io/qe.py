@@ -1144,9 +1144,12 @@ class QEParser:
             self.nk3 = float(monkhorst_tag.attrib["k3"])
 
         self.nks = int(main_xml_root.findall(".//output/band_structure/nks")[0].text)
-        self.atm_wfc = int(
-            main_xml_root.findall(".//output/band_structure/num_of_atomic_wfc")[0].text
-        )
+        
+        atm_wfc_elements = main_xml_root.findall(".//output/band_structure/num_of_atomic_wfc")
+        if atm_wfc_elements:
+            self.atm_wfc = int(atm_wfc_elements[0].text)
+        else:
+            self.atm_wfc = 0
 
         self.nelec = float(
             main_xml_root.findall(".//output/band_structure/nelec")[0].text
