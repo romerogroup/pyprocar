@@ -2160,7 +2160,7 @@ class VaspParser(BaseParser):
         if kgrid is None or kgrid_mode is None or k_shift is None:
             return None
         
-        return kpoints.KGridInfo(
+        return kpoints_core.KGridInfo(
             kgrid=kgrid,
             kgrid_mode=kgrid_mode,
             kshift=k_shift
