@@ -14,7 +14,8 @@ import matplotlib.patches as mpatches
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from matplotlib.collections import LineCollection
+from matplotlib.collections import LineCollection, PathCollection
+from matplotlib.lines import Line2D
 from matplotlib.ticker import MultipleLocator
 
 from pyprocar.core import KPath
@@ -76,12 +77,8 @@ class BandStructurePlotter:
         self.kpath = kpath
         self.x = kpath.get_distances(as_segments=False)
         
-        logger.info(f"kpath shape: {self.x.shape}")
-        logger.info(f"bands shape: {bands.shape}")
-
-        if bands.ndim == 2:
-            bands = bands[..., np.newaxis]
-        n_spin_channels = bands.shape[-1]
+        bands, _ , _ = self._validate_data(bands=bands)
+        
         # Merge kwargs: generic kwargs as fallback, line_kwargs override
         merged_line_kwargs = {}
         if kwargs:
@@ -91,8 +88,15 @@ class BandStructurePlotter:
         # Preserve previous default linestyle if user didn't supply one
         if "linestyle" not in merged_line_kwargs:
             merged_line_kwargs["linestyle"] = "--"
+            
+            
+        created_lines: dict[tuple[int, int], Line2D] = {}
+        n_bands = bands.shape[1]
+        n_spin_channels = bands.shape[-1]
         for ispin in range(n_spin_channels):
-            self.ax.plot(self.x, bands[..., ispin], **merged_line_kwargs)
+            for iband in range(n_bands):
+                ret = self.ax.plot(self.x, bands[:, iband, ispin], **merged_line_kwargs)
+                created_lines[(iband, ispin)] = ret[0]
 
         # Record exportable data
         for ispin in range(n_spin_channels):
@@ -100,14 +104,18 @@ class BandStructurePlotter:
                 key = f"bands__band-{iband}_spinChannel-{ispin}"
                 self.values_dict[key] = bands[:, iband, ispin]
         self._record_kpath_exports(kpath)
+        return created_lines
             
-        
-        
     def plot_scatter(self, 
              kpath: KPath, 
              bands: np.ndarray, 
              scalars: np.ndarray = None,
              scatter_kwargs: dict | None = None,
+             cmap: str | mpcolors.Colormap = "plasma",
+             norm: str | mpcolors.Normalize | type | None = "auto",
+             clim: Tuple[float | None, float | None] | None = None,
+             show_colorbar: bool | None = True,
+             colorbar_kwargs: dict | None = None,
              **kwargs):
         """Plot band energies as scatter, optionally colored by `scalars`.
 
@@ -128,41 +136,47 @@ class BandStructurePlotter:
         self.kpath = kpath
         self.x = kpath.get_distances(as_segments=False)
         
-        logger.info(f"kpath shape: {self.x.shape}")
-        logger.info(f"bands shape: {bands.shape}")
-        if scalars is not None:
-            logger.info(f"scalars shape: {scalars.shape}")
+        # Validate data
+        bands, scalars, _ = self._validate_data(bands, scalars)
         
-
-        if bands.ndim == 2:
-            bands = bands[..., np.newaxis]
-        n_spin_channels = bands.shape[-1]
-
-        if scalars is not None and scalars.ndim != bands.ndim:
-            error_message = "scalars must have the same number of dimensions as bands"
-            error_message += f"bands has {bands.ndim} dimensions, scalars has {scalars.ndim} dimensions"
-            error_message += f"Use a built in method in ElectronicBandStructurePath to get the scalars"
-            raise ValueError(error_message)
-        elif scalars is not None and scalars.ndim == bands.ndim and scalars.shape[-1] != n_spin_channels:
-            error_message = "scalars must have the same number of spin channels as bands."
-            error_message += f"bands has {n_spin_channels} spin channels, scalars has {scalars.shape[-1]} spin channels\n"
-            error_message += f"This error is likely due to a non-colinear calculation where the scalars can have spin components\n"
-            raise ValueError(error_message)
-
+        # Resolve colormap
+        resolved_norm, resolved_cmap, scalar_mappable = self._resolve_colormap(
+            data=scalars,
+            cmap=cmap,
+            norm=norm,
+        )
+        
         # Merge kwargs for scatter
         merged_scatter_kwargs = {}
         if kwargs:
             merged_scatter_kwargs.update(kwargs)
         if scatter_kwargs:
             merged_scatter_kwargs.update(scatter_kwargs)
+            
+        merged_scatter_kwargs["norm"] = resolved_norm
+        merged_scatter_kwargs["cmap"] = resolved_cmap
 
+        created_collections: dict[tuple[int, int], PathCollection] = {}
+        
+        # Plot scatter
+        n_spin_channels = bands.shape[-1]
+        n_bands = bands.shape[1]
         for ispin in range(n_spin_channels):
             data=None
             if scalars is not None:
                 data = scalars[..., ispin]
                 
-            self.ax.scatter(self.x, bands[..., ispin], c=data, **merged_scatter_kwargs)
+            for iband in range(n_bands):
+                y = bands[:, iband, ispin]
+                c_vals = None if data is None else data[:, iband]
+                coll = self.ax.scatter(self.x, y, c=c_vals, **merged_scatter_kwargs)
+                created_collections[(iband, ispin)] = coll
 
+        # Add colorbar if requested
+        if scalars is not None and show_colorbar:
+            colorbar_kwargs = colorbar_kwargs or {}
+            self.cb = self.fig.colorbar(scalar_mappable, ax=self.ax, **colorbar_kwargs)
+            
         # Record exportable data
         for ispin in range(n_spin_channels):
             for iband in range(bands.shape[1]):
@@ -172,17 +186,19 @@ class BandStructurePlotter:
                     pkey = f"projections__scatter__band-{iband}_spinChannel-{ispin}"
                     self.values_dict[pkey] = scalars[:, iband, ispin]
         self._record_kpath_exports(kpath)
+        return created_collections
             
             
     def plot_parametric(self, 
              kpath: KPath, 
              bands: np.ndarray, 
              scalars: np.ndarray = None, 
-             cmap: str = "plasma",
-             norm: mpcolors.Normalize = None,
-             clim:tuple = (None, None),
+             cmap: str | mpcolors.Colormap = "plasma",
+             norm: str | mpcolors.Normalize | type | None = "auto",
+             clim:Tuple[float | None, float | None] | None = None,
              linewidth:float = 2.0,
              collection_kwargs: dict | None = None,
+             show_colorbar: bool | None = True,
              colorbar_kwargs: dict | None = None,
              **kwargs):
         """Plot parametric bands colored by `scalars` via LineCollection.
@@ -213,40 +229,22 @@ class BandStructurePlotter:
             hood; explicit `collection_kwargs` takes precedence).
         """
         
-        if not hasattr(self, "norm") or not hasattr(self, "clim") or not hasattr(self, "cmap"):
-            self.set_scalar_mappable(norm=norm, clim=clim, cmap=cmap)
-            
         self.kpath = kpath
         self.x = kpath.get_distances(as_segments=False)
         
-        logger.info(f"kpath shape: {self.x.shape}")
-        logger.info(f"bands shape: {bands.shape}")
-        if scalars is not None:
-            logger.info(f"scalars shape: {scalars.shape}")
+        # Validate data
+        bands, scalars, _ = self._validate_data(bands=bands, scalars=scalars)
         
-
-        if bands.ndim == 2:
-            bands = bands[..., np.newaxis]
-        n_spin_channels = bands.shape[-1]
-        n_bands = bands.shape[1]
+        # Resolve colormap
+        resolved_norm, resolved_cmap, scalar_mappable = self._resolve_colormap(
+            data=scalars,
+            cmap=cmap,
+            norm=norm,
+            clim=clim,
+        )
         
-        if scalars is not None and scalars.ndim != bands.ndim:
-            error_message = "scalars must have the same number of dimensions as bands"
-            error_message += f"bands has {bands.ndim} dimensions, scalars has {scalars.ndim} dimensions"
-            error_message += f"Use a built in method in ElectronicBandStructurePath to get the scalars"
-            raise ValueError(error_message)
-        elif scalars is not None and scalars.ndim == bands.ndim and scalars.shape[-1] != n_spin_channels:
-            error_message = "scalars must have the same number of spin channels as bands."
-            error_message += f"bands has {n_spin_channels} spin channels, scalars has {scalars.shape[-1]} spin channels\n"
-            error_message += f"This error is likely due to a non-colinear calculation where the scalars can have spin components\n"
-            raise ValueError(error_message)
-        
-        # if width_weights is None:
-        #     width_weights = np.ones_like(bands)
-        #     linewidth = 2.0
-        
+        # Prepare data
         width_weights = np.ones_like(bands)
-      
         mbands = np.ma.masked_array(bands, False)
         # if width_weights is not None:
         #     logger.info(f"___Applying width mask___")
@@ -267,8 +265,13 @@ class BandStructurePlotter:
             merged_collection_kwargs.update(kwargs)
         if collection_kwargs:
             merged_collection_kwargs.update(collection_kwargs)
-
+            
+        # Plot parametric bands
         last_lc = None
+        created_collections: dict[tuple[int, int], LineCollection] = {}
+        
+        n_spin_channels = bands.shape[-1]
+        n_bands = bands.shape[1]
         for ispin_channel in range(n_spin_channels):
             for iband in range(n_bands):
                 points = np.array([self.x, mbands[:, iband, ispin_channel]]).T.reshape(-1, 1, 2)
@@ -279,17 +282,30 @@ class BandStructurePlotter:
                 # Handle colors
                 if scalars is not None:
                     lc.set_array(scalars[:, iband, ispin_channel])
-                    lc.set_cmap(self.cmap)
-                    lc.set_norm(self.norm)
+                    lc.set_cmap(resolved_cmap)
+                    lc.set_norm(resolved_norm)
                     
                 lc.set_linewidth(width_weights[:, iband, ispin_channel] * linewidth)
                 self.ax.add_collection(lc)
                 last_lc = lc
-
-        if scalars is not None and last_lc is not None:
+                created_collections[(iband, ispin_channel)] = lc
+                
+        # Add colorbar if requested
+        if scalars is not None and show_colorbar:
             colorbar_kwargs = colorbar_kwargs or {}
-            self.cb = self.fig.colorbar(last_lc, ax=self.ax, **colorbar_kwargs)
-
+            self.cb = self.fig.colorbar(scalar_mappable, ax=self.ax, **colorbar_kwargs)
+        
+        # Set default plot parameters
+        self.set_xlim()
+        ymin = float(bands.min())
+        ymax = float(bands.max())
+        elimit = (ymin, ymax)
+        self.set_ylim(elimit)
+        self.set_yticks()
+        self.set_xticks()
+        self.set_xlabel()
+        self.set_ylabel()
+        
         # Record exportable data
         for ispin in range(n_spin_channels):
             for iband in range(n_bands):
@@ -299,6 +315,7 @@ class BandStructurePlotter:
                     pkey = f"projections__parametric__band-{iband}_spinChannel-{ispin}"
                     self.values_dict[pkey] = scalars[:, iband, ispin]
         self._record_kpath_exports(kpath)
+        return created_collections
 
             
     def plot_quiver(self, 
@@ -311,6 +328,12 @@ class BandStructurePlotter:
             scale_units:str='inches',
             units:str='inches',
             color=None,
+            cmap: str | mpcolors.Colormap = "plasma",
+            norm: str | mpcolors.Normalize | type | None = "auto",
+            clim:Tuple[float | None, float | None] | None = None,
+            quiver_kwargs: dict | None = None,
+            show_colorbar: bool | None = True,
+            colorbar_kwargs: dict | None = None,
             **kwargs):
         """Plot vector-valued data (e.g., velocities) as arrows along bands.
 
@@ -338,33 +361,35 @@ class BandStructurePlotter:
         self.kpath = kpath
         self.x = kpath.get_distances(as_segments=False)
         
-        logger.info(f"kpath shape: {self.x.shape}")
-        logger.info(f"bands shape: {bands.shape}")
-        logger.info(f"vectors shape: {vectors.shape}")
-        if bands.ndim == 2:
-            bands = bands[...,np.newaxis]
-        if vectors.ndim == 2:
-            vectors = vectors[...,np.newaxis]
-
+        # Validate data
+        bands, _, vectors = self._validate_data(bands=bands, vectors=vectors)
+        
+        # Resolve colormap
+        resolved_norm, resolved_cmap, scalar_mappable = self._resolve_colormap(
+            data=vectors,
+            cmap=cmap,
+            norm=norm,
+            clim=clim,
+        )
+        
+        # Merge kwargs and quiver_kwargs
+        merged_collection_kwargs = {}
+        if kwargs:
+            merged_collection_kwargs.update(kwargs)
+        if quiver_kwargs:
+            merged_collection_kwargs.update(quiver_kwargs)
+            
+        merged_collection_kwargs["norm"] = resolved_norm
+        merged_collection_kwargs["cmap"] = resolved_cmap
+        
+        # Plot quivers
+        created_quivers: dict[tuple[int, int], object] = {}
         n_spin_channels = bands.shape[-1]
         n_bands = bands.shape[1]
-        
-        if vectors is not None and vectors.ndim != bands.ndim:
-            error_message = "vectors must have the same number of dimensions as bands"
-            error_message += f"bands has {bands.ndim} dimensions, vectors has {vectors.ndim} dimensions"
-            error_message += f"Use a built in method in ElectronicBandStructurePath to get the scalars"
-            raise ValueError(error_message)
-        elif vectors is not None and vectors.ndim == bands.ndim and vectors.shape[-1] != n_spin_channels:
-            error_message = "vectors must have the same number of spin channels as bands."
-            error_message += f"bands has {n_spin_channels} spin channels, vectors has {vectors.shape[1]} spin channels\n"
-            error_message += f"This error is likely due to a non-colinear calculation where the vectors can have spin components\n"
-            raise ValueError(error_message)
-        
-        
-        
         for ispin_channel in range(n_spin_channels):
             u = vectors[...,ispin_channel]                # Arrow y-component
             v = np.ones_like(vectors[...,ispin_channel])  # Arrow x-component
+            vector_norms = vectors[...,ispin_channel]
             current_bands = bands[...,ispin_channel]
         
             for iband in range(n_bands):
@@ -378,16 +403,22 @@ class BandStructurePlotter:
                 quiver_args.append(band_u[::skip])
                 quiver_args.append(band_v[::skip])
                 if color is None:
-                    quiver_args.append(band_u)
+                    quiver_args.append(vector_norms[...,iband])
                     
-                self.ax.quiver(
+                qv = self.ax.quiver(
                     *quiver_args,
                     angles=angles,
                     scale=scale,
                     scale_units=scale_units,
                     units = units,
                     color=color,
-                    **kwargs)
+                    **merged_collection_kwargs)
+                created_quivers[(iband, ispin_channel)] = qv
+                
+        # Add colorbar if requested
+        if vectors is not None and show_colorbar:
+            colorbar_kwargs = colorbar_kwargs or {}
+            self.cb = self.fig.colorbar(scalar_mappable, ax=self.ax, **colorbar_kwargs)
 
         # Record exportable bands
         for ispin in range(n_spin_channels):
@@ -395,6 +426,7 @@ class BandStructurePlotter:
                 key = f"bands__band-{iband}_spinChannel-{ispin}"
                 self.values_dict[key] = bands[:, iband, ispin]
         self._record_kpath_exports(kpath)
+        return created_quivers
 
     def plot_atomic_levels(
         self,
@@ -405,7 +437,10 @@ class BandStructurePlotter:
         cmap: str = "plasma",
         norm: Union[mpcolors.Normalize, type] = None,
         clim: Tuple[float, float] = (None, None),
+        show_colorbar: bool | None = True,
+        colorbar_kwargs: dict | None = None,
         linewidth: float = None,
+        line_collection_kwargs: dict | None = None,
         show_text: bool = True,
     ) -> None:
         """Plot atomic-like energy levels for a single k-point input.
@@ -437,37 +472,37 @@ class BandStructurePlotter:
         show_text : bool, optional
             Whether to draw text labels near levels. Default True.
         """
-        if bands.ndim == 2:
-            bands = bands[..., np.newaxis]
-        if bands.shape[0] != 1:
-            raise ValueError("plot_atomic_levels requires a single k-point (n_k=1)")
 
         # Fake 2-point x-axis for drawing horizontal segments
         self.kpath = None
         self.x = np.array([0.0, 1.0])
 
-        n_spins = bands.shape[-1]
-        n_bands = bands.shape[1]
+        # Validate data
+        bands, scalars, _ = self._validate_data(bands=bands, scalars=scalars)
+        if bands.shape[0] != 1:
+            raise ValueError("plot_atomic_levels requires a single k-point (n_k=1)")
 
-        # Determine limits
-        if elimit is None:
-            ymin = float(bands.min())
-            ymax = float(bands.max())
-            elimit = (ymin, ymax)
-        self.set_ylim(elimit)
-
-        # Configure scalars mapping if provided
-        if scalars is not None:
-            if scalars.ndim == 2:
-                scalars = scalars[..., np.newaxis]
-            if scalars.shape[0] != 1:
-                raise ValueError("scalars for atomic levels must have first dimension 1")
-            self.set_scalar_mappable(norm=norm, clim=clim, cmap=cmap)
-
+        # Resolve colormap
+        resolved_norm, resolved_cmap, scalar_mappable = self._resolve_colormap(
+            data=scalars,
+            cmap=cmap,
+            norm=norm,
+            clim=clim,
+        )
+        
+        # Merge kwargs and line_collection_kwargs
+        merged_collection_kwargs = {}
+        if line_collection_kwargs:
+            merged_collection_kwargs.update(line_collection_kwargs)
+        merged_collection_kwargs["norm"] = resolved_norm
+        merged_collection_kwargs["cmap"] = resolved_cmap
+        
         # Remove x ticks for atomic levels and compute text bbox in data units
         self.ax.xaxis.set_major_locator(plt.NullLocator())
 
+        
         # Determine a representative text bbox in data coordinates
+        n_bands = bands.shape[1]
         sample_text = f"{labels_prefix}-0 : b-{n_bands}"
         tmp_txt = self.ax.text(self.x[0], float(bands.min()), sample_text)
         try:
@@ -479,30 +514,33 @@ class BandStructurePlotter:
             # Fallback small sizes if renderer not ready
             w, h = 0.05, 0.05
         tmp_txt.remove()
-
+        
         # Ensure enough x-range to accommodate lateral shifts and keep labels inside
         x_base = self.x[0] + 0.2 * w
         self.set_xlim((self.x[0], self.x[-1]))
+        
 
+        # Plot atomic levels
         last_lc = None
         # Sort energies to manage label overlap; alternate lateral shifts based on bbox h
-        for ispin in range(n_spins):
+        n_spin_channels = bands.shape[-1]
+        n_bands = bands.shape[1]
+        for ispin in range(n_spin_channels):
             energies = bands[0, :, ispin]
             # order = np.argsort(energies)
             last_y = None
             shift_state = 0  # 0: first column near left edge, 1: second column to the right
-            for idx in range(len(bands[0, :, ispin])):
-                y = float(energies[idx])
-                if scalars is None:
-                    self.ax.plot(self.x, [y, y], color="black", linewidth=1.2)
-                else:
-                    pts = np.array([[self.x[0], y], [self.x[1], y]])
-                    segments = np.array([pts])
-                    lc = LineCollection(segments, cmap=self.cmap, norm=self.norm)
-                    level_scalar = float(np.asarray(scalars[0, idx, ispin]))
+            for iband in range(n_bands):
+                y = float(energies[iband])
+     
+                pts = np.array([[self.x[0], y], [self.x[1], y]])
+                segments = np.array([pts])
+                lc = LineCollection(segments, **merged_collection_kwargs)
+                if scalars is not None:
+                    level_scalar = float(np.asarray(scalars[0, iband, ispin]))
                     lc.set_array(np.array([level_scalar]))
-                    self.ax.add_collection(lc)
-                    last_lc = lc
+                self.ax.add_collection(lc)
+                last_lc = lc
 
                 if show_text:
                     # if vertical overlap, toggle lateral shift
@@ -514,17 +552,30 @@ class BandStructurePlotter:
                     # Clamp inside current xlim
                     xmin, xmax = self.ax.get_xlim()
                     x_pos = min(max(x_pos, xmin + 0.05 * w), xmax - 0.05 * w)
-                    self.ax.text(x_pos, y, f"{labels_prefix}-{ispin} : b-{idx+1}")
+                    self.ax.text(x_pos, y, f"{labels_prefix}-{ispin} : b-{iband+1}")
                     last_y = y
-            
+        
+        # Add colorbar if requested
+        if scalars is not None and show_colorbar:
+            colorbar_kwargs = colorbar_kwargs or {}
+            self.cb = self.fig.colorbar(scalar_mappable, ax=self.ax, **colorbar_kwargs)
+        
+        # Determine limits
+        if elimit is None:
+            ymin = float(bands.min())
+            ymax = float(bands.max())
+            elimit = (ymin, ymax)
+        self.set_ylim(elimit)
+        
+        
+        
         self.set_yticks()
         self.set_xticks()
-        # self.draw_fermi()
         self.set_xlabel()
         self.set_ylabel()
 
         # Export
-        for ispin in range(n_spins):
+        for ispin in range(n_spin_channels):
             for iband in range(n_bands):
                 key = f"bands__band-{iband}_spinChannel-{ispin}"
                 level = float(bands[0, iband, ispin])
@@ -537,12 +588,17 @@ class BandStructurePlotter:
         kpath: KPath,
         bands: np.ndarray,
         weights: List[np.ndarray],
-        colors: Optional[List[str]] = None,
-        cmap_list: Optional[List[str]] = None,
         labels: Optional[List[str]] = None,
+        colors: Optional[List[str]] = None,
+        norm: str | mpcolors.Normalize | type | None = "auto",
+        clim: Tuple[float | None, float | None] | None = None,
+        cmap: str | mpcolors.Colormap = "plasma",
+        cmap_list: Optional[List[str]] = None,
         fill_alpha: float = 0.3,
-        edge_alpha: float = 0.8,
         linewidth: float = 1.0,
+        fill_between_kwargs: dict | None = None,
+        show_colorbar: bool | None = None,
+        colorbar_kwargs: dict | None = None,
         **kwargs,
     ) -> None:
         """Plot overlays by filling band envelopes using provided weights.
@@ -570,10 +626,11 @@ class BandStructurePlotter:
         self.kpath = kpath
         self.x = kpath.get_distances(as_segments=False)
 
-        if bands.ndim == 2:
-            bands = bands[..., np.newaxis]
-        n_spins = bands.shape[-1]
-        n_bands = bands.shape[1]
+        # Validate data
+        bands, _, _ = self._validate_data(bands=bands)
+        for i, weight in enumerate(weights):
+            _, weight, _ = self._validate_data(bands=bands, scalars=weight)
+            weights[i] = weight
 
         # Default colormap names per overlay, fallback if explicit colors not given
         if cmap_list is None:
@@ -585,87 +642,88 @@ class BandStructurePlotter:
                 cmap_name = cmap_list[i % len(cmap_list)]
                 cmap = plt.get_cmap(cmap_name)
                 colors.append(cmap(0.7))
+                
+            cmaps=[]
+            norms=[]
+            scalar_mappables=[]
+            for i in range(len(weights)):
+                resolved_norm, resolved_cmap, scalar_mappable = self._resolve_colormap(
+                    data=weights[i],
+                    cmap=cmap_list[i % len(cmap_list)],
+                    norm=norm,
+                    clim=clim,
+                )
+                cmaps.append(resolved_cmap)
+                norms.append(resolved_norm)
+                scalar_mappables.append(scalar_mappable)
+                
+                
+        # Merge kwargs and fill_between_kwargs
+        merged_collection_kwargs = {}
+        if kwargs:
+            merged_collection_kwargs.update(kwargs)
+        if fill_between_kwargs:
+            merged_collection_kwargs.update(fill_between_kwargs)
+            
+        merged_collection_kwargs["alpha"] = fill_alpha
+        merged_collection_kwargs["linewidth"] = linewidth
 
+
+        # Iterate over weights and fill between
         legend_handles = []
+        n_spin_channels = bands.shape[-1]
+        n_bands = bands.shape[1]
         for widx, w in enumerate(weights):
             if w.ndim == 2:
                 w = w[..., np.newaxis]
             if w.shape != bands.shape:
                 raise ValueError("Each weight must have the same shape as bands")
             color = colors[widx]
-            for ispin in range(n_spins):
+            for ispin in range(n_spin_channels):
                 for iband in range(n_bands):
                     y = bands[:, iband, ispin]
                     width_arr = w[:, iband, ispin]
+                    
+                    if colors is None:
+                        cmap = cmaps[widx]
+                        norm = norms[widx]
+                    else:
+                        cmap = None
+                        norm = None
+                    
                     self.ax.fill_between(
                         self.x,
                         y - width_arr / 2.0,
                         y + width_arr / 2.0,
                         color=color,
-                        alpha=fill_alpha,
-                        linewidth=linewidth,
-                        **kwargs,
+                        cmap=cmap,
+                        norm=norm,
+                        **merged_collection_kwargs,
                     )
             legend_label = labels[widx] if labels and widx < len(labels) else f"overlay-{widx+1}"
             legend_handles.append(mpatches.Patch(color=color, label=legend_label, alpha=fill_alpha))
+            
+        # Add colorbar if requested
+        if colors is not None and show_colorbar:
+            colorbar_kwargs = colorbar_kwargs or {}
+            self.cb = self.fig.colorbar(scalar_mappable, ax=self.ax, **colorbar_kwargs)
 
         # Export
-        for ispin in range(n_spins):
+        for ispin in range(n_spin_channels):
             for iband in range(n_bands):
                 key = f"bands__band-{iband}_spinChannel-{ispin}"
                 self.values_dict[key] = bands[:, iband, ispin]
         self._record_kpath_exports(kpath)
         self._legend_handles = legend_handles
-                
-    def set_scalar_mappable(self, 
-                            norm:mpcolors.Normalize = None, 
-                            clim:tuple = (None, None), 
-                            cmap:str = "plasma"):
         
-        vmin = clim[0]
-        vmax = clim[1]
-        if vmin is None:
-            vmin=0
-        if vmax is None:
-            vmax=1
-        if norm is None:
-            norm = mpcolors.Normalize
-            
-        norm = norm(vmin, vmax)
-        self.norm = norm
-        self.clim = clim
-        self.cmap = cmap
-
-        self.cm = cm.ScalarMappable(norm=norm, cmap=cmap)
-        
-    def show_colorbar(self, 
-                      label:str = "",
-                      colorbar_kwargs:dict = None):
-        """Add a colorbar to the plot.
-
-        Parameters
-        ----------
-        label : str, optional
-            Label for the colorbar, by default "".
-        n_ticks : int, optional
-            Number of ticks on the colorbar, by default 5.
-        cmap : str, optional
-            Colormap name, by default "plasma".
-        norm : matplotlib.colors.Normalize, optional
-            Normalization instance for color mapping, by default None.
-        clim : tuple of float, optional
-            Color limits as (vmin, vmax), by default (None, None).
-        colorbar_kwargs : dict, optional
-            Additional kwargs for matplotlib colorbar function, by default None.
-        """
-        colorbar_kwargs = colorbar_kwargs or {}
-        self.colorbar = self.fig.colorbar(
-                        self.cm,
-                        ax=self.ax, 
-                        label=label,
-                        **colorbar_kwargs)
-        
-            
+        self.set_xlim()
+        self.set_ylim()
+        self.set_yticks()
+        self.set_xticks()
+        self.set_xlabel()
+        self.set_ylabel()
+        self.legend()
+                        
     def set_xlim(self, xlim:List[float] = None, **kwargs):
         if xlim is None:
             xlim = (self.x[0], self.x[-1])
@@ -877,4 +935,94 @@ class BandStructurePlotter:
         
     def show(self):
         plt.show()
+        
+    def _validate_data(self, 
+                               bands: np.ndarray | None, 
+                               scalars: np.ndarray | None = None,
+                               vectors: np.ndarray | None = None):
+        if bands.ndim == 2:
+            bands = bands[..., np.newaxis]
+        n_spin_channels = bands.shape[-1]
+ 
+        if scalars is not None and scalars.ndim == 2:
+            scalars = scalars[..., np.newaxis]
+        if scalars is not None and scalars.ndim != bands.ndim:
+            error_message = "scalars must have the same number of dimensions as bands"
+            error_message += f"bands has {bands.ndim} dimensions, scalars has {scalars.ndim} dimensions"
+            error_message += f"Use a built in method in ElectronicBandStructurePath to get the scalars"
+            raise ValueError(error_message)
+        elif scalars is not None and scalars.ndim == bands.ndim and scalars.shape[-1] != n_spin_channels:
+            error_message = "scalars must have the same number of spin channels as bands."
+            error_message += f"bands has {n_spin_channels} spin channels, scalars has {scalars.shape[-1]} spin channels\n"
+            error_message += f"This error is likely due to a non-colinear calculation where the scalars can have spin components\n"
+            raise ValueError(error_message)
+        
+        if vectors is not None and vectors.ndim == 2:
+            vectors = vectors[...,np.newaxis]
+        if vectors is not None and vectors.ndim != bands.ndim:
+            error_message = "vectors must have the same number of dimensions as bands"
+            error_message += f"bands has {bands.ndim} dimensions, vectors has {vectors.ndim} dimensions"
+            error_message += f"Use a built in method in ElectronicBandStructurePath to get the scalars"
+            raise ValueError(error_message)
+        elif vectors is not None and vectors.ndim == bands.ndim and vectors.shape[-1] != n_spin_channels:
+            error_message = "vectors must have the same number of spin channels as bands."
+            error_message += f"bands has {n_spin_channels} spin channels, vectors has {vectors.shape[1]} spin channels\n"
+            error_message += f"This error is likely due to a non-colinear calculation where the vectors can have spin components\n"
+            raise ValueError(error_message)
+        
+        return bands, scalars, vectors
     
+    # ---- color mapping resolver ----
+    def _resolve_colormap(self,
+                          data: np.ndarray | None,
+                          cmap: str | mpcolors.Colormap = "plasma",
+                          norm: str | mpcolors.Normalize | type | None = "auto",
+                          clim: Tuple[float | None, float | None] | None = None,
+                          ):
+        """Resolve a Normalize and Colormap for the given data.
+
+        - norm can be:
+          - 'auto' or None: build Normalize using data/clim
+          - a Normalize instance: use as is
+          - a Normalize subclass: instantiate with vmin/vmax from data/clim
+        - clim can be (vmin, vmax) with Nones to fill from data
+        - If persist=True, store on self (norm, cmap, cm)
+        Returns (norm_obj, cmap_obj, scalar_mappable)
+        """
+        if data is None:
+            return None, None, None
+       
+        vmin = None
+        vmax = None
+        if clim is not None:
+            vmin, vmax = clim
+        # Compute from data if needed
+        if data is not None:
+            try:
+                data_min = float(np.nanmin(np.asarray(data)))
+                data_max = float(np.nanmax(np.asarray(data)))
+            except Exception:
+                data_min, data_max = None, None
+            if vmin is None:
+                vmin = data_min
+            if vmax is None:
+                vmax = data_max
+
+        # Resolve Normalize
+        if isinstance(norm, mpcolors.Normalize):
+            norm_obj = norm
+        elif isinstance(norm, type) and issubclass(norm, mpcolors.Normalize):
+            norm_obj = norm(vmin=vmin, vmax=vmax)
+        elif norm in ("auto", None):
+            norm_obj = mpcolors.Normalize(vmin=vmin, vmax=vmax)
+        else:
+            norm_obj = mpcolors.Normalize(vmin=vmin, vmax=vmax)
+
+        # Resolve cmap
+        cmap_obj = cmap
+        # Build a ScalarMappable for colorbar convenience
+        scalar_mappable = cm.ScalarMappable(norm=norm_obj, cmap=cmap_obj)
+        if data is not None:
+            scalar_mappable.set_array(np.asarray(data).ravel())
+            
+        return norm_obj, cmap_obj, scalar_mappable
