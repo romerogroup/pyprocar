@@ -99,22 +99,25 @@ class QEParser:
             with open(bands_in_filepath, "r") as f:
                 self.bandsIn = f.read()
             self._get_kpoint_labels()
+        self.ebs = None
+        try:
+            self.ebs = ElectronicBandStructure(
+                kpoints=self.kpoints,
+                n_kx=self.nkx,
+                n_ky=self.nky,
+                n_kz=self.nkz,
+                bands=self.bands,
+                projected=self._spd2projected(self.spd),
+                efermi=self.efermi,
+                kpath=self.kpath,
+                projected_phase=self._spd2projected(self.spd_phase),
+                labels=self.orbital_names[:-1],
+                reciprocal_lattice=self.reciprocal_lattice,
+            )
+        except Exception as e:
+            logger.debug(e)
 
-        self.ebs = ElectronicBandStructure(
-            kpoints=self.kpoints,
-            n_kx=self.nkx,
-            n_ky=self.nky,
-            n_kz=self.nkz,
-            bands=self.bands,
-            projected=self._spd2projected(self.spd),
-            efermi=self.efermi,
-            kpath=self.kpath,
-            projected_phase=self._spd2projected(self.spd_phase),
-            labels=self.orbital_names[:-1],
-            reciprocal_lattice=self.reciprocal_lattice,
-        )
 
-        return None
 
     def kpoints_cart(self):
         """Returns the kpoints in cartesian coordinates
@@ -219,7 +222,7 @@ class QEParser:
 
         self.pdos_prefix = re.findall("filpdos\s*=\s*'(.*)'", pdos_in)[0]
         self.proj_prefix = re.findall("filproj\s*=\s*'(.*)'", pdos_in)[0]
-
+        
         # Parsing total density of states
         energies, total_dos = self._parse_dos_total(
             dos_total_filename=f"{dirpath}{os.sep}{self.pdos_prefix}.pdos_tot"
@@ -584,13 +587,21 @@ class QEParser:
         elif pdos_out_filepath.exists():
             projwfc_out_filepath = pdos_out_filepath
         else:
+            projwfc_out_filepath = Path(self.dirpath) / "projwfc.out"
+            
+
+        if not projwfc_out_filepath.exists():
             projwfc_out_filepath = None
 
         with open(scf_in_filepath, "r") as f:
             scf_in = f.read()
 
         outdir = re.findall("outdir\s*=\s*'\S*?(.*)'", scf_in)[0]
-        prefix = re.findall("prefix\s*=\s*'(.*)'", scf_in)[0]
+        
+        
+        prefix = re.findall("prefix\s*=\s*'(.*)'", scf_in)
+        if not prefix:
+            prefix="pwscf"
         xml_filename = prefix + ".xml"
 
         atomic_proj_xml_filepath = (
@@ -611,7 +622,14 @@ class QEParser:
 
         pdos_in_filepath = Path(self.dirpath) / pdos_in_filepath
         bands_in_filepath = Path(self.dirpath) / bands_in_filepath
-
+        
+        if not pdos_in_filepath.exists():
+            pdos_in_filepath = Path(self.dirpath) / "projwfc.in"
+            
+  
+        if not scf_out_filepath.exists():
+            scf_out_filepath = Path(self.dirpath) / "pwscf.out"
+            
         if pdos_out_filepath.exists():
             pdos_out_filepath = pdos_out_filepath
 
