@@ -842,7 +842,6 @@ class PwIn:
     @cached_property
     def kpoints_card(self) -> KPointsCard:
         for card_name, card in self.data.items():
-            print(card)
             if isinstance(card, KPointsCard):
                 return card
         raise ValueError("KPointsCard not found in PWInput")
