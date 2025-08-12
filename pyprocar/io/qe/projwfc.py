@@ -1017,53 +1017,79 @@ class AtomicProjXML:
         kpoints_match = eigen_state_element.findall(".//K-POINT")
         bands_by_kpoint = eigen_state_element.findall(".//E")
         projections_by_kpoint = eigen_state_element.findall(".//PROJS")
+
+        n_all_kpoints = len(bands_by_kpoint)
+        raw_kpoints = []
+        raw_weights = []
+        raw_bands = []
+        raw_projections = []
+        logger.info(f"Parsing kpoints: {n_all_kpoints}")
+        for i_kpoint in range(n_all_kpoints):
+            band_element = bands_by_kpoint[i_kpoint]
+            raw_bands.append(band_element.text.strip().split())
+            
+            kpoint_element = kpoints_match[i_kpoint]
+            weight = float(kpoint_element.attrib["Weight"])
+            raw_weights.append(weight)
+            
+            kpoint = np.array(kpoint_element.text.strip().split(), dtype=float)
+            raw_kpoints.append(kpoint)
+            
         
-        raw_bands=[]
+            atomic_wfc_projections = projections_by_kpoint[i_kpoint].findall(".//ATOMIC_WFC")
+            if not atomic_wfc_projections:
+                continue
+            projection = np.zeros(shape=(self.n_bands, self.n_atm_wfc), dtype=np.complex_)
+            for atomic_wfc_projection in atomic_wfc_projections:
+                i_atm_wfc = int(atomic_wfc_projection.attrib["index"]) - 1
+                i_spin_projection = int(atomic_wfc_projection.attrib["spin"]) - 1
+
+                atomic_band_projections = atomic_wfc_projection.text.strip().split("\n")
+                
+                for i_band, atomic_band_projection in enumerate(atomic_band_projections):
+                    real, imag = atomic_band_projection.strip().split()
+                    
+                    projection[i_band, i_atm_wfc] = complex(float(real), float(imag))
+            raw_projections.append(projection)
+                
+        raw_bands = np.array(raw_bands, dtype=float)
+        raw_projections = np.array(raw_projections, dtype=np.complex_)
+        raw_kpoints = np.array(raw_kpoints, dtype=float)
+        raw_weights = np.array(raw_weights, dtype=float)
         
-        projections = np.zeros(shape=(self.n_kpoints, self.n_bands, self.n_spin_projections, self.n_atm_wfc), dtype=np.complex_)
+        logger.debug(f"raw_bands: {raw_bands.shape}")
+        logger.debug(f"raw_projections: {raw_projections.shape}")
+        logger.debug(f"raw_kpoints: {raw_kpoints.shape}")
+        logger.debug(f"raw_weights: {raw_weights.shape}")
+        
         bands = np.zeros(shape=(self.n_kpoints, self.n_bands, self.n_spin_channels), dtype=float)
+        projections = np.zeros(shape=(self.n_kpoints, self.n_bands, self.n_spin_projections, self.n_atm_wfc), dtype=np.complex_)
         
-        if kpoints_match:
-            for i_kpoint, kpoint_element in enumerate(kpoints_match):
-                weight = float(kpoint_element.attrib["Weight"])
-                eigen_states["weights"].append(weight)
-            
-                kpoint = np.array(kpoint_element.text.strip().split(), dtype=float)
-                eigen_states["kpoints"].append(kpoint)
-           
-                raw_bands = bands_by_kpoint[i_kpoint].text.strip().split()
-                if self.n_spin_channels == 1:
-                    bands[i_kpoint, :, 0] = raw_bands
-                else:
-                    bands[i_kpoint, :, 0] = raw_bands[:self.n_bands]
-                    bands[i_kpoint, :, 1] = raw_bands[self.n_bands:]
-
-                atomic_wfc_projections = projections_by_kpoint[i_kpoint].findall(".//ATOMIC_WFC")
-                if not atomic_wfc_projections:
-                    continue
-                for atomic_wfc_projection in atomic_wfc_projections:
-                    i_atm_wfc = int(atomic_wfc_projection.attrib["index"]) - 1
-                    i_spin_projection = int(atomic_wfc_projection.attrib["spin"]) - 1
-
-                    atomic_band_projections = atomic_wfc_projection.text.strip().split("\n")
-                    
-                    for i_band, atomic_band_projection in enumerate(atomic_band_projections):
-                        real, imag = atomic_band_projection.strip().split()
-                        
-                        projections[i_kpoint, i_band, i_spin_projection, i_atm_wfc] = complex(float(real), float(imag))
-            
-                    
         
-        eigen_states["bands"] = np.array(bands, dtype=float)
-        eigen_states["projections"] = np.array(projections, dtype=np.complex_)
-        eigen_states["weights"] = np.array(eigen_states["weights"], dtype=float)
-        eigen_states["kpoints"] = np.array(eigen_states["kpoints"], dtype=float)
+        if self.n_spin_channels == 2:
+            kpoints = raw_kpoints[:self.n_kpoints]
+            weights = raw_weights[:self.n_kpoints]
+            bands[..., 0] = raw_bands[:self.n_kpoints]
+            bands[..., 1] = raw_bands[self.n_kpoints:]
+            projections[:, :, 0, :] = raw_projections[:self.n_kpoints]
+            projections[:, :, 1, :] = raw_projections[self.n_kpoints:]
+            
+        logger.info(f"bands: {bands.shape}")
+        logger.info(f"projections: {projections.shape}")
+        logger.info(f"kpoints: {kpoints.shape}")
+        logger.info(f"weights: {weights.shape}")
+  
+        eigen_states["bands"] = bands
+        eigen_states["projections"] = projections
+        eigen_states["weights"] = weights
+        eigen_states["kpoints"] = kpoints
         
         return eigen_states
     
     @cached_property
     def kpoints(self) -> np.ndarray | None:
         if self.eigen_states:
+            print(self.eigen_states["kpoints"].shape)
             return self.eigen_states["kpoints"]
         else:
             return None
