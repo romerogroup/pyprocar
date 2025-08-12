@@ -198,10 +198,6 @@ class ProjwfcOut:
         return len(self.l_orbital_map)
     
     @cached_property
-    def n_orbitals(self) -> int:
-        return len(self.orbital_map)
-    
-    @cached_property
     def n_atm_wfcs(self) -> int:
         return len(self.atm_wfcs)
     
@@ -311,6 +307,10 @@ class ProjwfcOut:
             return self.non_colinear_orbitals
         else:
             return self.colinear_orbitals
+        
+    @cached_property
+    def n_orbitals(self) -> int:
+        return len(self.orbitals)
     
     @cached_property
     def wfc_mapping(self):
@@ -1435,7 +1435,7 @@ class ProjwfcDOS:
         """
         atom_indices = sorted(set(f["metadata"]["atom_index"] for f in self.files_metadata))
         n_atoms = len(atom_indices)
-        n_orbitals = len(self.orbitals)
+        n_orbitals = self.n_orbitals
 
         # Initialize array
         dos_array = np.zeros((self.n_energies, self.n_spin_channels, n_atoms, n_orbitals))
@@ -1527,3 +1527,7 @@ class ProjwfcDOS:
             return self.non_colinear_orbitals
         else:
             return self.colinear_orbitals
+        
+    @cached_property
+    def n_orbitals(self) -> int:
+        return len(self.orbitals)
