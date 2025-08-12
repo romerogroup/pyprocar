@@ -2499,8 +2499,18 @@ class PwXML:
                 rotation = rotation.reshape(3, 3).T
                 
                 sym_ops["rotations"].append(rotation)
-                sym_ops["translations"].append(np.array(symmetry_operation.findall(".//fractional_translation")[0].text.split(), dtype=float))
-                sym_ops["equivalent_atoms"].append(np.array(symmetry_operation.findall(".//equivalent_atoms")[0].text.split(), dtype=int))
+                
+                fractional_translation = symmetry_operation.findall(".//fractional_translation")
+                if fractional_translation:
+                    sym_ops["translations"].append(np.array(fractional_translation[0].text.split(), dtype=float))
+                else:
+                    sym_ops["translations"].append(np.zeros(3))
+                
+                equivalent_atoms = symmetry_operation.findall(".//equivalent_atoms")
+                if equivalent_atoms:
+                    sym_ops["equivalent_atoms"].append(np.array(equivalent_atoms[0].text.split(), dtype=int))
+                else:
+                    sym_ops["equivalent_atoms"].append(np.zeros(5))
                 
             sym_ops["rotations"] = np.array(sym_ops["rotations"], dtype=float)
             sym_ops["translations"] = np.array(sym_ops["translations"], dtype=float)
