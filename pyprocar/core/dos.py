@@ -92,6 +92,16 @@ class DensityOfStates:
 
         self.total = np.array(self.total)
         self.projected = np.array(self.projected)
+        
+    def __repr__(self):
+        repr_str = "DensityOfStates(\n"
+        for key, value in self.__dict__.items():
+            if isinstance(value, np.ndarray):
+                repr_str += f"    {key}: {value.shape}\n"
+            else:
+                repr_str += f"    {key}: {value}\n"
+        repr_str += ")"
+        return repr_str
 
     def __eq__(self, other):
         energies_equal = np.allclose(self.energies, other.energies)
@@ -110,6 +120,8 @@ class DensityOfStates:
         )
 
         return dos_equal
+    
+    
 
     @property
     def n_dos(self):
