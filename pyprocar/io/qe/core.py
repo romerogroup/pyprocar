@@ -446,10 +446,17 @@ class QEParser:
         
         return self.spd_phase.real
     
+    @cached_property
+    def orbitals(self) -> Optional[List[str]]:
+        if self.projwfc_out is not None and self.projwfc_out.orbitals is not None:
+            return self.projwfc_out.orbitals
+        elif self.atomic_proj_xml is not None and self.atomic_proj_xml.orbitals is not None:
+            return self.atomic_proj_xml.orbitals
+        return None
+    
     # -------- computed properties --------
     @cached_property
     def ebs(self) -> Optional[ElectronicBandStructure]:
-
         return ElectronicBandStructure(
                 kpoints=self.kpoints,
                 n_kx=self.nk1,
@@ -460,7 +467,7 @@ class QEParser:
                 efermi=self.fermi,
                 kpath=self.kpath,
                 projected_phase=self.spd_phase,
-                labels=self.projwfc_out.orbitals,
+                labels=self.orbitals,
                 reciprocal_lattice=self.reciprocal_lattice,
             )
         
