@@ -421,6 +421,8 @@ class KPointsCard(QECardBlock):
     nks: int | None = None
     kpoints: np.ndarray | None = None
     weights: np.ndarray | None = None
+    line_points: list[int] = field(default_factory=list)
+    line_comments: list[str] = field(default_factory=list)
     nk1: int | None = None
     nk2: int | None = None
     nk3: int | None = None
@@ -428,6 +430,13 @@ class KPointsCard(QECardBlock):
     sk2: int | None = None
     sk3: int | None = None
     is_gamma: bool = False
+    knames: list[str] = field(default_factory=list)
+    kticks: list[int] = field(default_factory=list)
+    nhigh_sym: int | None = None
+    ngrids: list[int] = field(default_factory=list)
+    high_symmetry_points: np.ndarray | None = None
+    special_kpoints: np.ndarray | None = None
+    modified_knames: list[str] = field(default_factory=list)
     
     def __post_init__(self) -> None:
         self.parse()
@@ -472,6 +481,12 @@ class KPointsCard(QECardBlock):
         elif self.mode == "gamma":
             self.parse_gamma_mode()
             
+        elif self.mode == "crystal":
+            self.parse_crystal_mode()
+        
+        elif self.mode == "crystal_b":
+            self.parse_crystal_b_mode()
+            
         else:
             self.parse_explicit_mode(lines)
         return 
@@ -497,6 +512,85 @@ class KPointsCard(QECardBlock):
         self.is_gamma = True
         return None
     
+    def parse_crystal_mode(self) -> None:
+        lines = self.block.splitlines()   
+        n_kpoints = int(lines[0])
+        self.knames = []
+        self.kticks = []
+        self.line_comments = []
+
+        for itick, x in enumerate(lines[1:]):
+            cols = x.split()
+            if len(cols) == 5:
+                comment = cols[4].strip()
+                k_name = comment.replace("!", "").replace("#", "").strip()
+                self.knames.append(k_name)
+                self.kticks.append(itick)
+                self.line_comments.append(comment)
+        self.nhigh_sym = len(self.knames)
+        
+    def parse_crystal_b_mode(self) -> None:
+        lines = self.block.splitlines()
+        self.nhigh_sym = int(lines[0])
+        high_symmetry_points = []
+        line_points = []
+        for line in lines[1:]:
+            if line.strip():
+                cols = line.split()
+                kx,ky,kz,n_points = cols[:4]
+                high_symmetry_points.append([float(kx), float(ky), float(kz)])
+                line_points.append(int(n_points))
+                
+                if len(cols) == 5:
+                    comment = cols[4].strip().replace("!", "").replace("#", "").strip()
+                    self.line_comments.append(comment)
+                else:
+                    self.line_comments.append("")
+        
+        self.high_symmetry_points = np.array(high_symmetry_points, dtype=float)
+        self.line_points = np.array(line_points, dtype=int)
+        self.kticks = []
+
+        tick_Count = 1
+        for ihs in range(self.nhigh_sym):
+
+            # In QE cyrstal_b mode, the user is able to specify grid on last high symmetry point.
+            # QE just uses 1 for the last high symmetry point.
+            grid_current = self.line_points[ihs]
+            if ihs < self.nhigh_sym - 2:
+                self.ngrids.append(grid_current)
+
+            # Incrementing grid by 1 for seocnd to last high symmetry point
+            elif ihs == self.nhigh_sym - 2:
+                self.ngrids.append(grid_current + 1)
+
+            # I have no idea why I skip the last high symmetry point. I think it had to do with disconinuous points.
+            # Need to code test case for this. Otherwise leave it as is.
+            # elif ihs == self.nhigh_sym - 1:
+            #     continue
+            self.kticks.append(tick_Count - 1)
+            tick_Count += grid_current
+
+        # Initial guess for knames
+        self.knames = [str(x) for x in range(self.nhigh_sym)]
+        if len(self.line_comments) == self.nhigh_sym:
+            tmp_knames = []
+            for i, comment in enumerate(self.line_comments):
+                tmp_knames.append(comment.replace(",", "").replace("vlvp1d", "").replace(" ", ""))
+            self.knames = tmp_knames
+        
+        # Formating to conform with Kpath class
+        self.special_kpoints = np.zeros(shape=(len(self.kticks) - 1, 2, 3))
+
+        self.modified_knames = []
+        for itick in range(len(self.kticks)):
+            if itick != len(self.kticks) - 1:
+                self.special_kpoints[itick, 0, :] = self.high_symmetry_points[itick]
+                self.special_kpoints[itick, 1, :] = self.high_symmetry_points[itick + 1]
+                self.modified_knames.append(
+                    [self.knames[itick], self.knames[itick + 1]]
+                )
+    
     def parse_explicit_mode(self, lines: list[str]) -> None:
         # All other explicit-list modes expect: first line is nks, followed by nks lines
         if not lines:
@@ -507,7 +601,7 @@ class KPointsCard(QECardBlock):
             nks = 0
         kpts_list: list[list[float]] = []
         wts_list: list[float] = []
-        labels_list: list[str] = []
+        line_comments: list[str] = []
         for i in range(1, min(1 + nks, len(lines))):
             cols = lines[i].split()
             if len(cols) < 4:
@@ -540,7 +634,7 @@ class KPointsCard(QECardBlock):
                 continue
             kpts_list.append([kx, ky, kz])
             wts_list.append(wt)
-            labels_list.append(label)
+            line_comments.append(label)
 
         if nks and len(kpts_list) != nks:
             # If fewer lines were parsed than declared, adjust to what we have
@@ -551,7 +645,7 @@ class KPointsCard(QECardBlock):
         
         self.kpoints=kpts_arr
         self.weights=wts_arr
-        self.labels=labels_list
+        self.line_comments=line_comments
     
  
 @dataclass
@@ -711,49 +805,57 @@ class PwIn:
         return {block.name: block for block in qe_card_blocks}
     
     @cached_property
-    def control(self) -> ControlCard:
+    def control_card(self) -> ControlCard:
         for block in self.data:
             if isinstance(block, ControlCard):
                 return block
         raise ValueError("ControlCard not found in PWInput")
     
     @cached_property
-    def system(self) -> SystemCard:
+    def system_card(self) -> SystemCard:
         for block in self.data:
             if isinstance(block, SystemCard):
                 return block
         raise ValueError("SystemCard not found in PWInput")
     
     @cached_property
-    def electrons(self) -> ElectronsCard:
+    def electrons_card(self) -> ElectronsCard:
         for block in self.data:
             if isinstance(block, ElectronsCard):
                 return block
         raise ValueError("ElectronsCard not found in PWInput")
     
     @cached_property
-    def atomic_species(self) -> AtomicSpeciesCard:
+    def atomic_species_card(self) -> AtomicSpeciesCard:
         for block in self.data:
             if isinstance(block, AtomicSpeciesCard):
                 return block
         raise ValueError("AtomicSpeciesCard not found in PWInput")
     
     @cached_property
-    def k_points(self) -> KPointsCard:
+    def atomic_positions_card(self) -> AtomicPositionsCard:
+        for block in self.data:
+            if isinstance(block, AtomicPositionsCard):
+                return block
+        raise ValueError("AtomicPositionsCard not found in PWInput")
+    
+    @cached_property
+    def kpoints_card(self) -> KPointsCard:
         for card_name, card in self.data.items():
+            print(card)
             if isinstance(card, KPointsCard):
                 return card
         raise ValueError("KPointsCard not found in PWInput")
     
     @cached_property
-    def cell_parameters(self) -> CellCard:
+    def cell_card(self) -> CellCard:
         for block in self.data:
             if isinstance(block, CellCard):
                 return block
         raise ValueError("CellCard not found in PWInput")
     
     @cached_property
-    def occupations(self) -> OccupationsCard:
+    def occupations_card(self) -> OccupationsCard:
         for block in self.data:
             if isinstance(block, OccupationsCard):
                 return block
@@ -2324,8 +2426,6 @@ class PwXML:
             return self.ks_energies["occupations"]
         return None
     
-    
-    
     @cached_property
     def symmetries_element(self) -> ET.Element | None:
         match = self.root.findall(".//output/symmetries")
@@ -2356,24 +2456,37 @@ class PwXML:
     
     @cached_property
     def symmetry_operations_elements(self) -> ET.Element | None:
-        match = self.symmetries_element.findall(".//symmetry")
+        match = self.symmetries_element.findall(".//symmetries")
         if match:
             return match[0]
         return None
     
     @cached_property
     def n_sym_ops(self) -> int:
-        if self.symmetry_operations_elements:
-            return len(self.symmetry_operations_elements)
+        n_sym_match = self.symmetries_element.findall(".//nsym")
+        if n_sym_match:
+            return int(n_sym_match[0].text)
+        return 0
+    
+    @cached_property
+    def n_rot(self) -> int:
+        n_rot_match = self.symmetries_element.findall(".//nrot")
+        if n_rot_match:
+            return int(n_rot_match[0].text)
         return 0
     
     @cached_property
     def sym_ops(self) -> dict[str, Any] | None:
-        if self.symmetry_operations_elements:
+        sym_ops_match = self.symmetries_element.findall(".//symmetry")
+        if sym_ops_match:
             sym_ops = {"rotations": [], "translations": [], "equivalent_atoms": []}
             
-            for symmetry_operation in self.symmetry_operations_elements:
-                rotation = np.array(symmetry_operation.findall(".//rotation")[0].text.split(), dtype=float)
+            for symmetry_operation in sym_ops_match:
+                rotation = symmetry_operation.findall(".//rotation")
+                if rotation:
+                    rotation = np.array(rotation[0].text.split(), dtype=float)
+                else:
+                    rotation = np.eye(3)
                 rotation = rotation.reshape(3, 3).T
                 
                 sym_ops["rotations"].append(rotation)
@@ -2383,6 +2496,12 @@ class PwXML:
             sym_ops["rotations"] = np.array(sym_ops["rotations"], dtype=float)
             sym_ops["translations"] = np.array(sym_ops["translations"], dtype=float)
             return sym_ops
+        return None
+    
+    @cached_property
+    def rotations(self) -> np.ndarray | None:
+        if self.sym_ops:
+            return self.sym_ops["rotations"]
         return None
     
     @cached_property
@@ -2397,5 +2516,55 @@ class PwXML:
         match = self.root.findall(".//output/band_structure/nbands")
         if match:
             return int(match[0].text)
+        
+    @cached_property
+    def kmesh_mode(self) -> str:
+        monkhorst_pack_match = self.root.findall(".//output/band_structure/starting_k_points/monkhorst_pack")
+        gamma_point_match = self.root.findall(".//output/band_structure/starting_k_points/gamma_point")
+        if monkhorst_pack_match:
+            return "monkhorst_pack"
+        elif gamma_point_match:
+            return "gamma_point"
+        return 0
+        
+    @cached_property
+    def nk1(self) -> int:
+        match = self.root.findall(".//output/band_structure/starting_k_points/monkhorst_pack")
+        if match:
+            return int(match[0].attrib["nk1"])
+        return 0
     
+    @cached_property
+    def nk2(self) -> int:
+        match = self.root.findall(".//output/band_structure/starting_k_points/monkhorst_pack")
+        if match:
+            return int(match[0].attrib["nk2"])
+        return 0
     
+    @cached_property
+    def nk3(self) -> int:
+        match = self.root.findall(".//output/band_structure/starting_k_points/monkhorst_pack")
+        if match:
+            return int(match[0].attrib["nk3"])
+        return 0
+    
+    @cached_property
+    def sk1(self) -> int:
+        match = self.root.findall(".//output/band_structure/starting_k_points/monkhorst_pack")
+        if match:
+            return int(match[0].attrib["k1"])
+        return 0
+    
+    @cached_property
+    def sk2(self) -> int:
+        match = self.root.findall(".//output/band_structure/starting_k_points/monkhorst_pack")
+        if match:
+            return int(match[0].attrib["k2"])
+        return 0
+    
+    @cached_property
+    def sk3(self) -> int:
+        match = self.root.findall(".//output/band_structure/starting_k_points/monkhorst_pack")
+        if match:
+            return int(match[0].attrib["k3"])
+        return 0
