@@ -23,7 +23,7 @@ from pyvista import row_array
 from pyprocar.core import DensityOfStates, ElectronicBandStructure, KPath, Structure
 from pyprocar.io.qe.utils import parse_qe_input_cards
 from pyprocar.utils.info import OrbitalOrdering
-from pyprocar.utils.units import AU_TO_ANG, HARTREE_TO_EV
+from pyprocar.utils.units import AU_TO_ANG, HARTREE_TO_EV, RYDBERG_TO_EV
 
 logger = logging.getLogger(__name__)
 user_logger = logging.getLogger("user")
@@ -990,12 +990,13 @@ class AtomicProjXML:
         return False
     
     @cached_property
-    def fermi_energy(self) -> float:
+    def fermi(self) -> float:
+        """Fermi energy in eV"""
         header_match = self.root.findall(".//HEADER")
         if not header_match:
             return 0
         
-        return float(header_match[0].get("FERMI_ENERGY"))
+        return float(header_match[0].get("FERMI_ENERGY")) * RYDBERG_TO_EV
     
     @cached_property
     def n_spin_projections(self) -> int:
@@ -1006,6 +1007,17 @@ class AtomicProjXML:
         
     @cached_property
     def eigen_states(self) -> dict[str, Any]:
+        """
+        Parses the atomic_proj.xml file and returns the bands, projections, kpoints, and weights.
+         - Energies are in Rydberg.
+         - Bands are subtracted by the Fermi energy.
+        Returns:
+            dict[str, Any]: A dictionary containing the bands, projections, kpoints, and weights.
+                - bands: np.ndarray of shape (n_kpoints, n_bands, n_spin_channels) # In Rydberg
+                - projections: np.ndarray of shape (n_kpoints, n_bands, n_spin_projections, n_atm_wfc)
+                - kpoints: np.ndarray of shape (n_kpoints, 3)
+                - weights: np.ndarray of shape (n_kpoints)
+        """
         eigen_states = {"bands": [], "projections": [], "kpoints": [], "weights": []}
         
         eigen_states_match = self.root.findall(".//EIGENSTATES")
@@ -1073,11 +1085,18 @@ class AtomicProjXML:
             bands[..., 1] = raw_bands[self.n_kpoints:]
             projections[:, :, 0, :] = raw_projections[:self.n_kpoints]
             projections[:, :, 1, :] = raw_projections[self.n_kpoints:]
+        else:
+            kpoints = raw_kpoints
+            weights = raw_weights
+            bands[..., 0] = raw_bands
+            projections[:, :, 0, :] = raw_projections
+            
             
         logger.info(f"bands: {bands.shape}")
         logger.info(f"projections: {projections.shape}")
         logger.info(f"kpoints: {kpoints.shape}")
         logger.info(f"weights: {weights.shape}")
+        
   
         eigen_states["bands"] = bands
         eigen_states["projections"] = projections
@@ -1089,15 +1108,16 @@ class AtomicProjXML:
     @cached_property
     def kpoints(self) -> np.ndarray | None:
         if self.eigen_states:
-            print(self.eigen_states["kpoints"].shape)
             return self.eigen_states["kpoints"]
         else:
             return None
         
     @cached_property
     def bands(self) -> np.ndarray | None:
+        """"""
         if self.eigen_states:
-            return self.eigen_states["bands"]
+            bands = self.eigen_states["bands"] * RYDBERG_TO_EV
+            return bands
         else:
             return None
         
@@ -1279,6 +1299,14 @@ class ProjwfcDOS:
                 "metadata": meta,
             })
         return files_metadata
+    
+    @cached_property
+    def n_atoms(self) -> int:
+        n_atoms = 0
+        for file_metadata in self.files_metadata:
+            if file_metadata["metadata"]["atom_index"] is not None:
+                n_atoms = max(n_atoms, file_metadata["metadata"]["atom_index"])
+        return n_atoms
     
     @cached_property
     def total_dos_filepath(self) -> Path | None:
