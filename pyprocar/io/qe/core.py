@@ -373,20 +373,26 @@ class QEParser:
     @cached_property
     def fermi(self) -> Optional[float]:
         if self.scf_out is not None and self.scf_out.fermi_energy_ev is not None:
+            logger.debug(f"Fermi energy found in {self.scf_out.fermi_energy_ev}")
             return self.scf_out.fermi_energy_ev
         if self.pw_xml is not None and self.pw_xml.fermi is not None:
             return self.pw_xml.fermi
+        
         return None
     
     @cached_property
     def bands(self) -> Optional[np.ndarray]:
-        if self.atomic_proj_xml is not None and self.atomic_proj_xml.bands is not None:
-            return self.atomic_proj_xml.bands
-        elif self.projwfc_out is not None and self.projwfc_out.bands is not None:
-            return self.projwfc_out.bands
-        elif self.pw_xml is not None and self.pw_xml.bands is not None:
-            return self.pw_xml.bands
+        # if self.atomic_proj_xml is not None and self.atomic_proj_xml.bands is not None:
+        #     logger.debug("Parsing bands from atomic_proj.xml")
+        #     return self.atomic_proj_xml.bands # - self.fermi
+        # elif self.projwfc_out is not None and self.projwfc_out.bands is not None:
+        #     logger.debug("Parsing bands from projwfc.out")
+        #     return HARTREE_TO_EV * self.projwfc_out.bands
+        # elif self.pw_xml is not None and self.pw_xml.bands is not None:
+        #     logger.debug("Parsing bands from pw.xml")
+        #     return HARTREE_TO_EV * self.pw_xml.bands
 
+        return HARTREE_TO_EV * self.pw_xml.bands
         user_logger.warning("No bands found in atomic_proj.xml or projwfc.out or pw.xml")
         return None
     
@@ -437,6 +443,14 @@ class QEParser:
             i_state = state_num - 1
             pyprocar_projections_phase[..., i_atom, i_orbital] += projections[..., i_state]
             
+        n_kpoints = self.atomic_proj_xml.n_kpoints
+        n_bands = self.atomic_proj_xml.n_bands
+        n_spin_channels = self.atomic_proj_xml.n_spin_channels
+        n_atoms = self.projwfc_out.n_atoms
+        n_orbitals = self.projwfc_out.n_orbitals
+        n_principals = 1
+        
+        pyprocar_projections_phase = pyprocar_projections_phase.reshape(n_kpoints, n_bands, n_atoms, n_principals,  n_orbitals, n_spin_channels)
         return pyprocar_projections_phase
     
     @cached_property
@@ -475,19 +489,32 @@ class QEParser:
     def projected_dos(self) -> Optional[np.ndarray]:
         if self.projwfc_dos is None:
             return None
-        return self.projwfc_dos.projected_dos
+        
+        n_energies = self.projwfc_dos.n_energies
+        n_spin_channels = self.projwfc_dos.n_spin_channels
+        n_orbitals = self.projwfc_out.n_orbitals
+        n_atoms = self.projwfc_dos.n_atoms
+
+        n_principals = 1
+        projected_dos = self.projwfc_dos.projected_dos
+        projected_dos = projected_dos.reshape(n_atoms, n_principals, n_orbitals, n_spin_channels, n_energies)
+        # projected_dos = projected_dos.reshape(n_energies, n_spin_channels, n_principals, n_atoms, n_orbitals)
+        logger.debug(f"projected_dos: {projected_dos.shape}")
+        return projected_dos
     
     @cached_property
     def total_dos(self) -> Optional[np.ndarray]:
         if self.projwfc_dos is None:
             return None
-        return self.projwfc_dos.total_dos
+        n_spin_channels = self.projwfc_dos.n_spin_channels
+        n_energies = self.projwfc_dos.n_energies
+        return self.projwfc_dos.total_dos.reshape((n_spin_channels, n_energies))
     
     @cached_property
     def energies(self) -> Optional[np.ndarray]:
         if self.projwfc_dos is None:
             return None
-        return self.projwfc_dos.bands[0, :]
+        return self.projwfc_dos.bands[0] - self.fermi
 
     @cached_property
     def dos(self) -> Optional[DensityOfStates]:
@@ -495,16 +522,19 @@ class QEParser:
             user_logger.warning("No PDOS files found for DOS construction")
             return None
         
-        try:
-            return DensityOfStates(
-                    energies=self.energies,
-                    total=self.total_dos,
-                    efermi=self.fermi,
-                    projected=self.projected_dos,
-                )
-        except Exception as exc:
-            user_logger.warning(f"Error building DOS: {exc}")
+        if self.kpath is not None:
+            logger.info(f"Detected kpath. Skipping parsing of pdos files")
             return None
+        
+        logger.debug(f"energies: {self.energies.shape}")
+        logger.debug(f"total_dos: {self.total_dos.shape}")
+        logger.debug(f"projected_dos: {self.fermi}")
+        return DensityOfStates(
+                energies=self.energies,
+                total=self.total_dos,
+                efermi=self.fermi,
+                projected=self.projected_dos,
+            )
         
     @cached_property
     def species(self) -> Optional[List[str]]:
