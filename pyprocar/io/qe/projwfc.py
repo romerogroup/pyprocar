@@ -33,6 +33,8 @@ COORDS_PATTERN = rf"\s*({FLOAT_PATTERN})\s*({FLOAT_PATTERN})\s*({FLOAT_PATTERN})
 
 ORBITAL_ORDERING = OrbitalOrdering()
 
+
+
 def convert_lorbnum_to_letter(lorbnum):
         """A helper method to convert the lorb number to the letter format
 
@@ -166,14 +168,13 @@ class ProjwfcOut:
     def is_non_colinear(self) -> bool:
         if self.atm_wfcs:
             atm_wfc = self.atm_wfcs[0]
-            return "j" in atm_wfc
+            return atm_wfc['j'] is not None
         return False
     
     @cached_property
     def is_spin_polarized(self) -> bool:
         """Whether the calculation is spin polarized."""
         n_kpoints = self.kpoints.shape[0]
-        
         return n_kpoints != self.nkstot
         
     @cached_property
@@ -298,42 +299,11 @@ class ProjwfcOut:
 
     @cached_property
     def non_colinear_orbitals(self):
-        orbitals = [
-                {"l": 0, "j": 0.5, "m": -0.5},
-                {"l": 0, "j": 0.5, "m": 0.5},
-                {"l": 1, "j": 0.5, "m": -0.5},
-                {"l": 1, "j": 0.5, "m": 0.5},
-                {"l": 1, "j": 1.5, "m": -1.5},
-                {"l": 1, "j": 1.5, "m": -0.5},
-                {"l": 1, "j": 1.5, "m": -0.5},
-                {"l": 1, "j": 1.5, "m": 1.5},
-                {"l": 2, "j": 1.5, "m": -1.5},
-                {"l": 2, "j": 1.5, "m": -0.5},
-                {"l": 2, "j": 1.5, "m": -0.5},
-                {"l": 2, "j": 1.5, "m": 1.5},
-                {"l": 2, "j": 2.5, "m": -2.5},
-                {"l": 2, "j": 2.5, "m": -1.5},
-                {"l": 2, "j": 2.5, "m": -0.5},
-                {"l": 2, "j": 2.5, "m": 0.5},
-                {"l": 2, "j": 2.5, "m": 1.5},
-                {"l": 2, "j": 2.5, "m": 2.5},
-            ]
-        return orbitals
+        return ORBITAL_ORDERING.flat_soc_order
     
     @cached_property
     def colinear_orbitals(self):
-        orbitals = [
-                {"l": 0, "m": 1},
-                {"l": 1, "m": 3},
-                {"l": 1, "m": 1},
-                {"l": 1, "m": 2},
-                {"l": 2, "m": 5},
-                {"l": 2, "m": 3},
-                {"l": 2, "m": 1},
-                {"l": 2, "m": 2},
-                {"l": 2, "m": 4},
-            ]
-        return orbitals
+        return ORBITAL_ORDERING.az_to_lm_records
     
     @cached_property
     def orbitals(self):
@@ -1491,7 +1461,7 @@ class ProjwfcDOS:
 
     @cached_property
     def colinear_orbitals(self):
-        return ORBITAL_ORDERING.flat_azimuthal
+        return ORBITAL_ORDERING.az_to_lm_records
 
     @cached_property
     def non_colinear_orbitals(self):
