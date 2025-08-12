@@ -2216,6 +2216,10 @@ class PwXML:
         match = self.root.findall(".//output/band_structure/nbnd_up")
         if match:
             return int(match[0].text)
+        
+        match = self.root.findall(".//output/band_structure/nbnd")
+        if match:
+            return int(match[0].text)
         return 0
     
     @cached_property
@@ -2351,15 +2355,18 @@ class PwXML:
             return None
 
         raw_n_kpoints = self.n_kpoints if self.is_spin_calc else self.n_kpoints * 2
+        raw_n_bands = self.n_bands if not self.is_spin_calc else self.n_bands * 2
 
-        raw_bands = np.zeros(shape=(raw_n_kpoints, self.n_bands))
-        raw_occupations = np.zeros(shape=(raw_n_kpoints, self.n_bands))
+
+        raw_bands = np.zeros(shape=(self.n_kpoints, raw_n_bands))
+        raw_occupations = np.zeros(shape=(self.n_kpoints, raw_n_bands))
         kpoints = np.zeros(shape=(self.n_kpoints, 3))
         weights = np.zeros(shape=(self.n_kpoints))
         bands = np.zeros(shape=(self.n_kpoints, self.n_bands, self.n_spin))
         occupations = np.zeros(shape=(self.n_kpoints, self.n_bands, self.n_spin))
         npws = np.zeros(shape=(self.n_kpoints, self.n_bands))
 
+        
         for ikpoint, kpoint_element in enumerate(ks_energies_match):
 
             kpoints_match = kpoint_element.findall(".//k_point")
@@ -2372,7 +2379,7 @@ class PwXML:
             
             eigenvalues_match = kpoint_element.findall(".//eigenvalues")
             if eigenvalues_match:
-                raw_bands[ikpoint, :] = HARTREE_TO_EV * np.array(eigenvalues_match[0].text.split(), dtype=float)
+                raw_bands[ikpoint, :] = np.array(eigenvalues_match[0].text.split(), dtype=float)
             
             occupations_match = kpoint_element.findall(".//occupations")
             if occupations_match:
@@ -2396,6 +2403,9 @@ class PwXML:
         kpoints = np.around(
             kpoints.dot(np.linalg.inv(self.reciprocal_lattice)), decimals=8
         )
+        # print(bands[:,:,0].shape)
+        # print(bands[:,self.n_bands:,1].shape)
+        # print(np.allclose(bands[...,0], bands[...,1]))
         
         ks_energies = {"bands": bands, "occupations": occupations, "kpoints": kpoints, "weights": weights}
         return ks_energies
@@ -2507,14 +2517,10 @@ class PwXML:
     def fermi(self) -> float | None:
         match = self.root.findall(".//output/band_structure/fermi_energy")
         if match:
-            return float(match[0].text)
+            return float(match[0].text) * HARTREE_TO_EV
         return None
     
-    @cached_property
-    def n_bands(self) -> int:
-        match = self.root.findall(".//output/band_structure/nbands")
-        if match:
-            return int(match[0].text)
+ 
         
     @cached_property
     def kmesh_mode(self) -> str:
