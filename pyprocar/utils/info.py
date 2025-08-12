@@ -98,6 +98,16 @@ class OrbitalOrdering:
     def l_orbital_map(self) -> Dict[str, int]:
         return {l_orbital_name: i for i, l_orbital_name in enumerate(self.azimuthal_order.keys())}
     
+    @property
+    def az_to_lm_records(self) -> List[Dict[str, int]]:
+        az_to_lm_records = []
+        for l_orbital_name in self.azimuthal_order.keys():
+            for i_m, m_orbital_name in enumerate(self.azimuthal_order[l_orbital_name]):
+                az_to_lm_records.append({
+                    "l": self.l_orbital_map[l_orbital_name],
+                    "m": i_m+1,
+                })
+        return az_to_lm_records
     
 
     def _flatten_order(self, order_dict: Dict[str, List[str]]) -> List[str]:
