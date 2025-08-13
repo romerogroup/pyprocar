@@ -104,6 +104,13 @@ class ProjwfcIn:
     def data(self) -> dict[str, Any]:
         return parse_qe_input_cards(self.text)
     
+    @cached_property
+    def is_kresolved(self) -> bool:
+        if "kresolveddos" in self.data:
+            return self.data["kresolveddos"] == True
+        else:
+            return False
+    
     
 
 class ProjwfcOut:
@@ -1035,7 +1042,8 @@ class AtomicProjXML:
         raw_weights = []
         raw_bands = []
         raw_projections = []
-        logger.info(f"Parsing kpoints: {n_all_kpoints}")
+        logger.debug(f"Parsing kpoints: {n_all_kpoints}")
+        logger.debug(f"Parsing projections: {len(projections_by_kpoint)}")
         for i_kpoint in range(n_all_kpoints):
             band_element = bands_by_kpoint[i_kpoint]
             raw_bands.append(band_element.text.strip().split())
@@ -1061,7 +1069,7 @@ class AtomicProjXML:
                 for i_band, atomic_band_projection in enumerate(atomic_band_projections):
                     real, imag = atomic_band_projection.strip().split()
                     
-                    projection[i_band, i_atm_wfc] = complex(float(real), float(imag))
+                    projection[i_band, i_atm_wfc] += complex(float(real), float(imag))
             raw_projections.append(projection)
                 
         raw_bands = np.array(raw_bands, dtype=float)
@@ -1083,6 +1091,9 @@ class AtomicProjXML:
             weights = raw_weights[:self.n_kpoints]
             bands[..., 0] = raw_bands[:self.n_kpoints]
             bands[..., 1] = raw_bands[self.n_kpoints:]
+            
+            logger.debug(f"raw_projections spin-up: {raw_projections[:self.n_kpoints].shape}")
+            logger.debug(f"raw_projections spin-down: {raw_projections[self.n_kpoints:].shape}")
             projections[:, :, 0, :] = raw_projections[:self.n_kpoints]
             projections[:, :, 1, :] = raw_projections[self.n_kpoints:]
         else:
@@ -1134,52 +1145,12 @@ class AtomicProjXML:
             return self.eigen_states["weights"]
         else:
             return None
-        
-                    # sigma_projections_match = projections.findall(".//ATOMIC_SIGMA_PHI")
-                    # if sigma_projections_match:
-                    #     for sigma_projections in enumerate(sigma_projections_match):
-
-                    #         if not atomic_wfc_projections:
-                    #             continue
-                            
-                    #         for atomic_wfc_projection in atomic_wfc_projections:
-                    #             i_atm_wfc = int(atomic_wfc_projection.attrib["index"]) - 1
-                    #             i_spin_projection = int(atomic_wfc_projection.attrib["spin"])
-
-                    #             atomic_band_projections = atomic_wfc_projection.text.split("\n")
-                    #             for i_band, atomic_band_projection in enumerate(atomic_band_projections):
-                    #                 real, imag = atomic_band_projection.split()
-                                    
-                    #                 projections[i_kpoint, i_band, i_spin_projection, i_atm_wfc] = complex(float(real), float(imag))
-                
-                
-    
-                        
-            # projections_match = eigen_state_element.findall(".//PROJS")
-            # if projections_match:
-            #     spin_reuslts = [projections_match[i * self.n_kpoints : (i + 1) * self.n_kpoints] for i in range(self.n_spin_channels)]
-            #     for ispin, spin_result in enumerate(spin_reuslts):
-            #         for ik, proj_tag in enumerate(spin_result):
-            #             atm_wfs_match = proj_tag.findall("ATOMIC_WFC")
-            #             if atm_wfs_match:
-            #                 atm_wfs_index = int(atm_wfs_match[0].attrib["index"])
-            #                 spin_index = int(atm_wfs_match[0].attrib["spin"])
-                        # for atm_wfs_tag in atm_wfs_tags:
-                        #     iwfc = int(atm_wfs_tag.get("index"))
-                        #     iorb = self.wfc_mapping[f"wfc_{iwfc}"]["orbital"]
-                        #     iatm = self.wfc_mapping[f"wfc_{iwfc}"]["atom"] - 1
-                        #     band_projections = atm_wfs_tag.text.strip().split("\n")
-                        #     for iband, band_projection in enumerate(band_projections):
-                        #         real = float(band_projection.split()[0])
-                        #         imag = float(band_projection.split()[1])
-                        #         comp = complex(real, imag)
-                        #         comp_squared = np.absolute(comp) ** 2
-
-                        #         projs_phase[ik, iband, ispin, iatm, iorb] = complex(real, imag)
-                        #         projs[ik, iband, ispin, iatm, iorb] = comp_squared
-                
-                
 class ProjwfcPDOSFile:
+    
+    FILE_PATTERN = re.compile(
+    r"pdos_atm#(\d+)\(([^)]+)\)_wfc#(\d+)\(([^)_]+)(?:_j([\d.]+))?\)"
+    )
+
     def __init__(self, filepath: Union[str, Path]) -> None:
         self._filepath = Path(filepath)
         self._text = self._read()
@@ -1203,21 +1174,39 @@ class ProjwfcPDOSFile:
         return None
     
     @cached_property
+    def filename_info(self) -> dict[str, Any]:
+        m = self.FILE_PATTERN.search(self._filepath.name)
+        if not m:
+            return {}
+        return {
+            "atom_index": int(m.group(1)),
+            "atom_symbol": m.group(2),
+            "wfc_index": int(m.group(3)),
+            "orbital": m.group(4),
+            "j_value": float(m.group(5)) if m.group(5) else None,
+        }
+        
+    @cached_property
+    def lines(self) -> list[str]:
+        return self.text.splitlines()
+    
+    @cached_property
     def columns(self) -> list[str]:
         """
         Extracts column names from the header line starting with '#'
         """
-        for line in self.text.splitlines():
-            if line.strip().startswith("#") and not line.strip().startswith("# Spin"):
-                # Remove '#' and split
-                return line.strip("# ").split()
-        return []
+        header_line = self.lines[0]
+        columns = header_line.strip("# ").split()
+        if columns[1] == "(eV)":
+            str_val=columns.pop(1)
+            # columns[0] = columns[0] + str_val
+        return columns
     
     @property
     def data(self) -> pd.DataFrame:
         cols = self.columns
         data_lines = []
-        for line in self.text.splitlines():
+        for line in self.lines[1:]:
             if not line.strip() or line.strip().startswith("#"):
                 continue
             parts = line.split()
@@ -1227,7 +1216,9 @@ class ProjwfcPDOSFile:
                 data_lines.append(row)
             except ValueError:
                 continue
-
+        
+        data_array = np.array(data_lines)
+        logger.debug(f"data_array: {data_array.shape}")
         # Adjust header length to match actual data length
         if data_lines:
             n_data_cols = len(data_lines[0])
@@ -1292,20 +1283,16 @@ class ProjwfcDOS:
     @cached_property
     def files_metadata(self) -> list[dict[str, Any]]:
         files_metadata = []
-        for fp in self.filepaths:
-            meta = self._parse_filename(fp.name)
-            files_metadata.append({
-                "filepath": fp,
-                "metadata": meta,
-            })
+        for fp in self.pdos_files:
+            files_metadata.append(fp.filename_info)
         return files_metadata
     
     @cached_property
     def n_atoms(self) -> int:
         n_atoms = 0
         for file_metadata in self.files_metadata:
-            if file_metadata["metadata"]["atom_index"] is not None:
-                n_atoms = max(n_atoms, file_metadata["metadata"]["atom_index"])
+            if file_metadata["atom_index"] is not None:
+                n_atoms = max(n_atoms, file_metadata["atom_index"])
         return n_atoms
     
     @cached_property
@@ -1324,24 +1311,25 @@ class ProjwfcDOS:
             return None
         
         dos_array = np.zeros((self.n_energies, self.n_spin_channels))
+        
 
         df = self.total_dos_filepath.data
         # Determine spin channels
         if self.is_spin_polarized:
             # Spin-polarized: use dosup(E) and dosdw(E) columns
-            dos_up = df.iloc[:, 2].to_numpy()
-            dos_down = df.iloc[:, 3].to_numpy()
+            dos_up = df["dosup(E)"].to_numpy()
+            dos_down = df["dosdw(E)"].to_numpy()
             dos_array = np.stack((dos_up, dos_down), axis=1)  # shape (n_energies, 2)
         else:
             # Non-spin-polarized: only one DOS column
-            dos_total = df.iloc[:, 2].to_numpy()
+            dos_total = df["dos(E)"].to_numpy()
             dos_array = dos_total[:, np.newaxis]  # shape (n_energies, 1)
 
         return dos_array
 
     @cached_property
     def pdos_files(self) -> list[ProjwfcPDOSFile]:
-        return [ProjwfcPDOSFile(file_metadata["filepath"]) for file_metadata in self.files_metadata]
+        return [ProjwfcPDOSFile(filepath) for filepath in self.filepaths]
             
     @cached_property
     def data(self) -> list[dict[str, Any]]:
@@ -1350,7 +1338,7 @@ class ProjwfcDOS:
     
     @cached_property
     def is_non_colinear(self) -> bool:
-        return self.files_metadata[0]["metadata"]["j_value"] is not None
+        return self.files_metadata[0]["j_value"] is not None
     
     
     @cached_property
@@ -1366,6 +1354,15 @@ class ProjwfcDOS:
             return 2
         else:
             return 1
+        
+    @cached_property
+    def is_kresolved(self) -> bool:
+        df = self.data[0]  # first file's DataFrame
+
+        if "ik" in df.columns:
+            return True
+        else:
+            return False
 
     # -------------------------
     # Public access: energies
@@ -1433,7 +1430,7 @@ class ProjwfcDOS:
             (n_energies, n_spin_channels, n_atoms, n_orbitals)
         Orbitals are ordered according to self.orbitals (from ORBITAL_ORDERING).
         """
-        atom_indices = sorted(set(f["metadata"]["atom_index"] for f in self.files_metadata))
+        atom_indices = sorted(set(f["atom_index"] for f in self.files_metadata))
         n_atoms = len(atom_indices)
         n_orbitals = self.n_orbitals
 
@@ -1443,7 +1440,7 @@ class ProjwfcDOS:
         # Group files by atom
         atom_to_files: Dict[int, List[dict]] = {a: [] for a in atom_indices}
         for f in self.files_metadata:
-            atom_to_files[f["metadata"]["atom_index"]].append(f)
+            atom_to_files[f["atom_index"]].append(f)
 
         for ai, atom in enumerate(atom_indices):
             for f in atom_to_files[atom]:
@@ -1452,8 +1449,8 @@ class ProjwfcDOS:
 
                 if self.is_non_colinear:
                     # SOC case: multiple m-components in one file
-                    l = ORBITAL_ORDERING.l_orbital_map[f["metadata"]["orbital"][0].lower()]
-                    j = f["metadata"]["j_value"]
+                    l = ORBITAL_ORDERING.l_orbital_map[f["orbital"][0].lower()]
+                    j = f["j_value"]
                     n_m = df.shape[1] - 2  # E, LDOS, then PDOS_m...
                     pdos_m = df.iloc[:, 2:].to_numpy()
                     m_values = np.linspace(-j, j, int(2 * j + 1))
@@ -1463,9 +1460,9 @@ class ProjwfcDOS:
 
                 else:
                     # Collinear case
-                    l = ORBITAL_ORDERING.l_orbital_map[f["metadata"]["orbital"][0].lower()]
+                    l = ORBITAL_ORDERING.l_orbital_map[f["orbital"][0].lower()]
 
-                    if f["metadata"]["orbital"] in ("s", "p", "d", "f"):
+                    if f["orbital"] in ("s", "p", "d", "f"):
                         # Multiple m-components in one file
                         n_pdos_cols = df.shape[1] - 2
                         if self.is_spin_polarized and self.n_spin_channels == 2:
@@ -1495,7 +1492,7 @@ class ProjwfcDOS:
 
                     else:
                         # Single m-component per file
-                        m_idx = ORBITAL_ORDERING.az_to_flat_index[f["metadata"]["orbital"]]
+                        m_idx = ORBITAL_ORDERING.az_to_flat_index[f["orbital"]]
                         target_idx = m_idx
                         if self.is_spin_polarized and self.n_spin_channels == 2:
                             dos_array[:, 0, ai, target_idx] = df.iloc[:, -2].to_numpy()
