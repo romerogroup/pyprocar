@@ -165,7 +165,8 @@ class DensityOfStates:
         bool
             Boolean for if this is non-colinear calc
         """
-        if self.n_spins == 3 or self.n_spins == 4:
+        # last condition is for quantum espresso total angular momentum basis
+        if self.n_spins == 3 or self.n_spins == 4 or len(self.projected[0][0]) == 2 + 2 + 4 + 4 + 6 + 6 + 8:
             return True
         else:
             return False
@@ -235,10 +236,12 @@ class DensityOfStates:
         if orbitals is None:
             orbitals = np.arange(len(projected[0][0]), dtype=int)
             
+        logger.debug(f"Summing over atoms: {atoms}")
+        logger.debug(f"Summing over principal_q_numbers: {principal_q_numbers}")
         logger.debug(f"Summing over orbitals: {orbitals}")
-        logger.debug(f"Summing over spins: {spins}")
         
         # print(orbitals)
+        
         # Adjusting for spin type calculation
         if self.n_spins == 2:
             ret = np.zeros(shape=(2, self.n_dos))
