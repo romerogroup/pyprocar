@@ -61,6 +61,20 @@ NONCOLINEAR_AZIMUTHAL_ORBITAL_ORDER = [
     {"l": 2, "j": 2.5, "m_j": 0.5},
     {"l": 2, "j": 2.5, "m_j": 1.5},
     {"l": 2, "j": 2.5, "m_j": 2.5},
+    {"l": 3, "j": 2.5, "m_j": -2.5},
+    {"l": 3, "j": 2.5, "m_j": -1.5},
+    {"l": 3, "j": 2.5, "m_j": -0.5},
+    {"l": 3, "j": 2.5, "m_j": 0.5},
+    {"l": 3, "j": 2.5, "m_j": 1.5},
+    {"l": 3, "j": 2.5, "m_j": 2.5},
+    {"l": 3, "j": 3.5, "m_j": -3.5},
+    {"l": 3, "j": 3.5, "m_j": -2.5},
+    {"l": 3, "j": 3.5, "m_j": -1.5},
+    {"l": 3, "j": 3.5, "m_j": -0.5},
+    {"l": 3, "j": 3.5, "m_j": 0.5},
+    {"l": 3, "j": 3.5, "m_j": 1.5},
+    {"l": 3, "j": 3.5, "m_j": 2.5},
+    {"l": 3, "j": 3.5, "m_j": 3.5},
     # Extend for f orbitals with SOC if needed
 ]
 
@@ -173,8 +187,8 @@ class OrbitalOrdering:
 
     def get_soc_index(self, l: int, j: float, m: float) -> int:
         """Get index in SOC ordering."""
-        for idx, entry in enumerate(self.soc_order):
-            if entry["l"] == l and entry["j"] == j and entry["m"] == m:
+        for idx, entry in enumerate(self.flat_soc_order):
+            if entry["l"] == l and entry["j"] == j and entry["m_j"] == m:
                 return idx
         raise ValueError("SOC orbital not found.")
 
