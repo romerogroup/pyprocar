@@ -286,6 +286,14 @@ class QEParser:
     def kpath(self) -> Optional[KPath]:
         if self.bands_in is None:
             return None
+        
+        if self.bands_in.kpoints_card is None:
+            return None
+        
+        if self.bands_in.kpoints_card.modified_knames is None:
+            return None
+        
+        
         return KPath(
             knames=self.bands_in.kpoints_card.modified_knames,
             special_kpoints=self.bands_in.kpoints_card.special_kpoints,
@@ -382,17 +390,14 @@ class QEParser:
     
     @cached_property
     def bands(self) -> Optional[np.ndarray]:
-        # if self.atomic_proj_xml is not None and self.atomic_proj_xml.bands is not None:
-        #     logger.debug("Parsing bands from atomic_proj.xml")
-        #     return self.atomic_proj_xml.bands # - self.fermi
-        # elif self.projwfc_out is not None and self.projwfc_out.bands is not None:
-        #     logger.debug("Parsing bands from projwfc.out")
-        #     return HARTREE_TO_EV * self.projwfc_out.bands
-        # elif self.pw_xml is not None and self.pw_xml.bands is not None:
-        #     logger.debug("Parsing bands from pw.xml")
-        #     return HARTREE_TO_EV * self.pw_xml.bands
-
-        return HARTREE_TO_EV * self.pw_xml.bands
+        if self.atomic_proj_xml is not None and self.atomic_proj_xml.bands is not None:
+            logger.debug("Parsing bands from atomic_proj.xml")
+            return self.atomic_proj_xml.bands # - self.fermi
+        elif self.projwfc_out is not None and self.projwfc_out.bands is not None:
+            logger.debug("Parsing bands from projwfc.out")
+            return HARTREE_TO_EV * self.projwfc_out.bands
+        elif self.pw_xml is not None and self.pw_xml.bands is not None:
+            logger.debug("Parsing bands from pw.xml")
         user_logger.warning("No bands found in atomic_proj.xml or projwfc.out or pw.xml")
         return None
     
@@ -442,7 +447,7 @@ class QEParser:
             i_atom = atm_num - 1
             i_state = state_num - 1
             pyprocar_projections_phase[..., i_atom, i_orbital] += projections[..., i_state]
-            
+       
         n_kpoints = self.atomic_proj_xml.n_kpoints
         n_bands = self.atomic_proj_xml.n_bands
         n_spin_channels = self.atomic_proj_xml.n_spin_channels
@@ -450,7 +455,9 @@ class QEParser:
         n_orbitals = self.projwfc_out.n_orbitals
         n_principals = 1
         
-        pyprocar_projections_phase = pyprocar_projections_phase.reshape(n_kpoints, n_bands, n_atoms, n_principals,  n_orbitals, n_spin_channels)
+        # Move spin channels to the last axis. This is need to have the dimensionality to have the same shape as the format in pyproxcar
+        pyprocar_projections_phase = np.moveaxis(pyprocar_projections_phase, 2, -1)
+        pyprocar_projections_phase = pyprocar_projections_phase.reshape((n_kpoints, n_bands, n_atoms, n_principals, n_orbitals, n_spin_channels))
         return pyprocar_projections_phase
     
     @cached_property
@@ -458,7 +465,7 @@ class QEParser:
         if self.atomic_proj_xml is None and self.projwfc_out is None and self.spd_phase is None:
             return None
         
-        return self.spd_phase.real
+        return np.absolute(self.spd_phase)**2
     
     @cached_property
     def orbitals(self) -> Optional[List[str]]:
@@ -495,10 +502,12 @@ class QEParser:
         n_orbitals = self.projwfc_out.n_orbitals
         n_atoms = self.projwfc_dos.n_atoms
 
+        # Reshaping to match what pyprocar expects
         n_principals = 1
-        projected_dos = self.projwfc_dos.projected_dos
+        projected_dos = self.projwfc_dos.projected_dos    # with shape (n_energies, n_spin_channels, n_atoms, n_orbitals)
+        projected_dos = np.moveaxis(projected_dos, 1, -1) # shape (n_energies, n_orbitals, n_atoms, n_spin_channels)
+        projected_dos = np.moveaxis(projected_dos, 0, -1) # shape (n_atoms, n_orbitals, n_spin_channels, n_energies)
         projected_dos = projected_dos.reshape(n_atoms, n_principals, n_orbitals, n_spin_channels, n_energies)
-        # projected_dos = projected_dos.reshape(n_energies, n_spin_channels, n_principals, n_atoms, n_orbitals)
         logger.debug(f"projected_dos: {projected_dos.shape}")
         return projected_dos
     
@@ -508,13 +517,18 @@ class QEParser:
             return None
         n_spin_channels = self.projwfc_dos.n_spin_channels
         n_energies = self.projwfc_dos.n_energies
-        return self.projwfc_dos.total_dos.reshape((n_spin_channels, n_energies))
+        logger.debug(f"total_dos: {self.projwfc_dos.total_dos.shape}")
+        return self.projwfc_dos.total_dos.reshape((n_spin_channels, n_energies), order="F")
     
     @cached_property
     def energies(self) -> Optional[np.ndarray]:
         if self.projwfc_dos is None:
             return None
         return self.projwfc_dos.bands[0] - self.fermi
+    
+    @cached_property
+    def is_dos_calculation(self) -> bool:
+        return not self.projwfc_in.is_kresolved
 
     @cached_property
     def dos(self) -> Optional[DensityOfStates]:
@@ -522,8 +536,7 @@ class QEParser:
             user_logger.warning("No PDOS files found for DOS construction")
             return None
         
-        if self.kpath is not None:
-            logger.info(f"Detected kpath. Skipping parsing of pdos files")
+        if not self.is_dos_calculation:
             return None
         
         logger.debug(f"energies: {self.energies.shape}")
