@@ -2353,6 +2353,8 @@ class PwXML:
         ks_energies_match = self.root.findall(".//output/band_structure/ks_energies")
         if not ks_energies_match:
             return None
+        
+        logger.debug(f"n_ks_energies: {len(ks_energies_match)}")
 
         raw_n_kpoints = self.n_kpoints if self.is_spin_calc else self.n_kpoints * 2
         raw_n_bands = self.n_bands if not self.is_spin_calc else self.n_bands * 2
