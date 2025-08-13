@@ -184,14 +184,7 @@ class Parser:
             None
         """
 
-        parser = qe.QEParser(
-            dirpath=self.dirpath,
-            scf_in_filepath="scf.in",
-            bands_in_filepath="bands.in",
-            pdos_in_filepath="pdos.in",
-            kpdos_in_filepath="kpdos.in",
-            atomic_proj_xml_filepath="atomic_proj.xml",
-        )
+        parser = qe.QEParser(dirpath=self.dirpath)
 
         self.ebs = parser.ebs
         self.kpath = parser.kpath

@@ -163,7 +163,7 @@ class ElectronicBandStructure:
         if self.kpath is not None:
             logger.info(f"Kpath: {self.kpath}")
         if self.labels is not None:
-            logger.info(f"Kpath: {self.labels}")
+            logger.info(f"Orbitals: {self.labels}")
         if self.reciprocal_lattice is not None:
             logger.info(f"Reciprocal lattice: \n{self.reciprocal_lattice}")
         if self.weights is not None:
@@ -1139,8 +1139,20 @@ class ElectronicBandStructure:
             spins = np.arange(self.nspins, dtype=int)
         if orbitals is None:
             orbitals = np.arange(self.norbitals, dtype=int)
+            
+        logger.debug(f"orbitals: {orbitals}")
+        logger.debug(f"principal_q_numbers: {principal_q_numbers}")
+        logger.debug(f"atoms: {atoms}")
+        logger.debug(f"spins: {spins}")
+        logger.debug(f"sum_noncolinear: {sum_noncolinear}")
+        logger.debug(f"self.projected.shape: {self.projected.shape}")
+        
         # sum over orbitals
         ret = np.sum(self.projected[:, :, :, :, orbitals, :], axis=-2)
+        logger.debug(f"ret.shape after summing over orbitals: {ret.shape}")
+        expected_shape = (self.nkpoints, self.nbands, self.natoms, self.nprincipals, self.nspins)
+        if ret.shape != expected_shape:
+            ret = ret.reshape(expected_shape)
         # sum over principle quantum number
         ret = np.sum(ret[:, :, :, principal_q_numbers, :], axis=-2)
         # sum over atoms

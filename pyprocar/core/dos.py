@@ -92,6 +92,16 @@ class DensityOfStates:
 
         self.total = np.array(self.total)
         self.projected = np.array(self.projected)
+        
+    def __repr__(self):
+        repr_str = "DensityOfStates(\n"
+        for key, value in self.__dict__.items():
+            if isinstance(value, np.ndarray):
+                repr_str += f"    {key}: {value.shape}\n"
+            else:
+                repr_str += f"    {key}: {value}\n"
+        repr_str += ")"
+        return repr_str
 
     def __eq__(self, other):
         energies_equal = np.allclose(self.energies, other.energies)
@@ -110,6 +120,8 @@ class DensityOfStates:
         )
 
         return dos_equal
+    
+    
 
     @property
     def n_dos(self):
@@ -153,7 +165,8 @@ class DensityOfStates:
         bool
             Boolean for if this is non-colinear calc
         """
-        if self.n_spins == 3 or self.n_spins == 4:
+        # last condition is for quantum espresso total angular momentum basis
+        if self.n_spins == 3 or self.n_spins == 4 or len(self.projected[0][0]) == 2 + 2 + 4 + 4 + 6 + 6 + 8:
             return True
         else:
             return False
@@ -223,10 +236,12 @@ class DensityOfStates:
         if orbitals is None:
             orbitals = np.arange(len(projected[0][0]), dtype=int)
             
+        logger.debug(f"Summing over atoms: {atoms}")
+        logger.debug(f"Summing over principal_q_numbers: {principal_q_numbers}")
         logger.debug(f"Summing over orbitals: {orbitals}")
-        logger.debug(f"Summing over spins: {spins}")
         
         # print(orbitals)
+        
         # Adjusting for spin type calculation
         if self.n_spins == 2:
             ret = np.zeros(shape=(2, self.n_dos))
