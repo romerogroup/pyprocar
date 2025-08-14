@@ -98,7 +98,6 @@ def bandsplot(
     ktick_limit: List[float] = None,
     x_limit: List[float] = None,
     use_cache: bool = False,
-    verbose: int = 1,
     quiet_welcome: bool = False,
     **kwargs,
 ):
@@ -155,11 +154,8 @@ def bandsplot(
         Boolean to not print the welcome message
     use_cache: bool, optional
         Boolean to use cache for EBS
-    verbose: int, optional
-        Verbosity level
-    """
 
-    set_verbose_level(verbose)
+    """
     
     if quiet_welcome:
         user_logger.setLevel(logging.ERROR)

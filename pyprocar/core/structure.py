@@ -92,6 +92,16 @@ class Structure:
             
 
         return None
+    
+    def __repr__(self):
+        repr_str = "Structure(\n"
+        for key, value in self.__dict__.items():
+            if isinstance(value, np.ndarray):
+                repr_str += f"    {key}: {value.shape}\n"
+            else:
+                repr_str += f"    {key}: {value}\n"
+        repr_str += ")"
+        return repr_str
 
     def __eq__(self, other):
         atoms_equal = all(self.atoms == other.atoms)

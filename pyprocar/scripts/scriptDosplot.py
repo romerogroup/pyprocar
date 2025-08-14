@@ -275,7 +275,6 @@ def dosplot(
         >>> fig.show()
 
     """
-    set_verbose_level(verbose)
 
     user_logger.info(f"If you want more detailed logs, set verbose to 2 or more")
     user_logger.info("_" * 100)

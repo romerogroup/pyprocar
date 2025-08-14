@@ -62,13 +62,8 @@ class FermiHandler:
             This is used when only symmetry reduced kpoints used in the calculation, by default True
         use_cache : bool, optional
             Boolean to use cached Pickle files, by default True
-        verbose : int, optional
-            Verbosity level, by default 1
         """
-        set_verbose_level(verbose)
 
-        user_logger.info(f"If you want more detailed logs, set verbose to 2 or more")
-        user_logger.info("_" * 100)
 
         welcome()
 
