@@ -518,7 +518,7 @@ class QEParser:
         n_spin_channels = self.projwfc_dos.n_spin_channels
         n_energies = self.projwfc_dos.n_energies
         logger.debug(f"total_dos: {self.projwfc_dos.total_dos.shape}")
-        return self.projwfc_dos.total_dos.reshape((n_spin_channels, n_energies), order="F")
+        return self.projwfc_dos.total_dos.reshape((n_spin_channels, n_energies), order="C")
     
     @cached_property
     def energies(self) -> Optional[np.ndarray]:
