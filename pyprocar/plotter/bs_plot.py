@@ -98,6 +98,16 @@ class BandStructurePlotter:
                 ret = self.ax.plot(self.x, bands[:, iband, ispin], **merged_line_kwargs)
                 created_lines[(iband, ispin)] = ret[0]
 
+        self.set_xlim()
+        ymin = float(bands.min())
+        ymax = float(bands.max())
+        elimit = (ymin, ymax)
+        self.set_ylim(elimit)
+        self.set_yticks()
+        self.set_xticks()
+        self.set_xlabel()
+        self.set_ylabel()
+        
         # Record exportable data
         for ispin in range(n_spin_channels):
             for iband in range(bands.shape[1]):
@@ -177,6 +187,16 @@ class BandStructurePlotter:
             colorbar_kwargs = colorbar_kwargs or {}
             self.cb = self.fig.colorbar(scalar_mappable, ax=self.ax, **colorbar_kwargs)
             
+        self.set_xlim()
+        ymin = float(bands.min())
+        ymax = float(bands.max())
+        elimit = (ymin, ymax)
+        self.set_ylim(elimit)
+        self.set_yticks()
+        self.set_xticks()
+        self.set_xlabel()
+        self.set_ylabel()
+        
         # Record exportable data
         for ispin in range(n_spin_channels):
             for iband in range(bands.shape[1]):
@@ -986,7 +1006,8 @@ class BandStructurePlotter:
           - a Normalize instance: use as is
           - a Normalize subclass: instantiate with vmin/vmax from data/clim
         - clim can be (vmin, vmax) with Nones to fill from data
-        - If persist=True, store on self (norm, cmap, cm)
+        - If vmin/vmax are inferred from data, snap to visually pleasant bounds:
+          prefer +/-0.5 when close, otherwise expand to integer floor/ceil.
         Returns (norm_obj, cmap_obj, scalar_mappable)
         """
         if data is None:
@@ -1003,10 +1024,50 @@ class BandStructurePlotter:
                 data_max = float(np.nanmax(np.asarray(data)))
             except Exception:
                 data_min, data_max = None, None
-            if vmin is None:
+            # Only infer (and possibly snap) when not explicitly provided via
+            # `clim`.
+            infer_vmin = vmin is None
+            infer_vmax = vmax is None
+            if infer_vmin:
                 vmin = data_min
-            if vmax is None:
+            if infer_vmax:
                 vmax = data_max
+
+            # Snap heuristics: prefer +/-0.5 when near; otherwise use
+            # integer floor/ceil to create clean colorbar bounds.
+            half_tol = 0.05  # how close to 0.5/-0.5 to snap
+            int_pad = 0.0    # extra pad after floor/ceil
+
+            def _snap_min(value: float) -> float:
+                if np.isfinite(value):
+                    if abs(value + 0.5) <= half_tol:
+                        return -0.5
+                    if abs(value - 0.5) <= half_tol:
+                        return 0.5
+                    return float(np.floor(value - int_pad))
+                return value
+
+            def _snap_max(value: float) -> float:
+                if np.isfinite(value):
+                    if abs(value - 0.5) <= half_tol:
+                        return 0.5
+                    if abs(value + 0.5) <= half_tol:
+                        return -0.5
+                    return float(np.ceil(value + int_pad))
+                return value
+
+            if infer_vmin:
+                vmin = _snap_min(vmin)
+            if infer_vmax:
+                vmax = _snap_max(vmax)
+
+            # Ensure vmin < vmax; if equal after snapping, expand slightly
+            if vmin is not None and vmax is not None and vmin >= vmax:
+                eps = 1e-8
+                if infer_vmin:
+                    vmin = vmin - eps
+                else:
+                    vmax = vmax + eps
 
         # Resolve Normalize
         if isinstance(norm, mpcolors.Normalize):
