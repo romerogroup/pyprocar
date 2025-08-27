@@ -218,39 +218,15 @@ class ElkParser:
         else:
             self.nspin = 1
 
-        lattice = self._read_lattice_out()
-        pattern_nspc = re.search(
-            r"(?m)^atoms\s*\r?\n\s*(\d+)",
-            file_content,
-            re.IGNORECASE
-        )
+        if (self.dir_path/'GEOMETRY.OUT').exists():
+            lattice = self._read_geometry_out()
         
-        nspecies = int(pattern_nspc.group(1)) if pattern_nspc else None
-
-        pattern_spc = re.compile(r"(?mi)^\s*'([A-Za-z]+\.in)'[\s\S]*?^\s*(\d+).*\s")
         
-        atoms: List[str] = []
-        fractional_coords: Union[List[List[float]], npt.NDArray[np.float64]] = []
-        for m in pattern_spc.finditer(file_content):
-            atom_count = int(m.group(2))
-            atom_symbols = [m.group(1).replace('.in','')]*atom_count
-            atoms += atom_symbols
-            start = m.end()
-            tail  = file_content[start:].splitlines() 
+        
 
-            pos_lines = tail[:atom_count]
-            for line in pos_lines:
-                fractional_coords += [[float(x) for x in float_re.findall(line)]]
-        fractional_coords = np.array(fractional_coords)
-        if fractional_coords.shape[1] == 6:
-            external_mag_field = fractional_coords[:, 3:]
-            fractional_coords = fractional_coords[:, :3]
 
-        self.structure = Structure(
-            atoms=atoms,
-            lattice=lattice,
-            fractional_coordinates=fractional_coords,
-        )
+
+
 
     def _read_bands(self):
         """
@@ -468,33 +444,87 @@ class ElkParser:
             self.fermi = float(rf.readline().split()[0]) * HARTREE_TO_EV
         return self.fermi
 
-    def _read_lattice_out(self):
-        """
-        Returns the reciprocal lattice read from LATTICE.OUT
-        """
-        with open(self.dir_path / "LATTICE.OUT", "r") as rf:
-            file_content = rf.read()
+    # def _read_lattice_out(self):
+    #     """
+    #     Returns the reciprocal lattice read from LATTICE.OUT
+    #     """
+    #     with open(self.dir_path / "LATTICE.OUT", "r") as rf:
+    #         file_content = rf.read()
 
-        space_section_pattern = re.compile(
-            r"(\bReal-space|\bReciprocal-space)[\s\S]*?"
-            r"Stored column-wise as a matrix\s*:\s*\n"
-            r"((?:[ \t]*[+\-]?\d+\.\d+(?:[Ee][+\-]?\d+)?\s+){8}"
-            r"[+\-]?\d+\.\d+(?:[Ee][+\-]?\d+)?\s*\n)"
+    #     space_section_pattern = re.compile(
+    #         r"(\bReal-space|\bReciprocal-space)[\s\S]*?"
+    #         r"Stored column-wise as a matrix\s*:\s*\n"
+    #         r"((?:[ \t]*[+\-]?\d+\.\d+(?:[Ee][+\-]?\d+)?\s+){8}"
+    #         r"[+\-]?\d+\.\d+(?:[Ee][+\-]?\d+)?\s*\n)"
+    #     )
+        
+    #     for match in space_section_pattern.finditer(file_content):
+    #         space_type = match.group(1)
+    #         matrix_block_str  = match.group(2)  
+    #         lattice_basis = np.fromstring(matrix_block_str, sep=" ").reshape(3, 3)
+
+    #         if space_type == "Real-space":
+    #             self.real_lattice = lattice_basis
+    #         else:
+    #             self.reciprocal_lattice = lattice_basis
+    #     return self.real_lattice
+    
+    def _read_geometry_out(self):
+        """sumary_line
+        
+        Keyword arguments:
+        argument -- description
+        Return: return_description
+        """
+        
+        path_geometry_out = self.dir_path/'GEOMETRY.OUT'
+        content_geometry_out = path_geometry_out.read_text()
+        
+        # Read lattice
+        pattern_matrix = re.compile(
+            r"avec[\s\S]*?\n"
+            rf"((?:[ \t]*{FLOAT}\s+){{8}}"
+            rf"{FLOAT}\s*\n)"
+        )
+
+        match = pattern_matrix.search(content_geometry_out)
+        matrix_block_str = match.group(1)
+        lattice = np.fromstring(matrix_block_str, sep=" ").reshape(3, 3)
+        
+        # read atoms and coords
+        pattern_nspc = re.search(
+            r"(?m)^atoms\s*\r?\n\s*(\d+)",
+            content_geometry_out,
+            re.IGNORECASE
         )
         
-        for match in space_section_pattern.finditer(file_content):
-            space_type = match.group(1)
-            matrix_block_str  = match.group(2)  
-            lattice_basis = np.fromstring(matrix_block_str, sep=" ").reshape(3, 3)
+        nspecies = int(pattern_nspc.group(1)) if pattern_nspc else None
 
-            if space_type == "Real-space":
-                self.real_lattice = lattice_basis
-            else:
-                self.reciprocal_lattice = lattice_basis
-        return self.real_lattice
-    
-    # def _read_geometry(self):
+        pattern_spc = re.compile(r"(?mi)^\s*'([A-Za-z]+\.in)'[\s\S]*?^\s*(\d+).*\s")
         
+        atoms: List[str] = []
+        fractional_coords: Union[List[List[float]], npt.NDArray[np.float64]] = []
+        for m in pattern_spc.finditer(content_geometry_out):
+            atom_count = int(m.group(2))
+            atom_symbols = [m.group(1).replace('.in','')]*atom_count
+            atoms += atom_symbols
+            start = m.end()
+            tail  = content_geometry_out[start:].splitlines() 
+
+            pos_lines = tail[:atom_count]
+            for line in pos_lines:
+                fractional_coords += [[float(x) for x in float_re.findall(line)]]
+        fractional_coords = np.array(fractional_coords)
+        if fractional_coords.shape[1] == 6:
+            external_mag_field = fractional_coords[:, 3:]
+            fractional_coords = fractional_coords[:, :3]
+        assert(len(set(atoms))==nspecies), "Number of species in GEOMETRY.OUT does not match the parsed species."
+        self.structure = Structure(
+            atoms=atoms,
+            lattice=lattice,
+            fractional_coordinates=fractional_coords,
+        )
+        return self.structure
         
     def _spd2projected(self, spd, nprinciples=1):
         """
