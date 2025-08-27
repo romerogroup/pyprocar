@@ -93,15 +93,31 @@ class Structure:
         return None
     
     def __repr__(self):
-        repr_str = "Structure(\n"
-        for key, value in self.__dict__.items():
-            if isinstance(value, np.ndarray):
-                repr_str += f"    {key}: {value.shape}\n"
-            else:
-                repr_str += f"    {key}: {value}\n"
-        repr_str += ")"
-        return repr_str
+        """Unambiguous representation with essential details for debugging."""
+        return (
+            f"Structure(natoms={self.natoms}, "
+            f"species={list(self.species)}, "
+            f"volume={self.volume*1e30:.3f} A^3, "
+            f"angles=({self.alpha:.2f}, {self.beta:.2f}, {self.gamma:.2f}), "
+            f"spacegroup='{self.get_space_group_international() if self.has_complete_data else 'N/A'}')"
+        )
 
+    def __str__(self):
+        """Human-readable summary of the structure."""
+        header = f"Structure with {self.natoms} atoms and {self.nspecies} species"
+        species_line = f"Species: {', '.join(self.species)}"
+        volume_line = f"Volume: {self.volume*1e30:.3f} A^3"
+        angle_line = f"Angles (α, β, γ): {self.alpha:.2f}°, {self.beta:.2f}°, {self.gamma:.2f}°"
+        sg_line = f"Space group: {self.get_space_group_international() if self.has_complete_data else 'N/A'}"
+
+        # Only show first few fractional coords for readability
+        frac_preview = "\n".join(
+            f"  {atom}: {coord}" for atom, coord in zip(self.atoms, self.fractional_coordinates)
+        )
+        
+        return "\n".join([header, species_line, volume_line, angle_line, sg_line, "Fractional coordinates:", frac_preview])
+
+    
     def __eq__(self, other):
         atoms_equal = all(self.atoms == other.atoms)
 
