@@ -218,7 +218,7 @@ class ElkParser:
         else:
             self.nspin = 1
 
-        lattice = self._read_lattice_out(file_content)
+        lattice = self._read_lattice_out()
         pattern_nspc = re.search(
             r"(?m)^atoms\s*\r?\n\s*(\d+)",
             file_content,
@@ -493,7 +493,7 @@ class ElkParser:
                 self.reciprocal_lattice = lattice_basis
         return self.real_lattice
     
-    def _read_geometry(self):
+    # def _read_geometry(self):
         
         
     def _spd2projected(self, spd, nprinciples=1):
