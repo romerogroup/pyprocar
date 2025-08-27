@@ -216,6 +216,7 @@ class DOSPlot:
         self._set_plot_limits(spin_channels)
         bottom_value = 0
         for specie in range(len(self.structure.species)):
+            logger.debug(f"specie: {specie}")
             idx = np.array(self.structure.atoms) == self.structure.species[specie]
             atoms = list(np.where(idx)[0])
 
@@ -230,6 +231,11 @@ class DOSPlot:
                     atoms, orbitals, spin_projections, principal_q_numbers
                 )
             )
+            
+            logger.debug(f"dos_projected for specie {self.structure.species[specie]}: {np.mean(dos_projected)}")
+            
+            if np.mean(dos_projected) == 0:
+                continue
 
             color = self.config.colors[specie]
 
@@ -309,6 +315,10 @@ class DOSPlot:
                     principal_q_numbers=principal_q_numbers,
                 )
             )
+            
+            # Skips plotting if the projected dos is zero. This is a workaround for a bug in quantum espresso stack orbitals mode
+            if np.mean(dos_projected) == 0:
+                continue
 
             color = self.config.colors[iorb]
             for ispin, spin_channel in enumerate(spin_channels):
@@ -402,6 +412,11 @@ class DOSPlot:
                     principal_q_numbers=principal_q_numbers,
                 )
             )
+            
+            logger.debug(f"dos_projected: {np.mean(dos_projected)}")
+            
+            if np.mean(dos_projected) == 0:
+                continue
 
             color = colors_dict[specie]
             for ispin, spin_channel in enumerate(spin_channels):
@@ -452,13 +467,17 @@ class DOSPlot:
         self, atoms, orbitals, spin_projections, principal_q_numbers
     ):
         dos_total = np.array(self.dos.total)
-        dos_total_projected = self.dos.dos_sum()
+        if self.dos.n_spins == 4:
+            dos_total_projected = self.dos.dos_sum(spins=spin_projections)
+        else:
+            dos_total_projected = self.dos.dos_sum()
         dos_projected = self.dos.dos_sum(
             atoms=atoms,
             principal_q_numbers=principal_q_numbers,
             orbitals=orbitals,
             spins=spin_projections,
         )
+            
         return dos_total, dos_total_projected, dos_projected
 
     def _get_spins_projections_and_channels(self, spins):
@@ -492,7 +511,7 @@ class DOSPlot:
         # This condition will depend on which orbital basis is being used.
         if (
             self.dos.is_non_collinear
-            and len(self.dos.projected[0][0]) == 2 + 2 + 4 + 4 + 6
+            and len(self.dos.projected[0][0]) == 2 + 2 + 4 + 4 + 6 + 6 + 8
         ):
             spins = [0]
             if orbitals:
@@ -508,9 +527,13 @@ class DOSPlot:
                     label += "d-j=1.5"
                 if sum([x in orbitals for x in [12, 13, 14, 15, 16, 17]]) == 6:
                     label += "d-j=2.5"
+                if sum([x in orbitals for x in [18, 19, 20, 21, 22, 23]]) == 6:
+                    label += "f-j=2.5"
+                if sum([x in orbitals for x in [24, 25, 26, 27, 28, 29, 30, 31]]) == 8:
+                    label += "f-j=3.5"
             else:
-                if len(self.dos.projected[0][0]) == 2 + 2 + 4 + 4 + 6:
-                    label = "-spd-j=0.5,1.5,2.5"
+                if len(self.dos.projected[0][0]) == 2 + 2 + 4 + 4 + 6 + 6 + 8:
+                    label = "-spdf-j=0.5,1.5,2.5,3.5"
                 else:
                     label = "-"
         else:
@@ -537,10 +560,6 @@ class DOSPlot:
     def _get_stack_orbitals_labels(self, atoms):
         atom_names = ""
         if atoms:
-            print(
-                "The plot only considers atoms",
-                np.array(self.structure.atoms)[atoms],
-            )
             atom_names = ""
             for ispc in np.unique(np.array(self.structure.atoms)[atoms]):
                 atom_names += ispc + "-"
@@ -550,17 +569,22 @@ class DOSPlot:
         if atom_names == all_atoms:
             atom_names = ""
 
+        logger.debug(f"self.dos.projected[0][0]: {len(self.dos.projected[0][0])}")
+        logger.debug(f"self.dos.is_non_collinear: {self.dos.is_non_collinear}")
+        
         if (
             self.dos.is_non_collinear
-            and len(self.dos.projected[0][0]) == 2 + 2 + 4 + 4 + 6
+            and len(self.dos.projected[0][0]) == 2 + 2 + 4 + 4 + 6 + 6 + 8
         ):
-            orb_names = ["s-j=0.5", "p-j=0.5", "p-j=1.5", "d-j=1.5", "d-j=2.5"]
+            orb_names = ["s-j=0.5", "p-j=0.5", "p-j=1.5", "d-j=1.5", "d-j=2.5", "f-j=2.5", "f-j=3.5"]
             orb_l = [
                 [0, 1],
                 [2, 3],
                 [4, 5, 6, 7],
                 [8, 9, 10, 11],
                 [12, 13, 14, 15, 16, 17],
+                [18, 19, 20, 21, 22, 23],
+                [24, 25, 26, 27, 28, 29, 30, 31]
             ]
         elif len(self.dos.projected[0][0]) == 1 + 3 + 5:
             orb_names = ["s", "p", "d"]
@@ -574,10 +598,10 @@ class DOSPlot:
     def _get_stack_labels(self, orbitals):
         if (
             self.dos.is_non_collinear
-            and len(self.dos.projected[0][0]) == 2 + 2 + 4 + 4 + 6
+            and len(self.dos.projected[0][0]) == 2 + 2 + 4 + 4 + 6 + 6 + 8
         ):
-            if len(self.dos.projected[0][0]) == 2 + 2 + 4 + 4 + 6:
-                all_orbitals = "-spd-j=0.5,1.5,2.5"
+            if len(self.dos.projected[0][0]) == 2 + 2 + 4 + 4 + 6 + 6 + 8:
+                all_orbitals = "-spdf-j=0.5,1.5,2.5,3.5"
             else:
                 all_orbitals = "-"
         else:
@@ -590,7 +614,7 @@ class DOSPlot:
 
         label = "-"
         # For coupled basis
-        if len(self.dos.projected[0][0]) == 2 + 2 + 4 + 4 + 6:
+        if len(self.dos.projected[0][0]) == 2 + 2 + 4 + 4 + 6 + 6 + 8:
             if sum([x in orbitals for x in [0, 1]]) == 2:
                 label += "s-j=0.5"
             if sum([x in orbitals for x in [2, 3]]) == 2:
@@ -601,6 +625,10 @@ class DOSPlot:
                 label += "d-j=1.5"
             if sum([x in orbitals for x in [12, 13, 14, 15, 16, 17]]) == 6:
                 label += "d-j=2.5"
+            if sum([x in orbitals for x in [18, 19, 20, 21, 22, 23]]) == 6:
+                label += "f-j=2.5"
+            if sum([x in orbitals for x in [24, 25, 26, 27, 28, 29, 30, 31]]) == 8:
+                label += "f-j=3.5"
             if label == "-" + all_orbitals:
                 label = ""
         # For uncoupled basis
@@ -716,10 +744,17 @@ class DOSPlot:
         dos_total = dos_total[spin_channel, :]
         dos_projected = dos_projected[spin_channel, :]
         dos_total_projected = dos_total_projected[spin_channel, :]
+
+        # Should be between 0 and 1
         normalized_dos_projected = dos_projected / dos_total_projected
-
+        
+        # assert normalized_dos_projected.min() >= 0 and normalized_dos_projected.max() <= 1, "Issue with the normalization of the projected DOS"
+        # Removing issues points due to divisions by zero
         normalized_dos_projected = np.nan_to_num(normalized_dos_projected, 0)
-
+        threshold = max(abs(dos_total)) + 1
+        normalized_dos_projected[np.abs(normalized_dos_projected) > threshold] = 0
+        
+    
         if ispin > 0 and len(self.dos.total) > 1:
             dos_total *= -1
             dos_projected *= -1
