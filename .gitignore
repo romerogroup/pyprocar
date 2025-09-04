@@ -180,3 +180,5 @@ pyrightconfig.json
 .cursor
 
 detailedCommitMessageTemporaryFile.txt
+
+.pixi/
