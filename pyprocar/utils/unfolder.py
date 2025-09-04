@@ -1,6 +1,7 @@
 import numpy as np
 
 from pyprocar.core.structure import Structure
+from pyprocar.utils import np_utils
 
 
 class Unfolder:
