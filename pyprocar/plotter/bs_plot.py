@@ -5,6 +5,7 @@ __date__ = "March 31, 2020"
 
 import json
 import logging
+from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import List, Optional, Tuple, Union
 
@@ -25,6 +26,26 @@ logger = logging.getLogger(__name__)
 # Removed legacy style/strategy scaffolding in favor of simpler API.
 
 # Simplified main plotter class
+
+@dataclass
+class PlainBandStyle:
+    color: str = "black"
+    linestyle: str = "-"
+    linewidth: float = 1.0 
+    alpha: float = 1.0
+    label: str = None
+    extra_kwargs: dict = field(default_factory=dict)
+    
+    @classmethod
+    def from_dict(cls, style_dict: dict):
+        return cls(**style_dict)
+    
+    def to_dict(self):
+        return {k: str(v) for k, v in asdict(self).items()}
+    
+    
+
+
 class BandStructurePlotter:
     """Visualizer for band-structure arrays from a model layer.
 
@@ -81,13 +102,12 @@ class BandStructurePlotter:
         
         # Merge kwargs: generic kwargs as fallback, line_kwargs override
         merged_line_kwargs = {}
-        if kwargs:
-            merged_line_kwargs.update(kwargs)
+ 
         if line_kwargs:
-            merged_line_kwargs.update(line_kwargs)
+            merged_line_kwargs.update(kwargs)
         # Preserve previous default linestyle if user didn't supply one
         if "linestyle" not in merged_line_kwargs:
-            merged_line_kwargs["linestyle"] = "--"
+            merged_line_kwargs["linestyle"] = "-"
             
             
         created_lines: dict[tuple[int, int], Line2D] = {}
@@ -95,7 +115,7 @@ class BandStructurePlotter:
         n_spin_channels = bands.shape[-1]
         for ispin in range(n_spin_channels):
             for iband in range(n_bands):
-                ret = self.ax.plot(self.x, bands[:, iband, ispin], **merged_line_kwargs)
+                ret = self.ax.plot(self.x, bands[:, iband, ispin], **style.to_dict())
                 created_lines[(iband, ispin)] = ret[0]
 
         self.set_xlim()
@@ -955,6 +975,8 @@ class BandStructurePlotter:
         
     def show(self):
         plt.show()
+        
+
         
     def _validate_data(self, 
                                bands: np.ndarray | None, 
