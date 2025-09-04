@@ -13,7 +13,7 @@ import numpy as np
 from pyprocar import io
 from pyprocar.cfg import ConfigFactory, ConfigManager, PlotType
 from pyprocar.plotter import EBSPlot
-from pyprocar.utils import data_utils, welcome
+from pyprocar.utils import data_utils, np_utils, welcome
 from pyprocar.utils.info import orbital_names
 from pyprocar.utils.log_utils import set_verbose_level
 
@@ -314,7 +314,7 @@ def bandsplot(
             atoms = []
             for iatom in np.unique(atoms_str):
                 atoms = np.append(atoms, np.where(structure.atoms == iatom)[0]).astype(
-                    np.int
+                    np_utils.INT_DTYPE
                 )
 
         if orbitals is not None and isinstance(orbitals[0], str):
@@ -322,7 +322,7 @@ def bandsplot(
 
             orbitals = []
             for iorb in orbital_str:
-                orbitals = np.append(orbitals, orbital_names[iorb]).astype(np.int)
+                orbitals = np.append(orbitals, orbital_names[iorb]).astype(np_utils.INT_DTYPE)
 
         projection_labels = []
         projection_label = ""

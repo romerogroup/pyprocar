@@ -13,6 +13,7 @@ import numpy as np
 from numpy import array
 
 from pyprocar.core import DensityOfStates, ElectronicBandStructure, KPath, Structure
+from pyprocar.utils import np_utils
 from pyprocar.utils.strings import remove_comment
 
 logger = logging.getLogger(__name__)
@@ -1109,7 +1110,7 @@ class Procar(collections.abc.Mapping):
                 self.spd_phase.shape[3],
                 int(self.spd_phase.shape[4] / 2) + 1,
             ),
-            dtype=np.complex_,
+            dtype=np_utils.COMPLEX_DTYPE,
         )
 
         for i in range(1, (self.orbitalCount) * 2 - 2, 2):

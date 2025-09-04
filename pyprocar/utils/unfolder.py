@@ -1,5 +1,8 @@
 import numpy as np
+
 from pyprocar.core.structure import Structure
+from pyprocar.utils import np_utils
+
 
 class Unfolder:
     def __init__(
@@ -49,7 +52,7 @@ class Unfolder:
             shape=(self.ebs.nkpoints,
                    self.ebs.nbands,
                    self.ebs.natoms * self.ebs.nprincipals * self.ebs.norbitals, self.ebs.nspins),
-            dtype=np.complex_)
+            dtype=np_utils.COMPLEX_DTYPE)
         for ispin in range(self.ebs.nspins):
             self.eigenvectors[:, :, :, ispin] = np.reshape(
                 self.ebs.projected_phase[:, :, :, :, :, ispin],

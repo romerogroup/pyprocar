@@ -22,6 +22,7 @@ from pyvista import row_array
 
 from pyprocar.core import DensityOfStates, ElectronicBandStructure, KPath, Structure
 from pyprocar.io.qe.utils import parse_qe_input_cards
+from pyprocar.utils import np_utils
 from pyprocar.utils.info import OrbitalOrdering
 from pyprocar.utils.units import AU_TO_ANG, HARTREE_TO_EV, RYDBERG_TO_EV
 
@@ -1059,7 +1060,7 @@ class AtomicProjXML:
             atomic_wfc_projections = projections_by_kpoint[i_kpoint].findall(".//ATOMIC_WFC")
             if not atomic_wfc_projections:
                 continue
-            projection = np.zeros(shape=(self.n_bands, self.n_atm_wfc), dtype=np.complex_)
+            projection = np.zeros(shape=(self.n_bands, self.n_atm_wfc), dtype=np_utils.COMPLEX_DTYPE)
             for atomic_wfc_projection in atomic_wfc_projections:
                 i_atm_wfc = int(atomic_wfc_projection.attrib["index"]) - 1
                 i_spin_projection = int(atomic_wfc_projection.attrib["spin"]) - 1
@@ -1073,7 +1074,7 @@ class AtomicProjXML:
             raw_projections.append(projection)
                 
         raw_bands = np.array(raw_bands, dtype=float)
-        raw_projections = np.array(raw_projections, dtype=np.complex_)
+        raw_projections = np.array(raw_projections, dtype=np_utils.COMPLEX_DTYPE)
         raw_kpoints = np.array(raw_kpoints, dtype=float)
         raw_weights = np.array(raw_weights, dtype=float)
         
@@ -1083,7 +1084,7 @@ class AtomicProjXML:
         logger.debug(f"raw_weights: {raw_weights.shape}")
         
         bands = np.zeros(shape=(self.n_kpoints, self.n_bands, self.n_spin_channels), dtype=float)
-        projections = np.zeros(shape=(self.n_kpoints, self.n_bands, self.n_spin_projections, self.n_atm_wfc), dtype=np.complex_)
+        projections = np.zeros(shape=(self.n_kpoints, self.n_bands, self.n_spin_projections, self.n_atm_wfc), dtype=np_utils.COMPLEX_DTYPE)
         
         
         if self.n_spin_channels == 2:
