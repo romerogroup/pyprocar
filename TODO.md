@@ -1,2 +1,5 @@
 - [ ] Non collinear overlay mode does not work for quantum espresso in the total angular momentum basis
 - [ ] Visual error for DOS stack orbitals for quantum espresso f orbitals. It shows some contributions to f orbitals even though they are not included 
+
+
+- [ ] doubl
