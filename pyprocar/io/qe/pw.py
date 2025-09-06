@@ -776,8 +776,8 @@ class PwIn:
             if not head:
                 return False
             return (
-                re.search(r"^\s*&control\b", head, re.IGNORECASE | re.MULTILINE) is not None
-                and re.search(r"^\s*&system\b", head, re.IGNORECASE | re.MULTILINE) is not None
+                re.search(r"^.*&control\b", head, re.IGNORECASE | re.MULTILINE) is not None
+                and re.search(r"^.*&system\b", head, re.IGNORECASE | re.MULTILINE) is not None
             )
         except Exception:
             return False
