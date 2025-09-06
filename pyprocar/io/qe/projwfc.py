@@ -73,11 +73,7 @@ class ProjwfcIn:
                 return False
             if re.search(r"projwfc", head, re.IGNORECASE):
                 return True
-            # Fallback heuristic: contains outdir and prefix assignments and no '&control'
-            has_outdir = re.search(r"\boutdir\s*=", head, re.IGNORECASE)
-            has_prefix = re.search(r"\bprefix\s*=", head, re.IGNORECASE)
-            has_pw_markers = re.search(r"^\s*&control\b", head, re.IGNORECASE | re.MULTILINE)
-            return bool(has_outdir and has_prefix and not has_pw_markers)
+            return False
         except Exception:
             return False
 
