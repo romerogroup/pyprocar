@@ -1,7 +1,7 @@
 __author__ = "Logan Lang"
 __maintainer__ = "Logan Lang"
-__email__ = "lllang@mix.wvu.edu"
-__date__ = "March 31, 2020"
+__email__ = "lllangWV@gmail.com"
+__date__ = "September 6, 2025"
 
 import ast
 import copy

@@ -7210,8 +7210,8 @@ packages:
   requires_python: '>=3.9'
 - pypi: ./
   name: pyprocar
-  version: 6.5.1.dev63
-  sha256: 3f78429a662faf6503d94e6f183c5980a30520dbed27065c1f06d4323c22a459
+  version: 6.5.1.dev181
+  sha256: 176e839a29c371c9c2fbed999d60878868217be0b32d645d8fc3b91c5b7354a1
   requires_dist:
   - matplotlib>=3.8
   - numpy
