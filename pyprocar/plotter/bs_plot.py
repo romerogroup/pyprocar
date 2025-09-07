@@ -115,7 +115,7 @@ class BandStructurePlotter:
         n_spin_channels = bands.shape[-1]
         for ispin in range(n_spin_channels):
             for iband in range(n_bands):
-                ret = self.ax.plot(self.x, bands[:, iband, ispin], **style.to_dict())
+                ret = self.ax.plot(self.x, bands[:, iband, ispin], **merged_line_kwargs)
                 created_lines[(iband, ispin)] = ret[0]
 
         self.set_xlim()
