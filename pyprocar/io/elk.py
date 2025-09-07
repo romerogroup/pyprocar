@@ -18,10 +18,6 @@ from pyprocar.core.structure import Structure
 from pyprocar.io.base import BaseParser
 
 from .. import utils
-from ..core.dos import DensityOfStates
-from ..core.ebs import ElectronicBandStructure
-from ..core.kpath import KPath
-from ..core.structure import Structure
 
 HARTREE_TO_EV = 27.211386245988
 FLOAT = r"[-+]?(?:\d+\.\d*|\.\d+|\d+)(?:[Ee][-+]?\d+)?"
