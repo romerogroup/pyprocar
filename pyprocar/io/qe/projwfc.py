@@ -1039,8 +1039,6 @@ class AtomicProjXML:
         raw_weights = []
         raw_bands = []
         raw_projections = []
-        logger.debug(f"Parsing kpoints: {n_all_kpoints}")
-        logger.debug(f"Parsing projections: {len(projections_by_kpoint)}")
         for i_kpoint in range(n_all_kpoints):
             band_element = bands_by_kpoint[i_kpoint]
             raw_bands.append(band_element.text.strip().split())
@@ -1074,11 +1072,6 @@ class AtomicProjXML:
         raw_kpoints = np.array(raw_kpoints, dtype=float)
         raw_weights = np.array(raw_weights, dtype=float)
         
-        logger.debug(f"raw_bands: {raw_bands.shape}")
-        logger.debug(f"raw_projections: {raw_projections.shape}")
-        logger.debug(f"raw_kpoints: {raw_kpoints.shape}")
-        logger.debug(f"raw_weights: {raw_weights.shape}")
-        
         bands = np.zeros(shape=(self.n_kpoints, self.n_bands, self.n_spin_channels), dtype=float)
         projections = np.zeros(shape=(self.n_kpoints, self.n_bands, self.n_spin_projections, self.n_atm_wfc), dtype=np_utils.COMPLEX_DTYPE)
         
@@ -1089,8 +1082,7 @@ class AtomicProjXML:
             bands[..., 0] = raw_bands[:self.n_kpoints]
             bands[..., 1] = raw_bands[self.n_kpoints:]
             
-            logger.debug(f"raw_projections spin-up: {raw_projections[:self.n_kpoints].shape}")
-            logger.debug(f"raw_projections spin-down: {raw_projections[self.n_kpoints:].shape}")
+           
             projections[:, :, 0, :] = raw_projections[:self.n_kpoints]
             projections[:, :, 1, :] = raw_projections[self.n_kpoints:]
         else:
@@ -1098,14 +1090,7 @@ class AtomicProjXML:
             weights = raw_weights
             bands[..., 0] = raw_bands
             projections[:, :, 0, :] = raw_projections
-            
-            
-        logger.info(f"bands: {bands.shape}")
-        logger.info(f"projections: {projections.shape}")
-        logger.info(f"kpoints: {kpoints.shape}")
-        logger.info(f"weights: {weights.shape}")
-        
-  
+              
         eigen_states["bands"] = bands
         eigen_states["projections"] = projections
         eigen_states["weights"] = weights
