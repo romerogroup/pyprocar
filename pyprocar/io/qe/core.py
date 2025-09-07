@@ -142,7 +142,17 @@ class QEParser:
         self._detected["data_xml"] = sort_pref(data_xmls)[0] if data_xmls else None
         self._detected["pw_xml"] = sort_pref(pw_xmls)[0] if pw_xmls else None
 
-        logger.info(f"Detected files: {self.summary()}")
+        detected_files = self.summary()
+        log_msg = f"Detected files:\n"
+        for k, v in detected_files.items():
+            log_msg += f"{k}: "
+            if isinstance(v, dict):
+                log_msg += f"{k}:\n"
+                for k2, v2 in v.items():
+                    log_msg += f"  {k2}: {v2}\n"
+            else:
+                log_msg += f"{v}\n"
+        logger.info(log_msg)
 
     def summary(self) -> Dict[str, Union[str, List[str], None]]:
         def _p(v: Optional[Path] | List[Path]):
@@ -283,6 +293,26 @@ class QEParser:
             return None
         
     @cached_property
+    def _raw_kpoints(self) -> Optional[np.ndarray]:
+        kpoints = None
+        if self.atomic_proj_xml is not None:
+            logger.info("Parsing kpoints from atomic_proj.xml")
+            kpoints = self.atomic_proj_xml.kpoints
+        elif self.projwfc_out is not None and self.projwfc_out.kpoints is not None:
+            logger.info("Parsing kpoints from projwfc.out")
+            kpoints = self.projwfc_out.kpoints
+        elif self.bands_in is not None and self.bands_in.kpoints_card is not None and self.bands_in.kpoints_card.kpoints is not None:
+            logger.info("Parsing kpoints from bands.in")
+            kpoints = self.bands_in.kpoints_card.kpoints
+        elif self.pw_xml is not None and self.pw_xml.kpoints is not None:
+            logger.info("Parsing kpoints from pw.xml")
+            kpoints = self.pw_xml.kpoints
+        else:
+            user_logger.warning("No kpoints found in atomic_proj.xml or projwfc.out or bands.in")
+            return None
+        return kpoints
+    
+    @cached_property
     def kpath(self) -> Optional[KPath]:
         if self.bands_in is None:
             return None
@@ -293,29 +323,34 @@ class QEParser:
         if self.bands_in.kpoints_card.modified_knames is None:
             return None
         
+        high_sym_points = self.bands_in.kpoints_card.high_symmetry_points
+
+        kticks = find_high_symmetry_ticks(self._raw_kpoints, high_sym_points)
+        self._kticks = kticks
+        new_kpoints = insert_continuous_points(self._raw_kpoints, kticks)
+        new_kpoints = np.array(new_kpoints)
         
+        segment_names = self.bands_in.kpoints_card.modified_knames
         return KPath(
-            knames=self.bands_in.kpoints_card.modified_knames,
+            knames= segment_names,
+            kticks=kticks,
             special_kpoints=self.bands_in.kpoints_card.special_kpoints,
-            kticks=self.bands_in.kpoints_card.kticks,
             ngrids=self.bands_in.kpoints_card.ngrids,
             has_time_reversal=True,
         )
         
     @cached_property
+    def kticks(self) -> List[int]:
+        if hasattr(self, "_kticks"):
+            return self._kticks
+        return []
+    
+    @property
     def kpoints(self) -> Optional[np.ndarray]:
-        kpoints = None
-        if self.atomic_proj_xml is not None:
-            kpoints = self.atomic_proj_xml.kpoints
-        elif self.projwfc_out is not None and self.projwfc_out.kpoints is not None:
-            kpoints = self.projwfc_out.kpoints
-        elif self.bands_in is not None and self.bands_in.kpoints_card is not None and self.bands_in.kpoints_card.kpoints is not None:
-            kpoints = self.bands_in.kpoints_card.kpoints
-        elif self.pw_xml is not None and self.pw_xml.kpoints is not None:
-            kpoints = self.pw_xml.kpoints
-        else:
-            user_logger.warning("No kpoints found in atomic_proj.xml or projwfc.out or bands.in")
-            return None
+        kpoints = self._raw_kpoints
+        if self.kpath is not None:
+            logger.info("Parsing kpoints from kpath")
+            kpoints = insert_continuous_points(self._raw_kpoints, self.kticks)
         return kpoints
     
     @cached_property
@@ -391,15 +426,23 @@ class QEParser:
     @cached_property
     def bands(self) -> Optional[np.ndarray]:
         if self.atomic_proj_xml is not None and self.atomic_proj_xml.bands is not None:
-            logger.debug("Parsing bands from atomic_proj.xml")
-            return self.atomic_proj_xml.bands # - self.fermi
+            logger.info("Parsing bands from atomic_proj.xml")
+            bands = self.atomic_proj_xml.bands
         elif self.projwfc_out is not None and self.projwfc_out.bands is not None:
-            logger.debug("Parsing bands from projwfc.out")
-            return HARTREE_TO_EV * self.projwfc_out.bands
+            logger.info("Parsing bands from projwfc.out")
+            bands = HARTREE_TO_EV * self.projwfc_out.bands
         elif self.pw_xml is not None and self.pw_xml.bands is not None:
-            logger.debug("Parsing bands from pw.xml")
-        user_logger.warning("No bands found in atomic_proj.xml or projwfc.out or pw.xml")
-        return None
+            logger.info("Parsing bands from pw.xml")
+            bands = HARTREE_TO_EV * self.pw_xml.bands
+        else:
+            user_logger.warning("No bands found in atomic_proj.xml or projwfc.out or pw.xml")
+            return None
+        
+        if self.kpath is not None:
+            bands = insert_continuous_points(bands, self.kticks)
+        logger.debug(f"Bands: {bands.shape}")
+        
+        return bands
     
     @cached_property
     def spd_phase(self) -> Optional[np.ndarray]:
@@ -458,6 +501,11 @@ class QEParser:
         # Move spin channels to the last axis. This is need to have the dimensionality to have the same shape as the format in pyproxcar
         pyprocar_projections_phase = np.moveaxis(pyprocar_projections_phase, 2, -1)
         pyprocar_projections_phase = pyprocar_projections_phase.reshape((n_kpoints, n_bands, n_atoms, n_principals, n_orbitals, n_spin_channels))
+        
+        if self.kpath is not None:
+            pyprocar_projections_phase = insert_continuous_points(pyprocar_projections_phase, self.kticks)
+        logger.debug(f"Spd Phase: {pyprocar_projections_phase.shape}")
+        
         return pyprocar_projections_phase
     
     @cached_property
@@ -465,15 +513,26 @@ class QEParser:
         if self.atomic_proj_xml is None and self.projwfc_out is None and self.spd_phase is None:
             return None
         
-        return np.absolute(self.spd_phase)**2
+        logger.info(f"Parsing spd from spd phase")
+        spd = np.absolute(self.spd_phase)**2
+        
+        n_kpoints = self.spd_phase.shape[0]
+        if self.kpath is not None and n_kpoints != self.kpath.n_kpoints:
+            spd = insert_continuous_points(spd, self.kticks)
+        logger.debug(f"Spd: {spd.shape}")
+        return spd
     
     @cached_property
     def orbitals(self) -> Optional[List[str]]:
-        if self.projwfc_out is not None and self.projwfc_out.orbitals is not None:
+        if self.projwfc_out is not None:
+            logger.info("Parsing orbitals from projwfc.out")
             return self.projwfc_out.orbitals
-        elif self.atomic_proj_xml is not None and self.atomic_proj_xml.orbitals is not None:
+        elif self.atomic_proj_xml is not None:
+            logger.info("Parsing orbitals from atomic_proj.xml")
             return self.atomic_proj_xml.orbitals
-        return None
+        else:
+            logger.info("No orbitals found in projwfc.out or atomic_proj.xml")
+            return None
     
     # -------- computed properties --------
     @cached_property
@@ -590,3 +649,72 @@ class QEParser:
             rotations=self.rotations,
         )
 
+
+
+def find_high_symmetry_ticks(raw_kpoints, high_sym_points, atol=1e-6):
+    """
+    Find indices of raw_kpoints that match high_sym_points within tolerance.
+
+    Parameters
+    ----------
+    raw_kpoints : (N, 3) ndarray
+        List of kpoints along the path.
+    high_sym_points : (M, 3) ndarray
+        List of special kpoints to match.
+    atol : float
+        Absolute tolerance for matching.
+
+    Returns
+    -------
+    kticks : list[int]
+        Indices in raw_kpoints corresponding to high_sym_points.
+    """
+    raw_kpoints = np.asarray(raw_kpoints)
+    high_sym_points = np.asarray(high_sym_points)
+
+    # Compute pairwise distances (N, M)
+    dists = np.linalg.norm(
+        raw_kpoints[:, None, :] - high_sym_points[None, :, :], axis=-1
+    )
+
+    # Find matches within tolerance
+    matches = np.where(dists < atol)
+
+    # matches[0] = indices in raw_kpoints
+    # matches[1] = indices in high_sym_points
+    # To enforce one-to-one mapping, take the first match for each high_sym_point
+    unique_hs, idx = np.unique(matches[1], return_index=True)
+    kticks = matches[0][idx]
+
+    return kticks.tolist()
+
+def insert_continuous_points(arr: np.ndarray, tick_indices: np.ndarray) -> np.ndarray:
+    """
+    Insert duplicates at tick indices to enforce VASP-style repeated kpoints.
+
+    Parameters
+    ----------
+    arr : np.ndarray
+        Array with shape (nk, ...), where axis=0 corresponds to kpoints.
+    tick_indices : array-like
+        Indices of tick points (end of each segment).
+        Continuous ticks will be duplicated.
+
+    Returns
+    -------
+    np.ndarray
+        New array with duplicated rows at continuous tick points.
+    """
+    tick_indices = np.asarray(tick_indices)
+
+    # Continuous ticks are all except the very first one
+    continuous_ticks = tick_indices[1:-1]  
+
+    # Values to duplicate
+    rows_to_insert = arr[continuous_ticks]
+
+    # Insert them back at the right positions
+    # np.insert shifts indices automatically, so we need to offset
+    out = np.insert(arr, continuous_ticks + 1, rows_to_insert, axis=0)
+
+    return out
