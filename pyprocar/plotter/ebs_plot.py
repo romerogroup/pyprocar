@@ -120,6 +120,9 @@ class EBSPlot:
             logger.info(
                 "Kpath exists and nsegments == ngrids. Creating path from kpath"
             )
+            logger.debug(f"ngrids: {self.kpath.ngrids}")
+            logger.debug(f"nsegments: {self.kpath.nsegments}")
+            
             k_current = None
             for isegment in range(self.kpath.nsegments):
                 kstart, kend = self.kpath.special_kpoints[isegment]
