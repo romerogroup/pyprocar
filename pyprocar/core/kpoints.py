@@ -14,12 +14,12 @@ import numpy as np
 import pyvista as pv
 
 from pyprocar.core.brillouin_zone import BrillouinZone
-from pyprocar.utils import math
+from pyprocar.utils import math, np_utils
 
 logger = logging.getLogger(__name__)
 
-KPOINTS_DTYPE = np.ndarray[tuple[int, Literal[3]], np.dtype[np.float_]]
-RECIPROCAL_LATTICE_DTYPE = np.ndarray[tuple[Literal[3], Literal[3]], np.dtype[np.float_]]
+KPOINTS_DTYPE = np.ndarray[tuple[int, Literal[3]], np.dtype[np_utils.FLOAT_DTYPE]]
+RECIPROCAL_LATTICE_DTYPE = np.ndarray[tuple[Literal[3], Literal[3]], np.dtype[np_utils.FLOAT_DTYPE]]
 
 class KGRID_MODE(Enum):
     MONKHORST = "monkhorst"
@@ -139,6 +139,24 @@ def format_names(names: List[str], as_latex: bool = False):
         new_names.append(x)
     return new_names
 
+
+SPECIAL_KPOINT_ALIASES = {
+    "Γ": ["gamma", "Gamma", "G", "g", "Γ"],
+    "X": ["x", "X"],
+    "M": ["m", "M", "M-point"],
+    "K": ["k", "K"],
+    "L": ["l", "L"],
+    # add more as needed
+}
+
+def normalize_kpoint_name(name: str) -> str:
+    """Normalize special kpoint names to a canonical form."""
+    name = name.strip()  # remove whitespace
+    for canonical, aliases in SPECIAL_KPOINT_ALIASES.items():
+        if name in aliases:
+            return canonical
+    return name  # fallback: return as-is if not found
+
 class KPath:
     def __init__(
         self,
@@ -165,7 +183,7 @@ class KPath:
             This is a list of tuples containing the names of the segments. 
             The first element of the tuple is the name of the start point of the segment 
             and the second element is the name of the end point of the segment.
-        special_kpoints: Dict[str, np.ndarray]
+        special_kpoint_map: Dict[str, np.ndarray]
             A dictionary containing the special kpoints.
             The key is the name of the special kpoint and the value is the kpoint.
         tick_name_map: Dict[int, str]
@@ -178,28 +196,47 @@ class KPath:
         zero_diff_threshold: float
             The threshold for a zero difference
         """
+        logger.info("Initializing KPath")
+        logger.debug(f"n_grids: {n_grids}")
+        logger.debug(f"discontinuity_threshold: {discontinuity_threshold}")
+        logger.debug(f"zero_diff_threshold: {zero_diff_threshold}")
+        logger.debug(f"tick_name_map: {tick_name_map}")
+        logger.debug(f"reciprocal_lattice: \n {reciprocal_lattice}")
+        
+        
         if kpoints is None and n_grids is None:
-            raise ValueError("Either kpoints or n_grids must be provided")
+            err_msg = "Either kpoints or n_grids must be provided"
+            logger.error(err_msg)
+            raise ValueError(err_msg)
         
         self._n_grids = n_grids
-        self._kpoints = kpoints
         self.discontinuity_threshold = discontinuity_threshold
         self.zero_diff_threshold = zero_diff_threshold
         self._tick_name_map = tick_name_map
         self._reciprocal_lattice = reciprocal_lattice
         
-        
-        if self._kpoints is None:
-            logger.info("No kpoints provided. Generating kpoints from special kpoints and ngrids")
-            self._kpoints = self.generate_points(segment_names, special_kpoint_map, n_grids)
-            
-        
-        self._segment_indices, self._continuous_start_indices, self._discontinuity_start_indices = self.get_segment_indices()
+        # Normalizing kpoint names to canonical form
+        segment_names = self._normalize_kpoint_names(segment_names)
         self._segment_names = segment_names
+        
+        # Generate kpoints if not provided
+        self._kpoints = kpoints
+        if self._kpoints is None:
+            self._kpoints = self.generate_points(segment_names, special_kpoint_map, n_grids)
+        logger.debug(f"Kpoints shape: {self._kpoints.shape}")
+        
+        # Get kpoint indices per kpath segment
+        self._segment_indices, self._continuous_start_indices, self._discontinuity_start_indices = self.get_segment_indices()
+        
+        # Get unique special kpoint names
         self._special_kpoint_names = self.get_special_kpoint_names(segment_names=self._segment_names)
         
+        # Format special kpoint names
         self.special_kpoint_names = format_names(self._special_kpoint_names, as_latex=as_latex)
         
+
+        logger.info(f"\n{self}\n")
+        logger.info("KPath initialized")
 
     def __eq__(self, other):
         segment_names_equal = self.segment_names == other.segment_names
@@ -211,12 +248,11 @@ class KPath:
     def __str__(self):
         ret = "K-Path\n"
         ret += "------\n"
+        
         for isegment, segment_indices in enumerate(self.segment_indices):
             start_name, end_name = self.segment_names[isegment]
             start_kpoint = self.special_kpoint_map[start_name]
             end_kpoint = self.special_kpoint_map[end_name]
-            
-
 
             ret += "{:>2}. {:<8}: ({:>6.2f} {:>6.2f} {:>6.2f}) -> {:<8}: ({:>6.2f} {:>6.2f} {:>6.2f})\n".format(
                     isegment + 1,
@@ -349,6 +385,7 @@ class KPath:
                 special_kpoint_names.append(segment_name[0])
             if segment_name[1] not in special_kpoint_names:
                 special_kpoint_names.append(segment_name[1])
+                
         return special_kpoint_names
     
     def get_special_kpoints(self, as_segments: bool = False, cartesian: bool = False):
@@ -475,25 +512,20 @@ class KPath:
 
         if self._kpoints is None or len(self._kpoints) == 0:
             return np.array([])
-            
+        
         # Compute differences between consecutive kpoints
         k_diffs = np.diff(self._kpoints, axis=0)
         
         # Calculate the norm of differences
         k_diff_norms = np.linalg.norm(k_diffs, axis=1)
-        
+
         # Find indices where difference is 0 (or very close to 0)
         continuous_end_indices = list(np.where(k_diff_norms < self.zero_diff_threshold)[0])
         discontinuity_end_indices = list(np.where(k_diff_norms > self.discontinuity_threshold)[0])
         
-        logger.info(f"Continuous indices: {continuous_end_indices}")
-        logger.info(f"Discontinuity indices: {discontinuity_end_indices}")
         segment_end_indices = continuous_end_indices + discontinuity_end_indices + [len(self._kpoints) - 1]
         segment_end_indices.sort()
-        
-        logger.info(f"Found {len(segment_end_indices)} segments")
-        
-        
+
         indices = []
         for i, segment_end_index in enumerate(segment_end_indices):
             if i == 0:
@@ -532,6 +564,7 @@ class KPath:
         """
         Generate the kpath points
         """
+        
         kpoints_on_path = []
         if self.kpoints is not None:
             
@@ -545,6 +578,8 @@ class KPath:
                     kpoints_on_path = np.concatenate((kpoints_on_path, kpoints))
             
         else:
+            logger.info("No kpoints provided. Generating kpoints from special kpoints and ngrids")
+            
             if n_grids is None:
                 raise ValueError("n_grids must be provided")
             if segment_names is None:
@@ -563,6 +598,15 @@ class KPath:
                 else:
                     kpoints_on_path = np.concatenate((kpoints_on_path, kpoints))
         return kpoints_on_path
+    
+    def _normalize_kpoint_names(self, segment_names: list[tuple[str, str]]):
+        new_segment_names = []
+        for segment_name in segment_names:
+            kstart_label, kend_label = segment_name
+            normalized_kstart_label = normalize_kpoint_name(kstart_label)
+            normalized_kend_label = normalize_kpoint_name(kend_label)
+            new_segment_names.append((normalized_kstart_label, normalized_kend_label))
+        return new_segment_names
 
     def get_optimized_kpoints_transformed(
         self, transformation_matrix, same_grid_size=False
