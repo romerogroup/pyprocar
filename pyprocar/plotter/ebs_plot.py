@@ -104,6 +104,62 @@ class EBSPlot:
         self.set_xlim()
         self.set_ylim()
 
+    def _get_x(self):
+        """
+        Provides the x axis data of the plots
+
+        Returns
+        -------
+        np.ndarray
+            x-axis data.
+
+        """
+        logger.info("___Getting x values___")
+        self.values_dict[f"k_current"] = []
+        pos = 0
+        if self.kpath is not None and self.kpath.nsegments == len(self.kpath.ngrids):
+            logger.info(
+                "Kpath exists and nsegments == ngrids. Creating path from kpath"
+            )
+            logger.debug(f"ngrids: {self.kpath.ngrids}")
+            logger.debug(f"nsegments: {self.kpath.nsegments}")
+            
+            k_current = None
+            for isegment in range(self.kpath.nsegments):
+                kstart, kend = self.kpath.special_kpoints[isegment]
+                if self.kdirect is False:
+                    kstart = np.dot(self.ebs.reciprocal_lattice, kstart)
+                    kend = np.dot(self.ebs.reciprocal_lattice, kend)
+
+                distance = np.linalg.norm(kend - kstart)
+                if isegment == 0:
+                    x = np.linspace(pos, pos + distance, self.kpath.ngrids[isegment])
+                    k_current = kstart
+                    self.values_dict[f"k_current"].append(k_current.tolist())
+                else:
+                    x = np.append(
+                        x,
+                        np.linspace(pos, pos + distance, self.kpath.ngrids[isegment]),
+                        axis=0,
+                    )
+
+                k_unit_dir = (kend - kstart) / distance
+                for i in range(x.shape[0]):
+                    k_current += k_unit_dir * distance
+                    self.values_dict[f"k_current"].append(k_current.tolist())
+
+                pos += distance
+        else:
+            logger.info(
+                "Kpath does not exist or nsegments != ngrids. Creating x from kpoints"
+            )
+
+            x = np.arange(0, self.ebs.kpoints.shape[0])
+
+        return np.array(x).reshape(
+            -1,
+        )
+
     def plot_bands(self):
         """
         Plot the plain band structure.

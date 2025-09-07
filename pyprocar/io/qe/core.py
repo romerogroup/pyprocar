@@ -103,7 +103,7 @@ class QEParser:
                 pass
 
         # Out files: detect program type by peeking first 5 lines
-        out_files = [p for p in files if p.suffix.lower() == ".out"]
+        out_files = [p for p in files if (p.suffix.lower() == ".out" or p.suffix.lower() == ".log")]
         pwscf_outs: List[Path] = []
         projwfc_outs: List[Path] = []
         for of in out_files:
@@ -149,6 +149,17 @@ class QEParser:
         self._detected["data_xml"] = sort_pref(data_xmls)[0] if data_xmls else None
         self._detected["pw_xml"] = sort_pref(pw_xmls)[0] if pw_xmls else None
 
+        detected_files = self.summary()
+        log_msg = f"Detected files:\n"
+        for k, v in detected_files.items():
+            log_msg += f"{k}: "
+            if isinstance(v, dict):
+                log_msg += f"{k}:\n"
+                for k2, v2 in v.items():
+                    log_msg += f"  {k2}: {v2}\n"
+            else:
+                log_msg += f"{v}\n"
+        logger.info(log_msg)
         detected_files = self.summary()
         log_msg = f"Detected files:\n"
         for k, v in detected_files.items():
@@ -302,23 +313,42 @@ class QEParser:
             return None
         
     @cached_property
+    def alat(self) -> Optional[float]:
+        if self.scf_out is not None and self.scf_out.alat is not None:
+            logger.info("Parsing alat from scf.out")
+            alat = self.scf_out.alat * AU_TO_ANG
+        elif self.pw_xml is not None and self.pw_xml.alat is not None:
+            logger.info("Parsing alat from pw.xml")
+            alat = self.pw_xml.alat
+        else:
+            user_logger.warning("No alat found in scf.out or pw.xml")
+            return None
+        logger.debug(f"alat: {alat}")
+        return alat
+        
+    @cached_property
     def _raw_kpoints(self) -> Optional[np.ndarray]:
-        kpoints = None
+        kpoints_cart = None
         if self.atomic_proj_xml is not None:
             logger.info("Parsing kpoints from atomic_proj.xml")
-            kpoints = self.atomic_proj_xml.kpoints
+            kpoints_cart = self.atomic_proj_xml.kpoints
         elif self.projwfc_out is not None and self.projwfc_out.kpoints is not None:
             logger.info("Parsing kpoints from projwfc.out")
-            kpoints = self.projwfc_out.kpoints
+            kpoints_cart = self.projwfc_out.kpoints
         elif self.bands_in is not None and self.bands_in.kpoints_card is not None and self.bands_in.kpoints_card.kpoints is not None:
             logger.info("Parsing kpoints from bands.in")
-            kpoints = self.bands_in.kpoints_card.kpoints
+            kpoints_cart = self.bands_in.kpoints_card.kpoints
         elif self.pw_xml is not None and self.pw_xml.kpoints is not None:
             logger.info("Parsing kpoints from pw.xml")
-            kpoints = self.pw_xml.kpoints
+            kpoints_cart = self.pw_xml.kpoints
         else:
             user_logger.warning("No kpoints found in atomic_proj.xml or projwfc.out or bands.in")
             return None
+        
+        scaled_kpoints_cart = kpoints_cart * (2*np.pi / (self.alat))
+        
+        kpoints = np.around(scaled_kpoints_cart.dot(np.linalg.inv(self.reciprocal_lattice)), decimals=8)
+        
         return kpoints
     
     @cached_property
@@ -421,14 +451,21 @@ class QEParser:
     @cached_property
     def reciprocal_lattice(self) -> Optional[np.ndarray]:
         if self.pw_xml is not None and self.pw_xml.reciprocal_lattice is not None:
-            return self.pw_xml.reciprocal_lattice
+            logger.info("Parsing reciprocal lattice from pw.xml")
+            reciprocal_lattice = self.pw_xml.reciprocal_lattice
         if self.scf_out is not None and self.scf_out.reciprocal_axes is not None:
-            return self.scf_out.reciprocal_axes
+            logger.info("Parsing reciprocal lattice from scf.out")
+            reciprocal_lattice = self.scf_out.reciprocal_axes
         elif self.bands_out is not None and self.bands_out.reciprocal_axes is not None:
-            return self.bands_out.reciprocal_axes
+            logger.info("Parsing reciprocal lattice from bands.out")
+            reciprocal_lattice = self.bands_out.reciprocal_axes
         elif self.nscf_out is not None and self.nscf_out.reciprocal_axes is not None:
-            return self.nscf_out.reciprocal_axes
-        return None
+            logger.info("Parsing reciprocal lattice from nscf.out")
+            reciprocal_lattice = self.nscf_out.reciprocal_axes
+        else:
+            logger.warning("No reciprocal lattice found in pw.xml or scf.out or bands.out or nscf.out")
+            return None
+        return  (2 * np.pi / self.alat) * reciprocal_lattice
     
     @cached_property
     def fermi(self) -> Optional[float]:
@@ -445,7 +482,11 @@ class QEParser:
         if self.atomic_proj_xml is not None and self.atomic_proj_xml.bands is not None:
             logger.info("Parsing bands from atomic_proj.xml")
             bands = self.atomic_proj_xml.bands
+            logger.info("Parsing bands from atomic_proj.xml")
+            bands = self.atomic_proj_xml.bands
         elif self.projwfc_out is not None and self.projwfc_out.bands is not None:
+            logger.info("Parsing bands from projwfc.out")
+            bands = HARTREE_TO_EV * self.projwfc_out.bands
             logger.info("Parsing bands from projwfc.out")
             bands = HARTREE_TO_EV * self.projwfc_out.bands
         elif self.pw_xml is not None and self.pw_xml.bands is not None:
@@ -663,16 +704,18 @@ class QEParser:
         )
 
 
-def find_high_symmetry_ticks(raw_kpoints, high_sym_points, atol=1e-6):
+def find_high_symmetry_ticks(raw_kpoints, high_sym_points, atol=1e-4):
     """
     Find indices of raw_kpoints that match high_sym_points within tolerance.
+    Each high_sym_point is matched once, in order, to the first raw_kpoint
+    within tolerance. Duplicates in high_sym_points are allowed.
 
     Parameters
     ----------
     raw_kpoints : (N, 3) ndarray
         List of kpoints along the path.
     high_sym_points : (M, 3) ndarray
-        List of special kpoints to match.
+        List of special kpoints to match, in order (duplicates allowed).
     atol : float
         Absolute tolerance for matching.
 
@@ -689,16 +732,29 @@ def find_high_symmetry_ticks(raw_kpoints, high_sym_points, atol=1e-6):
         raw_kpoints[:, None, :] - high_sym_points[None, :, :], axis=-1
     )
 
-    # Find matches within tolerance
-    matches = np.where(dists < atol)
+    kticks = []
+    last_idx = -1  # ensure we move forward along raw_kpoints
 
-    # matches[0] = indices in raw_kpoints
-    # matches[1] = indices in high_sym_points
-    # To enforce one-to-one mapping, take the first match for each high_sym_point
-    unique_hs, idx = np.unique(matches[1], return_index=True)
-    kticks = matches[0][idx]
+    # for i, kpoint in enumerate(raw_kpoints[:501]):
+    #     print(i, kpoint)
+    # print(raw_kpoints[:501])
+    # print(raw_kpoints.shape)
+    for j in range(dists.shape[1]):
+        # Find matches *after* the last matched index
+        matches = np.where((dists[:, j] < atol) & (np.arange(len(raw_kpoints)) > last_idx))[0]
+        # print(kticks)
+        # print(matches)
+        if len(matches) > 0:
+            idx = matches[0]  # first valid match
+            kticks.append(idx)
+            last_idx = idx
+        else:
+            raise ValueError(
+                f"No match found for high_sym_point {j}: {high_sym_points[j]}"
+            )
+            
 
-    return kticks.tolist()
+    return kticks
 
 def insert_continuous_points(arr: np.ndarray, tick_indices: np.ndarray) -> np.ndarray:
     """
