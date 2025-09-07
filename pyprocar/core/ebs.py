@@ -31,7 +31,7 @@ from pyprocar.core.brillouin_zone import BrillouinZone
 from pyprocar.core.property_store import PointSet, Property
 from pyprocar.core.serializer import get_serializer
 from pyprocar.core.structure import Structure
-from pyprocar.utils import math, physics
+from pyprocar.utils import math, np_utils, physics
 from pyprocar.utils.info import orbital_index_name_map, orbital_names
 from pyprocar.utils.unfolder import Unfolder
 
@@ -43,10 +43,10 @@ user_logger = logging.getLogger("user")
 NUMERICAL_STABILITY_FACTOR = 0.0001
 
 
-BANDS_DTYPE = np.ndarray[tuple[int,int,int], np.dtype[np.float_]]
-PROJECTED_DTYPE = np.ndarray[tuple[int,int,int,int,int], np.dtype[np.float_]]
-PROJECTED_PHASE_DTYPE = np.ndarray[tuple[int,int,int,int,int], np.dtype[np.float_]]
-WEIGHTS_DTYPE = np.ndarray[tuple[int,int], np.dtype[np.float_]]
+BANDS_DTYPE = np.ndarray[tuple[int,int,int], np.dtype[np_utils.FLOAT_DTYPE]]
+PROJECTED_DTYPE = np.ndarray[tuple[int,int,int,int,int], np.dtype[np_utils.FLOAT_DTYPE]]
+PROJECTED_PHASE_DTYPE = np.ndarray[tuple[int,int,int,int,int], np.dtype[np_utils.FLOAT_DTYPE]]
+WEIGHTS_DTYPE = np.ndarray[tuple[int,int], np.dtype[np_utils.FLOAT_DTYPE]]
 
 def get_ebs_from_data(
         kpoints: kpoints.KPOINTS_DTYPE | None = None,
@@ -210,6 +210,9 @@ class ElectronicBandStructure(PointSet, PyvistaInterface):
         structure: Structure | None = None,
     ):
         super().__init__(kpoints)
+        
+        logger.info(f"Initializing ElectronicBandStructure")
+
 
         if bands is not None:
             self.add_property(name="bands", value=bands)
@@ -225,6 +228,8 @@ class ElectronicBandStructure(PointSet, PyvistaInterface):
         self._reciprocal_lattice = reciprocal_lattice
         self._shifted_to_fermi = shifted_to_fermi
         self._structure = structure
+        
+        logger.info("___ElectronicBandStructure initialization complete___")
 
     def __str__(self):
         ret = "\n Electronic Band Structure     \n"
@@ -1013,6 +1018,8 @@ class ElectronicBandStructurePath(ElectronicBandStructure, DifferentiablePropert
         super().__init__(**kwargs)
         self._kpath = kpath
         self.as_cart()
+        logger.debug(f"ElectronicBandStructurePath: \n {self}")
+        logger.info("___ElectronicBandStructurePath initialization complete___")
         
     @classmethod
     def from_code(cls, code: str, dirpath: str, use_cache: bool = False, ebs_filename: str = "ebs.pkl"):
