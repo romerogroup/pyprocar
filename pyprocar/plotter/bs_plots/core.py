@@ -21,29 +21,38 @@ class BandsPlotter(BasePlotter):
     
     def __init__(self, figsize=(8, 6), dpi=100, ax=None, **kwargs):
         super().__init__(figsize=figsize, dpi=dpi, ax=ax, **kwargs)
+        self._plotters = []
     
     def _plot(self, kpath: KPath, bands: np.ndarray, **kwargs):
         pass
+    
+    @property
+    def plotters(self):
+        return self._plotters
+    
+    def _add_plotter(self, plotter: BasePlotter, *args, **kwargs):
+        self._plotters.append(plotter)
+        return plotter.plot(*args, **kwargs)
         
     def overlay(self, kpath: KPath, bands: np.ndarray, **kwargs):
         p = OverlayPlot(ax=self.ax, **self.instance_plot_params)
-        return p.plot(kpath, bands, **kwargs)
+        return self._add_plotter(p, kpath, bands, **kwargs)
         
     def scatter(self, kpath: KPath, bands: np.ndarray, scalars: np.ndarray = None, **kwargs):
         p = ScatterPlot(ax=self.ax, **self.instance_plot_params)
-        return p.plot(kpath, bands, scalars=scalars, **kwargs)
+        return self._add_plotter(p, kpath, bands, scalars=scalars, **kwargs)
     
     def parametric(self, kpath: KPath, bands: np.ndarray, scalars: np.ndarray = None, **kwargs):
         p = ParametricPlot(ax=self.ax, **self.instance_plot_params)
-        return p.plot(kpath, bands, scalars=scalars, **kwargs)
+        return self._add_plotter(p, kpath, bands, scalars=scalars, **kwargs)
     
     def quiver(self, kpath: KPath, bands: np.ndarray, vectors: np.ndarray = None, **kwargs):
         p = QuiverPlot(ax=self.ax, **self.instance_plot_params)
-        return p.plot(kpath, bands, vectors=vectors, **kwargs)
+        return self._add_plotter(p, kpath, bands, vectors=vectors, **kwargs)
 
     def atomic(self, bands: np.ndarray, **kwargs):
         p = AtomicLevelsPlot(ax=self.ax, **self.instance_plot_params)
-        return p.plot(bands, **kwargs)
+        return self._add_plotter(p, bands, **kwargs)
         
         
         
