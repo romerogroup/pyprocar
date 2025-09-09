@@ -99,7 +99,9 @@ class ProjwfcIn:
     
     @cached_property
     def data(self) -> dict[str, Any]:
-        return parse_qe_input_cards(self.text)
+        data = parse_qe_input_cards(self.text)
+        logger.info(f"PROJWFC INPUT: {data}")
+        return data
     
     @cached_property
     def is_kresolved(self) -> bool:

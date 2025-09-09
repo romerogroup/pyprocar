@@ -333,13 +333,20 @@ class QEParser:
     
     @cached_property
     def kpath(self) -> Optional[KPath]:
+        if self.is_dos_calculation:
+            logger.info("No kpath found for DOS calculation")
+            return None
+        
         if self.bands_in is None:
+            logger.info("No bands.in file found, therefore not parsing kpath")
             return None
         
         if self.bands_in.kpoints_card is None:
+            logger.info("No kpoints_card found in bands.in, therefore not parsing kpath")
             return None
         
         if self.bands_in.kpoints_card.modified_knames is None:
+            logger.info("No modified_knames found in bands.in, therefore not parsing kpath")
             return None
         
         high_sym_points = self.bands_in.kpoints_card.high_symmetry_points
@@ -426,7 +433,7 @@ class QEParser:
         if self.pw_xml is not None and self.pw_xml.reciprocal_lattice is not None:
             logger.info("Parsing reciprocal lattice from pw.xml")
             reciprocal_lattice = self.pw_xml.reciprocal_lattice
-        if self.scf_out is not None and self.scf_out.reciprocal_axes is not None:
+        elif self.scf_out is not None and self.scf_out.reciprocal_axes is not None:
             logger.info("Parsing reciprocal lattice from scf.out")
             reciprocal_lattice = self.scf_out.reciprocal_axes
         elif self.bands_out is not None and self.bands_out.reciprocal_axes is not None:
@@ -614,7 +621,10 @@ class QEParser:
     
     @cached_property
     def is_dos_calculation(self) -> bool:
-        return not self.projwfc_in.is_kresolved
+        logger.info("Checking if DOS calculation")
+        is_dos_calculation = not self.projwfc_in.is_kresolved
+        logger.info(f"Is DOS calculation: {is_dos_calculation}")
+        return is_dos_calculation
 
     @cached_property
     def dos(self) -> Optional[DensityOfStates]:
