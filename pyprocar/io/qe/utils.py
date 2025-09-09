@@ -8,6 +8,40 @@ QEValue = Union[QEScalar, QETensor]
 
 
     
+def _strip_qe_comments(text: str) -> str:
+    """Remove QE-style comments from text.
+
+    - In namelists, "!" starts a comment anywhere on the line (unless inside quotes)
+    - In cards, lines with first non-space character "#" are comments
+    - Trailing whitespace-only lines are dropped
+    """
+    cleaned_lines = []
+    for line in text.splitlines():
+        # Skip card-style comment lines beginning with '#'
+        if line.lstrip().startswith("#"):
+            continue
+
+        in_single = False
+        in_double = False
+        out_chars: list[str] = []
+        for ch in line:
+            if ch == "'" and not in_double:
+                in_single = not in_single
+            elif ch == '"' and not in_single:
+                in_double = not in_double
+
+            # In namelists, '!' begins a comment when not inside quotes
+            if ch == "!" and not in_single and not in_double:
+                break
+            out_chars.append(ch)
+
+        cleaned = "".join(out_chars).rstrip()
+        if cleaned.strip():
+            cleaned_lines.append(cleaned)
+
+    return "\n".join(cleaned_lines)
+
+
 def parse_qe_input_cards(text: str | list[str]) -> Dict[str, QEValue]:
     """Parse the input cards in Quantum ESPRESSO.
     Input data format: { } = optional, [ ] = it depends, | = or
@@ -31,6 +65,9 @@ def parse_qe_input_cards(text: str | list[str]) -> Dict[str, QEValue]:
     params: Dict[str, QEValue] = {}
     if isinstance(text, list):
         text = "\n".join(text)
+
+    # Remove comments before tokenizing
+    text = _strip_qe_comments(text)
 
     token_regex = re.compile(r"([A-Za-z0-9_]+(?:\s*\([^)]*\))?)\s*=\s*([^,\n]+)")
     for name, value_str in token_regex.findall(text):
