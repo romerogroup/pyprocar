@@ -4,6 +4,7 @@ __email__ = "petavazohi@mail.wvu.edu, lllang@mix.wvu.edu"
 __date__ = "March 31, 2020"
 
 import logging
+from functools import cached_property
 from pathlib import Path
 
 import numpy as np
@@ -72,20 +73,6 @@ class Structure:
         if self.atoms.shape[0] != self.fractional_coordinates.shape[0]:
             raise ValueError("atoms and fractional_coordinates must have the same length")
 
-        if (
-            self.lattice is not None
-            and self.fractional_coordinates is not None
-            and atoms is not None
-        ):
-            self.has_complete_data = True
-        else:
-            self.has_complete_data = False
-        self.wyckoff_positions = None
-        self.group = None
-
-        if self.has_complete_data:
-            self.get_wyckoff_positions()
-
         self._rotations = rotations
         if self._rotations is None:
             self._rotations = np.empty(shape=(0, 3, 3))
@@ -140,6 +127,18 @@ class Structure:
     @property
     def rotations(self):
         return self._rotations
+    
+    @property
+    def wyckoff_positions(self):
+        if self._wyckoff_positions is None:
+            self.get_wyckoff_positions()
+        return self._wyckoff_positions
+    
+    @property
+    def group(self):
+        if self._group is None:
+            self.get_wyckoff_positions()
+        return self._group
 
     @property
     def volume(self):
@@ -402,6 +401,9 @@ class Structure:
         np.ndarray
             The wyckoff positions
         """
+        if self.lattice is None or self.fractional_coordinates is None or self.atoms is None:
+            raise ValueError("Lattice, fractional coordinates, and atoms must be set to get wyckoff positions")
+        
         wyckoff_positions = np.empty(shape=(self.natoms), dtype="<U4")
         
         spglib_dataset = spglib.get_symmetry_dataset(self._spglib_cell, symprec)
