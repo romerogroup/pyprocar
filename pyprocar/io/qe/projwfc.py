@@ -19,6 +19,7 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 import numpy as np
 import pandas as pd
 from pyvista import row_array
+from scipy.interpolate import NearestNDInterpolator, RegularGridInterpolator
 
 from pyprocar.core import DensityOfStates, ElectronicBandStructure, KPath, Structure
 from pyprocar.io.qe.utils import parse_qe_input_cards
@@ -1333,6 +1334,7 @@ class ProjwfcDOS:
     @cached_property
     def data(self) -> list[dict[str, Any]]:
         dataframes = [pdos_file.data for pdos_file in self.pdos_files]
+        dataframes = self._regularize_projections(dataframes)
         return dataframes
     
     @cached_property
@@ -1374,7 +1376,8 @@ class ProjwfcDOS:
         - If not k-resolved: n_kpoints == 1
         """
         df = self.data[0]  # first file's DataFrame
-
+        
+        
         if "ik" in df.columns:
             # K-resolved case
             ik_values = df["ik"].unique()
@@ -1387,7 +1390,7 @@ class ProjwfcDOS:
                 bands.append(e_k)
             bands = np.array(bands)
 
-            # Consistency check across all files
+            # Validation check across all files
             for ifile, df_other in enumerate(self.data[1:], start=1):
                 for i, ik in enumerate(ik_values):
                     e_k_other = df_other[df_other["ik"] == ik]["E"].to_numpy()
@@ -1399,18 +1402,17 @@ class ProjwfcDOS:
             return bands
 
         else:
-            # Not k-resolved: treat as single k-point
-            energies = df["E"].to_numpy()
-
-            # Consistency check across all files
+            ref_energies = df["E"].to_numpy()
+            
+            # Validation check across all files
             for ifile, df_other in enumerate(self.data[1:], start=1):
                 e_other = df_other["E"].to_numpy()
-                if not np.allclose(e_other, energies):
-                    raise ValueError(
-                        f"Energies differ in file {self.files_metadata[ifile]['filepath']}"
-                    )
-            return energies[np.newaxis, :] # shape (1, n_energies)
+                if e_other.shape != ref_energies.shape:
+                    raise ValueError(f"Energies differ in file {self.pdos_files[ifile].filepath}")
+                
+            return ref_energies[np.newaxis, :] # shape (1, n_energies)
 
+    
     @cached_property
     def energies(self) -> np.ndarray:
         return self.bands
@@ -1418,6 +1420,25 @@ class ProjwfcDOS:
     @cached_property
     def n_energies(self) -> int:
         return self.bands.shape[1]
+    
+    
+    def _regularize_projections(self, dfs: list[pd.DataFrame]):
+        ref_energies = dfs[0]["E"].to_numpy()
+        for ifile, df_other in enumerate(dfs[1:], start=1):
+            df_values = df_other.to_numpy()
+            new_df_values = np.zeros((ref_energies.shape[0], df_values.shape[1]))
+            
+            energies= df_values[:, 0]
+            scalar_values = df_values[:, 1:]
+            
+            new_df_values[:, 0] = ref_energies
+            for i in range(1,scalar_values.shape[1]):
+                new_df_values[:, i] = np.interp(ref_energies, energies, scalar_values[:, i])
+            
+            
+            dfs[ifile] = pd.DataFrame(new_df_values, columns=df_other.columns)
+        return dfs
+        
     # -------------------------
     # Cached property: projected_dos
     # -------------------------
@@ -1483,8 +1504,8 @@ class ProjwfcDOS:
                         for mi, orb_name in enumerate(orb_names_for_l):
                             target_idx = ORBITAL_ORDERING.az_to_flat_index[orb_name]
                             if self.is_spin_polarized and self.n_spin_channels == 2:
-                                dos_array[:, 0, ai, target_idx] = pdos_m[:, mi * 2]     # spin-up
-                                dos_array[:, 1, ai, target_idx] = pdos_m[:, mi * 2 + 1] # spin-down
+                                dos_array[:, 0, ai, target_idx] = pdos_m[:, mi * 2]    # spin-up
+                                dos_array[:, 1, ai, target_idx] =  pdos_m[:, mi * 2 + 1] # spin-down
                             else:
                                 dos_array[:, 0, ai, target_idx] = pdos_m[:, mi]
 
