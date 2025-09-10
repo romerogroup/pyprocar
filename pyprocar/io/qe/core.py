@@ -64,15 +64,15 @@ class QEParser:
             user_logger.warning(f"Directory not found: {self._dirpath}")
             return
 
-        # files: List[Path] = []
-        # for root, dirs, filenames in os.walk(self._dirpath, followlinks=True):
-        #     for name in filenames:
-        #         try:
-        #             files.append(Path(root) / name)
-        #         except Exception:
-        #             pass
-        
-        files = [p for p in self._dirpath.rglob("*", recurse_symlinks=True) if p.is_file()]
+        files: List[Path] = []
+        for root, dirs, filenames in os.walk(self._dirpath, followlinks=True):
+            for name in filenames:
+                try:
+                    files.append(Path(root) / name)
+                except Exception:
+                    pass
+        # Only works for pathlib==3.13 or python==3.13
+        # files = [p for p in self._dirpath.rglob("*", recurse_symlinks=True) if p.is_file()]
 
 
         # XMLs
