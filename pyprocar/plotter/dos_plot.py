@@ -1040,6 +1040,14 @@ class DOSPlot:
                 )
             self.ax.legend(self.handles, labels, **self.config.legend_params)
         return None
+    
+    def set_title(self, title: str = ""):
+        """A method to set the title of the plot
+        """
+        if self.config.title:
+            title = self.config.title
+        self.ax.set_title(title, **self.config.title_params)
+        return None
 
     def draw_fermi(self, value, orientation: str = "horizontal"):
         """A method to draw the fermi surface
