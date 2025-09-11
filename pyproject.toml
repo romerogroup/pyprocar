@@ -125,9 +125,13 @@ platforms = ["linux-64", "osx-arm64", "osx-64", "win-64"]
 [tool.pixi.pypi-dependencies]
 pyprocar = {path = ".", editable = true}
 
+[tool.pixi.feature.py310.dependencies]
+python = "==3.10"
+
 [tool.pixi.environments]
 tests = { features = ["tests"], solve-group = "default" }
 build = { features = ["build"], solve-group = "default" }
 docs = { features = ["docs"], solve-group = "default" }
 dev = { features = ["dev"], solve-group = "default" }
 
+py310 = { features = ["py310"] }

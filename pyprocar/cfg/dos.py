@@ -210,6 +210,7 @@ class DensityOfStatesConfig(BaseConfig):
         default_factory=lambda: [r"$\uparrow$", r"$\downarrow$"]
     )
     title: Optional[str] = None
+    title_params: Dict[str, Any] = field(default_factory=lambda: {})
     verbose: bool = True
     weighted_color: bool = True
     weighted_width: bool = False

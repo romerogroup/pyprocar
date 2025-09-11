@@ -71,7 +71,16 @@ class QEParser:
             user_logger.warning(f"Directory not found: {self._dirpath}")
             return
 
-        files = [p for p in self._dirpath.rglob("*") if p.is_file()]
+        files: List[Path] = []
+        for root, dirs, filenames in os.walk(self._dirpath, followlinks=True):
+            for name in filenames:
+                try:
+                    files.append(Path(root) / name)
+                except Exception:
+                    pass
+        # Only works for pathlib==3.13 or python==3.13
+        # files = [p for p in self._dirpath.rglob("*", recurse_symlinks=True) if p.is_file()]
+
 
         # XMLs
         atomic_proj_xml = [p for p in files if re.search(r"(?i)^atomic_proj\.xml$", p.name)]
@@ -191,6 +200,7 @@ class QEParser:
                 "projwfc_out": self._detected["projwfc_out"] is not None,
                 "atomic_proj_xml": self._detected["atomic_proj_xml"] is not None,
                 "pw_xml": self._detected["pw_xml"] is not None,
+                "data_file_schema_xml": self._detected["data_file_schema_xml"] is not None,
                 "pdos": isinstance(self._detected.get("pdos_files"), list) and len(self._detected.get("pdos_files") or []) > 0,
             },
         }
@@ -313,6 +323,16 @@ class QEParser:
             return None
         
     @cached_property
+    def data_file_schema_xml(self) -> Optional[PwXML]:
+        fp = self._detected.get("data_file_schema_xml")
+        if not fp:
+            return None
+        try:
+            return PwXML(fp)
+        except Exception:
+            return None
+        
+    @cached_property
     def alat(self) -> Optional[float]:
         if self.scf_out is not None and self.scf_out.alat is not None:
             logger.info("Parsing alat from scf.out")
@@ -320,6 +340,9 @@ class QEParser:
         elif self.pw_xml is not None and self.pw_xml.alat is not None:
             logger.info("Parsing alat from pw.xml")
             alat = self.pw_xml.alat
+        elif self.data_file_schema_xml is not None and self.data_file_schema_xml.alat is not None:
+            logger.info("Parsing alat from data_file_schema.xml")
+            alat = self.data_file_schema_xml.alat
         else:
             user_logger.warning("No alat found in scf.out or pw.xml")
             return None
@@ -341,6 +364,9 @@ class QEParser:
         elif self.pw_xml is not None and self.pw_xml.kpoints is not None:
             logger.info("Parsing kpoints from pw.xml")
             kpoints_cart = self.pw_xml.kpoints
+        elif self.data_file_schema_xml is not None and self.data_file_schema_xml.kpoints is not None:
+            logger.info("Parsing kpoints from data_file_schema.xml")
+            kpoints_cart = self.data_file_schema_xml.kpoints
         else:
             user_logger.warning("No kpoints found in atomic_proj.xml or projwfc.out or bands.in")
             return None
@@ -353,13 +379,20 @@ class QEParser:
     
     @cached_property
     def kpath(self) -> Optional[KPath]:
+        if self.is_dos_calculation:
+            logger.info("No kpath found for DOS calculation")
+            return None
+        
         if self.bands_in is None:
+            logger.info("No bands.in file found, therefore not parsing kpath")
             return None
         
         if self.bands_in.kpoints_card is None:
+            logger.info("No kpoints_card found in bands.in, therefore not parsing kpath")
             return None
         
         if self.bands_in.kpoints_card.modified_knames is None:
+            logger.info("No modified_knames found in bands.in, therefore not parsing kpath")
             return None
         
         high_sym_points = self.bands_in.kpoints_card.high_symmetry_points
@@ -406,6 +439,9 @@ class QEParser:
             return self.nscf_in.kpoints_card.nk1
         if self.pw_xml is not None and self.pw_xml.nk1 is not None:
             return self.pw_xml.nk1
+        elif self.data_file_schema_xml is not None and self.data_file_schema_xml.nk1 is not None:
+            logger.info("Parsing nk1 from data_file_schema.xml")
+            return self.data_file_schema_xml.nk1
         return None
     
     @cached_property
@@ -414,6 +450,9 @@ class QEParser:
             return self.nscf_in.kpoints_card.nk2
         if self.pw_xml is not None and self.pw_xml.nk2 is not None:
             return self.pw_xml.nk2
+        elif self.data_file_schema_xml is not None and self.data_file_schema_xml.nk2 is not None:
+            logger.info("Parsing nk2 from data_file_schema.xml")
+            return self.data_file_schema_xml.nk2
         return None
     
     @cached_property
@@ -422,6 +461,9 @@ class QEParser:
             return self.nscf_in.kpoints_card.nk3
         if self.pw_xml is not None and self.pw_xml.nk3 is not None:
             return self.pw_xml.nk3
+        elif self.data_file_schema_xml is not None and self.data_file_schema_xml.nk3 is not None:
+            logger.info("Parsing nk3 from data_file_schema.xml")
+            return self.data_file_schema_xml.nk3
         return None
     
     @cached_property
@@ -430,6 +472,9 @@ class QEParser:
             return self.nscf_in.kpoints_card.sk1
         if self.pw_xml is not None and self.pw_xml.sk1 is not None:
             return self.pw_xml.sk1
+        elif self.data_file_schema_xml is not None and self.data_file_schema_xml.sk1 is not None:
+            logger.info("Parsing sk1 from data_file_schema.xml")
+            return self.data_file_schema_xml.sk1
         return None
     
     @cached_property
@@ -438,6 +483,9 @@ class QEParser:
             return self.nscf_in.kpoints_card.sk2
         if self.pw_xml is not None and self.pw_xml.sk2 is not None:
             return self.pw_xml.sk2
+        elif self.data_file_schema_xml is not None and self.data_file_schema_xml.sk2 is not None:
+            logger.info("Parsing sk2 from data_file_schema.xml")
+            return self.data_file_schema_xml.sk2
         return None
     
     @cached_property
@@ -446,6 +494,9 @@ class QEParser:
             return self.nscf_in.kpoints_card.sk3
         if self.pw_xml is not None and self.pw_xml.sk3 is not None:
             return self.pw_xml.sk3
+        elif self.data_file_schema_xml is not None and self.data_file_schema_xml.sk3 is not None:
+            logger.info("Parsing sk3 from data_file_schema.xml")
+            return self.data_file_schema_xml.sk3
         return None
     
     @cached_property
@@ -453,7 +504,10 @@ class QEParser:
         if self.pw_xml is not None and self.pw_xml.reciprocal_lattice is not None:
             logger.info("Parsing reciprocal lattice from pw.xml")
             reciprocal_lattice = self.pw_xml.reciprocal_lattice
-        if self.scf_out is not None and self.scf_out.reciprocal_axes is not None:
+        elif self.data_file_schema_xml is not None and self.data_file_schema_xml.reciprocal_lattice is not None:
+            logger.info("Parsing reciprocal lattice from data_file_schema.xml")
+            reciprocal_lattice = self.data_file_schema_xml.reciprocal_lattice
+        elif self.scf_out is not None and self.scf_out.reciprocal_axes is not None:
             logger.info("Parsing reciprocal lattice from scf.out")
             reciprocal_lattice = self.scf_out.reciprocal_axes
         elif self.bands_out is not None and self.bands_out.reciprocal_axes is not None:
@@ -474,6 +528,8 @@ class QEParser:
             return self.scf_out.fermi_energy_ev
         if self.pw_xml is not None and self.pw_xml.fermi is not None:
             return self.pw_xml.fermi
+        elif self.data_file_schema_xml is not None and self.data_file_schema_xml.fermi is not None:
+            return self.data_file_schema_xml.fermi
         
         return None
     
@@ -492,6 +548,9 @@ class QEParser:
         elif self.pw_xml is not None and self.pw_xml.bands is not None:
             logger.info("Parsing bands from pw.xml")
             bands = HARTREE_TO_EV * self.pw_xml.bands
+        elif self.data_file_schema_xml is not None and self.data_file_schema_xml.bands is not None:
+            logger.info("Parsing bands from data_file_schema.xml")
+            bands = HARTREE_TO_EV * self.data_file_schema_xml.bands
         else:
             user_logger.warning("No bands found in atomic_proj.xml or projwfc.out or pw.xml")
             return None
@@ -641,7 +700,10 @@ class QEParser:
     
     @cached_property
     def is_dos_calculation(self) -> bool:
-        return not self.projwfc_in.is_kresolved
+        logger.info("Checking if DOS calculation")
+        is_dos_calculation = not self.projwfc_in.is_kresolved
+        logger.info(f"Is DOS calculation: {is_dos_calculation}")
+        return is_dos_calculation
 
     @cached_property
     def dos(self) -> Optional[DensityOfStates]:
@@ -666,6 +728,8 @@ class QEParser:
     def species(self) -> Optional[List[str]]:
         if self.pw_xml is not None and self.pw_xml.atomic_species is not None:
             return self.pw_xml.atomic_species
+        elif self.data_file_schema_xml is not None and self.data_file_schema_xml.atomic_species is not None:
+            return self.data_file_schema_xml.atomic_species
         else:
             user_logger.warning("No atomic species found in any input or output file")
             return None
@@ -674,6 +738,8 @@ class QEParser:
     def direct_lattice(self) -> Optional[np.ndarray]:
         if self.pw_xml is not None and self.pw_xml.direct_lattice is not None:
             return self.pw_xml.direct_lattice
+        elif self.data_file_schema_xml is not None and self.data_file_schema_xml.direct_lattice is not None:
+            return self.data_file_schema_xml.direct_lattice
         else:
             user_logger.warning("No direct lattice found in any input or output file")
             return None
@@ -682,6 +748,8 @@ class QEParser:
     def atomic_positions(self) -> Optional[np.ndarray]:
         if self.pw_xml is not None and self.pw_xml.atomic_positions is not None:
             return self.pw_xml.atomic_positions
+        elif self.data_file_schema_xml is not None and self.data_file_schema_xml.atomic_positions is not None:
+            return self.data_file_schema_xml.atomic_positions
         else:
             user_logger.warning("No atomic positions found in any input or output file")
             return None
@@ -690,6 +758,8 @@ class QEParser:
     def rotations(self) -> Optional[np.ndarray]:
         if self.pw_xml is not None and self.pw_xml.rotations is not None:
             return self.pw_xml.rotations
+        elif self.data_file_schema_xml is not None and self.data_file_schema_xml.rotations is not None:
+            return self.data_file_schema_xml.rotations
         else:
             user_logger.warning("No rotations found in any input or output file")
             return None
@@ -735,15 +805,10 @@ def find_high_symmetry_ticks(raw_kpoints, high_sym_points, atol=1e-4):
     kticks = []
     last_idx = -1  # ensure we move forward along raw_kpoints
 
-    # for i, kpoint in enumerate(raw_kpoints[:501]):
-    #     print(i, kpoint)
-    # print(raw_kpoints[:501])
-    # print(raw_kpoints.shape)
+
     for j in range(dists.shape[1]):
         # Find matches *after* the last matched index
         matches = np.where((dists[:, j] < atol) & (np.arange(len(raw_kpoints)) > last_idx))[0]
-        # print(kticks)
-        # print(matches)
         if len(matches) > 0:
             idx = matches[0]  # first valid match
             kticks.append(idx)

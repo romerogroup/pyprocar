@@ -452,6 +452,7 @@ def dosplot(
     edos_plot.set_xticks()
     edos_plot.set_yticks()
     edos_plot.grid()
+    edos_plot.set_title()
 
     if config.draw_baseline:
         edos_plot.draw_baseline(value=0, orientation=orientation)
