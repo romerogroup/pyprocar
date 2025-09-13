@@ -21,6 +21,7 @@ from matplotlib.lines import Line2D
 from matplotlib.ticker import MultipleLocator
 
 from pyprocar.core import KPath
+from pyprocar.core.property_store import Property
 
 logger = logging.getLogger(__name__)
 
@@ -91,6 +92,18 @@ class BasePlotter(ABC):
     def plot(self, kpath: KPath, bands: np.ndarray, **kwargs):
         self.update_instance_params(**kwargs)
         self._plot(kpath, bands, **kwargs)
+        self.set_default_plot_parameters(bands)
+        
+    def set_default_plot_parameters(self, bands: np.ndarray):
+        self.set_xlim()
+        ymin = float(bands.min())
+        ymax = float(bands.max())
+        elimit = (ymin, ymax)
+        self.set_ylim(elimit)
+        self.set_yticks()
+        self.set_xticks()
+        self.set_xlabel()
+        self.set_ylabel()
         
     def set_xlim(self, xlim:List[float] = None, **kwargs):
         if xlim is None:
@@ -306,8 +319,14 @@ class BasePlotter(ABC):
         
     def _validate_data(self, 
                                bands: np.ndarray | None, 
-                               scalars: np.ndarray | None = None,
-                               vectors: np.ndarray | None = None):
+                               scalars: np.ndarray | Property | None = None,
+                               vectors: np.ndarray | Property | None = None):
+        
+        if scalars is not None and isinstance(scalars, Property):
+            scalars = scalars.value
+        if vectors is not None and isinstance(vectors, Property):
+            vectors = vectors.value
+            
         if bands.ndim == 2:
             bands = bands[..., np.newaxis]
         n_spin_channels = bands.shape[-1]

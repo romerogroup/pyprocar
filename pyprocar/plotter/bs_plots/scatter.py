@@ -21,6 +21,7 @@ from matplotlib.ticker import MultipleLocator
 
 from pyprocar.core import KPath
 from pyprocar.plotter.bs_plots.base import BasePlotter
+from pyprocar.utils.inspect_utils import keep_func_kwargs
 
 logger = logging.getLogger(__name__)
 
@@ -37,8 +38,9 @@ class ScatterPlot(BasePlotter):
     norm: Optional[str | mpcolors.Normalize | type] = "auto"
     clim: Optional[Tuple[Optional[float], Optional[float]]] = None
     show_colorbar: bool | None = True
-    colorbar_kwargs: dict = {}
     scatter_kwargs: dict = {}
+    colorbar_title: str | None = "Scalars"
+    colorbar_kwargs: dict = {}
     
     # Resolve colormap
     def _plot(self, kpath: KPath, bands: np.ndarray, scalars: np.ndarray = None, **kwargs):
@@ -54,6 +56,9 @@ class ScatterPlot(BasePlotter):
             norm=self.norm,
             clim=self.clim,
         )
+        self.scatter_kwargs["cmap"] = resolved_cmap
+        self.scatter_kwargs["norm"] = resolved_norm
+        self.scatter_kwargs["clim"] = self.clim if "clim" not in self.scatter_kwargs else self.scatter_kwargs["clim"]
     
         created_collections: dict[tuple[int, int], PathCollection] = {}
         
@@ -68,32 +73,14 @@ class ScatterPlot(BasePlotter):
             for iband in range(n_bands):
                 y = bands[:, iband, ispin]
                 c_vals = None if data is None else data[:, iband]
-                coll = self.ax.scatter(self.x, y, c=c_vals, cmap=self.cmap, **self.scatter_kwargs)
+                coll = self.ax.scatter(self.x, y, c=c_vals, **self.scatter_kwargs)
                 created_collections[(iband, ispin)] = coll
 
         # Add colorbar if requested
         if scalars is not None and self.show_colorbar:
+            self.colorbar_kwargs["label"] = self.colorbar_title
             self.cb = self.fig.colorbar(scalar_mappable, ax=self.ax, **self.colorbar_kwargs)
-            
-        self.set_xlim()
-        ymin = float(bands.min())
-        ymax = float(bands.max())
-        elimit = (ymin, ymax)
-        self.set_ylim(elimit)
-        self.set_yticks()
-        self.set_xticks()
-        self.set_xlabel()
-        self.set_ylabel()
-        
-        # Record exportable data
-        for ispin in range(n_spin_channels):
-            for iband in range(bands.shape[1]):
-                bkey = f"bands__band-{iband}_spinChannel-{ispin}"
-                self.values_dict[bkey] = bands[:, iband, ispin]
-                if scalars is not None:
-                    pkey = f"projections__scatter__band-{iband}_spinChannel-{ispin}"
-                    self.values_dict[pkey] = scalars[:, iband, ispin]
-        self._record_kpath_exports(kpath)
+                    
         return created_collections
     
     

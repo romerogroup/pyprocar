@@ -37,10 +37,10 @@ class ParametricPlot(BasePlotter):
     norm: Optional[str | mpcolors.Normalize | type] = "auto"
     clim: Optional[Tuple[Optional[float], Optional[float]]] = None
     linewidth:float = 2.0
-    collection_kwargs: dict | None = None
+    collection_kwargs: dict | None = {}
     show_colorbar: bool | None = True
-    colorbar_kwargs: dict | None = None
-    
+    colorbar_kwargs: dict | None = {}
+
     # Resolve colormap
     def _plot(self, kpath: KPath, bands: np.ndarray, scalars: np.ndarray = None, **kwargs):
         self.kpath = kpath
@@ -110,32 +110,4 @@ class ParametricPlot(BasePlotter):
                 last_lc = lc
                 created_collections[(iband, ispin_channel)] = lc
                 
-        # Set default plot parameters
-        self.set_xlim()
-        ymin = float(bands.min())
-        ymax = float(bands.max())
-        elimit = (ymin, ymax)
-        self.set_ylim(elimit)
-        self.set_yticks()
-        self.set_xticks()
-        self.set_xlabel()
-        self.set_ylabel()
-        
-        # Record exportable data
-        for ispin in range(n_spin_channels):
-            for iband in range(n_bands):
-                bkey = f"bands__band-{iband}_spinChannel-{ispin}"
-                self.values_dict[bkey] = bands[:, iband, ispin]
-                if scalars is not None:
-                    pkey = f"projections__parametric__band-{iband}_spinChannel-{ispin}"
-                    self.values_dict[pkey] = scalars[:, iband, ispin]
-        self._record_kpath_exports(kpath)
         return created_collections
-    
-    
-
-    
-# if __name__ == "__main__":
-#     scatter = Scatter(clim=(0, 10))
-#     print(scatter.class_plot_params)
-#     print(scatter.instance_plot_params)

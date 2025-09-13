@@ -1,4 +1,4 @@
-from typing import Optional, Tuple
+from typing import List, Optional, Tuple
 
 import matplotlib.colors as mpcolors
 import matplotlib.pyplot as plt
@@ -34,9 +34,9 @@ class BandsPlotter(BasePlotter):
         self._plotters.append(plotter)
         return plotter.plot(*args, **kwargs)
         
-    def overlay(self, kpath: KPath, bands: np.ndarray, **kwargs):
+    def overlay(self, kpath: KPath, bands: np.ndarray, weights: List[np.ndarray], **kwargs):
         p = OverlayPlot(ax=self.ax, **self.instance_plot_params)
-        return self._add_plotter(p, kpath, bands, **kwargs)
+        return self._add_plotter(p, kpath, bands, weights=weights, **kwargs)
         
     def scatter(self, kpath: KPath, bands: np.ndarray, scalars: np.ndarray = None, **kwargs):
         p = ScatterPlot(ax=self.ax, **self.instance_plot_params)

@@ -20,6 +20,7 @@ from matplotlib.lines import Line2D
 from matplotlib.ticker import MultipleLocator
 
 from pyprocar.core import KPath
+from pyprocar.core.property_store import Property
 from pyprocar.plotter.bs_plots.base import BasePlotter
 
 logger = logging.getLogger(__name__)
@@ -42,19 +43,22 @@ class QuiverPlot(BasePlotter):
     cmap: str | mpcolors.Colormap = "plasma"
     norm: str | mpcolors.Normalize | type | None = "auto"
     clim:Tuple[float | None, float | None] | None = None
-    quiver_kwargs: dict | None = None
+    show_colorbar: bool | None = True
+    quiver_kwargs: dict = {}
+    colorbar_title: str | None = "Vectors"
+    colorbar_kwargs: dict = {}
     
     
     # Resolve colormap
-    def _plot(self, kpath: KPath, bands: np.ndarray, vectors: np.ndarray = None, **kwargs):
-        if vectors is None:
-            raise ValueError("vectors must be provided for plot_quiver")
+    def _plot(self, kpath: KPath, bands: np.ndarray, vectors: np.ndarray | Property = None, **kwargs):
 
+        # Validate data
+        bands, _, vectors = self._validate_data(bands=bands, vectors=vectors)
+        
         self.kpath = kpath
         self.x = kpath.get_distances(as_segments=False)
         
-        # Validate data
-        bands, _, vectors = self._validate_data(bands=bands, vectors=vectors)
+        
         
         # Resolve colormap
         resolved_norm, resolved_cmap, scalar_mappable = self._resolve_colormap(
@@ -63,7 +67,10 @@ class QuiverPlot(BasePlotter):
             norm=self.norm,
             clim=self.clim,
         )
-        
+        self.quiver_kwargs["cmap"] = resolved_cmap
+        self.quiver_kwargs["norm"] = resolved_norm
+        self.quiver_kwargs["clim"] = self.clim if "clim" not in self.quiver_kwargs else self.quiver_kwargs["clim"]
+    
         # Plot quivers
         created_quivers: dict[tuple[int, int], object] = {}
         n_spin_channels = bands.shape[-1]
@@ -80,11 +87,11 @@ class QuiverPlot(BasePlotter):
                 band_current_bands = current_bands[...,iband]
     
                 quiver_args = []
-                print(self.skip)
                 quiver_args.append(self.x[::self.skip])
                 quiver_args.append(band_current_bands[::self.skip])
                 quiver_args.append(band_u[::self.skip])
                 quiver_args.append(band_v[::self.skip])
+                
                 if self.color is None:
                     quiver_args.append(vector_norms[...,iband])
                     
@@ -99,16 +106,10 @@ class QuiverPlot(BasePlotter):
                 created_quivers[(iband, ispin_channel)] = qv
                 
         if vectors is not None and self.show_colorbar:
+            self.colorbar_kwargs["label"] = self.colorbar_title
             self.cb = self.fig.colorbar(scalar_mappable, ax=self.ax, **self.colorbar_kwargs)
                 
-        # Record exportable bands
-        for ispin in range(n_spin_channels):
-            for iband in range(n_bands):
-                key = f"bands__band-{iband}_spinChannel-{ispin}"
-                self.values_dict[key] = bands[:, iband, ispin]
-        self._record_kpath_exports(kpath)
         return created_quivers
-
     
     
 

@@ -40,9 +40,9 @@ class OverlayPlot(BasePlotter):
     cmap_list: Optional[List[str]] = None
     fill_alpha: float = 0.3
     linewidth: float = 1.0
-    fill_between_kwargs: dict | None = None
+    fill_between_kwargs: dict | None = {}
     show_colorbar: bool | None = None
-    colorbar_kwargs: dict | None = None
+    colorbar_kwargs: dict | None = {}
     
     # Resolve colormap
     def _plot(self, kpath: KPath, bands: np.ndarray, weights: List[np.ndarray], labels: Optional[List[str]] = None, **kwargs):
@@ -112,23 +112,10 @@ class OverlayPlot(BasePlotter):
                         norm=norm,
                         **self.fill_between_kwargs,
                     )
-            legend_label = self.labels[widx] if self.labels and widx < len(self.labels) else f"overlay-{widx+1}"
+            legend_label = labels[widx] if labels and widx < len(labels) else f"overlay-{widx+1}"
             legend_handles.append(mpatches.Patch(color=color, label=legend_label, alpha=self.fill_alpha))
-            
-        # Export
-        for ispin in range(n_spin_channels):
-            for iband in range(n_bands):
-                key = f"bands__band-{iband}_spinChannel-{ispin}"
-                self.values_dict[key] = bands[:, iband, ispin]
-        self._record_kpath_exports(kpath)
-        self._legend_handles = legend_handles
         
-        self.set_xlim()
-        self.set_ylim()
-        self.set_yticks()
-        self.set_xticks()
-        self.set_xlabel()
-        self.set_ylabel()
+        self._legend_handles = legend_handles
         self.legend()
 
     
