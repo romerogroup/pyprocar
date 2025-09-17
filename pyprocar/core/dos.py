@@ -1,24 +1,15 @@
-"""This module defines an object to handle the density of states in a DFT
-calculations.
-"""
+"""Core density of states data object."""
 
-__author__ = "Pedram Tavadze, Logan Lang"
-__copyright__ = "Copyright (C) 2007 Free Software Foundation,"
-__credits__ = ["Uthpala Herath"]
-__license__ = "GNU GENERAL PUBLIC LICENSE"
-__maintainer__ = "Logan Lang, Pedram Tavadze"
-__email__ = "petavazohi@mix.wvu.edu"
-__status__ = "Production"
+from __future__ import annotations
 
 import logging
 from pathlib import Path
-from typing import List
+from typing import Sequence
 
 import numpy as np
 import numpy.typing as npt
 from scipy.integrate import trapezoid
 from scipy.interpolate import CubicSpline
-from sympy.physics.quantum.cg import CG
 
 from pyprocar.core.property_store import PointSet, Property
 from pyprocar.core.serializer import get_serializer
@@ -30,520 +21,602 @@ def get_dos_from_code(
     code: str,
     dirpath: str,
     use_cache: bool = False,
-    filename: str = "dos.pkl"
-    ):
+    filename: str = "dos.pkl",
+) -> "DensityOfStates":
+    """Parse a calculation directory and return a :class:`DensityOfStates`.
+
+    Parameters
+    ----------
+    code
+        Identifier for the parser to use (e.g. ``"vasp"``).
+    dirpath
+        Calculation directory path.
+    use_cache
+        If ``True`` and a cached pickle exists it will be loaded instead of
+        parsing the raw files.
+    filename
+        Name of the cache file to use when ``use_cache`` is ``True``.
+    """
 
     from pyprocar.io import Parser
-    dos_filepath = Path(dirpath) / filename
-    
-    if not use_cache or not dos_filepath.exists():
-        logger.info(f"Parsing EBS calculation directory: {dirpath}")
-        parser = Parser(code=code, dirpath=dirpath)
-        dos=parser.dos
-        dos.save(dos_filepath)
-    else:
-        logger.info(f"Loading EBS  from picklefile: {dos_filepath}")
-        dos = DensityOfStates.load(dos_filepath)
-        
-    return dos
-    
 
+    dos_filepath = Path(dirpath) / filename
+
+    if not use_cache or not dos_filepath.exists():
+        logger.info("Parsing DOS calculation directory: %s", dirpath)
+        parser = Parser(code=code, dirpath=dirpath)
+        dos = parser.dos
+        if use_cache:
+            dos.save(dos_filepath)
+    else:
+        logger.info("Loading DOS from cache: %s", dos_filepath)
+        dos = DensityOfStates.load(dos_filepath)
+
+    return dos
+
+
+def _finite_difference_gradient(
+    points: npt.NDArray[np.float64],
+    values: npt.NDArray[np.float64],
+) -> npt.NDArray[np.float64]:
+    """Simple 1D finite-difference gradient along the first axis."""
+    energies = np.asarray(points, dtype=np.float64).reshape(-1)
+    array = np.asarray(values, dtype=np.float64)
+
+    if array.shape[0] != energies.shape[0]:
+        raise ValueError(
+            "Gradient requires the first axis of the property to match the "
+            "number of sample points."
+        )
+
+    if energies.size < 2:
+        return np.zeros_like(array)
+
+    edge_order = 2 if energies.size > 2 else 1
+    return np.gradient(array, energies, axis=0, edge_order=edge_order)
 
 
 class DensityOfStates(PointSet):
-    """A class that contains density of states calculated by the a density
-    functional theory calculation.
-
-    Parameters
-    ----------
-    energies : np.ndarray,
-        Points on energy spectrum. shape = (n_dos, )
-    total : np.ndarray
-        Densities at each point. shape = (n_dos, )
-    fermi : float
-        Fermi energy of the system.
-    projected : np.ndarray, optional
-        Projection of elements, orbitals, spin, etc. shape = (n_atoms, n_principals, n_orbitals, n_spins, n_dos)
-        ``i_principal`` works like the principal quantum number n. The last
-        index should be the total. (i_principal = -1)
-        n = i_principal => 0, 1, 2, 3, -1 => s, p, d, total
-        ``i_orbital`` works similar to angular quantum number l, but not the
-        same. i_orbital follows this order
-        (0, 1, 2, 3, 4, 5, 6, 7, 8) => s, py, pz, px, dxy, dyz, dz2, dxz, dx2-y2.
-        ``i_spin`` works as magnetic quantum number.
-        m = 0, 1, for spin up and down, by default None.
-    interpolation_factor : int, optional
-        The number of density of states points will increase by this factor
-        in the interpolation, by default 1.
-
-    """
+    """Data-centric representation of a density of states calculation."""
 
     def __init__(
         self,
-        energies: npt.NDArray[np.float64],
-        total: npt.NDArray[np.float64],
+        energies: npt.ArrayLike,
+        total: npt.ArrayLike,
         fermi: float = 0.0,
-        projected: npt.NDArray[np.float64] = None,
+        projected: npt.ArrayLike | None = None,
         orbital_names: list[str] | None = None,
-    ):
-        logger.info(f"Initializing DensityOfStates")
-        logger.debug(f"energies: {energies.shape}")
-        logger.debug(f"total: {total.shape}")
-        logger.debug(f"projected: {projected.shape}")
-        super().__init__(energies)
-        
-        
-        projected = np.array(projected)
-        self.add_property(name="total", value=total)
-        
+        gradient_func=None,
+    ) -> None:
+        energies_array = self._prepare_energies(energies)
+        gradient = gradient_func or _finite_difference_gradient
+
+        super().__init__(points=energies_array, gradient_func=gradient)
+
+        self._fermi = float(fermi)
+        self._orbital_names = orbital_names
+
+        total_array = self._prepare_total(total)
+        self.add_property(name="total", value=total_array)
+
         if projected is not None:
-            self.add_property(name="projected", value=projected)
-            
-        self._orbital_names = orbital_names      
-        
-    def __repr__(self):
-        repr_str = "DensityOfStates(\n"
-        for key, value in self.__dict__.items():
-            if isinstance(value, np.ndarray):
-                repr_str += f"    {key}: {value.shape}\n"
-            else:
-                repr_str += f"    {key}: {value}\n"
-        repr_str += ")"
-        return repr_str
+            projected_array = self._prepare_projected(projected)
+            self.add_property(name="projected", value=projected_array)
 
-    def __eq__(self, other):
-        energies_equal = np.allclose(self.energies, other.energies)
-        total_equal = np.allclose(self.total, other.total)
-        fermi_equal = self.fermi == other.fermi
-        projected_equal = np.allclose(self.projected, other.projected)
-
-        n_spins_equal = self.n_spins == other.n_spins
-
-        dos_equal = (
-            energies_equal
-            and total_equal
-            and fermi_equal
-            and projected_equal
-            and n_spins_equal
+        logger.debug(
+            "Initialized DensityOfStates with %d energies, %d spin channels",
+            self.n_energies,
+            self.n_spin_channels,
         )
 
-        return dos_equal
-    
+    # ------------------------------------------------------------------
+    # Basic representation & comparisons
+    # ------------------------------------------------------------------
+    def __repr__(self) -> str:  # pragma: no cover - repr is for debugging only
+        cls = self.__class__.__name__
+        return (
+            f"{cls}(n_energies={self.n_energies}, n_spins={self.n_spins}, "
+            f"n_atoms={self.n_atoms}, n_orbitals={self.n_orbitals}, "
+            f"fermi={self.fermi:.4f})"
+        )
+
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, DensityOfStates):
+            return False
+        arrays_equal = (
+            np.allclose(self.energies, other.energies)
+            and np.allclose(self.total, other.total)
+        )
+        proj_equal = True
+        if self.projected is not None or other.projected is not None:
+            proj_equal = np.allclose(self.projected, other.projected)
+        return arrays_equal and proj_equal and np.isclose(self.fermi, other.fermi)
+
     @classmethod
-    def from_code(cls, code: str, dirpath: str, use_cache: bool = False, filename: str = "dos.pkl"):
-        return get_dos_from_code(code, dirpath, use_cache, filename)
-    
-    @classmethod
-    def load(cls, path: Path):
-        serializer = get_serializer(path)
-        dos = serializer.load(path)
-        return dos
-    
-    def save(self, path: Path):
-        serializer = get_serializer(path)
-        serializer.save(self, path)
-    
+    def from_code(
+        cls,
+        code: str,
+        dirpath: str,
+        use_cache: bool = False,
+        filename: str = "dos.pkl",
+    ) -> "DensityOfStates":
+        return get_dos_from_code(code=code, dirpath=dirpath, use_cache=use_cache, filename=filename)
+
+    # ------------------------------------------------------------------
+    # Core data accessors
+    # ------------------------------------------------------------------
     @property
     def energies(self) -> npt.NDArray[np.float64]:
-        return self._points
-    
+        return self.points
+
     @property
     def total(self) -> npt.NDArray[np.float64]:
-        return self.get_property("total").value
-    
+        prop = super().get_property("total")
+        return prop.value if prop is not None else np.empty((0, 0))
+
     @property
-    def projected(self) -> npt.NDArray[np.float64]:
-        return self.get_property("projected").value
-    
+    def projected(self) -> npt.NDArray[np.float64] | None:
+        prop = super().get_property("projected")
+        return prop.value if prop is not None else None
+
     @property
-    def orbital_names(self):
+    def orbital_names(self) -> list[str] | None:
         return self._orbital_names
 
     @property
+    def fermi(self) -> float:
+        return self._fermi
+
+    @property
     def n_energies(self) -> int:
-        return self._points.shape[0]
-    
-    @property
-    def n_dos(self):
-        """The number of dos values
+        return self.points.shape[0]
 
-        Returns
-        -------
-        int
-            The number of dos values
-        """
-        return self.n_energies
-    
     @property
-    def n_spin_channels(self):
-        """The number of spin channels
-
-        Returns
-        -------
-        int
-            The number of spin channels
-        """
+    def n_spin_channels(self) -> int:
         return self.total.shape[1]
-    
-    @property
-    def n_spins(self):
-        """The number of spin projections
 
-        Returns
-        -------
-        int
-            The number of spin projections
-        """
+    @property
+    def n_spins(self) -> int:
+        if self.projected is None:
+            return self.n_spin_channels
         return self.projected.shape[1]
 
     @property
-    def n_atoms(self):
-        """The number of atoms
-
-        Returns
-        -------
-        int
-            The number of atoms
-        """
+    def n_atoms(self) -> int:
+        if self.projected is None:
+            return 0
         return self.projected.shape[2]
 
     @property
-    def n_orbitals(self):
-        """The number of orbitals
-
-        Returns
-        -------
-        int
-            The number of orbitals
-        """
+    def n_orbitals(self) -> int:
+        if self.projected is None:
+            return 0
         return self.projected.shape[3]
 
-    
+    @property
+    def spin_channels(self) -> npt.NDArray[np.int_]:
+        return np.arange(self.n_spin_channels, dtype=int)
 
     @property
-    def spin_channels(self):
-        """The number of spin channels
+    def is_spin_polarized(self) -> bool:
+        return self.n_spin_channels == 2
 
-        Returns
-        -------
-        int
-            The number of spin channels
-        """
-
-        return np.arange(self.n_spin_channels)
-    
     @property
-    def is_spin_polarized(self):
-        """Boolean for if this is spin polarized
-        """
-        return self.n_spins == 2
-    
-    @property
-    def is_non_collinear(self):
-        """Boolean for if this is non-colinear calc
-
-        Returns
-        -------
-        bool
-            Boolean for if this is non-colinear calc
-        """
-        # last condition is for quantum espresso total angular momentum basis
-        if self.n_spins == 3 or self.n_spins == 4 or len(self.projected[0][0]) == 2 + 2 + 4 + 4 + 6 + 6 + 8:
-            return True
-        else:
+    def is_non_collinear(self) -> bool:
+        if self.projected is None:
             return False
+        if self.n_spins in (3, 4):
+            return True
+        if self.projected.shape[-1] == 2 + 2 + 4 + 4 + 6 + 6 + 8:
+            return True
+        return False
 
     @property
-    def spin_projection_names(self):
-        spin_projection_names = ["Spin-up", "Spin-down"]
+    def spin_projection_names(self) -> list[str]:
         if self.is_non_collinear:
             return ["total", "x", "y", "z"]
-        elif self.n_spins == 2:
-            return spin_projection_names
-        else:
-            return spin_projection_names[:1]
-
-    def dos_sum(
-        self,
-        atoms: List[int] = None,
-        orbitals: List[int] = None,
-        spins: List[int] = None,
-        sum_noncolinear: bool = True,
-    ):
-        """
-
-        .. code-block::
-            :linenos:
-
-            Orbital table
-
-            +-------+-----+------+------+------+------+------+------+------+------+
-            |n-lm   |  0  |   1  |  2   |   3  |   4  |   5  |   6  |   7  |   8  |
-            +=======+=====+======+======+======+======+======+======+======+======+
-            |-1(tot)|  s  |  py  |  pz  |  px  | dxy  | dyz  | dz2  | dxz  |x2-y2 |
-            +=======+=====+======+======+======+======+======+======+======+======+
-            |   0   |  s  |      |      |      |      |      |      |      |      |
-            +=======+=====+======+======+======+======+======+======+======+======+
-            |   1   |  s  |  py  |  pz  |  px  |      |      |      |      |      |
-            +=======+=====+======+======+======+======+======+======+======+======+
-            |   2   |  s  |  py  |  pz  |  px  | dxy  | dyz  | dz2  | dxz  |x2-y2 |
-            +=======+=====+======+======+======+======+======+======+======+======+
-            |  ...  | ... |  ... |  ... |  ... |  ... |  ... |  ... |  ... |  ... |
-            +=======+=====+======+======+======+======+======+======+======+======+
-
-
-
-        Parameters
-        ----------
-        atoms : List[int], optional
-             list of atom index needed to be sumed over.
-             count from zero with the same
-             order as input. The default is None.
-        orbitals : List[int], optional
-            List of orbitals to be summed over. The default is None.
-        spins : List[int], optional
-            List of spins to be summed over. The default is None.
-
-        Returns
-        -------
-        ret : list float
-            The summed density of states.
-
-        """
-
-        projected = self.projected
-
-
-        if spins is None and self.n_spins == 4:
-            raise ValueError("Spins must be provided for non-colinear calculations. This is because the spin projections cannot be summed over")
-        elif spins is None and self.n_spins != 4:
-            spins = np.arange(self.n_spins, dtype=int)
-        if atoms is None:
-            atoms = np.arange(self.n_atoms, dtype=int)
-        if orbitals is None:
-            orbitals = np.arange(self.n_orbitals, dtype=int)
-
-        logger.debug(f"Summing over atoms: {atoms}")
-        logger.debug(f"Summing over orbitals: {orbitals}")
-        
-        projected_sum = np.sum(self.projected[..., orbitals], axis=-1)
-        # sum over atoms
-        projected_sum = np.sum(projected_sum[... , atoms], axis=-1)
-        # sum over spins only in non collinear and reshaping for consistency (nkpoints, nbands, nspins)
-        if self.is_non_collinear and sum_noncolinear:
-            projected_sum = np.sum(projected_sum[..., spins], axis=-1)
-            projected_sum = projected_sum[..., np.newaxis]
-        elif self.is_non_collinear:
-            projected_sum = projected_sum[..., spins]
-            
         if self.is_spin_polarized:
-            # Zero out the spin channel that is not specified
-            if np.allclose(np.asarray(spins), np.array([0])):
-                projected_sum[..., 1] = 0
-            elif np.allclose(np.asarray(spins), np.array([1])):
-                projected_sum[..., 0] = 0
-        
-        return projected_sum
+            return ["Spin-up", "Spin-down"]
+        return ["Spin-up"]
 
+    # ------------------------------------------------------------------
+    # Property store bridge
+    # ------------------------------------------------------------------
+    def get_property(self, key=None, **kwargs):
+        prop_name, (calc_name, gradient_order) = self._extract_key(key)
 
-    def get_current_basis(self):
-        """Returns a string of current orbital basis
+        params = self._params_for_property(prop_name, kwargs)
+        requested_key = self._make_property_key(prop_name, params)
+        stored_key = requested_key
 
-        Returns
-        -------
-        str
-            Returns a string of current orbital basis
-        """
+        if stored_key not in self.property_store:
+            computed = self.compute_property(prop_name, **kwargs)
+            if computed is None:
+                return None
+            if isinstance(computed, Property):
+                property_obj = computed
+            else:
+                property_obj = Property(name=stored_key, value=np.asarray(computed))
+            self.add_property(property=property_obj)
+            stored_key = property_obj.name
 
-        n_orbitals = self.projected.shape[2]
+        normalized_key = self._normalize_super_key(key, stored_key)
+        return super().get_property(normalized_key)
 
-        if n_orbitals == 18:
-            basis = "jm basis"
-        elif n_orbitals == 9:
-            basis = "spd basis"
-        elif n_orbitals == 9:
-            basis = "spdf basis"
-        else:
-            basis = "I do not know"
-        return basis
+    def compute_property(self, name: str, **kwargs):
+        if name in {"projected_sum", "projected_sum_total"}:
+            total_proj, projected = self.compute_projected_sum(**kwargs)
+            params = self._projected_sum_cache_params(**kwargs)
+            base = "projected_sum_total" if name.endswith("_total") else "projected_sum"
+            value = total_proj if name.endswith("_total") else projected
+            key = self._make_property_key(base, params)
+            return Property(name=key, value=value)
 
-    def coupled_to_uncoupled_basis(self):
-        """
-        Converts coupled projections to uncoupled projections. This assumes the orbitals are order by
+        if name == "normalized_total":
+            mode = kwargs.get("mode", "max")
+            normalized = self.compute_normalized_total(mode=mode)
+            params = {} if mode == "max" else {"mode": mode}
+            key = self._make_property_key(name, params)
+            return Property(name=key, value=normalized)
 
-        .. code-block::
-            :linenos:
-
-            coupled_orbitals = [
-                            {"l": 's', "j": 0.5, "m": -0.5},
-                            {"l": 's', "j": 0.5, "m": 0.5},
-
-                            {"l": 'p', "j": 0.5, "m": -0.5},
-                            {"l": 'p', "j": 0.5, "m": 0.5},
-
-                            {"l": 'p', "j": 1.5, "m": -1.5},
-                            {"l": 'p', "j": 1.5, "m": -0.5},
-                            {"l": 'p', "j": 1.5, "m": -0.5},
-                            {"l": 'p', "j": 1.5, "m": 1.5},
-
-                            {"l": 'd', "j": 1.5, "m": -1.5},
-                            {"l": 'd', "j": 1.5, "m": -0.5},
-                            {"l": 'd', "j": 1.5, "m": -0.5},
-                            {"l": 'd', "j": 1.5, "m": 1.5},
-
-                            {"l": 'd', "j": 2.5, "m": -2.5},
-                            {"l": 'd', "j": 2.5, "m": -1.5},
-                            {"l": 'd', "j": 2.5, "m": -0.5},
-                            {"l": 'd', "j": 2.5, "m": 0.5},
-                            {"l": 'd', "j": 2.5, "m": 1.5},
-                            {"l": 'd', "j": 2.5, "m": 2.5},
-                        ]
-            uncoupled_orbitals = [
-                        {"l": 0, "m": 1},
-                        {"l": 1, "m": 3},
-                        {"l": 1, "m": 1},
-                        {"l": 1, "m": 2},
-                        {"l": 2, "m": 5},
-                        {"l": 2, "m": 3},
-                        {"l": 2, "m": 1},
-                        {"l": 2, "m": 2},
-                        {"l": 2, "m": 4},
-                    ]
-
-        Returns
-        -------
-        ret :  None
-            None
-
-        """
-        n_atoms = self.projected.shape[0]
-        n_principle = self.projected.shape[1]
-        n_uncoupled_orbitals = self.projected.shape[2]
-        n_spins = self.projected.shape[3]
-        n_energy = self.projected.shape[4]
-
-        uncoupled_projected = np.zeros(
-            shape=(n_atoms, n_principle, n_uncoupled_orbitals, 2, n_energy)
-        )
-
-        def x(proj_1, proj_2, clebsh_1, clebsch_2, clebsch_3, clebsch_4):
-            a = proj_2
-            b = (
-                clebsch_4
-                * (proj_1 - (clebsh_1 / clebsch_3) * proj_2)
-                / (clebsch_2 - (clebsh_1 / clebsch_3))
-            )
-            return (a - b) / clebsch_3
-
-        def y(proj_1, proj_2, clebsh_1, clebsch_2, clebsch_3, clebsch_4):
-            a = proj_1
-            b = (clebsh_1 / clebsch_3) * proj_2
-            c = clebsch_2 - (clebsh_1 / clebsch_3)
-            return (a - b) / c
-
-        paired_uncoupled_obritals = [
-            [0, 1],
-            [2, 3],
-            [4, 5, 6, 7],
-            [8, 9, 10, 11],
-            [12, 13, 14, 15, 16, 17],
-        ]
-        print(float(CG(j1=1 / 2, m1=-1 / 2, j2=1 / 2, m2=+1 / 2, j3=1, m3=0).doit()))
-
-        uncoupled_projected[:, :, 0, :, :] = (
-            self.projected[:, :, 0, :, :] + self.projected[:, :, 1, :, :]
-        )
+        if name == "cumulative_total":
+            cumulative = self.compute_cumulative_total()
+            key = self._make_property_key(name, {})
+            return Property(name=key, value=cumulative)
 
         return None
 
-    def normalize_dos(self, mode="max"):
-        """
-        Normalizes the density of states.
+    def add_property(
+        self,
+        property: Property | None = None,
+        *,
+        name: str | None = None,
+        value: npt.ArrayLike | None = None,
+    ) -> Property:
+        """Attach a custom property to the DOS object.
 
-        Returns
-        -------
-        None
-            None
-            The density of states is normalized.
+        Users may supply an existing :class:`Property` instance or provide a
+        ``name`` and array ``value`` whose first axis matches the energy grid.
         """
-        possible_modes = ["max", "integral"]
-        total_normalized = np.zeros_like(self.total)
-        if mode not in possible_modes:
-            raise ValueError(f"The mode must be {possible_modes}")
-        if mode == "max":
-            for i in range(self.n_spin_channels):
-                total_normalized[:,i] = self.total[:,i] / np.max(self.total[:,i])
-        elif mode == "integral":
-            for i in range(self.n_spin_channels):
-                y = self.total[:,i]
-                x = self.energies
-                integral = trapezoid(y, x=self.energies)
-                total_normalized[:,i] = self.total[:,i] / integral
-        return DensityOfStates(energies=self.energies, total=total_normalized, projected=self.projected, orbital_names=self.orbital_names)
-    
-    def compute_projected_sum(self, atoms, orbitals, spin_projections):
-        dos_total = np.array(self.total)
+
+        if property is not None and (name is not None or value is not None):
+            raise ValueError("Provide either a Property instance or name/value, not both.")
+
+        if property is not None:
+            self.validate_property_points(property)
+            super().add_property(property=property)
+            return self.property_store[property.name]
+
+        if name is None or value is None:
+            raise ValueError("Both name and value are required when not supplying a Property instance.")
+
+        value_array = np.asarray(value, dtype=np.float64)
+        if value_array.ndim == 0:
+            raise ValueError("Property values must have at least one dimension aligned with energies.")
+        if value_array.shape[0] != self.n_energies:
+            raise ValueError(
+                "Property values must share the DOS energy grid along the first axis."
+            )
+
+        super().add_property(name=name, value=value_array)
+        return self.property_store[name]
+
+    # ------------------------------------------------------------------
+    # Core calculations
+    # ------------------------------------------------------------------
+    def dos_sum(
+        self,
+        atoms: Sequence[int] | None = None,
+        orbitals: Sequence[int] | None = None,
+        spins: Sequence[int] | None = None,
+        principal_q_numbers: Sequence[int] | None = None,
+        sum_noncolinear: bool = True,
+    ) -> npt.NDArray[np.float64]:
+        """Sum projections over selected atoms, orbitals, and spins."""
+        if self.projected is None:
+            raise ValueError("Projected DOS is not available for this calculation")
+
+        if principal_q_numbers is not None:
+            logger.debug(
+                "Principal quantum numbers were provided but are not currently "
+                "used in DOS summaries."
+            )
+
+        spins_ndarray = self._sanitize_indices(spins, self.n_spins)
+        if spins_ndarray is None:
+            if self.n_spins == 4:
+                raise ValueError(
+                    "Spins must be provided for non-colinear calculations."
+                )
+            spins_ndarray = np.arange(self.n_spins, dtype=int)
+
+        atoms_ndarray = self._sanitize_indices(atoms, self.n_atoms)
+        orbitals_ndarray = self._sanitize_indices(orbitals, self.n_orbitals)
+
+        zero_result = np.zeros((self.n_energies, self.n_spins), dtype=np.float64)
+        if (
+            atoms_ndarray is not None
+            and atoms_ndarray.size == 0
+            or orbitals_ndarray is not None
+            and orbitals_ndarray.size == 0
+        ):
+            aggregated = zero_result
+        else:
+            projected = np.asarray(self.projected, dtype=np.float64)
+            if atoms_ndarray is not None:
+                projected = np.take(projected, atoms_ndarray, axis=2)
+            if orbitals_ndarray is not None:
+                projected = np.take(projected, orbitals_ndarray, axis=3)
+            aggregated = projected.sum(axis=-1).sum(axis=-1)
+
+        if self.is_non_collinear:
+            selected = aggregated[..., spins_ndarray]
+            if sum_noncolinear:
+                aggregated_result = np.sum(selected, axis=-1, keepdims=True)
+            else:
+                aggregated_result = selected
+        else:
+            aggregated_result = np.zeros_like(aggregated)
+            aggregated_result[..., spins_ndarray] = aggregated[..., spins_ndarray]
+
+        return aggregated_result
+
+    def compute_projected_sum(
+        self,
+        atoms: Sequence[int] | None = None,
+        orbitals: Sequence[int] | None = None,
+        spins: Sequence[int] | None = None,
+        principal_q_numbers: Sequence[int] | None = None,
+        sum_noncolinear: bool = True,
+    ) -> tuple[npt.NDArray[np.float64], npt.NDArray[np.float64]]:
+        """Return total and filtered projected DOS sums."""
+        if self.projected is None:
+            raise ValueError("Projected DOS is not available for this calculation")
+
         if self.n_spins == 4:
-            dos_total_projected = self.dos_sum(spins=spin_projections)
+            dos_total_projected = self.dos_sum(
+                spins=spins,
+                sum_noncolinear=sum_noncolinear,
+            )
         else:
             dos_total_projected = self.dos_sum()
+
         dos_projected = self.dos_sum(
             atoms=atoms,
             orbitals=orbitals,
-            spins=spin_projections,
+            spins=spins,
+            principal_q_numbers=principal_q_numbers,
+            sum_noncolinear=sum_noncolinear,
         )
-            
+
         return dos_total_projected, dos_projected
-    
-    def interpolate(self, factor=2):
-        if factor in [1, 0]:
-            return
-        
-        # Interpolate total DOS (shape: (n_energies, n_spin))
+
+    def compute_normalized_total(self, mode: str = "max") -> npt.NDArray[np.float64]:
+        factors = self._normalization_factors(mode)
+        return self.total / factors
+
+    def compute_cumulative_total(self) -> npt.NDArray[np.float64]:
+        total = np.asarray(self.total, dtype=np.float64)
+        if total.shape[0] < 2:
+            return np.zeros_like(total)
+        delta_e = np.diff(self.energies)
+        avg = 0.5 * (total[1:] + total[:-1])
+        cumulative = np.zeros_like(total)
+        cumulative[1:] = np.cumsum(avg * delta_e[:, np.newaxis], axis=0)
+        return cumulative
+
+    def normalize_dos(self, mode: str = "max") -> "DensityOfStates":
+        factors = self._normalization_factors(mode)
+        total_normalized = self.total / factors
+
+        projected_normalized = None
+        if self.projected is not None:
+            projected_scale = factors
+            if projected_scale.shape[1] != self.n_spins:
+                projected_scale = np.broadcast_to(
+                    projected_scale[:, :1], (1, self.n_spins)
+                )
+            projected_normalized = self.projected / projected_scale.reshape(
+                1, projected_scale.shape[1], 1, 1
+            )
+
+        return DensityOfStates(
+            energies=self.energies,
+            total=total_normalized,
+            fermi=self.fermi,
+            projected=projected_normalized,
+            orbital_names=self.orbital_names,
+        )
+
+    def interpolate(self, factor: int = 2) -> "DensityOfStates":
+        if factor in (0, 1):
+            return self
+
         energies, total = interpolate(self.energies, self.total, factor=factor)
+        projected = None
+        if self.projected is not None:
+            _, projected = interpolate(self.energies, self.projected, factor=factor)
 
-        # Interpolate projected DOS 
-        # shape: (n_energies, n_spin, n_atoms, n_orbitals)
-        _, projected = interpolate(self.energies, self.projected, factor=factor)
-        
-        return DensityOfStates(energies=energies, total=total, projected=projected, orbital_names=self.orbital_names)
+        return DensityOfStates(
+            energies=energies,
+            total=total,
+            fermi=self.fermi,
+            projected=projected,
+            orbital_names=self.orbital_names,
+        )
 
+    def get_current_basis(self) -> str:
+        if self.projected is None:
+            return "Unknown"
+        n_orbitals = self.projected.shape[-1]
+        if n_orbitals == 18:
+            return "jm basis"
+        if n_orbitals == 9:
+            return "spd basis"
+        if n_orbitals == 32:
+            return "spdf basis"
+        return "Unknown"
 
-    def save(self, path: Path):
+    def coupled_to_uncoupled_basis(self):  # pragma: no cover - legacy feature
+        raise NotImplementedError(
+            "Coupled-to-uncoupled basis conversion is not implemented for the "
+            "new DOS representation."
+        )
+
+    # ------------------------------------------------------------------
+    # Serialization helpers
+    # ------------------------------------------------------------------
+    def save(self, path: Path) -> None:
         serializer = get_serializer(path)
         serializer.save(self, path)
 
     @classmethod
-    def load(cls, path: Path):
+    def load(cls, path: Path) -> "DensityOfStates":
         serializer = get_serializer(path)
         return serializer.load(path)
 
+    # ------------------------------------------------------------------
+    # Internal helpers
+    # ------------------------------------------------------------------
+    def _prepare_energies(self, energies: npt.ArrayLike) -> npt.NDArray[np.float64]:
+        energies_array = np.asarray(energies, dtype=np.float64).reshape(-1)
+        if energies_array.ndim != 1:
+            raise ValueError("Energies must be a 1D array")
+        return energies_array
 
-def interpolate(x, y, factor=2):
-    """
-    Interplates the function y=f(x) by increasing the x points by the factor.
-    # TODO need to add ‘linear’, ‘nearest’, ‘nearest-up’, ‘zero’, ‘slinear’, ‘quadratic’, ‘cubic’, ‘previous’, or ‘next’
+    def _prepare_total(self, total: npt.ArrayLike) -> npt.NDArray[np.float64]:
+        total_array = np.asarray(total, dtype=np.float64)
+        if total_array.ndim == 1:
+            total_array = total_array[:, np.newaxis]
+        if total_array.shape[0] != self.n_energies:
+            raise ValueError("Total DOS must have the same number of energies")
+        return total_array
 
-    Parameters
-    ----------
-    x : list float
-        points of x.
-    y : list float
-        points of y=f(x).
-    factor : int, optional
-        Multiplies the number of x points by this factor. The default is 2.
+    def _prepare_projected(self, projected: npt.ArrayLike) -> npt.NDArray[np.float64]:
+        projected_array = np.asarray(projected, dtype=np.float64)
 
-    Returns
-    -------
-    xs : list float
-        points in which y was interpolated.
-    ys : list float
-        interpolated points.
+        if projected_array.shape[0] != self.n_energies and projected_array.shape[-1] == self.n_energies:
+            projected_array = np.moveaxis(projected_array, -1, 0)
 
-    """
+        if projected_array.ndim == 3:
+            projected_array = projected_array[:, np.newaxis, :, :]
 
-    cs = CubicSpline(x, y)
-    xs = np.linspace(min(x), max(x), len(x) * factor)
+        if projected_array.ndim != 4:
+            raise ValueError(
+                "Projected DOS must have shape (n_energies, n_spins, n_atoms, n_orbitals)"
+            )
+
+        if projected_array.shape[0] != self.n_energies:
+            raise ValueError("Projected DOS must align with the energy grid")
+
+        return projected_array
+
+    def _normalization_factors(self, mode: str) -> npt.NDArray[np.float64]:
+        total = np.asarray(self.total, dtype=np.float64)
+        if mode == "max":
+            factors = np.max(np.abs(total), axis=0, keepdims=True)
+        elif mode == "integral":
+            integrals = trapezoid(total, x=self.energies, axis=0)
+            factors = integrals[np.newaxis, :]
+        else:
+            raise ValueError(f"Unsupported normalization mode: {mode}")
+        factors = np.asarray(factors, dtype=np.float64)
+        factors = np.where(factors == 0, 1.0, factors)
+        return factors
+
+    def _sanitize_indices(
+        self,
+        indices: Sequence[int] | None,
+        upper_bound: int,
+    ) -> np.ndarray | None:
+        if indices is None:
+            return None
+        arr = np.asarray(list(indices), dtype=int).ravel()
+        if arr.size == 0:
+            return np.array([], dtype=int)
+        arr = np.where(arr < 0, upper_bound + arr, arr)
+        if np.any((arr < 0) | (arr >= upper_bound)):
+            raise IndexError("Index out of bounds")
+        return np.unique(arr)
+
+    def _params_for_property(self, name: str, kwargs: dict) -> dict:
+        if name in {"projected_sum", "projected_sum_total"}:
+            return self._projected_sum_cache_params(**kwargs)
+        if name == "normalized_total":
+            mode = kwargs.get("mode", "max")
+            return {} if mode == "max" else {"mode": mode}
+        if name == "cumulative_total":
+            return {}
+        return {key: value for key, value in kwargs.items() if value is not None}
+
+    def _projected_sum_cache_params(self, **kwargs) -> dict[str, tuple[int, ...] | bool]:
+        params: dict[str, tuple[int, ...] | bool] = {}
+        atoms = kwargs.get("atoms")
+        orbitals = kwargs.get("orbitals")
+        spins = kwargs.get("spins")
+        principal_q_numbers = kwargs.get("principal_q_numbers")
+        sum_noncolinear = kwargs.get("sum_noncolinear", True)
+
+        atoms_idx = self._sanitize_indices(atoms, self.n_atoms)
+        if atoms_idx is not None:
+            params["atoms"] = tuple(int(i) for i in atoms_idx)
+
+        orbitals_idx = self._sanitize_indices(orbitals, self.n_orbitals)
+        if orbitals_idx is not None:
+            params["orbitals"] = tuple(int(i) for i in orbitals_idx)
+
+        spins_idx = self._sanitize_indices(spins, self.n_spins)
+        if spins_idx is not None:
+            params["spins"] = tuple(int(i) for i in spins_idx)
+
+        if principal_q_numbers is not None:
+            principal_tuple = tuple(sorted(dict.fromkeys(int(i) for i in principal_q_numbers)))
+            params["principal_q_numbers"] = principal_tuple
+        if not sum_noncolinear:
+            params["sum_noncolinear"] = False
+        return params
+
+    def _make_property_key(
+        self,
+        base_name: str,
+        params: dict | None,
+    ) -> str:
+        if not params:
+            return base_name
+        tokens = [base_name]
+        for key in sorted(params):
+            value = params[key]
+            if value is None:
+                continue
+            if isinstance(value, tuple):
+                string = ",".join(str(v) for v in value) if value else "[]"
+            else:
+                string = str(value)
+            tokens.append(f"{key}={string}")
+        return "|".join(tokens)
+
+    def _normalize_super_key(self, original_key, resolved_name: str):
+        if original_key is None or isinstance(original_key, str):
+            return resolved_name
+        if isinstance(original_key, tuple):
+            if len(original_key) == 2 and isinstance(original_key[1], int):
+                return (resolved_name, original_key[1])
+            if len(original_key) == 2 and isinstance(original_key[1], str):
+                return (resolved_name, original_key[1])
+            if len(original_key) == 3:
+                return (resolved_name, original_key[1], original_key[2])
+        return resolved_name
+
+
+def interpolate(
+    x: npt.ArrayLike,
+    y: npt.ArrayLike,
+    factor: int = 2,
+) -> tuple[npt.NDArray[np.float64], npt.NDArray[np.float64]]:
+    """Interpolate ``y`` over ``x`` by increasing the sample count."""
+    x_array = np.asarray(x, dtype=np.float64)
+    y_array = np.asarray(y, dtype=np.float64)
+    cs = CubicSpline(x_array, y_array, axis=0)
+    xs = np.linspace(float(np.min(x_array)), float(np.max(x_array)), len(x_array) * factor)
     ys = cs(xs)
-
     return xs, ys
