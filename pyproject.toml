@@ -135,3 +135,6 @@ docs = { features = ["docs"], solve-group = "default" }
 dev = { features = ["dev"], solve-group = "default" }
 
 py310 = { features = ["py310"] }
+
+[tool.pixi.dependencies]
+pytest = ">=8.4.2,<9"
