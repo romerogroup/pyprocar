@@ -141,6 +141,41 @@ def test_projected_sum_total_property(dos_spin_polarized):
     assert np.allclose(total_property.value, manual_total)
 
 
+def test_build_parametric_dataset_matches_manual(dos_spin_polarized):
+    dataset = dos_spin_polarized.build_parametric_dataset(atoms=[0], orbitals=[1], spins=[0])
+
+    total_proj, projected = dos_spin_polarized.compute_projected_sum(
+        atoms=[0], orbitals=[1], spins=[0]
+    )
+
+    manual_norm = np.divide(
+        projected[:, 0],
+        total_proj[:, 0],
+        out=np.zeros_like(projected[:, 0]),
+        where=total_proj[:, 0] != 0,
+    )
+    manual_norm = np.nan_to_num(manual_norm, nan=0.0, posinf=0.0, neginf=0.0)
+
+    assert dataset.totals.shape == (1, dos_spin_polarized.n_energies)
+    assert dataset.projected.shape == (1, dos_spin_polarized.n_energies)
+    assert dataset.total_projected.shape == (1, dos_spin_polarized.n_energies)
+    assert np.allclose(dataset.totals[0], dos_spin_polarized.total[:, 0])
+    assert np.allclose(dataset.normalized()[0], manual_norm)
+
+
+def test_build_parametric_dataset_spin_selection(dos_spin_polarized):
+    dataset = dos_spin_polarized.build_parametric_dataset(spins=[1])
+    assert dataset.totals.shape == (1, dos_spin_polarized.n_energies)
+    assert dataset.spin_indices == (1,)
+    assert dataset.spin_labels == (dos_spin_polarized.spin_projection_names[1],)
+
+
+def test_build_parametric_dataset_invalid_spin_raises(dos_spin_polarized):
+    with pytest.raises(IndexError):
+        dos_spin_polarized.build_parametric_dataset(spins=[5])
+
+
+
 def test_normalized_total_property(dos_spin_polarized):
     normalized = dos_spin_polarized.get_property("normalized_total").value
     assert normalized.shape == dos_spin_polarized.total.shape
