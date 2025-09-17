@@ -173,12 +173,15 @@ class VaspParser(BaseParser):
     @cached_property
     def total_dos(self):
         if self.vasprun is not None and self.vasprun.has_dos:
-            return np.moveaxis(self.vasprun.total_dos, (0), (-1))
+            total_dos = np.moveaxis(self.vasprun.total_dos, (0), (-1))
         elif self.doscar is not None and self.doscar.has_dos:
-            return self.doscar.total_dos
+            total_dos = self.doscar.total_dos
         else:
             return None
         
+        total_dos = total_dos[...,np.newaxis] if len(total_dos.shape) == 1 else total_dos
+        return total_dos
+    
     @cached_property
     def projected_dos(self):
         if self.vasprun is not None and self.vasprun.has_dos:
