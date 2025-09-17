@@ -3,8 +3,9 @@
 from __future__ import annotations
 
 import logging
+from dataclasses import dataclass
 from pathlib import Path
-from typing import Sequence
+from typing import Sequence, Tuple
 
 import numpy as np
 import numpy.typing as npt
@@ -15,6 +16,30 @@ from pyprocar.core.property_store import PointSet, Property
 from pyprocar.core.serializer import get_serializer
 
 logger = logging.getLogger(__name__)
+
+
+@dataclass(frozen=True)
+class ParametricDataset:
+    """Container for precomputed DOS data used by parametric plots."""
+
+    energies: npt.NDArray[np.float64]
+    totals: npt.NDArray[np.float64]
+    total_projected: npt.NDArray[np.float64]
+    projected: npt.NDArray[np.float64]
+    spin_indices: Tuple[int, ...]
+    spin_labels: Tuple[str, ...]
+
+    def normalized(self) -> npt.NDArray[np.float64]:
+        denominators = np.asarray(self.total_projected, dtype=np.float64)
+        numerators = np.asarray(self.projected, dtype=np.float64)
+        with np.errstate(divide="ignore", invalid="ignore"):
+            normalized = np.divide(
+                numerators,
+                denominators,
+                out=np.zeros_like(numerators),
+                where=denominators != 0,
+            )
+        return np.nan_to_num(normalized, copy=False, nan=0.0, posinf=0.0, neginf=0.0)
 
 
 def get_dos_from_code(
@@ -309,18 +334,11 @@ class DensityOfStates(PointSet):
         atoms: Sequence[int] | None = None,
         orbitals: Sequence[int] | None = None,
         spins: Sequence[int] | None = None,
-        principal_q_numbers: Sequence[int] | None = None,
         sum_noncolinear: bool = True,
     ) -> npt.NDArray[np.float64]:
         """Sum projections over selected atoms, orbitals, and spins."""
         if self.projected is None:
             raise ValueError("Projected DOS is not available for this calculation")
-
-        if principal_q_numbers is not None:
-            logger.debug(
-                "Principal quantum numbers were provided but are not currently "
-                "used in DOS summaries."
-            )
 
         spins_ndarray = self._sanitize_indices(spins, self.n_spins)
         if spins_ndarray is None:
@@ -366,7 +384,6 @@ class DensityOfStates(PointSet):
         atoms: Sequence[int] | None = None,
         orbitals: Sequence[int] | None = None,
         spins: Sequence[int] | None = None,
-        principal_q_numbers: Sequence[int] | None = None,
         sum_noncolinear: bool = True,
     ) -> tuple[npt.NDArray[np.float64], npt.NDArray[np.float64]]:
         """Return total and filtered projected DOS sums."""
@@ -385,11 +402,77 @@ class DensityOfStates(PointSet):
             atoms=atoms,
             orbitals=orbitals,
             spins=spins,
-            principal_q_numbers=principal_q_numbers,
             sum_noncolinear=sum_noncolinear,
         )
 
         return dos_total_projected, dos_projected
+
+    def build_parametric_dataset(
+        self,
+        *,
+        atoms: Sequence[int] | None = None,
+        orbitals: Sequence[int] | None = None,
+        spins: Sequence[int] | None = None,
+        sum_noncolinear: bool = True,
+    ) -> ParametricDataset:
+        """Prepare the arrays needed for parametric DOS visualisations."""
+
+        if self.projected is None:
+            raise ValueError(
+                "Projected DOS data are required to build a parametric dataset."
+            )
+
+        spin_indices = self._sanitize_indices(spins, self.n_spins)
+        if spin_indices is None:
+            spin_indices = np.arange(self.n_spins, dtype=int)
+        if spin_indices.size == 0:
+            raise ValueError("At least one spin channel must be selected.")
+
+        total = np.asarray(self.total, dtype=np.float64)
+        if total.ndim == 1:
+            total = total[:, np.newaxis]
+
+        if np.any(spin_indices >= total.shape[1]):
+            raise IndexError("Spin indices exceed available DOS spin channels.")
+
+        total_selected = total[:, spin_indices]
+        if total_selected.ndim == 1:
+            total_selected = total_selected[:, np.newaxis]
+
+        dos_total_projected, dos_projected = self.compute_projected_sum(
+            atoms=atoms,
+            orbitals=orbitals,
+            spins=spin_indices,
+            sum_noncolinear=sum_noncolinear,
+        )
+
+        dos_total_projected = np.asarray(dos_total_projected, dtype=np.float64)
+        dos_projected = np.asarray(dos_projected, dtype=np.float64)
+
+        if dos_total_projected.ndim == 1:
+            dos_total_projected = dos_total_projected[:, np.newaxis]
+        if dos_projected.ndim == 1:
+            dos_projected = dos_projected[:, np.newaxis]
+
+        total_projected_selected = dos_total_projected[:, spin_indices]
+        projected_selected = dos_projected[:, spin_indices]
+
+        if total_projected_selected.ndim == 1:
+            total_projected_selected = total_projected_selected[:, np.newaxis]
+        if projected_selected.ndim == 1:
+            projected_selected = projected_selected[:, np.newaxis]
+
+        spin_labels_source = self.spin_projection_names
+        spin_labels = tuple(spin_labels_source[idx] for idx in spin_indices)
+
+        return ParametricDataset(
+            energies=np.asarray(self.energies, dtype=np.float64),
+            totals=total_selected.T,
+            total_projected=total_projected_selected.T,
+            projected=projected_selected.T,
+            spin_indices=tuple(int(i) for i in spin_indices.tolist()),
+            spin_labels=spin_labels,
+        )
 
     def compute_normalized_total(self, mode: str = "max") -> npt.NDArray[np.float64]:
         factors = self._normalization_factors(mode)
@@ -554,7 +637,6 @@ class DensityOfStates(PointSet):
         atoms = kwargs.get("atoms")
         orbitals = kwargs.get("orbitals")
         spins = kwargs.get("spins")
-        principal_q_numbers = kwargs.get("principal_q_numbers")
         sum_noncolinear = kwargs.get("sum_noncolinear", True)
 
         atoms_idx = self._sanitize_indices(atoms, self.n_atoms)
@@ -569,9 +651,6 @@ class DensityOfStates(PointSet):
         if spins_idx is not None:
             params["spins"] = tuple(int(i) for i in spins_idx)
 
-        if principal_q_numbers is not None:
-            principal_tuple = tuple(sorted(dict.fromkeys(int(i) for i in principal_q_numbers)))
-            params["principal_q_numbers"] = principal_tuple
         if not sum_noncolinear:
             params["sum_noncolinear"] = False
         return params

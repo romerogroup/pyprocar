@@ -1,463 +1,218 @@
-__author__ = "Pedram Tavadze and Logan Lang"
-__maintainer__ = "Pedram Tavadze and Logan Lang"
-__email__ = "petavazohi@mail.wvu.edu, lllang@mix.wvu.edu"
-__date__ = "March 31, 2020"
+"""Shared utilities for density of states plotting backends."""
 
-import json
+from __future__ import annotations
+
 import logging
 from abc import ABC, abstractmethod
-from dataclasses import asdict, dataclass, field
-from pathlib import Path
-from typing import List, Optional, Tuple, Union
+from typing import Any, Dict, Iterable, Mapping
 
-import matplotlib as mpl
-import matplotlib.cm as cm
-import matplotlib.colors as mpcolors
-import matplotlib.patches as mpatches
 import matplotlib.pyplot as plt
 import numpy as np
-import pandas as pd
-
-from pyprocar.core import KPath
-from pyprocar.core.property_store import Property
 
 logger = logging.getLogger(__name__)
 
-def get_class_attributes(cls):
-    class_attributes = {}
+
+def _is_property(obj: Any) -> bool:
+    return isinstance(obj, property)
+
+
+def get_class_attributes(cls) -> Dict[str, Any]:
+    """Return the public data attributes defined on ``cls``."""
+
+    attributes: Dict[str, Any] = {}
     for name, value in cls.__dict__.items():
-        if not callable(value) and not name.startswith('__'):
-            class_attributes[name] = value
-    return class_attributes
+        if name.startswith("_"):
+            continue
+        if callable(value) or _is_property(value):
+            continue
+        attributes[name] = value
+    return attributes
+
 
 class BasePlotter(ABC):
+    """Lightweight wrapper around a matplotlib axis for DOS plots."""
 
-    def __init__(self, figsize=(8, 6), dpi=100, ax=None, **kwargs):
+    orientation: str = "horizontal"
+    energy_label: str = "Energy (eV)"
+    dos_label: str = "Density of states"
+    baseline: float = 0.0
+    baseline_kwargs: Dict[str, Any] | None = None
+    show_baseline: bool = False
+    show_fermi: bool = True
+    fermi_energy: float | None = None
+    fermi_line_kwargs: Dict[str, Any] | None = None
+    legend: bool = False
+    legend_kwargs: Dict[str, Any] | None = None
+    mirror_spins: bool = True
+
+    def __init__(self, figsize=(6, 4), dpi: int = 100, ax=None, **kwargs) -> None:
         self.figsize = figsize
         self.dpi = dpi
 
-        self.ax = ax
-        if self.ax is None:
+        if ax is None:
             self.fig, self.ax = plt.subplots(figsize=figsize, dpi=dpi)
         else:
-            self.fig = plt.gcf()
+            self.ax = ax
+            self.fig = ax.get_figure()
 
-        self.data_store = {}
-        self.values_dict = {}
-        self._legend_handles = []
-        
-        self.x = None
+        self._values: Dict[str, np.ndarray] = {}
         self.update_instance_params(**kwargs)
-        
+        self._validate_orientation()
+
+    # ------------------------------------------------------------------
+    # High level orchestration
+    # ------------------------------------------------------------------
+    def plot(self, *args, **kwargs):
+        """Update instance parameters and delegate plotting to subclasses."""
+        self.update_instance_params(**kwargs)
+        return self._plot(*args, **kwargs)
+
     @abstractmethod
-    def _plot(self, kpath: KPath, bands: np.ndarray,  **kwargs):
-        pass
-    
+    def _plot(self, 
+              energies: Iterable[float], 
+              dos_values: Iterable[Iterable[float]] | np.ndarray,
+              **kwargs):
+        raise NotImplementedError
+
+    # ------------------------------------------------------------------
+    # Configuration helpers
+    # ------------------------------------------------------------------
+    @property
+    def class_plot_params(self) -> Dict[str, Any]:
+        return get_class_attributes(self.__class__)
 
     @property
-    def class_plot_params(self):
-        class_attrs = get_class_attributes(self.__class__)
-        tmp_attrs = class_attrs.copy()
-        for attr_name, value in tmp_attrs.items():
-            if isinstance(value, property):
-                class_attrs.pop(attr_name)
-            elif attr_name == "_abc_impl":
-                class_attrs.pop(attr_name)
-        return class_attrs
-    
-    @property
-    def instance_plot_params(self):
-        class_attrs = get_class_attributes(self.__class__)
-        
-        instance_attrs = {}
-        for attr_name, value in class_attrs.items():
-            instance_attrs[attr_name] = getattr(self, attr_name, None)
+    def instance_plot_params(self) -> Dict[str, Any]:
+        attrs = {}
+        for name in self.class_plot_params:
+            attrs[name] = getattr(self, name, None)
+        return attrs
 
-        return instance_attrs
-    
-    @property
-    def plot_params(self):
+    def update_instance_params(self, **kwargs) -> Dict[str, Any]:
+        for key, value in kwargs.items():
+            if key in self.class_plot_params:
+                setattr(self, key, value)
+        self._validate_orientation()
         return self.instance_plot_params
-    
-    def update_instance_params(self, **kwargs):
-        plot_params = self.instance_plot_params
-        for plot_param_name, plot_param_value in kwargs.items():
-            if plot_param_name in plot_params:
-                setattr(self, plot_param_name, plot_param_value)
-        return self.instance_plot_params
-        
-    
-    def plot(self, kpath: KPath, bands: np.ndarray, **kwargs):
-        self.update_instance_params(**kwargs)
-        self._plot(kpath, bands, **kwargs)
-        self.set_default_plot_parameters(bands)
-        
-    def set_default_plot_parameters(self, bands: np.ndarray):
-        self.set_xlim()
-        ymin = float(bands.min())
-        ymax = float(bands.max())
-        elimit = (ymin, ymax)
-        self.set_ylim(elimit)
-        self.set_yticks()
-        self.set_xticks()
-        self.set_xlabel()
-        self.set_ylabel()
-        
-    def _setup_colorbar(self, dos_projected, dos_total_projected):
 
-        vmin, vmax = self._get_color_limits(dos_projected, dos_total_projected)
-        cmap = mpl.cm.get_cmap(self.config.cmap)
+    # ------------------------------------------------------------------
+    # Orientation utilities
+    # ------------------------------------------------------------------
+    def _validate_orientation(self) -> None:
+        if self.orientation not in {"horizontal", "vertical"}:
+            raise ValueError(
+                "orientation must be either 'horizontal' or 'vertical', "
+                f"got {self.orientation!r}"
+            )
 
-        if self.config.plot_bar:
-            norm = mpl.colors.Normalize(vmin=vmin, vmax=vmax)
-            cb = self.fig.colorbar(
-                mpl.cm.ScalarMappable(norm=norm, cmap=cmap), ax=self.ax
-            )
-            cb.ax.tick_params(labelsize=self.config.colorbar_tick_labelsize)
-            cb.set_label(
-                self.config.colorbar_title,
-                size=self.config.colorbar_title_size,
-                rotation=270,
-                labelpad=self.config.colorbar_title_padding,
-            )
-        
-    def _get_color_limits(self, dos_projected, dos_total_projected):
-        if self.config.clim:
-            self.clim = self.config.clim
-        else:
-            self.clim = [0, 0]
-            self.clim[0] = dos_projected.min() / dos_total_projected.max()
-            self.clim[1] = dos_projected.max() / dos_total_projected.max()
-        return self.clim
-        
-    def _set_plot_limits(self, spin_channels):
-        total_max = 0
-        for ispin in range(len(spin_channels)):
-            tmp_max = self.dos.total[ispin].max()
-            if tmp_max > total_max:
-                total_max = tmp_max
+    def orient_line(self, energies: np.ndarray, values: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+        energies = np.asarray(energies, dtype=np.float64).reshape(-1)
+        values = np.asarray(values, dtype=np.float64).reshape(-1)
+        if self.orientation == "horizontal":
+            return energies, values
+        return values, energies
+
+    def fill_between(
+        self,
+        energies: Iterable[float],
+        values: Iterable[float],
+        baseline: float | None = None,
+        **kwargs,
+    ):
+        energies = np.asarray(list(energies), dtype=np.float64)
+        values = np.asarray(list(values), dtype=np.float64)
+        base_value = self.baseline if baseline is None else baseline
 
         if self.orientation == "horizontal":
-            x_label = self.config.x_label
-            y_label = self.config.y_label
-            xlim = [self.dos.energies.min(), self.dos.energies.max()]
-            ylim = (
-                [-self.dos.total.max(), total_max]
-                if len(spin_channels) == 2
-                else [0, total_max]
-            )
-        elif self.orientation == "vertical":
-            x_label = self.config.y_label
-            y_label = self.config.x_label
-            xlim = (
-                [-self.dos.total.max(), total_max]
-                if len(spin_channels) == 2
-                else [0, total_max]
-            )
-            ylim = [self.dos.energies.min(), self.dos.energies.max()]
+            return self.ax.fill_between(energies, values, base_value, **kwargs)
+        return self.ax.fill_betweenx(energies, base_value, values, **kwargs)
 
-        self.set_xlabel(x_label)
-        self.set_ylabel(y_label)
-        self.set_xlim(xlim)
-        self.set_ylim(ylim)
-        
-        
-    def set_xticks(
-        self, tick_positions: List[int] = None, tick_names: List[str] = None
-    ):
-        """A method to set the xticks of the plot
+    # ------------------------------------------------------------------
+    # Axis helpers
+    # ------------------------------------------------------------------
+    def finalize_axes(
+        self,
+        energies: np.ndarray,
+        values: np.ndarray,
+        *,
+        baseline: float | None = None,
+    ) -> None:
+        energies = np.asarray(energies, dtype=np.float64).reshape(-1)
+        values = np.asarray(values, dtype=np.float64)
+        if values.ndim > 1:
+            values = values.reshape(-1)
 
-        Parameters
-        ----------
-        tick_positions : List[int], optional
-            A list of tick positions, by default None
-        tick_names : List[str], optional
-            A list of tick names, by default None
+        if baseline is None:
+            baseline = self.baseline
 
-        """
+        if baseline is not None:
+            values = np.concatenate([values, np.atleast_1d(baseline)])
 
-        if tick_positions is not None:
-            self.ax.set_xticks(tick_positions)
-        if tick_names is not None:
-            self.ax.set_xticklabels(tick_names)
-        if self.config.major_x_tick_params:
-            self.ax.tick_params(**self.config.major_x_tick_params)
-        if self.config.minor_x_tick_params:
-            self.ax.tick_params(**self.config.minor_x_tick_params)
-        return None
-
-    def set_yticks(
-        self, tick_positions: List[int] = None, tick_names: List[str] = None
-    ):
-        """A method to set the yticks of the plot
-
-        Parameters
-        ----------
-        tick_positions : List[int], optional
-            A list of tick positions, by default None
-        tick_names : List[str], optional
-            A list of tick names, by default None
-
-        """
-        if tick_positions is not None:
-            self.ax.set_xticks(tick_positions)
-        if tick_names is not None:
-            self.ax.set_xticklabels(tick_names)
-
-        if self.config.major_y_tick_params:
-            self.ax.tick_params(**self.config.major_y_tick_params)
-        if self.config.minor_y_tick_params:
-            self.ax.tick_params(**self.config.minor_y_tick_params)
-        return None
-
-    def set_xlim(self, interval: List[int] = None):
-        """A method to set the xlim of the plot
-
-        Parameters
-        ----------
-        interval : List[int], optional
-            The x interval, by default None
-        """
-        if interval is not None:
-            self.ax.set_xlim(interval)
-        return None
-
-    def set_ylim(self, interval: List[int] = None):
-        """A method to set the ylim of the plot
-
-        Parameters
-        ----------
-        interval : List[int], optional
-            The y interval, by default None
-        """
-        if interval is not None:
-            self.ax.set_ylim(interval)
-
-        return None
-
-    def set_xlabel(self, label: str):
-        """A method to set the x label
-
-        Parameters
-        ----------
-        label : str
-            The x label name
-
-        Returns
-        -------
-        None
-            None
-        """
-        if self.config.x_label:
-            self.ax.set_xlabel(self.config.x_label, **self.config.x_label_params)
+        finite_mask = np.isfinite(values)
+        if not finite_mask.any():
+            values = np.zeros(1)
         else:
-            self.ax.set_xlabel(label, **self.config.x_label_params)
-        return None
+            values = values[finite_mask]
 
-    def set_ylabel(self, label: str):
-        """A method to set the y label
-
-        Parameters
-        ----------
-        label : str
-            The y label name
-
-        Returns
-        -------
-        None
-            None
-        """
-        if self.config.y_label:
-            self.ax.set_ylabel(self.config.y_label, **self.config.y_label_params)
+        if self.orientation == "horizontal":
+            self.ax.set_xlabel(self.energy_label)
+            self.ax.set_ylabel(self.dos_label)
+            self.ax.set_xlim(float(np.min(energies)), float(np.max(energies)))
+            ymin = float(np.min(values))
+            ymax = float(np.max(values))
+            if np.isclose(ymin, ymax):
+                pad = abs(ymin) if ymin != 0 else 1.0
+                ymin -= pad
+                ymax += pad
+            self.ax.set_ylim(ymin, ymax)
         else:
-            self.ax.set_ylabel(label, **self.config.y_label_params)
+            self.ax.set_ylabel(self.energy_label)
+            self.ax.set_xlabel(self.dos_label)
+            ymin = float(np.min(energies))
+            ymax = float(np.max(energies))
+            self.ax.set_ylim(ymin, ymax)
+            xmin = float(np.min(values))
+            xmax = float(np.max(values))
+            if np.isclose(xmin, xmax):
+                pad = abs(xmin) if xmin != 0 else 1.0
+                xmin -= pad
+                xmax += pad
+            self.ax.set_xlim(xmin, xmax)
 
-    def legend(self, labels: List[str] = None):
-        """A method to include the legend
+        if self.legend:
+            self.ax.legend(**(self.legend_kwargs or {}))
 
-        Parameters
-        ----------
-        label : str
-            The labels for the legend
+        if self.show_baseline and baseline is not None:
+            self._draw_baseline(baseline)
 
-        Returns
-        -------
-        None
-            None
-        """
-        if labels == None:
-            labels = self.labels
-        if self.config.legend and len(labels) != 0:
-            if len(self.handles) != len(labels):
-                raise ValueError(
-                    f"The number of labels and handles should be the same, currently there are {len(self.handles)} handles and {len(labels)} labels"
-                )
-            self.ax.legend(self.handles, labels, **self.config.legend_params)
-        return None
-    
-    def set_title(self, title: str = ""):
-        """A method to set the title of the plot
-        """
-        if self.config.title:
-            title = self.config.title
-        self.ax.set_title(title, **self.config.title_params)
-        return None
+        if self.show_fermi and self.fermi_energy is not None:
+            self._draw_fermi(self.fermi_energy)
 
-    def draw_fermi(self, value, orientation: str = "horizontal"):
-        """A method to draw the fermi surface
+    # ------------------------------------------------------------------
+    # Drawing helpers
+    # ------------------------------------------------------------------
+    def _draw_baseline(self, value: float) -> None:
+        kwargs = dict(color="black", linewidth=0.8, linestyle="--")
+        kwargs.update(self.baseline_kwargs or {})
+        if self.orientation == "horizontal":
+            self.ax.axhline(value, **kwargs)
+        else:
+            self.ax.axvline(value, **kwargs)
 
-        Parameters
-        ----------
-        orientation : str, optional
-            Boolean to plot vertical or horizontal, by default 'horizontal'
-        color : str, optional
-            A color , by default "blue"
-        linestyle : str, optional
-            THe line style, by default "dotted"
-        linewidth : float, optional
-            The linewidth, by default 1
+    def _draw_fermi(self, value: float) -> None:
+        kwargs = dict(color="tab:red", linewidth=1.0, linestyle="--")
+        kwargs.update(self.fermi_line_kwargs or {})
+        if self.orientation == "horizontal":
+            self.ax.axvline(value, **kwargs)
+        else:
+            self.ax.axhline(value, **kwargs)
 
-        Returns
-        -------
-        None
-            None
-        """
-        if orientation == "horizontal":
-            self.ax.axvline(
-                x=value,
-                color=self.config.fermi_color,
-                linestyle=self.config.fermi_linestyle,
-                linewidth=self.config.fermi_linewidth,
-            )
-        elif orientation == "vertical":
-            self.ax.axhline(
-                y=value,
-                color=self.config.fermi_color,
-                linestyle=self.config.fermi_linestyle,
-                linewidth=self.config.fermi_linewidth,
-            )
-        return None
+    # ------------------------------------------------------------------
+    # Data capture helpers
+    # ------------------------------------------------------------------
+    def store_arrays(self, mapping: Mapping[str, np.ndarray]) -> None:
+        self._values.update({key: np.asarray(value) for key, value in mapping.items()})
 
-    def draw_baseline(self, value, orientation: str = "horizontal"):
-        """A method to draw the baseline
-
-        Parameters
-        ----------
-        value : float
-            The value of the baseline
-        """
-        if orientation == "horizontal":
-            self.ax.axhline(y=value, **self.config.baseline_params)
-        elif orientation == "vertical":
-            self.ax.axvline(x=value, **self.config.baseline_params)
-        return None
-
-    def grid(self):
-        """A method to include a grid on the plot.
-
-        Returns
-        -------
-        None
-            None
-        """
-        if self.config.grid:
-            self.ax.grid(
-                self.config.grid,
-                which=self.config.grid_which,
-                color=self.config.grid_color,
-                linestyle=self.config.grid_linestyle,
-                linewidth=self.config.grid_linewidth,
-            )
-        return None
-
-    def show(self):
-        """A method to show the plot
-
-        Returns
-        -------
-        None
-            None
-        """
-        plt.show()
-        return None
-
-    def save(self, filename: str = "dos.pdf"):
-        """A method to save the plot
-
-        Parameters
-        ----------
-        filename : str, optional
-            The filename, by default 'dos.pdf'
-
-        Returns
-        -------
-        None
-            None
-        """
-
-        plt.savefig(filename, dpi=self.config.dpi, bbox_inches="tight")
-        plt.clf()
-        return None
-
-    def update_config(self, config_dict):
-        for key, value in config_dict.items():
-            self.config[key]["value"] = value
-
-    def export_data(self, filename):
-        """
-        This method will export the data to a csv file
-
-        Parameters
-        ----------
-        filename : str
-            The file name to export the data to
-
-        Returns
-        -------
-        None
-            None
-        """
-        possible_file_types = ["csv", "txt", "json", "dat"]
-        file_type = filename.split(".")[-1]
-        if file_type not in possible_file_types:
-            raise ValueError(f"The file type must be {possible_file_types}")
-        if self.values_dict is None:
-            raise ValueError("The data has not been plotted yet")
-
-        column_names = list(self.values_dict.keys())
-        sorted_column_names = [None] * len(column_names)
-        index = 0
-        for column_name in column_names:
-            if "energies" in column_name.split("_")[0]:
-                sorted_column_names[index] = column_name
-                index += 1
-
-        for column_name in column_names:
-            if "dosTotalSpin" in column_name.split("_")[0]:
-                sorted_column_names[index] = column_name
-                index += 1
-        for ispin in range(2):
-            for column_name in column_names:
-
-                if "spinChannel-0" in column_name.split("_")[0] and ispin == 0:
-                    sorted_column_names[index] = column_name
-                    index += 1
-                if "spinChannel-1" in column_name.split("_")[0] and ispin == 1:
-                    sorted_column_names[index] = column_name
-                    index += 1
-
-        column_names.sort()
-        if file_type == "csv":
-            df = pd.DataFrame(self.values_dict)
-            df.to_csv(filename, columns=sorted_column_names, index=False)
-        elif file_type == "txt":
-            df = pd.DataFrame(self.values_dict)
-            df.to_csv(filename, columns=sorted_column_names, sep="\t", index=False)
-        elif file_type == "json":
-            with open(filename, "w") as outfile:
-                for key, value in self.values_dict.items():
-                    self.values_dict[key] = value.tolist()
-                json.dump(self.values_dict, outfile)
-        elif file_type == "dat":
-            df = pd.DataFrame(self.values_dict)
-            df.to_csv(filename, columns=sorted_column_names, sep=" ", index=False)
+    @property
+    def values_dict(self) -> Dict[str, np.ndarray]:
+        return dict(self._values)

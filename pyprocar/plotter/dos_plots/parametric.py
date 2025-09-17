@@ -1,49 +1,307 @@
+"""Parametric density of states plotting."""
+
+from __future__ import annotations
+
+import logging
+from collections.abc import Mapping, Sequence
+from typing import Dict, Iterable, Tuple
+
+import matplotlib.cm as cm
+from matplotlib import colormaps
+from matplotlib.collections import LineCollection
+import matplotlib.colors as mcolors
+import numpy as np
+
+from pyprocar.plotter.dos_plots.base import BasePlotter
+
+logger = logging.getLogger(__name__)
+
+
+def _prepare_parametric_inputs(
+    energies: Iterable[float],
+    dos_values: Iterable[Iterable[float]] | np.ndarray,
+    scalars: Iterable[Iterable[float]] | np.ndarray | None,
+    labels: Iterable[str] | None,
+) -> tuple[np.ndarray, np.ndarray, np.ndarray, Tuple[str, ...]]:
+    energies_array = np.asarray(list(energies), dtype=np.float64).reshape(-1)
+    if energies_array.size < 2:
+        raise ValueError("Parametric plots require at least two energy samples.")
+
+    dos_array = np.asarray(dos_values, dtype=np.float64)
+    if dos_array.ndim == 1:
+        dos_array = dos_array[np.newaxis, :]
+    if dos_array.shape[1] != energies_array.size:
+        raise ValueError("dos_values must align with the provided energies.")
+
+    if scalars is None:
+        scalars_array = dos_array
+    else:
+        scalars_array = np.asarray(scalars, dtype=np.float64)
+        if scalars_array.ndim == 1:
+            scalars_array = scalars_array[np.newaxis, :]
+        if scalars_array.shape != dos_array.shape:
+            raise ValueError("scalars must have the same shape as dos_values.")
+
+    labels_tuple: Tuple[str, ...] = tuple(labels or ())
+    return energies_array, dos_array, scalars_array, labels_tuple
 
 
 class ParametricPlot(BasePlotter):
+    """Render a DOS where the fill color encodes projection weights."""
 
-    def _plot(self, energies,  ,**kwargs):
-        values_dict = {}
-        spin_projections, spin_channels = self._get_spins_projections_and_channels(
-            spins
+    cmap: str | mcolors.Colormap = "plasma"
+    clim: tuple[float | None, float | None] | None = None
+    show_colorbar: bool = True
+    colorbar_kwargs: Dict[str, object] | None = None
+    plot_total: bool = True
+    total_line_kwargs: Mapping[str, object] | Sequence[Mapping[str, object]] | None = None
+    fill_kwargs: Mapping[str, object] | None = None
+
+    def _plot(
+        self,
+        energies: Iterable[float],
+        dos_values: Iterable[Iterable[float]] | np.ndarray,
+        scalars: Iterable[Iterable[float]] | np.ndarray,
+        *,
+        labels: Iterable[str] | None = None,
+        scale: bool = False,
+        plot_total: bool | None = None,
+        colorbar: bool | None = None,
+        total_kwargs: Mapping[str, object] | Sequence[Mapping[str, object]] | None = None,
+        fill_kwargs: Mapping[str, object] | None = None,
+    ):
+        energies_array, dos_array, scalar_array, labels_tuple = _prepare_parametric_inputs(
+            energies, dos_values, scalars, labels
         )
-        dos_total, dos_total_projected, dos_projected = self._calculate_parametric_dos(
-            atoms, orbitals, spin_projections, principal_q_numbers
-        )
 
-        orbital_string = ":".join([str(orbital) for orbital in orbitals])
-        atom_string = ":".join([str(atom) for atom in atoms])
-        spin_string = ":".join(
-            [str(spin_projection) for spin_projection in spin_projections]
-        )
+        line_values = dos_array.copy()
+        mirror = self.mirror_spins and line_values.shape[0] == 2
+        if mirror:
+            line_values[1:, :] *= -1.0
 
-        self._setup_colorbar(dos_projected, dos_total_projected)
-        self._set_plot_limits(spin_channels)
+        colour_weights = scalar_array if not scale else scalar_array * line_values
 
-        for ispin, spin_channel in enumerate(spin_channels):
-            energies, dos_spin_total, normalized_dos_spin_projected = (
-                self._prepare_parametric_spin_data(
-                    spin_channel, ispin, dos_total, dos_projected, dos_total_projected,
-                    scale=kwargs.get("scale", False)
+        vmin, vmax = self._resolve_clim(colour_weights)
+        norm = mcolors.Normalize(vmin=vmin, vmax=vmax)
+        try:
+            cmap_obj = colormaps.get_cmap(self.cmap)
+        except AttributeError:  # pragma: no cover - backward compatibility
+            cmap_obj = cm.get_cmap(self.cmap)
+
+        fill_cfg = dict(alpha=0.7)
+        fill_cfg.update(self.fill_kwargs or {})
+        fill_cfg.update(fill_kwargs or {})
+
+        stored: Dict[str, np.ndarray] = {"energies": energies_array}
+
+        for index in range(line_values.shape[0]):
+            label = labels_tuple[index] if index < len(labels_tuple) else None
+            self._plot_spin_series(
+                energies_array,
+                line_values[index],
+                colour_weights[index],
+                cmap=cmap_obj,
+                norm=norm,
+                fill_kwargs=fill_cfg,
+            )
+
+            if (plot_total if plot_total is not None else self.plot_total):
+                kwargs = self._resolve_line_kwargs(
+                    index,
+                    overrides=total_kwargs,
                 )
+                x_data, y_data = self.orient_line(energies_array, line_values[index])
+                if label is not None:
+                    kwargs.setdefault("label", label)
+                self.ax.plot(x_data, y_data, **kwargs)
+
+            stored[f"dos_total_{index}"] = line_values[index]
+            stored[f"dos_weight_{index}"] = colour_weights[index]
+
+        if colorbar if colorbar is not None else self.show_colorbar:
+            self._draw_colorbar(norm, cmap_obj)
+
+        self.store_arrays(stored)
+        self.finalize_axes(energies_array, line_values)
+
+    # ------------------------------------------------------------------
+    # Helpers
+    # ------------------------------------------------------------------
+    def _plot_spin_series(
+        self,
+        energies: np.ndarray,
+        totals: np.ndarray,
+        colour_values: np.ndarray,
+        *,
+        cmap,
+        norm,
+        fill_kwargs: Mapping[str, object],
+    ) -> None:
+        energies = np.asarray(energies, dtype=np.float64)
+        totals = np.asarray(totals, dtype=np.float64)
+        colour_values = np.asarray(colour_values, dtype=np.float64)
+
+        for idx in range(energies.size - 1):
+            segment_color = cmap(norm(colour_values[idx]))
+            x_segment = energies[idx : idx + 2]
+            y_segment = totals[idx : idx + 2]
+            self.fill_between(x_segment, y_segment, **fill_kwargs, color=segment_color)
+
+    def _resolve_clim(self, colour_values: np.ndarray) -> tuple[float, float]:
+        provided = self.clim
+        if provided is not None:
+            vmin, vmax = provided
+            if vmin is None:
+                vmin = float(np.nanmin(colour_values))
+            if vmax is None:
+                vmax = float(np.nanmax(colour_values))
+            if np.isclose(vmin, vmax):
+                vmax = vmin + 1.0
+            return float(vmin), float(vmax)
+
+        finite = np.isfinite(colour_values)
+        if not finite.any():
+            return 0.0, 1.0
+        vmin = float(np.nanmin(colour_values[finite]))
+        vmax = float(np.nanmax(colour_values[finite]))
+        if np.isclose(vmin, vmax):
+            vmax = vmin + 1.0
+        return vmin, vmax
+
+    def _draw_colorbar(self, norm, cmap) -> None:
+        sm = cm.ScalarMappable(norm=norm, cmap=cmap)
+        kwargs = dict(pad=0.02, shrink=0.8)
+        kwargs.update(self.colorbar_kwargs or {})
+        cb = self.fig.colorbar(sm, ax=self.ax, **kwargs)
+        cb.ax.set_ylabel("Projection weight", rotation=270, labelpad=12)
+
+    def _resolve_line_kwargs(
+        self,
+        index: int,
+        overrides: Mapping[str, object] | Sequence[Mapping[str, object]] | None,
+    ) -> Dict[str, object]:
+        base = dict(color="black", linewidth=1.2)
+
+        configured = self.total_line_kwargs
+        if isinstance(configured, Sequence) and not isinstance(configured, (dict, str)):
+            if configured:
+                idx = index % len(configured)
+                base.update(dict(configured[idx]))
+        elif isinstance(configured, Mapping):
+            base.update(dict(configured))
+
+        if isinstance(overrides, Sequence) and not isinstance(overrides, (dict, str)):
+            if overrides:
+                idx = index % len(overrides)
+                base.update(dict(overrides[idx]))
+        elif isinstance(overrides, Mapping):
+            base.update(dict(overrides))
+
+        return base
+
+
+class ParametricLinePlot(ParametricPlot):
+    """Render a DOS using coloured line segments instead of filled regions."""
+
+    line_collection_kwargs: Mapping[str, object] | Sequence[Mapping[str, object]] | None = None
+
+    def _plot(
+        self,
+        energies: Iterable[float],
+        dos_values: Iterable[Iterable[float]] | np.ndarray,
+        scalars: Iterable[Iterable[float]] | np.ndarray | None,
+        *,
+        labels: Iterable[str] | None = None,
+        scale: bool = False,
+        plot_total: bool | None = None,
+        colorbar: bool | None = None,
+        total_kwargs: Mapping[str, object] | Sequence[Mapping[str, object]] | None = None,
+        line_kwargs: Mapping[str, object] | Sequence[Mapping[str, object]] | None = None,
+    ):
+        energies_array, dos_array, scalar_array, labels_tuple = _prepare_parametric_inputs(
+            energies, dos_values, scalars, labels
+        )
+
+        line_values = dos_array.copy()
+        mirror = self.mirror_spins and line_values.shape[0] == 2
+        if mirror:
+            line_values[1:, :] *= -1.0
+
+        colour_weights = scalar_array if not scale else scalar_array * line_values
+
+        vmin, vmax = self._resolve_clim(colour_weights)
+        norm = mcolors.Normalize(vmin=vmin, vmax=vmax)
+        try:
+            cmap_obj = colormaps.get_cmap(self.cmap)
+        except AttributeError:  # pragma: no cover - backward compatibility
+            cmap_obj = cm.get_cmap(self.cmap)
+
+        stored: Dict[str, np.ndarray] = {"energies": energies_array}
+
+        for index in range(line_values.shape[0]):
+            label = labels_tuple[index] if index < len(labels_tuple) else None
+            x_data, y_data = self.orient_line(energies_array, line_values[index])
+
+            points = np.column_stack([x_data, y_data]).reshape(-1, 1, 2)
+            segments = np.concatenate([points[:-1], points[1:]], axis=1)
+
+            lc = LineCollection(segments)
+            lc.set_cmap(cmap_obj)
+            lc.set_norm(norm)
+
+            segment_weights = 0.5 * (
+                colour_weights[index, :-1] + colour_weights[index, 1:]
             )
+            lc.set_array(segment_weights)
 
-            self._plot_spin_data_parametric(
-                energies, dos_spin_total, normalized_dos_spin_projected
+            kwargs = self._resolve_line_collection_kwargs(
+                index,
+                overrides=line_kwargs,
             )
+            lc.set_linewidth(kwargs.get("linewidth", 1.5))
+            lc.set_linestyle(kwargs.get("linestyle", "-"))
+            lc.set_alpha(kwargs.get("alpha", 1.0))
 
-            if self.config.plot_total:
-                self._plot_total_dos(energies, dos_spin_total, spin_channel)
+            self.ax.add_collection(lc)
 
-            values_dict["energies"] = energies
-            values_dict["dosTotalSpin-" + str(spin_channel)] = dos_spin_total
-            values_dict[
-                "spinChannel-"
-                + str(spin_channel)
-                + f"_orbitals-{orbital_string}"
-                + f"_atoms-{atom_string}"
-                + f"_spinProjection-{spin_string}"
-            ] = normalized_dos_spin_projected
+            if (plot_total if plot_total is not None else self.plot_total):
+                total_kwargs_resolved = self._resolve_line_kwargs(
+                    index,
+                    overrides=total_kwargs,
+                )
+                if label is not None:
+                    total_kwargs_resolved.setdefault("label", label)
+                self.ax.plot(x_data, y_data, **total_kwargs_resolved)
 
-        self.values_dict = values_dict
-        return values_dict
+            stored[f"dos_total_{index}"] = line_values[index]
+            stored[f"dos_weight_{index}"] = colour_weights[index]
+
+        if colorbar if colorbar is not None else self.show_colorbar:
+            self._draw_colorbar(norm, cmap_obj)
+
+        self.store_arrays(stored)
+        self.finalize_axes(energies_array, line_values)
+
+    def _resolve_line_collection_kwargs(
+        self,
+        index: int,
+        overrides: Mapping[str, object] | Sequence[Mapping[str, object]] | None,
+    ) -> Dict[str, object]:
+        base: Dict[str, object] = {}
+
+        configured = self.line_collection_kwargs
+        if isinstance(configured, Sequence) and not isinstance(configured, (dict, str)):
+            if configured:
+                idx = index % len(configured)
+                base.update(dict(configured[idx]))
+        elif isinstance(configured, Mapping):
+            base.update(dict(configured))
+
+        if isinstance(overrides, Sequence) and not isinstance(overrides, (dict, str)):
+            if overrides:
+                idx = index % len(overrides)
+                base.update(dict(overrides[idx]))
+        elif isinstance(overrides, Mapping):
+            base.update(dict(overrides))
+
+        return base

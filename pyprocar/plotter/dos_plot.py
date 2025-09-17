@@ -104,7 +104,6 @@ class DOSPlot:
         atoms: List[int] = None,
         orbitals: List[int] = None,
         spins: List[int] = None,
-        principal_q_numbers: List[int] = [-1],
         **kwargs
     ):
         values_dict = {}
@@ -112,7 +111,7 @@ class DOSPlot:
             spins
         )
         dos_total, dos_total_projected, dos_projected = self._calculate_parametric_dos(
-            atoms, orbitals, spin_projections, principal_q_numbers
+            atoms, orbitals, spin_projections
         )
 
         orbital_string = ":".join([str(orbital) for orbital in orbitals])
@@ -157,7 +156,6 @@ class DOSPlot:
         atoms: List[int] = None,
         orbitals: List[int] = None,
         spins: List[int] = None,
-        principal_q_numbers: List[int] = [-1],
         **kwargs
     ):
         values_dict = {}
@@ -165,7 +163,7 @@ class DOSPlot:
             spins
         )
         dos_total, dos_total_projected, dos_projected = self._calculate_parametric_dos(
-            atoms, orbitals, spin_projections, principal_q_numbers
+            atoms, orbitals, spin_projections
         )
 
         orbital_string = ":".join([str(orbital) for orbital in orbitals])
@@ -205,7 +203,6 @@ class DOSPlot:
 
     def plot_stack_species(
         self,
-        principal_q_numbers: List[int] = [-1],
         orbitals: List[int] = None,
         spins: List[int] = None,
         overlay_mode: bool = False,
@@ -233,7 +230,7 @@ class DOSPlot:
 
             dos_total, dos_total_projected, dos_projected = (
                 self._calculate_parametric_dos(
-                    atoms, orbitals, spin_projections, principal_q_numbers
+                    atoms, orbitals, spin_projections
                 )
             )
             
@@ -290,7 +287,6 @@ class DOSPlot:
 
     def plot_stack_orbitals(
         self,
-        principal_q_numbers: List[int] = [-1],
         atoms: List[int] = None,
         spins: List[int] = None,
         overlay_mode: bool = False,
@@ -318,7 +314,6 @@ class DOSPlot:
                     atoms=atoms,
                     orbitals=orb_l[iorb],
                     spin_projections=spin_projections,
-                    principal_q_numbers=principal_q_numbers,
                 )
             )
             
@@ -374,7 +369,6 @@ class DOSPlot:
     def plot_stack(
         self,
         items: dict = None,
-        principal_q_numbers: List[int] = [-1],
         spins: List[int] = None,
         overlay_mode: bool = False,
         **kwargs
@@ -416,7 +410,6 @@ class DOSPlot:
                     atoms=atoms,
                     orbitals=orbitals,
                     spin_projections=spin_projections,
-                    principal_q_numbers=principal_q_numbers,
                 )
             )
             
@@ -471,7 +464,7 @@ class DOSPlot:
         return values_dict
 
     def _calculate_parametric_dos(
-        self, atoms, orbitals, spin_projections, principal_q_numbers
+        self, atoms, orbitals, spin_projections
     ):
         dos_total = np.array(self.dos.total)
         if self.dos.n_spins == 4:
@@ -480,7 +473,6 @@ class DOSPlot:
             dos_total_projected = self.dos.dos_sum()
         dos_projected = self.dos.dos_sum(
             atoms=atoms,
-            principal_q_numbers=principal_q_numbers,
             orbitals=orbitals,
             spins=spin_projections,
         )

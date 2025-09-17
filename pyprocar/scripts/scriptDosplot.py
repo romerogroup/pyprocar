@@ -385,13 +385,14 @@ def dosplot(
         if mode == "parametric":
             user_logger.info("Plotting DOS in parametric mode")
             edos_plot.plot_parametric(
-                atoms=atoms, principal_q_numbers=[-1], orbitals=orbitals, spins=spins
+                atoms=atoms,
+                orbitals=orbitals,
+                spins=spins,
             )
         elif mode == "parametric_line":
             user_logger.info("Plotting DOS in parametric line mode")
             edos_plot.plot_parametric_line(
                 atoms=atoms,
-                principal_q_numbers=[-1],
                 orbitals=orbitals,
                 spins=spins,
             )
