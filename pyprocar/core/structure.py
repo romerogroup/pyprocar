@@ -88,22 +88,35 @@ class Structure:
             f"angles=({self.alpha:.2f}, {self.beta:.2f}, {self.gamma:.2f}), "
             f"spacegroup='{self.get_space_group_international()}')"
         )
-
+        
     def __str__(self):
         """Human-readable summary of the structure."""
         header = f"Structure with {self.natoms} atoms and {self.nspecies} species"
         species_line = f"Species: {', '.join(self.species)}"
-        volume_line = f"Volume: {self.volume*1e30:.3f} A^3"
+        volume_line = f"Volume: {self.volume*1e30:.3f} Å^3"
         angle_line = f"Angles (α, β, γ): {self.alpha:.2f}°, {self.beta:.2f}°, {self.gamma:.2f}°"
         sg_line = f"Space group: {self.get_space_group_international()}"
 
-        # Only show first few fractional coords for readability
-        frac_preview = "\n".join(
-            f"  {atom}: {coord}" for atom, coord in zip(self.atoms, self.fractional_coordinates)
-        )
-        
-        return "\n".join([header, species_line, volume_line, angle_line, sg_line, "Fractional coordinates:", frac_preview])
+        col_width = 12
+        coord_header = f"{'Atom':<8}{'x':^{col_width}}{'y':^{col_width}}{'z':^{col_width}}"
+        coord_lines = [coord_header, "-" * len(coord_header)]
 
+        for atom, coord in zip(self.atoms, self.fractional_coordinates):
+            coord_lines.append(
+                f"{atom:<8}{coord[0]:{col_width}.6f}{coord[1]:{col_width}.6f}{coord[2]:{col_width}.6f}"
+            )
+
+        frac_preview = "\n".join(coord_lines)
+
+        return "\n".join([
+            header,
+            species_line,
+            volume_line,
+            angle_line,
+            sg_line,
+            "Fractional coordinates:",
+            frac_preview
+        ])
     
     def __eq__(self, other):
         atoms_equal = all(self.atoms == other.atoms)
