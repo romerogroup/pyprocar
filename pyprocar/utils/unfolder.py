@@ -116,7 +116,7 @@ class Unfolder:
         self.trans_indices = indices
 
     def _get_weight(self, evec, qpt, G=None):
-        """
+        r"""
         get the weight of a mode which has the wave vector of qpt and
         eigenvector of evec.
 

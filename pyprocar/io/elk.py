@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import List, Optional, Tuple, Union
 import numpy.typing as npt
 import numpy as np
+import warnings
 
 
 from ..core.dos import DensityOfStates
@@ -100,11 +101,8 @@ class ElkParser:
         # rf.close()
 
         # self._read_lattice_out()
+        self._read_geometry()
         self._read_elkin()
-        if (self.path_dir/'GEOMETRY.OUT').exists():
-            self._read_geometry_out()
-        else:
-            raise ValueError("Cannot find \"GEOMETRY.OUT\", it seems the calculation did not finish.")
         self._read_fermi()
 
         if self.is_bands_calculation:
@@ -204,19 +202,19 @@ class ElkParser:
             raise ValueError("No 'tasks' block found in elk.in")
         self.tasks = [int(n) for n in match.group(1).split()]
 
-        if 20 in self.tasks:
-            self.is_bands_calculation = True
-            self.filepaths.append(self.path_dir / "BANDS.OUT")
-        if 21 in self.tasks or 22 in self.tasks:
-            self.is_bands_calculation = True
-            ispc = 1
-            for spc in self.composition:
-                for iatom in range(self.composition[spc]):
-                    self.filepaths.append(
-                        self.path_dir /
-                        f"BAND_S{ispc:02d}_A{iatom + 1:04d}.OUT"
-                    )
-                ispc += 1
+        # if 20 in self.tasks:
+        #     self.is_bands_calculation = True
+        #     self.filepaths.append(self.path_dir / "BANDS.OUT")
+        # if 21 in self.tasks or 22 in self.tasks:
+        #     self.is_bands_calculation = True
+        #     ispc = 1
+        #     for spc in self.composition:
+        #         for iatom in range(self.composition[spc]):
+        #             self.filepaths.append(
+        #                 self.path_dir /
+        #                 f"BAND_S{ispc:02d}_A{iatom + 1:04d}.OUT"
+        #             )
+        #         ispc += 1
 
         self.spinpol = re.findall(r"spinpol\s*([.a-zA-Z]*)", file_content)
         if len(self.spinpol) != 0:
@@ -227,9 +225,6 @@ class ElkParser:
             self.nspin = 2
         else:
             self.nspin = 1
-
-
-        
 
     def _read_bands(self):
         """
@@ -451,7 +446,7 @@ class ElkParser:
             self.fermi = float(rf.readline().split()[0]) * HARTREE_TO_EV
         return self.fermi
 
-    def _read_geometry_out(self):
+    def _read_geometry(self):
         """sumary_line
 
         Keyword arguments:
@@ -459,27 +454,52 @@ class ElkParser:
         Return: return_description
         """
 
-        path_geometry_out = self.path_dir/'GEOMETRY.OUT'
-        content_geometry_out = path_geometry_out.read_text()
-
-        # Read lattice
+        path_geometry = self.path_dir/'GEOMETRY.OUT'
+        if not(path_geometry.exists()):
+            warnings.warn(
+                "GEOMETRY.OUT not found. Reading elk.in to extract geometries."
+                "Please ensure that the calculation has completed successfully."
+                )
+            path_geometry = self.path_dir/'elk.in'
+        content_geometry = path_geometry.read_text()
+        
         pattern_matrix = re.compile(
             r"avec[\s\S]*?\n"
             rf"((?:[ \t]*{FLOAT}\s+){{8}}"
             rf"{FLOAT}\s*\n)"
         )
 
-        match = pattern_matrix.search(content_geometry_out)
+        match = pattern_matrix.search(content_geometry)
         matrix_block_str = match.group(1)
         lattice = np.fromstring(matrix_block_str, sep=" ").reshape(3, 3)
 
-        # read atoms and coords
+        pattern = r"""
+        ^\s*scale(?!\d)[^\n]*      # 'scale' not followed by a digit
+        \n(?:[^\S\r\n]*\n)*        # allow blank lines after
+        [^\S\r\n]*([+-]?\d+(?:\.\d+)?)  # capture int or float (no sci notation)
+        """
+        m = re.search(pattern, content_geometry, flags=re.MULTILINE | re.IGNORECASE | re.VERBOSE)
+        if m:
+            scale = float(m.group(1))
+            lattice *= scale
+            
+        for i in range(3):
+            pattern = rf"""
+            ^\s*scale{i+1}[^\n]*   
+            \n(?:[^\S\r\n]*\n)*
+            [^\S\r\n]*([+-]?\d+(?:\.\d+)?)
+            """
+            m = re.search(pattern, content_geometry, flags=re.MULTILINE | re.IGNORECASE | re.VERBOSE)
+            if m:
+                scale = float(m.group(1))
+                lattice[:,i] *= scale
+
         pattern_nspc = re.search(
             r"(?m)^atoms\s*\r?\n\s*(\d+)",
-            content_geometry_out,
+            content_geometry,
             re.IGNORECASE
         )
-
+        
         nspecies = int(pattern_nspc.group(1)) if pattern_nspc else None
 
         pattern_spc = re.compile(
@@ -488,12 +508,12 @@ class ElkParser:
         atoms: List[str] = []
         fractional_coords: Union[List[List[float]],
                                  npt.NDArray[np.float64]] = []
-        for m in pattern_spc.finditer(content_geometry_out):
+        for m in pattern_spc.finditer(content_geometry):
             atom_count = int(m.group(2))
             atom_symbols = [m.group(1).replace('.in', '')]*atom_count
             atoms += atom_symbols
             start = m.end()
-            tail = content_geometry_out[start:].splitlines()
+            tail = content_geometry[start:].splitlines()
 
             pos_lines = tail[:atom_count]
             for line in pos_lines:

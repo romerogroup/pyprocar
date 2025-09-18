@@ -6,6 +6,9 @@ __date__ = "March 31, 2020"
 import logging
 from functools import cached_property
 from pathlib import Path
+from typing import Dict
+from collections import Counter
+
 
 import numpy as np
 import spglib
@@ -92,9 +95,10 @@ class Structure:
     def __str__(self):
         """Human-readable summary of the structure."""
         header = f"Structure with {self.natoms} atoms and {self.nspecies} species"
-        species_line = f"Species: {', '.join(self.species)}"
+        species_line = "".join([rf"{x}:{self.composition[x]} " for x in self.composition]).strip()
         volume_line = f"Volume: {self.volume*1e30:.3f} Å^3"
         angle_line = f"Angles (α, β, γ): {self.alpha:.2f}°, {self.beta:.2f}°, {self.gamma:.2f}°"
+        lattice_parameters_line = f"Lattice Parameters (a, b, c): {self.a:.2f}, {self.b:.2f}, {self.c:.2f}"
         sg_line = f"Space group: {self.get_space_group_international()}"
 
         col_width = 12
@@ -111,8 +115,9 @@ class Structure:
         return "\n".join([
             header,
             species_line,
-            volume_line,
+            lattice_parameters_line,
             angle_line,
+            volume_line,
             sg_line,
             "Fractional coordinates:",
             frac_preview
@@ -136,6 +141,7 @@ class Structure:
 
         structure_equal = atoms_equal and fractional_coordinates_equal and lattice_equal
         return structure_equal
+    
     
     @property
     def rotations(self):
@@ -360,6 +366,25 @@ class Structure:
 
         return reciprocal_lattice
 
+    @property
+    def composition(self)-> Dict[str, int]:
+        """
+        Return the composition of the structure as a dictionary.
+
+        Returns
+        -------
+        Dict[str, int]
+            A mapping where keys are the unique atomic species in
+            `self.atoms` and values are their counts.
+
+        Examples
+        --------
+        >>> self.atoms = ['Ba', 'Ba', 'Cu', 'Cu', 'Cu', 'O', 'O']
+        >>> self.composition
+        {'Ba': 2, 'Cu': 3, 'O': 2}
+        """
+        return dict(Counter(self.atoms))
+    
     @property
     def _spglib_cell(self):
         """Return the structure in spglib format
@@ -623,3 +648,4 @@ class Structure:
     def load(cls, path: Path):
         serializer = get_serializer(path)
         return serializer.load(path)
+
