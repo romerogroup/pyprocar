@@ -42,10 +42,12 @@ def parse_dos_block(dos_block: str) -> Tuple[np.ndarray, np.ndarray]:
 
 class ElkParser:
 
-    def __init__(self, dir_path: Union[str, Path], kdirect: bool = True):
+    def __init__(self, path_dir: Union[str, Path], kdirect: bool = True):
         # elk specific input parameters
-        self.dir_path = Path(dir_path)
-        self.elkin_filepath = self.dir_path / "elk.in"
+        self.path_dir = Path(path_dir)
+        if not(self.path_dir.is_dir()):
+            raise ValueError(f"The directory path {self.path_dir.as_posix()} does not exist or is not a valid directory.")
+        self.elkin_filepath = self.path_dir / "elk.in"
         self.filepaths = []
         self.elkin = None
         self.nbands = None
@@ -99,6 +101,10 @@ class ElkParser:
 
         # self._read_lattice_out()
         self._read_elkin()
+        if (self.path_dir/'GEOMETRY.OUT').exists():
+            self._read_geometry_out()
+        else:
+            raise ValueError("Cannot find \"GEOMETRY.OUT\", it seems the calculation did not finish.")
         self._read_fermi()
 
         if self.is_bands_calculation:
@@ -187,7 +193,7 @@ class ElkParser:
         Reads and parses elk.in
         """
 
-        path = self.dir_path / "elk.in"
+        path = self.path_dir / "elk.in"
         file_content = path.read_text()
         pattern_task = re.compile(
             r"(?m)^[ \t]*tasks[ \t]*\n"       # “tasks” line
@@ -200,14 +206,14 @@ class ElkParser:
 
         if 20 in self.tasks:
             self.is_bands_calculation = True
-            self.filepaths.append(self.dir_path / "BANDS.OUT")
+            self.filepaths.append(self.path_dir / "BANDS.OUT")
         if 21 in self.tasks or 22 in self.tasks:
             self.is_bands_calculation = True
             ispc = 1
             for spc in self.composition:
                 for iatom in range(self.composition[spc]):
                     self.filepaths.append(
-                        self.dir_path /
+                        self.path_dir /
                         f"BAND_S{ispc:02d}_A{iatom + 1:04d}.OUT"
                     )
                 ispc += 1
@@ -222,8 +228,8 @@ class ElkParser:
         else:
             self.nspin = 1
 
-        if (self.dir_path/'GEOMETRY.OUT').exists():
-            lattice = self._read_geometry_out()
+
+        
 
     def _read_bands(self):
         """
@@ -238,7 +244,7 @@ class ElkParser:
 
             raw_nbands = int(len(lines) / (self.nkpoints + 1))
 
-            rf = open(self.dir_path / "BANDLINES.OUT", "r")
+            rf = open(self.path_dir / "BANDLINES.OUT", "r")
             bandLines = rf.readlines()
             rf.close()
 
@@ -313,7 +319,7 @@ class ElkParser:
             )
             idx_bands_out = None
             for ifile in range(len(self.filepaths)):
-                if self.filepaths[ifile] == self.dir_path / "BANDS.OUT":
+                if self.filepaths[ifile] == self.path_dir / "BANDS.OUT":
                     idx_bands_out = ifile
             if idx_bands_out != None:
                 del self.filepaths[idx_bands_out]
@@ -373,13 +379,13 @@ class ElkParser:
         DesityOfStates
             Returns a DensityOfStates object from pyprocar.core.dos
         """
-        if not os.path.exists(self.dir_path / "TDOS.OUT"):
+        if not os.path.exists(self.path_dir / "TDOS.OUT"):
 
             return None
         tdos = []
         pdos = {}
         n_atoms = 0
-        for i_file in self.dir_path.iterdir():
+        for i_file in self.path_dir.iterdir():
             if i_file.name == "TDOS.OUT":
                 with open(i_file, "r") as f:
                     data = f.read()
@@ -441,7 +447,7 @@ class ElkParser:
         """
         Returns the fermi energy read from FERMI.OUT
         """
-        with open(self.dir_path / "EFERMI.OUT", "r") as rf:
+        with open(self.path_dir / "EFERMI.OUT", "r") as rf:
             self.fermi = float(rf.readline().split()[0]) * HARTREE_TO_EV
         return self.fermi
 
@@ -453,7 +459,7 @@ class ElkParser:
         Return: return_description
         """
 
-        path_geometry_out = self.dir_path/'GEOMETRY.OUT'
+        path_geometry_out = self.path_dir/'GEOMETRY.OUT'
         content_geometry_out = path_geometry_out.read_text()
 
         # Read lattice

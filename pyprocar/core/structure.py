@@ -86,7 +86,7 @@ class Structure:
             f"species={list(self.species)}, "
             f"volume={self.volume*1e30:.3f} A^3, "
             f"angles=({self.alpha:.2f}, {self.beta:.2f}, {self.gamma:.2f}), "
-            f"spacegroup='{self.get_space_group_international() if self.has_complete_data else 'N/A'}')"
+            f"spacegroup='{self.get_space_group_international()}')"
         )
 
     def __str__(self):
@@ -95,7 +95,7 @@ class Structure:
         species_line = f"Species: {', '.join(self.species)}"
         volume_line = f"Volume: {self.volume*1e30:.3f} A^3"
         angle_line = f"Angles (α, β, γ): {self.alpha:.2f}°, {self.beta:.2f}°, {self.gamma:.2f}°"
-        sg_line = f"Space group: {self.get_space_group_international() if self.has_complete_data else 'N/A'}"
+        sg_line = f"Space group: {self.get_space_group_international()}"
 
         # Only show first few fractional coords for readability
         frac_preview = "\n".join(
