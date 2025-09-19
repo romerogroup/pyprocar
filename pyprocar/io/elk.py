@@ -192,16 +192,17 @@ class ElkParser:
         """
 
         path = self.path_dir / "elk.in"
-        file_content = path.read_text()
+        content_elkin = path.read_text()
         pattern_task = re.compile(
             r"(?m)^[ \t]*tasks[ \t]*\n"       # “tasks” line
             r"((?:[ \t]*\d+[ \t]*\n)+)"       # one or more lines of digits
         )
-        match = pattern_task.search(file_content)
+        match = pattern_task.search(content_elkin)
         if not match:
             raise ValueError("No 'tasks' block found in elk.in")
         self.tasks = [int(n) for n in match.group(1).split()]
 
+        
         # if 20 in self.tasks:
         #     self.is_bands_calculation = True
         #     self.filepaths.append(self.path_dir / "BANDS.OUT")
@@ -216,7 +217,7 @@ class ElkParser:
         #             )
         #         ispc += 1
 
-        self.spinpol = re.findall(r"spinpol\s*([.a-zA-Z]*)", file_content)
+        self.spinpol = re.findall(r"spinpol\s*([.a-zA-Z]*)", content_elkin)
         if len(self.spinpol) != 0:
             self.spinpol = utils.strings.bool_fortran(self.spinpol[0])
         else:
@@ -225,6 +226,34 @@ class ElkParser:
             self.nspin = 2
         else:
             self.nspin = 1
+        if 20 in self.tasks or 21 in self.tasks or 22 in self.tasks:
+            PLOT1D_PATTERN = re.compile(
+                rf"^\s*plot1d[^\n]*\n\s*([+-]?\d+)\s+([+-]?\d+)[^\n]*\n(?P<block>(?:^\s*{FLOAT}\s+{FLOAT}\s+{FLOAT}.*\n)+)",
+            re.IGNORECASE | re.MULTILINE | re.VERBOSE
+            )
+            m = PLOT1D_PATTERN.search(content_elkin)
+            if not m:
+                warnings.warn("plot1d section not found, using defaults values nvp1d=2, npp1d=200")
+                self.n_vertices = 2
+                self.n_kpoints = 200
+            else:
+                n_vertices = int(m.group(1))
+                n_kpoints = int(m.group(2))
+                block = m.group("block")
+                TRIPLE_RE = re.compile(
+                    rf"^\s*({FLOAT})\s+({FLOAT})\s+({FLOAT})",
+                    re.MULTILINE
+                )
+                triples = TRIPLE_RE.findall(block)
+                assert len(triples) == n_vertices
+                # Convert to float; normalize D→E for Python float()
+                k_vertices = np.array(triples,
+                                dtype=float
+                                )
+                
+                self.n_vertices = n_vertices 
+                self.n_kpoints = n_kpoints
+                self.k_vertices = k_vertices
 
     def _read_bands(self):
         """
