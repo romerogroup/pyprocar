@@ -7,10 +7,10 @@ from collections.abc import Mapping, Sequence
 from typing import Dict, Iterable, Tuple
 
 import matplotlib.cm as cm
-from matplotlib import colormaps
-from matplotlib.collections import LineCollection
 import matplotlib.colors as mcolors
 import numpy as np
+from matplotlib import colormaps
+from matplotlib.collections import LineCollection
 
 from pyprocar.plotter.dos_plots.base import BasePlotter
 
@@ -263,15 +263,6 @@ class ParametricLinePlot(ParametricPlot):
             lc.set_alpha(kwargs.get("alpha", 1.0))
 
             self.ax.add_collection(lc)
-
-            if (plot_total if plot_total is not None else self.plot_total):
-                total_kwargs_resolved = self._resolve_line_kwargs(
-                    index,
-                    overrides=total_kwargs,
-                )
-                if label is not None:
-                    total_kwargs_resolved.setdefault("label", label)
-                self.ax.plot(x_data, y_data, **total_kwargs_resolved)
 
             stored[f"dos_total_{index}"] = line_values[index]
             stored[f"dos_weight_{index}"] = colour_weights[index]
