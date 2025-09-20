@@ -18,30 +18,6 @@ from pyprocar.core.serializer import get_serializer
 logger = logging.getLogger(__name__)
 
 
-@dataclass(frozen=True)
-class ParametricDataset:
-    """Container for precomputed DOS data used by parametric plots."""
-
-    energies: npt.NDArray[np.float64]
-    totals: npt.NDArray[np.float64]
-    total_projected: npt.NDArray[np.float64]
-    projected: npt.NDArray[np.float64]
-    spin_indices: Tuple[int, ...]
-    spin_labels: Tuple[str, ...]
-
-    def normalized(self) -> npt.NDArray[np.float64]:
-        denominators = np.asarray(self.total_projected, dtype=np.float64)
-        numerators = np.asarray(self.projected, dtype=np.float64)
-        with np.errstate(divide="ignore", invalid="ignore"):
-            normalized = np.divide(
-                numerators,
-                denominators,
-                out=np.zeros_like(numerators),
-                where=denominators != 0,
-            )
-        return np.nan_to_num(normalized, copy=False, nan=0.0, posinf=0.0, neginf=0.0)
-
-
 def get_dos_from_code(
     code: str,
     dirpath: str,
@@ -113,7 +89,7 @@ class DensityOfStates(PointSet):
         orbital_names: list[str] | None = None,
         gradient_func=None,
     ) -> None:
-        energies_array = self._prepare_energies(energies)
+        energies_array = energies
         gradient = gradient_func or _finite_difference_gradient
 
         super().__init__(points=energies_array, gradient_func=gradient)
@@ -121,13 +97,13 @@ class DensityOfStates(PointSet):
         self._fermi = float(fermi)
         self._orbital_names = orbital_names
 
-        total_array = self._prepare_total(total)
+        total_array = self._validate_total(total)
         self.add_property(name="total", value=total_array)
 
         if projected is not None:
-            projected_array = self._prepare_projected(projected)
+            projected_array = self._validate_projected(projected)
             self.add_property(name="projected", value=projected_array)
-
+            
         logger.debug(
             "Initialized DensityOfStates with %d energies, %d spin channels",
             self.n_energies,
@@ -155,6 +131,12 @@ class DensityOfStates(PointSet):
         proj_equal = True
         if self.projected is not None or other.projected is not None:
             proj_equal = np.allclose(self.projected, other.projected)
+        raw_self = self.projected
+        raw_other = other.projected
+        if raw_self is not None or raw_other is not None:
+            if raw_self is None or raw_other is None:
+                return False
+            proj_equal = proj_equal and np.allclose(raw_self, raw_other)
         return arrays_equal and proj_equal and np.isclose(self.fermi, other.fermi)
 
     @classmethod
@@ -183,6 +165,22 @@ class DensityOfStates(PointSet):
     def projected(self) -> npt.NDArray[np.float64] | None:
         prop = super().get_property("projected")
         return prop.value if prop is not None else None
+
+    @property
+    def spin_texture(self) -> npt.NDArray[np.float64] | None:
+        prop = super().get_property("spin_texture")
+        if prop is not None:
+            return prop
+        spin_texture = self.sum_projection_components(spins = [1, 2, 3])
+        return spin_texture
+    
+    @property
+    def magnetization(self) -> npt.NDArray[np.float64] | None:
+        prop = super().get_property("magnetization")
+        if prop is not None:
+            return prop
+        magnetization = self.compute_magnetization()
+        return magnetization
 
     @property
     def orbital_names(self) -> list[str] | None:
@@ -270,10 +268,10 @@ class DensityOfStates(PointSet):
 
     def compute_property(self, name: str, **kwargs):
         if name in {"projected_sum", "projected_sum_total"}:
-            total_proj, projected = self.compute_projected_sum(**kwargs)
+            projected = self.compute_projected_sum(**kwargs)
             params = self._projected_sum_cache_params(**kwargs)
             base = "projected_sum_total" if name.endswith("_total") else "projected_sum"
-            value = total_proj if name.endswith("_total") else projected
+            value = projected
             key = self._make_property_key(base, params)
             return Property(name=key, value=value)
 
@@ -288,6 +286,16 @@ class DensityOfStates(PointSet):
             cumulative = self.compute_cumulative_total()
             key = self._make_property_key(name, {})
             return Property(name=key, value=cumulative)
+        
+        if name == "spin_texture":
+            spin_texture = self.compute_spin_texture(**kwargs)
+            key = self._make_property_key(name, {})
+            return Property(name=key, value=spin_texture)
+        
+        if name == "magnetization":
+            magnetization = self.compute_magnetization(**kwargs)
+            key = self._make_property_key(name, {})
+            return Property(name=key, value=magnetization)
 
         return None
 
@@ -329,151 +337,170 @@ class DensityOfStates(PointSet):
     # ------------------------------------------------------------------
     # Core calculations
     # ------------------------------------------------------------------
-    def dos_sum(
+    def sum_projection_components(
         self,
+        values_array: npt.NDArray[np.float64],
         atoms: Sequence[int] | None = None,
         orbitals: Sequence[int] | None = None,
         spins: Sequence[int] | None = None,
-        sum_noncolinear: bool = True,
+        keepdims: bool = True,
     ) -> npt.NDArray[np.float64]:
         """Sum projections over selected atoms, orbitals, and spins."""
-        if self.projected is None:
-            raise ValueError("Projected DOS is not available for this calculation")
+        
+        n_dims = values_array.ndim
+        if n_dims <= 2:
+            raise ValueError("Values array must have at least 3 dimensions")
 
-        spins_ndarray = self._sanitize_indices(spins, self.n_spins)
-        if spins_ndarray is None:
-            if self.n_spins == 4:
-                raise ValueError(
-                    "Spins must be provided for non-colinear calculations."
+        atoms_ndarray = self._validate_indices(atoms, self.n_atoms)
+        orbitals_ndarray = self._validate_indices(orbitals, self.n_orbitals)
+        spins_ndarray = self._validate_indices(spins, self.n_spins)
+
+        tmp_array = values_array
+        # Spin Channels should not be summed over only taken!
+        if spins_ndarray is not None:
+            tmp_array = np.take(tmp_array, spins_ndarray, axis=1)
+        if atoms_ndarray is not None:
+            tmp_array = np.take(tmp_array, atoms_ndarray, axis=2)
+        if orbitals_ndarray is not None:
+            tmp_array = np.take(tmp_array, orbitals_ndarray, axis=3)
+        
+        if keepdims:
+            summed_array = tmp_array.sum(axis=2,keepdims=True).sum(axis=3,keepdims=True)
+        else:
+            summed_array = tmp_array.sum(axis=-1, keepdims=False).sum(axis=-1, keepdims=False)
+
+        return summed_array
+    
+    def normalize_projection_components(self,
+                                        values_array: npt.NDArray[np.float64],
+                                        atoms: Sequence[int] | None = None,
+                                        orbitals: Sequence[int] | None = None,
+                                        spins: Sequence[int] | None = None,
+                                        by_spin_magnitude: bool = False,
+                                        keepdims: bool = True,
+                                        **kwargs) -> npt.NDArray[np.float64]:
+        summed_array = self.sum_projection_components(values_array=values_array, 
+                                                      atoms=atoms, 
+                                                      orbitals=orbitals, 
+                                                      spins=spins, 
+                                                      keepdims=keepdims, **kwargs)
+        
+        total_proj_array = self.sum_projection_components(values_array=values_array, 
+                                                spins=spins, 
+                                                keepdims=keepdims, **kwargs)
+
+        normalized_array = np.zeros_like(summed_array)
+        with np.errstate(divide="ignore", invalid="ignore"):
+            
+            
+            if self.is_non_collinear:
+                total_spin_magnitude = np.linalg.norm(total_array, axis=1, keepdims=keepdims)
+                normalized_array[:,0,...] = np.divide(
+                    summed_array[:,0, ...],
+                    total_proj_array[:, 0, ...],
+                    out=np.zeros_like(summed_array[:,0, ...]),
+                    where=total_array[:, 0, ...] != 0,
                 )
-            spins_ndarray = np.arange(self.n_spins, dtype=int)
-
-        atoms_ndarray = self._sanitize_indices(atoms, self.n_atoms)
-        orbitals_ndarray = self._sanitize_indices(orbitals, self.n_orbitals)
-
-        zero_result = np.zeros((self.n_energies, self.n_spins), dtype=np.float64)
-        if (
-            atoms_ndarray is not None
-            and atoms_ndarray.size == 0
-            or orbitals_ndarray is not None
-            and orbitals_ndarray.size == 0
-        ):
-            aggregated = zero_result
-        else:
-            projected = np.asarray(self.projected, dtype=np.float64)
-            if atoms_ndarray is not None:
-                projected = np.take(projected, atoms_ndarray, axis=2)
-            if orbitals_ndarray is not None:
-                projected = np.take(projected, orbitals_ndarray, axis=3)
-            aggregated = projected.sum(axis=-1).sum(axis=-1)
-
-        if self.is_non_collinear:
-            selected = aggregated[..., spins_ndarray]
-            if sum_noncolinear:
-                aggregated_result = np.sum(selected, axis=-1, keepdims=True)
+                for i in range(1, summed_array.shape[1]):
+                    if by_spin_magnitude:
+                        total_array = total_spin_magnitude[:,i,...]
+                    else:
+                        total_array = total_proj_array[:,i,...]
+                    normalized_array[:,i,...] = np.divide(
+                        summed_array[:,i,...],
+                        total_array,
+                        out=np.zeros_like(summed_array[:,i,...]),
+                        where=total_array != 0,
+                    )
             else:
-                aggregated_result = selected
-        else:
-            aggregated_result = np.zeros_like(aggregated)
-            aggregated_result[..., spins_ndarray] = aggregated[..., spins_ndarray]
-
-        return aggregated_result
+                for ispin in range(0, summed_array.shape[1]):
+                    normalized_array[:,ispin,...] = np.divide(
+                        summed_array[:,ispin,...],
+                        total_proj_array[:,ispin,...],
+                        out=np.zeros_like(summed_array[:,ispin,...]),
+                        where=total_proj_array[:,ispin,...] != 0,
+                    )
+   
+        return normalized_array
 
     def compute_projected_sum(
         self,
         atoms: Sequence[int] | None = None,
         orbitals: Sequence[int] | None = None,
         spins: Sequence[int] | None = None,
-        sum_noncolinear: bool = True,
+        normalize: bool = False,
+        **kwargs
     ) -> tuple[npt.NDArray[np.float64], npt.NDArray[np.float64]]:
         """Return total and filtered projected DOS sums."""
         if self.projected is None:
             raise ValueError("Projected DOS is not available for this calculation")
 
-        if self.n_spins == 4:
-            dos_total_projected = self.dos_sum(
+        if normalize:
+            return self.normalize_projection_components(
+                values_array=self.projected,
+                atoms=atoms,
+                orbitals=orbitals,
                 spins=spins,
-                sum_noncolinear=sum_noncolinear,
+                **kwargs
             )
         else:
-            dos_total_projected = self.dos_sum()
-
-        dos_projected = self.dos_sum(
-            atoms=atoms,
-            orbitals=orbitals,
-            spins=spins,
-            sum_noncolinear=sum_noncolinear,
-        )
-
-        return dos_total_projected, dos_projected
-
-    def build_parametric_dataset(
-        self,
-        *,
-        atoms: Sequence[int] | None = None,
-        orbitals: Sequence[int] | None = None,
-        spins: Sequence[int] | None = None,
-        sum_noncolinear: bool = True,
-    ) -> ParametricDataset:
-        """Prepare the arrays needed for parametric DOS visualisations."""
-
-        if self.projected is None:
-            raise ValueError(
-                "Projected DOS data are required to build a parametric dataset."
+            return self.sum_projection_components(
+                values_array=self.projected,
+                atoms=atoms,
+                orbitals=orbitals,
+                spins=spins,
+                **kwargs
             )
-
-        spin_indices = self._sanitize_indices(spins, self.n_spins)
-        if spin_indices is None:
-            spin_indices = np.arange(self.n_spins, dtype=int)
-        if spin_indices.size == 0:
-            raise ValueError("At least one spin channel must be selected.")
-
-        total = np.asarray(self.total, dtype=np.float64)
-        if total.ndim == 1:
-            total = total[:, np.newaxis]
-
-        if np.any(spin_indices >= total.shape[1]):
-            raise IndexError("Spin indices exceed available DOS spin channels.")
-
-        total_selected = total[:, spin_indices]
-        if total_selected.ndim == 1:
-            total_selected = total_selected[:, np.newaxis]
-
-        dos_total_projected, dos_projected = self.compute_projected_sum(
-            atoms=atoms,
-            orbitals=orbitals,
-            spins=spin_indices,
-            sum_noncolinear=sum_noncolinear,
-        )
-
-        dos_total_projected = np.asarray(dos_total_projected, dtype=np.float64)
-        dos_projected = np.asarray(dos_projected, dtype=np.float64)
-
-        if dos_total_projected.ndim == 1:
-            dos_total_projected = dos_total_projected[:, np.newaxis]
-        if dos_projected.ndim == 1:
-            dos_projected = dos_projected[:, np.newaxis]
-
-        total_projected_selected = dos_total_projected[:, spin_indices]
-        projected_selected = dos_projected[:, spin_indices]
-
-        if total_projected_selected.ndim == 1:
-            total_projected_selected = total_projected_selected[:, np.newaxis]
-        if projected_selected.ndim == 1:
-            projected_selected = projected_selected[:, np.newaxis]
-
-        spin_labels_source = self.spin_projection_names
-        spin_labels = tuple(spin_labels_source[idx] for idx in spin_indices)
-
-        return ParametricDataset(
-            energies=np.asarray(self.energies, dtype=np.float64),
-            totals=total_selected.T,
-            total_projected=total_projected_selected.T,
-            projected=projected_selected.T,
-            spin_indices=tuple(int(i) for i in spin_indices.tolist()),
-            spin_labels=spin_labels,
-        )
-
+            
+    def compute_spin_texture(self,
+                             atoms: list[int] = None,
+                             orbitals: list[int] = None,
+                             normalize: bool = False,
+                             normalize_by_magnitude: bool = False,
+                             **kwargs) -> npt.NDArray[np.float64] | None:
+        if not self.is_non_collinear:
+            raise ValueError(
+                "Spin texture is only available for non-collinear calculations"
+            )
+        spin_texture_sum = self.sum_projection_components(atoms=atoms, 
+                                            orbitals=orbitals, 
+                                            spins = [1, 2, 3],
+                                            **kwargs)
+        
+        if normalize_by_magnitude or normalize:
+            return self.normalize_projection_components(
+                values_array=spin_texture_sum,
+                atoms=atoms,
+                orbitals=orbitals,
+                spins=[1, 2, 3],
+                by_spin_magnitude=normalize_by_magnitude,
+                **kwargs
+            )
+        else:
+            return spin_texture_sum
+        
+        
+    def compute_magnetization(self,
+                              atoms: list[int] = None,
+                              orbitals: list[int] = None,
+                              keepdims: bool = False,
+                              **kwargs) -> npt.NDArray[np.float64] | None:
+        if self.projected is None:
+            raise ValueError("Projected DOS is not available for this calculation")
+        
+        if self.is_non_collinear:
+            spin_texture_sum = self.sum_projection_components(self.spin_texture, atoms=atoms, orbitals=orbitals, keepdims=keepdims, **kwargs)
+            magnetization = np.linalg.norm(spin_texture_sum, axis=1, keepdims=keepdims)
+            return magnetization
+        elif self.is_spin_polarized:
+            projected_sum = self.sum_projection_components(self.projected, atoms=atoms, orbitals=orbitals, keepdims=keepdims, **kwargs)
+            
+            magnetization = projected_sum[:,0, ...] - projected_sum[:,1, ...]
+            return magnetization
+        else:
+            raise ValueError("DOS is not spin polarized or non-collinear")
+        
+    
     def compute_normalized_total(self, mode: str = "max") -> npt.NDArray[np.float64]:
         factors = self._normalization_factors(mode)
         return self.total / factors
@@ -492,14 +519,15 @@ class DensityOfStates(PointSet):
         factors = self._normalization_factors(mode)
         total_normalized = self.total / factors
 
-        projected_normalized = None
-        if self.projected is not None:
+        projected_scaled = None
+        projected_raw = self.projected_unnormalized
+        if projected_raw is not None:
             projected_scale = factors
             if projected_scale.shape[1] != self.n_spins:
                 projected_scale = np.broadcast_to(
                     projected_scale[:, :1], (1, self.n_spins)
                 )
-            projected_normalized = self.projected / projected_scale.reshape(
+            projected_scaled = projected_raw / projected_scale.reshape(
                 1, projected_scale.shape[1], 1, 1
             )
 
@@ -507,7 +535,7 @@ class DensityOfStates(PointSet):
             energies=self.energies,
             total=total_normalized,
             fermi=self.fermi,
-            projected=projected_normalized,
+            projected=projected_scaled,
             orbital_names=self.orbital_names,
         )
 
@@ -517,8 +545,9 @@ class DensityOfStates(PointSet):
 
         energies, total = interpolate(self.energies, self.total, factor=factor)
         projected = None
-        if self.projected is not None:
-            _, projected = interpolate(self.energies, self.projected, factor=factor)
+        projected_raw = self.projected_unnormalized
+        if projected_raw is not None:
+            _, projected = interpolate(self.energies, projected_raw, factor=factor)
 
         return DensityOfStates(
             energies=energies,
@@ -561,13 +590,8 @@ class DensityOfStates(PointSet):
     # ------------------------------------------------------------------
     # Internal helpers
     # ------------------------------------------------------------------
-    def _prepare_energies(self, energies: npt.ArrayLike) -> npt.NDArray[np.float64]:
-        energies_array = np.asarray(energies, dtype=np.float64).reshape(-1)
-        if energies_array.ndim != 1:
-            raise ValueError("Energies must be a 1D array")
-        return energies_array
 
-    def _prepare_total(self, total: npt.ArrayLike) -> npt.NDArray[np.float64]:
+    def _validate_total(self, total: npt.ArrayLike) -> npt.NDArray[np.float64]:
         total_array = np.asarray(total, dtype=np.float64)
         if total_array.ndim == 1:
             total_array = total_array[:, np.newaxis]
@@ -575,7 +599,7 @@ class DensityOfStates(PointSet):
             raise ValueError("Total DOS must have the same number of energies")
         return total_array
 
-    def _prepare_projected(self, projected: npt.ArrayLike) -> npt.NDArray[np.float64]:
+    def _validate_projected(self, projected: npt.ArrayLike) -> npt.NDArray[np.float64]:
         projected_array = np.asarray(projected, dtype=np.float64)
 
         if projected_array.shape[0] != self.n_energies and projected_array.shape[-1] == self.n_energies:
@@ -607,7 +631,7 @@ class DensityOfStates(PointSet):
         factors = np.where(factors == 0, 1.0, factors)
         return factors
 
-    def _sanitize_indices(
+    def _validate_indices(
         self,
         indices: Sequence[int] | None,
         upper_bound: int,
@@ -639,15 +663,15 @@ class DensityOfStates(PointSet):
         spins = kwargs.get("spins")
         sum_noncolinear = kwargs.get("sum_noncolinear", True)
 
-        atoms_idx = self._sanitize_indices(atoms, self.n_atoms)
+        atoms_idx = self._validate_indices(atoms, self.n_atoms)
         if atoms_idx is not None:
             params["atoms"] = tuple(int(i) for i in atoms_idx)
 
-        orbitals_idx = self._sanitize_indices(orbitals, self.n_orbitals)
+        orbitals_idx = self._validate_indices(orbitals, self.n_orbitals)
         if orbitals_idx is not None:
             params["orbitals"] = tuple(int(i) for i in orbitals_idx)
 
-        spins_idx = self._sanitize_indices(spins, self.n_spins)
+        spins_idx = self._validate_indices(spins, self.n_spins)
         if spins_idx is not None:
             params["spins"] = tuple(int(i) for i in spins_idx)
 
@@ -699,3 +723,18 @@ def interpolate(
     xs = np.linspace(float(np.min(x_array)), float(np.max(x_array)), len(x_array) * factor)
     ys = cs(xs)
     return xs, ys
+
+
+@dataclass
+class DOSSeriesSpec:
+    energies: npt.NDArray[np.float64]
+    total: npt.NDArray[np.float64]
+    scalars: npt.NDArray[np.float64] | None
+    vectors: npt.NDArray[np.float64] | None
+    scalars_label: str | list[str] | None
+    vectors_label: str | list[str] | None
+    total_label: str | None
+    title: str | None
+    energy_label: str | None
+    dos_label: str | None
+    
