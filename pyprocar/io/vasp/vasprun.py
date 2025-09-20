@@ -62,6 +62,14 @@ class VaspXML(collections.abc.Mapping):
             return False
 
     @property
+    def is_spin_polarized(self):
+        spins = list(self.data["general"]["dos"]["total"]["array"]["data"].keys())
+        if len(spins) == 4:
+            return True
+        else:
+            return False
+
+    @property
     def bands(self):
         """Parses the electronic bands
 
@@ -210,7 +218,8 @@ class VaspXML(collections.abc.Mapping):
                             ispin
                         ][ispin]
                     )[:, 1:]
-
+                    
+   
                 # if 'Spin-Total' in list(dos_projected[name].keys()):
                 #     del dos_projected[name]['Spin-Total']
             return (

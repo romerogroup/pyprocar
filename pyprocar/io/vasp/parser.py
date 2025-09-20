@@ -84,6 +84,12 @@ class VaspParser(BaseParser):
     @cached_property
     def version_tuple(self):
         return tuple(int(x) for x in self.version.split("."))
+    
+    @cached_property
+    def is_spin_polarized(self):
+        if self.vasprun:
+            return self.vasprun.is_spin_polarized
+        return False
 
     @property
     def kpath(self):
@@ -164,12 +170,15 @@ class VaspParser(BaseParser):
     def energies(self):
         if self.vasprun is not None and self.vasprun.has_dos:
             energies = self.vasprun.dos_total["energies"]
-            return energies
+
         elif self.doscar is not None and self.doscar.has_dos:
-            return self.doscar.energies
+            energies = self.doscar.energies
         else:
             return None
-    
+        
+        # if self.is_spin_polarized:
+        #     energies = np.repeat(energies, 2, axis=0)
+        return energies
     @cached_property
     def total_dos(self):
         if self.vasprun is not None and self.vasprun.has_dos:
@@ -185,8 +194,10 @@ class VaspParser(BaseParser):
     @cached_property
     def projected_dos(self):
         if self.vasprun is not None and self.vasprun.has_dos:
+            logger.info("Using vasprun projected dos")
             return np.moveaxis(self.vasprun.dos_projected, (0, 1, 2, 3), (2, 3, 1, 0))
         elif self.doscar is not None and self.doscar.has_dos:
+            logger.info("Using doscar projected dos")
             return self.doscar.projected_dos
         else:
             return None
