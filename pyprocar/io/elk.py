@@ -226,7 +226,7 @@ class ElkParser:
             self.nspin = 2
         else:
             self.nspin = 1
-        if 20 in self.tasks or 21 in self.tasks or 22 in self.tasks:
+        if np.any([x in self.tasks for x in [20, 21, 22]]):
             PLOT1D_PATTERN = re.compile(
                 rf"^\s*plot1d[^\n]*\n\s*([+-]?\d+)\s+([+-]?\d+)[^\n]*\n(?P<block>(?:^\s*{FLOAT}\s+{FLOAT}\s+{FLOAT}.*\n)+)",
             re.IGNORECASE | re.MULTILINE | re.VERBOSE
@@ -254,24 +254,29 @@ class ElkParser:
                 self.n_vertices = n_vertices 
                 self.n_kpoints = n_kpoints
                 self.k_vertices = k_vertices
+            # self._read_bands()
 
     def _read_bands(self):
         """
         if the task is any of 20,21,22 it parses the BANDS*.OUT files
         and prepares the spd, bands and kpoints for bandsplot
         """
-        if np.any([x in self.tasks for x in [20, 21, 22]]):
-
-            rf = open(self.filepaths[0], "r")
-            lines = rf.readlines()
-            rf.close()
-
+        if 20 in self.tasks:
+            # process BANDS.OUT
+            bands = np.loadtxt(self.path_dir/"BANDS.OUT")
+            self.bands = bands.reshape(-1,self.n_kpoints,bands.shape[1])
+        if 21 in self.tasks or 22 in self.tasks:
+            for ispecie, specie in enumerate(self.structure.composition):
+                for iatom in range(self.structure.composition[specie]):
+                    path_file = self.path_dir/f"BAND_S{ispecie+1:02d}_A{iatom+1:04d}.OUT"
+                    bands_atom = np.loadtxt(path_file)
+                    
+                    
+                    
             raw_nbands = int(len(lines) / (self.nkpoints + 1))
-
             rf = open(self.path_dir / "BANDLINES.OUT", "r")
             bandLines = rf.readlines()
             rf.close()
-
             tick_pos = []
             # using strings for a better comparision and avoiding rounding by python
             for iline in range(0, len(bandLines), 3):
