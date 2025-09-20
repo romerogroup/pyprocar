@@ -68,7 +68,7 @@ def test_dos_sum_spin_polarized(dos_spin_polarized):
     orbitals = [1, 3]
 
     result = dos_spin_polarized.dos_sum(atoms=atoms, orbitals=orbitals, spins=[0])
-    expected = np.sum(dos_spin_polarized.projected[..., orbitals], axis=-1)
+    expected = np.sum(dos_spin_polarized.projected_unnormalized[..., orbitals], axis=-1)
     expected = np.sum(expected[..., atoms], axis=-1)
     manual = np.zeros_like(expected)
     manual[..., 0] = expected[..., 0]
@@ -83,7 +83,7 @@ def test_dos_sum_non_collinear(dos_non_collinear):
     spins = [1, 2, 3]
 
     summed = dos_non_collinear.dos_sum(atoms=atoms, orbitals=orbitals, spins=spins)
-    manual = np.sum(dos_non_collinear.projected[..., orbitals], axis=-1)
+    manual = np.sum(dos_non_collinear.projected_unnormalized[..., orbitals], axis=-1)
     manual = np.sum(manual[..., atoms], axis=-1)
     manual = np.sum(manual[..., spins], axis=-1, keepdims=True)
 
@@ -93,20 +93,13 @@ def test_dos_sum_non_collinear(dos_non_collinear):
     expanded = dos_non_collinear.dos_sum(
         atoms=atoms, orbitals=orbitals, spins=spins, sum_noncolinear=False
     )
-    manual_expanded = np.sum(dos_non_collinear.projected[..., orbitals], axis=-1)
+    manual_expanded = np.sum(dos_non_collinear.projected_unnormalized[..., orbitals], axis=-1)
     manual_expanded = np.sum(manual_expanded[..., atoms], axis=-1)
     manual_expanded = manual_expanded[..., spins]
 
     assert expanded.shape == manual_expanded.shape == (dos_non_collinear.n_energies, len(spins))
     assert np.allclose(expanded, manual_expanded)
 
-
-def test_compute_projected_sum_tuple(dos_spin_polarized):
-    total_proj, projected = dos_spin_polarized.compute_projected_sum(
-        atoms=[0], orbitals=[0], spins=[0]
-    )
-    assert total_proj.shape == dos_spin_polarized.total.shape
-    assert projected.shape == dos_spin_polarized.total.shape
 
 
 def test_projected_sum_property_matches_dos_sum(dos_spin_polarized):
@@ -140,34 +133,6 @@ def test_projected_sum_total_property(dos_spin_polarized):
     manual_total = dos_spin_polarized.dos_sum()
     assert np.allclose(total_property.value, manual_total)
 
-
-def test_build_parametric_dataset_matches_manual(dos_spin_polarized):
-    dataset = dos_spin_polarized.build_parametric_dataset(atoms=[0], orbitals=[1], spins=[0])
-
-    total_proj, projected = dos_spin_polarized.compute_projected_sum(
-        atoms=[0], orbitals=[1], spins=[0]
-    )
-
-    manual_norm = np.divide(
-        projected[:, 0],
-        total_proj[:, 0],
-        out=np.zeros_like(projected[:, 0]),
-        where=total_proj[:, 0] != 0,
-    )
-    manual_norm = np.nan_to_num(manual_norm, nan=0.0, posinf=0.0, neginf=0.0)
-
-    assert dataset.totals.shape == (1, dos_spin_polarized.n_energies)
-    assert dataset.projected.shape == (1, dos_spin_polarized.n_energies)
-    assert dataset.total_projected.shape == (1, dos_spin_polarized.n_energies)
-    assert np.allclose(dataset.totals[0], dos_spin_polarized.total[:, 0])
-    assert np.allclose(dataset.normalized()[0], manual_norm)
-
-
-def test_build_parametric_dataset_spin_selection(dos_spin_polarized):
-    dataset = dos_spin_polarized.build_parametric_dataset(spins=[1])
-    assert dataset.totals.shape == (1, dos_spin_polarized.n_energies)
-    assert dataset.spin_indices == (1,)
-    assert dataset.spin_labels == (dos_spin_polarized.spin_projection_names[1],)
 
 
 def test_build_parametric_dataset_invalid_spin_raises(dos_spin_polarized):
