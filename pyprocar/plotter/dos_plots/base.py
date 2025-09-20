@@ -34,6 +34,8 @@ class BasePlotter(ABC):
     """Lightweight wrapper around a matplotlib axis for DOS plots."""
 
     orientation: str = "horizontal"
+    mirror_spins: bool = False
+    legend_enabled: bool = True
 
     def __init__(self, figsize=(6, 4), dpi: int = 100, ax=None, **kwargs) -> None:
         self.figsize = figsize
@@ -119,95 +121,114 @@ class BasePlotter(ABC):
             return self.ax.fill_between(energies, values, baseline, **kwargs)
         return self.ax.fill_betweenx(energies, baseline, values, **kwargs)
 
-    def set_dos_label(self, label: str):
+    def set_dos_label(self, label: str = "DOS"):
         if self.orientation == "horizontal":    
             self.set_ylabel(label)
         else:
             self.set_xlabel(label)
             
-    def set_dos_lim(self, lim: tuple[float, float]):
+    def set_dos_lim(self, lim: tuple[float, float] = None, data: np.ndarray = None):
+        if data is not None:
+            lim = (data.min(), data.max())
+            
         if self.orientation == "horizontal":
             self.set_ylim(lim)
         else:
             self.set_xlim(lim)
-
-    def set_energy_label(self, label: str):
-        self.ax.set_xlabel(label)
+            
+    def set_dos_ticklabel(self, labels: Sequence[str] = None, positions: Sequence[float] = None):
+        if self.orientation == "horizontal":
+            self.set_yticklabel(labels, positions)
+        else:
+            self.set_xticklabel(labels, positions)
+            
+    def set_dos_tick_params(self, which: str = "major", **kwargs):
+        if self.orientation == "horizontal":
+            self.set_ytick_params(which=which, **kwargs)
+        else:
+            self.set_xtick_params(which=which, **kwargs)
+    
+    def set_energy_label(self, label: str = "Energy"):
+        if self.orientation == "horizontal":
+            self.set_xlabel(label)
+        else:
+            self.set_ylabel(label)
+            
+    def set_energy_lim(self, lim: tuple[float, float] = None, data: np.ndarray = None):
+        if data is not None:
+            lim = (data.min(), data.max())
+            
+        if self.orientation == "horizontal":
+            self.set_xlim(lim)
+        else:
+            self.set_ylim(lim)
+            
+    def set_energy_ticklabel(self, labels: Sequence[str] = None, positions: Sequence[float] = None):
+        if self.orientation == "horizontal":
+            self.set_xticklabel(labels, positions)
+        else:
+            self.set_yticklabel(labels, positions)
+            
+    def set_energy_tick_params(self, which: str = "major", **kwargs):
+        if self.orientation == "horizontal":
+            self.set_xtick_params(which=which, **kwargs)
+        else:
+            self.set_ytick_params(which=which, **kwargs)
 
     # ------------------------------------------------------------------
     # Axis helpers
     # ------------------------------------------------------------------
-    # def finalize_axes(
-    #     self,
-    #     energies: np.ndarray,
-    #     values: np.ndarray,
-    # ) -> None:
-    #     energies = np.asarray(energies, dtype=np.float64).reshape(-1)
-    #     values = np.asarray(values, dtype=np.float64)
-    #     if values.ndim > 1:
-    #         values = values.reshape(-1)
+    def finalize_axes(
+        self,
+        energies: np.ndarray,
+        dos_values: np.ndarray,
+    ) -> None:
+        energies = np.asarray(energies, dtype=np.float64).reshape(-1)
+        dos_values = np.asarray(dos_values, dtype=np.float64)
+        if dos_values.ndim > 1:
+            dos_values = dos_values.reshape(-1)
 
 
-    #     finite_mask = np.isfinite(values)
-    #     if not finite_mask.any():
-    #         values = np.zeros(1)
-    #     else:
-    #         values = values[finite_mask]
-            
-    #     x_data, y_data = self.orient_data(energies, values)
+        finite_mask = np.isfinite(dos_values)
+        if not finite_mask.any():
+            dos_values = np.zeros(1)
+        else:
+            dos_values = dos_values[finite_mask]
 
+        self.set_energy_label()
+        self.set_energy_lim(data=energies)
+        self.set_energy_tick_params()
         
-    #     if self.orientation == "horizontal":
-    #         self.set_xlabel(self.energy_label)
-    #         self.set_ylabel(self.dos_label)
-    #         self.set_xlim((float(np.min(energies)), float(np.max(energies))))
-    #         ymin = float(np.min(values))
-    #         ymax = float(np.max(values))
-    #         if np.isclose(ymin, ymax):
-    #             pad = abs(ymin) if ymin != 0 else 1.0
-    #             ymin -= pad
-    #             ymax += pad
-    #         self.set_ylim((ymin, ymax))
-    #     else:
-    #         self.set_ylabel(self.energy_label)
-    #         self.set_xlabel(self.dos_label)
-    #         ymin = float(np.min(energies))
-    #         ymax = float(np.max(energies))
-    #         self.set_ylim((ymin, ymax))
-    #         xmin = float(np.min(values))
-    #         xmax = float(np.max(values))
-    #         if np.isclose(xmin, xmax):
-    #             pad = abs(xmin) if xmin != 0 else 1.0
-    #             xmin -= pad
-    #             xmax += pad
-    #         self.set_xlim((xmin, xmax))
+        self.set_dos_label()
+        self.set_dos_lim(data=dos_values)
+        self.set_dos_tick_params()
 
-    #     if self.legend_enabled:
-    #         self.legend()
-
-    #     self.draw_baseline()
-
-    #     if self.show_fermi and self.fermi_energy is not None:
-    #         self.draw_fermi(self.fermi_energy)
 
     # ------------------------------------------------------------------
     # Drawing helpers
     # ------------------------------------------------------------------
-    def _draw_baseline(self, value: float) -> None:
-        kwargs = dict(color="black", linewidth=0.8, linestyle="--")
-        kwargs.update(self.baseline_kwargs or {})
+    def draw_baseline(self, value: float, 
+                      color="black", 
+                      linewidth=0.8, 
+                      linestyle="--", 
+                      **kwargs) -> None:
+        
+        all_kwargs = dict(color=color, linewidth=linewidth, linestyle=linestyle, **kwargs)
         if self.orientation == "horizontal":
-            self.ax.axhline(value, **kwargs)
+            self.ax.axhline(value, **all_kwargs)
         else:
-            self.ax.axvline(value, **kwargs)
+            self.ax.axvline(value, **all_kwargs)
 
-    def _draw_fermi(self, value: float) -> None:
-        kwargs = dict(color="tab:red", linewidth=1.0, linestyle="--")
-        kwargs.update(self.fermi_line_kwargs or {})
+    def draw_fermi(self, value: float,
+                   color="tab:red", 
+                   linewidth=1.0, 
+                   linestyle="--", 
+                   **kwargs) -> None:
+        all_kwargs = dict(color=color, linewidth=linewidth, linestyle=linestyle, **kwargs)
         if self.orientation == "horizontal":
-            self.ax.axvline(value, **kwargs)
+            self.ax.axvline(value, **all_kwargs)
         else:
-            self.ax.axhline(value, **kwargs)
+            self.ax.axhline(value, **all_kwargs)
             
     def show(self):
         plt.show()
@@ -255,8 +276,14 @@ class BasePlotter(ABC):
         if labels is not None:
             self.ax.set_yticklabels(labels, **kwargs)
 
-    def set_tick_params(self, axis: str = "both", **kwargs) -> None:
+    def set_tick_params(self, axis: str = "both", which: str = "major", **kwargs) -> None:
         self.ax.tick_params(axis=axis, **kwargs)
+
+    def set_xtick_params(self, which: str = "major", **kwargs) -> None:
+        self.set_tick_params(axis="x", which=which, **kwargs)
+
+    def set_ytick_params(self, which: str = "major", **kwargs) -> None:
+        self.set_tick_params(axis="y", which=which, **kwargs)
 
     def legend(
         self,
@@ -264,25 +291,11 @@ class BasePlotter(ABC):
         labels: Sequence[str] | None = None,
         **kwargs,
     ) -> None:
-        legend_kwargs = dict(self.legend_kwargs or {})
-        legend_kwargs.update(kwargs)
         if handles is not None or labels is not None:
-            self.ax.legend(handles, labels, **legend_kwargs)
+            self.ax.legend(handles, labels, **kwargs)
         else:
-            self.ax.legend(**legend_kwargs)
-
-    def draw_fermi(self, value: float | None = None) -> None:
-        if value is None:
-            value = self.fermi_energy
-        if value is None:
-            return
-        self._draw_fermi(value)
-
-    def draw_baseline(self, value: float | None = None) -> None:
-        if value is None:
-            return
-        self._draw_baseline(value)
-
+            self.ax.legend(**kwargs)
+            
     # ------------------------------------------------------------------
     # Data capture helpers
     # ------------------------------------------------------------------
