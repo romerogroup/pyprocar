@@ -8,6 +8,7 @@ from typing import Tuple
 
 import numpy as np
 
+from pyprocar.core.property_store import Property
 from pyprocar.plotter.dos_plots.base import BasePlotter
 from pyprocar.plotter.dos_plots.parametric import ParametricLinePlot, ParametricPlot
 
@@ -60,12 +61,13 @@ class DOSPlotter(BasePlotter):
         self,
         energies: Iterable[float],
         dos_values: Iterable[Iterable[float]] | np.ndarray,
-        scalars: Iterable[Iterable[float]] | np.ndarray | None = None,
+        scalars: Iterable[Iterable[float]] | np.ndarray | Property | None = None,
         labels: Iterable[str] | None = None,
         *,
         scale: bool = False,
         **kwargs,
     ):
+
         plotter = ParametricLinePlot(ax=self.ax, **self.instance_plot_params)
         return self._add_plotter(
             plotter,
