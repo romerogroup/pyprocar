@@ -3,9 +3,10 @@
 from __future__ import annotations
 
 import logging
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Sequence, Tuple
+from typing import Any, Sequence
+import copy
 
 import numpy as np
 import numpy.typing as npt
@@ -14,6 +15,7 @@ from scipy.interpolate import CubicSpline
 
 from pyprocar.core.property_store import PointSet, Property
 from pyprocar.core.serializer import get_serializer
+
 
 logger = logging.getLogger(__name__)
 
@@ -155,32 +157,27 @@ class DensityOfStates(PointSet):
     @property
     def energies(self) -> npt.NDArray[np.float64]:
         return self.points
+    
+    @property
+    def energy_label(self) -> str:
+        return self.points_label
 
     @property
     def total(self) -> npt.NDArray[np.float64]:
-        prop = super().get_property("total")
-        return prop.value if prop is not None else np.empty((0, 0))
+        return self.get_property("total")
 
     @property
     def projected(self) -> npt.NDArray[np.float64] | None:
-        prop = super().get_property("projected")
-        return prop.value if prop is not None else None
+        return self.get_property("projected")
+
 
     @property
-    def spin_texture(self) -> npt.NDArray[np.float64] | None:
-        prop = super().get_property("spin_texture")
-        if prop is not None:
-            return prop
-        spin_texture = self.sum_projection_components(spins = [1, 2, 3])
-        return spin_texture
-    
+    def spin_texture(self) -> Property | None:
+        return self.get_property("spin_texture")
+
     @property
-    def magnetization(self) -> npt.NDArray[np.float64] | None:
-        prop = super().get_property("magnetization")
-        if prop is not None:
-            return prop
-        magnetization = self.compute_magnetization()
-        return magnetization
+    def magnetization(self) -> Property | None:
+        return self.get_property("magnetization")
 
     @property
     def orbital_names(self) -> list[str] | None:
@@ -196,25 +193,25 @@ class DensityOfStates(PointSet):
 
     @property
     def n_spin_channels(self) -> int:
-        return self.total.shape[1]
+        return self.total.to_array().shape[1]
 
     @property
     def n_spins(self) -> int:
         if self.projected is None:
             return self.n_spin_channels
-        return self.projected.shape[1]
+        return self.projected.to_array().shape[1]
 
     @property
     def n_atoms(self) -> int:
         if self.projected is None:
             return 0
-        return self.projected.shape[2]
+        return self.projected.to_array().shape[2]
 
     @property
     def n_orbitals(self) -> int:
         if self.projected is None:
             return 0
-        return self.projected.shape[3]
+        return self.projected.to_array().shape[3]
 
     @property
     def spin_channels(self) -> npt.NDArray[np.int_]:
@@ -230,7 +227,7 @@ class DensityOfStates(PointSet):
             return False
         if self.n_spins in (3, 4):
             return True
-        if self.projected.shape[-1] == 2 + 2 + 4 + 4 + 6 + 6 + 8:
+        if self.projected.to_array().shape[-1] == 2 + 2 + 4 + 4 + 6 + 6 + 8:
             return True
         return False
 
@@ -256,46 +253,45 @@ class DensityOfStates(PointSet):
             computed = self.compute_property(prop_name, **kwargs)
             if computed is None:
                 return None
-            if isinstance(computed, Property):
-                property_obj = computed
-            else:
-                property_obj = Property(name=stored_key, value=np.asarray(computed))
+            property_obj = self._coerce_to_property(computed, stored_key)
             self.add_property(property=property_obj)
             stored_key = property_obj.name
 
         normalized_key = self._normalize_super_key(key, stored_key)
         return super().get_property(normalized_key)
 
+    def _coerce_to_property(
+        self,
+        computed: Property | npt.ArrayLike,
+        name: str,
+    ) -> Property:
+        if isinstance(computed, Property):
+            computed.name = name
+            if getattr(computed, "_point_set", None) is None:
+                computed._bind_owner(self)
+            return computed
+
+        return Property(
+            name=name,
+            value=np.asarray(computed, dtype=np.float64),
+            point_set=self,
+        )
+
     def compute_property(self, name: str, **kwargs):
         if name in {"projected_sum", "projected_sum_total"}:
-            projected = self.compute_projected_sum(**kwargs)
-            params = self._projected_sum_cache_params(**kwargs)
-            base = "projected_sum_total" if name.endswith("_total") else "projected_sum"
-            value = projected
-            key = self._make_property_key(base, params)
-            return Property(name=key, value=value)
+            return self.compute_projected_sum(**kwargs)
 
         if name == "normalized_total":
-            mode = kwargs.get("mode", "max")
-            normalized = self.compute_normalized_total(mode=mode)
-            params = {} if mode == "max" else {"mode": mode}
-            key = self._make_property_key(name, params)
-            return Property(name=key, value=normalized)
+            return self.compute_normalized_total(**kwargs)
 
         if name == "cumulative_total":
-            cumulative = self.compute_cumulative_total()
-            key = self._make_property_key(name, {})
-            return Property(name=key, value=cumulative)
-        
+            return self.compute_cumulative_total()
+
         if name == "spin_texture":
-            spin_texture = self.compute_spin_texture(**kwargs)
-            key = self._make_property_key(name, {})
-            return Property(name=key, value=spin_texture)
-        
+            return self.compute_spin_texture(**kwargs)
+
         if name == "magnetization":
-            magnetization = self.compute_magnetization(**kwargs)
-            key = self._make_property_key(name, {})
-            return Property(name=key, value=magnetization)
+            return self.compute_magnetization(**kwargs)
 
         return None
 
@@ -429,98 +425,224 @@ class DensityOfStates(PointSet):
         orbitals: Sequence[int] | None = None,
         spins: Sequence[int] | None = None,
         normalize: bool = False,
-        **kwargs
-    ) -> tuple[npt.NDArray[np.float64], npt.NDArray[np.float64]]:
-        """Return total and filtered projected DOS sums."""
+        **kwargs,
+    ) -> Property:
+        """Return projected DOS sums as a Property instance."""
         if self.projected is None:
             raise ValueError("Projected DOS is not available for this calculation")
 
+        kwargs = dict(kwargs)
+        keepdims = kwargs.pop("keepdims", True)
+        sum_noncolinear = kwargs.pop("sum_noncolinear", True)
+
         if normalize:
-            return self.normalize_projection_components(
-                values_array=self.projected,
+            values = self.normalize_projection_components(
+                values_array=self.projected.to_array(),
                 atoms=atoms,
                 orbitals=orbitals,
                 spins=spins,
-                **kwargs
+                keepdims=keepdims,
+                **kwargs,
             )
         else:
-            return self.sum_projection_components(
-                values_array=self.projected,
+            values = self.sum_projection_components(
+                values_array=self.projected.to_array(),
                 atoms=atoms,
                 orbitals=orbitals,
                 spins=spins,
-                **kwargs
+                keepdims=keepdims,
+                **kwargs,
             )
+
+        # if (
+        #     self.is_non_collinear
+        #     and sum_noncolinear
+        #     and values.shape[1] > 1
+        # ):
+        #     result_values = values.sum(axis=1, keepdims=keepdims)
+        # else:
+        #     result_values = values
+
+        label = self._auto_label_projected_sum(
+            atoms=atoms, orbitals=orbitals, spins=spins, normalize=normalize
+        )
+        metadata = {
+            "atoms": list(atoms) if atoms is not None else None,
+            "orbitals": list(orbitals) if orbitals is not None else None,
+            "spins": list(spins) if spins is not None else None,
+            "normalized": normalize,
+            "keepdims": keepdims,
+            "label": label,
+            "sum_noncolinear": sum_noncolinear,
+        }
+
+        return Property(
+            name="Projected DOS",
+            value=values,
+            point_set=self,
+            units="states/eV",
+            metadata=metadata,
+        )
             
-    def compute_spin_texture(self,
-                             atoms: list[int] = None,
-                             orbitals: list[int] = None,
-                             normalize: bool = False,
-                             normalize_by_magnitude: bool = False,
-                             **kwargs) -> npt.NDArray[np.float64] | None:
+    def compute_spin_texture(
+        self,
+        atoms: Sequence[int] | None = None,
+        orbitals: Sequence[int] | None = None,
+        normalize: bool = False,
+        normalize_by_magnitude: bool = False,
+        **kwargs,
+    ) -> Property:
         if not self.is_non_collinear:
             raise ValueError(
                 "Spin texture is only available for non-collinear calculations"
             )
-        spin_texture_sum = self.sum_projection_components(atoms=atoms, 
-                                            orbitals=orbitals, 
-                                            spins = [1, 2, 3],
-                                            **kwargs)
-        
-        if normalize_by_magnitude or normalize:
-            return self.normalize_projection_components(
-                values_array=spin_texture_sum,
+        if self.projected is None:
+            raise ValueError("Projected DOS is not available for this calculation")
+
+        kwargs = dict(kwargs)
+        keepdims = kwargs.pop("keepdims", True)
+        spin_indices = [1, 2, 3]
+
+        if normalize or normalize_by_magnitude:
+            values = self.normalize_projection_components(
+                values_array=self.projected.to_array(),
+                atoms=atoms,
+                orbitals=orbitals,
+                spins=spin_indices,
+                by_spin_magnitude=normalize_by_magnitude,
+                keepdims=keepdims,
+                **kwargs,
+            )
+        else:
+            values = self.sum_projection_components(
+                values_array=self.projected.to_array(),
+                atoms=atoms,
+                orbitals=orbitals,
+                spins=spin_indices,
+                keepdims=keepdims,
+                **kwargs,
+            )
+
+        normalization_mode = "magnitude" if normalize_by_magnitude else ("fraction" if normalize else "raw")
+        metadata = {
+            "atoms": list(atoms) if atoms is not None else None,
+            "orbitals": list(orbitals) if orbitals is not None else None,
+            "normalize": normalize,
+            "normalize_by_magnitude": normalize_by_magnitude,
+            "normalization_mode": normalization_mode,
+            "keepdims": keepdims,
+        }
+
+        return Property(
+            name="Spin Texture",
+            value=values,
+            point_set=self,
+            units="states/eV",
+            metadata=metadata,
+        )
+
+    def compute_magnetization(
+        self,
+        atoms: Sequence[int] | None = None,
+        orbitals: Sequence[int] | None = None,
+        keepdims: bool = False,
+        **kwargs,
+    ) -> Property:
+        if self.projected is None:
+            raise ValueError("Projected DOS is not available for this calculation")
+
+        kwargs = dict(kwargs)
+        # keepdims already explicit in signature, ensure downstream helpers receive it once
+        kwargs.pop("keepdims", None)
+
+        if self.is_non_collinear:
+            components = self.sum_projection_components(
+                values_array=self.projected.to_array(),
                 atoms=atoms,
                 orbitals=orbitals,
                 spins=[1, 2, 3],
-                by_spin_magnitude=normalize_by_magnitude,
-                **kwargs
+                keepdims=keepdims,
+                **kwargs,
             )
-        else:
-            return spin_texture_sum
-        
-        
-    def compute_magnetization(self,
-                              atoms: list[int] = None,
-                              orbitals: list[int] = None,
-                              keepdims: bool = False,
-                              **kwargs) -> npt.NDArray[np.float64] | None:
-        if self.projected is None:
-            raise ValueError("Projected DOS is not available for this calculation")
-        
-        if self.is_non_collinear:
-            spin_texture_sum = self.sum_projection_components(self.spin_texture, atoms=atoms, orbitals=orbitals, keepdims=keepdims, **kwargs)
-            magnetization = np.linalg.norm(spin_texture_sum, axis=1, keepdims=keepdims)
-            return magnetization
+            magnetization_array = np.linalg.norm(components, axis=1, keepdims=keepdims)
+            mode = "non-collinear"
         elif self.is_spin_polarized:
-            projected_sum = self.sum_projection_components(self.projected, atoms=atoms, orbitals=orbitals, keepdims=keepdims, **kwargs)
-            
-            magnetization = projected_sum[:,0, ...] - projected_sum[:,1, ...]
-            return magnetization
+            components = self.sum_projection_components(
+                values_array=self.projected.to_array(),
+                atoms=atoms,
+                orbitals=orbitals,
+                spins=[0, 1],
+                keepdims=keepdims,
+                **kwargs,
+            )
+            magnetization_array = components[:, 0, ...] - components[:, 1, ...]
+            mode = "collinear"
         else:
             raise ValueError("DOS is not spin polarized or non-collinear")
-        
-    
-    def compute_normalized_total(self, mode: str = "max") -> npt.NDArray[np.float64]:
-        factors = self._normalization_factors(mode)
-        return self.total / factors
 
-    def compute_cumulative_total(self) -> npt.NDArray[np.float64]:
-        total = np.asarray(self.total, dtype=np.float64)
+        metadata = {
+            "atoms": list(atoms) if atoms is not None else None,
+            "orbitals": list(orbitals) if orbitals is not None else None,
+            "keepdims": keepdims,
+            "mode": mode,
+        }
+
+        return Property(
+            name="Magnetization",
+            value=magnetization_array,
+            point_set=self,
+            units="states/eV",
+            metadata=metadata,
+        )
+
+    def compute_normalized_total(
+        self,
+        mode: str = "max",
+        **kwargs,
+    ) -> Property:
+        _ = kwargs  # unused extra parameters for forward compatibility
+        factors = self._normalization_factors(mode)
+        values = self.total / factors
+        metadata = {
+            "mode": mode,
+        }
+
+        return Property(
+            name="Normalized total DOS",
+            value=values,
+            point_set=self,
+            units="dimensionless",
+            metadata=metadata,
+        )
+
+    def compute_cumulative_total(self) -> Property:
+        total = self.total.to_array()
         if total.shape[0] < 2:
-            return np.zeros_like(total)
-        delta_e = np.diff(self.energies)
-        avg = 0.5 * (total[1:] + total[:-1])
-        cumulative = np.zeros_like(total)
-        cumulative[1:] = np.cumsum(avg * delta_e[:, np.newaxis], axis=0)
-        return cumulative
+            cumulative = np.zeros_like(total)
+        else:
+            delta_e = np.diff(self.energies)
+            avg = 0.5 * (total[1:] + total[:-1])
+            cumulative = np.zeros_like(total)
+            cumulative[1:] = np.cumsum(avg * delta_e[:, np.newaxis], axis=0)
+
+        metadata = {
+            "integrator": "trapezoid",
+        }
+
+        return Property(
+            name="Cumulative total DOS",
+            value=cumulative,
+            point_set=self,
+            units="states",
+            metadata=metadata,
+        )
 
     def normalize_dos(self, mode: str = "max") -> "DensityOfStates":
         factors = self._normalization_factors(mode)
         total_normalized = self.total / factors
 
         projected_scaled = None
-        projected_raw = self.projected_unnormalized
+        projected_raw = self.projected.to_array()
         if projected_raw is not None:
             projected_scale = factors
             if projected_scale.shape[1] != self.n_spins:
@@ -538,6 +660,12 @@ class DensityOfStates(PointSet):
             projected=projected_scaled,
             orbital_names=self.orbital_names,
         )
+        
+    def shift_by_fermi(self) -> "DensityOfStates":
+        new_dos = copy.deepcopy(self)
+        new_dos._points -= self.fermi
+        new_dos._points_label = "E − E_F (eV)"
+        return copy
 
     def interpolate(self, factor: int = 2) -> "DensityOfStates":
         if factor in (0, 1):
@@ -617,6 +745,56 @@ class DensityOfStates(PointSet):
             raise ValueError("Projected DOS must align with the energy grid")
 
         return projected_array
+    
+    
+    
+    def _auto_label_projected_sum(
+        self,
+        *,
+        atoms: Sequence[int] | None,
+        orbitals: Sequence[int] | None,
+        spins: Sequence[int] | None,
+        normalize: bool,
+    ) -> str:
+        def fmt_indices(ix):
+            if ix is None:
+                return "all"
+            ix = list(ix)
+            if len(ix) == 0:
+                return "[]"
+            # collapse simple contiguous runs like 4–8
+            runs = []
+            start = prev = ix[0]
+            for v in ix[1:]:
+                if v == prev + 1:
+                    prev = v
+                else:
+                    runs.append((start, prev))
+                    start = prev = v
+            runs.append((start, prev))
+            parts = [f"{a}" if a == b else f"{a}–{b}" for a, b in runs]
+            return ",".join(parts)
+
+        # Spin label
+        spin_lbl = "spins="
+        if spins is None:
+            spin_lbl += "all"
+        else:
+            try:
+                names = self.spin_projection_names
+                parts = []
+                for s in spins:
+                    parts.append(names[s] if s < len(names) else str(s))
+                spin_lbl = "spins=" + ",".join(parts)
+            except Exception:
+                spin_lbl += fmt_indices(spins)
+
+        atoms_lbl = f"atoms={fmt_indices(atoms)}"
+        orb_lbl   = f"orbitals={fmt_indices(orbitals)}"
+        mode_lbl  = "fraction" if normalize else "raw"
+
+        return f"Σ proj ({atoms_lbl}; {orb_lbl}; {spin_lbl}; {mode_lbl})"
+
 
     def _normalization_factors(self, mode: str) -> npt.NDArray[np.float64]:
         total = np.asarray(self.total, dtype=np.float64)
@@ -725,16 +903,16 @@ def interpolate(
     return xs, ys
 
 
-@dataclass
-class DOSSeriesSpec:
-    energies: npt.NDArray[np.float64]
-    total: npt.NDArray[np.float64]
-    scalars: npt.NDArray[np.float64] | None
-    vectors: npt.NDArray[np.float64] | None
-    scalars_label: str | list[str] | None
-    vectors_label: str | list[str] | None
-    total_label: str | None
-    title: str | None
-    energy_label: str | None
-    dos_label: str | None
-    
+@dataclass(frozen=True)
+class DOSSeries:
+    """A single plottable DOS track on a shared energy grid."""
+    energies: np.ndarray                  # (N,)
+    total:    np.ndarray                  # (N,)
+    values:   np.ndarray                  # (N,) or (N, n_channels)
+    label:    str                         # legend label
+    units:    str = "states/eV"           # y-units
+    scalars:  np.ndarray | None = None    # optional parametric coloring (N, n_channels) or (N,)
+    vectors:  np.ndarray | None = None    # optional (e.g., (N,3) polarization)
+    energy_label: str = "E − E_F (eV)"    # x-axis label
+    dos_label:    str = "DOS"             # y-axis label
+    meta: dict = field(default_factory=dict)

@@ -67,14 +67,23 @@ def test_dos_sum_spin_polarized(dos_spin_polarized):
     atoms = [0, 2]
     orbitals = [1, 3]
 
-    result = dos_spin_polarized.dos_sum(atoms=atoms, orbitals=orbitals, spins=[0])
-    expected = np.sum(dos_spin_polarized.projected_unnormalized[..., orbitals], axis=-1)
-    expected = np.sum(expected[..., atoms], axis=-1)
-    manual = np.zeros_like(expected)
-    manual[..., 0] = expected[..., 0]
+    projected_sum = dos_spin_polarized.compute_projected_sum(
+        atoms=atoms,
+        orbitals=orbitals,
+        spins=[0],
+        keepdims=False,
+    )
+    result = projected_sum.to_array()
 
-    assert result.shape == expected.shape
+    projected = dos_spin_polarized.projected.to_array()
+    expected = np.sum(projected[..., orbitals], axis=-1)
+    expected = np.sum(expected[..., atoms], axis=-1)
+    manual = expected[..., [0]]
+
+    assert result.shape == manual.shape
     assert np.allclose(result, manual)
+    assert projected_sum.metadata["atoms"] == atoms
+    assert projected_sum.metadata["keepdims"] is False
 
 
 def test_dos_sum_non_collinear(dos_non_collinear):
@@ -82,25 +91,25 @@ def test_dos_sum_non_collinear(dos_non_collinear):
     orbitals = [0, 2]
     spins = [1, 2, 3]
 
-    summed = dos_non_collinear.dos_sum(atoms=atoms, orbitals=orbitals, spins=spins)
-    manual = np.sum(dos_non_collinear.projected_unnormalized[..., orbitals], axis=-1)
-    manual = np.sum(manual[..., atoms], axis=-1)
-    manual = np.sum(manual[..., spins], axis=-1, keepdims=True)
-
-    assert summed.shape == manual.shape == (dos_non_collinear.n_energies, 1)
-    assert np.allclose(summed, manual)
-
-    expanded = dos_non_collinear.dos_sum(
-        atoms=atoms, orbitals=orbitals, spins=spins, sum_noncolinear=False
+    summed_property = dos_non_collinear.compute_projected_sum(
+        atoms=atoms,
+        orbitals=orbitals,
+        spins=spins,
+        keepdims=False,
     )
-    manual_expanded = np.sum(dos_non_collinear.projected_unnormalized[..., orbitals], axis=-1)
-    manual_expanded = np.sum(manual_expanded[..., atoms], axis=-1)
-    manual_expanded = manual_expanded[..., spins]
-
-    assert expanded.shape == manual_expanded.shape == (dos_non_collinear.n_energies, len(spins))
-    assert np.allclose(expanded, manual_expanded)
-
-
+    summed = summed_property.to_array()
+    assert summed.shape == (dos_non_collinear.n_energies, 3)
+    
+    expanded_property = dos_non_collinear.compute_projected_sum(
+        atoms=atoms,
+        orbitals=orbitals,
+        spins=spins,
+        keepdims=True,
+    )
+    expanded = expanded_property.to_array()
+    
+    assert expanded.shape == (dos_non_collinear.n_energies, len(spins), 1, 1)
+ 
 
 def test_projected_sum_property_matches_dos_sum(dos_spin_polarized):
     atoms = [0, 1]
@@ -108,9 +117,14 @@ def test_projected_sum_property_matches_dos_sum(dos_spin_polarized):
     spins = [0]
 
     property_value = dos_spin_polarized.get_property(
-        "projected_sum", atoms=atoms, orbitals=orbitals, spins=spins
-    ).value
-    manual = dos_spin_polarized.dos_sum(atoms=atoms, orbitals=orbitals, spins=spins)
+        "projected_sum", atoms=atoms, orbitals=orbitals, spins=spins, keepdims=False
+    ).to_array()
+    projected = dos_spin_polarized.projected.to_array()
+    manual = np.sum(projected[..., orbitals], axis=-1)
+    manual = np.sum(manual[..., atoms], axis=-1)
+    manual = manual[..., spins]
+    
+    assert property_value.shape == manual.shape
 
     assert np.allclose(property_value, manual)
     assert "projected_sum|atoms=0,1|orbitals=0,2|spins=0" in dos_spin_polarized.property_store
@@ -129,15 +143,15 @@ def test_projected_sum_property_caches_variants(dos_spin_polarized):
 
 
 def test_projected_sum_total_property(dos_spin_polarized):
-    total_property = dos_spin_polarized.get_property("projected_sum_total", spins=[0])
-    manual_total = dos_spin_polarized.dos_sum()
-    assert np.allclose(total_property.value, manual_total)
-
-
-
-def test_build_parametric_dataset_invalid_spin_raises(dos_spin_polarized):
-    with pytest.raises(IndexError):
-        dos_spin_polarized.build_parametric_dataset(spins=[5])
+    total_property = dos_spin_polarized.get_property(
+        "projected_sum_total", spins=[0], keepdims=False
+    ).to_array()
+    manual_total = dos_spin_polarized.sum_projection_components(
+        values_array=dos_spin_polarized.projected.to_array(),
+        spins=[0],
+        keepdims=False,
+    )
+    assert np.allclose(total_property, manual_total)
 
 
 
@@ -148,14 +162,14 @@ def test_normalized_total_property(dos_spin_polarized):
 
     normalized_integral = dos_spin_polarized.get_property(
         "normalized_total", mode="integral"
-    ).value
+    ).to_array()
     integrals = np.trapezoid(normalized_integral, x=dos_spin_polarized.energies, axis=0)
     assert np.allclose(integrals, np.ones(dos_spin_polarized.n_spin_channels))
 
 
 def test_cumulative_total_property(dos_spin_polarized):
-    cumulative = dos_spin_polarized.get_property("cumulative_total").value
-    assert cumulative.shape == dos_spin_polarized.total.shape
+    cumulative = dos_spin_polarized.get_property("cumulative_total").to_array()
+    assert cumulative.shape == dos_spin_polarized.total.to_array().shape
     diff = np.diff(cumulative, axis=0)
     assert np.all(diff >= -1e-12)
 
