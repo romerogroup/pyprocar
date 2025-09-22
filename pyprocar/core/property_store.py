@@ -45,7 +45,7 @@ class Property:
     name: str
     value: npt.NDArray[np.float64]
     gradients: dict[int, npt.NDArray[np.float64]]
-    units: str | None = None
+    
     _laplacian: npt.NDArray[np.float64] = np.array([])
     _divergence: npt.NDArray[np.float64] = np.array([])
     _curl: npt.NDArray[np.float64] = np.array([])
@@ -53,6 +53,8 @@ class Property:
     _curl_gradient: npt.NDArray[np.float64] = np.array([])
     _magnitude: npt.NDArray[np.float64] = np.array([])
     _point_set: weakref.ReferenceType | None = None
+    units: str | None = None
+    label: str | None = None
     metadata: dict[str, Any] = {}
 
     def __init__(self, 
@@ -62,6 +64,7 @@ class Property:
                 points: npt.NDArray[np.float64] | None = None,
                 gradient_func: Callable = None,
                 units: str | None = None,
+                label: str | None = None,
                 point_set: Union["PointSet", None] = None,
                 metadata: dict[str, Any] | None = None):
         self.name = name
@@ -74,8 +77,6 @@ class Property:
         else:
             gradients = {1: to_numpy_array(None), 2: to_numpy_array(None)}
         self.gradients = gradients
-
-
     
         if point_set is not None and points is None:
             self._validate_point_set(point_set)
@@ -87,6 +88,10 @@ class Property:
         elif point_set is not None and points is not None:
             raise ValueError("Either point_set or points and gradient_func must be provided.")
         
+        self.label = label
+        if self.label is None:
+            self.label = name
+            
         if metadata is not None:
             self.metadata = metadata
 
@@ -101,6 +106,14 @@ class Property:
     @property
     def points(self) -> npt.NDArray[np.float64]:
         return self.point_set.points
+    
+    @property
+    def points_label(self):
+        return self.point_set.points_label
+    
+    @property
+    def points_units(self) -> str:
+        return self.point_set.points_units
     
     def gradient(self, order:int, store:bool = False, value:npt.NDArray[np.float64] | None = None) -> npt.NDArray[np.float64]:
         if value is None:
@@ -314,10 +327,12 @@ class PointSet:
                  point_data: dict[str, Property] | Sequence[Property] | None = None, 
                  gradient_func: Callable[[npt.NDArray[np.float64], npt.NDArray[np.float64]], npt.NDArray[np.float64]] | None = None,
                  transform_matrix: npt.NDArray[np.float64] | None = None,
-                 points_label: str | None = None) -> None:
+                 points_label: str | None = None,
+                 points_units: str | None = None) -> None:
         
         self._points = np.array(points)
         self._points_label = points_label
+        self._points_units = points_units
         self._point_data = {}
         if isinstance(point_data, dict):
             for name, property in point_data.items():
@@ -353,6 +368,10 @@ class PointSet:
     @property
     def points_label(self) -> str | None:
         return self._points_label
+    
+    @property
+    def points_units(self) -> str | None:
+        return self._points_units
     
     @property
     def n_points(self) -> int:
@@ -409,7 +428,8 @@ class PointSet:
     def add_property(self, 
                      property: Property | None = None,
                      name:str | None = None,
-                     value:npt.ArrayLike | None = None) -> None:
+                     value:npt.ArrayLike | None = None,
+                     **kwargs) -> None:
         if property is not None:
             logger.info("Adding property %s", property.name)
             if hasattr(property, "bind_owner"):
@@ -426,7 +446,7 @@ class PointSet:
 
         property = self.point_data.get(name, None)
         if property is None:
-            property = Property(name=name)
+            property = Property(name=name, **kwargs)
         
         if value is not None:
             property.value = np.array(value)
