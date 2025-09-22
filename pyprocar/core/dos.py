@@ -100,11 +100,17 @@ class DensityOfStates(PointSet):
         self._orbital_names = orbital_names
 
         total_array = self._validate_total(total)
-        self.add_property(name="total", value=total_array)
+        self.add_property(name="total", 
+                          value=total_array,
+                          units = "states/eV",
+                          label = "DOS")
 
         if projected is not None:
             projected_array = self._validate_projected(projected)
-            self.add_property(name="projected", value=projected_array)
+            self.add_property(name="projected", 
+                              value=projected_array, 
+                              units = "states/eV",
+                              label = "Projected DOS")
             
         logger.debug(
             "Initialized DensityOfStates with %d energies, %d spin channels",
@@ -154,13 +160,27 @@ class DensityOfStates(PointSet):
     # ------------------------------------------------------------------
     # Core data accessors
     # ------------------------------------------------------------------
+    
+    @property
+    def points_label(self) -> str:
+        return "Energy"
+    
+    @property
+    def points_units(self) -> str:
+        return "eV"
+    
     @property
     def energies(self) -> npt.NDArray[np.float64]:
         return self.points
     
+    
     @property
     def energy_label(self) -> str:
         return self.points_label
+    
+    @property
+    def energy_units(self) -> str:
+        return self.points_units
 
     @property
     def total(self) -> npt.NDArray[np.float64]:
@@ -298,9 +318,9 @@ class DensityOfStates(PointSet):
     def add_property(
         self,
         property: Property | None = None,
-        *,
         name: str | None = None,
         value: npt.ArrayLike | None = None,
+        **kwargs
     ) -> Property:
         """Attach a custom property to the DOS object.
 
@@ -313,7 +333,7 @@ class DensityOfStates(PointSet):
 
         if property is not None:
             self.validate_property_points(property)
-            super().add_property(property=property)
+            super().add_property(property=property, **kwargs)
             return self.property_store[property.name]
 
         if name is None or value is None:
@@ -327,7 +347,7 @@ class DensityOfStates(PointSet):
                 "Property values must share the DOS energy grid along the first axis."
             )
 
-        super().add_property(name=name, value=value_array)
+        super().add_property(name=name, value=value_array, **kwargs)
         return self.property_store[name]
 
     # ------------------------------------------------------------------
@@ -339,7 +359,7 @@ class DensityOfStates(PointSet):
         atoms: Sequence[int] | None = None,
         orbitals: Sequence[int] | None = None,
         spins: Sequence[int] | None = None,
-        keepdims: bool = True,
+        keepdims: bool = False,
     ) -> npt.NDArray[np.float64]:
         """Sum projections over selected atoms, orbitals, and spins."""
         
@@ -373,7 +393,7 @@ class DensityOfStates(PointSet):
                                         orbitals: Sequence[int] | None = None,
                                         spins: Sequence[int] | None = None,
                                         by_spin_magnitude: bool = False,
-                                        keepdims: bool = True,
+                                        keepdims: bool = False,
                                         **kwargs) -> npt.NDArray[np.float64]:
         summed_array = self.sum_projection_components(values_array=values_array, 
                                                       atoms=atoms, 
@@ -432,8 +452,7 @@ class DensityOfStates(PointSet):
             raise ValueError("Projected DOS is not available for this calculation")
 
         kwargs = dict(kwargs)
-        keepdims = kwargs.pop("keepdims", True)
-        sum_noncolinear = kwargs.pop("sum_noncolinear", True)
+        keepdims = kwargs.pop("keepdims", False)
 
         if normalize:
             values = self.normalize_projection_components(
@@ -473,7 +492,6 @@ class DensityOfStates(PointSet):
             "normalized": normalize,
             "keepdims": keepdims,
             "label": label,
-            "sum_noncolinear": sum_noncolinear,
         }
 
         return Property(
@@ -662,10 +680,10 @@ class DensityOfStates(PointSet):
         )
         
     def shift_by_fermi(self) -> "DensityOfStates":
-        new_dos = copy.deepcopy(self)
-        new_dos._points -= self.fermi
-        new_dos._points_label = "E − E_F (eV)"
-        return copy
+        # new_dos = copy.deepcopy(self)
+        self._points -= self.fermi
+        self._points_label = "E − E_F (eV)"
+        return self
 
     def interpolate(self, factor: int = 2) -> "DensityOfStates":
         if factor in (0, 1):
