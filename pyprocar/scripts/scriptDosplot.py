@@ -14,7 +14,7 @@ import yaml
 
 from pyprocar.cfg import ConfigFactory, ConfigManager, PlotType
 from pyprocar.io import Parser
-from pyprocar.plotter import DOSPlot
+from pyprocar.plotter import DOSPlotter
 from pyprocar.utils import ROOT, data_utils, welcome
 from pyprocar.utils.info import orbital_names
 from pyprocar.utils.log_utils import set_verbose_level

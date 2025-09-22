@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from pyprocar.io import Parser
-from pyprocar.plotter import DOSPlot, EBSPlot
+from pyprocar.plotter import DOSPlotter, EBSPlot
 from pyprocar.scripts.scriptBandsplot import bandsplot
 from pyprocar.scripts.scriptDosplot import dosplot
 from pyprocar.utils import welcome
