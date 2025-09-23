@@ -463,6 +463,8 @@ class DensityOfStates(PointSet):
                 keepdims=keepdims,
                 **kwargs,
             )
+            data_lim = (0, 1.0)
+            units = None
         else:
             values = self.sum_projection_components(
                 values_array=self.projected.to_array(),
@@ -472,7 +474,8 @@ class DensityOfStates(PointSet):
                 keepdims=keepdims,
                 **kwargs,
             )
-
+            data_lim=None
+            units = "states/eV"
         # if (
         #     self.is_non_collinear
         #     and sum_noncolinear
@@ -498,8 +501,9 @@ class DensityOfStates(PointSet):
             name="Projected DOS",
             value=values,
             point_set=self,
-            units="states/eV",
+            units=units,
             metadata=metadata,
+            data_lim=data_lim,
         )
             
     def compute_spin_texture(

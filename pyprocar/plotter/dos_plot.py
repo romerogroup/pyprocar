@@ -183,6 +183,7 @@ class DOSPlotter:
         scale:bool = False, 
         cmap: str | mcolors.Colormap = "plasma",
         norm: mcolors.Normalize | str | None = None,
+        clim: tuple[float | None, float | None] | None = None,
         linewidth: float = 1.5,
         linestyle: str = "-",
         alpha: float = 1.0,
@@ -199,20 +200,20 @@ class DOSPlotter:
         data_units = point_data.units
         
         scalars_array = scalars_data.to_array()
-        scalars_label = scalars_data.label
-        scalars_units = scalars_data.units
-        
+
         if scalars_array.ndim == 1:
             n_channels = 1
         else:
             n_channels = scalars_array.shape[1]
         
-        colour_weights = scalars_array if not scale else scalars_array * data_array
-        
+
         logger.debug(f"Energy shape: {energy_array.shape}")
         logger.debug(f"point_values shape: {data_array.shape}")
-        logger.debug(f"Scalars shape: {colour_weights.shape}")
+        logger.debug(f"Scalars shape: {scalars_array.shape}")
         logger.debug(f"n_channels: {n_channels}")
+        clim = self._resolve_clim(scalars_data, clim=clim)
+        cmap = self._resolve_cmap(cmap)
+        norm = self._resolve_norm(clim, norm)
   
         for i_channel in range(n_channels):
         
@@ -220,12 +221,8 @@ class DOSPlotter:
             points = np.column_stack([x_data, y_data]).reshape(-1, 1, 2)
             segments = np.concatenate([points[:-1], points[1:]], axis=1)
 
-            lc = LineCollection(segments)
-            lc.set_cmap(cmap)
-            lc.set_norm(norm)
-
-            segment_weights = 0.5 * (colour_weights[:,i_channel] + colour_weights[:,i_channel])
-            lc.set_array(segment_weights)
+            lc = LineCollection(segments, cmap=cmap, norm=norm)
+            lc.set_array(scalars_array[:,i_channel])
             lc.set_linewidth(linewidth)
             lc.set_linestyle(linestyle)
             lc.set_alpha(alpha)
@@ -245,6 +242,7 @@ class DOSPlotter:
         scalars_data: Property,
         cmap: str | mcolors.Colormap = "plasma",
         norm: mcolors.Normalize | str | None = None,
+        clim: tuple[float | None, float | None] | None = None,
         show_colorbar: bool = True,
         **kwargs
     ):
@@ -256,21 +254,15 @@ class DOSPlotter:
         data_array = point_data.to_array()
         data_label = point_data.label
         data_units = point_data.units
-        
+
         scalars_array = scalars_data.to_array()
-        scalars_label = scalars_data.label
-        scalars_units = scalars_data.units
-        
+
         n_channels = scalars_array.shape[1]
         logger.debug(f"n_channels: {n_channels}")
-        vmin, vmax = self._resolve_clim(scalars_array)
-        if isinstance(cmap, str):
-            cmap = plt.get_cmap(cmap)
-        if isinstance(norm, str):
-            norm = plt.get_norm(norm)
-        elif norm is None:
-            norm = mcolors.Normalize(vmin=vmin, vmax=vmax)
-            
+        
+        clim = self._resolve_clim(scalars_data, clim=clim)
+        norm = self._resolve_norm(clim, norm)
+        cmap = self._resolve_cmap(cmap)
         
         logger.debug(f"Energy shape: {energy_array.shape}")
         logger.debug(f"point_values shape: {data_array.shape}")
@@ -290,7 +282,7 @@ class DOSPlotter:
         self.set_energy_label(energy_label, unit_label=energy_units)
         
         if show_colorbar:
-            self.plot_colorbar(scalars_data, cmap=cmap, norm=norm, **keep_func_kwargs(kwargs, self.colorbar))
+            self.plot_colorbar(scalars_data, cmap=cmap, norm=norm, clim=clim, **keep_func_kwargs(kwargs, self.colorbar))
             
         self.finalize_axes(energy_array, data_array)
 
@@ -298,60 +290,88 @@ class DOSPlotter:
     # ------------------------------------------------------------------
     # Helpers
     # ------------------------------------------------------------------
-    def _resolve_clim(self, colour_values: np.ndarray) -> tuple[float, float]:
-        finite = np.isfinite(colour_values)
-        if not finite.any():
-            return 0.0, 1.0
-        vmin = float(np.nanmin(colour_values[finite]))
-        vmax = float(np.nanmax(colour_values[finite]))
+    def _resolve_clim(self, scalars_data: Property, clim: tuple[float | None, float | None] | None = None) -> tuple[float, float]:
+        if clim is not None:
+            return clim
+        
+        scalars_array = scalars_data.to_array()
+        scalars_lim = scalars_data.data_lim
+        
+        if scalars_lim is not None:
+            return scalars_lim
+
+        finite = np.isfinite(scalars_array)
+        vmin = float(np.nanmin(scalars_array[finite]))
+        vmax = float(np.nanmax(scalars_array[finite]))
         if np.isclose(vmin, vmax):
             vmax = vmin + 1.0
+
         return vmin, vmax
+    
+    def _resolve_norm(self, clim: tuple[float | None, float | None] | None,
+                      norm: mcolors.Normalize | str | None = None, 
+                      clip: bool = True) -> mcolors.Normalize:
+        vmin, vmax = clim
+        if norm is None:
+            print(f"vmin: {vmin}, vmax: {vmax}")
+            norm = mcolors.Normalize(vmin, vmax, clip=clip)
+        elif isinstance(norm, str):
+            norm = plt.get_norm(norm)(vmin, vmax)
+        elif isinstance(norm, mcolors.Normalize):
+            return norm
+        else:
+            raise ValueError(f"Invalid norm: {norm}")
+        return norm
+    
+    def _resolve_cmap(self, cmap: str | mcolors.Colormap | None = None) -> mcolors.Colormap:
+        if cmap is None:
+            cmap = plt.get_cmap(cmap)
+        elif isinstance(cmap, str):
+            cmap = plt.get_cmap(cmap)
+        elif isinstance(cmap, mcolors.Colormap):
+            cmap = cmap
+        return cmap
 
     def plot_colorbar(self, scalars_data: Property, 
-                       cmap = "plasma",
-                       norm = None,
-                       pad=0.02, 
-                       shrink=0.8,
-                       orientation="vertical",
-                       location="right",
-                       set_colorbar_label_kwargs=None,
-                       set_colorbar_tick_params_kwargs=None,
-                       set_colorbar_ticklabels_kwargs=None,
-                       **kwargs) -> None:
-        scalars_array = scalars_data.to_array()
+                    cmap = "plasma",
+                    norm = None,
+                    clim = None,
+                    pad=0.02, 
+                    shrink=0.8,
+                    orientation="vertical",
+                    location="right",
+                    set_colorbar_label_kwargs=None,
+                    set_colorbar_tick_params_kwargs=None,
+                    **kwargs) -> None:
+        
         scalars_label = scalars_data.label
         scalars_units = scalars_data.units
 
-        vmin, vmax = self._resolve_clim(scalars_array)
-        label = f"{scalars_label} ({scalars_units})"
-        if norm is None:
-            norm = mcolors.Normalize(vmin, vmax)
-        if cmap is None:
-            cmap = plt.get_cmap(self.cmap)
+        clim = self._resolve_clim(scalars_data, clim=clim)
+        norm = self._resolve_norm(clim, norm)
+        cmap = self._resolve_cmap(cmap)
         sm = cm.ScalarMappable(norm=norm, cmap=cmap)
         
-        kwargs.update(dict(pad=pad, shrink=shrink, orientation=orientation, location=location))
+        kwargs.update({
+            "pad":pad, 
+            "shrink":shrink, 
+            "orientation":orientation, 
+            "location":location,
+        })
         
  
         self._cb_orientation = orientation
         self._cb_location = location
         self._cb = self.fig.colorbar(sm, ax=self.ax, **kwargs)
-        
+
         set_colorbar_label_kwargs = set_colorbar_label_kwargs if set_colorbar_label_kwargs is not None else {}
-        self.set_colorbar_label(label, **set_colorbar_label_kwargs)
+        if scalars_units is not None:
+            scalars_label = f"{scalars_label} ({scalars_units})"
+        self.set_colorbar_label(scalars_label, **set_colorbar_label_kwargs)
         
         set_colorbar_tick_params_kwargs = set_colorbar_tick_params_kwargs if set_colorbar_tick_params_kwargs is not None else {}
         self.set_colorbar_tick_params(**set_colorbar_tick_params_kwargs)
-        
-        set_colorbar_ticklabels_kwargs = set_colorbar_ticklabels_kwargs if set_colorbar_ticklabels_kwargs is not None else {}
-        if "clim" not in set_colorbar_ticklabels_kwargs:
-            set_colorbar_ticklabels_kwargs["clim"] = (vmin, vmax)
-        if "labels" in set_colorbar_ticklabels_kwargs:
-            set_colorbar_ticklabels_kwargs.pop("clim")
-            
-        self.set_colorbar_ticks(**set_colorbar_ticklabels_kwargs)
-        
+
     def set_colorbar_label(self, label: str, 
                            rotation=270,
                            labelpad=12,
@@ -391,19 +411,7 @@ class DOSPlotter:
                            n_ticks: int = 5,
                            **kwargs):
         
-        
-        colorbar_ticks = self.get_colorbar_ticks()
-        colorbar_min = colorbar_ticks.min()
-        colorbar_max = colorbar_ticks.max()
-        
-        ticks = np.linspace(colorbar_min, colorbar_max, n_ticks)
-        
-        if labels is None:
-            labels = [f"{x:.2f}" for x in ticks]
-        
-        logger.debug(f"colorbar ticks: {ticks}")
-        logger.debug(f"colorbar labels: {labels}")
-        
+    
         self._validate_ticks(ticks, labels)
         
         if self.colorbar_orientation == "vertical":
@@ -416,9 +424,26 @@ class DOSPlotter:
             return self.colorbar_axes.get_yticks()
         else:
             return self.colorbar_axes.get_xticks()
+        
+    def get_colorbar_lim(self):
+        if self.colorbar_orientation == "vertical":
+            return self.colorbar_axes.get_ylim()
+        else:
+            return self.colorbar_axes.get_xlim()
+        
+    def get_colorbar_ticklabels(self):
+        if self.colorbar_orientation == "vertical":
+            return self.colorbar_axes.get_yticklabels()
+        else:
+            return self.colorbar_axes.get_xticklabels()
             
         
     def _validate_ticks(self, ticks: Sequence[float] | ticker.Locator, labels: Sequence[str]):
+        
+        if isinstance(ticks, ticker.Locator):
+            ticks = ticks.get_ticks()
+        if isinstance(labels, ticker.Locator):
+            labels = labels.get_ticklabels()
         if len(ticks) != len(labels):
             raise ValueError(f"Ticks and labels must have the same length: {len(ticks)} != {len(labels)}")
         
@@ -599,6 +624,10 @@ class DOSPlotter:
     # ------------------------------------------------------------------
     # Public axis utilities
     # ------------------------------------------------------------------
+    def set_title(self, title: str | None, **kwargs) -> None:
+        if title is not None:
+            self.ax.set_title(title, **kwargs)
+    
     def set_xlim(self, limits: Tuple[float, float] | None, **kwargs) -> None:
         if limits is None:
             return

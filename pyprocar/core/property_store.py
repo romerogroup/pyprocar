@@ -56,6 +56,7 @@ class Property:
     units: str | None = None
     label: str | None = None
     metadata: dict[str, Any] = {}
+    data_lim: tuple[float | None, float | None] | None = None
 
     def __init__(self, 
                 name:str, 
@@ -66,7 +67,8 @@ class Property:
                 units: str | None = None,
                 label: str | None = None,
                 point_set: Union["PointSet", None] = None,
-                metadata: dict[str, Any] | None = None):
+                metadata: dict[str, Any] | None = None,
+                data_lim: tuple[float | None, float | None] | None = None):
         self.name = name
         self.value = to_numpy_array(value)
         self.units = units
@@ -91,10 +93,11 @@ class Property:
         self.label = label
         if self.label is None:
             self.label = name
-            
+
         if metadata is not None:
             self.metadata = metadata
 
+        self.data_lim = data_lim
     
     @property
     def point_set(self) -> "PointSet":
