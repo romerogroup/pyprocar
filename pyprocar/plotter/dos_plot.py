@@ -7,6 +7,7 @@ from abc import ABC, abstractmethod
 from typing import Any, Dict, Iterable, Mapping, Sequence, Tuple
 from pyprocar.core.property_store import Property
 from enum import Enum
+from dataclasses import dataclass
 
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
@@ -60,10 +61,13 @@ class AxesOrientation(Enum):
     VERTICAL = "vertical"
     
     @classmethod
-    def from_string(cls, string: str) -> "AxesOrientation":
-        if string == "horizontal":
+    def from_string(cls, string: str | "AxesOrientation") -> "AxesOrientation":
+        if isinstance(string, AxesOrientation):
+            return string
+        lower_string = string.lower()
+        if lower_string[0] == "h":
             return cls.HORIZONTAL
-        elif string == "vertical":
+        elif lower_string[0] == "v":
             return cls.VERTICAL
         else:
             raise ValueError(f"Invalid axes orientation: {string}")
@@ -85,30 +89,30 @@ class Axis(Enum):
             raise ValueError(f"Invalid axis: {string}")
     
 
+@dataclass
 class DOSPlotter:
     """Lightweight wrapper around a matplotlib axis for DOS plots."""
 
-    orientation: str = "horizontal"
-    mirror_spins: bool = False
-    legend_enabled: bool = True
+    orientation: str = AxesOrientation.HORIZONTAL
+    figsize: tuple[int, int] = (6, 4)
+    dpi: int = 100
+    ax: plt.Axes | None = None
+    
 
-    def __init__(self, 
-                 figsize=(6, 4), 
-                 dpi: int = 100, 
-                 ax=None,
-                 orientation:str = "horizontal") -> None:
-        self.figsize = figsize
-        self.dpi = dpi
+    def __post_init__(self):
 
-        if ax is None:
-            self.fig, self.ax = plt.subplots(figsize=figsize, dpi=dpi)
+        if self.ax is None:
+            self._fig, self.ax = plt.subplots(figsize=self.figsize, dpi=self.dpi)
         else:
-            self.ax = ax
-            self.fig = ax.get_figure()
-
-        self._values: Dict[str, np.ndarray] = {}
-        self._validate_orientation()
+            self.ax = self.ax
+            self._fig = self.ax.get_figure()
+            
+        self.orientation = AxesOrientation.from_string(self.orientation)
         
+    @property
+    def fig(self) -> plt.Figure:
+        return self._fig
+    
     @property
     def colorbar(self) -> cm.ScalarMappable:
         if not hasattr(self, "_cb"):
@@ -123,6 +127,7 @@ class DOSPlotter:
     def colorbar_orientation(self) -> str | None:
         if not hasattr(self, "_cb_orientation"):
             return None
+        self._cb_orientation = AxesOrientation.from_string(self._cb_orientation)
         return self._cb_orientation
     
     @property
@@ -144,9 +149,9 @@ class DOSPlotter:
     ):
         scalars_mode = ScalarsMode.from_string(scalars_mode)
         if scalars_data and scalars_mode == ScalarsMode.LINE:
-            self.plot_scalar_line(point_data, scalars_data)
+            self.plot_scalar_line(point_data, scalars_data,**kwargs)
         elif scalars_data and scalars_mode == ScalarsMode.FILL:
-            self.plot_scalar_fill(point_data, scalars_data)
+            self.plot_scalar_fill(point_data, scalars_data,**kwargs)
         else:
             self.plot_line(point_data, **kwargs)
                 
@@ -174,13 +179,17 @@ class DOSPlotter:
             x_data, y_data = self.orient_data(energy_array, data_array[:,i_channel])
             plt.plot(x_data, y_data, **kwargs)
         
-        self.set_dos_label(data_label, unit_label=data_units)
         self.set_energy_label(energy_label, unit_label=energy_units)
+        self.set_energy_lim(point_data=point_data)
+        self.set_energy_tick_params()
+        
+        self.set_dos_label(data_label, unit_label=data_units)
+        self.set_dos_lim(point_data=point_data)
+        self.set_dos_tick_params()
         
     def plot_scalar_line(self,
         point_data: Property,
         scalars_data: Property,
-        scale:bool = False, 
         cmap: str | mcolors.Colormap = "plasma",
         norm: mcolors.Normalize | str | None = None,
         clim: tuple[float | None, float | None] | None = None,
@@ -233,9 +242,14 @@ class DOSPlotter:
             self.plot_colorbar(scalars_data, cmap=cmap, norm=norm, **keep_func_kwargs(kwargs, self.plot_colorbar))
             
         
-        self.set_dos_label(data_label, unit_label=data_units)
+        
         self.set_energy_label(energy_label, unit_label=energy_units)
-        self.finalize_axes(energy_array, data_array)
+        self.set_energy_lim(point_data=point_data)
+        self.set_energy_tick_params()
+        
+        self.set_dos_label(data_label, unit_label=data_units)
+        self.set_dos_lim(point_data=point_data)
+        self.set_dos_tick_params()
         
     def plot_scalar_fill(self,
         point_data: Property,
@@ -278,13 +292,18 @@ class DOSPlotter:
                 y_segment = channel_data_array[idx : idx + 2]
                 self.fill_between(x_segment, y_segment, color=segment_color, **kwargs)
 
-        self.set_dos_label(data_label, unit_label=data_units)
-        self.set_energy_label(energy_label, unit_label=energy_units)
-        
         if show_colorbar:
-            self.plot_colorbar(scalars_data, cmap=cmap, norm=norm, clim=clim, **keep_func_kwargs(kwargs, self.colorbar))
+            self.plot_colorbar(scalars_data, cmap=cmap, norm=norm, **keep_func_kwargs(kwargs, self.plot_colorbar))
             
-        self.finalize_axes(energy_array, data_array)
+        self.set_energy_label(energy_label, unit_label=energy_units)
+        self.set_energy_lim(point_data=point_data)
+        self.set_energy_tick_params()
+        
+        self.set_dos_label(data_label, unit_label=data_units)
+        self.set_dos_lim(point_data=point_data)
+        self.set_dos_tick_params()
+        
+        self.draw_baseline(value=0.0)
 
 
     # ------------------------------------------------------------------
@@ -313,7 +332,6 @@ class DOSPlotter:
                       clip: bool = True) -> mcolors.Normalize:
         vmin, vmax = clim
         if norm is None:
-            print(f"vmin: {vmin}, vmax: {vmax}")
             norm = mcolors.Normalize(vmin, vmax, clip=clip)
         elif isinstance(norm, str):
             norm = plt.get_norm(norm)(vmin, vmax)
@@ -333,15 +351,15 @@ class DOSPlotter:
         return cmap
 
     def plot_colorbar(self, scalars_data: Property, 
-                    cmap = "plasma",
-                    norm = None,
-                    clim = None,
-                    pad=0.02, 
-                    shrink=0.8,
-                    orientation="vertical",
-                    location="right",
-                    set_colorbar_label_kwargs=None,
-                    set_colorbar_tick_params_kwargs=None,
+                    cmap: str | mcolors.Colormap = "plasma",
+                    norm: mcolors.Normalize | str | None = None,
+                    clim: tuple[float | None, float | None] | None = None,
+                    pad: float = 0.02, 
+                    shrink: float = 0.8,
+                    orientation: str = "vertical",
+                    location: str = "right",
+                    set_colorbar_label_kwargs: dict | None = None,
+                    set_colorbar_tick_params_kwargs: dict | None = None,
                     **kwargs) -> None:
         
         scalars_label = scalars_data.label
@@ -378,7 +396,7 @@ class DOSPlotter:
                            **kwargs):
 
         self._validate_colorbar()
-        if self.colorbar_orientation == "vertical":
+        if self.colorbar_orientation is AxesOrientation.VERTICAL:
             self.colorbar_axes.set_ylabel(label, rotation=rotation, labelpad=labelpad, 
                                   **kwargs)
         else:
@@ -387,7 +405,7 @@ class DOSPlotter:
         
     def set_colorbar_tick_params(self, **kwargs):
         self._validate_colorbar()
-        if self.colorbar_orientation == "vertical":
+        if self.colorbar_orientation is AxesOrientation.VERTICAL:
             self.colorbar_axes.tick_params(axis="y", **kwargs)
         else:
             self.colorbar_axes.tick_params(axis="x", **kwargs)
@@ -400,7 +418,7 @@ class DOSPlotter:
         elif clim is not None and labels is None:
             labels = [f"{x:.2f}" for x in np.linspace(clim[0], clim[1], n_ticks)]
         
-        if self.colorbar_orientation == "vertical":
+        if self.colorbar_orientation is AxesOrientation.VERTICAL:
             self.colorbar_axes.set_yticklabels(labels, **kwargs)
         else:
             self.colorbar_axes.set_xticklabels(labels, **kwargs)
@@ -414,29 +432,28 @@ class DOSPlotter:
     
         self._validate_ticks(ticks, labels)
         
-        if self.colorbar_orientation == "vertical":
+        if self.colorbar_orientation is AxesOrientation.VERTICAL:
             self.colorbar_axes.set_yticks(ticks, labels, **kwargs)
         else:
             self.colorbar_axes.set_xticks(ticks, labels, **kwargs)
             
     def get_colorbar_ticks(self):
-        if self.colorbar_orientation == "vertical":
+        if self.colorbar_orientation is "vertical":
             return self.colorbar_axes.get_yticks()
         else:
             return self.colorbar_axes.get_xticks()
         
     def get_colorbar_lim(self):
-        if self.colorbar_orientation == "vertical":
+        if self.colorbar_orientation is AxesOrientation.VERTICAL:
             return self.colorbar_axes.get_ylim()
         else:
             return self.colorbar_axes.get_xlim()
         
     def get_colorbar_ticklabels(self):
-        if self.colorbar_orientation == "vertical":
+        if self.colorbar_orientation is AxesOrientation.VERTICAL:
             return self.colorbar_axes.get_yticklabels()
         else:
             return self.colorbar_axes.get_xticklabels()
-            
         
     def _validate_ticks(self, ticks: Sequence[float] | ticker.Locator, labels: Sequence[str]):
         
@@ -452,43 +469,15 @@ class DOSPlotter:
             raise ValueError("There is no colorbar for this plotter. call colorbar() or plot() with show_colorbar=True")
 
     # ------------------------------------------------------------------
-    # Configuration helpers
-    # ------------------------------------------------------------------
-    @property
-    def class_plot_params(self) -> Dict[str, Any]:
-        return get_class_attributes(self.__class__)
-
-    @property
-    def instance_plot_params(self) -> Dict[str, Any]:
-        attrs = {}
-        for name in self.class_plot_params:
-            attrs[name] = getattr(self, name, None)
-        return attrs
-
-    def update_instance_params(self, **kwargs) -> Dict[str, Any]:
-        for key, value in kwargs.items():
-            if key == "legend":
-                self.legend_enabled = bool(value)
-                continue
-            if key in self.class_plot_params:
-                setattr(self, key, value)
-        self._validate_orientation()
-        return self.instance_plot_params
-
-    # ------------------------------------------------------------------
     # Orientation utilities
     # ------------------------------------------------------------------
-    def _validate_orientation(self) -> None:
-        if self.orientation not in {"horizontal", "vertical"}:
-            raise ValueError(
-                "orientation must be either 'horizontal' or 'vertical', "
-                f"got {self.orientation!r}"
-            )
-
+    
     def orient_data(self, energies: np.ndarray, values: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
         energies = np.asarray(energies, dtype=np.float64).reshape(-1)
         values = np.asarray(values, dtype=np.float64).reshape(-1)
-        if self.orientation == "horizontal":
+        
+        logger.debug(f"Plot orientation: {self.orientation}")
+        if self.orientation is AxesOrientation.HORIZONTAL:
             return energies, values
         return values, energies
 
@@ -502,35 +491,40 @@ class DOSPlotter:
         energies = np.asarray(list(energies), dtype=np.float64)
         values = np.asarray(list(values), dtype=np.float64)
 
-        if self.orientation == "horizontal":
+        if self.orientation is AxesOrientation.HORIZONTAL:
             return self.ax.fill_between(energies, values, baseline, **kwargs)
         return self.ax.fill_betweenx(energies, baseline, values, **kwargs)
+
+    # ------------------------------------------------------------------
+    # Axis utilities
+    # ------------------------------------------------------------------
+    
 
     def set_dos_label(self, label: str = "DOS", unit_label: str = None):
         if unit_label is not None:
             label = f"{label} ({unit_label})"
-        if self.orientation == "horizontal":    
+        if self.orientation is AxesOrientation.HORIZONTAL:    
             self.set_ylabel(label)
         else:
             self.set_xlabel(label)
             
-    def set_dos_lim(self, lim: tuple[float, float] = None, data: np.ndarray = None):
-        if data is not None:
-            lim = (data.min(), data.max())
+    def set_dos_lim(self, lim: tuple[float, float] = None, point_data: Property | None = None):
+        if point_data is not None:
+            lim = self._infer_point_dat_lim(point_data)
             
-        if self.orientation == "horizontal":
+        if self.orientation is AxesOrientation.HORIZONTAL:
             self.set_ylim(lim)
         else:
             self.set_xlim(lim)
             
     def set_dos_ticklabel(self, labels: Sequence[str] = None, positions: Sequence[float] = None):
-        if self.orientation == "horizontal":
+        if self.orientation is AxesOrientation.HORIZONTAL:
             self.set_yticklabel(labels, positions)
         else:
             self.set_xticklabel(labels, positions)
             
     def set_dos_tick_params(self, which: str = "major", **kwargs):
-        if self.orientation == "horizontal":
+        if self.orientation is AxesOrientation.HORIZONTAL:
             self.set_ytick_params(which=which, **kwargs)
         else:
             self.set_xtick_params(which=which, **kwargs)
@@ -538,58 +532,40 @@ class DOSPlotter:
     def set_energy_label(self, label: str = "Energy", unit_label: str = None):
         if unit_label is not None:
             label = f"{label} ({unit_label})"
-        if self.orientation == "horizontal":
+        if self.orientation is AxesOrientation.HORIZONTAL:
             self.set_xlabel(label)
         else:
             self.set_ylabel(label)
             
             
-    def set_energy_lim(self, lim: tuple[float, float] = None, data: np.ndarray = None):
-        if data is not None:
-            lim = (data.min(), data.max())
+    def set_energy_lim(self, lim: tuple[float, float] = None, point_data: Property | None = None):
+        if point_data is not None:
+            lim = self._infer_points_lim(point_data)
             
-        if self.orientation == "horizontal":
+        if self.orientation is AxesOrientation.HORIZONTAL:
             self.set_xlim(lim)
         else:
             self.set_ylim(lim)
             
     def set_energy_ticklabel(self, labels: Sequence[str] = None, positions: Sequence[float] = None):
-        if self.orientation == "horizontal":
+        if self.orientation is AxesOrientation.HORIZONTAL:
             self.set_xticklabel(labels, positions)
         else:
             self.set_yticklabel(labels, positions)
             
     def set_energy_tick_params(self, which: str = "major", **kwargs):
-        if self.orientation == "horizontal":
+        if self.orientation is AxesOrientation.HORIZONTAL:
             self.set_xtick_params(which=which, **kwargs)
         else:
             self.set_ytick_params(which=which, **kwargs)
+            
+    def _infer_points_lim(self, point_data: Property) -> tuple[float, float]:
+        point_data_array = point_data.points
+        return point_data_array.min(), point_data_array.max()
 
-    # ------------------------------------------------------------------
-    # Axis helpers
-    # ------------------------------------------------------------------
-    def finalize_axes(
-        self,
-        energies: np.ndarray,
-        dos_values: np.ndarray,
-    ) -> None:
-        energies = np.asarray(energies, dtype=np.float64).reshape(-1)
-        dos_values = np.asarray(dos_values, dtype=np.float64)
-        if dos_values.ndim > 1:
-            dos_values = dos_values.reshape(-1)
-
-
-        finite_mask = np.isfinite(dos_values)
-        if not finite_mask.any():
-            dos_values = np.zeros(1)
-        else:
-            dos_values = dos_values[finite_mask]
-
-        self.set_energy_lim(data=energies)
-        self.set_energy_tick_params()
-        
-        self.set_dos_lim(data=dos_values)
-        self.set_dos_tick_params()
+    def _infer_point_dat_lim(self, point_data: Property) -> tuple[float, float]:
+        point_data_array = point_data.to_array()
+        return point_data_array.min(), point_data_array.max()
 
 
     # ------------------------------------------------------------------
@@ -602,7 +578,7 @@ class DOSPlotter:
                       **kwargs) -> None:
         
         all_kwargs = dict(color=color, linewidth=linewidth, linestyle=linestyle, **kwargs)
-        if self.orientation == "horizontal":
+        if self.orientation is AxesOrientation.HORIZONTAL:
             self.ax.axhline(value, **all_kwargs)
         else:
             self.ax.axvline(value, **all_kwargs)
@@ -613,7 +589,7 @@ class DOSPlotter:
                    linestyle="--", 
                    **kwargs) -> None:
         all_kwargs = dict(color=color, linewidth=linewidth, linestyle=linestyle, **kwargs)
-        if self.orientation == "horizontal":
+        if self.orientation is AxesOrientation.HORIZONTAL:
             self.ax.axvline(value, **all_kwargs)
         else:
             self.ax.axhline(value, **all_kwargs)

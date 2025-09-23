@@ -5,6 +5,7 @@ from __future__ import annotations
 import logging
 from dataclasses import dataclass, field
 from pathlib import Path
+from enum import Enum
 from typing import Any, Sequence
 import copy
 
@@ -78,6 +79,71 @@ def _finite_difference_gradient(
     edge_order = 2 if energies.size > 2 else 1
     return np.gradient(array, energies, axis=0, edge_order=edge_order)
 
+
+class NormMode(Enum):
+    FRACTION = "fraction"
+    RAW = "raw"
+    MAX = "max"
+    INTEGRAL = "integral"
+    ELECTRONS = "electrons"
+    TOTAL_PROJECTION = "total_projection"
+    SPIN_MAGNITUDE = "spin_magnitude"
+    
+    @classmethod
+    def from_input(cls, input: str | NormMode) -> NormMode:
+        if isinstance(input, NormMode):
+            return input
+        if not isinstance(input, str):
+            raise ValueError(f"Invalid normalization mode: {input}")
+        
+        lower_input = input.lower()
+        if lower_input[0] == "f":
+            return cls.FRACTION
+        elif lower_input[0] == "r":
+            return cls.RAW
+        elif lower_input[0] == "m":
+            return cls.MAX
+        elif lower_input[0] == "i":
+            return cls.INTEGRAL
+        elif lower_input[0] == "e":
+            return cls.ELECTRONS
+        elif lower_input[0] == "t":
+            return cls.TOTAL_PROJECTION
+        elif lower_input[0] == "s":
+            return cls.SPIN_MAGNITUDE
+        
+        list_modes = cls.list_modes()
+        err_msg = f"Invalid normalization mode: {input}. Valid modes are:\n"
+        err_msg += "\n".join([f"- {mode}" for mode in list_modes])
+        raise ValueError(err_msg)
+    
+    @classmethod 
+    def list_modes(cls) -> list[str]:
+        return [mode.value for mode in cls]
+    
+    @classmethod
+    def get_mode_prefix(cls, mode: str | NormMode) -> str:
+        if mode == cls.RAW:
+            return ""
+        else:
+            return "Normalized"
+        
+    @classmethod
+    def get_mode_type_label(cls, mode: str | NormMode) -> str:
+        if mode == cls.RAW:
+            return ""
+        elif mode == cls.TOTAL_PROJECTION:
+            return "by Total Projection"
+        elif mode == cls.SPIN_MAGNITUDE:
+            return "by Spin Magnitude"
+        elif mode == cls.MAX:
+            return "by Max"
+        elif mode == cls.INTEGRAL:
+            return "by Integral"
+        elif mode == cls.ELECTRONS:
+            return "by Electrons"
+        else:
+            return ""
 
 class DensityOfStates(PointSet):
     """Data-centric representation of a density of states calculation."""
@@ -259,6 +325,18 @@ class DensityOfStates(PointSet):
             return ["Spin-up", "Spin-down"]
         return ["Spin-up"]
 
+    @property
+    def n_electrons(self) -> float:
+        return self.integrate(self.total)
+    
+    @property
+    def spin_magnitude(self) -> npt.NDArray[np.float64]:
+        return self.compute_magnetization()
+    
+    @property
+    def projected_total(self) -> npt.NDArray[np.float64]:
+        return self.compute_projected_sum(normalize=False)
+    
     # ------------------------------------------------------------------
     # Property store bridge
     # ------------------------------------------------------------------
@@ -350,6 +428,13 @@ class DensityOfStates(PointSet):
         super().add_property(name=name, value=value_array, **kwargs)
         return self.property_store[name]
 
+
+    # ------------------------------------------------------------------
+    # Operations
+    # ------------------------------------------------------------------
+    def integrate(self, values_array: npt.NDArray[np.float64]) -> npt.NDArray[np.float64]:
+        return np.trapezoid(values_array, x=self.energies, axis=0)
+    
     # ------------------------------------------------------------------
     # Core calculations
     # ------------------------------------------------------------------
@@ -387,55 +472,77 @@ class DensityOfStates(PointSet):
 
         return summed_array
     
-    def normalize_projection_components(self,
-                                        values_array: npt.NDArray[np.float64],
-                                        atoms: Sequence[int] | None = None,
-                                        orbitals: Sequence[int] | None = None,
-                                        spins: Sequence[int] | None = None,
-                                        by_spin_magnitude: bool = False,
-                                        keepdims: bool = False,
-                                        **kwargs) -> npt.NDArray[np.float64]:
-        summed_array = self.sum_projection_components(values_array=values_array, 
-                                                      atoms=atoms, 
-                                                      orbitals=orbitals, 
-                                                      spins=spins, 
-                                                      keepdims=keepdims, **kwargs)
+    def normalize(self, mode: str | NormMode, values_array: npt.NDArray[np.float64], **kwargs) -> npt.NDArray[np.float64]:
+        mode = NormMode.from_input(mode)
+        if mode is NormMode.RAW:
+            return values_array
+        elif mode is NormMode.TOTAL_PROJECTION:
+            return self.normalize_total_projection(values_array=values_array, **kwargs)
+        elif mode is NormMode.SPIN_MAGNITUDE:
+            return self.normalize_spin_magnitude(values_array=values_array, **kwargs)
+        elif mode is NormMode.MAX:
+            return self.normalize_max(values_array=values_array, **kwargs)
+        elif mode is NormMode.INTEGRAL:
+            return self.normalize_integral(values_array=values_array, **kwargs)
+        elif mode is NormMode.ELECTRONS:
+            return self.normalize_electrons(values_array=values_array, **kwargs)
+            
+            
+    def normalize_max(self, values_array: npt.NDArray[np.float64], **kwargs) -> npt.NDArray[np.float64]:
+        values_array = np.asarray(values_array, dtype=np.float64)
+   
+        factors = np.max(np.abs(values_array), axis=0, keepdims=True)
+        factors = np.asarray(factors, dtype=np.float64)
+        factors = np.where(factors == 0, 1.0, factors)
         
-        total_proj_array = self.sum_projection_components(values_array=values_array, 
-                                                spins=spins, 
-                                                keepdims=keepdims, **kwargs)
-
-        normalized_array = np.zeros_like(summed_array)
         with np.errstate(divide="ignore", invalid="ignore"):
+            normalized_array = np.divide(values_array, 
+                                factors, 
+                                out=np.zeros_like(values_array), 
+                                where=factors != 0)
+        return normalized_array
+    
+    def normalize_integral(self, values_array: npt.NDArray[np.float64], **kwargs) -> npt.NDArray[np.float64]:
+        values_array = np.asarray(values_array, dtype=np.float64)
+        integrals = trapezoid(values_array, x=self.energies, axis=0)
+        factors = integrals[np.newaxis, :]
+  
+        factors = np.asarray(factors, dtype=np.float64)
+        factors = np.where(factors == 0, 1.0, factors)
+        with np.errstate(divide="ignore", invalid="ignore"):
+            normalized_array = np.divide(values_array, 
+                                factors, 
+                                out=np.zeros_like(values_array), 
+                                where=factors != 0)
+        return normalized_array
+    
+    
+    def normalize_electrons(self, values_array: npt.NDArray[np.float64], **kwargs) -> npt.NDArray[np.float64]:
+        return values_array / self.n_electrons
             
-            
-            if self.is_non_collinear:
-                total_spin_magnitude = np.linalg.norm(total_array, axis=1, keepdims=keepdims)
-                normalized_array[:,0,...] = np.divide(
-                    summed_array[:,0, ...],
-                    total_proj_array[:, 0, ...],
-                    out=np.zeros_like(summed_array[:,0, ...]),
-                    where=total_array[:, 0, ...] != 0,
+    def normalize_spin_magnitude(self, values_array: npt.NDArray[np.float64], **kwargs) -> npt.NDArray[np.float64]:
+        if self.spin_magnitude is None:
+            raise ValueError("Spin magnitude is not available for this calculation")
+        normalized_array = np.zeros_like(values_array)
+        for i in range(1, values_array.shape[1]):
+            normalized_array[:,i,...] = np.divide(
+                    values_array[:,i,...],
+                    self.spin_magnitude[:,i,...],
+                    out=np.zeros_like(values_array[:,i,...]),
+                    where=self.spin_magnitude[:,i,...] != 0,
                 )
-                for i in range(1, summed_array.shape[1]):
-                    if by_spin_magnitude:
-                        total_array = total_spin_magnitude[:,i,...]
-                    else:
-                        total_array = total_proj_array[:,i,...]
-                    normalized_array[:,i,...] = np.divide(
-                        summed_array[:,i,...],
-                        total_array,
-                        out=np.zeros_like(summed_array[:,i,...]),
-                        where=total_array != 0,
-                    )
-            else:
-                for ispin in range(0, summed_array.shape[1]):
-                    normalized_array[:,ispin,...] = np.divide(
-                        summed_array[:,ispin,...],
-                        total_proj_array[:,ispin,...],
-                        out=np.zeros_like(summed_array[:,ispin,...]),
-                        where=total_proj_array[:,ispin,...] != 0,
-                    )
+        return normalized_array
+    
+    def normalize_total_projection(self,values_array: npt.NDArray[np.float64],**kwargs) -> npt.NDArray[np.float64]:
+        normalized_array = np.zeros_like(values_array)
+        with np.errstate(divide="ignore", invalid="ignore"):
+            for ispin in range(0, values_array.shape[1]):
+                normalized_array[:,ispin,...] = np.divide(
+                    values_array[:,ispin,...],
+                    self.projected_total[:,ispin,...],
+                    out=np.zeros_like(values_array[:,ispin,...]),
+                    where=self.projected_total[:,ispin,...] != 0,
+                )
    
         return normalized_array
 
@@ -444,18 +551,17 @@ class DensityOfStates(PointSet):
         atoms: Sequence[int] | None = None,
         orbitals: Sequence[int] | None = None,
         spins: Sequence[int] | None = None,
-        normalize: bool = False,
+        norm_mode: str | NormMode = "raw",
         **kwargs,
     ) -> Property:
         """Return projected DOS sums as a Property instance."""
         if self.projected is None:
             raise ValueError("Projected DOS is not available for this calculation")
 
+        norm_mode = NormMode.from_input(norm_mode)
         kwargs = dict(kwargs)
         keepdims = kwargs.pop("keepdims", False)
-
-        if normalize:
-            values = self.normalize_projection_components(
+        values = self.sum_projection_components(
                 values_array=self.projected.to_array(),
                 atoms=atoms,
                 orbitals=orbitals,
@@ -463,46 +569,64 @@ class DensityOfStates(PointSet):
                 keepdims=keepdims,
                 **kwargs,
             )
+        
+        values = self.normalize(mode=norm_mode, values_array=values, **kwargs)
+
+        mode_prefix = NormMode.get_mode_prefix(norm_mode)
+        mode_type_label = NormMode.get_mode_type_label(norm_mode)
+        
+        
+        
+        name = "projected_sum"
+        label = "Projected DOS"
+        data_lim = None
+        units = "states/eV"
+        normalize = True
+        if norm_mode is NormMode.RAW:
+            name = "projected_sum"
+            label = "Projected DOS"
+            normalize = False
+        elif norm_mode is NormMode.TOTAL_PROJECTION:
+            name = "normalized_projected_sum_total"
+            label = "Normalized Projected DOS"
             data_lim = (0, 1.0)
             units = None
-        else:
-            values = self.sum_projection_components(
-                values_array=self.projected.to_array(),
-                atoms=atoms,
-                orbitals=orbitals,
-                spins=spins,
-                keepdims=keepdims,
-                **kwargs,
-            )
-            data_lim=None
-            units = "states/eV"
-        # if (
-        #     self.is_non_collinear
-        #     and sum_noncolinear
-        #     and values.shape[1] > 1
-        # ):
-        #     result_values = values.sum(axis=1, keepdims=keepdims)
-        # else:
-        #     result_values = values
+        elif norm_mode is NormMode.SPIN_MAGNITUDE:
+            name = "normalized_projected_sum_spin_magnitude"
+            label = "Normalized Projected DOS"
+            units = None
+        elif norm_mode is NormMode.MAX:
+            name = "normalized_projected_sum_max"
+            label = "Normalized Projected DOS"
+            units = None
+        elif norm_mode is NormMode.INTEGRAL:
+            name = "normalized_projected_sum_integral"
+            label = "Normalized Projected DOS"
+            units = "1/eV"
+        elif norm_mode is NormMode.ELECTRONS:
+            name = "normalized_projected_sum_electrons"
+            label = "Normalized Projected DOS"
+            units = "1/eV"
 
-        label = self._auto_label_projected_sum(
+        extra_metadata_label = self._auto_label_projected_sum(
             atoms=atoms, orbitals=orbitals, spins=spins, normalize=normalize
         )
         metadata = {
             "atoms": list(atoms) if atoms is not None else None,
             "orbitals": list(orbitals) if orbitals is not None else None,
             "spins": list(spins) if spins is not None else None,
-            "normalized": normalize,
+            "norm_mode": norm_mode,
             "keepdims": keepdims,
-            "label": label,
+            "label": extra_metadata_label,
         }
 
         return Property(
-            name="Projected DOS",
+            name=name,
             value=values,
             point_set=self,
             units=units,
             metadata=metadata,
+            label=label,
             data_lim=data_lim,
         )
             
@@ -830,6 +954,8 @@ class DensityOfStates(PointSet):
         factors = np.asarray(factors, dtype=np.float64)
         factors = np.where(factors == 0, 1.0, factors)
         return factors
+    
+    
 
     def _validate_indices(
         self,
