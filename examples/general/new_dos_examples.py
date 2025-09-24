@@ -73,7 +73,7 @@ def test_plot_horizontal_total_with_projected_sum_scalars_line():
 
 
     total = dos_non_spin_polarized.total
-    projected_sum = dos_non_spin_polarized.compute_projected_sum(atoms=atoms, orbitals=orbitals, spins=[0], normalize=True)
+    projected_sum = dos_non_spin_polarized.compute_projected_sum(atoms=atoms, orbitals=orbitals, spins=[0], norm_mode="total_projection")
     
     
     plotter = DOSPlotter(orientation="horizontal")
@@ -88,7 +88,7 @@ def test_plot_horizontal_total_with_projected_sum_scalars_fill():
 
 
     total = dos_non_spin_polarized.total
-    projected_sum = dos_non_spin_polarized.compute_projected_sum(atoms=atoms, orbitals=orbitals, spins=[0], normalize=True)
+    projected_sum = dos_non_spin_polarized.compute_projected_sum(atoms=atoms, orbitals=orbitals, spins=[0], norm_mode="total_projection")
     
     
     plotter = DOSPlotter(orientation="horizontal")
@@ -104,7 +104,7 @@ def test_plot_vertical_total_with_projected_sum_scalars_line():
 
 
     total = dos_non_spin_polarized.total
-    projected_sum = dos_non_spin_polarized.compute_projected_sum(atoms=atoms, orbitals=orbitals, spins=[0], normalize=True)
+    projected_sum = dos_non_spin_polarized.compute_projected_sum(atoms=atoms, orbitals=orbitals, spins=[0], norm_mode="total_projection")
     
     
     plotter = DOSPlotter(orientation="vertical")
@@ -119,7 +119,7 @@ def test_plot_vertical_total_with_projected_sum_scalars_fill():
 
 
     total = dos_non_spin_polarized.total
-    projected_sum = dos_non_spin_polarized.compute_projected_sum(atoms=atoms, orbitals=orbitals, spins=[0], normalize=True)
+    projected_sum = dos_non_spin_polarized.compute_projected_sum(atoms=atoms, orbitals=orbitals, spins=[0], norm_mode="total_projection")
     
     
     plotter = DOSPlotter(orientation="vertical")
@@ -136,7 +136,7 @@ def test_spin_polarized_plot_total_with_projected_sum_scalars_line():
 
 
     total = dos_spin_polarized.total
-    projected_sum = dos_spin_polarized.compute_projected_sum(atoms=atoms, orbitals=orbitals, spins=[0], normalize=True)
+    projected_sum = dos_spin_polarized.compute_projected_sum(atoms=atoms, orbitals=orbitals, spins=[0], norm_mode="total_projection")
     
     
     plotter = DOSPlotter(orientation="horizontal")
@@ -150,18 +150,63 @@ def test_non_colinear_plot_total_with_projected_sum_scalars_line():
     orbitals = [4,5,6,7,8]
     
     total = dos_non_colinear.total
-    projected_sum = dos_non_colinear.compute_projected_sum(atoms=atoms, orbitals=orbitals, spins=[0], normalize=True)
+    projected_sum = dos_non_colinear.compute_projected_sum(atoms=atoms, orbitals=orbitals, spins=[0], norm_mode="total_projection")
     
     plotter = DOSPlotter(orientation="horizontal")
     plotter.plot(total, scalars_data=projected_sum, scalars_mode="line")
     plotter.show()
 
 
+def test_non_colinear_plot_total_with_magnetization_scalars_line(norm_mode="raw"):
+    dos_non_colinear = DensityOfStates.from_code(code="vasp", dirpath=DOS_NON_COLINEAR_DIR)
+    atoms = [1]
+    orbitals = [4,5,6,7,8]
+    
+    total = dos_non_colinear.total
+    projected_sum = dos_non_colinear.compute_magnetization(atoms=atoms, orbitals=orbitals, norm_mode=norm_mode)
+    
+    plotter = DOSPlotter(orientation="horizontal")
+    plotter.plot(total, scalars_data=projected_sum, scalars_mode="line")
+    plotter.show()
+    
+def test_non_colinear_plot_total_with_spin_texture_magnitude_scalars_line(norm_mode="spin_magnitude"):
+    dos_non_colinear = DensityOfStates.from_code(code="vasp", dirpath=DOS_NON_COLINEAR_DIR)
+    atoms = [1]
+    orbitals = [4,5,6,7,8]
+    
+    total = dos_non_colinear.total
+    spin_texture_magnitude = dos_non_colinear.compute_spin_texture_magnitude(atoms=atoms, orbitals=orbitals, norm_mode=norm_mode)
+    
+    plotter = DOSPlotter(orientation="horizontal")
+    plotter.plot(total, scalars_data=spin_texture_magnitude, scalars_mode="line")
+    plotter.show()    
 
+# def test_non_colinear_plot_total_with_sx_magnitude_scalars_line(norm_mode="spin_magnitude"):
+#     dos_non_colinear = DensityOfStates.from_code(code="vasp", dirpath=DOS_NON_COLINEAR_DIR)
+#     atoms = [1]
+#     orbitals = [4,5,6,7,8]
+    
+#     total = dos_non_colinear.total
+#     sx = dos_non_colinear.compute_projected_sum(atoms=atoms, orbitals=orbitals, spins=[1], norm_mode=norm_mode)
+    
+#     plotter = DOSPlotter(orientation="horizontal")
+#     plotter.plot(total, scalars_data=sx, scalars_mode="line")
+#     plotter.show()
+
+
+
+###########################################################
+# Basic plots testing
+###########################################################
 # test_plot_horizontal_total_line()
 # test_plot_horizontal_projected_sum_line()
-test_plot_horizontal_projected_sum_line_integral_normalized()
+# test_plot_horizontal_projected_sum_line_integral_normalized()
 
+
+
+###########################################################
+# Orientation testing
+###########################################################
 # test_plot_horizontal_total_with_projected_sum_scalars_line()
 # test_plot_horizontal_total_with_projected_sum_scalars_fill()
 
@@ -169,9 +214,18 @@ test_plot_horizontal_projected_sum_line_integral_normalized()
 # test_plot_vertical_total_with_projected_sum_scalars_fill()
 
 
-# test_plot_total_with_projected_sum_scalars_line_vertical()
+###########################################################
+# Non-colinear testing
+###########################################################
+# test_non_colinear_plot_total_with_projected_sum_scalars_line()
+# test_non_colinear_plot_total_with_magnetization_scalars_line(norm_mode="magnetization")
 
 
+# test_non_colinear_plot_total_with_spin_texture_magnitude_scalars_line(norm_mode="raw")
+test_non_colinear_plot_total_with_spin_texture_magnitude_scalars_line(norm_mode="spin_magnitude")
+
+# test_non_colinear_plot_total_with_sx_magnitude_scalars_line(norm_mode="raw")
+# test_non_colinear_plot_total_with_sx_magnitude_scalars_line(norm_mode="spin_magnitude")
 
 
 

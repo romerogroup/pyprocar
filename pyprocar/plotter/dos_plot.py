@@ -241,8 +241,6 @@ class DOSPlotter:
         if show_colorbar:
             self.plot_colorbar(scalars_data, cmap=cmap, norm=norm, **keep_func_kwargs(kwargs, self.plot_colorbar))
             
-        
-        
         self.set_energy_label(energy_label, unit_label=energy_units)
         self.set_energy_lim(point_data=point_data)
         self.set_energy_tick_params()
