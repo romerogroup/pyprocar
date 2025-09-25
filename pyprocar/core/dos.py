@@ -16,6 +16,7 @@ from scipy.interpolate import CubicSpline
 
 from pyprocar.core.property_store import PointSet, Property
 from pyprocar.core.serializer import get_serializer
+from pyprocar.utils.inspect_utils import keep_func_kwargs
 
 
 logger = logging.getLogger(__name__)
@@ -162,6 +163,7 @@ class NormMode(Enum):
             return "N_Electrons-Normed"
         else:
             return ""
+
 
 class DensityOfStates(PointSet):
     """Data-centric representation of a density of states calculation."""
@@ -440,10 +442,33 @@ class DensityOfStates(PointSet):
     ) -> npt.NDArray[np.float64]:
         """Sum projections over selected atoms, orbitals, and spins."""
         
-        n_dims = values_array.ndim
-        if n_dims <= 2:
-            raise ValueError("Values array must have at least 3 dimensions")
+        tmp_array = self.select_projection_components(values_array=values_array, atoms=atoms, orbitals=orbitals, spins=spins)
+        
+        n_dims = tmp_array.ndim
+        if keepdims and n_dims == 4:
+            summed_array = tmp_array.sum(axis=2,keepdims=keepdims).sum(axis=3,keepdims=keepdims)
+        elif not keepdims and n_dims == 4:
+            summed_array = tmp_array.sum(axis=-1).sum(axis=-1)
+        elif n_dims == 3:
+            summed_array = tmp_array.sum(axis=2,keepdims=keepdims)
+        elif n_dims == 2:
+            summed_array = tmp_array
+        else:
+            raise ValueError(f"An unexpected error occured. This is likely due to a bug in the code. Please report this issue.")
 
+        logger.debug(f"summed_array: {summed_array.shape}")
+        return summed_array
+    
+    def select_projection_components(self,
+                                     values_array: npt.NDArray[np.float64],
+                                     atoms: Sequence[int] | None = None,
+                                     orbitals: Sequence[int] | None = None,
+                                     spins: Sequence[int] | None = None) -> npt.NDArray[np.float64]:
+        n_dims = values_array.ndim
+
+        if n_dims < 2:
+            raise ValueError("Values array must have at least 2 dimensions, which represent the energy and spin channels")
+        
         atoms_ndarray = self._validate_indices(atoms, self.n_atoms)
         orbitals_ndarray = self._validate_indices(orbitals, self.n_orbitals)
         spins_ndarray = self._validate_indices(spins, self.n_spins)
@@ -452,17 +477,13 @@ class DensityOfStates(PointSet):
         # Spin Channels should not be summed over only taken!
         if spins_ndarray is not None:
             tmp_array = np.take(tmp_array, spins_ndarray, axis=1)
-        if atoms_ndarray is not None:
+        if atoms_ndarray is not None and n_dims >= 3:
             tmp_array = np.take(tmp_array, atoms_ndarray, axis=2)
-        if orbitals_ndarray is not None:
+        if orbitals_ndarray is not None and n_dims >= 4:
             tmp_array = np.take(tmp_array, orbitals_ndarray, axis=3)
-        
-        if keepdims:
-            summed_array = tmp_array.sum(axis=2,keepdims=True).sum(axis=3,keepdims=True)
-        else:
-            summed_array = tmp_array.sum(axis=-1, keepdims=False).sum(axis=-1, keepdims=False)
 
-        return summed_array
+        logger.debug(f"selected_array: {tmp_array.shape}")
+        return tmp_array
     
     def normalize(self, mode: str | NormMode, values_array: npt.NDArray[np.float64], **kwargs) -> npt.NDArray[np.float64]:
         mode = NormMode.from_input(mode)
@@ -517,18 +538,22 @@ class DensityOfStates(PointSet):
     def normalize_magnetization(self, 
                                 values_array: npt.NDArray[np.float64], 
                                 sigma: float = 1.25, 
-                                 fill_value: float = 0.0,
-                                 eps: float = 0.001,
+                                fill_value: float = 0.0,
+                                eps: float = 0.001,
                                 **kwargs) -> npt.NDArray[np.float64]:
         if self.magnetization is None:
             raise ValueError("Magnetization is not available for this calculation")
         
         magnetization_array = self.magnetization.to_array()
+        
+        logger.debug(f"values_array: {values_array.shape}")
+        logger.debug(f"magnetization_array: {magnetization_array.shape}")
+        
 
         normalized_array = np.divide(values_array, 
                             magnetization_array, 
                             out=np.zeros_like(values_array), 
-                            where=magnetization_array != eps)
+                            where=magnetization_array >= eps)
             
         normalized_array = filter_data_within_sigma(normalized_array, sigma=sigma, fill_value=fill_value)
         return normalized_array
@@ -542,8 +567,10 @@ class DensityOfStates(PointSet):
         if self.spin_magnitude is None:
             raise ValueError("Spin magnitude is not available for this calculation")
         
-        normalized_array = np.zeros_like(values_array)
         spin_magnitude_array = self.spin_magnitude.to_array()
+        
+        logger.debug(f"spin magnitude array: {spin_magnitude_array.shape}")
+        logger.debug(f"values array: {values_array.shape}")
   
         normalized_array = np.divide(
                             values_array,
@@ -589,20 +616,9 @@ class DensityOfStates(PointSet):
         if self.projected is None:
             raise ValueError("Projected DOS is not available for this calculation")
 
-        norm_mode = NormMode.from_input(norm_mode)
-        kwargs = dict(kwargs)
-        keepdims = kwargs.pop("keepdims", False)
-        values = self.sum_projection_components(
-                values_array=self.projected.to_array(),
-                atoms=atoms,
-                orbitals=orbitals,
-                spins=spins,
-                keepdims=keepdims,
-                **kwargs,
-            )
-        
-        values = self.normalize(mode=norm_mode, values_array=values, **kwargs)
 
+        # Handle normalization and metadata
+        norm_mode = NormMode.from_input(norm_mode)
         mode_prefix = NormMode.get_mode_prefix(norm_mode)
         mode_type_suffix = NormMode.get_mode_type_suffix(norm_mode)
         
@@ -633,9 +649,21 @@ class DensityOfStates(PointSet):
             "orbitals": list(orbitals) if orbitals is not None else None,
             "spins": list(spins) if spins is not None else None,
             "norm_mode": norm_mode,
-            "keepdims": keepdims,
             "label": extra_metadata_label,
         }
+        
+
+        values = self.sum_projection_components(
+                values_array=self.projected.to_array(),
+                atoms=atoms,
+                orbitals=orbitals,
+                spins=spins,
+                **keep_func_kwargs(kwargs, self.sum_projection_components)
+            )
+        
+        
+        
+        values = self.normalize(mode=norm_mode, values_array=values, **kwargs)
 
         return Property(
             name=name,
@@ -651,38 +679,68 @@ class DensityOfStates(PointSet):
         self,
         atoms: Sequence[int] | None = None,
         orbitals: Sequence[int] | None = None,
+        spins: Sequence[int] | None = None,
         norm_mode: str | NormMode = "raw",
         **kwargs,
     ) -> Property:
+        # Handle which dos array to use
+        if self.projected is None and hasattr(self, "total"):
+            dos_array = self.total.to_array()
+        elif self.projected is not None:
+            dos_array = self.projected.to_array()
+        else:
+            raise ValueError("Spin texture cannot be computed, as the total or projected DOS is not provided")
+        
         if not self.is_non_collinear:
             raise ValueError(
                 "Spin texture is only available for non-collinear calculations"
             )
-        if self.projected is None:
-            raise ValueError("Projected DOS is not available for this calculation")
 
-        kwargs = dict(kwargs)
-        keepdims = kwargs.pop("keepdims", True)
-        
+        # Handle normalization and metadata
+        ALLOWED_NORM_MODES = {NormMode.TOTAL_PROJECTION, 
+                              NormMode.SPIN_MAGNITUDE, 
+                              NormMode.INTEGRAL, 
+                              NormMode.ELECTRONS, 
+                              NormMode.MAGNETIZATION,
+                              NormMode.RAW}
         norm_mode = NormMode.from_input(norm_mode)
         
-        values = self.sum_projection_components(
-            values_array=self.projected.to_array(),
-            atoms=atoms,
-            orbitals=orbitals,
-            keepdims=keepdims,
-            **kwargs,
-        )
-        
-        values = self.normalize(mode=norm_mode, values_array=values, **kwargs)
-
         mode_prefix = NormMode.get_mode_prefix(norm_mode)
         mode_type_suffix = NormMode.get_mode_type_suffix(norm_mode)
         
-        name = "spin_texture"
-        label = "Spin Texture"
+        
+        if spins is None:
+            spins = [1,2,3]
+        elif not set(spins).issubset({1, 2, 3}):
+            raise ValueError(f"Invalid spins for spin texture: {spins}. Must be subset of [1, 2, 3]")
+
+        name = ""
+        label = ""
+        if 1 in spins:
+            if len(label) > 0:
+                label += " - "
+                name += " - "
+            name += "s_x"
+            label += r"$S_x$"
+        if 2 in spins:
+            if len(label) > 0:
+                label += " - "
+                name += " - "
+            name += "s_y"
+            label += r"$S_y$"
+        if 3 in spins:
+            if len(label) > 0:
+                label += " - "
+                name += " - "
+            name += "s_z"
+            label += r"$S_z$"
+        if len(spins) == 3:
+            name += "spin_texture"
+            label += "Spin Texture"
+            
         data_lim = None
         units = "states/eV"
+        
         if len(mode_prefix) > 0:
             name = f"{mode_prefix.lower()} {name}"
             label = f"{mode_prefix} {label}"
@@ -690,24 +748,43 @@ class DensityOfStates(PointSet):
             name = f"{name}_{mode_type_suffix}"
             
         units = f"states/eV"
-        if norm_mode is NormMode.TOTAL_PROJECTION:
+        if norm_mode is NormMode.RAW:
+            pass
+        elif norm_mode is NormMode.TOTAL_PROJECTION:
             data_lim = (-1, 1)
         elif norm_mode is NormMode.SPIN_MAGNITUDE:
             data_lim = (-1, 1)
+        elif norm_mode is NormMode.MAGNETIZATION:
+            data_lim = None
         elif norm_mode is NormMode.INTEGRAL:
             units = "1/eV"
         elif norm_mode is NormMode.ELECTRONS:
             units = "1/eV"
+        else:
+            err_msg = f"Invalid normalization mode: {norm_mode}. Valid modes are: "
+            err_msg += "\n".join([f"- {mode.value}" for mode in ALLOWED_NORM_MODES])
+            raise ValueError(err_msg)
 
         metadata = {
             "atoms": list(atoms) if atoms is not None else None,
             "orbitals": list(orbitals) if orbitals is not None else None,
-            "norm_mode": norm_mode,
-            "keepdims": keepdims,
+            "norm_mode": norm_mode.value,
         }
+        
+        
+        # Compute the spin texture
+        values = self.sum_projection_components(
+            values_array=dos_array,
+            atoms=atoms,
+            orbitals=orbitals,
+            spins=[1,2,3],
+            **keep_func_kwargs(kwargs, self.sum_projection_components)
+        )
+        
+        values = self.normalize(mode=norm_mode, values_array=values, **kwargs)
 
         return Property(
-            name="Spin Texture",
+            name=name,
             value=values,
             point_set=self,
             units=units,
@@ -721,69 +798,62 @@ class DensityOfStates(PointSet):
         atoms: Sequence[int] | None = None,
         orbitals: Sequence[int] | None = None,
         norm_mode: str | NormMode = "raw",
+        from_total: bool = False,
         keepdims: bool = False,
         **kwargs,
     ) -> Property:
-        if self.projected is None:
-            raise ValueError("Projected DOS is not available for this calculation")
-        if not self.is_non_collinear and not self.is_spin_polarized:
-            raise ValueError("Magnetization is only available for non-collinear or spin polarized calculations")
         
-        kwargs = dict(kwargs)
-        # keepdims already explicit in signature, ensure downstream helpers receive it once
-        kwargs.pop("keepdims", None)
+        # Handle which dos array to use
+        if (self.projected is None and hasattr(self, "total")) or from_total:
+            dos_array = self.total.to_array()
+        elif self.projected is not None:
+            dos_array = self.projected.to_array()
+        else:
+            raise ValueError("Magnetization cannot be computed, as the total or projected DOS is not provided")
+        
+        # Handle spin cases dependent information
+        if self.is_non_collinear:
+            data_lim = None
+            mode = "non-collinear"
+            spins = [0]
+        elif self.is_spin_polarized:
+            data_lim = (-1, 1)
+            mode = "collinear"
+            spins = [0, 1]
+        else:
+            raise ValueError("DOS is not non-collinear or spin polarized")
+        
+        
+        # Handle normalization and metadata
+        ALLOWED_NORM_MODES = {NormMode.RAW, NormMode.MAGNETIZATION, NormMode.INTEGRAL, NormMode.ELECTRONS}
         
         norm_mode = NormMode.from_input(norm_mode)
-
-        if self.is_non_collinear:
-            magnetization_array = self.sum_projection_components(
-                values_array=self.projected.to_array(),
-                atoms=atoms,
-                orbitals=orbitals,
-                spins=[0],
-                keepdims=keepdims,
-                **kwargs,
-            )
-            mode = "non-collinear"
-        elif self.is_spin_polarized:
-            components = self.sum_projection_components(
-                values_array=self.projected.to_array(),
-                atoms=atoms,
-                orbitals=orbitals,
-                spins=[0, 1],
-                keepdims=keepdims,
-                **kwargs,
-            )
-            magnetization_array = components[:, 0, ...] - components[:, 1, ...]
-            mode = "collinear"
-        else:
-            raise ValueError("DOS is not spin polarized or non-collinear")
-        
-        if magnetization_array.ndim == 1:
-            magnetization_array = magnetization_array[..., np.newaxis]
-
-
-        values = self.normalize(mode=norm_mode, values_array=magnetization_array, **kwargs)
-
         mode_prefix = NormMode.get_mode_prefix(norm_mode)
         mode_type_suffix = NormMode.get_mode_type_suffix(norm_mode)
         
         name = "magnetization"
         label = "Magnetization"
-        data_lim = None
-        units = "states/eV"
         if len(mode_prefix) > 0:
             name = f"{mode_prefix.lower()} {name}"
             label = f"{mode_prefix} {label}"
         if len(mode_type_suffix) > 0:
             name = f"{name}_{mode_type_suffix}"
-            
-        units = f"states/eV"
-        if norm_mode is NormMode.INTEGRAL:
+        
+        units = "states/eV"
+        if norm_mode is NormMode.RAW:
+            pass
+        elif norm_mode is NormMode.MAGNETIZATION:
+            units = None
+        elif norm_mode is NormMode.INTEGRAL:
             units = "1/eV"
+            data_lim = None
         elif norm_mode is NormMode.ELECTRONS:
             units = "1/eV"
-            
+            data_lim = None
+        else:
+            err_msg = f"Invalid normalization mode: {norm_mode}. Valid modes are: \n"
+            err_msg += "\n".join([f"- {mode.value}" for mode in ALLOWED_NORM_MODES])
+            raise ValueError(err_msg)
         metadata = {
             "atoms": list(atoms) if atoms is not None else None,
             "orbitals": list(orbitals) if orbitals is not None else None,
@@ -791,6 +861,23 @@ class DensityOfStates(PointSet):
             "norm_mode": norm_mode,
             "mode": mode,
         }
+        # Compute the magnetization
+        components = self.sum_projection_components(
+                values_array=dos_array,
+                atoms=atoms,
+                orbitals=orbitals,
+                spins=spins,
+                **keep_func_kwargs(kwargs, self.sum_projection_components)
+            )
+        magnetization_array = components
+        if self.is_spin_polarized:
+            magnetization_array = components[:, 0, ...] - components[:, 1, ...]
+        
+        if magnetization_array.ndim == 1:
+            magnetization_array = magnetization_array[..., np.newaxis]
+
+        values = self.normalize(mode=norm_mode, values_array=magnetization_array, **kwargs)
+
         return Property(
             name=name,
             value=values,
@@ -806,35 +893,25 @@ class DensityOfStates(PointSet):
         atoms: Sequence[int] | None = None,
         orbitals: Sequence[int] | None = None,
         norm_mode: str | NormMode = "raw",
+        from_total: bool = False,
         keepdims: bool = False,
         **kwargs,
     ) -> Property:
-        if self.projected is None:
-            raise ValueError("Projected DOS is not available for this calculation")
+        # Handle which dos array to use
+        if (self.projected is None and hasattr(self, "total")) or from_total:
+            dos_array = self.total.to_array()
+        elif self.projected is not None:
+            dos_array = self.projected.to_array()
+        else:
+            raise ValueError("Spin texture magnitude cannot be computed, as the total or projected DOS is not provided")
+        
         if not self.is_non_collinear:
             raise ValueError("Spin texture magnitude is only available for non-collinear calculations")
-        
-        kwargs = dict(kwargs)
-        # keepdims already explicit in signature, ensure downstream helpers receive it once
-        kwargs.pop("keepdims", None)
-        
+  
+        # Handle normalization and metadata
         norm_mode = NormMode.from_input(norm_mode)
+        ALLOWED_NORM_MODES = {NormMode.INTEGRAL, NormMode.SPIN_MAGNITUDE, NormMode.ELECTRONS, NormMode.MAGNETIZATION, NormMode.RAW}
         
-        values = self.sum_projection_components(
-            values_array=self.projected.to_array(),
-            atoms=atoms,
-            orbitals=orbitals,
-            spins=[1,2,3],
-            keepdims=keepdims,
-            **kwargs,
-        )
-        values = np.linalg.norm(values, axis=-1, keepdims=keepdims)
- 
-        if values.ndim == 1:
-            values = values[..., np.newaxis]
-        
-        values = self.normalize(mode=norm_mode, values_array=values, **kwargs)
-
         mode_prefix = NormMode.get_mode_prefix(norm_mode)
         mode_type_suffix = NormMode.get_mode_type_suffix(norm_mode)
         
@@ -849,19 +926,46 @@ class DensityOfStates(PointSet):
             name = f"{name}_{mode_type_suffix}"
             
         units = f"states/eV"
-        if norm_mode is NormMode.INTEGRAL:
+        if norm_mode is NormMode.RAW:
+            pass
+        elif norm_mode is NormMode.INTEGRAL:
+            units = "1/eV"
+        elif norm_mode is NormMode.ELECTRONS:
             units = "1/eV"
         elif norm_mode is NormMode.SPIN_MAGNITUDE:
             data_lim = (0, 1)
-        elif norm_mode is NormMode.ELECTRONS:
-            units = "1/eV"
-            
+            units = None
+        elif norm_mode is NormMode.MAGNETIZATION:
+            units = None
+            data_lim = None
+        else:
+            err_msg = f"Invalid normalization mode: {norm_mode}. Valid modes are: "
+            err_msg += "\n".join([f"- {mode.value}" for mode in ALLOWED_NORM_MODES])
+            raise ValueError(err_msg)
+
         metadata = {
             "atoms": list(atoms) if atoms is not None else None,
             "orbitals": list(orbitals) if orbitals is not None else None,
             "keepdims": keepdims,
             "norm_mode": norm_mode,
         }
+        
+        values = self.sum_projection_components(
+            values_array=dos_array,
+            atoms=atoms,
+            orbitals=orbitals,
+            spins=[1,2,3],
+            **keep_func_kwargs(kwargs, self.sum_projection_components)
+        )
+        values = np.linalg.norm(values, axis=-1, keepdims=keepdims)
+ 
+        logger.debug(f"spin texture magnitude: {values.shape}")
+        logger.debug(f"spin texture magnitude (min, max): {np.min(values), np.max(values)}")
+        
+        if values.ndim == 1:
+            values = values[..., np.newaxis]
+        
+        values = self.normalize(mode=norm_mode, values_array=values, **kwargs)
 
         return Property(
             name=name,

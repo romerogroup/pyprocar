@@ -156,42 +156,117 @@ def test_non_colinear_plot_total_with_projected_sum_scalars_line():
     plotter.plot(total, scalars_data=projected_sum, scalars_mode="line")
     plotter.show()
 
-
-def test_non_colinear_plot_total_with_magnetization_scalars_line(norm_mode="raw"):
+###########################################################
+# Magnetization testing
+###########################################################
+def test_non_colinear_plot_total_with_magnetization_scalars_line():
     dos_non_colinear = DensityOfStates.from_code(code="vasp", dirpath=DOS_NON_COLINEAR_DIR)
     atoms = [1]
     orbitals = [4,5,6,7,8]
     
     total = dos_non_colinear.total
-    projected_sum = dos_non_colinear.compute_magnetization(atoms=atoms, orbitals=orbitals, norm_mode=norm_mode)
+    magnetization = dos_non_colinear.compute_magnetization(atoms=atoms, orbitals=orbitals)
     
     plotter = DOSPlotter(orientation="horizontal")
-    plotter.plot(total, scalars_data=projected_sum, scalars_mode="line")
+    plotter.plot(total, scalars_data=magnetization, scalars_mode="line")
     plotter.show()
     
-def test_non_colinear_plot_total_with_spin_texture_magnitude_scalars_line(norm_mode="spin_magnitude"):
+    
+    
+def test_non_colinear_plot_total_with_spin_texture_norm_mode_magnetization_scalars_line():
     dos_non_colinear = DensityOfStates.from_code(code="vasp", dirpath=DOS_NON_COLINEAR_DIR)
     atoms = [1]
     orbitals = [4,5,6,7,8]
     
     total = dos_non_colinear.total
-    spin_texture_magnitude = dos_non_colinear.compute_spin_texture_magnitude(atoms=atoms, orbitals=orbitals, norm_mode=norm_mode)
+    magnetization = dos_non_colinear.compute_magnetization(atoms=atoms, orbitals=orbitals, norm_mode="spin_magnitude")
+    
+    plotter = DOSPlotter(orientation="horizontal")
+    plotter.plot(total, scalars_data=magnetization, scalars_mode="line")
+    plotter.show()
+    
+    
+    
+def test_non_colinear_plot_total_with_mag_norm_mode_magnetization_from_total_line():
+    dos_non_colinear = DensityOfStates.from_code(code="vasp", dirpath=DOS_NON_COLINEAR_DIR)
+    atoms = [1]
+    orbitals = [4,5,6,7,8]
+    
+    total = dos_non_colinear.total
+    magnetization = dos_non_colinear.compute_magnetization(atoms=atoms, orbitals=orbitals, norm_mode="magnetization", from_total=True, fill_value=None)
+    
+    plotter = DOSPlotter(orientation="horizontal")
+    plotter.plot(total, scalars_data=magnetization, scalars_mode="line")
+    plotter.show()
+    
+
+###########################################################
+# Spin texture magnitude testing
+###########################################################
+def test_non_colinear_plot_total_with_spin_texture_magnitude_scalars_line(**kwargs):
+    dos_non_colinear = DensityOfStates.from_code(code="vasp", dirpath=DOS_NON_COLINEAR_DIR)
+    atoms = [1]
+    orbitals = [4,5,6,7,8]
+    
+    total = dos_non_colinear.total
+    spin_texture_magnitude = dos_non_colinear.compute_spin_texture_magnitude(atoms=atoms, orbitals=orbitals, **kwargs)
     
     plotter = DOSPlotter(orientation="horizontal")
     plotter.plot(total, scalars_data=spin_texture_magnitude, scalars_mode="line")
     plotter.show()    
+    
+def test_non_colinear_plot_total_with_spin_mag_norm_mode_spin_texture_magnitude_scalars_line(**kwargs):
+    dos_non_colinear = DensityOfStates.from_code(code="vasp", dirpath=DOS_NON_COLINEAR_DIR)
+    atoms = [1]
+    orbitals = [4,5,6,7,8]
+    
+    total = dos_non_colinear.total
+    spin_texture_magnitude = dos_non_colinear.compute_spin_texture_magnitude(atoms=atoms, orbitals=orbitals, norm_mode="spin_magnitude", **kwargs)
+    
+    plotter = DOSPlotter(orientation="horizontal")
+    plotter.plot(total, scalars_data=spin_texture_magnitude, scalars_mode="line")
+    plotter.show() 
+    
+def test_non_colinear_plot_total_with_mag_norm_mode_spin_texture_magnitude_scalars_line(**kwargs):
+    dos_non_colinear = DensityOfStates.from_code(code="vasp", dirpath=DOS_NON_COLINEAR_DIR)
+    atoms = [1]
+    orbitals = [4,5,6,7,8]
+    
+    total = dos_non_colinear.total
+    spin_texture_magnitude = dos_non_colinear.compute_spin_texture_magnitude(atoms=atoms, orbitals=orbitals, norm_mode="magnetization", **kwargs)
+    
+    plotter = DOSPlotter(orientation="horizontal")
+    plotter.plot(total, scalars_data=spin_texture_magnitude, scalars_mode="line")
+    plotter.show()
+    
+def test_non_colinear_plot_total_with_spin_mag_norm_mode_spin_texture_magnitude_from_total_scalars_line(**kwargs):
+    dos_non_colinear = DensityOfStates.from_code(code="vasp", dirpath=DOS_NON_COLINEAR_DIR)
+    atoms = [1]
+    orbitals = [4,5,6,7,8]
+    
+    total = dos_non_colinear.total
+    spin_texture_magnitude = dos_non_colinear.compute_spin_texture_magnitude(atoms=atoms, orbitals=orbitals, norm_mode="spin_magnitude", from_total=True, **kwargs)
+    
+    plotter = DOSPlotter(orientation="horizontal")
+    plotter.plot(total, scalars_data=spin_texture_magnitude, scalars_mode="line")
+    plotter.show() 
 
-# def test_non_colinear_plot_total_with_sx_magnitude_scalars_line(norm_mode="spin_magnitude"):
-#     dos_non_colinear = DensityOfStates.from_code(code="vasp", dirpath=DOS_NON_COLINEAR_DIR)
-#     atoms = [1]
-#     orbitals = [4,5,6,7,8]
+
+###########################################################
+# SX magnitude testing
+###########################################################
+
+def test_non_colinear_plot_total_with_sx_magnitude_scalars_line():
+    dos_non_colinear = DensityOfStates.from_code(code="vasp", dirpath=DOS_NON_COLINEAR_DIR)
+    atoms = [1]
+    orbitals = [4,5,6,7,8]
     
-#     total = dos_non_colinear.total
-#     sx = dos_non_colinear.compute_projected_sum(atoms=atoms, orbitals=orbitals, spins=[1], norm_mode=norm_mode)
+    total = dos_non_colinear.total
+    sx = dos_non_colinear.compute_spin_texture(atoms=atoms, orbitals=orbitals, spins=[1])
     
-#     plotter = DOSPlotter(orientation="horizontal")
-#     plotter.plot(total, scalars_data=sx, scalars_mode="line")
-#     plotter.show()
+    plotter = DOSPlotter(orientation="horizontal")
+    plotter.plot(total, scalars_data=sx, scalars_mode="line")
+    plotter.show()
 
 
 
@@ -217,12 +292,30 @@ def test_non_colinear_plot_total_with_spin_texture_magnitude_scalars_line(norm_m
 ###########################################################
 # Non-colinear testing
 ###########################################################
+
+# # Projected sum
 # test_non_colinear_plot_total_with_projected_sum_scalars_line()
-# test_non_colinear_plot_total_with_magnetization_scalars_line(norm_mode="magnetization")
+
+
+# # Magnetization
+# test_non_colinear_plot_total_with_magnetization_scalars_line()
+# test_non_colinear_plot_total_with_mag_norm_mode_magnetization_from_total_line()
+# test_non_colinear_plot_total_with_spin_texture_norm_mode_magnetization_scalars_line()  # This should produce values greater than one  since sum |m| <= total M
+
+# # Spin texture magnitude
+# test_non_colinear_plot_total_with_spin_texture_magnitude_scalars_line()
+# test_non_colinear_plot_total_with_spin_mag_norm_mode_spin_texture_magnitude_scalars_line(fill_value=0.0)
+# test_non_colinear_plot_total_with_spin_mag_norm_mode_spin_texture_magnitude_from_total_scalars_line(fill_value=0.0)  # Should result in 0.0 for all values as the total spin channels are 0.0
+
+# test_non_colinear_plot_total_with_mag_norm_mode_spin_texture_magnitude_scalars_line()   # This should be less than one  since sum |m| <= total M
+
+test_non_colinear_plot_total_with_sx_magnitude_scalars_line()
+
+
 
 
 # test_non_colinear_plot_total_with_spin_texture_magnitude_scalars_line(norm_mode="raw")
-test_non_colinear_plot_total_with_spin_texture_magnitude_scalars_line(norm_mode="spin_magnitude")
+# test_non_colinear_plot_total_with_spin_texture_magnitude_scalars_line(norm_mode="spin_magnitude")
 
 # test_non_colinear_plot_total_with_sx_magnitude_scalars_line(norm_mode="raw")
 # test_non_colinear_plot_total_with_sx_magnitude_scalars_line(norm_mode="spin_magnitude")
