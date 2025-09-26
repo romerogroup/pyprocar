@@ -127,7 +127,23 @@ def test_plot_vertical_total_with_projected_sum_scalars_fill():
     plotter.show()
     
     
+def test_non_spin_polarized_total_with_gradients_line(**kwargs):
+    dos_non_colinear = DensityOfStates.from_code(code="vasp", dirpath=DOS_NON_COLINEAR_DIR)
+    atoms = [1]
+    orbitals = [4,5,6,7,8]
     
+    total = dos_non_colinear.total
+    total_gradient = total.compute_gradient_property(order=1)
+    # print(total_gradient.shape)
+
+    plotter = DOSPlotter(orientation="horizontal")
+    plotter.plot(total, vectors_data=total_gradient)
+    plotter.show() 
+    
+    
+#--------------------------------------------------------
+# Spin polarized testing
+#--------------------------------------------------------
 
 def test_spin_polarized_plot_total_with_projected_sum_scalars_line():
     dos_spin_polarized = DensityOfStates.from_code(code="vasp", dirpath=DOS_SPIN_POLARIZED_DIR)
@@ -198,7 +214,6 @@ def test_non_colinear_plot_total_with_mag_norm_mode_magnetization_from_total_lin
     plotter = DOSPlotter(orientation="horizontal")
     plotter.plot(total, scalars_data=magnetization, scalars_mode="line")
     plotter.show()
-    
 
 ###########################################################
 # Spin texture magnitude testing
@@ -289,6 +304,10 @@ def test_non_colinear_plot_total_with_sx_magnitude_scalars_line():
 # test_plot_vertical_total_with_projected_sum_scalars_fill()
 
 
+# Gradient testing
+test_non_spin_polarized_total_with_gradients_line()
+
+
 ###########################################################
 # Non-colinear testing
 ###########################################################
@@ -309,7 +328,12 @@ def test_non_colinear_plot_total_with_sx_magnitude_scalars_line():
 
 # test_non_colinear_plot_total_with_mag_norm_mode_spin_texture_magnitude_scalars_line()   # This should be less than one  since sum |m| <= total M
 
-test_non_colinear_plot_total_with_sx_magnitude_scalars_line()
+# test_non_colinear_plot_total_with_sx_magnitude_scalars_line()
+
+
+#--------------------------------------------------------
+# Gradient testing
+#--------------------------------------------------------
 
 
 

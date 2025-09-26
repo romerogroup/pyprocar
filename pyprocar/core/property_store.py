@@ -3,8 +3,10 @@
 from collections.abc import Generator, MutableMapping
 from typing import Callable, Literal, Sequence, cast, Union
 import weakref
+import re
 import logging
 from typing import Any
+from enum import Enum
 import numpy as np
 import numpy.typing as npt
 import pyvista as pv
@@ -40,6 +42,35 @@ def to_numpy_array(data, dtype=None):
         return np.asarray(data, dtype=dtype)
 
 # pyright: reportUnknownMemberType=false
+
+class GradientOrder(Enum):
+    FIRST = 1
+    SECOND = 2
+    THIRD = 3
+    FOURTH = 4
+    OTHER = 0
+    @classmethod
+    def from_int(cls, order:int) -> "GradientOrder":
+        if order == 1:
+            return cls.FIRST
+        elif order == 2:
+            return cls.SECOND
+        elif order == 3:
+            return cls.THIRD
+        elif order == 4:
+            return cls.FOURTH
+        else:
+            return cls.OTHER
+        
+    def get_suffix(self) -> str:
+        if self == self.FIRST:
+            return "st"
+        elif self == self.SECOND:
+            return "nd"
+        elif self == self.THIRD:
+            return "rd"
+        else:
+            return "th"
 
 class Property:
     name: str
@@ -139,6 +170,17 @@ class Property:
             if store:
                 self.gradients[i] = tmp_value
         return tmp_value
+    
+    def compute_gradient_property(self, order:int) -> "Property":
+        gradient = self.gradient(order=order)
+        gradient_order = GradientOrder.from_int(order)
+        order_suffix = gradient_order.get_suffix()
+        return Property(
+            name=f"{self.name}_gradient_{order}", 
+            value=gradient, 
+            units=self.create_gradient_units(order), 
+            label=f"{self.label} "+ str(order) + "^{" + order_suffix + "}" + " Order Gradient",
+            point_set=self.point_set)
     
     @property
     def n_points(self) -> int:
@@ -319,6 +361,47 @@ class Property:
     
     def to_pandas(self) -> pd.DataFrame:
         return pd.DataFrame(self.value, columns=[self.name])
+    
+    @property
+    def has_denominator_unit(self) -> bool:
+        return "\\frac{" in self.units
+    
+    @property
+    def denominator_unit(self) -> str:
+        numerator_unit, denominator_unit = self._get_frac_units()
+        return denominator_unit
+        
+    @property
+    def numerator_unit(self) -> str:
+        numerator_unit, denominator_unit = self._get_frac_units()
+        return numerator_unit
+        
+    def _get_frac_units(self) -> tuple[str, str]:
+        if self.has_denominator_unit:
+            return parse_frac(self.units)
+        else:
+            return self.units, ""
+
+    def create_gradient_units(self, order:int) -> str:
+        points_units = self.points_units
+        
+        denominator_unit = self.denominator_unit
+        numerator_unit = self.numerator_unit
+        if denominator_unit == points_units:
+            denominator_unit = points_units + "^{" + str(order + 1) + "}"
+        elif denominator_unit != points_units and order == 1:
+            denominator_unit = denominator_unit + " " + points_units
+        elif denominator_unit != points_units and order > 1:
+            denominator_unit = denominator_unit + " " + points_units + "^{" + str(order) + "}"
+        else:
+            raise ValueError(f"Invalid denominator unit: {denominator_unit}. Must be {points_units}.")
+        
+        grad_unit = "$\\frac{" + numerator_unit  + "}{" + denominator_unit + "}$"
+        return grad_unit
+    
+
+        
+        
     
 class PointSet:
     _point_data: dict[str, Property]
@@ -552,3 +635,27 @@ class PointSet:
             raise ValueError(error_message)
 
         return prop_name, (calc_name, gradient_order)
+
+
+
+def parse_frac(latex_expr: str):
+    """
+    Extract numerator and denominator from a LaTeX \frac command.
+
+    Parameters
+    ----------
+    latex_expr : str
+        A string containing a LaTeX math mode expression with \frac.
+
+    Returns
+    -------
+    tuple[str, str] or None
+        (numerator, denominator) if found, else None.
+    """
+    # This regex assumes well-formed \frac{...}{...} with no nested braces
+    pattern = r'\\frac\{([^{}]+)\}\{([^{}]+)\}'
+    match = re.search(pattern, latex_expr)
+    if match:
+        num, den = match.groups()
+        return num.strip(), den.strip()
+    return None

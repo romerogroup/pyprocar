@@ -144,16 +144,25 @@ class DOSPlotter:
         self,
         point_data: Property,
         scalars_data: Property | None = None,
+        vectors_data: Property | None = None,
         scalars_mode: str = "line",
         **kwargs
     ):
         scalars_mode = ScalarsMode.from_string(scalars_mode)
         if scalars_data and scalars_mode == ScalarsMode.LINE:
+            logger.info(f"Plotting scalar line for {point_data.label}")
             self.plot_scalar_line(point_data, scalars_data,**kwargs)
         elif scalars_data and scalars_mode == ScalarsMode.FILL:
+            logger.info(f"Plotting scalar fill for {point_data.label}")
             self.plot_scalar_fill(point_data, scalars_data,**kwargs)
+        elif vectors_data:
+            logger.info(f"Plotting vectors for {point_data.label}")
+            self.plot_vectors(point_data, vectors_data, **kwargs)
         else:
+            logger.info(f"Plotting line for {point_data.label}")
             self.plot_line(point_data, **kwargs)
+            
+        
                 
         
     def plot_line(
@@ -302,6 +311,87 @@ class DOSPlotter:
         self.set_dos_tick_params()
         
         self.draw_baseline(value=0.0)
+        
+    def plot_vectors(self,
+        point_data: Property,
+        vectors_data: Property,
+        show_colorbar: bool = True,
+        skip:int=1,
+        angles:str='uv',
+        scale=None,
+        scale_units:str='inches',
+        units:str='inches',
+        color=None,
+        clim: tuple[float | None, float | None] | None = None,
+        norm: mcolors.Normalize | str | None = None,
+        cmap: str | mcolors.Colormap = "plasma",
+        **kwargs
+    ):
+        energy_array = point_data.points
+        energy_label = point_data.points_label
+        energy_units = point_data.points_units
+        n_energies = energy_array.size
+        
+        data_array = point_data.to_array()
+        data_label = point_data.label
+        data_units = point_data.units
+        
+        vectors_array = vectors_data.to_array()
+
+        n_channels = vectors_array.shape[1]
+        logger.debug(f"n_channels: {n_channels}")
+        
+        clim = self._resolve_clim(vectors_data, clim=clim)
+        norm = self._resolve_norm(clim, norm)
+        cmap = self._resolve_cmap(cmap)
+        
+        logger.debug(f"Energy shape: {energy_array.shape}")
+        logger.debug(f"point_values shape: {data_array.shape}")
+        logger.debug(f"Vectors shape: {vectors_array.shape}")
+        logger.debug(f"n_channels: {n_channels}")
+        
+        # Plot quivers
+        for i_channel in range(n_channels):
+            u = vectors_array[...,i_channel]                # Arrow y-component
+            v = np.ones_like(vectors_array[...,i_channel])  # Arrow x-component
+            vector_norms = vectors_array[...,i_channel]
+            
+            data_channel = data_array[...,i_channel]
+            
+            quiver_args = []
+            quiver_args.append(energy_array[::skip])
+            quiver_args.append(data_channel[::skip])
+            quiver_args.append(u[::skip])
+            quiver_args.append(v[::skip])
+            if color is None:
+                quiver_args.append(vector_norms[::skip])
+                
+            qv = self.ax.quiver(
+                *quiver_args,
+                angles=angles,
+                scale=scale,
+                scale_units=scale_units,
+                units = units,
+                color=color,
+                cmap=cmap,
+                norm=norm,
+                **keep_func_kwargs(kwargs, self.ax.quiver))
+            
+        if show_colorbar:
+            self.plot_colorbar(vectors_data, cmap=cmap, norm=norm, **keep_func_kwargs(kwargs, self.plot_colorbar))
+            
+        self.set_energy_label(energy_label, unit_label=energy_units)
+        self.set_energy_lim(point_data=point_data)
+        self.set_energy_tick_params()
+        
+        self.set_dos_label(data_label, unit_label=data_units)
+        self.set_dos_lim(point_data=point_data)
+        self.set_dos_tick_params()
+        
+        self.draw_baseline(0.0)
+        
+        return qv
+    
 
 
     # ------------------------------------------------------------------
@@ -436,7 +526,7 @@ class DOSPlotter:
             self.colorbar_axes.set_xticks(ticks, labels, **kwargs)
             
     def get_colorbar_ticks(self):
-        if self.colorbar_orientation is "vertical":
+        if self.colorbar_orientation is AxesOrientation.VERTICAL:
             return self.colorbar_axes.get_yticks()
         else:
             return self.colorbar_axes.get_xticks()

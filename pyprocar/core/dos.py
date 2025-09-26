@@ -188,14 +188,14 @@ class DensityOfStates(PointSet):
         total_array = self._validate_total(total)
         self.add_property(name="total", 
                           value=total_array,
-                          units = "states/eV",
+                          units = "$\\frac{states}{eV}$",
                           label = "DOS")
 
         if projected is not None:
             projected_array = self._validate_projected(projected)
             self.add_property(name="projected", 
                               value=projected_array, 
-                              units = "states/eV",
+                              units = "$\\frac{states}{eV}$",
                               label = "Projected DOS")
             
         logger.debug(
@@ -625,7 +625,7 @@ class DensityOfStates(PointSet):
         name = "projected_sum"
         label = "Projected DOS"
         data_lim = None
-        units = "states/eV"
+        units = "$\\frac{states}{eV}$"
         normalize = True
         if len(mode_prefix) > 0:
             name = f"{mode_prefix.lower()} {name}"
@@ -633,13 +633,13 @@ class DensityOfStates(PointSet):
         if len(mode_type_suffix) > 0:
             name = f"{name}_{mode_type_suffix}"
             
-        units = f"states/eV"
+        units = "$\\frac{states}{eV}$"
         if norm_mode is NormMode.TOTAL_PROJECTION:
             data_lim = (0, 1)
         elif norm_mode is NormMode.INTEGRAL:
-            units = "1/eV"
+            units = "$\\frac{1}{eV}$"
         elif norm_mode is NormMode.ELECTRONS:
-            units = "1/eV"
+            units = "$\\frac{1}{eV}$"
 
         extra_metadata_label = self._auto_label_projected_sum(
             atoms=atoms, orbitals=orbitals, spins=spins, normalize=normalize
@@ -727,19 +727,19 @@ class DensityOfStates(PointSet):
                 label += " - "
                 name += " - "
             name += "s_y"
-            label += r"$S_y$"
+            label += r"S_y"
         if 3 in spins:
             if len(label) > 0:
                 label += " - "
                 name += " - "
             name += "s_z"
-            label += r"$S_z$"
+            label += r"S_z"
         if len(spins) == 3:
             name += "spin_texture"
             label += "Spin Texture"
             
         data_lim = None
-        units = "states/eV"
+        units = "$\\frac{states}{eV}$"
         
         if len(mode_prefix) > 0:
             name = f"{mode_prefix.lower()} {name}"
@@ -747,7 +747,7 @@ class DensityOfStates(PointSet):
         if len(mode_type_suffix) > 0:
             name = f"{name}_{mode_type_suffix}"
             
-        units = f"states/eV"
+        units = "$\\frac{states}{eV}$"
         if norm_mode is NormMode.RAW:
             pass
         elif norm_mode is NormMode.TOTAL_PROJECTION:
@@ -757,9 +757,9 @@ class DensityOfStates(PointSet):
         elif norm_mode is NormMode.MAGNETIZATION:
             data_lim = None
         elif norm_mode is NormMode.INTEGRAL:
-            units = "1/eV"
+            units = "$\\frac{1}{eV}$"
         elif norm_mode is NormMode.ELECTRONS:
-            units = "1/eV"
+            units = "$\\frac{1}{eV}$"
         else:
             err_msg = f"Invalid normalization mode: {norm_mode}. Valid modes are: "
             err_msg += "\n".join([f"- {mode.value}" for mode in ALLOWED_NORM_MODES])
@@ -839,16 +839,16 @@ class DensityOfStates(PointSet):
         if len(mode_type_suffix) > 0:
             name = f"{name}_{mode_type_suffix}"
         
-        units = "states/eV"
+        units = "$\\frac{states}{eV}$"
         if norm_mode is NormMode.RAW:
             pass
         elif norm_mode is NormMode.MAGNETIZATION:
             units = None
         elif norm_mode is NormMode.INTEGRAL:
-            units = "1/eV"
+            units = "$\\frac{1}{eV}$"
             data_lim = None
         elif norm_mode is NormMode.ELECTRONS:
-            units = "1/eV"
+            units = "$\\frac{1}{eV}$"
             data_lim = None
         else:
             err_msg = f"Invalid normalization mode: {norm_mode}. Valid modes are: \n"
@@ -918,20 +918,20 @@ class DensityOfStates(PointSet):
         name = "spin_texture_magnitude"
         label = "Spin Texture Magnitude"
         data_lim = None
-        units = "states/eV"
+        units = "$\\frac{states}{eV}$"
         if len(mode_prefix) > 0:
             name = f"{mode_prefix.lower()} {name}"
             label = f"{mode_prefix} {label}"
         if len(mode_type_suffix) > 0:
             name = f"{name}_{mode_type_suffix}"
             
-        units = f"states/eV"
+        units = "$\\frac{states}{eV}$"
         if norm_mode is NormMode.RAW:
             pass
         elif norm_mode is NormMode.INTEGRAL:
-            units = "1/eV"
+            units = "$\\frac{1}{eV}$"
         elif norm_mode is NormMode.ELECTRONS:
-            units = "1/eV"
+            units = "$\\frac{1}{eV}$"
         elif norm_mode is NormMode.SPIN_MAGNITUDE:
             data_lim = (0, 1)
             units = None
@@ -1005,11 +1005,11 @@ class DensityOfStates(PointSet):
         if len(mode_type_suffix) > 0:
             name = f"{name}_{mode_type_suffix}"
             
-        units = f"states/eV"
+        units = "$\\frac{states}{eV}$"
         if norm_mode is NormMode.INTEGRAL:
-            units = "1/eV"
+            units = "$\\frac{1}{eV}$"
         elif norm_mode is NormMode.ELECTRONS:
-            units = "1/eV"
+            units = "$\\frac{1}{eV}$"
         
         return Property(
             name=name,
