@@ -129,6 +129,8 @@ class Property:
             self.metadata = metadata
 
         self.data_lim = data_lim
+        
+    
     
     @property
     def point_set(self) -> "PointSet":
@@ -315,7 +317,6 @@ class Property:
     def __delitem__(self, key: PROPERTY_KEY_TYPE) -> None:
         self[key] = np.array([])
 
-    @override
     def __str__(self) -> str:
         ret = f"{self.name} \n"
         ret += f" - Value: {self.value.shape}\n"
@@ -325,6 +326,21 @@ class Property:
                 if gradient.shape[0] != 0:
                     ret += f"  - Gradients {gradient_order}: {gradient.shape}\n"
         return ret
+    
+    def __repr__(self) -> str:
+        tmp = self.__class__.__name__
+        tmp += "("
+        tmp += f"name={self.name}, "
+        tmp += f"value={self.value.shape}, "
+        tmp += f"units={self.units}, "
+        tmp += f"label={self.label}, "
+        tmp += f"data_lim={self.data_lim}, "
+        for gradient_order, gradient in self.gradients.items():
+            tmp += f"gradient_{gradient_order}={gradient.shape}"
+            if gradient_order != list(self.gradients.keys())[-1]:
+                tmp += ", "
+        tmp += ")"
+        return tmp
     
     def iter_arrays(self) -> Generator[tuple[str, int, npt.NDArray[np.float64]], None, None]:
         for key, value in self.items():

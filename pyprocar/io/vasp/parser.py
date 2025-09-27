@@ -211,6 +211,7 @@ class VaspParser(BaseParser):
                 fermi=self.fermi,
                 projected=self.projected_dos,
                 orbital_names=self.orbitals,
+                structure=self.structure,
             )
             return dos
         else:

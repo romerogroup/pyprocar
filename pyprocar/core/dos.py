@@ -3,10 +3,15 @@
 from __future__ import annotations
 
 import logging
-from dataclasses import dataclass, field
+import re
+from dataclasses import dataclass, field    
 from pathlib import Path
 from enum import Enum
-from typing import Any, Sequence
+from collections.abc import Iterable
+from typing import TYPE_CHECKING, Any, Mapping, Sequence, Sequence, Callable, Union, TypeVar
+from functools import wraps
+from itertools import chain, product
+
 import copy
 
 import numpy as np
@@ -16,10 +21,14 @@ from scipy.interpolate import CubicSpline
 
 from pyprocar.core.property_store import PointSet, Property
 from pyprocar.core.serializer import get_serializer
-from pyprocar.utils.inspect_utils import keep_func_kwargs
+from pyprocar.utils.func_utils import keep_func_kwargs, expand_grouped_params
 
 
 logger = logging.getLogger(__name__)
+
+
+if TYPE_CHECKING:
+    from pyprocar.core.structure import Structure
 
 
 
@@ -82,6 +91,29 @@ def _finite_difference_gradient(
     edge_order = 2 if energies.size > 2 else 1
     return np.gradient(array, energies, axis=0, edge_order=edge_order)
 
+# class AtomicOrbSelectionIndex:
+#     """Class to store selection indices for atoms, orbitals, spins, and species."""
+#     def __init__(self, 
+#                  atoms: Iterable[int] | None = None, 
+#                  orbitals: Iterable[int] | None = None, 
+#                  spins: Iterable[int] | None = None, 
+#                  species: Iterable[str] | None = None, 
+#                  structure: Structure | None = None):
+        
+#         self._atoms = atoms
+#         self._orbitals = orbitals
+#         self._spins = spins
+#         self._species = species
+#         self._structure = structure
+
+    # def __post_init__(self):
+    #     if self.atoms is not None and self.species is not None:
+    #         raise ValueError("atoms and species cannot be specified together")
+    
+  
+    
+    
+    
 
 class NormMode(Enum):
     RAW = "raw"
@@ -93,27 +125,33 @@ class NormMode(Enum):
     MAGNETIZATION = "magnetization"
     
     @classmethod
-    def from_input(cls, input: str | NormMode) -> NormMode:
+    def from_input(cls, input: str | NormMode | None) -> NormMode:
         if isinstance(input, NormMode):
             return input
+        if input is None:
+            return cls.RAW
         if not isinstance(input, str):
             raise ValueError(f"Invalid normalization mode: {input}")
-        
+        input_mode = None
         lower_input = input.lower()
         if lower_input == "raw":
-            return cls.RAW
+            input_mode = cls.RAW
         elif lower_input == "max":
-            return cls.MAX
+            input_mode = cls.MAX
         elif lower_input == "integral":
-            return cls.INTEGRAL
+            input_mode = cls.INTEGRAL
         elif lower_input == "electrons":
-            return cls.ELECTRONS
+            input_mode = cls.ELECTRONS
         elif lower_input == "total_projection":
-            return cls.TOTAL_PROJECTION
+            input_mode = cls.TOTAL_PROJECTION
         elif lower_input == "spin_magnitude":
-            return cls.SPIN_MAGNITUDE
+            input_mode = cls.SPIN_MAGNITUDE
         elif lower_input == "magnetization":
-            return cls.MAGNETIZATION
+            input_mode = cls.MAGNETIZATION
+        
+        if input_mode is not None:
+            logger.info(f"Normalization mode: {input_mode}")
+            return input_mode
         
         list_modes = cls.list_modes()
         err_msg = f"Invalid normalization mode: {input}. Valid modes are:\n"
@@ -164,6 +202,50 @@ class NormMode(Enum):
         else:
             return ""
 
+class StackMode(Enum):
+    SPECIES = "species"
+    ORBITALS = "orbitals"
+    CUSTOM = "custom"
+    
+    @classmethod
+    def from_input(cls, input: str | StackMode) -> StackMode:
+        if isinstance(input, StackMode):
+            return input
+        if not isinstance(input, str):
+            raise ValueError(f"Invalid stack mode: {input}")
+        input_mode = None
+        lower_input = input.lower()
+        if lower_input == "species":
+            input_mode = cls.SPECIES
+        elif lower_input == "orbitals":
+            input_mode = cls.ORBITALS
+        elif lower_input == "custom":
+            input_mode = cls.CUSTOM
+
+        if input_mode is not None:
+            logger.info(f"Stack mode: {input_mode}")
+            return input_mode
+        
+        err_msg = f"Invalid stack mode: {input}. Valid modes are:\n"
+        err_msg += "\n".join([f"- {mode}" for mode in cls.list_modes()])
+        raise ValueError(err_msg)
+    
+    @classmethod
+    def list_modes(cls) -> list[str]:
+        return [mode.value for mode in cls]
+    
+    @classmethod
+    def get_mode_prefix(cls, mode: str | StackMode) -> str:
+        mode = cls.from_input(mode)
+        if mode == cls.SPECIES:
+            return "Species-Stacked"
+        elif mode == cls.ORBITALS:
+            return "Orbitals-Stacked"
+        elif mode == cls.CUSTOM:
+            return "Custom-Stacked"
+        else:
+            return ""
+
 
 class DensityOfStates(PointSet):
     """Data-centric representation of a density of states calculation."""
@@ -176,6 +258,7 @@ class DensityOfStates(PointSet):
         projected: npt.ArrayLike | None = None,
         orbital_names: list[str] | None = None,
         gradient_func=None,
+        structure: Structure | None = None,
     ) -> None:
         energies_array = energies
         gradient = gradient_func or _finite_difference_gradient
@@ -184,6 +267,7 @@ class DensityOfStates(PointSet):
 
         self._fermi = float(fermi)
         self._orbital_names = orbital_names
+        self._structure = structure
 
         total_array = self._validate_total(total)
         self.add_property(name="total", 
@@ -270,6 +354,22 @@ class DensityOfStates(PointSet):
     @property
     def energy_units(self) -> str:
         return self.points_units
+    
+    @property
+    def structure(self) -> Structure | None:
+        return self._structure
+    
+    @property
+    def atoms(self) -> npt.NDArray[np.int_]:
+        return self.structure.atoms
+    
+    @property
+    def species(self) -> list[str]:
+        return self.structure.species
+    
+    @property
+    def orbitals(self) -> list[str]:
+        return self.orbital_names
     
     #-------------------------------------------------------------------
     # Array Properties
@@ -383,6 +483,22 @@ class DensityOfStates(PointSet):
     def n_electrons(self) -> float:
         return self.integrate(self.total)
 
+    #-------------------------------------------------------------------
+    # Useful getters
+    #-------------------------------------------------------------------
+    
+    def get_species_atom_map(self, species: list[str] | str | None = None) -> dict[str, list[int]]:
+        atoms_array = np.asarray(self.atoms)
+        if species is None:
+            species = self.species
+        if isinstance(species, str):
+            species = [species]
+            
+        species_atoms_list = {}
+        for specie in species:
+            species_atoms_list[specie] = tuple(np.where(atoms_array == specie)[0].tolist())
+        return species_atoms_list
+
     # ------------------------------------------------------------------
     # Operations
     # ------------------------------------------------------------------
@@ -402,11 +518,13 @@ class DensityOfStates(PointSet):
             # Select values within energy range
             values_to_integrate = values_array[energy_indices]
             energies_to_integrate = self.energies[energy_indices]
-            
-        integral = np.trapezoid(values_to_integrate, x=energies_to_integrate, axis=0)
-        if cumulative:
-            integral = np.cumsum(integral, axis=0)
-        return integral
+        
+        return np.trapezoid(values_to_integrate, x=energies_to_integrate, axis=0)
+        
+    def cumsum(self, values: npt.NDArray[np.float64] | Property) -> npt.NDArray[np.float64]:
+        if isinstance(values, Property):
+            values = values.to_array()
+        return np.cumsum(values, axis=0)
     
     def shift_by_fermi(self) -> "DensityOfStates":
         # new_dos = copy.deepcopy(self)
@@ -441,11 +559,12 @@ class DensityOfStates(PointSet):
         keepdims: bool = False,
     ) -> npt.NDArray[np.float64]:
         """Sum projections over selected atoms, orbitals, and spins."""
-        
         tmp_array = self.select_projection_components(values_array=values_array, atoms=atoms, orbitals=orbitals, spins=spins)
         
         n_dims = tmp_array.ndim
+        print(keepdims)
         if keepdims and n_dims == 4:
+            
             summed_array = tmp_array.sum(axis=2,keepdims=keepdims).sum(axis=3,keepdims=keepdims)
         elif not keepdims and n_dims == 4:
             summed_array = tmp_array.sum(axis=-1).sum(axis=-1)
@@ -485,7 +604,7 @@ class DensityOfStates(PointSet):
         logger.debug(f"selected_array: {tmp_array.shape}")
         return tmp_array
     
-    def normalize(self, mode: str | NormMode, values_array: npt.NDArray[np.float64], **kwargs) -> npt.NDArray[np.float64]:
+    def normalize(self, mode: str | NormMode | None, values_array: npt.NDArray[np.float64], **kwargs) -> npt.NDArray[np.float64]:
         mode = NormMode.from_input(mode)
         if mode is NormMode.RAW:
             return values_array
@@ -603,20 +722,28 @@ class DensityOfStates(PointSet):
     # ------------------------------------------------------------------
     # Computing methods
     # ------------------------------------------------------------------
-
+    @expand_grouped_params("atoms", "orbitals", "spins", "species", "species_orbital_map", "atoms_orbital_map")
     def compute_projected_sum(
         self,
-        atoms: Sequence[int] | None = None,
-        orbitals: Sequence[int] | None = None,
-        spins: Sequence[int] | None = None,
-        norm_mode: str | NormMode = "raw",
-        **kwargs,
-    ) -> Property:
+        atoms:  Iterable[int] | None = None,
+        orbitals:  Iterable[int] | None = None,
+        spins: Iterable[int] | None = None,
+        species: Iterable[str] | None = None,
+        species_orbital_map: dict[str, Iterable[int]] | None = None,
+        atoms_orbital_map: dict[int, Iterable[int]] | None = None,
+        norm_mode: str | NormMode | None = "raw",
+        **kwargs) -> Property | list[Property]:
         """Return projected DOS sums as a Property instance."""
         if self.projected is None:
             raise ValueError("Projected DOS is not available for this calculation")
 
-
+        atoms, orbitals, spins, species = self._validate_projection_selection_params(atoms=atoms, 
+                                                   orbitals=orbitals, 
+                                                   spins=spins, 
+                                                   species=species, 
+                                                   species_orbital_map=species_orbital_map, 
+                                                   atoms_orbital_map=atoms_orbital_map)
+                
         # Handle normalization and metadata
         norm_mode = NormMode.from_input(norm_mode)
         mode_prefix = NormMode.get_mode_prefix(norm_mode)
@@ -648,6 +775,7 @@ class DensityOfStates(PointSet):
             "atoms": list(atoms) if atoms is not None else None,
             "orbitals": list(orbitals) if orbitals is not None else None,
             "spins": list(spins) if spins is not None else None,
+            "species": list(species) if species is not None else None,
             "norm_mode": norm_mode,
             "label": extra_metadata_label,
         }
@@ -986,19 +1114,17 @@ class DensityOfStates(PointSet):
         metadata = {
             "norm_mode": norm_mode,
         }
+        norm_mode = NormMode.from_input(norm_mode)
         
-        total_property = self.total
-        values = total_property.values
-        
-        normed_values = self.normalize(mode=norm_mode, values_array=total_property.values, **kwargs)
+        normed_values = self.normalize(mode=norm_mode, values_array=self.total.to_array(), **kwargs)
         
         mode_prefix = NormMode.get_mode_prefix(norm_mode)
         mode_type_suffix = NormMode.get_mode_type_suffix(norm_mode)
         
-        name = total_property.name
-        label = total_property.label
-        units = total_property.units
-        data_lim = total_property.data_lim
+        name = self.total.name
+        label = self.total.label
+        units = self.total.units
+        data_lim = self.total.data_lim
         if len(mode_prefix) > 0:
             name = f"{mode_prefix.lower()} {name}"
             label = f"{mode_prefix} {label}"
@@ -1021,11 +1147,8 @@ class DensityOfStates(PointSet):
             metadata=metadata,
         )
 
-    def compute_cumulative_total(self, norm_mode: str | NormMode = "max") -> Property:
-        total = self.total.to_array()
-        
-        cumlative_total = self.integrate(values_array=total, cumulative=True)
-
+    def compute_cumulative_total(self, norm_mode: str | NormMode  = None) -> Property:
+        cumlative_total = self.cumsum(values=self.total)
         norm_mode = NormMode.from_input(norm_mode)
         values = self.normalize(mode = norm_mode, values_array=cumlative_total)
 
@@ -1045,6 +1168,10 @@ class DensityOfStates(PointSet):
         if len(mode_type_suffix) > 0:
             name = f"{name}_{mode_type_suffix}"
 
+
+        logger.info(f"Cumulative total: {values.shape}")
+        logger.info(f"Cumulative total (min, max): {np.min(values), np.max(values)}")
+        
         return Property(
             name=name,
             value=values,
@@ -1190,6 +1317,111 @@ class DensityOfStates(PointSet):
     # Internal helpers
     # ------------------------------------------------------------------
 
+    def _stack_basis_info(self) -> dict[str, Any]:
+        if self.projected is None or self.n_orbitals == 0:
+            return {
+                "basis": "none",
+                "groups": [],
+                "total_label": "",
+                "all_indices": set(),
+            }
+
+        if self.is_non_collinear and self.n_orbitals == 32:
+            groups = [
+                ("s-j=0.5", [0, 1]),
+                ("p-j=0.5", [2, 3]),
+                ("p-j=1.5", [4, 5, 6, 7]),
+                ("d-j=1.5", [8, 9, 10, 11]),
+                ("d-j=2.5", [12, 13, 14, 15, 16, 17]),
+                ("f-j=2.5", [18, 19, 20, 21, 22, 23]),
+                ("f-j=3.5", [24, 25, 26, 27, 28, 29, 30, 31]),
+            ]
+            total_label = "-spdf-j=0.5,1.5,2.5,3.5"
+            basis = "jm"
+        elif self.n_orbitals == 9:
+            groups = [
+                ("s", [0]),
+                ("p", [1, 2, 3]),
+                ("d", [4, 5, 6, 7, 8]),
+            ]
+            total_label = "-spd"
+            basis = "spd"
+        elif self.n_orbitals == 16:
+            groups = [
+                ("s", [0]),
+                ("p", [1, 2, 3]),
+                ("d", [4, 5, 6, 7, 8]),
+                ("f", [9, 10, 11, 12, 13, 14, 15]),
+            ]
+            total_label = "-spdf"
+            basis = "spdf"
+        else:
+            if self.orbital_names:
+                groups = [(name, [idx]) for idx, name in enumerate(self.orbital_names)]
+                total_label = "-" + "".join(self.orbital_names)
+            else:
+                groups = [(f"orbital-{idx}", [idx]) for idx in range(self.n_orbitals)]
+                total_label = ""
+            basis = "custom"
+
+        return {
+            "basis": basis,
+            "groups": [(name, list(indices)) for name, indices in groups],
+            "total_label": total_label,
+            "all_indices": {idx for _, indices in groups for idx in indices},
+        }
+
+    def _format_orbital_suffix(
+        self,
+        orbitals: Sequence[int] | None,
+        basis_info: dict[str, Any],
+    ) -> str:
+        groups = basis_info["groups"]
+        if not groups:
+            return ""
+
+        if orbitals is None:
+            return basis_info.get("total_label", "")
+
+        selection = set(orbitals)
+        if not selection:
+            return "-"
+
+        label = "-"
+        matched = False
+        for group_name, indices in groups:
+            group_set = set(indices)
+            if group_set and group_set.issubset(selection):
+                label += group_name
+                matched = True
+
+        if not matched:
+            label += ",".join(str(idx) for idx in sorted(selection))
+
+        if selection == basis_info.get("all_indices", set()) and selection:
+            return ""
+
+        return label
+
+    
+    @staticmethod
+    def _slugify(text: str) -> str:
+        slug = re.sub(r"[^0-9a-zA-Z]+", "_", text.strip().lower())
+        slug = slug.strip("_")
+        return slug or "selection"
+
+    @staticmethod
+    def _make_unique_name(base: str, used: set[str]) -> str:
+        candidate = base or "stack"
+        candidate = candidate.strip("_") or "stack"
+        unique = candidate
+        counter = 2
+        while unique in used:
+            unique = f"{candidate}_{counter}"
+            counter += 1
+        used.add(unique)
+        return unique
+
     def _validate_total(self, total: npt.ArrayLike) -> npt.NDArray[np.float64]:
         total_array = np.asarray(total, dtype=np.float64)
         if total_array.ndim == 1:
@@ -1216,8 +1448,6 @@ class DensityOfStates(PointSet):
             raise ValueError("Projected DOS must align with the energy grid")
 
         return projected_array
-    
-    
     
     def _auto_label_projected_sum(
         self,
@@ -1346,6 +1576,68 @@ class DensityOfStates(PointSet):
         return resolved_name
 
 
+    def _validate_projection_selection_params(self, 
+                                              atoms: Sequence[int] | None = None, 
+                                              orbitals: Sequence[int] | None = None, 
+                                              spins: Sequence[int] | None = None, 
+                                              species: Sequence[str] | None = None, 
+                                              species_orbital_map: dict[str, Iterable[int]] | None = None, 
+                                              atoms_orbital_map: dict[int, Iterable[int]] | None = None
+                                              ) -> tuple[set[int], set[int], set[int], set[str]]:
+ 
+        if species is not None and atoms is not None:
+            raise ValueError("atoms and species cannot be specified together")
+        if species_orbital_map is not None and (species is not None or atoms is not None or orbitals is not None):
+            raise ValueError("species_orbital_map cannot be specified together with species, atoms, or orbitals")
+        if atoms_orbital_map is not None and (species is not None or atoms is not None or orbitals is not None):
+            raise ValueError("atoms_orbital_map cannot be specified together with species, atoms, or orbitals")
+        
+        
+        if species_orbital_map is not None:
+            atoms = set()
+            orbitals = set()
+            species = set()
+            for species_orbitals_dict in species_orbital_map:
+                for specie, orbital_indices in species_orbitals_dict.items():
+                    species.add(specie)
+                    orbitals.update(orbital_indices)
+                    
+        if atoms_orbital_map is not None:
+            atoms = set()
+            orbitals = set()
+            for atoms_orbital_dict in atoms_orbital_map:
+                for atom_indices, orbital_indices in atoms_orbital_dict.items():
+                    if isinstance(atom_indices, tuple):
+                        atoms.update(atom_indices)
+                    else:
+                        atoms.add(atom_indices)
+
+                    orbitals.update(orbital_indices)
+                
+        if species is not None:
+            species_atom_map = self.get_species_atom_map(species=species)
+            atoms = set()
+            for specie in species:
+                atoms.update(species_atom_map[specie])
+        elif species is None and atoms is None:
+            species_atom_map = self.get_species_atom_map()
+            species = set()
+            atoms = set()
+            for specie, atom_indices in species_atom_map.items():
+                species.add(specie)
+                atoms.update(atom_indices)
+        elif species is None and atoms is not None:
+            species_atom_map = self.get_species_atom_map()
+            species = set()
+            for specie, atom_indices in species_atom_map.items():
+                species.add(specie)
+                atom_indices = set(atom_indices)
+                if len(atom_indices.intersection(atoms)) > 0:
+                    species.add(specie)
+        
+        return atoms, orbitals, spins, species
+        
+        
 def interpolate(
     x: npt.ArrayLike,
     y: npt.ArrayLike,
@@ -1373,3 +1665,8 @@ def filter_data_within_sigma(data: npt.NDArray[np.float64], sigma: float = 3, fi
         data[above_3_sigma] = plus_3_sigma
         data[below_3_sigma] = minus_3_sigma
     return data
+
+
+
+
+

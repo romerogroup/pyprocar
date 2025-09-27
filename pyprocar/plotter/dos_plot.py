@@ -17,7 +17,7 @@ from matplotlib import colormaps
 import matplotlib.ticker as ticker
 from matplotlib.collections import LineCollection
 
-from pyprocar.utils.inspect_utils import keep_func_kwargs
+from pyprocar.utils.func_utils import keep_func_kwargs
 
 
 import numpy as np
