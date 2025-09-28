@@ -13,6 +13,8 @@ import pyvista as pv
 from typing_extensions import override
 import pandas as pd
 
+from pyprocar.utils.math import np_round_to_half
+
 VALUE_ARRAY_TYPE = npt.NDArray[np.float64]
 GRADIENT_TYPE =  dict[int, VALUE_ARRAY_TYPE]
 PROPERTY_KEY_TYPE = str | tuple[str, int]
@@ -128,7 +130,7 @@ class Property:
         if metadata is not None:
             self.metadata = metadata
 
-        self.data_lim = data_lim
+        self._data_lim = data_lim
         
     
     
@@ -351,6 +353,33 @@ class Property:
                     if gradient.shape[0] != 0:
                         yield key, gradient_order, gradient
 
+    @property
+    def n_channels(self) -> int:
+        if self.value.ndim == 1:
+            return 1
+        else:
+            return self.value.shape[1]
+    
+    @property
+    def data_lim(self) -> tuple[float | None, float | None]:
+        if self._data_lim is None:
+            data_mins = np.min(self.value, axis=0)
+            data_maxs = np.max(self.value, axis=0)
+            data_lims = np.vstack([data_mins, data_maxs]).T
+            return data_lims
+        return self._data_lim
+    
+    @property
+    def rounded_data_lim(self) -> tuple[float | None, float | None]:
+        if self._data_lim is None:
+            data_lims = self.data_lim
+            data_lims = np.vectorize(np_round_to_half)(data_lims)
+            # for i in range(data_lims.shape[0]):
+            #     for j in range(data_lims.shape[1]):
+            #         data_lims[i, j] = np_round_to_half(data_lims[i, j])
+            return data_lims
+        return self._data_lim
+    
     def items(self) -> Generator[tuple[str, npt.NDArray[np.float64] | dict[int, npt.NDArray[np.float64]] | str], None, None]:
         """Return field names and values as tuples."""
         yield from self.__dict__.items()
