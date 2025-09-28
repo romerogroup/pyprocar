@@ -7,6 +7,7 @@ import re
 from dataclasses import dataclass, field    
 from pathlib import Path
 from enum import Enum
+from collections import Counter
 from collections.abc import Iterable
 from typing import TYPE_CHECKING, Any, Mapping, Sequence, Callable, Union, TypeVar
 from functools import wraps
@@ -99,35 +100,120 @@ def _finite_difference_gradient(
     edge_order = 2 if energies.size > 2 else 1
     return np.gradient(array, energies, axis=0, edge_order=edge_order)
 
-# class AtomicOrbSelectionIndex:
-#     """Class to store selection indices for atoms, orbitals, spins, and species."""
-#     def __init__(self, 
-#                  atoms: Iterable[int] | None = None, 
-#                  orbitals: Iterable[int] | None = None, 
-#                  spins: Iterable[int] | None = None, 
-#                  species: Iterable[str] | None = None, 
-#                  structure: Structure | None = None):
-        
-#         self._atoms = atoms
-#         self._orbitals = orbitals
-#         self._spins = spins
-#         self._species = species
-#         self._structure = structure
+_FRAC_RE = re.compile(r"\\frac\{([^}]*)\}\{([^}]*)\}")
+_TOKEN_RE = re.compile(r"([A-Za-z\\_^-]+?)(?:\^\{?(-?\d+)\}?)?(?=$|\s|\\cdot)")
 
-    # def __post_init__(self):
-    #     if self.atoms is not None and self.species is not None:
-    #         raise ValueError("atoms and species cannot be specified together")
     
-  
-    
-    
-    
+def _strip_dollars(s: str) -> str:
+    return s.strip().strip("$")
+
+def _parse_product(s: str) -> Counter:
+    """
+    Parse a product like 'states eV^2' or 'states' into a Counter({'states':1,'eV':2})
+    Accepts optional \cdot separators.
+    """
+    s = s.strip()
+    units = Counter()
+    if not s or s == "1":
+        return units
+    # split by whitespace or \cdot without losing tokens
+    s = s.replace(r"\cdot", " ")
+    for m in _TOKEN_RE.finditer(s):
+        sym, exp = m.groups()
+        if sym in {"", "1"}:
+            continue
+        k = sym.strip()
+        n = int(exp) if exp is not None else 1
+        units[k] += n
+    # remove zeros
+    for k in list(units.keys()):
+        if units[k] == 0:
+            del units[k]
+    return units
+
+def _parse_units(u: str) -> Counter:
+    """
+    Supports forms like:
+      '$\\frac{states}{eV^2}$', 'states', '$\\frac{1}{eV}$'
+    Returns Counter with positive exponents for numerator,
+    negative for denominator.
+    """
+    u = _strip_dollars(u)
+    if not u:
+        return Counter()
+    m = _FRAC_RE.search(u)
+    if m:
+        num, den = m.group(1), m.group(2)
+        units = _parse_product(num) - _parse_product(den)  # subtract den exponents
+    else:
+        units = _parse_product(u)
+    # drop zero exponents
+    for k in list(units.keys()):
+        if units[k] == 0:
+            del units[k]
+    return units
+
+def _format_units(units: Counter) -> str:
+    """Return a compact LaTeX string like '$\\frac{states}{eV}$' or '$1$'."""
+    num = {k: v for k, v in units.items() if v > 0}
+    den = {k: -v for k, v in units.items() if v < 0}
+
+    def fmt_side(d: dict) -> str:
+        if not d:
+            return "1"
+        # put 'states' first if present, then alphabetical for stability
+        keys = sorted(d.keys(), key=lambda k: (k != "states", k))
+        parts = []
+        for k in keys:
+            p = d[k]
+            if p == 1:
+                parts.append(k)
+            else:
+                parts.append(f"{k}^{{{p}}}")
+        return r"\cdot ".join(parts)
+
+    if den:
+        num_s = fmt_side(num)
+        den_s = fmt_side(den)
+        # if numerator is 1 and denominator not empty → \frac{1}{...}
+        return f"$\\frac{{{num_s}}}{{{den_s}}}$"
+    else:
+        # only numerator (or both empty)
+        s = fmt_side(num)
+        return "$1$" if s == "1" else f"${s}$"
+
+def _units_divide(u_input: str, u_norm: str | None) -> str:
+    """Compute simplified units = input / normalizer."""
+    if not u_norm:
+        # e.g. MAX: divide by a value with same units → unitless
+        return None
+    ui = _parse_units(u_input or "")
+    un = _parse_units(u_norm or "")
+    simplified = ui - un
+    # drop zeros
+    for k in list(simplified.keys()):
+        if simplified[k] == 0:
+            del simplified[k]
+    # empty → dimensionless
+    if not simplified:
+        return None
+    return _format_units(simplified)
+
+
+
+def np_round_to_half(x):
+    x = np.asarray(x)
+    s = np.where(x >= 0, 1.0, -1.0)
+    y = np.abs(x)
+    k = np.floor(y / 0.5 + 0.5)  # integer after cast
+    return s * (0.5 * k).astype(float)
 
 class NormMode(Enum):
     RAW = "raw"
     MAX = "max"
     INTEGRAL = "integral"
     ELECTRONS = "electrons"
+    TOTAL = "total"
     TOTAL_PROJECTION = "total_projection"
     SPIN_MAGNITUDE = "spin_magnitude"
     MAGNETIZATION = "magnetization"
@@ -150,6 +236,8 @@ class NormMode(Enum):
             input_mode = cls.INTEGRAL
         elif lower_input == "electrons":
             input_mode = cls.ELECTRONS
+        elif lower_input == "total":
+            input_mode = cls.TOTAL
         elif lower_input == "total_projection":
             input_mode = cls.TOTAL_PROJECTION
         elif lower_input == "spin_magnitude":
@@ -171,11 +259,76 @@ class NormMode(Enum):
         return [mode.value for mode in cls]
         
     @classmethod
+    def normalizer_units(cls, mode: NormMode, input_units: str) -> str | None:
+        """
+        Units of the quantity you divide by for this normalization.
+        Return None for 'same-units' normalizers (e.g., MAX) to produce $1$.
+        """
+        mode = cls.from_input(mode)
+        # Common DOS-like units
+        dos_units = "$\\frac{states}{eV}$"
+        if mode is cls.RAW:
+            return ""  # nothing divides → keep input
+        if mode is cls.MAX:
+            return input_units  # divide by a max of the same quantity → unitless
+        if mode is cls.INTEGRAL:
+            # ∫ DOS dE → 'states' (area under curve)
+            return "$states$"
+        if mode is cls.ELECTRONS:
+            # divide by a count of electrons (dimensionally same as 'states')
+            return "$states$"
+        if mode in {cls.TOTAL_PROJECTION, cls.SPIN_MAGNITUDE, cls.MAGNETIZATION, cls.TOTAL}:
+            # divide by another DOS-like curve
+            return dos_units
+        # fallback
+        return ""
+    
+    @classmethod
+    def get_normed_units(cls, mode: NormMode, input_units: str) -> str:
+        """
+        Clean, simplified output units = input_units / normalizer_units(mode).
+        Examples:
+            input '$\\frac{states}{eV^2}$', mode=TOTAL_PROJECTION ('$states/eV$')
+            → '$\\frac{1}{eV}$'
+            input '$\\frac{states}{eV}$', mode=INTEGRAL ('$states$')
+            → '$\\frac{1}{eV}$'
+            input '$\\frac{states}{eV}$', mode=MAX (same units)
+            → '$1$'
+        """
+        mode = cls.from_input(mode)
+        if mode is cls.RAW:
+            return input_units
+        norm_units = cls.normalizer_units(mode, input_units)
+        norm_units = _units_divide(input_units, norm_units)
+        return _units_divide(input_units, norm_units)
+    
+    @classmethod
+    def get_normed_name(cls, mode: NormMode, name: str) -> str:
+        mode = cls.from_input(mode)
+        prefix = cls.get_mode_prefix(mode)
+        if len(prefix) > 0:
+            return f"{prefix} {name}"
+        else:
+            return name
+        
+    @classmethod
+    def get_normed_data_lim(cls, mode: NormMode, input_lim: tuple[float, float] | None) -> tuple[float, float] | None:
+        mode = cls.from_input(mode)
+        if mode == cls.RAW:
+            return input_lim
+        elif mode == cls.TOTAL_PROJECTION:
+            return (0, 1)
+        else:
+            return None
+        
+    @classmethod
     def get_mode_type_suffix(cls, mode: str | NormMode) -> str:
         mode = cls.from_input(mode)
         if mode == cls.RAW:
             return ""
         elif mode == cls.TOTAL_PROJECTION:
+            return "total_projection"
+        elif mode == cls.TOTAL:
             return "total"
         elif mode == cls.MAX:
             return "max"
@@ -189,6 +342,28 @@ class NormMode(Enum):
             return "magnetization"
         else:
             raise ValueError(f"Invalid normalization mode: {mode}")
+        
+    @classmethod
+    def get_mode_units(cls, mode: str | NormMode, input_units: str) -> str:
+        mode = cls.from_input(mode)
+        if mode == cls.RAW:
+            return input_units
+        elif mode == cls.TOTAL:
+            return "$\\frac{states}{eV}$"
+        elif mode == cls.TOTAL_PROJECTION:
+            return "$\\frac{states}{eV}$"
+        elif mode == cls.SPIN_MAGNITUDE:
+            return "$\\frac{states}{eV}$"
+        elif mode == cls.MAGNETIZATION:
+            return "$\\frac{states}{eV}$"
+        elif mode == cls.MAX:
+            return "$\\frac{states}{eV}$"
+        elif mode == cls.INTEGRAL:
+            return "states"
+        elif mode == cls.ELECTRONS:
+            return "states"
+        else:
+            return ""
     
     @classmethod
     def get_mode_prefix(cls, mode: str | NormMode) -> str:
@@ -197,6 +372,8 @@ class NormMode(Enum):
             return ""
         elif mode == cls.TOTAL_PROJECTION:
             return "Total-Projected-Normed"
+        elif mode == cls.TOTAL:
+            return "Total-Normed"
         elif mode == cls.SPIN_MAGNITUDE:
             return "Spin-Magnitude-Normed"
         elif mode == cls.MAGNETIZATION:
@@ -209,51 +386,28 @@ class NormMode(Enum):
             return "N_Electrons-Normed"
         else:
             return ""
-
-class StackMode(Enum):
-    SPECIES = "species"
-    ORBITALS = "orbitals"
-    CUSTOM = "custom"
-    
-    @classmethod
-    def from_input(cls, input: str | StackMode) -> StackMode:
-        if isinstance(input, StackMode):
-            return input
-        if not isinstance(input, str):
-            raise ValueError(f"Invalid stack mode: {input}")
-        input_mode = None
-        lower_input = input.lower()
-        if lower_input == "species":
-            input_mode = cls.SPECIES
-        elif lower_input == "orbitals":
-            input_mode = cls.ORBITALS
-        elif lower_input == "custom":
-            input_mode = cls.CUSTOM
-
-        if input_mode is not None:
-            logger.info(f"Stack mode: {input_mode}")
-            return input_mode
         
-        err_msg = f"Invalid stack mode: {input}. Valid modes are:\n"
-        err_msg += "\n".join([f"- {mode}" for mode in cls.list_modes()])
-        raise ValueError(err_msg)
-    
     @classmethod
-    def list_modes(cls) -> list[str]:
-        return [mode.value for mode in cls]
-    
-    @classmethod
-    def get_mode_prefix(cls, mode: str | StackMode) -> str:
+    def get_mode_footnote(cls, mode: str | NormMode) -> str:
         mode = cls.from_input(mode)
-        if mode == cls.SPECIES:
-            return "Species-Stacked"
-        elif mode == cls.ORBITALS:
-            return "Orbitals-Stacked"
-        elif mode == cls.CUSTOM:
-            return "Custom-Stacked"
+        if mode == cls.RAW:
+            return ""
+        elif mode == cls.TOTAL:
+            return "Normalization is by the Total DoS"
+        elif mode == cls.TOTAL_PROJECTION:
+            return "Normalization is by the Total Projection DoS"
+        elif mode == cls.SPIN_MAGNITUDE:
+            return "Normalization is by the Spin Magnitude DoS"
+        elif mode == cls.MAGNETIZATION:
+            return "Normalization is by the Magnetization DoS"
+        elif mode == cls.MAX:
+            return "Normalization is by the Max DoS"
+        elif mode == cls.INTEGRAL:
+            return "Normalization is by the Integral DoS"
+        elif mode == cls.ELECTRONS:
+            return "Normalization is by the N_Electrons DoS"
         else:
             return ""
-
 
 class DensityOfStates(PointSet):
     """Data-centric representation of a density of states calculation."""
@@ -283,14 +437,20 @@ class DensityOfStates(PointSet):
         self.add_property(name="total", 
                           value=total_array,
                           units = "$\\frac{states}{eV}$",
-                          label = "DOS")
+                          label = "DoS",
+                          metadata = {
+                              "label": ["Total"]
+                          })
 
         if projected is not None:
             projected_array = self._validate_projected(projected)
             self.add_property(name="projected", 
                               value=projected_array, 
                               units = "$\\frac{states}{eV}$",
-                              label = "Projected DOS")
+                              label = "Projected DoS",
+                              metadata = {
+                              "label": ["Projected DoS"]
+                          })
             
         logger.debug(
             "Initialized DensityOfStates with %d energies, %d spin channels",
@@ -617,6 +777,8 @@ class DensityOfStates(PointSet):
         mode = NormMode.from_input(mode)
         if mode is NormMode.RAW:
             return values_array
+        elif mode is NormMode.TOTAL:
+            return self.normalize_total(values_array=values_array, **kwargs)
         elif mode is NormMode.TOTAL_PROJECTION:
             return self.normalize_total_projection(values_array=values_array, **kwargs)
         elif mode is NormMode.SPIN_MAGNITUDE:
@@ -632,6 +794,23 @@ class DensityOfStates(PointSet):
         else:
             raise ValueError(f"Normalization mode {mode} not found. Likely forgot to add it to the normalize method.")
             
+    def normalize_total(self,values_array: npt.NDArray[np.float64],**kwargs) -> npt.NDArray[np.float64]:
+        normalized_array = np.zeros_like(values_array)
+        total_array = self.total.to_array()
+        
+        logger.debug(f"total: {total_array.shape}")
+        logger.debug(f"values_array: {values_array.shape}")
+        
+        for ispin in range(0, values_array.shape[1]):
+            normalized_array[:,ispin,...] = np.divide(
+                values_array[:,ispin,...],
+                total_array[:,ispin,...],
+                out=np.zeros_like(values_array[:,ispin,...]),
+                where=total_array[:,ispin,...] != 0,
+            )
+   
+        return normalized_array
+    
     def normalize_max(self, values_array: npt.NDArray[np.float64], **kwargs) -> npt.NDArray[np.float64]:
         values_array = np.asarray(values_array, dtype=np.float64)
    
@@ -741,6 +920,10 @@ class DensityOfStates(PointSet):
         species_orbital_map: dict[str, Iterable[int]] | None = None,
         atoms_orbital_map: dict[int, Iterable[int]] | None = None,
         norm_mode: str | NormMode | None = "raw",
+        include_normal_label: bool = False,
+        label: str = "Projected DoS",
+        name: str = "projected_sum",
+        units = "$\\frac{states}{eV}$",
         **kwargs) -> Property | list[Property]:
         """Return projected DOS sums as a Property instance."""
         if self.projected is None:
@@ -764,53 +947,6 @@ class DensityOfStates(PointSet):
         spins = selection.spins
         species = selection.species
 
-        # Handle normalization and metadata
-        norm_mode = NormMode.from_input(norm_mode)
-        mode_prefix = NormMode.get_mode_prefix(norm_mode)
-        mode_type_suffix = NormMode.get_mode_type_suffix(norm_mode)
-        
-        name = "projected_sum"
-        label = "Projected DOS"
-        data_lim = None
-        units = "$\\frac{states}{eV}$"
-        normalize = norm_mode is not NormMode.RAW
-        if len(mode_prefix) > 0:
-            name = f"{mode_prefix.lower()} {name}"
-            label = f"{mode_prefix} {label}"
-        if len(mode_type_suffix) > 0:
-            name = f"{name}_{mode_type_suffix}"
-            
-        units = "$\\frac{states}{eV}$"
-        if norm_mode is NormMode.TOTAL_PROJECTION:
-            data_lim = (0, 1)
-        elif norm_mode is NormMode.INTEGRAL:
-            units = "$\\frac{1}{eV}$"
-        elif norm_mode is NormMode.ELECTRONS:
-            units = "$\\frac{1}{eV}$"
-
-        label_plain, label_latex = self._format_selection_label(
-            selection=selection,
-            normalize=normalize,
-        )
-        metadata = {
-            "atoms": list(atoms) if len(atoms) > 0 else None,
-            "orbitals": list(orbitals) if orbitals is not None else None,
-            "spins": list(spins) if spins is not None else None,
-            "species": list(species) if len(species) > 0 else None,
-            "norm_mode": norm_mode,
-            "label": label_latex,
-            "label_plain": label_plain,
-            "atom_label": selection.labels.atom,
-            "atom_label_latex": selection.labels.atom_latex,
-            "orbital_label": selection.labels.orbital,
-            "orbital_label_latex": selection.labels.orbital_latex,
-            "spin_label": selection.labels.spin,
-            "spin_label_latex": selection.labels.spin_latex,
-            "species_label": selection.labels.species,
-            "species_label_latex": selection.labels.species_latex,
-        }
-        
-
         sum_kwargs = keep_func_kwargs(kwargs, self.sum_projection_components)
         values = self.sum_projection_components(
             values_array=self.projected.to_array(),
@@ -820,17 +956,65 @@ class DensityOfStates(PointSet):
             **sum_kwargs,
         )
         
-        
+        # Handle normalization and metadata
+        norm_mode = NormMode.from_input(norm_mode)
         values = self.normalize(mode=norm_mode, values_array=values, **kwargs)
+        
+        data_min = np.min(values,axis=0)
+        data_max = np.max(values,axis=0)
+        data_lim = (data_min, data_max)
+        rounded_data_lim = (np_round_to_half(data_min), np_round_to_half(data_max))
+        
+        name = NormMode.get_normed_name(norm_mode, name)
+        units = NormMode.get_normed_units(norm_mode, units)
+        footnote = NormMode.get_mode_footnote(norm_mode)
+        
+        
+        label_plain_list, label_latex_list = self._format_selection_label(
+            selection=selection,
+            normalize=norm_mode is not NormMode.RAW,
+            include_normal_label=include_normal_label,
+        )
+        metadata = {
+            "atoms": list(atoms) if len(atoms) > 0 else None,
+            "orbitals": list(orbitals) if orbitals is not None else None,
+            "spins": list(spins) if spins is not None else None,
+            "species": list(species) if len(species) > 0 else None,
+            "norm_mode": norm_mode,
+            "units": units,
+            "data_lim": data_lim,
+            "rounded_data_lim": rounded_data_lim,
+            "label": label_latex_list,
+            "label_plain": label_plain_list,
+            "footnote": footnote,
+            "scalar_label": label,
+            "atom_label": selection.labels.atom,
+            "atom_label_latex": selection.labels.atom_latex,
+            "orbital_label": selection.labels.orbital,
+            "orbital_label_latex": selection.labels.orbital_latex,
+            "spin_label": selection.labels.spin,
+            "spin_label_latex": selection.labels.spin_latex,
+            "species_label": selection.labels.species,
+            "species_label_latex": selection.labels.species_latex,
+            "label_prefix": selection.labels.prefix_plain,
+            "label_prefix_latex": selection.labels.prefix_latex,
+            "spin_component_labels": list(selection.labels.spin_components),
+            "spin_component_labels_latex": list(selection.labels.spin_components_latex),
+            "label_combined": selection.labels.combined,
+            "label_combined_latex": selection.labels.combined_latex,
+            "include_normal_label": include_normal_label,
+        }
+        
 
+        
         return Property(
             name=name,
             value=values,
             point_set=self,
-            units=units,
             metadata=metadata,
             label=label,
-            data_lim=data_lim,
+            units=metadata.get("units"),
+            data_lim=metadata.get("rounded_data_lim"),
         )
             
     def compute_spin_texture(
@@ -1421,19 +1605,48 @@ class DensityOfStates(PointSet):
 
     @staticmethod
     def _format_selection_label(
-        selection: ProjectionSelectionResult, *, normalize: bool
-    ) -> tuple[str, str]:
+        selection: ProjectionSelectionResult,
+        *,
+        normalize: bool,
+        include_normal_label: bool,
+    ) -> tuple[list[str], list[str]]:
         mode_plain = "fraction" if normalize else "raw"
         mode_latex = "\\mathrm{fraction}" if normalize else "\\mathrm{raw}"
 
-        base_plain = selection.labels.combined
-        base_latex = selection.labels.combined_latex
+        prefix_plain = selection.labels.prefix_plain
+        prefix_latex = selection.labels.prefix_latex
 
-        plain = f"{base_plain} [{mode_plain}]" if base_plain else f"[{mode_plain}]"
-        latex_body = base_latex if base_latex else "\\mathrm{all}"
-        latex = f"${latex_body} [{mode_latex}]$"
+        spin_components = selection.labels.spin_components
+        spin_components_latex = selection.labels.spin_components_latex
 
-        return plain, latex
+        if not spin_components:
+            spin_components = ("",)
+            spin_components_latex = ("",)
+
+        labels_plain: list[str] = []
+        labels_latex: list[str] = []
+
+        normal_suffix_plain = f" [{mode_plain}]" if include_normal_label else ""
+        normal_suffix_latex = f" [{mode_latex}]" if include_normal_label else ""
+
+        for component_plain, component_latex in zip(spin_components, spin_components_latex):
+            body_plain = prefix_plain
+            if component_plain:
+                body_plain = f"{body_plain}[{component_plain}]" if body_plain else component_plain
+            body_plain = body_plain or "all"
+            labels_plain.append(f"{body_plain}{normal_suffix_plain}")
+
+            body_latex = prefix_latex
+            if component_latex:
+                body_latex = (
+                    f"{body_latex}[{component_latex}]"
+                    if body_latex
+                    else f"[{component_latex}]"
+                )
+            body_latex = body_latex or "\\mathrm{all}"
+            labels_latex.append(f"${body_latex}{normal_suffix_latex}$")
+
+        return labels_plain, labels_latex
 
     def _validate_indices(
         self,
@@ -1466,6 +1679,7 @@ class DensityOfStates(PointSet):
         orbitals = kwargs.get("orbitals")
         spins = kwargs.get("spins")
         sum_noncolinear = kwargs.get("sum_noncolinear", True)
+        include_normal_label = kwargs.get("include_normal_label", True)
 
         atoms_idx = self._validate_indices(atoms, self.n_atoms)
         if atoms_idx is not None:
@@ -1481,6 +1695,8 @@ class DensityOfStates(PointSet):
 
         if not sum_noncolinear:
             params["sum_noncolinear"] = False
+        if not include_normal_label:
+            params["include_normal_label"] = False
         return params
 
     def _make_property_key(

@@ -641,6 +641,31 @@ class SpinIndexer:
         key = name.lower()
         return mapping.get(key, name)
 
+    def component_labels(self, spins: Sequence[int] | None) -> list[str]:
+        if spins is None:
+            return []
+        normalized = _normalize_indices(spins)
+        labels: list[str] = []
+        for idx in normalized:
+            if 0 <= idx < len(self.names):
+                labels.append(self.names[idx])
+            else:
+                labels.append(str(idx))
+        return labels
+
+    def component_labels_latex(self, spins: Sequence[int] | None) -> list[str]:
+        if spins is None:
+            return []
+        normalized = _normalize_indices(spins)
+        labels: list[str] = []
+        for idx in normalized:
+            if 0 <= idx < len(self.names):
+                name = self.names[idx]
+            else:
+                name = str(idx)
+            labels.append(self._spin_name_to_latex(name))
+        return labels
+
 
 @dataclass(frozen=True)
 class ProjectionLabels:
@@ -654,6 +679,10 @@ class ProjectionLabels:
     spin_latex: str
     species_latex: str
     combined_latex: str
+    prefix_plain: str
+    prefix_latex: str
+    spin_components: tuple[str, ...]
+    spin_components_latex: tuple[str, ...]
 
 
 @dataclass
@@ -719,13 +748,27 @@ class ProjectionLabelBuilder:
 
         spin_label = ""
         spin_label_latex = ""
+        spin_components: tuple[str, ...] = tuple()
+        spin_components_latex: tuple[str, ...] = tuple()
         if include_spins and self.spin_indexer is not None and spins is not None:
-            spin_label = self.spin_indexer.label(spins)
-            spin_label_latex = self.spin_indexer.label_latex(spins)
+            spin_components = tuple(self.spin_indexer.component_labels(spins))
+            spin_components_latex = tuple(self.spin_indexer.component_labels_latex(spins))
+            spin_label = ",".join(spin_components)
+            spin_label_latex = ",".join(spin_components_latex)
 
-        label_plain = atom_label
+        prefix_plain = atom_label
         if orbital_label:
-            label_plain = f"{label_plain}-({orbital_label})" if label_plain else f"({orbital_label})"
+            prefix_plain = f"{prefix_plain}-({orbital_label})" if prefix_plain else f"({orbital_label})"
+
+        prefix_latex = atom_label_latex
+        if orbital_label_latex:
+            prefix_latex = (
+                f"{prefix_latex}-({orbital_label_latex})"
+                if prefix_latex
+                else f"({orbital_label_latex})"
+            )
+
+        label_plain = prefix_plain
         if spin_label:
             label_plain = f"{label_plain}[{spin_label}]" if label_plain else spin_label
 
@@ -738,13 +781,7 @@ class ProjectionLabelBuilder:
 
         combined_plain = label_plain or "all"
 
-        combined_latex = atom_label_latex
-        if orbital_label_latex:
-            combined_latex = (
-                f"{combined_latex}-({orbital_label_latex})"
-                if combined_latex
-                else f"({orbital_label_latex})"
-            )
+        combined_latex = prefix_latex
         if spin_label_latex:
             combined_latex = (
                 f"{combined_latex}[{spin_label_latex}]"
@@ -765,6 +802,10 @@ class ProjectionLabelBuilder:
             spin_latex=spin_label_latex,
             species_latex=species_label_latex,
             combined_latex=combined_latex,
+            prefix_plain=prefix_plain,
+            prefix_latex=prefix_latex,
+            spin_components=spin_components,
+            spin_components_latex=spin_components_latex,
         )
 
     @staticmethod

@@ -156,8 +156,10 @@ def test_compute_projected_sum_non_collinear(dos_non_collinear):
         keepdims=True,
     )
     expanded = expanded_property.to_array()
-    
+
     assert expanded.shape == (dos_non_collinear.n_energies, len(spins), 1, 1)
+    assert len(expanded_property.metadata["label"]) == len(spins)
+    assert expanded_property.metadata["spin_component_labels_latex"] == ["S_x", "S_y", "S_z"]
  
 def test_compute_projected_sum_species_list(dos):
     atoms = None
@@ -237,11 +239,29 @@ def test_compute_projected_sum_metadata_contains_latex(dos_spin_polarized):
 
     metadata = prop.metadata
 
-    assert metadata["label"] == "$\\mathrm{V}_{1}-(s)[\\uparrow] [\\mathrm{raw}]$"
-    assert metadata["label_plain"] == "V_{1}-(s)[Spin-up] [raw]"
+    assert metadata["label"] == ["$\\mathrm{V}_{1}-(s)[\\uparrow]$"]
+    assert metadata["label_plain"] == ["V_{1}-(s)[Spin-up]"]
     assert metadata["atom_label"] == "V_{1}"
     assert metadata["atom_label_latex"] == "\\mathrm{V}_{1}"
     assert metadata["spin_label_latex"] == "\\uparrow"
+    assert metadata["spin_component_labels_latex"] == ["\\uparrow"]
+    assert metadata["include_normal_label"] is False
+
+
+def test_compute_projected_sum_metadata_without_normal_label(dos_spin_polarized):
+    prop = dos_spin_polarized.compute_projected_sum(
+        atoms=[1],
+        orbitals=[0],
+        spins=[0],
+        norm_mode="raw",
+        include_normal_label=False,
+    )
+
+    metadata = prop.metadata
+
+    assert metadata["label"] == ["$\\mathrm{V}_{1}-(s)[\\uparrow]$"]
+    assert metadata["label_plain"] == ["V_{1}-(s)[Spin-up]"]
+    assert metadata["include_normal_label"] is False
 
 def test_get_property_projected_sum_matches_dos_sum(dos_spin_polarized):
     atoms = [0, 1]

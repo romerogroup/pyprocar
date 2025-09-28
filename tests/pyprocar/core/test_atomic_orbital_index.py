@@ -75,6 +75,8 @@ def test_projection_label_builder_combines_sections():
     assert components.orbital_latex == "p,d_{xz}"
     assert components.spin == "Spin-up"
     assert components.spin_latex == "\\uparrow"
+    assert components.spin_components == ("Spin-up",)
+    assert components.spin_components_latex == ("\\uparrow",)
     assert components.species == "V"
     assert components.species_latex == "\\mathrm{V}"
 
