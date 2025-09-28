@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import logging
 from abc import ABC, abstractmethod
-from typing import Any, Dict, Iterable, Mapping, Sequence, Tuple
+from typing import Any, Dict, Iterable, Mapping, Sequence, Tuple, Callable
 from pyprocar.core.property_store import Property
 from enum import Enum
 from dataclasses import dataclass, field
@@ -20,8 +20,9 @@ import numpy as np
 from matplotlib import colormaps
 import matplotlib.ticker as ticker
 from matplotlib.collections import LineCollection
+from matplotlib.colors import Colormap
 
-from pyprocar.utils.func_utils import keep_func_kwargs
+from pyprocar.utils.func_utils import keep_func_kwargs, expand_grouped_params
 
 
 import numpy as np
@@ -45,7 +46,36 @@ def get_class_attributes(cls) -> Dict[str, Any]:
         attributes[name] = value
     return attributes
 
-
+class ShowColorbar(Enum):
+    SINGLE = "single"
+    PER_CHANNEL = "per_channel"
+    NONE = "none"
+    
+    @classmethod
+    def from_string(cls, input: str|ShowColorbar|bool|None) -> "ShowColorbar":
+        if isinstance(input, ShowColorbar):
+            return input
+        elif input is None:
+            return cls.NONE
+        elif isinstance(input, bool):
+            return cls.SINGLE if input else cls.NONE
+        
+        string = input.lower()
+        if string == "single":
+            return cls.SINGLE
+        elif string == "per_channel":
+            return cls.PER_CHANNEL
+        elif string == "none":
+            return cls.NONE
+        else:
+            err_msg = f"Invalid colorbar mode: {string}. Valid modes are:\n"
+            err_msg += "\n".join([f"- {mode}" for mode in cls.list_modes()])
+            raise ValueError(err_msg)
+        
+    @classmethod
+    def list_modes(cls) -> list[str]:
+        """List all available colorbar modes."""
+        return [mode.value for mode in cls]
 
 class ScalarsMode(Enum):
     LINE = "line"
@@ -91,6 +121,31 @@ class Axis(Enum):
             return cls.BOTH
         else:
             raise ValueError(f"Invalid axis: {string}")
+        
+class ChannelMode(Enum):
+    FLIP = "flip"
+    NORMAL = "normal"
+    
+    @classmethod
+    def from_string(cls, string: str | "ChannelMode" | None) -> "ChannelMode":
+        if isinstance(string, ChannelMode):
+            return string
+        elif string is None:
+            return cls.NORMAL
+        
+        string = string.lower()
+        if string == "flip":
+            return cls.FLIP
+        elif string == "normal":
+            return cls.NORMAL
+        else:
+            err_msg = f"Invalid channel mode: {string}. Valid modes are:\n"
+            err_msg += "\n".join([f"- {mode}" for mode in cls.list_modes()])
+            raise ValueError(err_msg)
+        
+    @classmethod
+    def list_modes(cls) -> list[str]:
+        return [mode.value for mode in cls]
     
 
 @dataclass
@@ -166,12 +221,22 @@ class DOSPlotter:
         else:
             logger.info(f"Plotting line for {point_data.label}")
             self.plot_line(point_data, **kwargs)
-            
+    
+    def iter_channels(self, n_channels: int, plot_channel_func: Callable, **kwargs):
+        channel_mode = ChannelMode.from_string(channel_mode)
+        for i_channel in range(n_channels):
+            plot_channel_func(i_channel, **kwargs)
+    
+    @expand_grouped_params("linewidth", "linestyle", "alpha")
     def plot_line(
         self,
         point_data: Property,
+        plot_kwargs: dict | None = None,
+        channel_mode: ChannelMode | str | None = ChannelMode.NORMAL,
         **kwargs
     ):
+        channel_mode = ChannelMode.from_string(channel_mode)
+        
         energy_array = point_data.points
         energy_label = point_data.points_label
         energy_units = point_data.points_units
@@ -189,11 +254,19 @@ class DOSPlotter:
             
         for i_channel in range(n_channels):
             x_data, y_data = self.orient_data(energy_array, data_array[:, i_channel])
-
-            plot_kwargs = dict(kwargs)
-            plot_kwargs.setdefault("label", metadata_labels[i_channel])
-
-            self.ax.plot(x_data, y_data, **plot_kwargs)
+            
+            if channel_mode == ChannelMode.FLIP and i_channel != 0:
+                y_data *= -1.0
+                
+            if not plot_kwargs:
+                plot_kwargs = [keep_func_kwargs(kwargs, self.ax.plot)]
+                
+            channel_plot_kwargs = plot_kwargs[i_channel] if len(plot_kwargs) > 1 else plot_kwargs[0]
+            
+            channel_label = channel_plot_kwargs.get("label", None)
+            if channel_label is None:
+                channel_label = metadata_labels[i_channel]
+            self.ax.plot(x_data, y_data, label=channel_label, **channel_plot_kwargs)
   
         
         self.set_energy_label(energy_label, unit_label=energy_units)
@@ -204,6 +277,7 @@ class DOSPlotter:
         self.set_dos_lim(point_data=point_data)
         self.set_dos_tick_params()
         
+    @expand_grouped_params("linewidth", "linestyle", "alpha", "line_collection_kwargs")
     def plot_scalar_line(self,
         point_data: Property,
         scalars_data: Property,
@@ -213,11 +287,15 @@ class DOSPlotter:
         linewidth: float = 1.5,
         linestyle: str = "-",
         alpha: float = 1.0,
-        show_colorbar: bool = True,
+        show_colorbar: ShowColorbar | str | bool |None = ShowColorbar.NONE,
         show_footnote: bool = True,
+        line_collection_kwargs: dict | None = None,
+        channel_mode: ChannelMode | str | None = ChannelMode.NORMAL,
         **kwargs
     ):
-        
+        show_colorbar = ShowColorbar.from_string(show_colorbar)
+        channel_mode = ChannelMode.from_string(channel_mode)
+
         energy_array = point_data.points
         energy_label = point_data.points_label
         energy_units = point_data.points_units
@@ -238,26 +316,46 @@ class DOSPlotter:
         logger.debug(f"point_values shape: {data_array.shape}")
         logger.debug(f"Scalars shape: {scalars_array.shape}")
         logger.debug(f"n_channels: {n_channels}")
-        clim = self._resolve_clim(scalars_data, clim=clim)
-        cmap = self._resolve_cmap(cmap)
-        norm = self._resolve_norm(clim, norm)
-  
+        cmaps = self._resolve_cmap(scalars_data=scalars_data, cmap=cmap)
+        norms = self._resolve_norm(scalars_data=scalars_data, norm=norm, clim=clim)
+
         for i_channel in range(n_channels):
-        
             x_data, y_data = self.orient_data(energy_array, data_array[:,i_channel])
+            if channel_mode == ChannelMode.FLIP and i_channel != 0:
+                y_data *= -1.0
             points = np.column_stack([x_data, y_data]).reshape(-1, 1, 2)
             segments = np.concatenate([points[:-1], points[1:]], axis=1)
 
-            lc = LineCollection(segments, cmap=cmap, norm=norm)
+            if not line_collection_kwargs:
+                line_collection_kwargs = [keep_func_kwargs(kwargs, LineCollection)]
+            
+  
+            cmap = cmaps[i_channel]
+            norm = norms[i_channel]
+            
+            channel_linestyle = linestyle[i_channel] if len(linestyle) > 1 else linestyle[0]
+            channel_alpha = alpha[i_channel] if len(alpha) > 1 else alpha[0]
+            channel_linewidth = linewidth[i_channel] if len(linewidth) > 1 else linewidth[0]
+            channel_line_collection_kwargs = line_collection_kwargs[i_channel] if len(line_collection_kwargs) > 1 else line_collection_kwargs[0]
+
+            
+            lc = LineCollection(segments, cmap=cmap, norm=norm, **channel_line_collection_kwargs)
             lc.set_array(scalars_array[:,i_channel])
-            lc.set_linewidth(linewidth)
-            lc.set_linestyle(linestyle)
-            lc.set_alpha(alpha)
+            lc.set_linewidth(channel_linewidth)
+            lc.set_linestyle(channel_linestyle)
+            lc.set_alpha(channel_alpha)
 
             self.ax.add_collection(lc)
             
-        if show_colorbar:
-            self.plot_colorbar(scalars_data, cmap=cmap, norm=norm, **keep_func_kwargs(kwargs, self.plot_colorbar))
+            if show_colorbar == ShowColorbar.PER_CHANNEL:
+                self.plot_colorbar(label=scalars_data.metadata.get("label")[i_channel], cmap=cmap, norm=norm, **keep_func_kwargs(kwargs, self.plot_colorbar))
+            
+        if show_colorbar == ShowColorbar.SINGLE:
+            scalars_label = scalars_data.label
+            scalars_unit = scalars_data.units
+            if scalars_unit is not None:
+                scalars_label = f"{scalars_label} ({scalars_unit})"
+            self.plot_colorbar(label=scalars_label, cmap=cmap, norm=norm, **keep_func_kwargs(kwargs, self.plot_colorbar))
             
         self.set_energy_label(energy_label, unit_label=energy_units)
         self.set_energy_lim(point_data=point_data)
@@ -270,15 +368,21 @@ class DOSPlotter:
         if show_footnote:
             self.set_footnote(scalars_data.metadata.get("footnote"))
         
+    @expand_grouped_params("fill_between_kwargs")
     def plot_scalar_fill(self,
         point_data: Property,
         scalars_data: Property,
         cmap: str | mcolors.Colormap = "plasma",
         norm: mcolors.Normalize | str | None = None,
         clim: tuple[float | None, float | None] | None = None,
-        show_colorbar: bool = True,
+        show_colorbar: ShowColorbar | str | bool = ShowColorbar.SINGLE,
+        channel_mode: ChannelMode | str | None = None,
+        fill_between_kwargs: Mapping[str, object] | Sequence[Mapping[str, object]] | None = None,
         **kwargs
     ):
+        channel_mode = ChannelMode.from_string(channel_mode)
+        show_colorbar = ShowColorbar.from_string(show_colorbar)
+        
         energy_array = point_data.points
         energy_label = point_data.points_label
         energy_units = point_data.points_units
@@ -291,28 +395,38 @@ class DOSPlotter:
         scalars_array = scalars_data.to_array()
 
         n_channels = scalars_array.shape[1]
-        logger.debug(f"n_channels: {n_channels}")
-        
-        clim = self._resolve_clim(scalars_data, clim=clim)
-        norm = self._resolve_norm(clim, norm)
-        cmap = self._resolve_cmap(cmap)
-        
-        logger.debug(f"Energy shape: {energy_array.shape}")
-        logger.debug(f"point_values shape: {data_array.shape}")
-        logger.debug(f"Scalars shape: {scalars_array.shape}")
-        logger.debug(f"n_channels: {n_channels}")
+
+        norms = self._resolve_norm(scalars_data, norm=norm, clim=clim)
+        cmaps = self._resolve_cmap(scalars_data, cmap=cmap)
         
         for i_channel in range(n_channels):
             channel_data_array = data_array[:,i_channel]
             channel_scalars_array = scalars_array[:,i_channel]
+            if channel_mode == ChannelMode.FLIP and i_channel != 0:
+                channel_data_array *= -1.0
+            channel_cmap = cmaps[i_channel]
+            channel_norm = norms[i_channel]
+            if not fill_between_kwargs:
+                fill_between_kwargs = [keep_func_kwargs(kwargs, self.fill_between)]
+                
+            channel_fill_between_kwargs = fill_between_kwargs[i_channel] if len(fill_between_kwargs) > i_channel else fill_between_kwargs[0]
+                
             for idx in range(n_energies - 1):
-                segment_color = cmap(norm(channel_scalars_array[idx]))
+                segment_color = channel_cmap(channel_norm(channel_scalars_array[idx]))
                 x_segment = energy_array[idx : idx + 2]
                 y_segment = channel_data_array[idx : idx + 2]
-                self.fill_between(x_segment, y_segment, color=segment_color, **kwargs)
+                
+                self.fill_between(x_segment, y_segment, color=segment_color, **channel_fill_between_kwargs)
 
-        if show_colorbar:
-            self.plot_colorbar(scalars_data, cmap=cmap, norm=norm, **keep_func_kwargs(kwargs, self.plot_colorbar))
+            if show_colorbar == ShowColorbar.PER_CHANNEL:
+                self.plot_colorbar(scalars_data.metadata.get("label")[i_channel], cmap=channel_cmap, norm=channel_norm, **keep_func_kwargs(kwargs, self.plot_colorbar))
+        
+        if show_colorbar == ShowColorbar.SINGLE:
+            scalars_label = scalars_data.label
+            scalars_unit = scalars_data.units
+            if scalars_unit is not None:
+                scalars_label = f"{scalars_label} ({scalars_unit})"
+            self.plot_colorbar(label=scalars_label, cmap=cmap, norm=norm, **keep_func_kwargs(kwargs, self.plot_colorbar))
             
         self.set_energy_label(energy_label, unit_label=energy_units)
         self.set_energy_lim(point_data=point_data)
@@ -324,10 +438,10 @@ class DOSPlotter:
         
         self.draw_baseline(value=0.0)
         
+    @expand_grouped_params("quiver_kwargs")
     def plot_vectors(self,
         point_data: Property,
         vectors_data: Property,
-        show_colorbar: bool = True,
         skip:int=1,
         angles:str='uv',
         scale=None,
@@ -337,8 +451,14 @@ class DOSPlotter:
         clim: tuple[float | None, float | None] | None = None,
         norm: mcolors.Normalize | str | None = None,
         cmap: str | mcolors.Colormap = "plasma",
+        channel_mode: ChannelMode | str | None = None,
+        show_colorbar: ShowColorbar | str | bool | None = True,
+        quiver_kwargs: dict | None = None,
         **kwargs
     ):
+        channel_mode = ChannelMode.from_string(channel_mode)
+        show_colorbar = ShowColorbar.from_string(show_colorbar)
+        
         energy_array = point_data.points
         energy_label = point_data.points_label
         energy_units = point_data.points_units
@@ -353,22 +473,27 @@ class DOSPlotter:
         n_channels = vectors_array.shape[1]
         logger.debug(f"n_channels: {n_channels}")
         
-        clim = self._resolve_clim(vectors_data, clim=clim)
-        norm = self._resolve_norm(clim, norm)
-        cmap = self._resolve_cmap(cmap)
+        norms = self._resolve_norm(vectors_data, norm = norm, clim = clim)
+        cmaps = self._resolve_cmap(vectors_data, cmap = cmap)
         
-        logger.debug(f"Energy shape: {energy_array.shape}")
-        logger.debug(f"point_values shape: {data_array.shape}")
-        logger.debug(f"Vectors shape: {vectors_array.shape}")
-        logger.debug(f"n_channels: {n_channels}")
         
         # Plot quivers
         for i_channel in range(n_channels):
             u = vectors_array[...,i_channel]                # Arrow y-component
             v = np.ones_like(vectors_array[...,i_channel])  # Arrow x-component
             vector_norms = vectors_array[...,i_channel]
-            
             data_channel = data_array[...,i_channel]
+            
+            if channel_mode == ChannelMode.FLIP and i_channel != 0:
+                data_channel *= -1.0
+                
+            channel_cmap = cmaps[i_channel] if len(cmaps) > 1 else cmaps[0]
+            channel_norm = norms[i_channel] if len(norms) > 1 else norms[0]
+            
+            if not quiver_kwargs:
+                quiver_kwargs = [keep_func_kwargs(kwargs, self.ax.quiver)]
+                
+            channel_quiver_kwargs = quiver_kwargs[i_channel] if len(quiver_kwargs) > 1 else quiver_kwargs[0]
             
             quiver_args = []
             quiver_args.append(energy_array[::skip])
@@ -385,12 +510,21 @@ class DOSPlotter:
                 scale_units=scale_units,
                 units = units,
                 color=color,
-                cmap=cmap,
-                norm=norm,
-                **keep_func_kwargs(kwargs, self.ax.quiver))
+                cmap=channel_cmap,
+                norm=channel_norm,
+                **channel_quiver_kwargs)
             
-        if show_colorbar:
-            self.plot_colorbar(vectors_data, cmap=cmap, norm=norm, **keep_func_kwargs(kwargs, self.plot_colorbar))
+            if show_colorbar == ShowColorbar.PER_CHANNEL:
+                self.plot_colorbar(vectors_data.metadata.get("label")[i_channel], cmap=channel_cmap, norm=channel_norm, **keep_func_kwargs(kwargs, self.plot_colorbar))
+        
+        
+        if show_colorbar == ShowColorbar.SINGLE:
+            scalars_label = vectors_data.label
+            scalars_unit = vectors_data.units
+            if scalars_unit is not None:
+                scalars_label = f"{scalars_label} ({scalars_unit})"
+            self.plot_colorbar(label=scalars_label, cmap=cmap, norm=norm, **keep_func_kwargs(kwargs, self.plot_colorbar))
+            
             
         self.set_energy_label(energy_label, unit_label=energy_units)
         self.set_energy_lim(point_data=point_data)
@@ -413,47 +547,66 @@ class DOSPlotter:
         if clim is not None:
             return clim
         
-        scalars_array = scalars_data.to_array()
-        scalars_lim = scalars_data.data_lim
+  
+        scalars_lim = scalars_data.rounded_data_lim
         
         if scalars_lim is not None:
             return scalars_lim
+        else:
+            return None
 
-        finite = np.isfinite(scalars_array)
-        vmin = float(np.nanmin(scalars_array[finite]))
-        vmax = float(np.nanmax(scalars_array[finite]))
-        if np.isclose(vmin, vmax):
-            vmax = vmin + 1.0
-
-        return vmin, vmax
-    
-    def _resolve_norm(self, clim: tuple[float | None, float | None] | None,
+    def _resolve_norm(self, 
+                      scalars_data: Property,
+                      clim: tuple[float | None, float | None] | None = None,
                       norm: mcolors.Normalize | str | None = None, 
                       clip: bool = True) -> mcolors.Normalize:
-        vmin, vmax = clim
-        if norm is None:
-            norm = mcolors.Normalize(vmin, vmax, clip=clip)
-        elif isinstance(norm, str):
-            norm = plt.get_norm(norm)(vmin, vmax)
-        elif isinstance(norm, mcolors.Normalize):
-            return norm
-        else:
-            raise ValueError(f"Invalid norm: {norm}")
-        return norm
+        
+        if clim is None:
+            clims = self._resolve_clim(scalars_data, clim=clim)
+        n_channels = scalars_data.n_channels
+        
+            
+        norms = []
+        for i_channel in range(n_channels):
+            vmin, vmax = clims[i_channel]
+            if norm is None:
+                tmp_norm = mcolors.Normalize(vmin, vmax, clip=clip)
+            elif isinstance(norm, str):
+                tmp_norm = plt.get_norm(norm)(vmin, vmax)
+            elif isinstance(norm, mcolors.Normalize):
+                tmp_norm = norm
+            else:
+                raise ValueError(f"Invalid norm: {norm}")
+            norms.append(tmp_norm)
+        return norms
     
-    def _resolve_cmap(self, cmap: str | mcolors.Colormap | None = None) -> mcolors.Colormap:
-        if cmap is None:
-            cmap = plt.get_cmap(cmap)
-        elif isinstance(cmap, str):
-            cmap = plt.get_cmap(cmap)
-        elif isinstance(cmap, mcolors.Colormap):
-            cmap = cmap
-        return cmap
+    def _resolve_cmap(self, 
+                      scalars_data: Property, 
+                      cmap: str | mcolors.Colormap | None
+                      ) -> list[mcolors.Colormap]:
+        n_channels = scalars_data.n_channels
+        
+        if not isinstance(cmap, Iterable) or isinstance(cmap, str):
+            cmap = [cmap] * n_channels
 
-    def plot_colorbar(self, scalars_data: Property, 
+            
+        cmaps = []
+        for i_channel in range(n_channels):
+            channel_cmap = cmap[i_channel]
+            if isinstance(channel_cmap, str):
+                channel_cmap = plt.get_cmap(channel_cmap)
+            elif isinstance(cmap, mcolors.Colormap):
+                pass
+            else:
+                raise TypeError(f"Invalid cmap type: {type(channel_cmap)}")
+
+            cmaps.append(channel_cmap)
+        return cmaps
+
+    def plot_colorbar(self, 
+                    label: str,
                     cmap: str | mcolors.Colormap = "plasma",
                     norm: mcolors.Normalize | str | None = None,
-                    clim: tuple[float | None, float | None] | None = None,
                     pad: float = 0.02, 
                     shrink: float = 0.8,
                     orientation: str = "vertical",
@@ -462,12 +615,6 @@ class DOSPlotter:
                     set_colorbar_tick_params_kwargs: dict | None = None,
                     **kwargs) -> None:
         
-        scalars_label = scalars_data.label
-        scalars_units = scalars_data.units
-
-        clim = self._resolve_clim(scalars_data, clim=clim)
-        norm = self._resolve_norm(clim, norm)
-        cmap = self._resolve_cmap(cmap)
         sm = cm.ScalarMappable(norm=norm, cmap=cmap)
         
         kwargs.update({
@@ -477,15 +624,13 @@ class DOSPlotter:
             "location":location,
         })
         
- 
         self._cb_orientation = orientation
         self._cb_location = location
         self._cb = self.fig.colorbar(sm, ax=self.ax, **kwargs)
 
         set_colorbar_label_kwargs = set_colorbar_label_kwargs if set_colorbar_label_kwargs is not None else {}
-        if scalars_units is not None:
-            scalars_label = f"{scalars_label} ({scalars_units})"
-        self.set_colorbar_label(scalars_label, **set_colorbar_label_kwargs)
+      
+        self.set_colorbar_label(label, **set_colorbar_label_kwargs)
         
         set_colorbar_tick_params_kwargs = set_colorbar_tick_params_kwargs if set_colorbar_tick_params_kwargs is not None else {}
         self.set_colorbar_tick_params(**set_colorbar_tick_params_kwargs)
@@ -811,3 +956,9 @@ class DOSPlotter:
     @property
     def values_dict(self) -> Dict[str, np.ndarray]:
         return dict(self._values)
+
+
+    def _resolve_channel_param(self, param: Iterable[Any] | None) -> Sequence[Any]:
+        if len(param) > 1:
+            return param
+        return param[0]
