@@ -7,7 +7,11 @@ from abc import ABC, abstractmethod
 from typing import Any, Dict, Iterable, Mapping, Sequence, Tuple
 from pyprocar.core.property_store import Property
 from enum import Enum
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+import re
+from collections import Counter
+from enum import Enum
+
 
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
@@ -97,7 +101,8 @@ class DOSPlotter:
     figsize: tuple[int, int] = (6, 4)
     dpi: int = 100
     ax: plt.Axes | None = None
-    
+    dos_lim: tuple[float, float] = None
+    energy_lim: tuple[float, float] = None
 
     def __post_init__(self):
 
@@ -162,9 +167,6 @@ class DOSPlotter:
             logger.info(f"Plotting line for {point_data.label}")
             self.plot_line(point_data, **kwargs)
             
-        
-                
-        
     def plot_line(
         self,
         point_data: Property,
@@ -177,16 +179,22 @@ class DOSPlotter:
         data_array = point_data.to_array()
         data_label = point_data.label
         data_units = point_data.units
-        
+
+        metadata_labels = point_data.metadata.get("label")
+
         if data_array.ndim == 1:
             n_channels = 1
         else:
             n_channels = data_array.shape[1]
             
         for i_channel in range(n_channels):
-            
-            x_data, y_data = self.orient_data(energy_array, data_array[:,i_channel])
-            plt.plot(x_data, y_data, **kwargs)
+            x_data, y_data = self.orient_data(energy_array, data_array[:, i_channel])
+
+            plot_kwargs = dict(kwargs)
+            plot_kwargs.setdefault("label", metadata_labels[i_channel])
+
+            self.ax.plot(x_data, y_data, **plot_kwargs)
+  
         
         self.set_energy_label(energy_label, unit_label=energy_units)
         self.set_energy_lim(point_data=point_data)
@@ -206,6 +214,7 @@ class DOSPlotter:
         linestyle: str = "-",
         alpha: float = 1.0,
         show_colorbar: bool = True,
+        show_footnote: bool = True,
         **kwargs
     ):
         
@@ -257,6 +266,9 @@ class DOSPlotter:
         self.set_dos_label(data_label, unit_label=data_units)
         self.set_dos_lim(point_data=point_data)
         self.set_dos_tick_params()
+        
+        if show_footnote:
+            self.set_footnote(scalars_data.metadata.get("footnote"))
         
     def plot_scalar_fill(self,
         point_data: Property,
@@ -600,10 +612,15 @@ class DOSPlotter:
         if point_data is not None:
             lim = self._infer_point_dat_lim(point_data)
             
-        if self.orientation is AxesOrientation.HORIZONTAL:
-            self.set_ylim(lim)
+        if self.dos_lim is not None:
+            self.dos_lim = (min(self.dos_lim[0], lim[0]), max(self.dos_lim[1], lim[1]))
         else:
-            self.set_xlim(lim)
+            self.dos_lim = lim
+        
+        if self.orientation is AxesOrientation.HORIZONTAL:
+            self.set_ylim(self.dos_lim)
+        else:
+            self.set_xlim(self.dos_lim)
             
     def set_dos_ticklabel(self, labels: Sequence[str] = None, positions: Sequence[float] = None):
         if self.orientation is AxesOrientation.HORIZONTAL:
@@ -630,10 +647,15 @@ class DOSPlotter:
         if point_data is not None:
             lim = self._infer_points_lim(point_data)
             
-        if self.orientation is AxesOrientation.HORIZONTAL:
-            self.set_xlim(lim)
+        if self.energy_lim is not None:
+            self.energy_lim = (min(self.energy_lim[0], lim[0]), max(self.energy_lim[1], lim[1]))
         else:
-            self.set_ylim(lim)
+            self.energy_lim = lim
+            
+        if self.orientation is AxesOrientation.HORIZONTAL:
+            self.set_xlim(self.energy_lim)
+        else:
+            self.set_ylim(self.energy_lim)
             
     def set_energy_ticklabel(self, labels: Sequence[str] = None, positions: Sequence[float] = None):
         if self.orientation is AxesOrientation.HORIZONTAL:
@@ -681,8 +703,13 @@ class DOSPlotter:
             self.ax.axvline(value, **all_kwargs)
         else:
             self.ax.axhline(value, **all_kwargs)
-            
-    def show(self):
+    
+    def tight_layout(self):
+        plt.tight_layout()
+
+    def show(self, tight_layout: bool = True):
+        if tight_layout:
+            plt.tight_layout()
         plt.show()
 
     # ------------------------------------------------------------------
@@ -741,6 +768,29 @@ class DOSPlotter:
     def set_ytick_params(self, which: str = "major", **kwargs) -> None:
         self.set_tick_params(axis="y", which=which, **kwargs)
 
+    def set_footnote(self, 
+                     footnote: str | None, 
+                     xy: tuple[float, float] = (0.0, -0.22),
+                     fontsize: str = "small",
+                     color: str = "0.4",
+                     textcoords: str = "offset points",
+                     xytext: tuple[float, float] = (0, 0.0),
+                     ha: str = "left",
+                     va: str = "bottom",
+                     annotation_clip: bool = False,
+                     xycoords: tuple[str, str] = ("axes fraction", "axes fraction"),
+                     **kwargs) -> None:
+        
+        footnote = f"footnote: {footnote}"
+        if footnote is not None:
+            self.ax.annotate(
+            footnote,
+            xy=xy, xycoords=xycoords,
+            xytext=xytext, textcoords=textcoords,
+            ha=ha, va=va, fontsize=fontsize, color=color,
+            annotation_clip=annotation_clip,
+            **kwargs)
+
     def legend(
         self,
         handles: Sequence[Any] | None = None,
@@ -751,7 +801,7 @@ class DOSPlotter:
             self.ax.legend(handles, labels, **kwargs)
         else:
             self.ax.legend(**kwargs)
-            
+
     # ------------------------------------------------------------------
     # Data capture helpers
     # ------------------------------------------------------------------
