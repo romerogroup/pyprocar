@@ -84,6 +84,110 @@ def test_plot_horizontal_total_with_projected_sum_scalars_line():
     plotter.plot(total, scalars_data=projected_sum, scalars_mode="line")
     plotter.show()
     
+def test_plot_horizontal_total_with_projected_sum_scalars_line_flip_channel_mode_per_channel_colorbar():
+    dos_non_spin_polarized = DensityOfStates.from_code(code="vasp", dirpath=DOS_SPIN_POLARIZED_DIR)
+    atoms = [1]
+    orbitals = [4,5,6,7]
+
+
+    total = dos_non_spin_polarized.total
+    projected_sum = dos_non_spin_polarized.compute_projected_sum(atoms=atoms, orbitals=orbitals, spins=[0,1], norm_mode="total_projection")
+
+    plotter = DOSPlotter(orientation="horizontal")
+    plotter.plot(total, scalars_data=projected_sum, scalars_mode="line", channel_mode="flip", show_colorbar="per_channel")
+    plotter.show()
+    
+    
+def test_plot_horizontal_projected_sum_with_grouped_kwargs():
+    dos_non_spin_polarized = DensityOfStates.from_code(code="vasp", dirpath=DOS_SPIN_POLARIZED_DIR)
+    atoms = [1]
+    orbitals = [4,5,6,7]
+
+    projected_sum = dos_non_spin_polarized.compute_projected_sum(atoms=atoms, orbitals=orbitals, spins=[0,1])
+
+    total = dos_non_spin_polarized.total
+    plotter = DOSPlotter(orientation="horizontal")
+    plot_kwargs = [
+        {"linewidth": 1.0, "alpha": 0.5},
+        {"linewidth": 2.0, "alpha": 1.0}
+    ]
+    plotter.plot(projected_sum, plot_kwargs=plot_kwargs)
+    plotter.plot(total)
+    
+    plotter.legend()
+    plotter.show()
+    
+
+    
+def test_plot_horizontal_total_with_projected_sum_scalars_line_with_grouped_kwargs():
+    dos_non_spin_polarized = DensityOfStates.from_code(code="vasp", dirpath=DOS_SPIN_POLARIZED_DIR)
+    atoms = [1]
+    orbitals = [4,5,6,7]
+
+
+    total = dos_non_spin_polarized.total
+    projected_sum = dos_non_spin_polarized.compute_projected_sum(atoms=atoms, orbitals=orbitals, spins=[0,1], norm_mode="total_projection")
+
+    plotter = DOSPlotter(orientation="horizontal")
+    plotter.plot(total, scalars_data=projected_sum, scalars_mode="line", linewidth=[1.0, 2.0], alpha=[0.5, 1.0])
+    plotter.show()
+    
+    
+def test_plot_horizontal_total_with_projected_sum_scalars_line_flip_channel_mode():
+    dos_non_spin_polarized = DensityOfStates.from_code(code="vasp", dirpath=DOS_SPIN_POLARIZED_DIR)
+    atoms = [1]
+    orbitals = [4,5,6,7]
+
+
+    total = dos_non_spin_polarized.total
+    projected_sum = dos_non_spin_polarized.compute_projected_sum(atoms=atoms, orbitals=orbitals, spins=[0,1], norm_mode="total_projection")
+
+    plotter = DOSPlotter(orientation="horizontal")
+    plotter.plot(total, scalars_data=projected_sum, scalars_mode="line", 
+                 linewidth=[1.0, 2.0], 
+                 alpha=[0.5, 1.0],
+                 channel_mode="flip")
+    plotter.show()
+    
+def test_plot_horizontal_total_with_projected_sum_scalars_fill_flip_channel_mode():
+    dos_non_spin_polarized = DensityOfStates.from_code(code="vasp", dirpath=DOS_SPIN_POLARIZED_DIR)
+    atoms = [1]
+    orbitals = [4,5,6,7]
+
+
+    total = dos_non_spin_polarized.total
+    projected_sum = dos_non_spin_polarized.compute_projected_sum(atoms=atoms, orbitals=orbitals, spins=[0,1], norm_mode="total_projection")
+
+    plotter = DOSPlotter(orientation="horizontal")
+    plotter.plot(total, scalars_data=projected_sum, 
+                 scalars_mode="fill", 
+                 linewidth=[1.0, 2.0], 
+                 alpha=[0.5, 1.0],
+                 channel_mode="flip")
+    plotter.show()
+    
+    
+    
+    
+    
+def test_plot_horizontal_total_with_projected_sum_scalars_fill_with_grouped_kwargs():
+    dos_non_spin_polarized = DensityOfStates.from_code(code="vasp", dirpath=DOS_SPIN_POLARIZED_DIR)
+    atoms = [1]
+    orbitals = [4,5,6,7]
+
+
+    total = dos_non_spin_polarized.total
+    projected_sum = dos_non_spin_polarized.compute_projected_sum(atoms=atoms, orbitals=orbitals, spins=[0,1], norm_mode="total_projection")
+
+    plotter = DOSPlotter(orientation="horizontal")
+    fill_between_kwargs = [
+        { "alpha": 0.5},
+        { "alpha": 1.0}
+    ]
+    
+    plotter.plot(total, scalars_data=projected_sum, scalars_mode="fill", fill_between_kwargs = fill_between_kwargs)
+    plotter.show()
+    
 def test_plot_horizontal_total_with_projected_sum_scalars_fill():
     dos_non_spin_polarized = DensityOfStates.from_code(code="vasp", dirpath=DOS_NON_SPIN_POLARIZED_DIR)
 
@@ -132,7 +236,7 @@ def test_plot_vertical_total_with_projected_sum_scalars_fill():
     
     
 def test_non_spin_polarized_total_with_gradients_line(**kwargs):
-    dos_non_colinear = DensityOfStates.from_code(code="vasp", dirpath=DOS_NON_COLINEAR_DIR)
+    dos_non_colinear = DensityOfStates.from_code(code="vasp", dirpath=DOS_SPIN_POLARIZED_DIR)
     atoms = [1]
     orbitals = [4,5,6,7,8]
     
@@ -141,7 +245,7 @@ def test_non_spin_polarized_total_with_gradients_line(**kwargs):
     # print(total_gradient.shape)
 
     plotter = DOSPlotter(orientation="horizontal")
-    plotter.plot(total, vectors_data=total_gradient)
+    plotter.plot(total, vectors_data=total_gradient, channel_mode="flip")
     plotter.show() 
     
     
@@ -293,11 +397,16 @@ def test_non_colinear_plot_total_with_sx_magnitude_scalars_line():
 # Basic plots testing
 ###########################################################
 # test_plot_horizontal_total_line()
-test_plot_horizontal_projected_sum_line()
+# test_plot_horizontal_projected_sum_line()
 # test_plot_horizontal_projected_sum_line_integral_normalized()
 
+# test_plot_horizontal_total_with_projected_sum_scalars_line_with_grouped_kwargs()
+# test_plot_horizontal_total_with_projected_sum_scalars_line_flip_channel_mode()
+# test_plot_horizontal_total_with_projected_sum_scalars_fill_flip_channel_mode()
+# test_plot_horizontal_projected_sum_with_grouped_kwargs()
+# test_plot_horizontal_total_with_projected_sum_scalars_fill_with_grouped_kwargs()
 
-
+# test_plot_horizontal_total_with_projected_sum_scalars_line_flip_channel_mode_per_channel_colorbar()
 ###########################################################
 # Orientation testing
 ###########################################################
@@ -309,7 +418,7 @@ test_plot_horizontal_projected_sum_line()
 
 
 # Gradient testing
-# test_non_spin_polarized_total_with_gradients_line()
+test_non_spin_polarized_total_with_gradients_line()
 
 
 ###########################################################
@@ -349,47 +458,3 @@ test_plot_horizontal_projected_sum_line()
 # test_non_colinear_plot_total_with_sx_magnitude_scalars_line(norm_mode="spin_magnitude")
 
 
-
-
-# dos_non_colinear = DensityOfStates.from_code(code="vasp", dirpath=NON_COLINEAR_DIR)
-
-# atoms = [1]
-# orbitals = [4,5,6,7,8]
-
-# projected_sum = dos_non_colinear.compute_projected_sum(atoms=atoms, orbitals=orbitals, spins=[0])
-# total = dos_non_colinear.total
-# plotter = DOSPlotter(orientation="horizontal")
-# # plotter.plot(projected_sum,  label = "d")
-# # plotter.plot(total)
-# plotter.plot(total, scalars_data=projected_sum)
-# # plotter.legend()
-# plotter.show()
-
-
-# n_e = dos_non_colinear.energies.shape[0]
-# import matplotlib.pyplot as plt
-# plt.plot(dos_non_colinear.energies, dos_non_colinear.total[:,0].reshape(n_e, -1), color="red")
-# plt.plot(dos_non_colinear.energies, dos_non_colinear.projected[:,0,...].reshape(n_e, -1))
-# plt.show()
-# plotter = DOSPlotter(orientation="vertical")
-# plotter.parametric_line(
-#     energies=dos_non_colinear.energies,
-#     dos_values=dos_non_colinear.total,
-#     scalars=dos_parametric,
-# )
-# plotter.show()
-
-# def validate_selection(self, selection: SelectionInput) -> list[list[int]]:
-#         val_select = []
-#         has_list = False
-#         for element in selection:
-#             if isinstance(element, list):
-#                 has_list = True
-#         for element in selection:
-#             if isinstance(element, list):
-#                 val_select.append(element)
-#             elif isinstance(element, int) and has_list:
-#                 val_select.append([element])
-#             elif isinstance(element, int) and not has_list:
-#                 val_select.append(element)
-#         return val_select
