@@ -24,7 +24,7 @@ from scipy.interpolate import NearestNDInterpolator, RegularGridInterpolator
 from pyprocar.core import DensityOfStates, ElectronicBandStructure, KPath, Structure
 from pyprocar.io.qe.utils import parse_qe_input_cards
 from pyprocar.utils import np_utils
-from pyprocar.utils.info import OrbitalOrdering
+from pyprocar.core.atomic_orbital_index import OrbitalIndexer
 from pyprocar.utils.units import AU_TO_ANG, HARTREE_TO_EV, RYDBERG_TO_EV
 
 logger = logging.getLogger(__name__)
@@ -33,7 +33,7 @@ user_logger = logging.getLogger("user")
 FLOAT_PATTERN = r"[-+]?\d+(?:\.\d+)?"
 COORDS_PATTERN = rf"\s*({FLOAT_PATTERN})\s*({FLOAT_PATTERN})\s*({FLOAT_PATTERN})\s*"
 
-ORBITAL_ORDERING = OrbitalOrdering()
+ORBITAL_ORDERING = OrbitalIndexer()
 
 
 

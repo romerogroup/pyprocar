@@ -16,11 +16,11 @@ from pyprocar.io.vasp.outcar import Outcar
 from pyprocar.io.vasp.poscar import Poscar
 from pyprocar.io.vasp.procar import Procar
 from pyprocar.io.vasp.vasprun import VaspXML
-from pyprocar.utils.info import OrbitalOrdering
+from pyprocar.core.atomic_orbital_index import OrbitalIndexer
 
 logger = logging.getLogger(__name__)
 
-ORBITAL_ORDERING = OrbitalOrdering()
+ORBITAL_ORDERING = OrbitalIndexer()
 
 class VaspParser(BaseParser):
     def __init__(

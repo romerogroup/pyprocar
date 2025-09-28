@@ -69,12 +69,12 @@ def test_plot_horizontal_projected_sum_line_integral_normalized():
 def test_plot_horizontal_total_with_projected_sum_scalars_line():
     dos_non_spin_polarized = DensityOfStates.from_code(code="vasp", dirpath=DOS_NON_SPIN_POLARIZED_DIR)
     atoms = [1]
-    orbitals = [4,5,6,7,8]
+    orbitals = [4,5,6,7]
 
 
     total = dos_non_spin_polarized.total
     projected_sum = dos_non_spin_polarized.compute_projected_sum(atoms=atoms, orbitals=orbitals, spins=[0], norm_mode="total_projection")
-    
+    print(projected_sum.metadata)
     
     plotter = DOSPlotter(orientation="horizontal")
     plotter.plot(total, scalars_data=projected_sum, scalars_mode="line")
@@ -297,7 +297,7 @@ def test_non_colinear_plot_total_with_sx_magnitude_scalars_line():
 ###########################################################
 # Orientation testing
 ###########################################################
-# test_plot_horizontal_total_with_projected_sum_scalars_line()
+test_plot_horizontal_total_with_projected_sum_scalars_line()
 # test_plot_horizontal_total_with_projected_sum_scalars_fill()
 
 # test_plot_vertical_total_with_projected_sum_scalars_line()
@@ -305,7 +305,7 @@ def test_non_colinear_plot_total_with_sx_magnitude_scalars_line():
 
 
 # Gradient testing
-test_non_spin_polarized_total_with_gradients_line()
+# test_non_spin_polarized_total_with_gradients_line()
 
 
 ###########################################################

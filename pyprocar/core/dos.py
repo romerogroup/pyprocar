@@ -8,7 +8,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from enum import Enum
 from collections.abc import Iterable
-from typing import TYPE_CHECKING, Any, Mapping, Sequence, Sequence, Callable, Union, TypeVar
+from typing import TYPE_CHECKING, Any, Mapping, Sequence, Callable, Union, TypeVar
 from functools import wraps
 from itertools import chain, product
 
@@ -19,6 +19,14 @@ import numpy.typing as npt
 from scipy import integrate
 from scipy.interpolate import CubicSpline
 
+from pyprocar.core.atomic_orbital_index import (
+    AtomIndexer,
+    OrbitalIndexer,
+    ProjectionLabelBuilder,
+    ProjectionSelectionResolver,
+    ProjectionSelectionResult,
+    SpinIndexer,
+)
 from pyprocar.core.property_store import PointSet, Property
 from pyprocar.core.serializer import get_serializer
 from pyprocar.utils.func_utils import keep_func_kwargs, expand_grouped_params
@@ -268,6 +276,8 @@ class DensityOfStates(PointSet):
         self._fermi = float(fermi)
         self._orbital_names = orbital_names
         self._structure = structure
+        self._projection_label_builder: ProjectionLabelBuilder | None = None
+        self._projection_selection_resolver: ProjectionSelectionResolver | None = None
 
         total_array = self._validate_total(total)
         self.add_property(name="total", 
@@ -562,7 +572,6 @@ class DensityOfStates(PointSet):
         tmp_array = self.select_projection_components(values_array=values_array, atoms=atoms, orbitals=orbitals, spins=spins)
         
         n_dims = tmp_array.ndim
-        print(keepdims)
         if keepdims and n_dims == 4:
             
             summed_array = tmp_array.sum(axis=2,keepdims=keepdims).sum(axis=3,keepdims=keepdims)
@@ -737,13 +746,24 @@ class DensityOfStates(PointSet):
         if self.projected is None:
             raise ValueError("Projected DOS is not available for this calculation")
 
-        atoms, orbitals, spins, species = self._validate_projection_selection_params(atoms=atoms, 
-                                                   orbitals=orbitals, 
-                                                   spins=spins, 
-                                                   species=species, 
-                                                   species_orbital_map=species_orbital_map, 
-                                                   atoms_orbital_map=atoms_orbital_map)
-                
+        if "kwargs" in kwargs and isinstance(kwargs["kwargs"], dict):
+            nested_kwargs = kwargs.pop("kwargs")
+            kwargs.update(nested_kwargs)
+
+        selection = self._resolve_projection_selection(
+            atoms=atoms,
+            orbitals=orbitals,
+            spins=spins,
+            species=species,
+            species_orbital_map=species_orbital_map,
+            atoms_orbital_map=atoms_orbital_map,
+        )
+
+        atoms = selection.atoms
+        orbitals = selection.orbitals
+        spins = selection.spins
+        species = selection.species
+
         # Handle normalization and metadata
         norm_mode = NormMode.from_input(norm_mode)
         mode_prefix = NormMode.get_mode_prefix(norm_mode)
@@ -753,7 +773,7 @@ class DensityOfStates(PointSet):
         label = "Projected DOS"
         data_lim = None
         units = "$\\frac{states}{eV}$"
-        normalize = True
+        normalize = norm_mode is not NormMode.RAW
         if len(mode_prefix) > 0:
             name = f"{mode_prefix.lower()} {name}"
             label = f"{mode_prefix} {label}"
@@ -768,27 +788,37 @@ class DensityOfStates(PointSet):
         elif norm_mode is NormMode.ELECTRONS:
             units = "$\\frac{1}{eV}$"
 
-        extra_metadata_label = self._auto_label_projected_sum(
-            atoms=atoms, orbitals=orbitals, spins=spins, normalize=normalize
+        label_plain, label_latex = self._format_selection_label(
+            selection=selection,
+            normalize=normalize,
         )
         metadata = {
-            "atoms": list(atoms) if atoms is not None else None,
+            "atoms": list(atoms) if len(atoms) > 0 else None,
             "orbitals": list(orbitals) if orbitals is not None else None,
             "spins": list(spins) if spins is not None else None,
-            "species": list(species) if species is not None else None,
+            "species": list(species) if len(species) > 0 else None,
             "norm_mode": norm_mode,
-            "label": extra_metadata_label,
+            "label": label_latex,
+            "label_plain": label_plain,
+            "atom_label": selection.labels.atom,
+            "atom_label_latex": selection.labels.atom_latex,
+            "orbital_label": selection.labels.orbital,
+            "orbital_label_latex": selection.labels.orbital_latex,
+            "spin_label": selection.labels.spin,
+            "spin_label_latex": selection.labels.spin_latex,
+            "species_label": selection.labels.species,
+            "species_label_latex": selection.labels.species_latex,
         }
         
 
+        sum_kwargs = keep_func_kwargs(kwargs, self.sum_projection_components)
         values = self.sum_projection_components(
-                values_array=self.projected.to_array(),
-                atoms=atoms,
-                orbitals=orbitals,
-                spins=spins,
-                **keep_func_kwargs(kwargs, self.sum_projection_components)
-            )
-        
+            values_array=self.projected.to_array(),
+            atoms=atoms,
+            orbitals=orbitals,
+            spins=spins,
+            **sum_kwargs,
+        )
         
         
         values = self.normalize(mode=norm_mode, values_array=values, **kwargs)
@@ -1317,111 +1347,6 @@ class DensityOfStates(PointSet):
     # Internal helpers
     # ------------------------------------------------------------------
 
-    def _stack_basis_info(self) -> dict[str, Any]:
-        if self.projected is None or self.n_orbitals == 0:
-            return {
-                "basis": "none",
-                "groups": [],
-                "total_label": "",
-                "all_indices": set(),
-            }
-
-        if self.is_non_collinear and self.n_orbitals == 32:
-            groups = [
-                ("s-j=0.5", [0, 1]),
-                ("p-j=0.5", [2, 3]),
-                ("p-j=1.5", [4, 5, 6, 7]),
-                ("d-j=1.5", [8, 9, 10, 11]),
-                ("d-j=2.5", [12, 13, 14, 15, 16, 17]),
-                ("f-j=2.5", [18, 19, 20, 21, 22, 23]),
-                ("f-j=3.5", [24, 25, 26, 27, 28, 29, 30, 31]),
-            ]
-            total_label = "-spdf-j=0.5,1.5,2.5,3.5"
-            basis = "jm"
-        elif self.n_orbitals == 9:
-            groups = [
-                ("s", [0]),
-                ("p", [1, 2, 3]),
-                ("d", [4, 5, 6, 7, 8]),
-            ]
-            total_label = "-spd"
-            basis = "spd"
-        elif self.n_orbitals == 16:
-            groups = [
-                ("s", [0]),
-                ("p", [1, 2, 3]),
-                ("d", [4, 5, 6, 7, 8]),
-                ("f", [9, 10, 11, 12, 13, 14, 15]),
-            ]
-            total_label = "-spdf"
-            basis = "spdf"
-        else:
-            if self.orbital_names:
-                groups = [(name, [idx]) for idx, name in enumerate(self.orbital_names)]
-                total_label = "-" + "".join(self.orbital_names)
-            else:
-                groups = [(f"orbital-{idx}", [idx]) for idx in range(self.n_orbitals)]
-                total_label = ""
-            basis = "custom"
-
-        return {
-            "basis": basis,
-            "groups": [(name, list(indices)) for name, indices in groups],
-            "total_label": total_label,
-            "all_indices": {idx for _, indices in groups for idx in indices},
-        }
-
-    def _format_orbital_suffix(
-        self,
-        orbitals: Sequence[int] | None,
-        basis_info: dict[str, Any],
-    ) -> str:
-        groups = basis_info["groups"]
-        if not groups:
-            return ""
-
-        if orbitals is None:
-            return basis_info.get("total_label", "")
-
-        selection = set(orbitals)
-        if not selection:
-            return "-"
-
-        label = "-"
-        matched = False
-        for group_name, indices in groups:
-            group_set = set(indices)
-            if group_set and group_set.issubset(selection):
-                label += group_name
-                matched = True
-
-        if not matched:
-            label += ",".join(str(idx) for idx in sorted(selection))
-
-        if selection == basis_info.get("all_indices", set()) and selection:
-            return ""
-
-        return label
-
-    
-    @staticmethod
-    def _slugify(text: str) -> str:
-        slug = re.sub(r"[^0-9a-zA-Z]+", "_", text.strip().lower())
-        slug = slug.strip("_")
-        return slug or "selection"
-
-    @staticmethod
-    def _make_unique_name(base: str, used: set[str]) -> str:
-        candidate = base or "stack"
-        candidate = candidate.strip("_") or "stack"
-        unique = candidate
-        counter = 2
-        while unique in used:
-            unique = f"{candidate}_{counter}"
-            counter += 1
-        used.add(unique)
-        return unique
-
     def _validate_total(self, total: npt.ArrayLike) -> npt.NDArray[np.float64]:
         total_array = np.asarray(total, dtype=np.float64)
         if total_array.ndim == 1:
@@ -1449,52 +1374,66 @@ class DensityOfStates(PointSet):
 
         return projected_array
     
-    def _auto_label_projected_sum(
+    def _get_projection_label_builder(self) -> ProjectionLabelBuilder:
+        if self._projection_label_builder is None:
+            atom_indexer = None
+            if self.structure is not None:
+                atom_indexer = AtomIndexer.from_structure(self.structure)
+            spin_indexer = SpinIndexer.from_projection_names(
+                self.spin_projection_names
+            )
+            self._projection_label_builder = ProjectionLabelBuilder(
+                atom_indexer=atom_indexer,
+                orbital_indexer=OrbitalIndexer(),
+                spin_indexer=spin_indexer,
+            )
+        return self._projection_label_builder
+
+    def _get_projection_selection_resolver(self) -> ProjectionSelectionResolver:
+        if self._projection_selection_resolver is None:
+            label_builder = self._get_projection_label_builder()
+            self._projection_selection_resolver = ProjectionSelectionResolver(
+                label_builder=label_builder,
+                orbital_names=self.orbital_names,
+                is_non_colinear=self.is_non_collinear,
+            )
+        return self._projection_selection_resolver
+
+    def _resolve_projection_selection(
         self,
         *,
-        atoms: Sequence[int] | None,
-        orbitals: Sequence[int] | None,
-        spins: Sequence[int] | None,
-        normalize: bool,
-    ) -> str:
-        def fmt_indices(ix):
-            if ix is None:
-                return "all"
-            ix = list(ix)
-            if len(ix) == 0:
-                return "[]"
-            # collapse simple contiguous runs like 4–8
-            runs = []
-            start = prev = ix[0]
-            for v in ix[1:]:
-                if v == prev + 1:
-                    prev = v
-                else:
-                    runs.append((start, prev))
-                    start = prev = v
-            runs.append((start, prev))
-            parts = [f"{a}" if a == b else f"{a}–{b}" for a, b in runs]
-            return ",".join(parts)
+        atoms: Sequence[int] | int | None = None,
+        orbitals: Sequence[int] | int | None = None,
+        spins: Sequence[int] | int | None = None,
+        species: Sequence[str] | str | None = None,
+        species_orbital_map: Sequence[Mapping[str, Iterable[int]]] | Mapping[str, Iterable[int]] | None = None,
+        atoms_orbital_map: Sequence[Mapping[Iterable[int] | int, Iterable[int]]] | Mapping[Iterable[int] | int, Iterable[int]] | None = None,
+    ) -> ProjectionSelectionResult:
+        resolver = self._get_projection_selection_resolver()
+        return resolver.resolve(
+            atoms=atoms,
+            orbitals=orbitals,
+            spins=spins,
+            species=species,
+            species_orbital_map=species_orbital_map,
+            atoms_orbital_map=atoms_orbital_map,
+        )
 
-        # Spin label
-        spin_lbl = "spins="
-        if spins is None:
-            spin_lbl += "all"
-        else:
-            try:
-                names = self.spin_projection_names
-                parts = []
-                for s in spins:
-                    parts.append(names[s] if s < len(names) else str(s))
-                spin_lbl = "spins=" + ",".join(parts)
-            except Exception:
-                spin_lbl += fmt_indices(spins)
+    @staticmethod
+    def _format_selection_label(
+        selection: ProjectionSelectionResult, *, normalize: bool
+    ) -> tuple[str, str]:
+        mode_plain = "fraction" if normalize else "raw"
+        mode_latex = "\\mathrm{fraction}" if normalize else "\\mathrm{raw}"
 
-        atoms_lbl = f"atoms={fmt_indices(atoms)}"
-        orb_lbl   = f"orbitals={fmt_indices(orbitals)}"
-        mode_lbl  = "fraction" if normalize else "raw"
+        base_plain = selection.labels.combined
+        base_latex = selection.labels.combined_latex
 
-        return f"Σ proj ({atoms_lbl}; {orb_lbl}; {spin_lbl}; {mode_lbl})"
+        plain = f"{base_plain} [{mode_plain}]" if base_plain else f"[{mode_plain}]"
+        latex_body = base_latex if base_latex else "\\mathrm{all}"
+        latex = f"${latex_body} [{mode_latex}]$"
+
+        return plain, latex
 
     def _validate_indices(
         self,
@@ -1587,55 +1526,21 @@ class DensityOfStates(PointSet):
  
         if species is not None and atoms is not None:
             raise ValueError("atoms and species cannot be specified together")
-        if species_orbital_map is not None and (species is not None or atoms is not None or orbitals is not None):
-            raise ValueError("species_orbital_map cannot be specified together with species, atoms, or orbitals")
-        if atoms_orbital_map is not None and (species is not None or atoms is not None or orbitals is not None):
-            raise ValueError("atoms_orbital_map cannot be specified together with species, atoms, or orbitals")
-        
-        
-        if species_orbital_map is not None:
-            atoms = set()
-            orbitals = set()
-            species = set()
-            for species_orbitals_dict in species_orbital_map:
-                for specie, orbital_indices in species_orbitals_dict.items():
-                    species.add(specie)
-                    orbitals.update(orbital_indices)
-                    
-        if atoms_orbital_map is not None:
-            atoms = set()
-            orbitals = set()
-            for atoms_orbital_dict in atoms_orbital_map:
-                for atom_indices, orbital_indices in atoms_orbital_dict.items():
-                    if isinstance(atom_indices, tuple):
-                        atoms.update(atom_indices)
-                    else:
-                        atoms.add(atom_indices)
+        selection = self._resolve_projection_selection(
+            atoms=atoms,
+            orbitals=orbitals,
+            spins=spins,
+            species=species,
+            species_orbital_map=species_orbital_map,
+            atoms_orbital_map=atoms_orbital_map,
+        )
 
-                    orbitals.update(orbital_indices)
-                
-        if species is not None:
-            species_atom_map = self.get_species_atom_map(species=species)
-            atoms = set()
-            for specie in species:
-                atoms.update(species_atom_map[specie])
-        elif species is None and atoms is None:
-            species_atom_map = self.get_species_atom_map()
-            species = set()
-            atoms = set()
-            for specie, atom_indices in species_atom_map.items():
-                species.add(specie)
-                atoms.update(atom_indices)
-        elif species is None and atoms is not None:
-            species_atom_map = self.get_species_atom_map()
-            species = set()
-            for specie, atom_indices in species_atom_map.items():
-                species.add(specie)
-                atom_indices = set(atom_indices)
-                if len(atom_indices.intersection(atoms)) > 0:
-                    species.add(specie)
-        
-        return atoms, orbitals, spins, species
+        atoms_set = set(selection.atoms)
+        orbitals_set = set(selection.orbitals) if selection.orbitals is not None else None
+        spins_set = set(selection.spins) if selection.spins is not None else None
+        species_set = set(selection.species)
+
+        return atoms_set, orbitals_set, spins_set, species_set
         
         
 def interpolate(
@@ -1665,8 +1570,3 @@ def filter_data_within_sigma(data: npt.NDArray[np.float64], sigma: float = 3, fi
         data[above_3_sigma] = plus_3_sigma
         data[below_3_sigma] = minus_3_sigma
     return data
-
-
-
-
-

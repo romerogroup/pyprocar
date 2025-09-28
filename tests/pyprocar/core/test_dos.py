@@ -218,14 +218,30 @@ def test_compute_projected_sum_atoms_orbital_map(dos):
 def test_compute_projected_sum_atoms_orbital_map_list(dos):
     spins = [0]
     atoms_orbital_map = [ {(0): [0], (1): [4,5,6,7,8] , (2): [0,1,2]}, {(0): [0]}]
-    
+
     projected_sum = dos.compute_projected_sum(spins=spins, atoms_orbital_map=atoms_orbital_map)
-    
+
    
     assert isinstance(projected_sum, list), f"The result should be a list given a list of atoms_orbital_map, ({projected_sum})"
     for projected_sum in projected_sum:
         assert isinstance(projected_sum, Property), f"The result should be a Property instance, ({projected_sum})"
 
+
+def test_compute_projected_sum_metadata_contains_latex(dos_spin_polarized):
+    prop = dos_spin_polarized.compute_projected_sum(
+        atoms=[1],
+        orbitals=[0],
+        spins=[0],
+        norm_mode="raw",
+    )
+
+    metadata = prop.metadata
+
+    assert metadata["label"] == "$\\mathrm{V}_{1}-(s)[\\uparrow] [\\mathrm{raw}]$"
+    assert metadata["label_plain"] == "V_{1}-(s)[Spin-up] [raw]"
+    assert metadata["atom_label"] == "V_{1}"
+    assert metadata["atom_label_latex"] == "\\mathrm{V}_{1}"
+    assert metadata["spin_label_latex"] == "\\uparrow"
 
 def test_get_property_projected_sum_matches_dos_sum(dos_spin_polarized):
     atoms = [0, 1]
