@@ -31,7 +31,7 @@ from pyprocar.core.atomic_orbital_index import (
 from pyprocar.core.property_store import PointSet, Property
 from pyprocar.core.serializer import get_serializer
 from pyprocar.utils.func_utils import keep_func_kwargs, expand_grouped_params
-
+from pyprocar.utils.math import np_round_to_half
 
 logger = logging.getLogger(__name__)
 
@@ -200,13 +200,6 @@ def _units_divide(u_input: str, u_norm: str | None) -> str:
     return _format_units(simplified)
 
 
-
-def np_round_to_half(x):
-    x = np.asarray(x)
-    s = np.where(x >= 0, 1.0, -1.0)
-    y = np.abs(x)
-    k = np.floor(y / 0.5 + 0.5)  # integer after cast
-    return s * (0.5 * k).astype(float)
 
 class NormMode(Enum):
     RAW = "raw"
@@ -434,13 +427,22 @@ class DensityOfStates(PointSet):
         self._projection_selection_resolver: ProjectionSelectionResolver | None = None
 
         total_array = self._validate_total(total)
+        
+        total_metadata ={}
+        if total_array.shape[1] == 1:
+            total_metadata["label"] = ["Total"]
+        elif total_array.shape[1] == 2:
+            total_metadata["label"] = ["$Total - \\uparrow$", "$Total - \\downarrow$"]
+        elif total_array.shape[1] == 4:
+            total_metadata["label"] = ["$Total$", "$Total - S_x$", "$Total - S_y$", "$Total - S_z$"]
+        else:
+            raise ValueError(f"Total array has {self.total_array.shape[1]} spin channels, which is not supported")
+        
         self.add_property(name="total", 
                           value=total_array,
                           units = "$\\frac{states}{eV}$",
                           label = "DoS",
-                          metadata = {
-                              "label": ["Total"]
-                          })
+                          metadata = total_metadata)
 
         if projected is not None:
             projected_array = self._validate_projected(projected)
@@ -929,10 +931,6 @@ class DensityOfStates(PointSet):
         if self.projected is None:
             raise ValueError("Projected DOS is not available for this calculation")
 
-        if "kwargs" in kwargs and isinstance(kwargs["kwargs"], dict):
-            nested_kwargs = kwargs.pop("kwargs")
-            kwargs.update(nested_kwargs)
-
         selection = self._resolve_projection_selection(
             atoms=atoms,
             orbitals=orbitals,
@@ -1014,7 +1012,7 @@ class DensityOfStates(PointSet):
             metadata=metadata,
             label=label,
             units=metadata.get("units"),
-            data_lim=metadata.get("rounded_data_lim"),
+            # data_lim=metadata.get("rounded_data_lim"),
         )
             
     def compute_spin_texture(

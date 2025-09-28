@@ -9,6 +9,12 @@ from scipy.signal import find_peaks
 
 logger = logging.getLogger(__name__)
 
+def np_round_to_half(x):
+    x = np.asarray(x)
+    s = np.where(x >= 0, 1.0, -1.0)
+    y = np.abs(x)
+    k = np.floor(y / 0.5 + 0.5)  # integer after cast
+    return s * (0.5 * k).astype(float)
 
 
 def get_angle(v, w, radians=False):

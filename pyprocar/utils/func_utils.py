@@ -83,23 +83,59 @@ def _to_groups(x: Any) -> list[Any]:
         return [_as_selection(g) for g in x]
     return [_as_selection(x)]
 
+
+_SPECIAL_NESTED_KEYS = ("kwargs", "options", "config", "params")
+
+def _flatten_special_kwargs(d: dict[str, Any],
+                            keys: tuple[str, ...] = _SPECIAL_NESTED_KEYS,
+                            deep: bool = True) -> dict[str, Any]:
+    """
+    Copy 'd' and pull any nested dicts under specified keys into the top level.
+    - Repeats until no more of those keys are present (deep=True).
+    - Later keys overwrite earlier on conflict (same behavior as **merge).
+    """
+    out = dict(d)
+    while True:
+        expanded = False
+        for k in keys:
+            v = out.pop(k, None)
+            if isinstance(v, dict):
+                out.update(v)
+                expanded = True
+        if not (deep and expanded):
+            break
+    return out
+
+# If you want recursive *merging* for dict values that are dicts themselves:
+def _recursive_merge(dst: dict[str, Any], src: dict[str, Any]) -> dict[str, Any]:
+    out = dict(dst)
+    for k, v in src.items():
+        if isinstance(v, dict) and isinstance(out.get(k), dict):
+            out[k] = _recursive_merge(out[k], v)
+        else:
+            out[k] = v
+    return out
+
+# --- grouped-params decorator ------------------------------------------------
+
 def expand_grouped_params(*param_names: str) -> Callable[[Callable[..., T]], Callable[..., Union[T, list[T]]]]:
     """
-    Decorator to expand specified parameters that may be given as lists of lists.
-    Scalar ints are promoted to single-item lists (e.g., 3 -> [3]).
-    Returns a single value if there’s exactly one combination; else a list.
+    Allows params like atoms/orbitals/spins/... to be lists-of-lists (groups).
+    Also flattens nested kwargs under keys: 'kwargs', 'options', 'config', 'params'.
     """
     def decorator(func: Callable[..., T]) -> Callable[..., Union[T, list[T]]]:
         sig = None
         try:
-            import inspect
             sig = inspect.signature(func)
         except Exception:
             pass
 
         @wraps(func)
         def wrapper(*args: Any, **kwargs: Any) -> Union[T, list[T]]:
-            # Bind args/kwargs to names so we can read/overwrite parameters easily
+            # 1) Flatten nested kwargs at the very beginning
+            kwargs = _flatten_special_kwargs(kwargs)
+
+            # 2) Bind for name access
             if sig is not None:
                 bound = sig.bind_partial(*args, **kwargs)
                 bound.apply_defaults()
@@ -107,20 +143,22 @@ def expand_grouped_params(*param_names: str) -> Callable[[Callable[..., T]], Cal
             else:
                 argmap = kwargs.copy()
 
-            # Normalize each target parameter into groups (outer list = groups;
-            # inner value = ONE selection passed to the core)
+            # 3) Normalize groups
             group_lists: list[list[Any]] = []
             for pname in param_names:
                 group_lists.append(_to_groups(argmap.get(pname, None)))
 
             results: list[T] = []
 
-            # Iterate over cartesian product of groups
+            # 4) Iterate Cartesian product of groups
             for combo in product(*group_lists):
                 callmap = dict(argmap)
                 for pname, value in zip(param_names, combo):
-                    # value here is ONE normalized selection (e.g., None, [3], [1,2], etc.)
                     callmap[pname] = value
+
+                # 5) Flatten nested kwargs again in the per-call map
+                #    (in case a group value injected its own nested opts)
+                callmap = _flatten_special_kwargs(callmap)
 
                 if sig is not None:
                     ba = sig.bind_partial(**callmap)
