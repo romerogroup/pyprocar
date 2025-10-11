@@ -2,6 +2,7 @@ import copy
 import logging
 import time
 from pathlib import Path
+from typing import Literal
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -391,8 +392,31 @@ def test_non_colinear_plot_total_with_sx_magnitude_scalars_line():
     plotter.plot(total, scalars_data=sx, scalars_mode="line")
     plotter.show()
 
+def test_non_spin_polarized():
+    dos_spin_polarized = DensityOfStates.from_code(code="vasp", dirpath=DOS_SPIN_POLARIZED_DIR)
+    atoms = [1]
+    orbitals = [4,5,6,7,8]
+    
+    total = dos_spin_polarized.total
+    projected_sum = dos_spin_polarized.compute_projected_sum(atoms=atoms, 
+                                                             orbitals=orbitals, 
+                                                             spins=[0,1], 
+                                                             norm_mode="total_projection")
+    
+    plotter = DOSPlotter(orientation="horizontal")
+    # plotter.plot_scalar_line(total.points, 
+    #                          total.to_array()[:,0], 
+    #                          projected_sum.to_array()[:,0],
+    #                          alpha = [1.0,1.0])
+    
+    plotter.plot(total, scalars_data=projected_sum, scalars_mode="line", alpha = [0.5, 1.0])
+    plotter.show()
+    
+    
+    # sx = dos_non_spin_polarized.compute_spin_texture(atoms=atoms, orbitals=orbitals, spins=[1])
 
 
+test_non_spin_polarized()
 ###########################################################
 # Basic plots testing
 ###########################################################
@@ -418,7 +442,7 @@ def test_non_colinear_plot_total_with_sx_magnitude_scalars_line():
 
 
 # Gradient testing
-test_non_spin_polarized_total_with_gradients_line()
+# test_non_spin_polarized_total_with_gradients_line()
 
 
 ###########################################################

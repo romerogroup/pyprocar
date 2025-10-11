@@ -2,7 +2,7 @@ import inspect
 from collections.abc import Sequence, Iterable
 from functools import wraps
 from itertools import product
-from typing import Any, Callable, TypeVar, Union
+from typing import Any, Callable, TypeVar, Union, Literal
 
 
 def example_func(a, b, c=10, d=20, *, e=30, f=40, **kwargs):
@@ -40,60 +40,15 @@ def keep_func_kwargs_and_args(kwargs, args, func, defaults=True):
     return {k: v for k, v in kwargs.items() if k in func_kwargs}, [v for v in args if v in func_args]
     
 T = TypeVar("T")
+Mode = Literal["grouped", "explode"]
 
-def _is_seq(x: Any) -> bool:
-    return isinstance(x, Iterable) and not isinstance(x, (str, bytes))
-
-def check_for_groups(x: Any) -> bool:
-    """True if x is a sequence of sequences, e.g. [[...], [...]]."""
-    if not _is_seq(x):
-        return False
-    try:
-        # Empty sequence -> NOT grouped (treated as a single empty selection)
-        return len(x) > 0 and _is_seq(next(iter(x)))
-    except StopIteration:
-        return False
-
-def _as_selection(x: Any) -> Any:
-    """
-    Normalize ONE selection (the inner object passed to the core function):
-      - None stays None (means "use default/all" semantics if your core supports it).
-      - int -> [int]
-      - sequence -> list(sequence)
-      - anything else -> as-is (you can tighten if needed)
-    """
-    if x is None:
-        return None
-    
-    if isinstance(x, dict):
-        return [x]
-    elif _is_seq(x):
-        return list(x)
-    else:
-        return [x]
-    return x  # fallback; customize if you want to be stricter
-
-def _to_groups(x: Any) -> list[Any]:
-    """
-    Normalize an argument into a list of selections ("groups"):
-      - If grouped (list of lists), return [ _as_selection(g) for g in x ]
-      - Else return [ _as_selection(x) ]
-    """
-    if check_for_groups(x):
-        return [_as_selection(g) for g in x]
-    return [_as_selection(x)]
-
+# --- helpers ---------------------------------------------------------------
 
 _SPECIAL_NESTED_KEYS = ("kwargs", "options", "config", "params")
 
 def _flatten_special_kwargs(d: dict[str, Any],
                             keys: tuple[str, ...] = _SPECIAL_NESTED_KEYS,
                             deep: bool = True) -> dict[str, Any]:
-    """
-    Copy 'd' and pull any nested dicts under specified keys into the top level.
-    - Repeats until no more of those keys are present (deep=True).
-    - Later keys overwrite earlier on conflict (same behavior as **merge).
-    """
     out = dict(d)
     while True:
         expanded = False
@@ -106,36 +61,128 @@ def _flatten_special_kwargs(d: dict[str, Any],
             break
     return out
 
-# If you want recursive *merging* for dict values that are dicts themselves:
-def _recursive_merge(dst: dict[str, Any], src: dict[str, Any]) -> dict[str, Any]:
-    out = dict(dst)
-    for k, v in src.items():
-        if isinstance(v, dict) and isinstance(out.get(k), dict):
-            out[k] = _recursive_merge(out[k], v)
+def _is_seq(x: Any) -> bool:
+    # treat numpy arrays / lists / tuples as sequences; exclude str/bytes
+    try:
+        from collections.abc import Iterable
+    except Exception:
+        Iterable = tuple  # fallback, shouldn't happen
+    return isinstance(x, Iterable) and not isinstance(x, (str, bytes))
+
+def _check_for_groups(x: Any) -> bool:
+    """Sequence of sequences? e.g., [[...],[...]]"""
+    if not _is_seq(x):
+        return False
+    try:
+        it = iter(x)
+        first = next(it)
+    except StopIteration:
+        return False
+    return _is_seq(first)
+
+def _as_selection_default(x: Any) -> Any:
+    """
+    Normalize a single selection. If you need int-> [int] behavior for
+    certain parameters, plug that in here or per-parameter.
+    """
+    return x
+
+def _to_groups_grouped(x: Any, as_selection: Callable[[Any], Any]) -> list[Any]:
+    """
+    Treat list as one group unless it's list-of-lists (already grouped).
+    """
+    if _check_for_groups(x):
+        return [as_selection(g) for g in x]
+    return [as_selection(x)]
+
+def _to_groups_explode(x: Any, as_selection: Callable[[Any], Any]) -> list[Any]:
+    """
+    Treat list as many groups; list-of-lists keeps each inner as its own group.
+    None -> [None].
+    """
+    if x is None:
+        return [None]
+    if _check_for_groups(x):
+        # already groups: each inner selection remains a group
+        return [as_selection(g) for g in x]
+    if _is_seq(x):
+        return [as_selection(v) for v in x]
+    return [as_selection(x)]
+
+# --- decorator -------------------------------------------------------------
+
+ParamSpec = Union[str, tuple[str, Mode]]
+
+def expand_grouped_params(
+    *params: ParamSpec,
+    default_mode: Mode = "grouped",
+    selection_normalizers: dict[str, Callable[[Any], Any]] | None = None,
+    use_all: bool = False,
+    exclude: Iterable[str] = (),
+) -> Callable[[Callable[..., T]], Callable[..., Union[T, list[T]]]]:
+    """
+    Expand specified parameters into a Cartesian product of 'groups'.
+
+    Parameters
+    ----------
+    params:
+      - "name"                  -> uses default_mode
+      - ("name","grouped"/"explode") -> per-param override
+      With use_all=True, these act as *overrides* on top of the auto-detected set.
+
+    default_mode:
+      - "grouped": list treated as one selection (list-of-lists = many)
+      - "explode": list treated as many groups
+
+    selection_normalizers:
+      Optional per-parameter function(selection) -> selection, applied to each
+      single selection (e.g., int -> [int] for atoms, or list(...) coercions).
+
+    use_all:
+      If True, automatically include all function parameters (except excluded),
+      so you don't need to list them in *params.
+
+    exclude:
+      Iterable of parameter names to ignore when use_all=True.
+    """
+    explicit_specs: dict[str, Mode] = {}
+    for p in params:
+        if isinstance(p, tuple):
+            name, mode = p
         else:
-            out[k] = v
-    return out
+            name, mode = p, default_mode
+        explicit_specs[name] = mode
 
-# --- grouped-params decorator ------------------------------------------------
+    selection_normalizers = selection_normalizers or {}
+    exclude = set(exclude) | {"self", "cls"}
 
-def expand_grouped_params(*param_names: str) -> Callable[[Callable[..., T]], Callable[..., Union[T, list[T]]]]:
-    """
-    Allows params like atoms/orbitals/spins/... to be lists-of-lists (groups).
-    Also flattens nested kwargs under keys: 'kwargs', 'options', 'config', 'params'.
-    """
     def decorator(func: Callable[..., T]) -> Callable[..., Union[T, list[T]]]:
-        sig = None
         try:
             sig = inspect.signature(func)
         except Exception:
-            pass
+            sig = None
+
+        # Build the final spec list now that we have the signature.
+        specs: list[tuple[str, Mode]] = []
+        if use_all and sig is not None:
+            for name, par in sig.parameters.items():
+                if name in exclude:
+                    continue
+                if par.kind in (inspect.Parameter.VAR_POSITIONAL, inspect.Parameter.VAR_KEYWORD):
+                    continue
+                mode = explicit_specs.get(name, default_mode)
+                specs.append((name, mode))
+        else:
+            # Use only explicitly provided params
+            for name, mode in explicit_specs.items():
+                specs.append((name, mode))
 
         @wraps(func)
         def wrapper(*args: Any, **kwargs: Any) -> Union[T, list[T]]:
-            # 1) Flatten nested kwargs at the very beginning
+            # 1) flatten nested kwargs at entry
             kwargs = _flatten_special_kwargs(kwargs)
 
-            # 2) Bind for name access
+            # 2) bind for named access
             if sig is not None:
                 bound = sig.bind_partial(*args, **kwargs)
                 bound.apply_defaults()
@@ -143,36 +190,36 @@ def expand_grouped_params(*param_names: str) -> Callable[[Callable[..., T]], Cal
             else:
                 argmap = kwargs.copy()
 
-            # 3) Normalize groups
+            # 3) build groups
             group_lists: list[list[Any]] = []
-            for pname in param_names:
-                group_lists.append(_to_groups(argmap.get(pname, None)))
+            for pname, mode in specs:
+                as_sel = selection_normalizers.get(pname, _as_selection_default)
+                groups = (_to_groups_grouped if mode == "grouped" else _to_groups_explode)(
+                    argmap.get(pname, None), as_sel
+                )
+                group_lists.append(groups)
 
+            # 4) product iterate
             results: list[T] = []
-
-            # 4) Iterate Cartesian product of groups
             for combo in product(*group_lists):
                 callmap = dict(argmap)
-                for pname, value in zip(param_names, combo):
+                for (pname, _mode), value in zip(specs, combo):
                     callmap[pname] = value
 
-                # 5) Flatten nested kwargs again in the per-call map
-                #    (in case a group value injected its own nested opts)
                 callmap = _flatten_special_kwargs(callmap)
 
                 if sig is not None:
                     ba = sig.bind_partial(**callmap)
                     ba.apply_defaults()
-                    result = func(*ba.args, **ba.kwargs)
+                    out = func(*ba.args, **ba.kwargs)
                 else:
-                    result = func(**callmap)
-                results.append(result)
+                    out = func(**callmap)
+                results.append(out)
 
             return results[0] if len(results) == 1 else results
 
         return wrapper
     return decorator
-
 
 if __name__ == "__main__":
     print(get_kwargs(example_func))

@@ -5,6 +5,8 @@ from __future__ import annotations
 import logging
 from abc import ABC, abstractmethod
 from typing import Any, Dict, Iterable, Mapping, Sequence, Tuple, Callable
+
+from pyvista._plot import plot
 from pyprocar.core.property_store import Property
 from enum import Enum
 from dataclasses import dataclass, field
@@ -22,7 +24,7 @@ import matplotlib.ticker as ticker
 from matplotlib.collections import LineCollection
 from matplotlib.colors import Colormap
 
-from pyprocar.utils.func_utils import keep_func_kwargs, expand_grouped_params
+from pyprocar.utils.func_utils import keep_func_kwargs, expand_grouped_params, keep_func_kwargs_and_args
 
 
 import numpy as np
@@ -206,12 +208,67 @@ class DOSPlotter:
         scalars_data: Property | None = None,
         vectors_data: Property | None = None,
         scalars_mode: str = "line",
+        channel_mode: str = "flip",
         **kwargs
     ):
+        channel_mode = ChannelMode.from_string(channel_mode)
+        n_channels = scalars_data.n_channels if scalars_data else point_data.n_channels
+        x_data , y_data = self.orient_data(point_data.points, point_data.to_array())
+        plot_kwargs = dict(x = [], y = [], 
+                           scalars = [], scalars_label = [], scalars_lim = [], 
+                           vectors = [], vectors_label = [], vectors_lim = [])
+
+        data_lim = (0, 0)
+        for i_channel in range(n_channels):
+            y_channel_data = y_data[:,i_channel]
+            if channel_mode == ChannelMode.FLIP and i_channel != 0:
+                y_channel_data = y_channel_data * -1.0
+            data_min = y_channel_data.min()
+            data_max = y_channel_data.max()
+            data_lim = (min(data_lim[0], data_min), max(data_lim[1], data_max))
+            plot_kwargs["y"].append(y_channel_data)
+            plot_kwargs["x"].append(x_data)
+            
+            if scalars_data:
+                plot_kwargs["scalars"].append(scalars_data.to_array()[:,i_channel])
+                plot_kwargs["scalars_label"].append(scalars_data.label)
+                plot_kwargs["scalars_lim"].append(scalars_data.rounded_data_lim[i_channel])
+            if vectors_data:
+                plot_kwargs["vectors"].append(vectors_data.to_array()[:,i_channel])
+                plot_kwargs["vectors_label"].append(vectors_data.label[i_channel])
+                plot_kwargs["vectors_lim"].append(vectors_data.rounded_data_lim[i_channel])
+
+        # plot_kwargs = keep_func_kwargs_and_args(plot_kwargs, self.plot_scalar_line)
+        additional_kwargs = keep_func_kwargs(kwargs, self.plot_scalar_line)
+        print(additional_kwargs)
+        # for additional_kwargs_key, additional_kwargs_value in additional_kwargs.items():
+        #     plot_kwargs.setdefault(additional_kwargs_key, additional_kwargs_value)
+        # additional_kwargs.update(plot_kwargs)
+        # for additional_kwargs_key, additional_kwargs_value in additional_kwargs.items():
+        #     try:
+        #         print(additional_kwargs_key, len(additional_kwargs_value))
+        #     except:
+        #         pass
+        # print(additional_kwargs['alpha'])
+
         scalars_mode = ScalarsMode.from_string(scalars_mode)
         if scalars_data and scalars_mode == ScalarsMode.LINE:
             logger.info(f"Plotting scalar line for {point_data.label}")
-            self.plot_scalar_line(point_data, scalars_data,**kwargs)
+            # print(additional_kwargs.get("alpha"))
+            x = plot_kwargs.pop("x")
+            y = plot_kwargs.pop("y")
+            scalars = plot_kwargs.pop("scalars")
+            scalars_label = plot_kwargs.pop("scalars_label")
+            scalars_lim = plot_kwargs.pop("scalars_lim")
+            additional_kwargs.update(plot_kwargs)
+            print(additional_kwargs)
+            self.plot_scalar_line(x = x, 
+                                  y = y, 
+                                  scalars = scalars, 
+                                  scalars_label = scalars_label, 
+                                  scalars_lim = scalars_lim, 
+                                  **plot_kwargs)
+            # self.plot_scalar_line(point_data, scalars_data,**kwargs)
         elif scalars_data and scalars_mode == ScalarsMode.FILL:
             logger.info(f"Plotting scalar fill for {point_data.label}")
             self.plot_scalar_fill(point_data, scalars_data,**kwargs)
@@ -221,11 +278,72 @@ class DOSPlotter:
         else:
             logger.info(f"Plotting line for {point_data.label}")
             self.plot_line(point_data, **kwargs)
+            
+        
+            
+        self.set_energy_label(point_data.points_label, unit_label=point_data.points_units)
+        self.set_energy_lim(point_data=point_data)
+        self.set_energy_tick_params()
+        
+        self.set_dos_label(point_data.label, unit_label=point_data.units)
+        self.set_dos_lim(lim=data_lim)
+        self.set_dos_tick_params()
     
-    def iter_channels(self, n_channels: int, plot_channel_func: Callable, **kwargs):
-        channel_mode = ChannelMode.from_string(channel_mode)
-        for i_channel in range(n_channels):
-            plot_channel_func(i_channel, **kwargs)
+    @expand_grouped_params(use_all=True, default_mode="explode")
+    def plot_scalar_line(self,
+        x: np.ndarray,
+        y: np.ndarray,
+        scalars: np.ndarray,
+        scalars_label: str | None = None,
+        scalars_lim: tuple[float | None, float | None] | None = None,
+        cmap: str | mcolors.Colormap = "plasma",
+        norm: mcolors.Normalize | str | None = None,
+        linewidth: float = 1.5,
+        linestyle: str = "-",
+        alpha: float = 1.0,
+        **kwargs
+    ):
+
+        # x_data, y_data = self.orient_data(energy_array, data_array)
+ 
+        points = np.column_stack([x, y]).reshape(-1, 1, 2)
+        segments = np.concatenate([points[:-1], points[1:]], axis=1)
+
+
+        plot_kwargs = keep_func_kwargs(kwargs, LineCollection)
+        plot_kwargs.setdefault("clim", scalars_lim)
+        plot_kwargs.setdefault("cmap", cmap)
+        plot_kwargs.setdefault("norm", norm)
+        plot_kwargs.setdefault("linewidth", linewidth)
+        plot_kwargs.setdefault("linestyle", linestyle)
+        plot_kwargs.setdefault("alpha", alpha)
+        # print(plot_kwargs.get("alpha"))
+        plot_kwargs.setdefault("array", scalars)
+        plot_kwargs.setdefault("label", scalars_label)
+        print(plot_kwargs.get("alpha"))
+        
+        lc = LineCollection(segments, **plot_kwargs)
+        self.ax.add_collection(lc)
+
+        # if show_colorbar == ShowColorbar.SINGLE:
+        #     scalars_label = scalars_data.label
+        #     scalars_unit = scalars_data.units
+        #     if scalars_unit is not None:
+        #         scalars_label = f"{scalars_label} ({scalars_unit})"
+        #     self.plot_colorbar(label=scalars_label, cmap=cmap, norm=norm, **keep_func_kwargs(kwargs, self.plot_colorbar))
+            
+        # self.set_energy_label(energy_label, unit_label=energy_units)
+        # self.set_energy_lim(point_data=point_data)
+        # self.set_energy_tick_params()
+        
+        # self.set_dos_label(data_label, unit_label=data_units)
+        # self.set_dos_lim(point_data=point_data)
+        # self.set_dos_tick_params()
+        
+        # if show_footnote:
+        #     self.set_footnote(scalars_data.metadata.get("footnote"))
+        
+    
     
     @expand_grouped_params("linewidth", "linestyle", "alpha")
     def plot_line(
@@ -277,97 +395,94 @@ class DOSPlotter:
         self.set_dos_lim(point_data=point_data)
         self.set_dos_tick_params()
         
-    @expand_grouped_params("linewidth", "linestyle", "alpha", "line_collection_kwargs")
-    def plot_scalar_line(self,
-        point_data: Property,
-        scalars_data: Property,
-        cmap: str | mcolors.Colormap = "plasma",
-        norm: mcolors.Normalize | str | None = None,
-        clim: tuple[float | None, float | None] | None = None,
-        linewidth: float = 1.5,
-        linestyle: str = "-",
-        alpha: float = 1.0,
-        show_colorbar: ShowColorbar | str | bool |None = ShowColorbar.NONE,
-        show_footnote: bool = True,
-        line_collection_kwargs: dict | None = None,
-        channel_mode: ChannelMode | str | None = ChannelMode.NORMAL,
-        **kwargs
-    ):
-        show_colorbar = ShowColorbar.from_string(show_colorbar)
-        channel_mode = ChannelMode.from_string(channel_mode)
+    # @expand_grouped_params("linewidth", "linestyle", "alpha", "line_collection_kwargs")
+    # def plot_scalar_line(self,
+    #     point_data: Property,
+    #     scalars_data: Property,
+    #     cmap: str | mcolors.Colormap = "plasma",
+    #     norm: mcolors.Normalize | str | None = None,
+    #     clim: tuple[float | None, float | None] | None = None,
+    #     linewidth: float = 1.5,
+    #     linestyle: str = "-",
+    #     alpha: float = 1.0,
+    #     show_colorbar: ShowColorbar | str | bool |None = ShowColorbar.NONE,
+    #     show_footnote: bool = True,
+    #     line_collection_kwargs: dict | None = None,
+    #     channel_mode: ChannelMode | str | None = ChannelMode.NORMAL,
+    #     **kwargs
+    # ):
+    #     show_colorbar = ShowColorbar.from_string(show_colorbar)
+    #     channel_mode = ChannelMode.from_string(channel_mode)
 
-        energy_array = point_data.points
-        energy_label = point_data.points_label
-        energy_units = point_data.points_units
+    #     energy_array = point_data.points
+    #     energy_label = point_data.points_label
+    #     energy_units = point_data.points_units
         
-        data_array = point_data.to_array()
-        data_label = point_data.label
-        data_units = point_data.units
+    #     data_array = point_data.to_array()
+    #     data_label = point_data.label
+    #     data_units = point_data.units
         
-        scalars_array = scalars_data.to_array()
+    #     scalars_array = scalars_data.to_array()
 
-        if scalars_array.ndim == 1:
-            n_channels = 1
-        else:
-            n_channels = scalars_array.shape[1]
+    #     if scalars_array.ndim == 1:
+    #         n_channels = 1
+    #     else:
+    #         n_channels = scalars_array.shape[1]
         
+    #     cmaps = self._resolve_cmap(scalars_data=scalars_data, cmap=cmap)
+    #     norms = self._resolve_norm(scalars_data=scalars_data, norm=norm, clim=clim)
 
-        logger.debug(f"Energy shape: {energy_array.shape}")
-        logger.debug(f"point_values shape: {data_array.shape}")
-        logger.debug(f"Scalars shape: {scalars_array.shape}")
-        logger.debug(f"n_channels: {n_channels}")
-        cmaps = self._resolve_cmap(scalars_data=scalars_data, cmap=cmap)
-        norms = self._resolve_norm(scalars_data=scalars_data, norm=norm, clim=clim)
+    #     for i_channel in range(n_channels):
+    #         x_data, y_data = self.orient_data(energy_array, data_array[:,i_channel])
+    #         if channel_mode == ChannelMode.FLIP and i_channel != 0:
+    #             y_data *= -1.0
+    #         points = np.column_stack([x_data, y_data]).reshape(-1, 1, 2)
+    #         segments = np.concatenate([points[:-1], points[1:]], axis=1)
 
-        for i_channel in range(n_channels):
-            x_data, y_data = self.orient_data(energy_array, data_array[:,i_channel])
-            if channel_mode == ChannelMode.FLIP and i_channel != 0:
-                y_data *= -1.0
-            points = np.column_stack([x_data, y_data]).reshape(-1, 1, 2)
-            segments = np.concatenate([points[:-1], points[1:]], axis=1)
-
-            if not line_collection_kwargs:
-                line_collection_kwargs = [keep_func_kwargs(kwargs, LineCollection)]
+    #         if not line_collection_kwargs:
+    #             line_collection_kwargs = [keep_func_kwargs(kwargs, LineCollection)]
             
   
-            cmap = cmaps[i_channel]
-            norm = norms[i_channel]
+    #         cmap = cmaps[i_channel]
+    #         norm = norms[i_channel]
             
-            channel_linestyle = linestyle[i_channel] if len(linestyle) > 1 else linestyle[0]
-            channel_alpha = alpha[i_channel] if len(alpha) > 1 else alpha[0]
-            channel_linewidth = linewidth[i_channel] if len(linewidth) > 1 else linewidth[0]
-            channel_line_collection_kwargs = line_collection_kwargs[i_channel] if len(line_collection_kwargs) > 1 else line_collection_kwargs[0]
+    #         channel_linestyle = linestyle[i_channel] if len(linestyle) > 1 else linestyle[0]
+    #         channel_alpha = alpha[i_channel] if len(alpha) > 1 else alpha[0]
+    #         channel_linewidth = linewidth[i_channel] if len(linewidth) > 1 else linewidth[0]
+    #         channel_line_collection_kwargs = line_collection_kwargs[i_channel] if len(line_collection_kwargs) > 1 else line_collection_kwargs[0]
 
             
-            lc = LineCollection(segments, cmap=cmap, norm=norm, **channel_line_collection_kwargs)
-            lc.set_array(scalars_array[:,i_channel])
-            lc.set_linewidth(channel_linewidth)
-            lc.set_linestyle(channel_linestyle)
-            lc.set_alpha(channel_alpha)
+    #         lc = LineCollection(segments, cmap=cmap, norm=norm, **channel_line_collection_kwargs)
+    #         lc.set_array(scalars_array[:,i_channel])
+    #         lc.set_linewidth(channel_linewidth)
+    #         lc.set_linestyle(channel_linestyle)
+    #         lc.set_alpha(channel_alpha)
 
-            self.ax.add_collection(lc)
+    #         self.ax.add_collection(lc)
             
-            if show_colorbar == ShowColorbar.PER_CHANNEL:
-                self.plot_colorbar(label=scalars_data.metadata.get("label")[i_channel], cmap=cmap, norm=norm, **keep_func_kwargs(kwargs, self.plot_colorbar))
+    #         if show_colorbar == ShowColorbar.PER_CHANNEL:
+    #             self.plot_colorbar(label=scalars_data.metadata.get("label")[i_channel], cmap=cmap, norm=norm, **keep_func_kwargs(kwargs, self.plot_colorbar))
             
-        if show_colorbar == ShowColorbar.SINGLE:
-            scalars_label = scalars_data.label
-            scalars_unit = scalars_data.units
-            if scalars_unit is not None:
-                scalars_label = f"{scalars_label} ({scalars_unit})"
-            self.plot_colorbar(label=scalars_label, cmap=cmap, norm=norm, **keep_func_kwargs(kwargs, self.plot_colorbar))
+    #     if show_colorbar == ShowColorbar.SINGLE:
+    #         scalars_label = scalars_data.label
+    #         scalars_unit = scalars_data.units
+    #         if scalars_unit is not None:
+    #             scalars_label = f"{scalars_label} ({scalars_unit})"
+    #         self.plot_colorbar(label=scalars_label, cmap=cmap, norm=norm, **keep_func_kwargs(kwargs, self.plot_colorbar))
             
-        self.set_energy_label(energy_label, unit_label=energy_units)
-        self.set_energy_lim(point_data=point_data)
-        self.set_energy_tick_params()
+    #     self.set_energy_label(energy_label, unit_label=energy_units)
+    #     self.set_energy_lim(point_data=point_data)
+    #     self.set_energy_tick_params()
         
-        self.set_dos_label(data_label, unit_label=data_units)
-        self.set_dos_lim(point_data=point_data)
-        self.set_dos_tick_params()
+    #     self.set_dos_label(data_label, unit_label=data_units)
+    #     self.set_dos_lim(point_data=point_data)
+    #     self.set_dos_tick_params()
         
-        if show_footnote:
-            self.set_footnote(scalars_data.metadata.get("footnote"))
-        
+    #     if show_footnote:
+    #         self.set_footnote(scalars_data.metadata.get("footnote"))
+            
+            
+    
     @expand_grouped_params("fill_between_kwargs")
     def plot_scalar_fill(self,
         point_data: Property,
@@ -719,7 +834,7 @@ class DOSPlotter:
     
     def orient_data(self, energies: np.ndarray, values: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
         energies = np.asarray(energies, dtype=np.float64).reshape(-1)
-        values = np.asarray(values, dtype=np.float64).reshape(-1)
+        values = np.asarray(values, dtype=np.float64)
         
         logger.debug(f"Plot orientation: {self.orientation}")
         if self.orientation is AxesOrientation.HORIZONTAL:
