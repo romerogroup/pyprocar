@@ -35,7 +35,7 @@ classifiers = [
 
 dynamic = ["version"]
 
-requires-python = ">=3.8"
+requires-python = ">=3.8,<3.14"
 dependencies = [
     "matplotlib>=3.8",
     "numpy",
@@ -53,7 +53,8 @@ dependencies = [
     "dill",
     "variconfig",
     "huggingface_hub[hf_transfer,cli]",
-    "pyvista[jupyter]"
+    "pyvista[jupyter]>0.44.0",
+    "vtk"
 ]
 
 [project.optional-dependencies]
