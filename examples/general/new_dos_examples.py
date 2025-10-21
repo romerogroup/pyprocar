@@ -304,7 +304,7 @@ def test_non_colinear_plot_total_with_spin_texture_norm_mode_magnetization_scala
     orbitals = [4,5,6,7,8]
     
     total = dos_non_colinear.total
-    magnetization = dos_non_colinear.compute_magnetization(atoms=atoms, orbitals=orbitals, norm_mode="spin_magnitude")
+    magnetization = dos_non_colinear.compute_magnetization(atoms=atoms, orbitals=orbitals, norm_mode="magnetization")
     
     plotter = DOSPlotter(orientation="horizontal")
     plotter.plot(total, scalars_data=magnetization, scalars_mode="line")
@@ -409,14 +409,14 @@ def test_non_spin_polarized():
     #                          projected_sum.to_array()[:,0],
     #                          alpha = [1.0,1.0])
     
-    plotter.plot(total, scalars_data=projected_sum, scalars_mode="line", alpha = [0.5, 1.0])
+    plotter.plot(total, scalars_data=projected_sum, scalars_mode="line", alpha = [0.5, 1.0], b = [0.1, 5.0])
     plotter.show()
     
     
     # sx = dos_non_spin_polarized.compute_spin_texture(atoms=atoms, orbitals=orbitals, spins=[1])
 
 
-test_non_spin_polarized()
+# test_non_spin_polarized()
 ###########################################################
 # Basic plots testing
 ###########################################################
@@ -467,6 +467,8 @@ test_non_spin_polarized()
 
 # test_non_colinear_plot_total_with_sx_magnitude_scalars_line()
 
+
+test_non_spin_polarized_total_with_gradients_line()
 
 #--------------------------------------------------------
 # Gradient testing
