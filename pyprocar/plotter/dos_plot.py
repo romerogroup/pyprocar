@@ -17,6 +17,7 @@ from inspect import signature, Parameter
 
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
+from matplotlib import patches
 import matplotlib.colors as mcolors
 import numpy as np
 from matplotlib import colormaps
@@ -222,7 +223,7 @@ class DOSPlotter:
             if scalars_data and scalars_mode == ScalarsMode.LINE:
                 self.add_scalar_line(series.x, series.y, series.scalars, series.scalars_label, series.scalars_lim, **series.additional_kwargs)
             elif scalars_data and scalars_mode == ScalarsMode.FILL:
-                self.plot_scalar_fill(point_data, scalars_data,**kwargs)
+                self.add_scalar_fill(series.x, series.y, series.scalars, scalars_lim=series.scalars_lim, **series.additional_kwargs)
             elif vectors_data:
                 self.add_vectors(series.x, series.y, series.vectors, 
                                  label =series.vectors_label,
@@ -289,13 +290,16 @@ class DOSPlotter:
         norm: mcolors.Normalize | str | None = None,
         **kwargs):
         
-        for idx in range(x.size - 1):
-            segment_color = cmap(norm(scalars[idx]))
-            x_segment = x[idx : idx + 2]
-            y_segment = y[idx : idx + 2]
-            
-            self.fill_between(x_segment, y_segment, color=segment_color, **kwargs)
+        cmap = self._resolve_cmap(cmap)
+        clim = self._resolve_clim(scalars, scalars_lim)
+        norm = self._resolve_norm(scalars, norm)
         
+        if self.orientation is AxesOrientation.HORIZONTAL:
+            self.fill_between_image(x, y, scalars, orientation=AxesOrientation.HORIZONTAL, **kwargs)
+        else:
+            self.fill_between_image(x, y, scalars, orientation=AxesOrientation.VERTICAL, **kwargs)
+        
+   
     def add_vectors(self,
         x: np.ndarray,
         y: np.ndarray,
@@ -396,66 +400,39 @@ class DOSPlotter:
         return series_list
     
     
-    def _resolve_clim(self, scalars_data: Property, clim: tuple[float | None, float | None] | None = None) -> tuple[float, float]:
+    def _resolve_cmap(self, cmap: str | mcolors.Colormap | None) -> list[mcolors.Colormap]:
+        if isinstance(cmap, str):
+            cmap = plt.get_cmap(cmap)
+        elif isinstance(cmap, mcolors.Colormap):
+            pass
+        else:
+            raise TypeError(f"Invalid cmap type: {type(cmap)}")
+
+        return cmap
+        
+    def _resolve_clim(self, scalars: np.ndarray = None, clim: tuple[float | None, float | None] | None = None) -> tuple[float, float]:
         if clim is not None:
             return clim
-        
-  
-        scalars_lim = scalars_data.rounded_data_lim
-        
-        if scalars_lim is not None:
-            return scalars_lim
-        else:
-            return None
 
+        finite = np.isfinite(scalars)
+        if not finite.any():
+            return 0.0, 1.0
+        vmin = float(np.nanmin(scalars[finite]))
+        vmax = float(np.nanmax(scalars[finite]))
+        if np.isclose(vmin, vmax):
+            vmax = vmin + 1.0
+        return vmin, vmax   
+        
     def _resolve_norm(self, 
-                      scalars_data: Property,
+                      scalars: np.ndarray = None,
                       clim: tuple[float | None, float | None] | None = None,
                       norm: mcolors.Normalize | str | None = None, 
                       clip: bool = True) -> mcolors.Normalize:
         
         if clim is None:
-            clims = self._resolve_clim(scalars_data, clim=clim)
-        n_channels = scalars_data.n_channels
-        
-            
-        norms = []
-        for i_channel in range(n_channels):
-            vmin, vmax = clims[i_channel]
-            if norm is None:
-                tmp_norm = mcolors.Normalize(vmin, vmax, clip=clip)
-            elif isinstance(norm, str):
-                tmp_norm = plt.get_norm(norm)(vmin, vmax)
-            elif isinstance(norm, mcolors.Normalize):
-                tmp_norm = norm
-            else:
-                raise ValueError(f"Invalid norm: {norm}")
-            norms.append(tmp_norm)
-        return norms
+            clim = self._resolve_clim(scalars, clim=clim)
+        return mcolors.Normalize(clim[0], clim[1], clip=clip)
     
-    def _resolve_cmap(self, 
-                      scalars_data: Property, 
-                      cmap: str | mcolors.Colormap | None
-                      ) -> list[mcolors.Colormap]:
-        n_channels = scalars_data.n_channels
-        
-        if not isinstance(cmap, Iterable) or isinstance(cmap, str):
-            cmap = [cmap] * n_channels
-
-            
-        cmaps = []
-        for i_channel in range(n_channels):
-            channel_cmap = cmap[i_channel]
-            if isinstance(channel_cmap, str):
-                channel_cmap = plt.get_cmap(channel_cmap)
-            elif isinstance(cmap, mcolors.Colormap):
-                pass
-            else:
-                raise TypeError(f"Invalid cmap type: {type(channel_cmap)}")
-
-            cmaps.append(channel_cmap)
-        return cmaps
-
     def plot_colorbar(self, 
                     label: str,
                     cmap: str | mcolors.Colormap = "plasma",
@@ -586,13 +563,81 @@ class DOSPlotter:
         baseline: float | None = 0.0,
         **kwargs,
     ):
-        energies = np.asarray(list(energies), dtype=np.float64)
-        values = np.asarray(list(values), dtype=np.float64)
+        # energies = np.asarray(list(energies), dtype=np.float64)
+        # values = np.asarray(list(values), dtype=np.float64)
+        
+        # print(values.shape)
+        # values = values.squeeze()
 
         if self.orientation is AxesOrientation.HORIZONTAL:
             return self.ax.fill_between(energies, values, baseline, **kwargs)
         return self.ax.fill_betweenx(energies, baseline, values, **kwargs)
+    
+    
+    def fill_between_image(self,
+        x: np.ndarray,
+        y: np.ndarray,
+        values: np.ndarray,
+        orientation: AxesOrientation = AxesOrientation.HORIZONTAL,
+        baseline: float | None = 1.0,
+        origin='lower',
+        aspect='auto',
+        interpolation='bilinear', 
+        zorder=0,
+        **kwargs):
+        
 
+        if baseline is None:
+        # match Matplotlib's default semantics: fill to 0 if not given
+            baseline_arr = np.zeros_like(values)
+        else:
+            baseline_arr = np.asarray(baseline, dtype=float) if np.ndim(baseline) else float(baseline)
+            if np.ndim(baseline_arr) == 0:
+                baseline_arr = np.full_like(values, baseline_arr)
+
+
+        y = y.squeeze()
+        x = x.squeeze()
+        baseline_arr = baseline_arr.squeeze()
+        
+        if orientation is AxesOrientation.HORIZONTAL:
+            x_shift = x
+            y_shift = y + baseline_arr
+            
+            x_poly_coords = np.r_[x_shift, x_shift[::-1]]
+            y_poly_coords = np.r_[y_shift, baseline_arr[::-1]]
+        else:
+            x_shift = x + baseline_arr
+            y_shift = y
+            
+            x_poly_coords = np.r_[x_shift, baseline_arr[::-1]]
+            y_poly_coords = np.r_[y_shift, y_shift[::-1]]
+        
+        ylo = np.nanmin(np.c_[y_shift, baseline_arr])
+        yhi = np.nanmax(np.c_[y_shift, baseline_arr])
+        xlo = np.nanmin(np.c_[x_shift, baseline_arr])
+        xhi = np.nanmax(np.c_[x_shift, baseline_arr])
+        
+        img = values[:, np.newaxis]            # shape (1, N)
+        im = self.ax.imshow(
+            img, 
+            extent=[xlo, xhi, ylo, yhi],
+            origin=origin, aspect=aspect, interpolation=interpolation, zorder=zorder, **kwargs
+        )
+
+        # clip polygon under/over the curve (y between v and b)
+        x_poly_coords = np.r_[x_shift, baseline_arr[::-1]]
+        y_poly_coords = np.r_[y_shift, baseline_arr[::-1]]
+        poly_xy = np.column_stack([x_poly_coords, y_poly_coords])
+
+        patch = patches.Polygon(poly_xy, closed=True, facecolor="none", edgecolor="none")
+        self.ax.add_patch(patch)
+        im.set_clip_path(patch)
+        
+        self.ax.plot(x_shift, y_shift, **({"color": "k", "lw": 1} | kwargs))
+        
+        
+        
     # ------------------------------------------------------------------
     # Axis utilities
     # ------------------------------------------------------------------

@@ -431,6 +431,7 @@ def test_non_spin_polarized():
 # test_plot_horizontal_total_with_projected_sum_scalars_fill_with_grouped_kwargs()
 
 # test_plot_horizontal_total_with_projected_sum_scalars_line_flip_channel_mode_per_channel_colorbar()
+
 ###########################################################
 # Orientation testing
 ###########################################################
@@ -438,7 +439,7 @@ def test_non_spin_polarized():
 # test_plot_horizontal_total_with_projected_sum_scalars_fill()
 
 # test_plot_vertical_total_with_projected_sum_scalars_line()
-# test_plot_vertical_total_with_projected_sum_scalars_fill()
+test_plot_vertical_total_with_projected_sum_scalars_fill()
 
 
 # Gradient testing
@@ -468,7 +469,7 @@ def test_non_spin_polarized():
 # test_non_colinear_plot_total_with_sx_magnitude_scalars_line()
 
 
-test_non_spin_polarized_total_with_gradients_line()
+# test_non_spin_polarized_total_with_gradients_line()
 
 #--------------------------------------------------------
 # Gradient testing
