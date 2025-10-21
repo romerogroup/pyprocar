@@ -23,8 +23,11 @@ def get_kwargs(func, defaults=True):
     
 def get_args(func, defaults=True):
     sig = inspect.signature(func)
-    return [name for name, param in sig.parameters.items() if param.default is not param.empty]
+    return [name for name, param in sig.parameters.items() if param.default is param.empty and name != "kwargs"]
     
+def get_params(func, defaults=True):
+    sig = inspect.signature(func)
+    return {name: param for name, param in sig.parameters.items()}
     
 def keep_func_kwargs(kwargs, func, ):
     func_kwargs = get_kwargs(func)
@@ -34,10 +37,16 @@ def keep_func_args(args, func, defaults=True):
     func_args = get_args(func, defaults)
     return [v for v in args if v in func_args]
     
-def keep_func_kwargs_and_args(kwargs, args, func, defaults=True):
+def keep_func_kwargs_and_args(kwargs, func, defaults=True):
     func_kwargs = get_kwargs(func, defaults)
     func_args = get_args(func, defaults)
-    return {k: v for k, v in kwargs.items() if k in func_kwargs}, [v for v in args if v in func_args]
+    return [v for k, v in kwargs.items() if k in func_args], {k: v for k, v in kwargs.items() if k in func_kwargs}, 
+    
+def keep_func_params(params, func, defaults=True):
+    func_params = get_params(func, defaults)
+    func_param_keys = set(func_params.keys())
+    return {k: v for k, v in params.items() if k in func_param_keys}
+    
     
 T = TypeVar("T")
 Mode = Literal["grouped", "explode"]
