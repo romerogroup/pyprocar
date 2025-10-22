@@ -230,7 +230,6 @@ def test_plot_vertical_total_with_projected_sum_scalars_fill():
     total = dos_non_spin_polarized.total
     projected_sum = dos_non_spin_polarized.compute_projected_sum(atoms=atoms, orbitals=orbitals, spins=[0], norm_mode="total_projection")
     
-    
     plotter = DOSPlotter(orientation="vertical")
     plotter.plot(total, scalars_data=projected_sum, scalars_mode="fill")
     plotter.show()
@@ -436,10 +435,10 @@ def test_non_spin_polarized():
 # Orientation testing
 ###########################################################
 # test_plot_horizontal_total_with_projected_sum_scalars_line()
-# test_plot_horizontal_total_with_projected_sum_scalars_fill()
+test_plot_horizontal_total_with_projected_sum_scalars_fill()
 
 # test_plot_vertical_total_with_projected_sum_scalars_line()
-test_plot_vertical_total_with_projected_sum_scalars_fill()
+# test_plot_vertical_total_with_projected_sum_scalars_fill()
 
 
 # Gradient testing
