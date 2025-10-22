@@ -294,10 +294,7 @@ class DOSPlotter:
         clim = self._resolve_clim(scalars, scalars_lim)
         norm = self._resolve_norm(scalars, norm)
         
-        if self.orientation is AxesOrientation.HORIZONTAL:
-            self.fill_between_image(x, y, scalars, orientation=AxesOrientation.HORIZONTAL, **kwargs)
-        else:
-            self.fill_between_image(x, y, scalars, orientation=AxesOrientation.VERTICAL, **kwargs)
+        self.fill_between_image(x, y, scalars, orientation=self.orientation, **kwargs)
         
    
     def add_vectors(self,
