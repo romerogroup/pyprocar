@@ -92,10 +92,16 @@ def test_plot_horizontal_total_with_projected_sum_scalars_line_flip_channel_mode
 
 
     total = dos_non_spin_polarized.total
-    projected_sum = dos_non_spin_polarized.compute_projected_sum(atoms=atoms, orbitals=orbitals, spins=[0,1], norm_mode="total_projection")
+    projected_sum = dos_non_spin_polarized.compute_projected_sum(atoms=atoms, 
+                                                                 orbitals=orbitals, 
+                                                                 spins=[0,1], 
+                                                                 norm_mode="total_projection")
 
     plotter = DOSPlotter(orientation="horizontal")
-    plotter.plot(total, scalars_data=projected_sum, scalars_mode="line", channel_mode="flip", show_colorbar="per_channel")
+    plotter.plot(total, scalars_data=projected_sum, 
+                 scalars_mode="line", 
+                 channel_mode="flip", 
+                 scalars_show_colorbar="per_channel")
     plotter.show()
     
     
@@ -162,7 +168,7 @@ def test_plot_horizontal_total_with_projected_sum_scalars_fill_flip_channel_mode
     plotter = DOSPlotter(orientation="horizontal")
     plotter.plot(total, scalars_data=projected_sum, 
                  scalars_mode="fill", 
-                 linewidth=[1.0, 2.0], 
+                #  linewidth=[1.0, 2.0], 
                  alpha=[0.5, 1.0],
                  channel_mode="flip")
     plotter.show()
@@ -181,12 +187,12 @@ def test_plot_horizontal_total_with_projected_sum_scalars_fill_with_grouped_kwar
     projected_sum = dos_non_spin_polarized.compute_projected_sum(atoms=atoms, orbitals=orbitals, spins=[0,1], norm_mode="total_projection")
 
     plotter = DOSPlotter(orientation="horizontal")
-    fill_between_kwargs = [
+    plot_kwargs = [
         { "alpha": 0.5},
         { "alpha": 1.0}
     ]
     
-    plotter.plot(total, scalars_data=projected_sum, scalars_mode="fill", fill_between_kwargs = fill_between_kwargs)
+    plotter.plot(total, scalars_data=projected_sum, scalars_mode="fill", plot_kwargs = plot_kwargs)
     plotter.show()
     
 def test_plot_horizontal_total_with_projected_sum_scalars_fill():
@@ -303,7 +309,9 @@ def test_non_colinear_plot_total_with_spin_texture_norm_mode_magnetization_scala
     orbitals = [4,5,6,7,8]
     
     total = dos_non_colinear.total
-    magnetization = dos_non_colinear.compute_magnetization(atoms=atoms, orbitals=orbitals, norm_mode="magnetization")
+    magnetization = dos_non_colinear.compute_magnetization(atoms=atoms, 
+                                                           orbitals=orbitals, 
+                                                           norm_mode="magnetization")
     
     plotter = DOSPlotter(orientation="horizontal")
     plotter.plot(total, scalars_data=magnetization, scalars_mode="line")
@@ -317,7 +325,11 @@ def test_non_colinear_plot_total_with_mag_norm_mode_magnetization_from_total_lin
     orbitals = [4,5,6,7,8]
     
     total = dos_non_colinear.total
-    magnetization = dos_non_colinear.compute_magnetization(atoms=atoms, orbitals=orbitals, norm_mode="magnetization", from_total=True, fill_value=None)
+    magnetization = dos_non_colinear.compute_magnetization(atoms=atoms, 
+                                                           orbitals=orbitals, 
+                                                           norm_mode="magnetization", 
+                                                           from_total=True, 
+                                                           fill_value=None)
     
     plotter = DOSPlotter(orientation="horizontal")
     plotter.plot(total, scalars_data=magnetization, scalars_mode="line")
@@ -435,7 +447,7 @@ def test_non_spin_polarized():
 # Orientation testing
 ###########################################################
 # test_plot_horizontal_total_with_projected_sum_scalars_line()
-test_plot_horizontal_total_with_projected_sum_scalars_fill()
+# test_plot_horizontal_total_with_projected_sum_scalars_fill()
 
 # test_plot_vertical_total_with_projected_sum_scalars_line()
 # test_plot_vertical_total_with_projected_sum_scalars_fill()
@@ -460,7 +472,7 @@ test_plot_horizontal_total_with_projected_sum_scalars_fill()
 
 # # Spin texture magnitude
 # test_non_colinear_plot_total_with_spin_texture_magnitude_scalars_line()
-# test_non_colinear_plot_total_with_spin_mag_norm_mode_spin_texture_magnitude_scalars_line(fill_value=0.0)
+test_non_colinear_plot_total_with_spin_mag_norm_mode_spin_texture_magnitude_scalars_line(fill_value=0.0)
 # test_non_colinear_plot_total_with_spin_mag_norm_mode_spin_texture_magnitude_from_total_scalars_line(fill_value=0.0)  # Should result in 0.0 for all values as the total spin channels are 0.0
 
 # test_non_colinear_plot_total_with_mag_norm_mode_spin_texture_magnitude_scalars_line()   # This should be less than one  since sum |m| <= total M
