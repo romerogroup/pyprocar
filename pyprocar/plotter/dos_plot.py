@@ -26,7 +26,8 @@ from matplotlib.collections import LineCollection
 from matplotlib.colors import Colormap
 
 from pyprocar.utils.func_utils import keep_func_kwargs, expand_grouped_params, keep_func_kwargs_and_args, keep_func_args, keep_func_params
-
+from pyprocar.utils.plot_utils import DEFAULT_COLORS, DEFAULT_COLOR_MAP
+from cycler import cycler
 
 logger = logging.getLogger(__name__)
 
@@ -170,7 +171,7 @@ class DOSPlotter:
             self._fig = self.ax.get_figure()
             
         self.orientation = AxesOrientation.from_string(self.orientation)
-        
+
     @property
     def fig(self) -> plt.Figure:
         return self._fig
@@ -218,6 +219,7 @@ class DOSPlotter:
         scalars_norm: str | mcolors.Normalize = None,
         scalars_clim: tuple[float | None, float | None] | None = None,
         scalars_show_colorbar: ShowColorbar | str = ShowColorbar.SINGLE,
+        plot_kwargs: list[dict[str, Any]] | None = None,
         **kwargs
     ):
         
@@ -249,6 +251,11 @@ class DOSPlotter:
             xlim = (min(xlim[0], series.x.min()), max(xlim[1], series.x.max()))
             ylim = (min(ylim[0], series.y.min()), max(ylim[1], series.y.max()))
             
+            if plot_kwargs is not None:
+                plot_kwargs_channel = plot_kwargs[i_channel]
+            else:
+                plot_kwargs_channel = {}
+            
             add_scalar_args = {
                 "x": series.x,
                 "y": series.y,
@@ -258,13 +265,13 @@ class DOSPlotter:
                 "cmap": cmap_s[i_channel],
                 "norm": norm_s[i_channel],
             }
-            
+            add_scalar_args.update(plot_kwargs_channel)
             add_line_args = {
                 "x": series.x,
                 "y": series.y,
                 "label": series.label,
             }
-            
+            add_line_args.update(plot_kwargs_channel)
             add_vectors_args = {
                 "x": series.x,
                 "y": series.y,
@@ -274,6 +281,7 @@ class DOSPlotter:
                 "norm": norm_v[i_channel],
                 "cmap": cmap_v[i_channel],
             }
+            add_vectors_args.update(plot_kwargs_channel)
             
             
             # add_scalar_args.update(series.additional_kwargs)
@@ -331,9 +339,8 @@ class DOSPlotter:
         x: np.ndarray,
         y: np.ndarray,
         label: str | None = None,
-        color: str | None = "black",
         **kwargs):
-        handle = self.ax.plot(x, y, label=label, color=color, **kwargs)
+        handle = self.ax.plot(x, y, label=label, **kwargs)
         return handle
     
     
@@ -375,12 +382,11 @@ class DOSPlotter:
         clim: tuple[float | None, float | None] | None = None,
         cmap: str | mcolors.Colormap = "plasma",
         norm: mcolors.Normalize | str | None = None,
-        plot_total: bool = True,
+        baseline: float | None = 0.0,
         **kwargs):
-        im = self.fill_between_image(x, y, scalars, orientation=self.orientation, 
+        im = self.fill_between_image(x, y, scalars, orientation=self.orientation, baseline=baseline,
                                          label=label, 
                                          cmap=cmap, norm=norm, clim=clim, 
-                                         plot_total=plot_total,
                                          **kwargs)
         return im
         
@@ -444,7 +450,6 @@ class DOSPlotter:
         s_label = scalars_data.label if scalars_data else None
         s_unit = scalars_data.units if scalars_data else None
         s_lims = getattr(scalars_data, "rounded_data_lim", None) if scalars_data else None
-        
         vectors = vectors_data.to_array() if vectors_data is not None else None
 
         v_label = vectors_data.label if vectors_data else None
@@ -630,7 +635,7 @@ class DOSPlotter:
         y: np.ndarray,
         values: np.ndarray,
         orientation: AxesOrientation = AxesOrientation.HORIZONTAL,
-        baseline: float | None = 1.0,
+        baseline: float | None = 0.0,
         origin='lower',
         aspect='auto',
         interpolation='bilinear', 
@@ -1037,6 +1042,7 @@ def _resolve_scaling_for_modality(
         all_vals = []
         gclim = (0,0)
         for s in series_list:
+            
             v = get_values(s)
             if v is not None:
                 all_vals.append(v)

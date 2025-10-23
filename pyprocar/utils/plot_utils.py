@@ -1,5 +1,7 @@
 import matplotlib.colors as mcolors
 import matplotlib.pyplot as plt
+import matplotlib as mpl
+from cycler import cycler
 
 # Credits to https://github.com/karthik/wesanderson
 wes_anderson_palettes = {
@@ -77,5 +79,6 @@ def create_colormap(palette_name):
 # )
 DEFAULT_COLORS = wes_anderson_palettes["Darjeeling1"]
 DEFAULT_COLORS.extend(wes_anderson_palettes["Darjeeling2"])
-plt.rcParams["axes.prop_cycle"] = plt.cycler(color=DEFAULT_COLORS)
+
+
 DEFAULT_COLOR_MAP = create_colormap("Zissou1Continuous")
