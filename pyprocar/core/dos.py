@@ -1015,306 +1015,427 @@ class DensityOfStates(PointSet):
             # data_lim=metadata.get("rounded_data_lim"),
         )
             
+    @expand_grouped_params("atoms", "orbitals", "spins", "species", "species_orbital_map", "atoms_orbital_map")
     def compute_spin_texture(
         self,
-        atoms: Sequence[int] | None = None,
-        orbitals: Sequence[int] | None = None,
-        spins: Sequence[int] | None = None,
+        atoms: Iterable[int] | None = None,
+        orbitals: Iterable[int] | None = None,
+        spins: Iterable[int] | None = None,
+        species: Iterable[str] | None = None,
+        species_orbital_map: dict[str, Iterable[int]] | None = None,
+        atoms_orbital_map: dict[int, Iterable[int]] | None = None,
         norm_mode: str | NormMode = "raw",
         **kwargs,
     ) -> Property:
-        # Handle which dos array to use
+        include_normal_label = bool(kwargs.pop("include_normal_label", False))
+        scalar_label = kwargs.pop("scalar_label", "Spin Texture")
+
         if self.projected is None and hasattr(self, "total"):
             dos_array = self.total.to_array()
         elif self.projected is not None:
             dos_array = self.projected.to_array()
         else:
             raise ValueError("Spin texture cannot be computed, as the total or projected DOS is not provided")
-        
+
         if not self.is_non_collinear:
+            raise ValueError("Spin texture is only available for non-collinear calculations")
+
+        if spins is None:
+            spins = (1, 2, 3)
+
+        selection = self._resolve_projection_selection(
+            atoms=atoms,
+            orbitals=orbitals,
+            spins=spins,
+            species=species,
+            species_orbital_map=species_orbital_map,
+            atoms_orbital_map=atoms_orbital_map,
+        )
+        atoms = selection.atoms
+        orbitals = selection.orbitals
+        spins = selection.spins
+        species = selection.species
+
+        if spins is None or len(spins) == 0:
+            raise ValueError("Spin texture requires at least one spin component to be selected")
+        invalid_spins = set(spins) - {1, 2, 3}
+        if invalid_spins:
             raise ValueError(
-                "Spin texture is only available for non-collinear calculations"
+                f"Invalid spins for spin texture: {sorted(invalid_spins)}. Valid components are [1, 2, 3]."
             )
 
-        # Handle normalization and metadata
-        ALLOWED_NORM_MODES = {NormMode.TOTAL_PROJECTION, 
-                              NormMode.SPIN_MAGNITUDE, 
-                              NormMode.INTEGRAL, 
-                              NormMode.ELECTRONS, 
-                              NormMode.MAGNETIZATION,
-                              NormMode.RAW}
-        norm_mode = NormMode.from_input(norm_mode)
-        
-        mode_prefix = NormMode.get_mode_prefix(norm_mode)
-        mode_type_suffix = NormMode.get_mode_type_suffix(norm_mode)
-        
-        
-        if spins is None:
-            spins = [1,2,3]
-        elif not set(spins).issubset({1, 2, 3}):
-            raise ValueError(f"Invalid spins for spin texture: {spins}. Must be subset of [1, 2, 3]")
-
-        name = ""
-        label = ""
-        if 1 in spins:
-            if len(label) > 0:
-                label += " - "
-                name += " - "
-            name += "s_x"
-            label += r"$S_x$"
-        if 2 in spins:
-            if len(label) > 0:
-                label += " - "
-                name += " - "
-            name += "s_y"
-            label += r"S_y"
-        if 3 in spins:
-            if len(label) > 0:
-                label += " - "
-                name += " - "
-            name += "s_z"
-            label += r"S_z"
-        if len(spins) == 3:
-            name += "spin_texture"
-            label += "Spin Texture"
-            
-        data_lim = None
-        units = "$\\frac{states}{eV}$"
-        
-        if len(mode_prefix) > 0:
-            name = f"{mode_prefix.lower()} {name}"
-            label = f"{mode_prefix} {label}"
-        if len(mode_type_suffix) > 0:
-            name = f"{name}_{mode_type_suffix}"
-            
-        units = "$\\frac{states}{eV}$"
-        if norm_mode is NormMode.RAW:
-            pass
-        elif norm_mode is NormMode.TOTAL_PROJECTION:
-            data_lim = (-1, 1)
-        elif norm_mode is NormMode.SPIN_MAGNITUDE:
-            data_lim = (-1, 1)
-        elif norm_mode is NormMode.MAGNETIZATION:
-            data_lim = None
-        elif norm_mode is NormMode.INTEGRAL:
-            units = "$\\frac{1}{eV}$"
-        elif norm_mode is NormMode.ELECTRONS:
-            units = "$\\frac{1}{eV}$"
-        else:
-            err_msg = f"Invalid normalization mode: {norm_mode}. Valid modes are: "
-            err_msg += "\n".join([f"- {mode.value}" for mode in ALLOWED_NORM_MODES])
-            raise ValueError(err_msg)
-
-        metadata = {
-            "atoms": list(atoms) if atoms is not None else None,
-            "orbitals": list(orbitals) if orbitals is not None else None,
-            "norm_mode": norm_mode.value,
+        allowed_modes = {
+            NormMode.TOTAL_PROJECTION,
+            NormMode.SPIN_MAGNITUDE,
+            NormMode.INTEGRAL,
+            NormMode.ELECTRONS,
+            NormMode.MAGNETIZATION,
+            NormMode.RAW,
         }
-        
-        
-        # Compute the spin texture
+        norm_mode = NormMode.from_input(norm_mode)
+        if norm_mode not in allowed_modes:
+            valid_modes = "\n".join(f"- {mode.value}" for mode in sorted(allowed_modes, key=lambda m: m.value))
+            raise ValueError(f"Invalid normalization mode: {norm_mode}. Valid modes are:\n{valid_modes}")
+
+        sum_kwargs = keep_func_kwargs(kwargs, self.sum_projection_components)
         values = self.sum_projection_components(
             values_array=dos_array,
             atoms=atoms,
             orbitals=orbitals,
-            spins=[1,2,3],
-            **keep_func_kwargs(kwargs, self.sum_projection_components)
+            spins=spins,
+            **sum_kwargs,
         )
-        
         values = self.normalize(mode=norm_mode, values_array=values, **kwargs)
 
-        return Property(
-            name=name,
-            value=values,
-            point_set=self,
-            units=units,
-            metadata=metadata,
-            label=label,
-            data_lim=data_lim,
+        data_min = np.min(values, axis=0)
+        data_max = np.max(values, axis=0)
+        data_lim = (data_min, data_max)
+        rounded_data_lim = (np_round_to_half(data_min), np_round_to_half(data_max))
+
+        property_name = NormMode.get_normed_name(norm_mode, "spin_texture")
+        units = NormMode.get_normed_units(norm_mode, "$\\frac{states}{eV}$")
+        footnote = NormMode.get_mode_footnote(norm_mode)
+
+        label_plain_list, label_latex_list = self._format_selection_label(
+            selection=selection,
+            normalize=norm_mode is not NormMode.RAW,
+            include_normal_label=include_normal_label,
         )
 
+        recommended_data_lim: tuple[float, float] | None = None
+        if norm_mode in {NormMode.TOTAL_PROJECTION, NormMode.SPIN_MAGNITUDE}:
+            recommended_data_lim = (-1.0, 1.0)
+
+        metadata = {
+            "atoms": list(atoms) if len(atoms) > 0 else None,
+            "orbitals": list(orbitals) if orbitals is not None else None,
+            "spins": list(spins) if spins is not None else None,
+            "species": list(species) if len(species) > 0 else None,
+            "norm_mode": norm_mode,
+            "units": units,
+            "data_lim": data_lim,
+            "rounded_data_lim": rounded_data_lim,
+            "label": label_latex_list,
+            "label_plain": label_plain_list,
+            "footnote": footnote,
+            "scalar_label": scalar_label,
+            "atom_label": selection.labels.atom,
+            "atom_label_latex": selection.labels.atom_latex,
+            "orbital_label": selection.labels.orbital,
+            "orbital_label_latex": selection.labels.orbital_latex,
+            "spin_label": selection.labels.spin,
+            "spin_label_latex": selection.labels.spin_latex,
+            "species_label": selection.labels.species,
+            "species_label_latex": selection.labels.species_latex,
+            "label_prefix": selection.labels.prefix_plain,
+            "label_prefix_latex": selection.labels.prefix_latex,
+            "spin_component_labels": list(selection.labels.spin_components),
+            "spin_component_labels_latex": list(selection.labels.spin_components_latex),
+            "label_combined": selection.labels.combined,
+            "label_combined_latex": selection.labels.combined_latex,
+            "include_normal_label": include_normal_label,
+            "recommended_data_lim": recommended_data_lim,
+        }
+
+        return Property(
+            name=property_name,
+            value=values,
+            point_set=self,
+            metadata=metadata,
+            label=scalar_label,
+            units=units,
+            data_lim=recommended_data_lim,
+        )
+
+    @expand_grouped_params("atoms", "orbitals", "spins", "species", "species_orbital_map", "atoms_orbital_map")
     def compute_magnetization(
         self,
-        atoms: Sequence[int] | None = None,
-        orbitals: Sequence[int] | None = None,
+        atoms: Iterable[int] | None = None,
+        orbitals: Iterable[int] | None = None,
+        spins: Iterable[int] | None = None,
+        species: Iterable[str] | None = None,
+        species_orbital_map: dict[str, Iterable[int]] | None = None,
+        atoms_orbital_map: dict[int, Iterable[int]] | None = None,
         norm_mode: str | NormMode = "raw",
         from_total: bool = False,
         keepdims: bool = False,
         **kwargs,
     ) -> Property:
-        
-        # Handle which dos array to use
+        include_normal_label = bool(kwargs.pop("include_normal_label", False))
+        scalar_label = kwargs.pop("scalar_label", "Magnetization")
+
         if (self.projected is None and hasattr(self, "total")) or from_total:
             dos_array = self.total.to_array()
-        elif self.projected is not None:
+        elif self.projected is not None and not from_total:
             dos_array = self.projected.to_array()
         else:
             raise ValueError("Magnetization cannot be computed, as the total or projected DOS is not provided")
-        
-        # Handle spin cases dependent information
+
         if self.is_non_collinear:
-            data_lim = None
+            default_spins: tuple[int, ...] = (0,)
             mode = "non-collinear"
-            spins = [0]
         elif self.is_spin_polarized:
-            data_lim = (-1, 1)
+            default_spins = (0, 1)
             mode = "collinear"
-            spins = [0, 1]
         else:
             raise ValueError("DOS is not non-collinear or spin polarized")
-        
-        
-        # Handle normalization and metadata
-        ALLOWED_NORM_MODES = {NormMode.RAW, NormMode.MAGNETIZATION, NormMode.INTEGRAL, NormMode.ELECTRONS}
-        
-        norm_mode = NormMode.from_input(norm_mode)
-        mode_prefix = NormMode.get_mode_prefix(norm_mode)
-        mode_type_suffix = NormMode.get_mode_type_suffix(norm_mode)
-        
-        name = "magnetization"
-        label = "Magnetization"
-        if len(mode_prefix) > 0:
-            name = f"{mode_prefix.lower()} {name}"
-            label = f"{mode_prefix} {label}"
-        if len(mode_type_suffix) > 0:
-            name = f"{name}_{mode_type_suffix}"
-        
-        units = "$\\frac{states}{eV}$"
-        if norm_mode is NormMode.RAW:
-            pass
-        elif norm_mode is NormMode.MAGNETIZATION:
-            units = None
-        elif norm_mode is NormMode.INTEGRAL:
-            units = "$\\frac{1}{eV}$"
-            data_lim = None
-        elif norm_mode is NormMode.ELECTRONS:
-            units = "$\\frac{1}{eV}$"
-            data_lim = None
+
+        if spins is None:
+            spins = default_spins
+
+        selection = self._resolve_projection_selection(
+            atoms=atoms,
+            orbitals=orbitals,
+            spins=spins,
+            species=species,
+            species_orbital_map=species_orbital_map,
+            atoms_orbital_map=atoms_orbital_map,
+        )
+        atoms = selection.atoms
+        orbitals = selection.orbitals
+        spins = selection.spins
+        species = selection.species
+
+        if self.is_non_collinear:
+            if spins is None or len(spins) != 1 or spins[0] != 0:
+                raise ValueError(
+                    "Magnetization for non-collinear calculations must use the total spin channel (index 0)."
+                )
         else:
-            err_msg = f"Invalid normalization mode: {norm_mode}. Valid modes are: \n"
-            err_msg += "\n".join([f"- {mode.value}" for mode in ALLOWED_NORM_MODES])
-            raise ValueError(err_msg)
-        metadata = {
-            "atoms": list(atoms) if atoms is not None else None,
-            "orbitals": list(orbitals) if orbitals is not None else None,
-            "keepdims": keepdims,
-            "norm_mode": norm_mode,
-            "mode": mode,
-        }
-        # Compute the magnetization
+            if spins is None or len(spins) != 2:
+                raise ValueError(
+                    "Magnetization for spin-polarized calculations requires exactly two spin channels (up and down)."
+                )
+
+        allowed_modes = {NormMode.RAW, NormMode.MAGNETIZATION, NormMode.INTEGRAL, NormMode.ELECTRONS}
+        norm_mode = NormMode.from_input(norm_mode)
+        if norm_mode not in allowed_modes:
+            valid_modes = "\n".join(f"- {mode.value}" for mode in sorted(allowed_modes, key=lambda m: m.value))
+            raise ValueError(f"Invalid normalization mode: {norm_mode}. Valid modes are:\n{valid_modes}")
+
+        sum_kwargs = keep_func_kwargs(kwargs, self.sum_projection_components)
         components = self.sum_projection_components(
-                values_array=dos_array,
-                atoms=atoms,
-                orbitals=orbitals,
-                spins=spins,
-                **keep_func_kwargs(kwargs, self.sum_projection_components)
-            )
-        magnetization_array = components
+            values_array=dos_array,
+            atoms=atoms,
+            orbitals=orbitals,
+            spins=spins,
+            keepdims=keepdims,
+            **sum_kwargs,
+        )
+
         if self.is_spin_polarized:
             magnetization_array = components[:, 0, ...] - components[:, 1, ...]
-        
+            if keepdims:
+                magnetization_array = magnetization_array[:, np.newaxis, ...]
+        else:
+            magnetization_array = components
+
         if magnetization_array.ndim == 1:
             magnetization_array = magnetization_array[..., np.newaxis]
 
         values = self.normalize(mode=norm_mode, values_array=magnetization_array, **kwargs)
 
+        data_min = np.min(values, axis=0)
+        data_max = np.max(values, axis=0)
+        data_lim = (data_min, data_max)
+        rounded_data_lim = (np_round_to_half(data_min), np_round_to_half(data_max))
+
+        property_name = NormMode.get_normed_name(norm_mode, "magnetization")
+        units = NormMode.get_normed_units(norm_mode, "$\\frac{states}{eV}$")
+        footnote = NormMode.get_mode_footnote(norm_mode)
+
+        label_plain_list, label_latex_list = self._format_selection_label(
+            selection=selection,
+            normalize=norm_mode is not NormMode.RAW,
+            include_normal_label=include_normal_label,
+        )
+
+        recommended_data_lim: tuple[float, float] | None = None
+        if self.is_spin_polarized and norm_mode is NormMode.RAW:
+            recommended_data_lim = (-1.0, 1.0)
+
+        metadata = {
+            "atoms": list(atoms) if len(atoms) > 0 else None,
+            "orbitals": list(orbitals) if orbitals is not None else None,
+            "spins": list(spins) if spins is not None else None,
+            "species": list(species) if len(species) > 0 else None,
+            "norm_mode": norm_mode,
+            "units": units,
+            "data_lim": data_lim,
+            "rounded_data_lim": rounded_data_lim,
+            "label": label_latex_list,
+            "label_plain": label_plain_list,
+            "footnote": footnote,
+            "scalar_label": scalar_label,
+            "atom_label": selection.labels.atom,
+            "atom_label_latex": selection.labels.atom_latex,
+            "orbital_label": selection.labels.orbital,
+            "orbital_label_latex": selection.labels.orbital_latex,
+            "spin_label": selection.labels.spin,
+            "spin_label_latex": selection.labels.spin_latex,
+            "species_label": selection.labels.species,
+            "species_label_latex": selection.labels.species_latex,
+            "label_prefix": selection.labels.prefix_plain,
+            "label_prefix_latex": selection.labels.prefix_latex,
+            "spin_component_labels": list(selection.labels.spin_components),
+            "spin_component_labels_latex": list(selection.labels.spin_components_latex),
+            "label_combined": selection.labels.combined,
+            "label_combined_latex": selection.labels.combined_latex,
+            "include_normal_label": include_normal_label,
+            "recommended_data_lim": recommended_data_lim,
+            "mode": mode,
+            "keepdims": keepdims,
+        }
+
         return Property(
-            name=name,
+            name=property_name,
             value=values,
             point_set=self,
-            units=units,
-            label=label,
-            data_lim=data_lim,
             metadata=metadata,
+            label=scalar_label,
+            units=units,
+            data_lim=recommended_data_lim,
         )
-        
+
+    @expand_grouped_params("atoms", "orbitals", "spins", "species", "species_orbital_map", "atoms_orbital_map")
     def compute_spin_texture_magnitude(
         self,
-        atoms: Sequence[int] | None = None,
-        orbitals: Sequence[int] | None = None,
+        atoms: Iterable[int] | None = None,
+        orbitals: Iterable[int] | None = None,
+        spins: Iterable[int] | None = None,
+        species: Iterable[str] | None = None,
+        species_orbital_map: dict[str, Iterable[int]] | None = None,
+        atoms_orbital_map: dict[int, Iterable[int]] | None = None,
         norm_mode: str | NormMode = "raw",
         from_total: bool = False,
         keepdims: bool = False,
         **kwargs,
     ) -> Property:
-        # Handle which dos array to use
+        include_normal_label = bool(kwargs.pop("include_normal_label", False))
+        scalar_label = kwargs.pop("scalar_label", "Spin Texture Magnitude")
+
         if (self.projected is None and hasattr(self, "total")) or from_total:
             dos_array = self.total.to_array()
-        elif self.projected is not None:
+        elif self.projected is not None and not from_total:
             dos_array = self.projected.to_array()
         else:
             raise ValueError("Spin texture magnitude cannot be computed, as the total or projected DOS is not provided")
-        
+
         if not self.is_non_collinear:
             raise ValueError("Spin texture magnitude is only available for non-collinear calculations")
-  
-        # Handle normalization and metadata
-        norm_mode = NormMode.from_input(norm_mode)
-        ALLOWED_NORM_MODES = {NormMode.INTEGRAL, NormMode.SPIN_MAGNITUDE, NormMode.ELECTRONS, NormMode.MAGNETIZATION, NormMode.RAW}
-        
-        mode_prefix = NormMode.get_mode_prefix(norm_mode)
-        mode_type_suffix = NormMode.get_mode_type_suffix(norm_mode)
-        
-        name = "spin_texture_magnitude"
-        label = "Spin Texture Magnitude"
-        data_lim = None
-        units = "$\\frac{states}{eV}$"
-        if len(mode_prefix) > 0:
-            name = f"{mode_prefix.lower()} {name}"
-            label = f"{mode_prefix} {label}"
-        if len(mode_type_suffix) > 0:
-            name = f"{name}_{mode_type_suffix}"
-            
-        units = "$\\frac{states}{eV}$"
-        if norm_mode is NormMode.RAW:
-            pass
-        elif norm_mode is NormMode.INTEGRAL:
-            units = "$\\frac{1}{eV}$"
-        elif norm_mode is NormMode.ELECTRONS:
-            units = "$\\frac{1}{eV}$"
-        elif norm_mode is NormMode.SPIN_MAGNITUDE:
-            data_lim = (0, 1)
-            units = None
-        elif norm_mode is NormMode.MAGNETIZATION:
-            units = None
-            data_lim = None
-        else:
-            err_msg = f"Invalid normalization mode: {norm_mode}. Valid modes are: "
-            err_msg += "\n".join([f"- {mode.value}" for mode in ALLOWED_NORM_MODES])
-            raise ValueError(err_msg)
 
-        metadata = {
-            "atoms": list(atoms) if atoms is not None else None,
-            "orbitals": list(orbitals) if orbitals is not None else None,
-            "keepdims": keepdims,
-            "norm_mode": norm_mode,
+        if spins is None:
+            spins = (1, 2, 3)
+
+        selection = self._resolve_projection_selection(
+            atoms=atoms,
+            orbitals=orbitals,
+            spins=spins,
+            species=species,
+            species_orbital_map=species_orbital_map,
+            atoms_orbital_map=atoms_orbital_map,
+        )
+        atoms = selection.atoms
+        orbitals = selection.orbitals
+        spins = selection.spins
+        species = selection.species
+
+        if spins is None or len(spins) == 0:
+            raise ValueError("Spin texture magnitude requires at least one spin component to be selected")
+        invalid_spins = set(spins) - {1, 2, 3}
+        if invalid_spins:
+            raise ValueError(
+                f"Invalid spins for spin texture magnitude: {sorted(invalid_spins)}. Valid components are [1, 2, 3]."
+            )
+
+        allowed_modes = {
+            NormMode.INTEGRAL,
+            NormMode.SPIN_MAGNITUDE,
+            NormMode.ELECTRONS,
+            NormMode.MAGNETIZATION,
+            NormMode.RAW,
         }
-        
+        norm_mode = NormMode.from_input(norm_mode)
+        if norm_mode not in allowed_modes:
+            valid_modes = "\n".join(f"- {mode.value}" for mode in sorted(allowed_modes, key=lambda m: m.value))
+            raise ValueError(f"Invalid normalization mode: {norm_mode}. Valid modes are:\n{valid_modes}")
+
+        sum_kwargs = keep_func_kwargs(kwargs, self.sum_projection_components)
         values = self.sum_projection_components(
             values_array=dos_array,
             atoms=atoms,
             orbitals=orbitals,
-            spins=[1,2,3],
-            **keep_func_kwargs(kwargs, self.sum_projection_components)
+            spins=spins,
+            **sum_kwargs,
         )
         values = np.linalg.norm(values, axis=-1, keepdims=keepdims)
- 
-        logger.debug(f"spin texture magnitude: {values.shape}")
-        logger.debug(f"spin texture magnitude (min, max): {np.min(values), np.max(values)}")
-        
+
+        logger.debug("spin texture magnitude array shape: %s", values.shape)
+
         if values.ndim == 1:
             values = values[..., np.newaxis]
-        
+
         values = self.normalize(mode=norm_mode, values_array=values, **kwargs)
 
+        data_min = np.min(values, axis=0)
+        data_max = np.max(values, axis=0)
+        data_lim = (data_min, data_max)
+        rounded_data_lim = (np_round_to_half(data_min), np_round_to_half(data_max))
+
+        property_name = NormMode.get_normed_name(norm_mode, "spin_texture_magnitude")
+        units = NormMode.get_normed_units(norm_mode, "$\\frac{states}{eV}$")
+        footnote = NormMode.get_mode_footnote(norm_mode)
+
+        label_plain_list, label_latex_list = self._format_selection_label(
+            selection=selection,
+            normalize=norm_mode is not NormMode.RAW,
+            include_normal_label=include_normal_label,
+        )
+
+        recommended_data_lim: tuple[float, float] | None = None
+        if norm_mode is NormMode.SPIN_MAGNITUDE:
+            recommended_data_lim = (0.0, 1.0)
+
+        metadata = {
+            "atoms": list(atoms) if len(atoms) > 0 else None,
+            "orbitals": list(orbitals) if orbitals is not None else None,
+            "spins": list(spins) if spins is not None else None,
+            "species": list(species) if len(species) > 0 else None,
+            "norm_mode": norm_mode,
+            "units": units,
+            "data_lim": data_lim,
+            "rounded_data_lim": rounded_data_lim,
+            "label": label_latex_list,
+            "label_plain": label_plain_list,
+            "footnote": footnote,
+            "scalar_label": scalar_label,
+            "atom_label": selection.labels.atom,
+            "atom_label_latex": selection.labels.atom_latex,
+            "orbital_label": selection.labels.orbital,
+            "orbital_label_latex": selection.labels.orbital_latex,
+            "spin_label": selection.labels.spin,
+            "spin_label_latex": selection.labels.spin_latex,
+            "species_label": selection.labels.species,
+            "species_label_latex": selection.labels.species_latex,
+            "label_prefix": selection.labels.prefix_plain,
+            "label_prefix_latex": selection.labels.prefix_latex,
+            "spin_component_labels": list(selection.labels.spin_components),
+            "spin_component_labels_latex": list(selection.labels.spin_components_latex),
+            "label_combined": selection.labels.combined,
+            "label_combined_latex": selection.labels.combined_latex,
+            "include_normal_label": include_normal_label,
+            "recommended_data_lim": recommended_data_lim,
+            "keepdims": keepdims,
+        }
+
         return Property(
-            name=name,
+            name=property_name,
             value=values,
             point_set=self,
-            units=units,
-            label=label,
-            data_lim=data_lim,
             metadata=metadata,
+            label=scalar_label,
+            units=units,
+            data_lim=recommended_data_lim,
         )
 
     def compute_normalized_total(
