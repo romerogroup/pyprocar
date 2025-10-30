@@ -5,7 +5,7 @@
 - To run in environment shell: `pixi shell -e tests`
 - To run in terminal: `pixi run -e tests`
 
-## Testing Instructions
+## Test
 - Run tests on single testing files and not the full test suite. example: `pixi run -e tests pytest tests/pyprocar/core/test_dos.py`
 - Try to keep tests. Use generated test data for testing.
 - These should be testing different execution paths of a layer. They should be contained within a single function with an appropiate name. 
@@ -36,11 +36,6 @@
 - Use **imperative mood** (`Add feature`, `Fix bug`, `Refactor parser`)  
 - Keep first line ≤ 72 chars
 - PR titles should describe intent clearly, not just “fix” or “update.”
-
-
-Perfect — the diagram you shared is exactly the kind of **dataflow / layering concept** that an AGENT needs to understand so it doesn’t “break abstraction boundaries” when making changes.  
-
-In `AGENTS.md`, this should become a **dedicated section** (let’s call it **DataFlow**) that sits alongside build/tests/style rules. This section isn’t for human readers to learn the science — it’s for agents to know *where to put code, what each layer is responsible for, and what not to mix together*.  
 
 ## DataFlow and Layer Responsibilities
 
