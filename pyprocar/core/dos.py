@@ -2,18 +2,17 @@
 
 from __future__ import annotations
 
+import copy
 import logging
 import re
-from dataclasses import dataclass, field    
-from pathlib import Path
-from enum import Enum
 from collections import Counter
 from collections.abc import Iterable
-from typing import TYPE_CHECKING, Any, Mapping, Sequence, Callable, Union, TypeVar
+from dataclasses import dataclass, field
+from enum import Enum
 from functools import wraps
 from itertools import chain, product
-
-import copy
+from pathlib import Path
+from typing import TYPE_CHECKING, Any, Callable, Mapping, Sequence, TypeVar, Union
 
 import numpy as np
 import numpy.typing as npt
@@ -30,7 +29,7 @@ from pyprocar.core.atomic_orbital_index import (
 )
 from pyprocar.core.property_store import PointSet, Property
 from pyprocar.core.serializer import get_serializer
-from pyprocar.utils.func_utils import keep_func_kwargs, expand_grouped_params
+from pyprocar.utils.func_utils import expand_grouped_params, keep_func_kwargs
 from pyprocar.utils.math import np_round_to_half
 
 logger = logging.getLogger(__name__)
@@ -939,7 +938,6 @@ class DensityOfStates(PointSet):
             species_orbital_map=species_orbital_map,
             atoms_orbital_map=atoms_orbital_map,
         )
-
         atoms = selection.atoms
         orbitals = selection.orbitals
         spins = selection.spins
@@ -1250,10 +1248,6 @@ class DensityOfStates(PointSet):
             include_normal_label=include_normal_label,
         )
 
-        recommended_data_lim: tuple[float, float] | None = None
-        if self.is_spin_polarized and norm_mode is NormMode.RAW:
-            recommended_data_lim = (-1.0, 1.0)
-
         metadata = {
             "atoms": list(atoms) if len(atoms) > 0 else None,
             "orbitals": list(orbitals) if orbitals is not None else None,
@@ -1282,7 +1276,6 @@ class DensityOfStates(PointSet):
             "label_combined": selection.labels.combined,
             "label_combined_latex": selection.labels.combined_latex,
             "include_normal_label": include_normal_label,
-            "recommended_data_lim": recommended_data_lim,
             "mode": mode,
             "keepdims": keepdims,
         }
@@ -1294,7 +1287,6 @@ class DensityOfStates(PointSet):
             metadata=metadata,
             label=scalar_label,
             units=units,
-            data_lim=recommended_data_lim,
         )
 
     @expand_grouped_params("atoms", "orbitals", "spins", "species", "species_orbital_map", "atoms_orbital_map")
@@ -1392,10 +1384,6 @@ class DensityOfStates(PointSet):
             include_normal_label=include_normal_label,
         )
 
-        recommended_data_lim: tuple[float, float] | None = None
-        if norm_mode is NormMode.SPIN_MAGNITUDE:
-            recommended_data_lim = (0.0, 1.0)
-
         metadata = {
             "atoms": list(atoms) if len(atoms) > 0 else None,
             "orbitals": list(orbitals) if orbitals is not None else None,
@@ -1424,7 +1412,6 @@ class DensityOfStates(PointSet):
             "label_combined": selection.labels.combined,
             "label_combined_latex": selection.labels.combined_latex,
             "include_normal_label": include_normal_label,
-            "recommended_data_lim": recommended_data_lim,
             "keepdims": keepdims,
         }
 
@@ -1435,7 +1422,6 @@ class DensityOfStates(PointSet):
             metadata=metadata,
             label=scalar_label,
             units=units,
-            data_lim=recommended_data_lim,
         )
 
     def compute_normalized_total(
