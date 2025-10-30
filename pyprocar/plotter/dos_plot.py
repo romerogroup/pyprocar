@@ -3,31 +3,34 @@
 from __future__ import annotations
 
 import logging
-from abc import ABC, abstractmethod
-from typing import Any, Dict, Iterable, Mapping, Sequence, Tuple, Callable
-
-from pyvista._plot import plot
-from pyprocar.core.property_store import Property
-from enum import Enum
-from dataclasses import dataclass, field
 import re
+from abc import ABC, abstractmethod
 from collections import Counter
+from dataclasses import dataclass, field
 from enum import Enum
-from inspect import signature, Parameter
+from inspect import Parameter, signature
+from typing import Any, Callable, Dict, Iterable, Mapping, Sequence, Tuple
 
-import matplotlib.pyplot as plt
 import matplotlib.cm as cm
-from matplotlib import patches
 import matplotlib.colors as mcolors
-import numpy as np
-from matplotlib import colormaps
+import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
+import numpy as np
+from cycler import cycler
+from matplotlib import colormaps, patches
 from matplotlib.collections import LineCollection
 from matplotlib.colors import Colormap
+from pyvista._plot import plot
 
-from pyprocar.utils.func_utils import keep_func_kwargs, expand_grouped_params, keep_func_kwargs_and_args, keep_func_args, keep_func_params
-from pyprocar.utils.plot_utils import DEFAULT_COLORS, DEFAULT_COLOR_MAP
-from cycler import cycler
+from pyprocar.core.property_store import Property
+from pyprocar.utils.func_utils import (
+    expand_grouped_params,
+    keep_func_args,
+    keep_func_kwargs,
+    keep_func_kwargs_and_args,
+    keep_func_params,
+)
+from pyprocar.utils.plot_utils import DEFAULT_COLOR_MAP, DEFAULT_COLORS
 
 logger = logging.getLogger(__name__)
 
@@ -291,6 +294,7 @@ class DOSPlotter:
                 add_scalar_args["plot_total"] = plot_total
                 artist = self.add_scalar_fill(**add_scalar_args, **series.additional_kwargs)
             else:
+                add_line_args 
                 artist = self.add_line(**add_line_args, **series.additional_kwargs)
  
             if vectors_data:
@@ -340,7 +344,7 @@ class DOSPlotter:
         y: np.ndarray,
         label: str | None = None,
         **kwargs):
-        handle = self.ax.plot(x, y, label=label, **kwargs)
+        handle = self.ax.plot(x, y, label=label, **keep_func_kwargs(kwargs, self.ax.plot))
         return handle
     
     
@@ -398,7 +402,7 @@ class DOSPlotter:
         label: str | None = None,
         skip:int=1,
         angles:str='uv',
-        scale=None,
+        scale:float=100.0,
         scale_units:str='inches',
         units:str='inches',
         color=None,
@@ -407,8 +411,8 @@ class DOSPlotter:
         cmap: str | mcolors.Colormap = "plasma",
         **kwargs):
         
-        u = vectors                # Arrow y-component
-        v = np.ones_like(vectors)  # Arrow x-component
+        u = vectors                # Arrow x-component
+        v = np.zeros_like(vectors) # Arrow y-component
         vector_norms = vectors
     
         quiver_args = []
@@ -428,7 +432,7 @@ class DOSPlotter:
             color=color,
             cmap=cmap,
             norm=norm,
-            **kwargs)
+            **keep_func_kwargs(kwargs, self.ax.quiver))
     
     # ------------------------------------------------------------------
     # Helpers
@@ -450,6 +454,7 @@ class DOSPlotter:
         s_label = scalars_data.label if scalars_data else None
         s_unit = scalars_data.units if scalars_data else None
         s_lims = getattr(scalars_data, "rounded_data_lim", None) if scalars_data else None
+        
         vectors = vectors_data.to_array() if vectors_data is not None else None
 
         v_label = vectors_data.label if vectors_data else None
@@ -621,8 +626,6 @@ class DOSPlotter:
     ):
         # energies = np.asarray(list(energies), dtype=np.float64)
         # values = np.asarray(list(values), dtype=np.float64)
-        
-        # print(values.shape)
         # values = values.squeeze()
 
         if self.orientation is AxesOrientation.HORIZONTAL:
@@ -688,7 +691,7 @@ class DOSPlotter:
             extent=[xlo, xhi, ylo, yhi],
             origin=origin, aspect=aspect, interpolation=interpolation, 
             zorder=zorder, cmap=cmap, norm=norm, clim=clim, 
-            **kwargs
+            **keep_func_kwargs(kwargs, self.ax.imshow)
         )
 
         # clip polygon under/over the curve (y between v and b)
