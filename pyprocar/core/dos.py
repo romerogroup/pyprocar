@@ -1142,10 +1142,6 @@ class DensityOfStates(PointSet):
                 include_normal_label=include_normal_label,
             )
 
-            recommended_data_lim: tuple[float, float] | None = None
-            if norm_mode in {NormMode.TOTAL_PROJECTION, NormMode.SPIN_MAGNITUDE}:
-                recommended_data_lim = (-1.0, 1.0)
-
             metadata = {
                 "atoms": list(atoms) if len(atoms) > 0 else None,
                 "orbitals": list(orbitals) if orbitals is not None else None,
@@ -1174,7 +1170,6 @@ class DensityOfStates(PointSet):
                 "label_combined": selection.labels.combined,
                 "label_combined_latex": selection.labels.combined_latex,
                 "include_normal_label": include_normal_label,
-                "recommended_data_lim": recommended_data_lim,
             }
 
             results.append(Property(
@@ -1184,7 +1179,6 @@ class DensityOfStates(PointSet):
                 metadata=metadata,
                 label=scalar_label,
                 units=units,
-                data_lim=recommended_data_lim,
             ))
         
         return results[0] if len(results) == 1 else results
