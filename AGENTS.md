@@ -1,107 +1,52 @@
-# AGENTS.md
- 
-## Dev Environment Setup
-- Install deps: `pixi install -e tests`
-- To run in environment shell: `pixi shell -e tests`
-- To run in terminal: `pixi run -e tests`
+# General Taks Guidelines
+- Always make a todo list on how to complete the task before starting.
+- The todo list should start with creating tests for a new behavior, bug fix, or feature.
+- Keep iterating until all the tests are passing. This should be module specific, do not worry about tests in other unrelated modules.
+# Architecture Overview
+- Make sure to always read and understand the architecture overview of the repository in `ARCHITECTURE.md`
 
-## Test
+# Deveolpment and Testing Guidelines
+- Install deps: `pixi install -e dev`
+- To run in environment shell: `pixi shell -e dev`
+- To run in terminal: `pixi run -e dev`
 - Run tests on single testing files and not the full test suite. example: `pixi run -e tests pytest tests/pyprocar/core/test_dos.py`
-- Try to keep tests. Use generated test data for testing.
+- Use generated test data for testing.
 - These should be testing different execution paths of a layer. They should be contained within a single function with an appropiate name. 
 - Prefer a single assert per test.
+- create new test files in the `tests/` directory. This will likely mirror the file structure of the `pyprocar/` directory.
 
-## Code Style Conventions
-
+# Code Style Conventions
+- Use `black` with line length 88
+- Import order must follow `isort`
+- Variable and function names must be snake_case
+- Class names must be PascalCase
 - Naming conventions:
   - Paths → `filepath` / `dirpath`
   - Lists → pluralized
-  - Parameter objects → use `@dataclass` if parameter count > 3  
 - Use type hints.
 - Prefer to use guard clauses for early returns and error handling.
 
-## Logging Conventions
+# Logging Conventions
 - Loggers should be accesed by their name. example: `logging.getLogger(__file__)`
 - Use user logger `logging.getLogger("user")` for user facing messages.
 - Use info level for initialization and completion messages.
 - Use debug level to get more detailed information such as array shapes, float, string, int values.
-- Never return array values in logs
+- Never return array values in logs, return the array shape instead.
 - Use warning level for warnings.
 - Use error level for errors.
 - Use critical level for critical errors.
 - When adding logs, prefer to add them at the start and end of a functions.
 
-## Commit & PR Guidelines
-
+# Commit & PR Guidelines
+- Branch names: `feature/*`, `bugfix/*`, or `hotfix/*`
 - Use **imperative mood** (`Add feature`, `Fix bug`, `Refactor parser`)  
 - Keep first line ≤ 72 chars
 - PR titles should describe intent clearly, not just “fix” or “update.”
 
-## DataFlow and Layer Responsibilities
+# Security
+- Do NOT commit `.env` file
 
-This project follows a **layered dataflow architecture**.  
-Agents should respect these layers and place new functionality in the correct layer.  
-⚠️ **Never mix responsibilities across layers** (e.g., don’t put plotting logic inside a parser).
-
-
-### Input Layer (Extraction)
-- **Responsibility**: Raw extraction from simulation output files with minimal interpretation.  
-- **Examples**: `PwSCF`, `Procar`, `VaspXML`, `AtomicProjXML` extractors.  
-- **Agent guidance**:  
-  - Only read files → produce raw Python objects or dict-like structures.  
-  - Do not apply unit conversions or build canonical objects here.  
-
-✅ Good: Extract numerical arrays directly from `vasprun.xml`.  
-❌ Bad: Convert units to eV here (belongs in Parser layer).  
-
----
-
-### Parser Layer (Adapter)
-- **Responsibility**: Coordinates low-level input readers, applies **unit conversions**, and builds **canonical Data Objects**.  
-- **Examples**: `QEParser`, `VaspParser`, common `Parser` superclass.  
-- **Agent guidance**:  
-  - Translate raw extracted data into well-structured domain objects (`ElectronicBandStructure`, `DensityOfStates`, etc.).  
-  - Apply consistent units (eV, reciprocal space, etc.) here.  
-  - Keep logic **deterministic and stateless**.  
-
-✅ Good: Convert raw energy levels into an `ElectronicBandStructure` instance.  
-❌ Bad: Generate or save plots here.  
-
----
-
-### Data Layer
-- **Responsibility**: Stores **canonical domain objects** (standardized representation of band structures, DOS, Fermi surfaces).  
-- **Examples**: `ElectronicBandStructure`, `DensityOfStates`, `FermiSurface`.  
-- **Agent guidance**:  
-  - These are pure data containers.  
-  - Do not mix them with visualization or I/O.  
-  - If adding a new property: ensure it respects canonical units and domain consistency.  
-
-✅ Good: Add a `.fermi_energy` attribute.  
-❌ Bad: Add a `.plot()` method (this belongs in Visualization).  
-
-
-### Visualization Layer
-- **Responsibility**: Consumes **Data Layer objects** and produces plots.  
-- **Examples**: `BandStructurePlotter`, `DOSPlotter`, `Fermi3DPlotter`.  
-- **Agent guidance**:  
-  - Input = standardized Data Objects only.  
-  - Output = visualizations (matplotlib, plotly, etc.).  
-  - Never re-implement parsing or unit conversion here.  
-
-✅ Good: A plotter that accepts a `DensityOfStates` object and produces a Matplotlib figure.  
-❌ Bad: A plotter that opens `vasprun.xml` directly.  
-
-### DataFlow Summary
-
-| Layer              | Responsibility                              | Output Type                   |
-|--------------------|----------------------------------------------|-------------------------------|
-| Input (Extraction) | Minimal file reading, raw structures         | Raw dicts/arrays              |
-| Parser (Adapter)   | Builds canonical objects, unit conversions   | Domain Data Objects           |
-| Data               | Canonical domain representation              | `ElectronicBandStructure`, etc. |
-| Visualization      | Uses Data objects → produces visual output   | Plots / figures               |
-
-### Agent Rules of Thumb
+# Agent Rules of Thumb
 - **Keep boundaries clean**:  
   - Extraction → No conversions  
   - Parser → No plotting  
