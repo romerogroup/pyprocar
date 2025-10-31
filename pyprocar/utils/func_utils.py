@@ -96,6 +96,77 @@ def _as_selection_default(x: Any) -> Any:
     """
     return x
 
+
+def expand_grouped_params_to_dicts(
+    params: dict[str, Any]
+) -> list[dict[str, Any]]:
+    """
+    Expand grouped parameters into a list of parameter dictionaries.
+    
+    Groups are aligned by index, not Cartesian product. If one parameter
+    is grouped (list of lists/dicts), others are broadcast to match.
+    If multiple parameters are grouped, they must have the same length.
+    
+    Parameters
+    ----------
+    params
+        Dictionary where keys are parameter names and values are their values.
+        Values can be:
+        - Single values (int, list, dict, None)
+        - Grouped values (list of lists or list of dicts)
+        
+    Returns
+    -------
+    list[dict[str, Any]]
+        List of parameter dictionaries, one per group index.
+        If no grouped params, returns list with single dict.
+        
+    Examples
+    --------
+    >>> params = {"atoms": [[0,2], [1]], "orbitals": [0,1,2]}
+    >>> expand_grouped_params_to_dicts(params)
+    [{"atoms": [0,2], "orbitals": [0,1,2]}, {"atoms": [1], "orbitals": [0,1,2]}]
+    
+    >>> params = {"atoms": [[0,2], [1]], "orbitals": [[0,1,2], [4,5,6,7,8]]}
+    >>> expand_grouped_params_to_dicts(params)
+    [{"atoms": [0,2], "orbitals": [0,1,2]}, {"atoms": [1], "orbitals": [4,5,6,7,8]}]
+    """
+    # Detect grouped parameters
+    grouped_params: dict[str, list[Any]] = {}
+    for key, value in params.items():
+        if _check_for_groups(value):
+            grouped_params[key] = value
+    
+    # Determine number of groups
+    if not grouped_params:
+        # No grouped params, return single dict
+        return [params.copy()]
+    
+    # Validate: all grouped params must have same length
+    group_lengths = {key: len(value) for key, value in grouped_params.items()}
+    if len(set(group_lengths.values())) > 1:
+        lengths_str = ", ".join(f"{k}={v}" for k, v in group_lengths.items())
+        raise ValueError(
+            f"Grouped parameters must have the same length. Found: {lengths_str}"
+        )
+    
+    n_groups = list(group_lengths.values())[0]
+    
+    # Build list of parameter dicts
+    result = []
+    for i in range(n_groups):
+        param_dict = {}
+        for key, value in params.items():
+            if key in grouped_params:
+                # Use i-th element from grouped param
+                param_dict[key] = grouped_params[key][i]
+            else:
+                # Broadcast single value to all groups
+                param_dict[key] = value
+        result.append(param_dict)
+    
+    return result
+
 def _to_groups_grouped(x: Any, as_selection: Callable[[Any], Any]) -> list[Any]:
     """
     Treat list as one group unless it's list-of-lists (already grouped).

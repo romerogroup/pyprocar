@@ -1,6 +1,8 @@
+import logging
+
 import numpy as np
 import pytest
-import logging
+
 from pyprocar.core.dos import DensityOfStates
 from pyprocar.core.property_store import Property
 from pyprocar.core.structure import Structure
@@ -207,6 +209,7 @@ def test_compute_projected_sum_species_orbital_map_list(dos):
     
     assert isinstance(projected_sum, list), f"The result should be a list given a list of species_orbital_map, ({projected_sum})"
     for projected_sum in projected_sum:
+        print(projected_sum.metadata)
         assert isinstance(projected_sum, Property), f"The result should be a Property instance, ({projected_sum})"
 
 def test_compute_projected_sum_atoms_orbital_map(dos):
