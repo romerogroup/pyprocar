@@ -385,7 +385,7 @@ def test_add_property_from_property_instance(dos_spin_polarized):
 
 
 def test_add_property_invalid_shape_raises(dos_spin_polarized):
-    with pytest.raises(ValueError):
+    with pytest.raises(AssertionError):
         dos_spin_polarized.add_property(name="bad", value=np.ones((2,)))
 
 
