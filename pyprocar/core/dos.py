@@ -676,8 +676,21 @@ class DensityOfStates(PointSet):
     
     def integrate(self, 
                   values_array: npt.NDArray[np.float64], 
-                  energy_lim: tuple[float, float] | None = None,
-                  cumulative: bool = False) -> npt.NDArray[np.float64]:
+                  energy_lim: tuple[float, float] | None = None) -> npt.NDArray[np.float64]:
+        """Integrate the values over the energy range.
+        
+        Parameters
+        ----------
+        values_array: npt.NDArray[np.float64]
+            The values to integrate.
+        energy_lim: tuple[float, float] | None
+            The energy range to integrate over.
+            
+        Returns
+        -------
+        npt.NDArray[np.float64]
+            The integrated values.
+        """
         values_to_integrate = values_array
         energies_to_integrate = self.energies
         if energy_lim is not None:
@@ -693,17 +706,48 @@ class DensityOfStates(PointSet):
         return np.trapezoid(values_to_integrate, x=energies_to_integrate, axis=0)
         
     def cumsum(self, values: npt.NDArray[np.float64] | Property) -> npt.NDArray[np.float64]:
+        """Compute the cumulative sum of the values.
+        
+        Parameters
+        ----------
+        values: npt.NDArray[np.float64] | Property
+            The values to cumsum.
+            
+        Returns
+        -------
+        npt.NDArray[np.float64]
+            The cumulative sum of the values.
+        """
         if isinstance(values, Property):
             values = values.to_array()
         return np.cumsum(values, axis=0)
-    
+
     def shift_by_fermi(self) -> "DensityOfStates":
+        """Shift the DOS by the Fermi energy.
+        
+        Returns
+        -------
+        DensityOfStates
+            The shifted DOS.
+        """
         # new_dos = copy.deepcopy(self)
         self._points -= self.fermi
         self._points_label = "E − E_F (eV)"
         return self
 
     def interpolate(self, factor: int = 2) -> "DensityOfStates":
+        """Interpolate the DOS by a factor.
+        
+        Parameters
+        ----------
+        factor: int
+            The factor to interpolate by.
+            
+        Returns
+        -------
+        DensityOfStates
+            The interpolated DOS.
+        """
         if factor in (0, 1):
             return self
 
@@ -729,7 +773,26 @@ class DensityOfStates(PointSet):
         spins: Sequence[int] | None = None,
         keepdims: bool = False,
     ) -> npt.NDArray[np.float64]:
-        """Sum projections over selected atoms, orbitals, and spins."""
+        """Sum projections over selected atoms, orbitals, and spins.
+        
+        Parameters
+        ----------
+        values_array: npt.NDArray[np.float64]
+            The values to sum.
+        atoms: Sequence[int] | None
+            The atoms to sum over.
+        orbitals: Sequence[int] | None
+            The orbitals to sum over.
+        spins: Sequence[int] | None
+            The spins to sum over.
+        keepdims: bool
+            Whether to keep the dimensions of the summed array.
+            
+        Returns
+        -------
+        npt.NDArray[np.float64]
+            The summed values.
+        """
         tmp_array = self.select_projection_components(values_array=values_array, atoms=atoms, orbitals=orbitals, spins=spins)
         
         n_dims = tmp_array.ndim
@@ -753,6 +816,25 @@ class DensityOfStates(PointSet):
                                      atoms: Sequence[int] | None = None,
                                      orbitals: Sequence[int] | None = None,
                                      spins: Sequence[int] | None = None) -> npt.NDArray[np.float64]:
+        """Select the projection components from the values array.
+        
+        Parameters
+        ----------
+        values_array: npt.NDArray[np.float64]
+            The values to select the projection components from.
+        atoms: Sequence[int] | None
+            The atoms to select the projection components from.
+        orbitals: Sequence[int] | None
+            The orbitals to select the projection components from.
+        spins: Sequence[int] | None
+            The spins to select the projection components from.
+            
+        Returns
+        -------
+        npt.NDArray[np.float64]
+            The selected projection components.
+        """
+        # Validate Input
         n_dims = values_array.ndim
 
         if n_dims < 2:
@@ -795,7 +877,21 @@ class DensityOfStates(PointSet):
         else:
             raise ValueError(f"Normalization mode {mode} not found. Likely forgot to add it to the normalize method.")
             
-    def normalize_total(self,values_array: npt.NDArray[np.float64],**kwargs) -> npt.NDArray[np.float64]:
+    def normalize_total(self, values_array: npt.NDArray[np.float64],**kwargs) -> npt.NDArray[np.float64]:
+        """Normalize the values array by the total DOS.
+        
+        Parameters
+        ----------
+        values_array: npt.NDArray[np.float64]
+            The values to normalize.
+        kwargs: dict[str, Any]
+            Additional kwargs.
+            
+        Returns
+        -------
+        npt.NDArray[np.float64]
+            The normalized values.
+        """
         normalized_array = np.zeros_like(values_array)
         total_array = self.total.to_array()
         
@@ -813,6 +909,20 @@ class DensityOfStates(PointSet):
         return normalized_array
     
     def normalize_max(self, values_array: npt.NDArray[np.float64], **kwargs) -> npt.NDArray[np.float64]:
+        """Normalize the values array by the max of the values.
+        
+        Parameters
+        ----------
+        values_array: npt.NDArray[np.float64]
+            The values to normalize.
+        kwargs: dict[str, Any]
+            Additional kwargs.
+            
+        Returns
+        -------
+        npt.NDArray[np.float64]
+            The normalized values.
+        """
         values_array = np.asarray(values_array, dtype=np.float64)
    
         factors = np.max(np.abs(values_array), axis=0, keepdims=True)
@@ -827,6 +937,20 @@ class DensityOfStates(PointSet):
         return normalized_array
     
     def normalize_integral(self, values_array: npt.NDArray[np.float64], **kwargs) -> npt.NDArray[np.float64]:
+        """Normalize the values array by the integral of the values.
+        
+        Parameters
+        ----------
+        values_array: npt.NDArray[np.float64]
+            The values to normalize.
+        kwargs: dict[str, Any]
+            Additional kwargs.
+            
+        Returns
+        -------
+        npt.NDArray[np.float64]
+            The normalized values.
+        """
         values_array = np.asarray(values_array, dtype=np.float64)
         integrals = integrate.trapezoid(values_array, x=self.energies, axis=0)
         factors = integrals[np.newaxis, :]
@@ -841,6 +965,15 @@ class DensityOfStates(PointSet):
         return normalized_array
     
     def normalize_electrons(self, values_array: npt.NDArray[np.float64], **kwargs) -> npt.NDArray[np.float64]:
+        """Normalize the values array by the number of electrons.
+        
+        Parameters
+        ----------
+        values_array: npt.NDArray[np.float64]
+            The values to normalize.
+        kwargs: dict[str, Any]
+            Additional kwargs.
+        """
         return values_array / self.n_electrons
     
     def normalize_magnetization(self, 
@@ -849,6 +982,20 @@ class DensityOfStates(PointSet):
                                 fill_value: float = 0.0,
                                 eps: float = 0.001,
                                 **kwargs) -> npt.NDArray[np.float64]:
+        """Normalize the values array by the magnetization.
+        
+        Parameters
+        ----------
+        values_array: npt.NDArray[np.float64]
+            The values to normalize.
+        kwargs: dict[str, Any]
+            Additional kwargs.
+            
+        Returns
+        -------
+        npt.NDArray[np.float64]
+            The normalized values.
+        """
         if self.magnetization is None:
             raise ValueError("Magnetization is not available for this calculation")
         
@@ -872,6 +1019,20 @@ class DensityOfStates(PointSet):
                                  fill_value: float = 0.0,
                                  eps: float = 0.001,
                                  **kwargs) -> npt.NDArray[np.float64]:
+        """Normalize the values array by the spin magnitude.
+        
+        Parameters
+        ----------
+        values_array: npt.NDArray[np.float64]
+            The values to normalize.
+        kwargs: dict[str, Any]
+            Additional kwargs.
+            
+        Returns
+        -------
+        npt.NDArray[np.float64]
+            The normalized values.
+        """
         if self.spin_magnitude is None:
             raise ValueError("Spin magnitude is not available for this calculation")
         
@@ -891,6 +1052,20 @@ class DensityOfStates(PointSet):
         return normalized_array
     
     def normalize_total_projection(self,values_array: npt.NDArray[np.float64],**kwargs) -> npt.NDArray[np.float64]:
+        """Normalize the values array by the projected total DOS.
+        
+        Parameters
+        ----------
+        values_array: npt.NDArray[np.float64]
+            The values to normalize.
+        kwargs: dict[str, Any]
+            Additional kwargs.
+            
+        Returns
+        -------
+        npt.NDArray[np.float64]
+            The normalized values.
+        """
         normalized_array = np.zeros_like(values_array)
         projected_total_array = self.projected_total.to_array()
         
@@ -1705,6 +1880,11 @@ class DensityOfStates(PointSet):
         ----------
         path: Path | str
             The path to load the DOS from.
+            
+        Returns
+        -------
+        DensityOfStates
+            The loaded DOS.
         """
         assert(isinstance(path, (Path, str))), "Path must be a Path or string."
         
@@ -1963,6 +2143,20 @@ class DensityOfStates(PointSet):
         indices: Sequence[int] | None,
         upper_bound: int,
     ) -> np.ndarray | None:
+        """Validate the indices.
+        
+        Parameters
+        ----------
+        indices: Sequence[int] | None
+            The indices to validate.
+        upper_bound: int
+            The upper bound of the indices.
+        
+        Returns
+        -------
+        np.ndarray | None
+            The validated indices.
+        """
         if indices is None:
             return None
         arr = np.asarray(list(indices), dtype=int).ravel()
@@ -1974,6 +2168,20 @@ class DensityOfStates(PointSet):
         return np.unique(arr)
 
     def _params_for_property(self, name: str, kwargs: dict) -> dict:
+        """Get the parameters for the property.
+        
+        Parameters
+        ----------
+        name: str
+            The name of the property.
+        kwargs: dict
+            The keyword arguments to get the parameters for the property.
+            
+        Returns
+        -------
+        dict
+            The parameters for the property.
+        """
         if name in {"projected_sum", "projected_sum_total"}:
             return self._projected_sum_cache_params(**kwargs)
         if name == "normalized_total":
@@ -1984,6 +2192,18 @@ class DensityOfStates(PointSet):
         return {key: value for key, value in kwargs.items() if value is not None}
 
     def _projected_sum_cache_params(self, **kwargs) -> dict[str, tuple[int, ...] | bool]:
+        """Get the parameters for the projected sum cache.
+        
+        Parameters
+        ----------
+        **kwargs: dict[str, Any]
+            The keyword arguments to get the parameters for the projected sum cache.
+            
+        Returns
+        -------
+        dict[str, tuple[int, ...] | bool]
+            The parameters for the projected sum cache.
+        """
         params: dict[str, tuple[int, ...] | bool] = {}
         atoms = kwargs.get("atoms")
         orbitals = kwargs.get("orbitals")
@@ -2014,6 +2234,20 @@ class DensityOfStates(PointSet):
         base_name: str,
         params: dict | None,
     ) -> str:
+        """Make the property key.
+        
+        Parameters
+        ----------
+        base_name: str
+            The base name of the property.
+        params: dict | None
+            The parameters to make the property key.
+            
+        Returns
+        -------
+        str
+            The property key.
+        """
         if not params:
             return base_name
         tokens = [base_name]
@@ -2028,7 +2262,21 @@ class DensityOfStates(PointSet):
             tokens.append(f"{key}={string}")
         return "|".join(tokens)
 
-    def _normalize_super_key(self, original_key, resolved_name: str):
+    def _normalize_super_key(self, original_key, resolved_name: str) -> str:
+        """Normalize the super key.
+        
+        Parameters
+        ----------
+        original_key: str | tuple[str, int] | tuple[str, str] | tuple[str, int, str]
+            The original key to normalize.
+        resolved_name: str
+            The resolved name to normalize.
+            
+        Returns
+        -------
+        str
+            The normalized super key.
+        """
         if original_key is None or isinstance(original_key, str):
             return resolved_name
         if isinstance(original_key, tuple):
@@ -2049,7 +2297,28 @@ class DensityOfStates(PointSet):
                                               species_orbital_map: dict[str, Iterable[int]] | None = None, 
                                               atoms_orbital_map: dict[int, Iterable[int]] | None = None
                                               ) -> tuple[set[int], set[int], set[int], set[str]]:
- 
+        """Validate the projection selection parameters.
+        
+        Parameters
+        ----------
+        atoms: Sequence[int] | None
+            The atoms to validate.
+        orbitals: Sequence[int] | None
+            The orbitals to validate.
+        spins: Sequence[int] | None
+            The spins to validate.
+        species: Sequence[str] | None
+            The species to validate.
+        species_orbital_map: dict[str, Iterable[int]] | None
+            The species orbital map to validate.
+        atoms_orbital_map: dict[int, Iterable[int]] | None
+            The atoms orbital map to validate.
+            
+        Returns
+        -------
+        tuple[set[int], set[int], set[int], set[str]]
+            The validated atoms, orbitals, spins, and species.
+        """
         if species is not None and atoms is not None:
             raise ValueError("atoms and species cannot be specified together")
         selection = self._resolve_projection_selection(
@@ -2074,7 +2343,15 @@ def interpolate(
     y: npt.ArrayLike,
     factor: int = 2,
 ) -> tuple[npt.NDArray[np.float64], npt.NDArray[np.float64]]:
-    """Interpolate ``y`` over ``x`` by increasing the sample count."""
+    """Interpolate ``y`` over ``x`` by increasing the sample count.
+    
+    Parameters
+    ----------
+    x: npt.ArrayLike
+        The x values to interpolate.
+    y: npt.ArrayLike
+        The y values to interpolate.
+    """
     x_array = np.asarray(x, dtype=np.float64)
     y_array = np.asarray(y, dtype=np.float64)
     cs = CubicSpline(x_array, y_array, axis=0)
@@ -2084,7 +2361,15 @@ def interpolate(
 
 
 def filter_data_within_sigma(data: npt.NDArray[np.float64], sigma: float = 3, fill_value: float | None = None) -> npt.NDArray[np.float64]:
+    """Filter the data within sigma of the mean.
     
+    Parameters
+    ----------
+    data: npt.NDArray[np.float64]
+        The data to filter.
+    sigma: float
+        The number of standard deviations to filter.
+    """
     indices = np.where(np.abs(data) > np.abs(data.mean()) + sigma * data.std())
     if fill_value is not None:
         data[indices] = fill_value
