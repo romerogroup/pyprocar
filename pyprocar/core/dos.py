@@ -1141,7 +1141,6 @@ class DensityOfStates(PointSet):
             Single Property if one result, list if multiple parameter combinations.
             
         """
-        assert(self.projected is not None and hasattr(self, "projected")), "Projected DOS is not available for this calculation"
         if self.projected is None:
             raise ValueError("Projected DOS is not available for this calculation")
 
@@ -1180,6 +1179,7 @@ class DensityOfStates(PointSet):
                 units=units,
                 selection=selection,
                 norm_mode=norm_mode,
+                allowed_norm_modes=None,
                 **kwargs,
             )
             
@@ -1244,18 +1244,19 @@ class DensityOfStates(PointSet):
             Single Property if one result, list if multiple parameter combinations.
         """
         # Validate Input
-        assert(self.is_non_collinear), "Spin texture is only available for non-collinear calculations"
+        if not self.is_non_collinear:
+            raise ValueError("Spin texture is only available for non-collinear calculations")
         
         # Resolve default values
         dos_array = self.total.to_array() if (self.projected is None and hasattr(self, "total")) else self.projected.to_array()
         spins = (1, 2, 3) if spins is None else spins
         
-        # Resolve Normalization modes
-        allowed_modes = {NormMode.TOTAL_PROJECTION, NormMode.SPIN_MAGNITUDE, NormMode.INTEGRAL, NormMode.ELECTRONS, NormMode.MAGNETIZATION, NormMode.RAW}
-        norm_mode = NormMode.from_input(norm_mode)
-        valid_modes = "\n".join(f"- {mode.value}" for mode in sorted(allowed_modes, key=lambda m: m.value))
-        assert(norm_mode in allowed_modes), f"Invalid normalization mode: {norm_mode}. Valid modes are:\n{valid_modes}"
-
+        for spin in spins:
+            if isinstance(spin, Iterable):
+                invalid_spins = set(spins) - {1, 2, 3}
+                if len(invalid_spins) > 0:
+                    raise ValueError(f"Invalid spins for spin texture magnitude: {sorted(invalid_spins)}. Valid components are [1, 2, 3].")
+        
         
         param_dicts = expand_grouped_params_to_dicts(dict(atoms=atoms, orbitals=orbitals, spins=spins, 
                                                           species=species, species_orbital_map=species_orbital_map, atoms_orbital_map=atoms_orbital_map))
@@ -1273,9 +1274,7 @@ class DensityOfStates(PointSet):
                 atoms_orbital_map=params["atoms_orbital_map"],
             )
             
-            invalid_spin = set(selection.spins) - set((1, 2, 3))
-            assert(invalid_spin == set()), "Invalid spin channels specified"
- 
+
             # Sum Atomic Projection Components
             values = self.sum_projection_components(
                 values_array=dos_array,
@@ -1293,6 +1292,7 @@ class DensityOfStates(PointSet):
                 units=units,
                 selection=selection,
                 norm_mode=norm_mode,
+                allowed_norm_modes={NormMode.TOTAL_PROJECTION, NormMode.SPIN_MAGNITUDE, NormMode.INTEGRAL, NormMode.ELECTRONS, NormMode.MAGNETIZATION, NormMode.RAW},
                 **kwargs,
             )
 
@@ -1304,7 +1304,6 @@ class DensityOfStates(PointSet):
         self,
         atoms: Iterable[int] | None = None,
         orbitals: Iterable[int] | None = None,
-        spins: Iterable[int] | None = None,
         species: Iterable[str] | None = None,
         species_orbital_map: dict[str, Iterable[int]] | None = None,
         atoms_orbital_map: dict[int, Iterable[int]] | None = None,
@@ -1332,8 +1331,6 @@ class DensityOfStates(PointSet):
             Atom indices to sum over. If None, sums over all atoms.
         orbitals
             Orbital indices to sum over. If None, sums over all orbitals.
-        spins
-            Spin channels to include. Defaults to (0, 1) for collinear or (0,) for non-collinear.
         species
             Species names to select atoms by.
         species_orbital_map
@@ -1365,21 +1362,14 @@ class DensityOfStates(PointSet):
         """
 
         # Validate Input
-        assert(self.is_spin_polarized or self.is_non_collinear), "DOS is not non-collinear or spin polarized"
-        assert(hasattr(self, "total") or hasattr(self, "projected")), "Total or projected DOS is not provided"
+        if not (self.is_spin_polarized or self.is_non_collinear):
+            raise ValueError("Magnetization requires a spin-polarized or non-collinear calculation")
+        if not (hasattr(self, "total") or hasattr(self, "projected")):
+            raise ValueError("Total or projected DOS is not available for this calculation")
         
         # Resolve default values
         dos_array = self.total.to_array() if (self.projected is None and hasattr(self, "total")) or from_total else self.projected.to_array()
-
         spins = (0,) if self.is_non_collinear else (0, 1)
-        mode = "non-collinear" if self.is_non_collinear else "collinear"
-        
-        # Resolve Normalization modes
-        allowed_modes = {NormMode.RAW, NormMode.MAGNETIZATION, NormMode.INTEGRAL, NormMode.ELECTRONS}
-        norm_mode = NormMode.from_input(norm_mode)
-        valid_modes = "\n".join(f"- {mode.value}" for mode in sorted(allowed_modes, key=lambda m: m.value))
-        assert(norm_mode in allowed_modes), f"Invalid normalization mode: {norm_mode}. Valid modes are:\n{valid_modes}"
-        
         
         # Resolve selection parameters groups.
         param_dicts = expand_grouped_params_to_dicts(dict(atoms=atoms, orbitals=orbitals, spins=spins, 
@@ -1398,15 +1388,10 @@ class DensityOfStates(PointSet):
                 atoms_orbital_map=params["atoms_orbital_map"],
             )
 
-            # Validate Spin Selection
-
-            if self.is_non_collinear:
-                assert(selection.spins is not None and (len(selection.spins) == 1 or selection.spins[0] == 0)), ("Magnetization for non-collinear calculations must use the total spin channel (index 0).")
-            elif self.is_spin_polarized:
-                assert(selection.spins is not None and len(selection.spins) == 2), ("Magnetization for spin-polarized calculations requires exactly two spin channels (up and down).")
-
-
-            # Sum Atomic Projection Components
+            # Compute Magnetization. 
+            # First sum over projections and then compute magnetization.
+            
+            # Sum Over Projections
             components = self.sum_projection_components(
                 values_array=dos_array,
                 atoms=selection.atoms,
@@ -1414,7 +1399,6 @@ class DensityOfStates(PointSet):
                 spins=selection.spins,
                 **keep_func_kwargs(kwargs, self.sum_projection_components),
             )
-            
             
             # Compute Magnetization
             if self.is_spin_polarized:
@@ -1427,7 +1411,7 @@ class DensityOfStates(PointSet):
             if magnetization_array.ndim == 1:
                 magnetization_array = magnetization_array[..., np.newaxis]
 
-            # Build Property Metadata
+            # Build Property
             prop = self._build_property(
                 values=magnetization_array,
                 label=label,
@@ -1435,6 +1419,7 @@ class DensityOfStates(PointSet):
                 units=units,
                 selection=selection,
                 norm_mode=norm_mode,
+                allowed_norm_modes={NormMode.RAW, NormMode.MAGNETIZATION, NormMode.INTEGRAL, NormMode.ELECTRONS},
                 **kwargs,
             )
 
@@ -1451,10 +1436,10 @@ class DensityOfStates(PointSet):
         species_orbital_map: dict[str, Iterable[int]] | None = None,
         atoms_orbital_map: dict[int, Iterable[int]] | None = None,
         norm_mode: str | NormMode = "raw",
-        from_total: bool = False,
         label: str = "Spin Texture Magnitude",
         name: str = "spin_texture_magnitude",
         units: str = "$\\frac{states}{eV}$",
+        from_total: bool = False,
         **kwargs,
     ) -> Property | list[Property]:
         """Compute spin texture magnitude ||S|| for non-collinear calculations.
@@ -1504,18 +1489,21 @@ class DensityOfStates(PointSet):
             If calculation is not non-collinear, or if invalid spins are specified.
         """
         # Validate Input
-        assert(hasattr(self, "total") or hasattr(self, "projected")), "Total or projected DOS is not provided"
-        assert(self.is_non_collinear), "DOS is not non-collinear"
+        if not (hasattr(self, "total") or hasattr(self, "projected")):
+            raise ValueError("Total or projected DOS is not provided")
+        if not self.is_non_collinear:
+            raise ValueError("DOS is not non-collinear")
 
         # Resolve default values
         dos_array = self.total.to_array() if (self.projected is None and hasattr(self, "total")) or from_total else self.projected.to_array()
         spins = (1, 2, 3) if spins is None else spins
         
-        # Resolve Normalization modes
-        allowed_modes = {NormMode.INTEGRAL,NormMode.SPIN_MAGNITUDE,NormMode.ELECTRONS,NormMode.MAGNETIZATION,NormMode.RAW}
-        norm_mode = NormMode.from_input(norm_mode)
-        valid_modes = "\n".join(f"- {mode.value}" for mode in sorted(allowed_modes, key=lambda m: m.value))
-        assert(norm_mode in allowed_modes), f"Invalid normalization mode: {norm_mode}. Valid modes are:\n{valid_modes}"
+        # Validate Spin Selection
+        for spin in spins:
+            if isinstance(spin, Iterable):
+                invalid_spins = set(spins) - {1, 2, 3}
+                if len(invalid_spins) > 0:
+                    raise ValueError(f"Invalid spins for spin texture magnitude: {sorted(invalid_spins)}. Valid components are [1, 2, 3].")
         
         # Resolve selection parameters groups.
         param_dicts = expand_grouped_params_to_dicts(dict(atoms=atoms, orbitals=orbitals, spins=spins, 
@@ -1533,10 +1521,6 @@ class DensityOfStates(PointSet):
                 atoms_orbital_map=params["atoms_orbital_map"],
             )
             
-            # Validate Spin Selection
-            invalid_spins = set(selection.spins) - {1, 2, 3}
-            assert(len(invalid_spins) == 0), f"Invalid spins for spin texture magnitude: {sorted(invalid_spins)}. Valid components are [1, 2, 3]."
-
             # Sum Atomic Projection Components
             values = self.sum_projection_components(
                 values_array=dos_array,
@@ -1556,6 +1540,7 @@ class DensityOfStates(PointSet):
                 units=units,
                 selection=selection,
                 norm_mode=norm_mode,
+                allowed_norm_modes={NormMode.INTEGRAL, NormMode.SPIN_MAGNITUDE, NormMode.ELECTRONS, NormMode.MAGNETIZATION, NormMode.RAW},
                 **kwargs,
             )
             results.append(prop)
@@ -1595,18 +1580,13 @@ class DensityOfStates(PointSet):
         Property
             Normalized total DOS as a Property.
         """
-        assert(hasattr(self, "total") and self.total is not None), "Total DOS is not provided"
+        if not (hasattr(self, "total") and self.total is not None):
+            raise ValueError("Total DOS is not provided")
         
         # Resolve Default Values
         name = self.total.name if name is None else name
         label = self.total.label if label is None else label
         units = self.total.units if units is None else units
-        
-        # Resolve Normalization Mode
-        norm_mode = NormMode.from_input(norm_mode)
-        allowed_modes = {NormMode.MAX, NormMode.INTEGRAL, NormMode.ELECTRONS}
-        valid_modes = "\n".join(f"- {mode.value}" for mode in sorted(allowed_modes, key=lambda m: m.value))
-        assert(norm_mode in allowed_modes), f"Invalid normalization mode: {norm_mode}. Valid modes are:\n{valid_modes}"
         
         prop = self._build_property(
             values=self.total.to_array(),
@@ -1614,6 +1594,7 @@ class DensityOfStates(PointSet):
             name=name,
             units=units,
             norm_mode=norm_mode,
+            allowed_norm_modes={NormMode.MAX, NormMode.INTEGRAL, NormMode.ELECTRONS},
             **kwargs,
         )
         
@@ -1653,14 +1634,9 @@ class DensityOfStates(PointSet):
             Cumulative total DOS as a Property.
         """
         # Validate Input
-        assert(hasattr(self, "total") and self.total is not None), "Total DOS is not provided"
+        if not (hasattr(self, "total") and self.total is not None):
+            raise ValueError("Total DOS is not provided")
                
-        # Resolve Normalization Mode
-        norm_mode = NormMode.from_input(norm_mode)
-        allowed_modes = {NormMode.MAX, NormMode.INTEGRAL, NormMode.ELECTRONS, NormMode.RAW}
-        valid_modes = "\n".join(f"- {mode.value}" for mode in sorted(allowed_modes, key=lambda m: m.value))
-        assert(norm_mode in allowed_modes), f"Invalid normalization mode: {norm_mode}. Valid modes are:\n{valid_modes}"
-
         # Compute Cumulative Total
         cumlative_total = self.cumsum(values=self.total.to_array())
 
@@ -1671,6 +1647,7 @@ class DensityOfStates(PointSet):
             name=name,
             units=units,
             norm_mode=norm_mode,
+            allowed_norm_modes={NormMode.MAX, NormMode.INTEGRAL, NormMode.ELECTRONS, NormMode.RAW},
             **kwargs,
         )
         
@@ -1902,9 +1879,10 @@ class DensityOfStates(PointSet):
         label: str,
         name: str,
         units: str,
-        norm_mode: NormMode,
+        norm_mode: str | NormMode | None,
         selection: ProjectionSelectionResult | None = None,
         include_normal_label: bool = False,
+        allowed_norm_modes: set[NormMode] | None = None,
         **kwargs,
     ) -> dict[str, Any]:
         """Build metadata dictionary for a computed property.
@@ -1920,11 +1898,13 @@ class DensityOfStates(PointSet):
         selection
             Resolved projection selection result.
         norm_mode
-            Normalization mode used.
+            Normalization mode (can be string, NormMode, or None).
         values
             Computed values array.
         include_normal_label
             Whether to include normalization label in metadata.
+        allowed_norm_modes
+            Set of allowed normalization modes. If None, all modes are allowed.
         **kwargs
             Additional kwargs passed to _build_property_metadata.
             
@@ -1934,8 +1914,13 @@ class DensityOfStates(PointSet):
             Complete metadata dictionary.
         """
         
-        # Optionally Normalize Values
+        # Resolve and validate normalization mode
         norm_mode = NormMode.from_input(norm_mode)
+        if allowed_norm_modes is not None:
+            valid_modes = "\n".join(f"- {mode.value}" for mode in sorted(allowed_norm_modes, key=lambda m: m.value))
+            assert(norm_mode in allowed_norm_modes), f"Invalid normalization mode: {norm_mode}. Valid modes are:\n{valid_modes}"
+        
+        # Optionally Normalize Values
         normed_name = NormMode.get_normed_name(norm_mode, name)
         normed_units = NormMode.get_normed_units(norm_mode, units)
         footnote = NormMode.get_mode_footnote(norm_mode)
