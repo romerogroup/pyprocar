@@ -18,6 +18,17 @@ RUN update-alternatives --install /usr/local/bin/fd fd /usr/bin/fdfind 50
 # 2) Configure Bash globally: completion, fzf bindings, aliases, and your functions
 RUN printf "%s\n" \
   "" \
+
+
+  "# ---------- PyProcar environment ----------" \
+  # Check for and manage SSH agent in container shell
+  "if [ -z \"\$SSH_AUTH_SOCK\" ]; then" \
+  "  if ! pgrep -u \"\$(id -u)\" ssh-agent > /dev/null 2>&1; then" \
+  "    eval \"\$(ssh-agent -s)\" > \$HOME/.ssh/ssh-agent" \
+  "  fi" \
+  "  eval \"\$(cat \$HOME/.ssh/ssh-agent)\" > /dev/null 2>&1" \
+  "  ssh-add 2>/dev/null || true" \
+  "fi" \
   "# ---------- Bash completion ----------" \
   "if [ -f /usr/share/bash-completion/bash_completion ]; then" \
   "  . /usr/share/bash-completion/bash_completion" \
