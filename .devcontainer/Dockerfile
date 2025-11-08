@@ -123,5 +123,3 @@ RUN useradd -m developer && echo "developer ALL=(ALL) NOPASSWD: ALL" >> /etc/sud
 USER developer
 WORKDIR /home/developer
 
-
-RUN mkdir -p /home/developer/.ssh && chmod 700 /home/developer/.ssh

@@ -3,11 +3,9 @@
     "build": {
       "dockerfile": "Dockerfile"
     },
-    "remoteUser": "developer",
     "mounts": [
       "source=${localEnv:USERPROFILE}\\.ssh,target=/home/developer/.ssh,type=bind,consistency=cached"
     ],
-
     "settings": {
       "terminal.integrated.defaultProfile.linux": "bash"
     },
