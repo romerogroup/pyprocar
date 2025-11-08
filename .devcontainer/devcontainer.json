@@ -10,10 +10,9 @@
   
 
 
-    "containerEnv": {
-        "DISPLAY": ":0",
-        "LIBGL_ALWAYS_INDIRECT": "1"
-        },
+    "mounts": [
+        "source=${localEnv:USERPROFILE}/.ssh,target=/home/developer/.ssh,type=bind,consistency=cached"
+    ],
 
     "features": {},
   

@@ -15,19 +15,23 @@ ENV LC_ALL=en_US.UTF-8
 
 RUN update-alternatives --install /usr/local/bin/fd fd /usr/bin/fdfind 50
 
+RUN apt-get update && apt-get install -y \
+    git \
+    curl \
+    sudo \
+    openssh-client \
+    ca-certificates \
+    ssh \
+    && rm -rf /var/lib/apt/lists/*
+
+
 # 2) Configure Bash globally: completion, fzf bindings, aliases, and your functions
 RUN printf "%s\n" \
   "" \
 
 
   "# ---------- PyProcar environment ----------" \
-  # Check for and manage SSH agent in container shell
-  "if [ -z \"\$SSH_AUTH_SOCK\" ]; then" \
-  "  if ! pgrep -u \"\$(id -u)\" ssh-agent > /dev/null 2>&1; then" \
-  "    eval \"\$(ssh-agent -s)\" > \$HOME/.ssh/ssh-agent" \
-  "  fi" \
-  "  eval \"\$(cat \$HOME/.ssh/ssh-agent)\" > /dev/null 2>&1" \
-  "  ssh-add 2>/dev/null || true" \
+
   "fi" \
   "# ---------- Bash completion ----------" \
   "if [ -f /usr/share/bash-completion/bash_completion ]; then" \
@@ -107,13 +111,6 @@ RUN printf "%s\n" \
   "" \
   >> /etc/bash.bashrc
 
-RUN apt-get update && apt-get install -y \
-    git \
-    curl \
-    sudo \
-    openssh-client \
-    ca-certificates \
-    && rm -rf /var/lib/apt/lists/*
 
 # Install GitHub CLI
 RUN curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | \
@@ -123,8 +120,6 @@ RUN curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | \
     tee /etc/apt/sources.list.d/github-cli.list > /dev/null && \
     apt-get update && apt-get install -y gh && rm -rf /var/lib/apt/lists/*
 
-
-
 # Install Pixi
 RUN curl -fsSL https://pixi.sh/install.sh | bash
 
@@ -132,3 +127,10 @@ RUN curl -fsSL https://pixi.sh/install.sh | bash
 RUN useradd -m developer && echo "developer ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
 USER developer
 WORKDIR /home/developer
+
+
+
+# Ensure .ssh directory exists with correct permissions
+RUN mkdir -p /home/developer/.ssh && chmod 700 /home/developer/.ssh && \
+    ssh-keyscan github.com >> /home/developer/.ssh/known_hosts 2>/dev/null && \
+    chmod 644 /home/developer/.ssh/known_hosts
