@@ -130,7 +130,3 @@ WORKDIR /home/developer
 
 
 
-# Ensure .ssh directory exists with correct permissions
-RUN mkdir -p /home/developer/.ssh && chmod 700 /home/developer/.ssh && \
-    ssh-keyscan github.com >> /home/developer/.ssh/known_hosts 2>/dev/null && \
-    chmod 644 /home/developer/.ssh/known_hosts

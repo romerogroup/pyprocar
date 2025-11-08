@@ -10,10 +10,6 @@
   
 
 
-    "mounts": [
-        "source=${localEnv:USERPROFILE}/.ssh,target=/home/developer/.ssh,type=bind,consistency=cached"
-    ],
-
     "features": {},
   
     "customizations": {
