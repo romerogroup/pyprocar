@@ -15,11 +15,6 @@
         "LIBGL_ALWAYS_INDIRECT": "1"
         },
 
-    // Mount SSH keys for cloning private repos
-    "mounts": [
-    "source=${localEnv:USERPROFILE}\\.ssh,target=/home/developer/.ssh,type=bind,consistency=cached"
-    ],
-  
     "features": {},
   
     "customizations": {
