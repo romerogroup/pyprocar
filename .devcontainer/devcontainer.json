@@ -1,0 +1,34 @@
+{
+    "name": "Ubuntu 24.04 + GitHub + Pixi + PyProcar",
+    "build": {
+      "dockerfile": "Dockerfile"
+    },
+    "remoteUser": "developer",
+    "settings": {
+      "terminal.integrated.defaultProfile.linux": "bash"
+    },
+  
+
+
+    "containerEnv": {
+        "DISPLAY": ":0",
+        "LIBGL_ALWAYS_INDIRECT": "1"
+        },
+
+    // Mount SSH keys for cloning private repos
+    "mounts": [
+    "source=${localEnv:USERPROFILE}\\.ssh,target=/home/developer/.ssh,type=bind,consistency=cached"
+    ],
+  
+    "features": {},
+  
+    "customizations": {
+      "vscode": {
+        "extensions": [
+          "ms-azuretools.vscode-docker",
+          "ms-vscode.remote-containers",
+          "GitHub.vscode-pull-request-github"
+        ]
+      }
+    }
+  }
