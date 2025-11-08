@@ -28,11 +28,6 @@ RUN apt-get update && apt-get install -y \
 # 2) Configure Bash globally: completion, fzf bindings, aliases, and your functions
 RUN printf "%s\n" \
   "" \
-
-
-  "# ---------- PyProcar environment ----------" \
-
-  "fi" \
   "# ---------- Bash completion ----------" \
   "if [ -f /usr/share/bash-completion/bash_completion ]; then" \
   "  . /usr/share/bash-completion/bash_completion" \
@@ -129,4 +124,4 @@ USER developer
 WORKDIR /home/developer
 
 
-
+RUN mkdir -p /home/developer/.ssh && chmod 700 /home/developer/.ssh
