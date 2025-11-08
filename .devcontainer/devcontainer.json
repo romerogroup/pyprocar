@@ -3,7 +3,7 @@
     "build": {
       "dockerfile": "Dockerfile"
     },
-    "remoteUser": "developer",
+    // "remoteUser": "developer",
     "settings": {
       "terminal.integrated.defaultProfile.linux": "bash"
     },
