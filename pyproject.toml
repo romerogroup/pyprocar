@@ -52,26 +52,17 @@ dependencies = [
     "gdown",
     "dill",
     "variconfig",
-    "huggingface_hub[hf_transfer,cli]",
+    "huggingface_hub",
     "pyvista[jupyter]>0.44.0",
     "vtk"
 ]
 
 [project.optional-dependencies]
 
-tests = [
-    "pytest",
-    "pytest-cov",
-    "pymatgen",
-    "PyGithub",
-    
-]
-
-build = [
-    "setuptools-scm",
-    "setuptools",
-    "build",
-]
+tests = ["pytest","pytest-cov","pymatgen","PyGithub", ]
+build = ["setuptools-scm","setuptools","build",]
+format = ["ruff"]
+lint = ["pylint"]
 
 docs = [
     "sphinx_design",
@@ -98,7 +89,7 @@ docs = [
 
 # Combine docs and tests, plus add any dev-specific packages
 dev = [
-    "pyprocar[docs,tests]"
+    "pyprocar[docs,tests,format,lint]"
 ]
 
 
@@ -123,19 +114,48 @@ channels = ["conda-forge"]
 platforms = ["linux-64", "osx-arm64", "osx-64", "win-64"]
 
 
-[tool.pixi.pypi-dependencies]
-pyprocar = {path = ".", editable = true}
 
-[tool.pixi.feature.py310.dependencies]
-python = "==3.10"
+[tool.pixi]
+pypi-dependencies = {pyprocar = {path = ".", editable = true}}
+
+[tool.pixi.feature]
+# core = {pypi-dependencies = {pyprocar = {path = ".", editable = true}}}
+py310 = {dependencies = {python = "3.10.*"}}
+py311 = {dependencies = {python = "3.11.*"}}
+py312 = {dependencies = {python = "3.12.*"}}
+py313 = {dependencies = {python = "3.13.*"}}
+
+
 
 [tool.pixi.environments]
-tests = { features = ["tests"], solve-group = "default" }
-build = { features = ["build"], solve-group = "default" }
-docs = { features = ["docs"], solve-group = "default" }
-dev = { features = ["dev"], solve-group = "default" }
+py310 = { features = ["py310", "tests"] }
+py311 = { features = ["py311", "tests"] }
+py312 = { features = ["py312", "tests"] }
+py313 = { features = ["py313", "tests"] }
+tests = { features = ["tests"] }
+lint = { features = ["lint"] }
+format = { features = ["format"] }
+build = { features = ["build"] }
+docs = { features = ["docs"] }
+dev = { features = ["dev"] }
 
-py310 = { features = ["py310"] }
 
-[tool.pixi.dependencies]
-pytest = ">=8.4.2,<9"
+
+[tool.pixi.tasks]
+_format = "ruff"
+_lint = "pylint"
+_test = "pytest"
+
+format = { depends-on = [{task = "_format", environment = "py312"}] }
+lint = { depends-on = [{task = "_lint", environment = "py312"}] }
+test = { depends-on = [{task = "_test", environment = "py312"}] }
+style = [{ task = "fmt" }, { task = "lint" }]
+
+[tool.pixi.tasks.test-all]
+depends-on = [
+  { task = "_test", environment = "py310"},
+  { task = "_test", environment = "py311"},
+  { task = "_test", environment = "py312"},
+  { task = "_test", environment = "py313"},
+
+]
