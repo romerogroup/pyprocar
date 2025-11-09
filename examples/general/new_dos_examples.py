@@ -1,6 +1,9 @@
 import copy
 import logging
 import time
+
+start_time = time.time()
+import os
 from pathlib import Path
 from typing import Literal
 
@@ -43,6 +46,7 @@ from pyprocar.plotter.dos_plot import DOSPlotter
 
 
 def test_plot_horizontal_total_line():
+    print("test_plot_horizontal_total_line")
     dos_non_spin_polarized = DensityOfStates.from_code(code="vasp", dirpath=DOS_NON_SPIN_POLARIZED_DIR)
     total = dos_non_spin_polarized.total
     plotter = DOSPlotter(orientation="horizontal")
@@ -435,7 +439,7 @@ def test_non_spin_polarized():
 ###########################################################
 # Basic plots testing
 ###########################################################
-# test_plot_horizontal_total_line()
+test_plot_horizontal_total_line()
 # test_plot_horizontal_projected_sum_line()
 # test_plot_horizontal_projected_sum_line_integral_normalized()
 
@@ -497,3 +501,4 @@ def test_non_spin_polarized():
 #     )
 
 
+print(f"Time taken: {time.time() - start_time} seconds")
