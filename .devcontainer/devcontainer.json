@@ -6,20 +6,35 @@
     "mounts": [
       "source=${localEnv:USERPROFILE}\\.ssh,target=/home/developer/.ssh,type=bind,consistency=cached"
     ],
+
+    "forwardPorts": [6080],
     "settings": {
       "terminal.integrated.defaultProfile.linux": "bash"
     },
-  
+    "postCreateCommand": "pixi install -e dev",
 
+    // "containerEnv": {
+    //   "DISPLAY": "172.31.0.1:0.0"
+    // },
 
-    "features": {},
+    "features": {
+        "desktop-lite": {}
+    },
+    "portsAttributes": {
+        "6080": {
+        "label": "desktop"
+        }
+    },
+
   
     "customizations": {
       "vscode": {
         "extensions": [
-          "ms-azuretools.vscode-docker",
-          "ms-vscode.remote-containers",
-          "GitHub.vscode-pull-request-github"
+            "ms-azuretools.vscode-docker",
+            "ms-vscode.remote-containers",
+            "GitHub.vscode-pull-request-github",
+            "anysphere.cursorpyright",
+            "ms-python.python"
         ]
       }
     }

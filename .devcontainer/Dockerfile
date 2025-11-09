@@ -106,7 +106,15 @@ RUN printf "%s\n" \
   "" \
   >> /etc/bash.bashrc
 
-
+  RUN apt-get update && apt-get install -y \
+  xvfb \
+  libgl1 \
+  libgl1-mesa-dev \
+  libxrender1 \
+  libsm6 \
+  libxext6 \
+  && rm -rf /var/lib/apt/lists/*
+  
 # Install GitHub CLI
 RUN curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | \
     dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg && \
@@ -116,10 +124,12 @@ RUN curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | \
     apt-get update && apt-get install -y gh && rm -rf /var/lib/apt/lists/*
 
 # Install Pixi
-RUN curl -fsSL https://pixi.sh/install.sh | bash
 
 # Create dev user
 RUN useradd -m developer && echo "developer ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
 USER developer
-WORKDIR /home/developer
+WORKDIR /workspaces/pyprocar
 
+RUN curl -fsSL https://pixi.sh/install.sh | bash -s -- -y --no-modify-path
+RUN pwd && ls -a
+ENV PATH="/home/developer/.pixi/bin:${PATH}"
