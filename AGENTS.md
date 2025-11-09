@@ -24,9 +24,9 @@
   - Paths → `filepath` / `dirpath`
   - Lists → pluralized
 - Use type hints.
-- Use assert statements for validation and error handling.
 - Prefer to use guard clauses for early returns and error handling.
 - Do not use nested functions.
+
 
 # Logging Conventions
 - Loggers should be accesed by their name. example: `logging.getLogger(__file__)`
