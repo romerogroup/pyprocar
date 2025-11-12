@@ -20,8 +20,9 @@ class Outcar(collections.abc.Mapping):
 
     The Outcar class acts as a Mapping, providing key-value access to the variables parsed from the OUTCAR file.
     """
+    
 
-    def __init__(self, filepath: Union[str, Path]):
+    def __init__(self, filepath: Union[str, Path] = None, file_str: str = None):
         """
         Constructor method to initialize an Outcar object. Reads the file specified by filename and stores its content.
 
@@ -30,13 +31,25 @@ class Outcar(collections.abc.Mapping):
         filename : Union[str, Path], optional
             The OUTCAR filename. If not provided, defaults to "OUTCAR".
         """
-        self.filepath: Path = Path(filepath)
-        self._get_axes_nk()
+        self._file_str = file_str
+        self._filepath = filepath
 
-        with open(self.filepath, "r") as rf:
-            self.file_str: str = rf.read()
-
-        logger.info(f"Vasp Version: {self.version}")
+    @classmethod
+    def from_str(cls, input: str):
+        return cls(file_str=input)
+        
+    @property
+    def filepath(self):
+        if self._filepath is None:
+            raise ValueError("filepath not found. Likely, Outcar provided as string.")
+        return Path(self._filepath)
+        
+    @cached_property
+    def file_str(self):
+        if self._file_str is None:
+            with open(self.filepath, "r") as rf:
+                self._file_str = rf.read()
+        return self._file_str
 
     def _get_axes_nk(self):
         """
@@ -47,19 +60,33 @@ class Outcar(collections.abc.Mapping):
         n_kx
             n_kx
         """
-        try:
-            raw_text = re.findall(r"generate\s*k-points\s*for:\s*(.*)", self.file_str)[
-                -1
-            ]
-            self.n_kx = int(raw_text.split()[0])
-            self.n_ky = int(raw_text.split()[1])
-            self.n_kz = int(raw_text.split()[2])
-        except:
-            self.n_kx = None
-            self.n_ky = None
-            self.n_kz = None
-
-        return None
+        
+        raw_text = re.findall(r"generate\s*k-points\s*for:\s*(.*)", self.file_str)
+        n_kx = None
+        n_ky = None
+        n_kz = None
+        if len(raw_text) > 0:
+            raw_text = raw_text[-1]
+            n_kx = int(raw_text.split()[0])
+            n_ky = int(raw_text.split()[1])
+            n_kz = int(raw_text.split()[2])
+        return n_kx, n_ky, n_kz
+    
+    @cached_property
+    def kgrid(self):
+        return self._get_axes_nk()
+    
+    @cached_property
+    def n_kx(self):
+        return self.kgrid[0]
+    
+    @cached_property
+    def n_ky(self):
+        return self.kgrid[1]
+    
+    @cached_property
+    def n_kz(self):
+        return self.kgrid[2]
 
     @cached_property
     def version(self):
