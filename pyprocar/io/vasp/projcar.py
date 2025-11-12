@@ -67,8 +67,6 @@ class Projcar(collections.abc.Mapping):
         if self._file_str is None:
             logger.info(f"Reading PROJCAR file: {self.filepath}")
             file_stream = self._open_file(self.filepath)
-            # Skip first line (header comment)
-            _ = file_stream.readline()
             # Read the rest of the file
             self._file_str = file_stream.read()
             file_stream.close()
@@ -79,13 +77,15 @@ class Projcar(collections.abc.Mapping):
     def frac_coords(self):
         """Parse and return fractional coordinates."""
         logger.debug("Parsing fractional coordinates from PROJCAR header")
-        
-        # Find all localized orbital specifications
+        print(self.file_str[:200])
+        # Find all ISITE lines
+        # isite_pattern = re.compile(
+        #     r"\s+ISITE:\s+\d+\s+R=\s+([-\d.]+)\s+([-\d.]+)\s+([-\d.]+)\s+"
+        # )
         orbital_pattern = re.compile(
             r"ISITE:\s*(\d+)\s+R=\s*([-\d.]+)\s+([-\d.]+)\s+([-\d.]+)\s+([^:\n]+):\s*([^\n]*)"
         )
         matches = orbital_pattern.findall(self.file_str)
-        
         if not matches:
             raise ValueError("No localized orbital specifications found in PROJCAR file")
         
