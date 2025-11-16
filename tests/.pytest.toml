@@ -1,5 +1,3 @@
-
-
 [pytest]
 log_auto_indent = "Off"
 log_cli = true
@@ -17,6 +15,3 @@ log_level = "INFO"
 
 verbosity_test_cases = "2"
 addopts = ["-s", "-v"]
-testpaths = [
-    "tests/pyprocar",
-]
