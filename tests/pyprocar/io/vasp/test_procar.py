@@ -1,3 +1,10 @@
+import re
+from pathlib import Path
+
+import numpy as np
+
+from pyprocar.io import vasp
+
 
 
 
@@ -271,3 +278,126 @@ ion      s     py     pz     px    dxy    dyz    dz2    dxz  x2-y2    tot
     5  0.219  0.000  0.000  0.000  0.000  0.000  0.000  0.000  0.000  0.219
 tot    0.846  0.000  0.000  0.006  0.000  0.000  0.000  0.000  0.000  0.852
 """
+
+
+HEADER_PATTERN = re.compile(
+    r"# of k-points:\s+(?P<kpoints>\d+)\s+# of bands:\s+(?P<bands>\d+)\s+# of ions:\s+(?P<ions>\d+)"
+)
+
+
+def _prepare_procar_content(
+    raw_content: str, kpoints_count: int, bands_count: int
+) -> str:
+    match = HEADER_PATTERN.search(raw_content)
+    if not match:
+        raise ValueError("Invalid PROCAR header")
+    ions_count = int(match.group("ions"))
+    new_header = (
+        f"# of k-points:  {kpoints_count:>3d}         "
+        f"# of bands:   {bands_count:>2d}         "
+        f"# of ions:    {ions_count}"
+    )
+    return HEADER_PATTERN.sub(new_header, raw_content, count=1)
+
+
+def _write_procar(
+    tmp_path: Path, raw_content: str, *, kpoints_count: int, bands_count: int
+) -> Path:
+    filepath = tmp_path / "PROCAR"
+    filepath.write_text(
+        _prepare_procar_content(raw_content, kpoints_count, bands_count)
+    )
+    return filepath
+
+
+class TestProcar:
+    def test_non_spin_polarized_metadata(self, tmp_path: Path) -> None:
+        procar_path = _write_procar(
+            tmp_path, NON_SPIN_POLARIZED_PROCAR, kpoints_count=2, bands_count=2
+        )
+        procar = vasp.Procar(procar_path)
+
+        assert procar.kpointsCount == 2
+        assert procar.bandsCount == 2
+        assert procar.ionsCount == 5
+        assert procar.ispin == 1
+        assert procar.kpoints.shape == (2, 3)
+        assert procar.bands.shape == (2, 2, 1)
+        assert procar.spd.shape == (2, 2, 1, 6, 11)
+
+        expected_kpoints = np.array(
+            [
+                [0.0, 0.0, 0.0],
+                [0.04761905, 0.0, 0.0],
+            ]
+        )
+        np.testing.assert_allclose(procar.kpoints, expected_kpoints)
+        expected_energies = np.array(
+            [
+                [-29.06108337, -14.30006222],
+                [-29.06042255, -14.29971681],
+            ]
+        )
+        np.testing.assert_allclose(procar.bands[:, :, 0], expected_energies)
+
+    def test_spin_polarized_detects_two_spins(self, tmp_path: Path) -> None:
+        procar_path = _write_procar(
+            tmp_path, SPIN_POLARIZED_PROCAR, kpoints_count=2, bands_count=2
+        )
+        procar = vasp.Procar(procar_path)
+
+        assert procar.kpointsCount == 2
+        assert procar.bandsCount == 2
+        assert procar.ionsCount == 5
+        assert procar.ispin == 2
+        assert procar.bands.shape == (2, 2, 2)
+
+        expected_kpoints = np.array(
+            [
+                [0.0, 0.0, 0.0],
+                [0.06666667, 0.0, 0.0],
+            ]
+        )
+        np.testing.assert_allclose(procar.kpoints, expected_kpoints)
+
+        expected_spin_up = np.array(
+            [
+                [-29.07152740, -14.21369582],
+                [-29.07374298, -14.31830429],
+            ]
+        )
+        expected_spin_down = np.array(
+            [
+                [-29.07502869, -14.31861896],
+                [-29.07024797, -14.21369642],
+            ]
+        )
+        np.testing.assert_allclose(procar.bands[:, :, 0], expected_spin_up)
+        np.testing.assert_allclose(procar.bands[:, :, 1], expected_spin_down)
+
+    def test_non_colinear_sets_four_spin_channels(self, tmp_path: Path) -> None:
+        procar_path = _write_procar(
+            tmp_path, NON_COLINEAR_PROCAR, kpoints_count=2, bands_count=2
+        )
+        procar = vasp.Procar(procar_path)
+
+        assert procar.kpointsCount == 2
+        assert procar.bandsCount == 2
+        assert procar.ionsCount == 5
+        assert procar.ispin == 4
+        assert procar.spd.shape == (2, 2, 4, 6, 11)
+
+        expected_kpoints = np.array(
+            [
+                [0.0, 0.0, 0.0],
+                [0.06666667, 0.0, 0.0],
+            ]
+        )
+        np.testing.assert_allclose(procar.kpoints, expected_kpoints)
+        expected_energies = np.array(
+            [
+                [-29.07166634, -29.06607067],
+                [-29.07038051, -29.06478989],
+            ]
+        )
+        np.testing.assert_allclose(procar.bands[:, :, 0], expected_energies)
