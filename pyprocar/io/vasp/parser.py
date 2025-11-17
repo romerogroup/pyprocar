@@ -1,14 +1,12 @@
-import collections
 import logging
-import re
 from functools import cached_property
 from pathlib import Path
-from typing import Union
 
 import numpy as np
 
 from pyprocar.core import DensityOfStates, Structure, get_ebs_from_data
 from pyprocar.core import kpoints as kpoints_core
+from pyprocar.core.atomic_orbital_index import OrbitalIndexer
 from pyprocar.io.base import BaseParser
 from pyprocar.io.vasp.doscar import Doscar
 from pyprocar.io.vasp.kpoints import Kpoints
@@ -16,7 +14,6 @@ from pyprocar.io.vasp.outcar import Outcar
 from pyprocar.io.vasp.poscar import Poscar
 from pyprocar.io.vasp.procar import Procar
 from pyprocar.io.vasp.vasprun import VaspXML
-from pyprocar.core.atomic_orbital_index import OrbitalIndexer
 
 logger = logging.getLogger(__name__)
 
@@ -25,14 +22,14 @@ ORBITAL_ORDERING = OrbitalIndexer()
 class VaspParser(BaseParser):
     def __init__(
         self,
-        dirpath: Union[str, Path],
-        incar: Union[str, Path] = "INCAR",
-        outcar: Union[str, Path] = "OUTCAR",
-        procar: Union[str, Path] = "PROCAR",
-        kpoints: Union[str, Path] = "KPOINTS",
-        poscar: Union[str, Path] = "POSCAR",
-        doscar: Union[str, Path] = "DOSCAR",
-        vasprun: Union[str, Path] = "vasprun.xml",
+        dirpath: str | Path,
+        incar: str | Path = "INCAR",
+        outcar: str | Path = "OUTCAR",
+        procar: str | Path = "PROCAR",
+        kpoints: str | Path = "KPOINTS",
+        poscar: str | Path = "POSCAR",
+        doscar: str | Path = "DOSCAR",
+        vasprun: str | Path = "vasprun.xml",
     ):
         super().__init__(dirpath)
         
