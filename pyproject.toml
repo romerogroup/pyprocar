@@ -100,7 +100,8 @@ reportMissingTypeStubs = false
 reportUnnecessaryIsInstance = false
 reportUnusedCallResult = false
 typeCheckingMode = "all"
-verboseOutput = true
+verboseOutput = false
+
 
 executionEnvironments = [
   { root = "docs", reportMissingImports = false, reportMissingModuleSource = false, reportUnknownVariableType = false, reportUnknownMemberType = false, reportUnusedCallResult = false, reportUnknownArgumentType = false },
