@@ -34,7 +34,7 @@ class VaspXML(Mapping[str, Any]):
     }
     colinear_spins_dict: dict[str, str] = {"spin 1": "Spin-up", "spin 2": "Spin-down"}
 
-    def __init__(self, filepath: str | Path = "vasprun.xml", file_str: str = ""):
+    def __init__(self, filepath: str | Path | None = "vasprun.xml", file_str: str = ""):
 
         self._filepath: str | Path | None = filepath
         self._file_str: str = file_str
@@ -43,7 +43,7 @@ class VaspXML(Mapping[str, Any]):
         
     @classmethod
     def from_str(cls, input: str):
-        return cls(file_str=input)
+        return cls(filepath=None, file_str=input)
     
     
 
@@ -125,9 +125,12 @@ class VaspXML(Mapping[str, Any]):
                         kpt
                     ]
                 )
-                eigen_values[ispin]["eigen_values"][:, ikpoint] = (
-                    temp[:, 0] - self.fermi
-                )
+                if self.fermi is not None:
+                    eigen_values[ispin]["eigen_values"][:, ikpoint] = (
+                        temp[:, 0] - self.fermi
+                    )
+                else:
+                    eigen_values[ispin]["eigen_values"][:, ikpoint] = temp[:, 0]
                 eigen_values[ispin]["occupancies"][:, ikpoint] = temp[:, 1]
         return eigen_values
 
@@ -279,7 +282,7 @@ class VaspXML(Mapping[str, Any]):
              The complete density (total,projected) of states as a python dictionary
         """
 
-        return {"total": self._get_dos_total(), "projected": self._get_dos_projected()}
+        return {"total": self._get_dos_total(), "projected": self._get_dos_projected(atoms=[])}
 
     @property
     def dos_total(self) -> dict[str, Any]:
@@ -306,7 +309,7 @@ class VaspXML(Mapping[str, Any]):
             pyprocar.core.dos object
         """
         ret: list[list[list[np.ndarray]]] = []
-        dos_projected, info = self._get_dos_projected()
+        dos_projected, info = self._get_dos_projected(atoms=[])
         if dos_projected is None:
             return None
         assert info is not None, "info is required"
@@ -588,7 +591,7 @@ class VaspXML(Mapping[str, Any]):
         text = text.strip(" ")
         return text == "T" or text == ".True." or text == ".TRUE."
 
-    def conv(self, ele: str, _type: str) -> float | int | str | None:
+    def conv(self, ele: str, _type: str) -> float | int | str | bool | None:
         """This function converts the xml text to the type specified in the attrib of xml tree"""
 
         if _type == "string":
@@ -599,7 +602,7 @@ class VaspXML(Mapping[str, Any]):
             return self.text_to_bool(ele)
         elif _type == "float":
             if "*" in ele:
-                return np.nan
+                return float('nan')
             else:
                 return float(ele)
 
@@ -716,13 +719,17 @@ class VaspXML(Mapping[str, Any]):
                         assert subelement.text is not None, "subelement.text is required"
                         ret["fermi"] = float(subelement.text)
                     continue
+                if subelement.tag not in ret:
+                    ret[subelement.tag] = {}
                 ret[subelement.tag] = self.get_general(subelement, ret[subelement.tag])
             return ret
 
     def _parse_vasprun(self) -> dict[str, Any]:
-        assert self.filepath is not None, "Filepath is required"
-        tree = ET.parse(self.filepath)
-        root = tree.getroot()
+        if self.filepath is not None:
+            tree = ET.parse(self.filepath)
+            root = tree.getroot()
+        else:
+            root = ET.fromstring(self.file_str)
 
         calculation: list[dict[str, Any]] = []
         structures: list[dict[str, Any]] = []
