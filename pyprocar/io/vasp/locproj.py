@@ -1,20 +1,20 @@
-import collections
 import gzip
 import logging
 import re
-from pathlib import Path
-from typing import Dict, List, Union
+from collections.abc import Iterator, Mapping
 from functools import cached_property
+from io import TextIOWrapper
+from pathlib import Path
+from typing import Any, override
 
 import numpy as np
 
 from pyprocar.utils import np_utils
 
-
 logger = logging.getLogger(__name__)
 
 
-class Locproj(collections.abc.Mapping):
+class Locproj(Mapping[str, Any]):
     """
     A class to parse the LOCPROJ file from VASP.
 
@@ -42,31 +42,33 @@ class Locproj(collections.abc.Mapping):
           with complex dtype
     """
 
-    def __init__(self, filepath: Union[str, Path] = None, file_str: str = None):
+    def __init__(self, filepath: str | Path | None = None, file_str: str | None = None):
         logger.info(f"Initializing Locproj parser for {filepath}")
-        self._filepath = filepath
-        self._file_str = file_str
+        self._filepath: str | Path | None = filepath
+        self._file_str: str = ""
         
     @classmethod
     def from_str(cls, input: str):
         return cls(file_str=input)
 
     @property
-    def filepath(self):
+    def filepath(self) -> Path | None:
         if self._filepath is None:
-            raise ValueError("filepath not found. Likely, Locproj provided as string.")
+            return None
         return Path(self._filepath)
 
     @cached_property
-    def file_str(self):
-        if self._file_str is None:
+    def file_str(self) -> str:
+        if self._file_str == "" and self.filepath is not None:
             file_stream = self._open_file(self.filepath)
             self._file_str = file_stream.read()
             file_stream.close()
+        elif self._file_str == "" and self.filepath is None:
+            raise ValueError("No file path or file string provided")
         return self._file_str
 
     @cached_property
-    def _dimensions(self) -> tuple:
+    def _dimensions(self) -> tuple[int, int, int, int]:
         """
         Parse dimensions from the first line.
 
@@ -100,7 +102,7 @@ class Locproj(collections.abc.Mapping):
 
         if len(numbers) < 4:
             raise ValueError(
-                f"First line should contain 4 numbers (n_spins n_k n_bands n_proj), "
+                "First line should contain 4 numbers (n_spins n_k n_bands n_proj), " +
                 f"got: {first_line}"
             )
 
@@ -110,7 +112,7 @@ class Locproj(collections.abc.Mapping):
         n_proj = int(numbers[3])
 
         logger.debug(
-            f"Dimensions: n_spins={n_spins}, n_k={n_k}, "
+            "Dimensions: n_spins={n_spins}, n_k={n_k}, " +
             f"n_bands={n_bands}, n_proj={n_proj}"
         )
         
@@ -137,7 +139,7 @@ class Locproj(collections.abc.Mapping):
         return self._dimensions[3]
 
     @cached_property
-    def _header_data(self) -> tuple:
+    def _header_data(self) -> tuple[np.ndarray, list[str], list[dict[str, str | dict[str, float]]]]:
         """
         Parse the header section containing localized orbital specifications.
 
@@ -167,19 +169,19 @@ class Locproj(collections.abc.Mapping):
 
         if len(matches) != self.n_proj:
             logger.warning(
-                f"Number of ISITE lines ({len(matches)}) does not match "
+                "Number of ISITE lines ({len(matches)}) does not match " +
                 f"n_proj from header ({self.n_proj})"
             )
 
         logger.debug(f"Found {len(matches)} localized orbital specifications")
 
         # Extract fractional coordinates, angular types, and radial specs
-        frac_coords_list = []
-        angular_types_list = []
-        radial_specs_list = []
+        frac_coords_list: list[list[float]] = []
+        angular_types_list: list[str] = []
+        radial_specs_list: list[dict[str, str | dict[str, float]]] = []
 
         for match in matches:
-            isite = int(match[0])
+
             x, y, z = float(match[1]), float(match[2]), float(match[3])
             radial_type_str = match[4].strip()
             orbital_str = match[5].strip()
@@ -211,18 +213,18 @@ class Locproj(collections.abc.Mapping):
         return self._header_data[0]
 
     @cached_property
-    def angular_types(self) -> List[str]:
+    def angular_types(self) -> list[str]:
         """Angular types (orbital names) for each projection."""
         return self._header_data[1]
 
     @cached_property
-    def radial_specs(self) -> List[Dict]:
+    def radial_specs(self) -> list[dict[str, str | dict[str, float]]]:
         """Radial specifications for each projection."""
         return self._header_data[2]
 
     def _parse_radial_spec(
         self, radial_type_str: str, params_str: str = ""
-    ) -> Dict[str, Union[str, Dict]]:
+    ) -> dict[str, str | dict[str, float]]:
         """
         Parse radial specification string into dictionary.
 
@@ -309,8 +311,8 @@ class Locproj(collections.abc.Mapping):
             spin = int(match.group(1))
             k = int(match.group(2))
             band = int(match.group(3))
-            energy = float(match.group(4))
-            weight = float(match.group(5))
+            # energy = float(match.group(4))
+            # weight = float(match.group(5))
 
             # Convert to 0-indexed
             spin_idx = spin - 1
@@ -333,10 +335,7 @@ class Locproj(collections.abc.Mapping):
             start_pos = match.end()
 
             # Find the end position (start of next "orbital" line or end of file)
-            if i < len(matches) - 1:
-                end_pos = matches[i + 1].start()
-            else:
-                end_pos = len(self.file_str)
+            end_pos = matches[i + 1].start() if i < len(matches) - 1 else len(self.file_str)
 
             block_str = self.file_str[start_pos:end_pos]
 
@@ -348,7 +347,8 @@ class Locproj(collections.abc.Mapping):
         return projections_array
 
     def _parse_orbital_block(
-        self, block_str: str, k_idx: int, band_idx: int, spin_idx: int, projections_array: np.ndarray
+        self, block_str: str, k_idx: int, band_idx: int, spin_idx: int, 
+        projections_array: np.ndarray
     ) -> None:
         """
         Parse a single orbital block containing projection values.
@@ -377,7 +377,7 @@ class Locproj(collections.abc.Mapping):
                 real_val, imag_val
             )
 
-    def _validate_file(self, filepath: Union[str, Path]) -> Path:
+    def _validate_file(self, filepath: str | Path) -> Path:
         """
         Validate and resolve the LOCPROJ file path.
 
@@ -399,11 +399,11 @@ class Locproj(collections.abc.Mapping):
             gz_path = filepath.with_suffix(".gz")
             if gz_path.is_file():
                 return gz_path
-            raise IOError(f"LOCPROJ file not found: {filepath}")
+            raise OSError(f"LOCPROJ file not found: {filepath}")
 
         return filepath
 
-    def _open_file(self, filepath: Union[str, Path]):
+    def _open_file(self, filepath: str | Path) -> TextIOWrapper:
         """
         Open LOCPROJ file, handling gzipped files.
 
@@ -424,11 +424,11 @@ class Locproj(collections.abc.Mapping):
                 return gzip.open(gz_path, mode="rt")
 
         if filepath.is_file():
-            return open(filepath, "r")
+            return open(filepath)
 
-        raise IOError(f"LOCPROJ file not found: {filepath}")
+        raise OSError(f"LOCPROJ file not found: {filepath}")
 
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> dict[str, Any]:
         """
         Return parsed data as dictionary.
 
@@ -444,15 +444,19 @@ class Locproj(collections.abc.Mapping):
             "projections": self.projections,
         }
 
-    def __contains__(self, key):
+    @override
+    def __contains__(self, key: object) -> bool:
         return key in self.__dict__
 
-    def __getitem__(self, key):
+    @override
+    def __getitem__(self, key: str) -> Any:
         return self.__dict__[key]
 
-    def __iter__(self):
+    @override
+    def __iter__(self) -> Iterator[str]:
         return self.__dict__.__iter__()
 
-    def __len__(self):
+    @override
+    def __len__(self) -> int:
         return len(self.__dict__)
 

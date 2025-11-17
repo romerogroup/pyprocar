@@ -1,10 +1,11 @@
-import collections
 import gzip
 import logging
 import re
+from collections.abc import Iterator, Mapping
 from functools import cached_property
+from io import TextIOWrapper
 from pathlib import Path
-from typing import Dict, List, Union
+from typing import Any, override
 
 import numpy as np
 
@@ -13,7 +14,7 @@ from pyprocar.utils import np_utils
 logger = logging.getLogger(__name__)
 
 
-class Projcar(collections.abc.Mapping):
+class Projcar(Mapping[str, Any]):
     """
     A class to parse the PROJCAR file from VASP.
 
@@ -24,6 +25,8 @@ class Projcar(collections.abc.Mapping):
     ----------
     filepath : Union[str, Path]
         The PROJCAR filepath
+    file_str : str | None, optional
+        The PROJCAR file content as string
 
     Returns
     -------
@@ -35,42 +38,29 @@ class Projcar(collections.abc.Mapping):
           with complex dtype
     """
 
-    def __init__(self, filepath: Union[str, Path] = None, file_str: str = None):
-        """
-        Initialize Projcar parser.
-
-        Parameters
-        ----------
-        filepath : Union[str, Path], optional
-            Path to PROJCAR file
-        file_str : str, optional
-            PROJCAR file content as string
-        """
-        self._file_str = file_str
-        self._filepath = filepath
-
+    def __init__(self, filepath: str | Path | None = None, file_str: str | None = None):
+        logger.info(f"Initializing Locproj parser for {filepath}")
+        self._filepath: str | Path | None = filepath
+        self._file_str: str = ""
+        
     @classmethod
     def from_str(cls, input: str):
-        """Create Projcar instance from string content."""
         return cls(file_str=input)
 
     @property
-    def filepath(self):
-        """Return validated filepath."""
+    def filepath(self) -> Path | None:
         if self._filepath is None:
-            raise ValueError("filepath not found. Likely, Projcar provided as string.")
-        return self._validate_file(self._filepath)
+            return None
+        return Path(self._filepath)
 
     @cached_property
-    def file_str(self):
-        """Read and cache file content."""
-        if self._file_str is None:
-            logger.info(f"Reading PROJCAR file: {self.filepath}")
+    def file_str(self) -> str:
+        if self._file_str == "" and self.filepath is not None:
             file_stream = self._open_file(self.filepath)
-            # Read the rest of the file
             self._file_str = file_stream.read()
             file_stream.close()
-            logger.info("PROJCAR file read completed")
+        elif self._file_str == "" and self.filepath is None:
+            raise ValueError("No file path or file string provided")
         return self._file_str
 
     @cached_property
@@ -90,7 +80,7 @@ class Projcar(collections.abc.Mapping):
             raise ValueError("No localized orbital specifications found in PROJCAR file")
         
         # Extract fractional coordinates
-        frac_coords_list = []
+        frac_coords_list: list[list[float]] = []
         for match in matches:
             x, y, z = float(match[1]), float(match[2]), float(match[3])
             frac_coords_list.append([x, y, z])
@@ -114,7 +104,7 @@ class Projcar(collections.abc.Mapping):
             raise ValueError("No localized orbital specifications found in PROJCAR file")
         
         # Parse radial type and parameters
-        radial_specs_list = []
+        radial_specs_list: list[dict[str, str | dict[str, float]]] = []
         for match in matches:
             radial_type_str = match[4].strip()
             params_str = match[5].strip()
@@ -129,12 +119,14 @@ class Projcar(collections.abc.Mapping):
         """Return number of atoms."""
         return len(self.frac_coords)
 
-    def _parse_radial_spec(self, radial_type_str: str, params_str: str = "") -> Dict[str, Union[str, Dict]]:
+    def _parse_radial_spec(self, radial_type_str: str, 
+                           params_str: str = "") -> dict[str, str | dict[str, float]]:
         """
         Parse radial specification string into dictionary.
 
         Examples:
-        - "Hydrogen-like" with "n= 1 za= 1.0000" -> {"type": "Hydrogen-like", "params": {"N": 1, "za": 1.0}}
+        - "Hydrogen-like" with "n= 1 za= 1.0000" -> {"type": "Hydrogen-like", 
+        "params": {"N": 1, "za": 1.0}}
         - "PAW projector" -> {"type": "PAW projector", "params": {}}
         - "PS partial wave" -> {"type": "PS partial wave", "params": {}}
         """
@@ -238,7 +230,7 @@ class Projcar(collections.abc.Mapping):
         return n_spins
     
     @cached_property
-    def n_bands(self):
+    def n_bands(self) -> int:
         """Return number of bands."""
         logger.debug("Determining number of bands")
         
@@ -246,7 +238,7 @@ class Projcar(collections.abc.Mapping):
         # Split by k-point headers and look for band data lines
         kpoint_sections = re.split(r"k-point:\s*\d+\s+spin:\s*\d+", self.file_str)
         
-        band_numbers = set()
+        band_numbers: set[int] = set()
         for section in kpoint_sections[1:]:  # Skip first section (before any k-point)
             # Find lines that start with whitespace followed by a number
             # and contain numerical data (projections)
@@ -274,8 +266,8 @@ class Projcar(collections.abc.Mapping):
         """Parse and return projection data."""
         logger.debug("Parsing PROJCAR projections")
         logger.debug(
-            f"Dimensions: n_k={self.n_k}, n_bands={self.n_bands}, "
-            f"n_spins={self.n_spins}, n_atoms={self.n_atoms}, "
+            f"Dimensions: n_k={self.n_k}, n_bands={self.n_bands}, " +
+            f"n_spins={self.n_spins}, n_atoms={self.n_atoms}, " +
             f"n_orbitals={self.n_orbitals}"
         )
         
@@ -309,7 +301,10 @@ class Projcar(collections.abc.Mapping):
         """
         # Split file into sections by ISITE
         isite_pattern = re.compile(r"ISITE:\s*(\d+)", re.MULTILINE)
-        isite_positions = [(m.start(), int(m.group(1))) for m in isite_pattern.finditer(self.file_str)]
+        
+        isite_positions: list[tuple[int, int]] = []
+        for m in isite_pattern.finditer(self.file_str):
+            isite_positions.append((m.start(), int(m.group(1))))
         
         # Process each ISITE section (atom)
         for i, (start_pos, isite_num) in enumerate(isite_positions):
@@ -426,13 +421,13 @@ class Projcar(collections.abc.Mapping):
                                 k_idx, band_idx, spin_idx, atom_idx, orb_idx
                             ] = complex(real_val, 0.0)
 
-    def _validate_file(self, filepath: Union[str, Path]) -> Path:
+    def _validate_file(self, filepath: str | Path) -> Path:
         """
         Validate and resolve the PROJCAR file path.
 
         Parameters
         ----------
-        filepath : Union[str, Path]
+        filepath : str | Path
             Path to PROJCAR file
 
         Returns
@@ -448,11 +443,11 @@ class Projcar(collections.abc.Mapping):
             gz_path = filepath.with_suffix(".gz")
             if gz_path.is_file():
                 return gz_path
-            raise IOError(f"PROJCAR file not found: {filepath}")
+            raise OSError(f"PROJCAR file not found: {filepath}")
 
         return filepath
 
-    def _open_file(self, filepath: Union[str, Path]):
+    def _open_file(self, filepath: str | Path) -> TextIOWrapper:
         """
         Open PROJCAR file, handling gzipped files.
 
@@ -473,11 +468,11 @@ class Projcar(collections.abc.Mapping):
                 return gzip.open(gz_path, mode="rt")
 
         if filepath.is_file():
-            return open(filepath, "r")
+            return open(filepath)
 
-        raise IOError(f"PROJCAR file not found: {filepath}")
+        raise OSError(f"PROJCAR file not found: {filepath}")
 
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> dict[str, Any]:
         """
         Return parsed data as dictionary.
 
@@ -492,24 +487,28 @@ class Projcar(collections.abc.Mapping):
             "projections": self.projections,
         }
 
-    def __contains__(self, key):
+    @override
+    def __contains__(self, key: object) -> bool:
         """Check if key exists as an attribute."""
-        return hasattr(self, key)
+        return key in self.__dict__
 
-    def __getitem__(self, key):
+    @override
+    def __getitem__(self, key: str) -> Any:
         """Get attribute value."""
         if hasattr(self, key):
             return getattr(self, key)
         raise KeyError(key)
 
-    def __iter__(self):
+    @override
+    def __iter__(self) -> Iterator[str]:
         """Iterate over public attributes."""
         # Return all public attributes (not starting with _)
         for key in dir(self):
             if not key.startswith("_") and not callable(getattr(self, key)):
                 yield key
 
-    def __len__(self):
+    @override
+    def __len__(self) -> int:
         """Return number of public attributes."""
         return sum(1 for _ in self)
 
