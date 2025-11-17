@@ -1,40 +1,78 @@
 import logging
 from functools import cached_property
 from pathlib import Path
+from typing import TypedDict
 
 import numpy as np
 
 logger = logging.getLogger(__name__)
 
 
+class HeaderLine1(TypedDict):
+    natoms: int
+    natoms_check: int
+    lorbit_flag: int
+    ncdij: int
+
+
+class HeaderLine6(TypedDict):
+    emax: float
+    emin: float
+    nedos: int
+    efermi: float
+    weight: float
+
+
 class Doscar:
     """
-    Parser for the VASP DOSCAR file.
-    Extracts:
-      - Number of atoms
-      - Total DOS (single or spin-pol.)
-      - Projected DOS (if present)
-      - Metadata (Efermi, volume, etc.)
+    A class to parse the DOSCAR file
+
+    Parameters
+    ----------
+    filepath : str | Path, optional
+        The DOSCAR filepath, by default "DOSCAR"
+    file_str : str, optional
+        The DOSCAR file content as a string, by default None
     """
 
-    def __init__(self, filepath: Path | str):
-        self._filepath = Path(filepath)
-        self._lines = self._readlines()
+    def __init__(
+        self,
+        filepath: str | Path | None = None,
+        file_str: str | None = None,
+    ) -> None:
+        logger.info("Initializing DOSCAR parser for %s", filepath)
+        self._filepath: str | Path | None = filepath
+        self._file_str: str | None = file_str
 
-    def _readlines(self):
-        with open(self._filepath, "r") as f:
-            return f.readlines()
+    @classmethod
+    def from_str(cls, input_str: str) -> "Doscar":
+        return cls(file_str=input_str)
+
+    @property
+    def filepath(self) -> Path | None:
+        if self._filepath is None:
+            return None
+        return Path(self._filepath)
 
     @cached_property
-    def lines(self):
-        return self._lines
+    def file_str(self) -> str:
+        if self._file_str is None:
+            if self.filepath is None:
+                raise ValueError("No file path or file string provided")
+            with open(self.filepath) as rf:
+                self._file_str = rf.read()
+        return self._file_str
+
+    @cached_property
+    def lines(self) -> list[str]:
+        return self.file_str.splitlines()
 
     # ---------------------------
     # === HEADER SECTION ===
     # ---------------------------
 
     @cached_property
-    def header_line1(self):
+    def header_line1(self) -> HeaderLine1:
         nions, nions2, lorbit_flag, ncdij = map(int, self.lines[0].split())
         return {
             "natoms": nions,
@@ -67,7 +105,7 @@ class Doscar:
         return self.lines[4].strip()
 
     @cached_property
-    def header_line6(self):
+    def header_line6(self) -> HeaderLine6:
         emax, emin, nedos, efermi, weight = self.lines[5].split()
         return {
             "emax": float(emax),
@@ -79,13 +117,16 @@ class Doscar:
 
     # convenience properties
     @cached_property
-    def natoms(self): return self.header_line1["natoms"]
+    def natoms(self) -> int:
+        return self.header_line1["natoms"]
 
     @cached_property
-    def nedos(self): return self.header_line6["nedos"]
+    def nedos(self) -> int:
+        return self.header_line6["nedos"]
 
     @cached_property
-    def efermi(self): return self.header_line6["efermi"]
+    def efermi(self) -> float:
+        return self.header_line6["efermi"]
 
     # ---------------------------
     # === TOTAL DOS ===
@@ -109,35 +150,15 @@ class Doscar:
 
     @cached_property
     def total_dos(self) -> np.ndarray:
-        """
-        For ISPIN=1 → shape (NEDOS, 3) [E, DOS, IntDOS]
-        For ISPIN=2 → shape (NEDOS, 5) [E, DOSup, DOSdown, IntDOSup, IntDOSdown]
-        """
-        start = 6
-        end = 6 + self.nedos
-        block = self.lines[start:end]
-        return np.array([list(map(float, line.split())) for line in block])
-
-    @cached_property
-    def total_dos(self) -> np.ndarray:
-        total_dos = None
-        if self.is_spin_pol:
-            total_dos = self._raw_total_dos[:, 1:3]
-        else:
-            total_dos = self._raw_total_dos[:, 1:2]
-        return total_dos
+        return self._raw_total_dos[:, 1:3] if self.is_spin_pol else self._raw_total_dos[:, 1:2]
     
     @cached_property
     def integrated_dos(self) -> np.ndarray:
-        if self.is_spin_pol:
-            return self._raw_total_dos[:, 3:]
-        else:
-            return self._raw_total_dos[:, 2:]
+        return self._raw_total_dos[:, 3:] if self.is_spin_pol else self._raw_total_dos[:, 2:]
     
     @cached_property
     def energies(self) -> np.ndarray:
-        return self._raw_total_dos[:, 0]
-    
+        return self._raw_total_dos[:, 0]    
 
     # ---------------------------
     # === PROJECTED DOS (PDOS) ===
@@ -150,7 +171,9 @@ class Doscar:
         Returns None if PDOS not present.
         """
         # projected DOS starts after total_dos
-        start = 6 + self.nedos
+        nedos = self.nedos
+        natoms = self.natoms
+        start = 6 + nedos
         if start >= len(self.lines):
             return None
 
@@ -173,25 +196,24 @@ class Doscar:
             n_orbitals = (ncols - 1) // 4
 
         # initialize array
-        pdos = np.zeros((self.nedos, n_spins, self.natoms, n_orbitals))
+        pdos = np.zeros((nedos, n_spins, natoms, n_orbitals))
 
         idx = start
-        for atom in range(self.natoms):
+        for atom in range(natoms):
             idx += 1  # skip atom header line
-            block = self.lines[idx : idx + self.nedos]
+            block = self.lines[idx : idx + nedos]
             arr = np.array([list(map(float, line.split())) for line in block])
 
-            energies = arr[:, 0]  # first column is energy
             cols = arr[:, 1:]     # rest are projections
 
             if n_spins == 1:
                 pdos[:, 0, atom, :] = cols
             else:
                 # reshape (NEDOS, n_spins, n_orbitals)
-                reshaped = cols.reshape(self.nedos, n_orbitals, n_spins)
+                reshaped = cols.reshape(nedos, n_orbitals, n_spins)
                 reshaped = np.transpose(reshaped, (0, 2, 1))
                 pdos[:, :, atom, :] = reshaped
 
-            idx += self.nedos
+            idx += nedos
 
         return pdos

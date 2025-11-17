@@ -1,3 +1,4 @@
+from pyprocar.io.vasp.doscar import Doscar
 from pyprocar.io.vasp.kpoints import Kpoints
 from pyprocar.io.vasp.locproj import Locproj
 from pyprocar.io.vasp.outcar import Outcar
@@ -15,5 +16,6 @@ __all__ = [
     "Kpoints",
     "Outcar",
     "Poscar",
+    "Doscar",
     "VaspXML",
 ]
