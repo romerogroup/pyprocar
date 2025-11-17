@@ -7,7 +7,6 @@ import pytest
 
 from pyprocar.io import vasp
 from pyprocar.utils.log_utils import set_verbose_level
-from tests.utils import BaseTest
 
 logger = logging.getLogger(__name__)
 
@@ -109,7 +108,7 @@ def kpoints_line_mode_cartesian_path(
     return write_kpoints_file("KPOINTS_line_cartesian", LINE_MODE_CARTESIAN)
 
 
-class TestKpoints(BaseTest):
+class TestKpoints:
     """Test class for VASP KPOINTS file parsing."""
 
     def test_kpoints_from_str_gamma(self):
