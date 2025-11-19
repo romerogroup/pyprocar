@@ -110,7 +110,7 @@ orbital     1     2     2      -34.3663568191        1.0000000000
 
 
 @pytest.fixture
-def locproj_filepath(tmp_path):
+def locproj_filepath(tmp_path: Path) -> Path:
     """Create a temporary LOCPROJ file for testing."""
     locproj_file = tmp_path / "LOCPROJ"
     locproj_file.write_text(LOCPROJ_STRING)
@@ -118,7 +118,7 @@ def locproj_filepath(tmp_path):
 
 
 class TestLocproj:
-    def test_locproj_dimensions(self, locproj_filepath):
+    def test_locproj_dimensions(self, locproj_filepath: Path) -> None:
         """Test that parsed dimensions match expected values from test data."""
         locproj = vasp.Locproj(locproj_filepath)
 
@@ -128,7 +128,7 @@ class TestLocproj:
         assert locproj.n_bands == 2
         assert locproj.n_proj == 16
 
-    def test_locproj_frac_coords(self, locproj_filepath):
+    def test_locproj_frac_coords(self, locproj_filepath: Path) -> None:
         """Test that fractional coordinates are correctly parsed."""
         locproj = vasp.Locproj(locproj_filepath)
         
@@ -141,7 +141,7 @@ class TestLocproj:
         # Check 9th coordinate (second atom)
         assert np.allclose(locproj.frac_coords[8], [-0.5, -0.5, -0.5])
 
-    def test_locproj_angular_types(self, locproj_filepath):
+    def test_locproj_angular_types(self, locproj_filepath: Path) -> None:
         """Test that angular types are correctly extracted."""
         locproj = vasp.Locproj(locproj_filepath)
 
@@ -153,7 +153,7 @@ class TestLocproj:
         assert locproj.angular_types[:8] == expected_orbitals
         assert locproj.angular_types[8:16] == expected_orbitals
 
-    def test_locproj_radial_specs(self, locproj_filepath):
+    def test_locproj_radial_specs(self, locproj_filepath: Path) -> None:
         """Test that radial specifications are correctly parsed."""
         locproj = vasp.Locproj(locproj_filepath)
         
@@ -164,7 +164,7 @@ class TestLocproj:
             assert spec["type"] == "Hydrogen-like"
             assert isinstance(spec["params"], dict)
 
-    def test_locproj_projections_shape(self, locproj_filepath):
+    def test_locproj_projections_shape(self, locproj_filepath: Path) -> None:
         """Test that projections array has correct shape and dtype."""
         locproj = vasp.Locproj(locproj_filepath)
         
@@ -172,7 +172,7 @@ class TestLocproj:
         assert locproj.projections.dtype in [np.complex128, np.complex64]
         assert np.iscomplexobj(locproj.projections)
 
-    def test_locproj_projections_values(self, locproj_filepath):
+    def test_locproj_projections_values(self, locproj_filepath: Path) -> None:
         """Test that projections contain expected values."""
         locproj = vasp.Locproj(locproj_filepath)
         
@@ -182,7 +182,7 @@ class TestLocproj:
         actual_val = locproj.projections[0, 0, 0, 0]
         assert np.isclose(actual_val, expected_val)
 
-    def test_locproj_from_str(self):
+    def test_locproj_from_str(self) -> None:
         """Test parsing from string."""
         locproj = vasp.Locproj.from_str(LOCPROJ_STRING)
         
@@ -195,7 +195,7 @@ class TestLocproj:
         assert len(locproj.radial_specs) == 16
         assert locproj.projections.shape == (2, 2, 1, 16)
 
-    def test_locproj_to_dict(self, locproj_filepath):
+    def test_locproj_to_dict(self, locproj_filepath: Path):
         """Test to_dict method."""
         locproj = vasp.Locproj(locproj_filepath)
         data = locproj.to_dict()

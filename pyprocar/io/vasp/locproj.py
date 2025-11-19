@@ -45,7 +45,7 @@ class Locproj(Mapping[str, Any]):
     def __init__(self, filepath: str | Path | None = None, file_str: str | None = None):
         logger.info(f"Initializing Locproj parser for {filepath}")
         self._filepath: str | Path | None = filepath
-        self._file_str: str = ""
+        self._file_str: str = file_str or ""
         
     @classmethod
     def from_str(cls, input: str):

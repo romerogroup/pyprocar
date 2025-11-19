@@ -38,10 +38,10 @@ class Projcar(Mapping[str, Any]):
           with complex dtype
     """
 
-    def __init__(self, filepath: str | Path | None = None, file_str: str | None = None):
+    def __init__(self, filepath: str | Path | None = None, file_str: str = ""):
         logger.info(f"Initializing Locproj parser for {filepath}")
         self._filepath: str | Path | None = filepath
-        self._file_str: str = ""
+        self._file_str: str = file_str or ""
         
     @classmethod
     def from_str(cls, input: str):
@@ -67,7 +67,7 @@ class Projcar(Mapping[str, Any]):
     def frac_coords(self):
         """Parse and return fractional coordinates."""
         logger.debug("Parsing fractional coordinates from PROJCAR header")
-        print(self.file_str[:200])
+        
         # Find all ISITE lines
         # isite_pattern = re.compile(
         #     r"\s+ISITE:\s+\d+\s+R=\s+([-\d.]+)\s+([-\d.]+)\s+([-\d.]+)\s+"

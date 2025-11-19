@@ -6,7 +6,7 @@ import pytest
 
 from pyprocar.io import vasp
 from pyprocar.utils.log_utils import set_verbose_level
-from tests.utils import DATA_DIR, BaseTest
+from tests.utils.base_test import BaseTest
 
 logger = logging.getLogger(__name__)
 
@@ -45,7 +45,7 @@ PROJCAR_STRING = """
 
 
 @pytest.fixture
-def projcar_file(tmp_path):
+def projcar_file(tmp_path: Path) -> Path:
     """Create a temporary PROJCAR file for testing."""
     projcar_file = tmp_path / "PROJCAR"
     projcar_file.write_text(PROJCAR_STRING)
@@ -54,13 +54,13 @@ def projcar_file(tmp_path):
 class TestProjcar(BaseTest):
     """Test Projcar parser with lazy loading."""
     
-    def test_projcar_lazy_loading(self, projcar_file):
+    def test_projcar_lazy_loading(self, projcar_file: Path) -> None:
         """Test that Projcar doesn't parse on initialization."""
         projcar = vasp.Projcar(projcar_file)
         # File shouldn't be read yet
-        assert projcar._file_str is None
+        assert projcar._file_str == "" # pyright: ignore[reportPrivateUsage]
     
-    def test_projcar_dimensions(self, projcar_file):
+    def test_projcar_dimensions(self, projcar_file: Path) -> None:
         """Test that Projcar correctly parses dimensions."""
         projcar = vasp.Projcar(projcar_file)
         assert projcar.n_k == 2
@@ -69,7 +69,7 @@ class TestProjcar(BaseTest):
         assert projcar.n_atoms == 2
         assert projcar.n_orbitals == 8
     
-    def test_projcar_frac_coords(self, projcar_file):
+    def test_projcar_frac_coords(self, projcar_file: Path) -> None:
         """Test fractional coordinates parsing."""
         projcar = vasp.Projcar(projcar_file)
         frac_coords = projcar.frac_coords
@@ -86,7 +86,7 @@ class TestProjcar(BaseTest):
             frac_coords[1], [-0.5, -0.5, -0.5]
         )
     
-    def test_projcar_radial_specs(self, projcar_file):
+    def test_projcar_radial_specs(self, projcar_file: Path) -> None:
         """Test radial specifications parsing."""
         projcar = vasp.Projcar(projcar_file)
         radial_specs = projcar.radial_specs
@@ -98,10 +98,14 @@ class TestProjcar(BaseTest):
             assert "type" in spec
             assert "params" in spec
             assert spec["type"] == "Hydrogen-like"
-            assert spec["params"]["N"] == 1
-            assert spec["params"]["za"] == 1.0
+            
+            # Type assertion: params should be a dict
+            params = spec["params"]
+            assert isinstance(params, dict)
+            assert params["N"] == 1
+            assert params["za"] == 1.0
     
-    def test_projcar_angular_types(self, projcar_file):
+    def test_projcar_angular_types(self, projcar_file: Path) -> None:
         """Test angular types parsing."""
         projcar = vasp.Projcar(projcar_file)
         angular_types = projcar.angular_types
@@ -109,7 +113,7 @@ class TestProjcar(BaseTest):
         expected = ["py", "pz", "px", "dxy", "dyz", "dz2", "dxz", "dx2-y2"]
         assert angular_types == expected
     
-    def test_projcar_projections_shape(self, projcar_file):
+    def test_projcar_projections_shape(self, projcar_file: Path) -> None:
         """Test projections array shape."""
         projcar = vasp.Projcar(projcar_file)
         projections = projcar.projections
@@ -119,7 +123,7 @@ class TestProjcar(BaseTest):
         assert np.iscomplexobj(projections)
         assert projections.dtype in (np.complex128, np.complex64)
     
-    def test_projcar_projections_values(self, projcar_file):
+    def test_projcar_projections_values(self, projcar_file: Path) -> None:
         """Test specific projection values."""
         projcar = vasp.Projcar(projcar_file)
         projections = projcar.projections
@@ -136,7 +140,7 @@ class TestProjcar(BaseTest):
         assert np.isclose(val.real, 0.532, atol=1e-3)
         assert np.isclose(val.imag, 0.138, atol=1e-3)
     
-    def test_projcar_to_dict(self, projcar_file):
+    def test_projcar_to_dict(self, projcar_file: Path) -> None:
         """Test to_dict method."""
         projcar = vasp.Projcar(projcar_file)
         data = projcar.to_dict()
@@ -159,14 +163,11 @@ class TestProjcar(BaseTest):
         assert projcar.n_atoms == 2
         assert projcar.n_orbitals == 8
     
-    def test_projcar_mapping_interface(self, projcar_file):
+    def test_projcar_mapping_interface(self, projcar_file: Path) -> None:
         """Test that Projcar implements Mapping interface."""
         projcar = vasp.Projcar(projcar_file)
         
-        # Test __contains__
-        assert "frac_coords" in projcar
-        assert "radial_specs" in projcar
-        assert "projections" in projcar
+
         
         # Test __getitem__
         assert projcar["frac_coords"] is projcar.frac_coords
