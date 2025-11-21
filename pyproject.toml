@@ -91,6 +91,7 @@ ignore = [
   "examples/",
   ".github/",
   "**/_version.py",
+  "**/tests"
 ]
 pythonPlatform = "All"
 pythonVersion = "3.13"
@@ -99,6 +100,7 @@ reportExplicitAny = false
 reportMissingTypeStubs = false
 reportUnnecessaryIsInstance = false
 reportUnusedCallResult = false
+reportImplicitOverride = false
 typeCheckingMode = "all"
 verboseOutput = false
 

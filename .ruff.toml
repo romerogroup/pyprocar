@@ -26,6 +26,7 @@ exclude = [
   "site-packages",
   "venv",
   ".pixi",
+  "tests",
 ]
 
 # Same as Black.
