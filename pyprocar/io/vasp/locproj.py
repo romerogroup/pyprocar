@@ -42,13 +42,13 @@ class Locproj(Mapping[str, Any]):
           with complex dtype
     """
 
-    def __init__(self, filepath: str | Path | None = None, file_str: str | None = None):
+    def __init__(self, filepath: str | Path | None = None, file_str: str  = ""):
         logger.info(f"Initializing Locproj parser for {filepath}")
         self._filepath: str | Path | None = filepath
-        self._file_str: str = file_str or ""
+        self._file_str: str = file_str
         
     @classmethod
-    def from_str(cls, input: str):
+    def from_str(cls, input: str) -> "Locproj":
         return cls(file_str=input)
 
     @property
@@ -60,12 +60,13 @@ class Locproj(Mapping[str, Any]):
     @cached_property
     def file_str(self) -> str:
         if self._file_str == "" and self.filepath is not None:
-            file_stream = self._open_file(self.filepath)
-            self._file_str = file_stream.read()
-            file_stream.close()
-        elif self._file_str == "" and self.filepath is None:
+            with open(file=self.filepath) as rf:
+                file_str = rf.read()
+        elif self._file_str != "":
+            file_str = self._file_str
+        else:
             raise ValueError("No file path or file string provided")
-        return self._file_str
+        return file_str
 
     @cached_property
     def _dimensions(self) -> tuple[int, int, int, int]:

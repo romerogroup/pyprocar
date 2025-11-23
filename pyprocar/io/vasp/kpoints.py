@@ -38,11 +38,11 @@ class Kpoints(Mapping[str, Any]):
     def __init__(
         self,
         filepath: str | Path | None = None,
-        file_str: str | None = None,
+        file_str: str = "",
     ) -> None:
         logger.info("Initializing Kpoints parser for %s", filepath)
         self._filepath: str | Path | None = filepath
-        self._file_str: str | None = file_str
+        self._file_str: str = file_str
 
     @classmethod
     def from_str(cls, input_str: str) -> "Kpoints":
@@ -56,12 +56,14 @@ class Kpoints(Mapping[str, Any]):
 
     @cached_property
     def file_str(self) -> str:
-        if self._file_str is None:
-            if self.filepath is None:
-                raise ValueError("No file path or file string provided")
-            with open(self.filepath) as rf:
-                self._file_str = rf.read()
-        return self._file_str
+        if self._file_str == "" and self.filepath is not None:
+            with open(file=self.filepath) as rf:
+                file_str = rf.read()
+        elif self._file_str != "":
+            file_str = self._file_str
+        else:
+            raise ValueError("No file path or file string provided")
+        return file_str
 
     @cached_property
     def lines(self) -> list[str]:

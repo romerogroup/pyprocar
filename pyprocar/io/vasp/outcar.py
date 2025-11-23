@@ -1,56 +1,63 @@
-import collections
 import logging
 import re
+from collections.abc import Mapping
 from functools import cached_property
 from pathlib import Path
-from typing import Union
+from typing import Any, override
 
 import numpy as np
 
 logger = logging.getLogger(__name__)
 
-class Outcar(collections.abc.Mapping):
+class Outcar(Mapping[str, Any]):
     """
     A class to parse the OUTCAR file from a VASP run and extract electronic structure data.
 
-    The OUTCAR file provides detailed output of a VASP run, including a summary of used input parameters,
-    information about electronic steps and KS-eigenvalues, stress tensors, forces on atoms, local charges
-    and magnetic moments, and dielectric properties. The amount of output written onto the OUTCAR file can
+    The OUTCAR file provides detailed output of a VASP run, 
+    including a summary of used input parameters,
+    information about electronic steps and KS-eigenvalues,
+    stress tensors, forces on atoms, local charges
+    and magnetic moments, and dielectric properties. The amount of output written onto the 
+    OUTCAR file can
     be chosen by modifying the NWRITE tag in the INCAR file.
 
-    The Outcar class acts as a Mapping, providing key-value access to the variables parsed from the OUTCAR file.
+    The Outcar class acts as a Mapping, providing key-value access to the variables parsed from 
+    the OUTCAR file.
     """
     
 
-    def __init__(self, filepath: Union[str, Path] = None, file_str: str = None):
+    def __init__(self, filepath: str | Path | None = None, file_str: str = ""):
         """
-        Constructor method to initialize an Outcar object. Reads the file specified by filename and stores its content.
+        Constructor method to initialize an Outcar object. Reads the file specified 
+        by filename and stores its content.
 
         Parameters
         ----------
         filename : Union[str, Path], optional
             The OUTCAR filename. If not provided, defaults to "OUTCAR".
         """
-        self._file_str = file_str
-        self._filepath = filepath
+        self._file_str: str = file_str
+        self._filepath: str | Path | None = filepath
 
     @classmethod
-    def from_str(cls, input: str):
+    def from_str(cls, input: str) -> "Outcar":
         return cls(file_str=input)
-        
-    @property
-    def filepath(self):
-        if self._filepath is None:
-            raise ValueError("filepath not found. Likely, Outcar provided as string.")
-        return Path(self._filepath)
-        
-    @cached_property
-    def file_str(self):
-        if self._file_str is None:
-            with open(self.filepath, "r") as rf:
-                self._file_str = rf.read()
-        return self._file_str
 
+    @property
+    def filepath(self) -> Path | None:
+        if self._filepath is None:
+            return None
+        return Path(self._filepath)
+
+    @cached_property
+    def file_str(self) -> str:
+        if self._file_str == "" and self.filepath is not None:
+            with open(self.filepath) as file_stream:
+                self._file_str = file_stream.read()
+        elif self._file_str == "" and self.filepath is None:
+            raise ValueError("No file path or file string provided")
+        return self._file_str
+    
     def _get_axes_nk(self):
         """
         n_kx
@@ -116,7 +123,7 @@ class Outcar(collections.abc.Mapping):
         return float(re.findall(r"E-fermi\s*:\s*(-?\d+.\d+)", self.file_str)[-1])
 
     @cached_property
-    def reciprocal_lattice(self):
+    def reciprocal_lattice(self) -> np.ndarray:
         """
         Finds and return the reciprocal lattice vectors, if more than
         one set present, it return just the last one.
@@ -130,6 +137,8 @@ class Outcar(collections.abc.Mapping):
         match = re.search(
             r"reciprocal lattice vectors[\s\S]+?(?=\n\s?\n\s?)", self.file_str
         )
+        if match is None:
+            raise ValueError("No reciprocal lattice vectors found")
         numbers = re.findall(r"[-]?\d+\.\d+", match.group(0))
 
         # Create a NumPy array from the found numbers, reshape it to 3 rows and 6 columns
@@ -140,7 +149,7 @@ class Outcar(collections.abc.Mapping):
         return reciprocal_lattice
 
     @cached_property
-    def rotations(self):
+    def rotations(self) -> np.ndarray:
         """
         Finds the point symmetry operations included in the OUTCAR file
         and returns them in matrix form.
@@ -153,30 +162,30 @@ class Outcar(collections.abc.Mapping):
 
         sym_ops = self.get_symmetry_operations()
 
-        if sym_ops is None:
-            return None
+        if not sym_ops:
+            return np.empty((0, 3, 3))
 
-        rotations = []
+        rotations: list[np.ndarray] = []
         for sym_op in sym_ops:
             rotations.append(sym_op["rotation"])
 
         return np.array(rotations)
 
-    def get_symmetry_operations(self):
+    def get_symmetry_operations(self) -> list[dict[str, Any]]:
         raw_spg_ops = re.search(
             r"Found\s+(\d+)\s+space group operations", self.file_str
         )
 
         if raw_spg_ops is None:
-            return None
+            return []
 
         n_spg_operations = int(raw_spg_ops.group(1))
 
         logger.debug(f"n_spg_operations: {n_spg_operations}")
 
         vasp54_block_match = re.search(
-            r"Space group operators:\s*\n"  # header line
-            r"([ \t]*irot[\s\S]+?)"  # from the column headers …
+            r"Space group operators:\s*\n"  + # header line
+            r"([ \t]*irot[\s\S]+?)" +  # from the column headers …
             r"(?=\n\s?\n\s?)",  # … up to the next blank/non-indented line
             self.file_str,
             flags=re.IGNORECASE,
@@ -214,7 +223,7 @@ class Outcar(collections.abc.Mapping):
 
         if vasp54_block_match:
             logger.info("Detected Space Group Operators in a format from VASP 5.4")
-            spg_operators = []
+            spg_operators: list[dict[str, Any]] = []
             block = vasp54_block_match.group(1).rstrip()
             logger.debug(f"space group operators block: \n{block}")
 
@@ -224,22 +233,22 @@ class Outcar(collections.abc.Mapping):
                 if i == 0:
                     headers = values
                     continue
+            
+                assert headers is not None
 
-                spg_operator = {}
+                spg_operator: dict[str, Any] = {}
                 for ispg, value in enumerate(values):
 
-                    column_name = headers[ispg]
-                    if column_name == "irot":
-                        value = int(value)
-                    else:
-                        value = float(value)
+
+                    column_name:str = headers[ispg]
+                    value = int(value) if column_name == "irot" else float(value)
                     spg_operator[column_name] = value
 
                 spg_operators.append(spg_operator)
 
-            sym_ops = []
+            sym_ops: list[dict[str, Any]] = []
             for operator in spg_operators:
-                sym_op = {}
+                sym_op: dict[str, Any] = {}
                 irot = operator["irot"]
                 det_A = operator["det(A)"]
                 # convert alpha to radians
@@ -277,12 +286,12 @@ class Outcar(collections.abc.Mapping):
                     * det_A
                 )
 
-                R = (
+                R = (  # pyright: ignore[reportConstantRedefinition]
                     np.linalg.inv(self.reciprocal_lattice.T)
                     .dot(R)
                     .dot(self.reciprocal_lattice.T)
                 )
-                R = np.round(R, decimals=3)
+                R = np.round(R, decimals=3)  # pyright: ignore[reportConstantRedefinition, reportUnknownVariableType]
 
                 sym_op["irot"] = irot
                 sym_op["rotation"] = R
@@ -330,25 +339,24 @@ class Outcar(collections.abc.Mapping):
             logger.info("No space group operators block found")
             return []
 
-    def to_dict(self):
-        tmp_dict = {}
+    def to_dict(self) -> dict[str, Any]:
+        tmp_dict: dict[str, Any] = {}
         symops = self.get_symmetry_operations()
         for symop in symops:
-            for key in symop.keys():
+            for key in symop:
                 if isinstance(symop[key], np.ndarray):
                     symop[key] = symop[key].tolist()
         tmp_dict["symops"] = symops
         tmp_dict["fermi"] = self.fermi
-        if self.reciprocal_lattice is not None:
-            tmp_dict["reciprocal_lattice"] = self.reciprocal_lattice.tolist()
-        if self.rotations is not None:
-            tmp_dict["rotations"] = self.rotations.tolist()
+        tmp_dict["reciprocal_lattice"] = self.reciprocal_lattice.tolist()
+        tmp_dict["rotations"] = self.rotations.tolist()
         return tmp_dict
 
-    def __contains__(self, key):
+    @override
+    def __contains__(self, key: str) -> bool:  # pyright: ignore[reportIncompatibleMethodOverride]
         return key in self.__dict__
 
-    def __getitem__(self, key):
+    def __getitem__(self, key: str) -> Any:
         return self.__dict__[key]
 
     def __iter__(self):

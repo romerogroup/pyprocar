@@ -9,7 +9,7 @@ from typing import Any, override
 
 import numpy as np
 
-from pyprocar.utils import np_utils
+# from pyprocar.utils import np_utils
 
 logger = logging.getLogger(__name__)
 
@@ -235,7 +235,8 @@ class Procar(Mapping[str, Any]):
     
     @cached_property
     def projected_phase(self) -> np.ndarray | None:
-        """Projected phase data array with shape [n_kpoints, n_bands, n_spins, n_atoms, n_orbitals]"""
+        """Projected phase data array with shape 
+        [n_kpoints, n_bands, n_spins, n_atoms, n_orbitals]"""
         if not self.has_phase:
             return None
         return self._read_phases()
@@ -298,7 +299,7 @@ class Procar(Mapping[str, Any]):
                 continue
             projection_lines = block.replace("tot", "0").strip().split("\n")
             for line in projection_lines:
-                spd.append(line.strip().split())
+                spd.append(line.strip().split())  # pyright: ignore[reportUnknownMemberType]
             
 
         spd = np.array(spd, dtype=float)
@@ -384,7 +385,7 @@ class Procar(Mapping[str, Any]):
 
         # Vasp format different for 1 atom
         n_spd_rows = self.n_atoms + 1
-        n_projection_rows = self.n_atoms + 1
+        # n_projection_rows = self.n_atoms + 1
         if self.is_non_colinear:
             n_spd_rows *= 4
             
@@ -408,8 +409,8 @@ class Procar(Mapping[str, Any]):
                 projection_phases_with_tot_with_ion = line.strip().split()
                 projection_phases = projection_phases_with_tot_with_ion[1:-1]
     
-                real_parts.append(projection_phases[::2])
-                imaginary_parts.append(projection_phases[1::2])
+                real_parts.append(projection_phases[::2])  # pyright: ignore[reportUnknownMemberType]
+                imaginary_parts.append(projection_phases[1::2])  # pyright: ignore[reportUnknownMemberType]
             
 
         real_parts = np.array(real_parts, dtype=float)

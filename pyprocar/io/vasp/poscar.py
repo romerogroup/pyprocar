@@ -12,7 +12,6 @@ from pyprocar.utils.strings import remove_comment
 logger = logging.getLogger(__name__)
 
 
-
 class Poscar(Mapping[str, Any]):
     """
     A class to parse the POSCAR file
@@ -27,13 +26,13 @@ class Poscar(Mapping[str, Any]):
 
     def __init__(self, 
                  filepath: str | Path | None = None, 
-                 file_str: str | None = None):
+                 file_str: str = ""):
         logger.info(f"Initializing Poscar parser for {filepath}")
         self._filepath: str | Path | None = filepath
-        self._file_str: str | None = file_str
+        self._file_str: str = file_str
         
     @classmethod
-    def from_str(cls, input: str):
+    def from_str(cls, input: str) -> "Poscar":
         return cls(file_str=input)
 
     @property
@@ -44,9 +43,11 @@ class Poscar(Mapping[str, Any]):
 
     @cached_property
     def file_str(self) -> str:
-        if self._file_str is None:
+        if self._file_str == "" and self.filepath is not None:
             with open(file=self.filepath) as rf:
                 self._file_str = rf.read()
+        elif self._file_str == "" and self.filepath is None:
+            raise ValueError("No file path or file string provided")
         return self._file_str
     
     @cached_property
