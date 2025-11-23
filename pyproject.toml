@@ -101,6 +101,7 @@ reportMissingTypeStubs = false
 reportUnnecessaryIsInstance = false
 reportUnusedCallResult = false
 reportImplicitOverride = false
+reportPrivateUsage = false
 typeCheckingMode = "all"
 verboseOutput = false
 
