@@ -1,6 +1,7 @@
 import logging
 from functools import cached_property
 from pathlib import Path
+from typing import overload
 
 import numpy as np
 
@@ -22,52 +23,152 @@ ORBITAL_ORDERING = OrbitalIndexer()
 class VaspParser(BaseParser):
     def __init__(
         self,
-        dirpath: str | Path,
-        incar: str | Path = "INCAR",
-        outcar: str | Path = "OUTCAR",
-        procar: str | Path = "PROCAR",
-        kpoints: str | Path = "KPOINTS",
-        poscar: str | Path = "POSCAR",
-        doscar: str | Path = "DOSCAR",
-        vasprun: str | Path = "vasprun.xml",
+        dirpath: str | Path = "",
+        outcar: str | Path | Outcar | None = "OUTCAR",
+        procar: str | Path | Procar | None = "PROCAR",
+        kpoints: str | Path | Kpoints | None = "KPOINTS",
+        poscar: str | Path | Poscar | None = "POSCAR",
+        doscar: str | Path | Doscar | None = "DOSCAR",
+        vasprun: str | Path | VaspXML | None = "vasprun.xml",
     ):
         super().__init__(dirpath)
         
-        outcar_filepath = Path(outcar)
-        incar_filepath = Path(incar)
-        procar_filepath = Path(procar)
-        kpoints_filepath = Path(kpoints)
-        poscar_filepath = Path(poscar)
-        vasprun_filepath = Path(vasprun)
-        doscar_filepath = Path(doscar)
+        # Initialize parser objects by checking if they are already parser instances or paths
+        self.outcar: Outcar | None = self._initialize_parser(outcar, Outcar)
+        self.procar: Procar | None = self._initialize_parser(procar, Procar)
+        self.kpoints: Kpoints | None = self._initialize_parser(kpoints, Kpoints)
+        self.poscar: Poscar | None = self._initialize_parser(poscar, Poscar)
+        self.vasprun: VaspXML | None = self._initialize_parser(vasprun, VaspXML)
+        self.doscar: Doscar | None = self._initialize_parser(doscar, Doscar)
         
-        self.incar_filepath: Path = self.dirpath / incar_filepath.name
-        self.outcar_filepath: Path = self.dirpath / outcar_filepath.name
-        self.procar_filepath: Path = self.dirpath / procar_filepath.name
-        self.kpoints_filepath: Path = self.dirpath / kpoints_filepath.name
-        self.poscar_filepath: Path = self.dirpath / poscar_filepath.name
-        self.vasprun_filepath: Path = self.dirpath / vasprun_filepath.name
-        self.doscar_filepath: Path = self.dirpath / doscar_filepath.name
+     
+          
+    
+    @overload
+    def _initialize_parser(
+        self, param: str | Path | Outcar | None, parser_class: type[Outcar]
+    ) -> Outcar | None: ...
+    
+    @overload
+    def _initialize_parser(
+        self, param: str | Path | Procar | None, parser_class: type[Procar]
+    ) -> Procar | None: ...
+    
+    @overload
+    def _initialize_parser(
+        self, param: str | Path | Kpoints | None, parser_class: type[Kpoints]
+    ) -> Kpoints | None: ...
+    
+    @overload
+    def _initialize_parser(
+        self, param: str | Path | Poscar | None, parser_class: type[Poscar]
+    ) -> Poscar | None: ...
+    
+    @overload
+    def _initialize_parser(
+        self, param: str | Path | VaspXML | None, parser_class: type[VaspXML]
+    ) -> VaspXML | None: ...
+    
+    @overload
+    def _initialize_parser(
+        self, param: str | Path | Doscar | None, parser_class: type[Doscar]
+    ) -> Doscar | None: ...
+    
+    def _initialize_parser(
+        self,
+        param: (
+            str | Path | Outcar | Procar | Kpoints | Poscar | VaspXML | Doscar | None
+        ),
+        parser_class: (
+            type[Outcar]
+            | type[Procar]
+            | type[Kpoints]
+            | type[Poscar]
+            | type[VaspXML]
+            | type[Doscar]
+        ),
+    ) -> Outcar | Procar | Kpoints | Poscar | VaspXML | Doscar | None:
+        """
+        Initialize a parser object from either a path or an existing parser instance.
         
-        self.procar: Procar | None = None
-        self.outcar: Outcar | None = None
-        self.kpoints: Kpoints | None = None
-        self.poscar: Poscar | None = None
-        self.vasprun: VaspXML | None = None
-        self.doscar: Doscar | None = None
+        Parameters
+        ----------
+        param : str | Path | ParserType | None
+            Either a file path or an already instantiated parser object
+        parser_class : type
+            The parser class to instantiate if param is a path
+            
+        Returns
+        -------
+        ParserType | None
+            The parser object or None if param is None or file doesn't exist
+        """
+        if param is None:
+            return None
         
-        if self.outcar_filepath.exists():
-            self.outcar = Outcar(self.outcar_filepath)
-        if self.procar_filepath.exists():
-            self.procar = Procar(self.procar_filepath)
-        if self.kpoints_filepath.exists():
-            self.kpoints = Kpoints(self.kpoints_filepath)
-        if self.poscar_filepath.exists():
-            self.poscar = Poscar(self.poscar_filepath)
-        if self.vasprun_filepath.exists():
-            self.vasprun = VaspXML(self.vasprun_filepath)
-        if self.doscar_filepath.exists():
-            self.doscar = Doscar(self.doscar_filepath)
+        # Check if it's already a parser instance
+        if isinstance(param, parser_class):
+            return param
+        
+        # It's a path (str or Path), so we need to create the parser
+        if not isinstance(param, (str, Path)):
+            return None
+            
+        filepath = self.dirpath / Path(param) if self.dirpath else Path(param)
+        
+        if filepath.exists():
+            return parser_class(filepath)
+        
+        return None
+            
+    @classmethod
+    def from_str(cls, 
+                 outcar: str | None = None,
+                 procar: str | None = None,
+                 kpoints: str | None = None,
+                 poscar: str | None = None,
+                 vasprun: str | None = None,
+                 doscar: str | None = None,
+                 ) -> "VaspParser":
+        """
+        Create a VaspParser from file content strings.
+        
+        Parameters
+        ----------
+        outcar : str | None
+            Content of OUTCAR file
+        procar : str | None
+            Content of PROCAR file
+        kpoints : str | None
+            Content of KPOINTS file
+        poscar : str | None
+            Content of POSCAR file
+        vasprun : str | None
+            Content of vasprun.xml file
+        doscar : str | None
+            Content of DOSCAR file
+            
+        Returns
+        -------
+        VaspParser
+            Parser instance with data loaded from strings
+        """
+        outcar_obj = Outcar.from_str(outcar) if outcar else None
+        procar_obj = Procar.from_str(procar) if procar else None
+        kpoints_obj = Kpoints.from_str(kpoints) if kpoints else None
+        poscar_obj = Poscar.from_str(poscar) if poscar else None
+        vasprun_obj = VaspXML.from_str(vasprun) if vasprun else None
+        doscar_obj = Doscar.from_str(doscar) if doscar else None
+        
+        return cls(
+            dirpath="",
+            outcar=outcar_obj, 
+            procar=procar_obj, 
+            kpoints=kpoints_obj, 
+            poscar=poscar_obj, 
+            vasprun=vasprun_obj, 
+            doscar=doscar_obj
+        )
             
     @cached_property
     def version(self) -> str | None:
@@ -210,9 +311,12 @@ class VaspParser(BaseParser):
                 orbital_names=self.orbitals,
                 structure=self.structure,
                 )
-        except Exception as e:
-            logger.warning("Issue with parsing the DOS. "+
-                           "Either it was not found or there is an issue with the parser: {e}")
+        except Exception:
+            msg = (
+                "Issue with parsing the DOS. "
+                "Either it was not found or there is an issue with the parser"
+            )
+            logger.warning(msg)
             dos = None
         return dos
         
