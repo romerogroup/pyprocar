@@ -1,7 +1,8 @@
 lefthook: pixi run -e lint --no-progress lefthook
 
 templates:
-  run: run -e lint --quiet --no-progress --frozen 
+  # run: run -e lint --quiet --no-progress --frozen
+  run: run -e lint --frozen
 
 colors: false
 

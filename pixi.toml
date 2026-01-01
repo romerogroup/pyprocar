@@ -68,12 +68,18 @@ git = ">=2.51.0,<3"
 python = ">=3.8,<3.15"
 
 [tasks]
-bump = "tbump --only-patch $RELEASE_VERSION"
+bump = "tbump --only-patch $RELEASE_VERSION --config $PIXI_PROJECT_ROOT/.config/tbump.toml"
 
 build-release = "hatch build --hooks-only"
 init = "python scripts/init-template.py"
 release = "python scripts/release.py"
+
 test = { depends-on = ["test-all"], description = "Run all tests" }
+test-torch-gpu = """python -c "import torch; 
+print(f'PyTorch version: {torch.__version__}')
+print(f'CUDA available: {torch.cuda.is_available()}')
+print(f'CUDA device count: {torch.cuda.device_count()}')
+print(f'Current device: {torch.cuda.current_device() if torch.cuda.is_available() else \"CPU\"}')" """
 
 ###############################################################
 # Additional workspace Feature Set Definitions
@@ -99,8 +105,8 @@ sphinxcontrib-youtube = "*"
 sphinx-new-tab-link = "*"
 
 [feature.docs.tasks]
-bump-changelog = { cmd = "git-cliff --unreleased --prepend CHANGELOG.md --tag $RELEASE_VERSION", env = { GITHUB_TOKEN = "$GITHUB_TOKEN" } }
-git-cliff-init = "git-cliff --init"
+bump-changelog = { cmd = "git-cliff --unreleased --prepend CHANGELOG.md --tag $RELEASE_VERSION --config $PIXI_PROJECT_ROOT/.config/cliff.toml", env = { GITHUB_TOKEN = "$GITHUB_TOKEN" } }
+git-cliff-init = "git-cliff --init --config $PIXI_PROJECT_ROOT/.config/cliff.toml"
 
 [feature.dev.dependencies]
 tbump = ">=6.9.0,<7"
@@ -116,13 +122,13 @@ pytest-timeout = ">=2.4.0,<3"
 pytest-xdist = ">=3.8.0,<4"
 pyyaml = ">=6.0.3,<7"
 rattler-build = ">=0.47.1,<0.48"
-rich = ">=14.1.0,<15"
+rich = "*"
 tomli-w = ">=1.2.0,<2"
 types-pyyaml = ">=6.0.12.20250915,<7"
 
 [feature.pytest.tasks]
-test-all = { cmd = "pytest -s --numprocesses=auto tests" }
-test-specific = { cmd = "pytest -k '{{ test_substring }}'", args = [
+test-all = { cmd = "pytest -s --numprocesses=auto tests --config-file $PIXI_PROJECT_ROOT/.config/.pytest.toml" }
+test-specific = { cmd = "pytest -k '{{ test_substring }}' --config-file $PIXI_PROJECT_ROOT/.config/.pytest.toml", args = [
   "test_substring",
 ] }
 
@@ -144,13 +150,13 @@ ruff = ">=0.14.0,<0.15"
 shellcheck = ">=0.10.0,<0.11"
 taplo = ">=0.10.0,<0.11"
 typos = ">=1.38.1,<2"
-lxml-stubs = "*"
 
 [feature.lint.tasks]
 actionlint = { cmd = "actionlint", env = { SHELLCHECK_OPTS = "-e SC2086" } }
-dprint-check = { cmd = "dprint check --log-level=silent", description = "Check formatting with dprint" }
-dprint-fmt = { cmd = "dprint fmt --incremental=false", description = "Format with dprint" }
+dprint-check = { cmd = "dprint check --allow-no-files --config $PIXI_PROJECT_ROOT/.config/.dprint.jsonc", description = "Check formatting with dprint" }
+dprint-fmt = { cmd = "dprint fmt --allow-no-files --incremental=false --config $PIXI_PROJECT_ROOT/.config/.dprint.jsonc", description = "Format with dprint" }
 lefthook = { cmd = "lefthook", description = "Run lefthook" }
+lefthook-reinstall = { cmd = "lefthook uninstall && lefthook install", description = "Reinstall lefthook" }
 lint = { depends-on = [
   "lint-fast",
   "lint-slow",
@@ -159,12 +165,12 @@ lint-fast = { cmd = "lefthook run pre-commit --all-files --force", description =
 lint-slow = { cmd = "lefthook run pre-push --all-files --force", description = "Run all slow linters and formatters on all code" }
 pre-commit-install = "lefthook install"
 pre-commit-install-minimal = "lefthook install pre-commit"
-ruff-format = { cmd = "ruff format --exit-non-zero-on-format --force-exclude" }
-ruff-lint = { cmd = "ruff check --fix --exit-non-zero-on-fix --force-exclude" }
+ruff-format = { cmd = "ruff format --exit-non-zero-on-format --force-exclude --config $PIXI_PROJECT_ROOT/.config/.ruff.toml" }
+ruff-lint = { cmd = "ruff check --fix --exit-non-zero-on-fix --force-exclude --config $PIXI_PROJECT_ROOT/.config/.ruff.toml" }
 toml-format = { cmd = "taplo fmt", env = { RUST_LOG = "warn" } }
-toml-lint = "taplo lint --verbose **/pixi.toml"
-typecheck-python = "basedpyright"
-typos = "typos --force-exclude"
+toml-lint = "taplo lint --verbose **/pixi.toml --config $PIXI_PROJECT_ROOT/.config/.taplo.toml"
+typecheck-python = "basedpyright --project $PIXI_PROJECT_ROOT/.config/pyrightconfig.json"
+typos = "typos --force-exclude --config $PIXI_PROJECT_ROOT/.config/.typos.toml"
 
 [feature.rust.dependencies]
 rust = ">=1.88.0,<1.89"
@@ -194,6 +200,7 @@ vs2017_win-64 = ">=19.16.27033,<20"
 get-version = "hatch version"
 
 
+
 ###############################################################
 # Virtual Environments Definitions
 ###############################################################
@@ -219,4 +226,4 @@ dev = { features = [
   "build",
   "llm",
   "pyprocar"
-], no-default-feature = true, solve-group = "default" }
+], no-default-feature = true, solve-group = "default" } 

@@ -5,6 +5,8 @@ extend-exclude = [
   "**/*.snap",
   "tests/data/mapping_files/*",
   "examples/**/**.ipynb",
+  "docs/src/monokai_colors.py",
+
 ]
 ignore-hidden = false
 
