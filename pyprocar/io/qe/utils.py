@@ -1,13 +1,11 @@
 import re
 from dataclasses import dataclass
-from typing import Dict, List, Optional, Tuple, Union
 
-QEScalar = Union[bool, int, float, str]
-QETensor = Dict[Tuple[int, ...], QEScalar]
-QEValue = Union[QEScalar, QETensor]
+QEScalar = bool | int | float | str
+QETensor = dict[tuple[int, ...], QEScalar]
+QEValue = QEScalar | QETensor
 
 
-    
 def _strip_qe_comments(text: str) -> str:
     """Remove QE-style comments from text.
 
@@ -42,7 +40,7 @@ def _strip_qe_comments(text: str) -> str:
     return "\n".join(cleaned_lines)
 
 
-def parse_qe_input_cards(text: str | list[str]) -> Dict[str, QEValue]:
+def parse_qe_input_cards(text: str | list[str]) -> dict[str, QEValue]:
     """Parse the input cards in Quantum ESPRESSO.
     Input data format: { } = optional, [ ] = it depends, | = or
 
@@ -60,9 +58,9 @@ def parse_qe_input_cards(text: str | list[str]) -> Dict[str, QEValue]:
     Do not start any line in cards with a "/" character.
     Leave a space between card names and card options, e.g.
     ATOMIC_POSITIONS (bohr), not ATOMIC_POSITIONS(bohr)
-    
+
     """
-    params: Dict[str, QEValue] = {}
+    params: dict[str, QEValue] = {}
     if isinstance(text, list):
         text = "\n".join(text)
 
@@ -87,7 +85,7 @@ def parse_qe_input_cards(text: str | list[str]) -> Dict[str, QEValue]:
     return params
 
 
-def split_name_indices(name: str) -> Tuple[str, Optional[Tuple[int, ...]]]:
+def split_name_indices(name: str) -> tuple[str, tuple[int, ...] | None]:
     m = re.match(r"^([A-Za-z0-9_]+)\s*\(([^)]*)\)$", name)
     if not m:
         return name, None
@@ -96,13 +94,14 @@ def split_name_indices(name: str) -> Tuple[str, Optional[Tuple[int, ...]]]:
     if not indices_raw:
         return base, tuple()
     parts = [p.strip() for p in indices_raw.split(",")]
-    idx: List[int] = []
+    idx: list[int] = []
     for p in parts:
         try:
             idx.append(int(p))
         except ValueError:
             pass
     return base, tuple(idx)
+
 
 def convert_to_typed_value(raw: str) -> QEScalar:
     s = raw.strip().rstrip(",")
