@@ -27,6 +27,7 @@ backend = { name = "pixi-build-python", version = "*" }
 
 # These are dependencies needed for the build process
 [package.host-dependencies]
+editables = "*"
 hatch-vcs = "*"
 hatchling = "*"
 platformdirs = "*"
@@ -59,13 +60,14 @@ lxml="*"
 [feature.pyprocar.dependencies]
 pyprocar = { path = "." }
 
+
 ###############################################################
 # Default workspace Feature Set Dependencies
 ###############################################################
 # Default dependencies
 [dependencies]
 git = ">=2.51.0,<3"
-python = ">=3.8,<3.15"
+python = ">=3.8,<3.14"
 
 [tasks]
 bump = "tbump --only-patch $RELEASE_VERSION --config $PIXI_PROJECT_ROOT/.config/tbump.toml"
@@ -75,12 +77,6 @@ init = "python scripts/init-template.py"
 release = "python scripts/release.py"
 
 test = { depends-on = ["test-all"], description = "Run all tests" }
-test-torch-gpu = """python -c "import torch; 
-print(f'PyTorch version: {torch.__version__}')
-print(f'CUDA available: {torch.cuda.is_available()}')
-print(f'CUDA device count: {torch.cuda.device_count()}')
-print(f'Current device: {torch.cuda.current_device() if torch.cuda.is_available() else \"CPU\"}')" """
-
 ###############################################################
 # Additional workspace Feature Set Definitions
 ###############################################################
@@ -109,6 +105,7 @@ bump-changelog = { cmd = "git-cliff --unreleased --prepend CHANGELOG.md --tag $R
 git-cliff-init = "git-cliff --init --config $PIXI_PROJECT_ROOT/.config/cliff.toml"
 
 [feature.dev.dependencies]
+pandas-stubs = "*"
 tbump = ">=6.9.0,<7"
 
 [feature.pytest.dependencies]
@@ -215,6 +212,7 @@ lint = { features = [
   "rust",
   "pytest",
   "build",
+  "dev",
   "llm",
 ], no-default-feature = true, solve-group = "default" }
 llm = { features = ["llm"], no-default-feature = true, solve-group = "default" }
@@ -224,6 +222,7 @@ dev = { features = [
   "rust",
   "pytest",
   "build",
+  "dev",
   "llm",
   "pyprocar"
 ], no-default-feature = true, solve-group = "default" } 

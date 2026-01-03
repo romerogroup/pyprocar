@@ -78,36 +78,3 @@ search_parent_directories = true
 version-file = "pyprocar/_version.py"
 
 # Theres are tools that are used in python tests
-
-[tool.inline-snapshot]
-format-command = "pixi run -e lint ruff format --stdin-filename {filename}"
-
-[tool.basedpyright]
-ignore = [
-  "**/*.ipynb",
-  "**/docs_hooks.py",
-  "docs/",
-  "sphinx/",
-  "examples/",
-  ".github/",
-  "**/_version.py",
-  "**/tests"
-]
-pythonPlatform = "All"
-pythonVersion = "3.13"
-reportAny = false
-reportExplicitAny = false
-reportMissingTypeStubs = false
-reportUnnecessaryIsInstance = false
-reportUnusedCallResult = false
-reportImplicitOverride = false
-reportPrivateUsage = false
-typeCheckingMode = "all"
-verboseOutput = false
-
-
-executionEnvironments = [
-  { root = "docs", reportMissingImports = false, reportMissingModuleSource = false, reportUnknownVariableType = false, reportUnknownMemberType = false, reportUnusedCallResult = false, reportUnknownArgumentType = false },
-  { root = "examples", reportMissingImports = false, reportMissingModuleSource = false, reportCallIssue = false, reportArgumentType = false, reportAttributeAccessIssue = false, reportUnknownMemberType = false, reportUnknownVariableType = false, reportUnknownParameterType = false, reportUnknownArgumentType = false, reportUnusedCallResult = false, reportMissingParameterType = false, reportUntypedFunctionDecorator = false },
-  # { root = "tests", reportMissingImports = false, reportMissingModuleSource = false, reportCallIssue = false, reportArgumentType = false, reportAttributeAccessIssue = false, reportUnknownMemberType = false, reportUnknownVariableType = false, reportUnknownParameterType = false, reportUnknownArgumentType = false, reportUnusedCallResult = false, reportMissingParameterType = false, reportUntypedFunctionDecorator = false },
-]
