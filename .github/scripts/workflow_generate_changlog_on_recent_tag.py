@@ -1,17 +1,16 @@
 import os
-import sys
-import subprocess
+from datetime import datetime
 
 import openai
 from dotenv import load_dotenv
-from datetime import datetime
-from utils import get_releases_data, run_git_command, bash_command
+from utils import bash_command, get_releases_data
+
 load_dotenv()
 
 api_key = os.getenv("OPENAI_API_KEY")
-TAG = os.getenv('TAG')
-REPO_NAME = os.getenv('REPO_NAME')
-GITHUB_TOKEN = os.getenv('GITHUB_TOKEN')
+TAG = os.getenv("TAG")
+REPO_NAME = os.getenv("REPO_NAME")
+GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
 
 summarize_commit_message_template = """
 I have the following commit messages:
@@ -58,54 +57,59 @@ ___
 ___
 """
 
+
 def summarize_commit_messages(commit_messages):
     client = openai.OpenAI(api_key=api_key)
     # Call the OpenAI API to classify and summarize the changes
     completion = client.chat.completions.create(
-    model="gpt-4o-mini",
-    max_tokens=500,
-    temperature=1.0,
-    messages=[
-        {"role": "system", 
-        "content": "You are a professional programmer that is excellent with github hub repository management." 
-        "Your goal is to help the user with tasks\n"},
-        {
-            "role": "user",
-            "content": summarize_commit_message_template.format(commit_messages=commit_messages),
-        }
-    ]
+        model="gpt-4o-mini",
+        max_tokens=500,
+        temperature=1.0,
+        messages=[
+            {
+                "role": "system",
+                "content": "You are a professional programmer that is excellent with github hub repository management."
+                "Your goal is to help the user with tasks\n",
+            },
+            {
+                "role": "user",
+                "content": summarize_commit_message_template.format(
+                    commit_messages=commit_messages
+                ),
+            },
+        ],
     )
     changes_summary = completion.choices[0].message.content.strip()
     return changes_summary
 
+
 def generate_changelog_message():
-
-    release_data=get_releases_data(repo_name=REPO_NAME, github_token=GITHUB_TOKEN, verbose=False)
+    release_data = get_releases_data(repo_name=REPO_NAME, github_token=GITHUB_TOKEN, verbose=False)
     # print(release_data)
-    if len(release_data)<=1:
-        previous_tag=TAG
+    if len(release_data) <= 1:
+        previous_tag = TAG
     else:
-        previous_tag=release_data[1]['tag_name']
+        previous_tag = release_data[1]["tag_name"]
 
-    commit_logs_str=bash_command(f'git log --pretty=format:"%h-%s" {previous_tag}..')
-    commit_logs=commit_logs_str.split('\n')
-    commit_messages=[commit_log.split('-')[-1] for commit_log in commit_logs]
+    commit_logs_str = bash_command(f'git log --pretty=format:"%h-%s" {previous_tag}..')
+    commit_logs = commit_logs_str.split("\n")
+    commit_messages = [commit_log.split("-")[-1] for commit_log in commit_logs]
     # print(commit_messages)
 
-    changes_summary=summarize_commit_messages(commit_messages)
+    changes_summary = summarize_commit_messages(commit_messages)
     current_date = datetime.now().strftime("%m-%d-%Y")
-    changelog_message=changelog_template.format(version=TAG, 
-                                                changes_summary=changes_summary,
-                                                current_date=current_date)
+    changelog_message = changelog_template.format(
+        version=TAG, changes_summary=changes_summary, current_date=current_date
+    )
     # print('-'*200)
     print(changelog_message)
     return changelog_message
 
-def modify_changelog(changelog_message):
 
+def modify_changelog(changelog_message):
     # Read the current CHANGELOG.md
     try:
-        with open('CHANGELOG.md', 'r') as file:
+        with open("CHANGELOG.md") as file:
             current_changelog = file.read()
     except FileNotFoundError:
         current_changelog = "___"
@@ -113,7 +117,7 @@ def modify_changelog(changelog_message):
     # Prepend the new changelog message
     updated_changelog = changelog_message + current_changelog
     # Write the updated changelog back to the file
-    with open('CHANGELOG.md', 'w') as file:
+    with open("CHANGELOG.md", "w") as file:
         file.write(updated_changelog)
 
     # print(os.getcwd())
@@ -121,8 +125,6 @@ def modify_changelog(changelog_message):
 
 
 if __name__ == "__main__":
-    changelog_message=generate_changelog_message()
-
+    changelog_message = generate_changelog_message()
 
     modify_changelog(changelog_message)
-    

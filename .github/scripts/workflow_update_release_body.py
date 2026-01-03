@@ -1,16 +1,15 @@
 import os
-import sys
-import requests
 
+import requests
 from dotenv import load_dotenv
 
 load_dotenv()
 
 # Get environment variables
-GITHUB_TOKEN = os.getenv('GITHUB_TOKEN')
-REPO_NAME = os.getenv('GITHUB_REPOSITORY')
-RELEASE_ID = os.getenv('RELEASE_ID')  # Pass the release ID from the GitHub Action context
-CHANGELOG = os.getenv('CHANGELOG')
+GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
+REPO_NAME = os.getenv("GITHUB_REPOSITORY")
+RELEASE_ID = os.getenv("RELEASE_ID")  # Pass the release ID from the GitHub Action context
+CHANGELOG = os.getenv("CHANGELOG")
 
 headers = {
     "Authorization": f"token {GITHUB_TOKEN}",
@@ -33,20 +32,18 @@ def get_release_details(release_id):
     else:
         print(f"Failed to fetch release data: {response.status_code}")
         print(response.json())
-        release_data={}
+        release_data = {}
     return release_data
 
 
-
 def update_release_body(input_string):
-    
     try:
-        release_data=get_release_details(RELEASE_ID)
-        new_release_body=release_data['body'] + '\n\n' + input_string
+        release_data = get_release_details(RELEASE_ID)
+        new_release_body = release_data["body"] + "\n\n" + input_string
     except Exception as e:
         print(f"Error: {e}")
         return None
-    
+
     print(new_release_body)
 
     api_url = f"https://api.github.com/repos/{REPO_NAME}/releases/{RELEASE_ID}"
@@ -70,8 +67,6 @@ def update_release_body(input_string):
     else:
         print(f"Failed to update release: {response.status_code}")
         print(response.json())
-
-
 
 
 if __name__ == "__main__":
