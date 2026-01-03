@@ -153,14 +153,14 @@ class Doscar:
     @cached_property
     def total_dos(self) -> np.ndarray:
         return self._raw_total_dos[:, 1:3] if self.is_spin_pol else self._raw_total_dos[:, 1:2]
-    
+
     @cached_property
     def integrated_dos(self) -> np.ndarray:
         return self._raw_total_dos[:, 3:] if self.is_spin_pol else self._raw_total_dos[:, 2:]
-    
+
     @cached_property
     def energies(self) -> np.ndarray:
-        return self._raw_total_dos[:, 0]    
+        return self._raw_total_dos[:, 0]
 
     # ---------------------------
     # === PROJECTED DOS (PDOS) ===
@@ -206,7 +206,7 @@ class Doscar:
             block = self.lines[idx : idx + nedos]
             arr = np.array([list(map(float, line.split())) for line in block])
 
-            cols = arr[:, 1:]     # rest are projections
+            cols = arr[:, 1:]  # rest are projections
 
             if n_spins == 1:
                 pdos[:, 0, atom, :] = cols

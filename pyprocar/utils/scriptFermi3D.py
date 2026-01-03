@@ -5,15 +5,16 @@ Created on Fri May 10 16:23:30 2019
 
 """
 
-from ..utils import UtilsProcar
-from ..io import ProcarParser
-from ..core import ProcarSelect
-import numpy as np
-from scipy.spatial import ConvexHull
-from scipy.spatial import Voronoi
-from skimage import measure
 from multiprocessing import Pool
+
+import numpy as np
 import scipy.interpolate as interpolate
+from scipy.spatial import ConvexHull, Voronoi
+from skimage import measure
+
+from ..core import ProcarSelect
+from ..io import ProcarParser
+from ..utils import UtilsProcar
 from .splash import welcome
 
 
@@ -145,9 +146,7 @@ def bring_pnts_to_BZ(recLat, kvector_cart, kvector_red, br_points):
             was_outside = True
         if was_outside:
             outsides.append(kvector_red[ik])
-            directions.append(
-                np.dot(movements[idirection - 1], np.linalg.pinv(recLat)).round(2)
-            )
+            directions.append(np.dot(movements[idirection - 1], np.linalg.pinv(recLat)).round(2))
         kvector_cart[ik] = ik_copy[:]
         kvector_red[ik] = np.dot(ik_copy, np.linalg.pinv(recLat)).round(2)
     if len(outsides):
@@ -172,7 +171,7 @@ def fft_interpolate(function, scale):
     )
 
     new_matrix = np.fft.ifftshift(new_matrix)
-    interpolated = np.real(np.fft.ifftn(new_matrix)) * (scale ** 3)
+    interpolated = np.real(np.fft.ifftn(new_matrix)) * (scale**3)
     return interpolated
 
 
@@ -203,12 +202,12 @@ def fermi3D(procar, outcar, bands=-1, scale=1, mode="plain", st=False, **kwargs)
         plotting_package
         nprocess
         face_colors
-        arrow_colors 
+        arrow_colors
         arrow_spin
         atom
         orbital
         spin
-        
+
     """
     welcome()
 
@@ -274,10 +273,9 @@ def fermi3D(procar, outcar, bands=-1, scale=1, mode="plain", st=False, **kwargs)
             return
     elif plotting_package == "plotly":
         try:
-            import plotly.plotly as py
             import plotly.figure_factory as ff
             import plotly.graph_objs as go
-            
+
             cmap = mpl.cm.get_cmap(cmap)
             figs = []
 
@@ -303,21 +301,23 @@ def fermi3D(procar, outcar, bands=-1, scale=1, mode="plain", st=False, **kwargs)
                 "You have selected ipyvolume as plotting package. please install ipyvolume or choose a different package"
             )
             return
-    if mode == 'colorful' :
-        face_colors = [(1, 0, 0),
-                       (0, 1, 0),
-                       (0, 0, 1),
-                       (1, 1, 0),
-                       (0, 1, 1),
-                       (1, 0, 1),
-                       (192/255, 192/255, 192/255),
-                       (128/255, 128/255, 128/255),
-                       (128/255, 0, 0),
-                       (128/255, 128/255, 0),
-                       (0, 128/255, 0),
-                       (128/255, 0, 128/255),
-                       (0, 128/255, 128/255),
-                       (0, 0, 128/255)]
+    if mode == "colorful":
+        face_colors = [
+            (1, 0, 0),
+            (0, 1, 0),
+            (0, 0, 1),
+            (1, 1, 0),
+            (0, 1, 1),
+            (1, 0, 1),
+            (192 / 255, 192 / 255, 192 / 255),
+            (128 / 255, 128 / 255, 128 / 255),
+            (128 / 255, 0, 0),
+            (128 / 255, 128 / 255, 0),
+            (0, 128 / 255, 0),
+            (128 / 255, 0, 128 / 255),
+            (0, 128 / 255, 128 / 255),
+            (0, 0, 128 / 255),
+        ]
 
     permissive = False
 
@@ -347,7 +347,7 @@ def fermi3D(procar, outcar, bands=-1, scale=1, mode="plain", st=False, **kwargs)
                 point_count += 1
             brillouin_faces.append(single_face)
         polydata_br = tvtk.PolyData(points=brillouin_point, polys=brillouin_faces)
-        mlab.figure(figure=None, bgcolor=(1,1,1), fgcolor=None, engine=None, size=(400, 350))
+        mlab.figure(figure=None, bgcolor=(1, 1, 1), fgcolor=None, engine=None, size=(400, 350))
         mlab.pipeline.surface(
             polydata_br,
             representation="wireframe",
@@ -356,13 +356,10 @@ def fermi3D(procar, outcar, bands=-1, scale=1, mode="plain", st=False, **kwargs)
             name="BRZ",
         )
     elif plotting_package == "plotly":
-
         for iface in poly:
             iface = np.pad(iface, ((0, 1), (0, 0)), "wrap")
             x, y, z = iface[:, 0], iface[:, 1], iface[:, 2]
-            plane = go.Scatter3d(
-                x=x, y=y, z=z, mode="lines", line=dict(color="black", width=4)
-            )
+            plane = go.Scatter3d(x=x, y=y, z=z, mode="lines", line=dict(color="black", width=4))
             figs.append(plane)
 
     elif plotting_package == "matplotlib":
@@ -468,7 +465,6 @@ def fermi3D(procar, outcar, bands=-1, scale=1, mode="plain", st=False, **kwargs)
             color_kvector_red = color_kvector.copy()
             color_kvector_cart = np.dot(color_kvector, recLat)
             if has_points_out:
-
                 color_kvector_cart, color_kvector_red, temp = bring_pnts_to_BZ(
                     recLat, color_kvector_cart, color_kvector_red, br_points
                 )
@@ -476,7 +472,6 @@ def fermi3D(procar, outcar, bands=-1, scale=1, mode="plain", st=False, **kwargs)
             print("mode selected was external, but no color_file name was provided")
             return
     if st:
-
         dataX = ProcarSelect(procarFile, deepCopy=True)
         dataY = ProcarSelect(procarFile, deepCopy=True)
         dataZ = ProcarSelect(procarFile, deepCopy=True)
@@ -506,7 +501,6 @@ def fermi3D(procar, outcar, bands=-1, scale=1, mode="plain", st=False, **kwargs)
         dataZ.selectOrbital(orbitals)
     ic = 0
     for iband in bands:
-
         print("Plotting band %d" % iband)
 
         eigen = data.bands[:, iband]
@@ -529,12 +523,9 @@ def fermi3D(procar, outcar, bands=-1, scale=1, mode="plain", st=False, **kwargs)
 
         try:
             # creating the isosurface if possible
-            verts, faces, normals, values = measure.marching_cubes_lewiner(
-                surf_equation, e_fermi
-            )
+            verts, faces, normals, values = measure.marching_cubes_lewiner(surf_equation, e_fermi)
 
         except:
-
             print("No isosurface for this band")
             continue
         # the vertices provided are scaled and shifted to start from zero
@@ -578,16 +569,13 @@ def fermi3D(procar, outcar, bands=-1, scale=1, mode="plain", st=False, **kwargs)
         # We create the center of faces by averaging coordinates of corners
 
         if mode == "parametric":
-
             character = data.spd[:, iband]
 
             centers = np.zeros(shape=(len(faces), 3))
             for iface in range(len(faces)):
                 centers[iface, 0:3] = np.average(verts[faces[iface]], axis=0)
 
-            colors = interpolate.griddata(
-                kvector_cart, character, centers, method="nearest"
-            )
+            colors = interpolate.griddata(kvector_cart, character, centers, method="nearest")
         elif mode == "external":
             character = np.array(color_eigen[ic])
             ic += 1
@@ -595,9 +583,7 @@ def fermi3D(procar, outcar, bands=-1, scale=1, mode="plain", st=False, **kwargs)
             for iface in range(len(faces)):
                 centers[iface, 0:3] = np.average(verts[faces[iface]], axis=0)
 
-            colors = interpolate.griddata(
-                color_kvector_cart, character, centers, method="nearest"
-            )
+            colors = interpolate.griddata(color_kvector_cart, character, centers, method="nearest")
 
         if st:
             projection_x = dataX.spd[:, iband]
@@ -610,9 +596,7 @@ def fermi3D(procar, outcar, bands=-1, scale=1, mode="plain", st=False, **kwargs)
 
             for ix in range(3):
                 verts_spin[:, ix] -= verts_spin[:, ix].min()
-                verts_spin[:, ix] -= (
-                    verts_spin[:, ix].max() - verts_spin[:, ix].min()
-                ) / 2
+                verts_spin[:, ix] -= (verts_spin[:, ix].max() - verts_spin[:, ix].min()) / 2
                 verts_spin[:, ix] *= klengths[ix]
             verts_spin = np.dot(verts_spin, recLat)
 
@@ -641,15 +625,9 @@ def fermi3D(procar, outcar, bands=-1, scale=1, mode="plain", st=False, **kwargs)
             for iface in range(len(faces_spin)):
                 centers[iface, 0:3] = np.average(verts_spin[faces_spin[iface]], axis=0)
 
-            colors1 = interpolate.griddata(
-                kvector_cart, projection_x, centers, method="linear"
-            )
-            colors2 = interpolate.griddata(
-                kvector_cart, projection_y, centers, method="linear"
-            )
-            colors3 = interpolate.griddata(
-                kvector_cart, projection_z, centers, method="linear"
-            )
+            colors1 = interpolate.griddata(kvector_cart, projection_x, centers, method="linear")
+            colors2 = interpolate.griddata(kvector_cart, projection_y, centers, method="linear")
+            colors3 = interpolate.griddata(kvector_cart, projection_z, centers, method="linear")
             spin_arrows = np.vstack((colors1, colors2, colors3)).T
 
         if plotting_package == "mayavi":
@@ -675,14 +653,10 @@ def fermi3D(procar, outcar, bands=-1, scale=1, mode="plain", st=False, **kwargs)
                             name="band-" + str(iband),
                         )
 
-
                 elif mode == "parametric" or mode == "external":
-
                     polydata.cell_data.scalars = colors
                     polydata.cell_data.scalars.name = "celldata"
-                    mlab.pipeline.surface(
-                        polydata, vmin=0, vmax=colors.max(), colormap=cmap
-                    )
+                    mlab.pipeline.surface(polydata, vmin=0, vmax=colors.max(), colormap=cmap)
                     cb = mlab.colorbar(orientation="vertical")
 
             if st:
@@ -727,11 +701,9 @@ def fermi3D(procar, outcar, bands=-1, scale=1, mode="plain", st=False, **kwargs)
                     figs.append(fig["data"][0])
 
             elif mode == "parametric" or mode == "external":
-
                 face_colors = cmap(colors)
                 colormap = [
-                    "rgb(%i,%i,%i)" % (x[0], x[1], x[2])
-                    for x in (face_colors * 255).round()
+                    "rgb(%i,%i,%i)" % (x[0], x[1], x[2]) for x in (face_colors * 255).round()
                 ]
                 x, y, z = zip(*verts)
                 fig = ff.create_trisurf(
@@ -762,16 +734,13 @@ def fermi3D(procar, outcar, bands=-1, scale=1, mode="plain", st=False, **kwargs)
             elif mode == "paramteric" or mode == "external":
                 face_colors = cmap(colors)
                 colormap = [
-                    "rgb(%i,%i,%i)" % (x[0], x[1], x[2])
-                    for x in (face_colors * 255).round()
+                    "rgb(%i,%i,%i)" % (x[0], x[1], x[2]) for x in (face_colors * 255).round()
                 ]
                 ipv.figure()
-                ipv.plot_trisurf(
-                    verts[:, 0], verts[:, 1], verts[:, 2], triangles=faces, color=cmap
-                )
+                ipv.plot_trisurf(verts[:, 0], verts[:, 1], verts[:, 2], triangles=faces, color=cmap)
 
     # if plotting_package == "mayavi":
-    #     mlab.colorbar(orientation="vertical") 
+    #     mlab.colorbar(orientation="vertical")
     #     mlab.show()
     # elif plotting_package == "plotly":
     #     layout = go.Layout(showlegend=False)

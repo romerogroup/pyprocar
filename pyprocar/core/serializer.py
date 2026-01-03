@@ -2,7 +2,6 @@ import importlib
 import json
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import Union
 
 import dill
 
@@ -62,7 +61,7 @@ class JSONSerializer(BaseSerializer):
 
     def load(self, path: Path):
         """Load an object from a JSON file using its metadata."""
-        with open(path, "r") as file:
+        with open(path) as file:
             data = json.load(file)
 
         # Extract metadata
@@ -74,9 +73,7 @@ class JSONSerializer(BaseSerializer):
             module = importlib.import_module(module_name)
             cls = getattr(module, class_name)
         except (ImportError, AttributeError) as e:
-            raise TypeError(
-                f"Could not find class {class_name} in module {module_name}"
-            ) from e
+            raise TypeError(f"Could not find class {class_name} in module {module_name}") from e
 
         # Use the dynamically loaded class to create the object
         return cls.from_dict(data)
@@ -89,7 +86,7 @@ SERIALIZERS = {
 }
 
 
-def get_serializer(path: Union[Path, str]):
+def get_serializer(path: Path | str):
     """Get the serializer for the given path."""
     if isinstance(path, str):
         path = Path(path)

@@ -1,13 +1,10 @@
-# -*- coding: utf-8 -*-
 """
 Created on Wed Oct 14 23:54:16 2020
 
 @author: lllan
 """
 
-import re
 from pathlib import Path
-from typing import Union
 
 import numpy as np
 
@@ -15,9 +12,9 @@ from pyprocar.io.base import BaseParser
 
 
 class FrmsfParser(BaseParser):
-    def __init__(self, dirpath: Union[str, Path], filepath: Union[str, Path] = Path("in.frmsf")):
+    def __init__(self, dirpath: str | Path, filepath: str | Path = Path("in.frmsf")):
         super().__init__(dirpath)
-        filepath=Path(filepath)
+        filepath = Path(filepath)
         self.filepath = self.dirpath / filepath.name
 
         rf = open(self.filepath)
@@ -41,7 +38,6 @@ class FrmsfParser(BaseParser):
         if self.kpointGenerationMethod == 0:
 
             def kGeneration(n1, n2, n3, N1, N2, N3):
-
                 return np.array(
                     [
                         (2 * n1 - 1 - N1) / N1,
@@ -53,13 +49,11 @@ class FrmsfParser(BaseParser):
         elif self.kpointGenerationMethod == 1:
 
             def kGeneration(n1, n2, n3, N1, N2, N3):
-
                 return np.array([(n1 - 1) / N1, (n2 - 1) / N2, (n3 - 1) / N3])
 
         elif self.kpointGenerationMethod == 2:
 
             def kGeneration(n1, n2, n3, N1, N2, N3):
-
                 return np.array(
                     [
                         (2 * n1 - 1) / (2 * N1),
@@ -70,9 +64,7 @@ class FrmsfParser(BaseParser):
 
         self.numkpoints = self.numPoints[0] * self.numPoints[1] * self.numPoints[2]
         self.numBands = int(self.data[2])
-        self.rec_lattice = np.array(
-            [[float(y) for y in x.split()] for x in self.data[3:6]]
-        )
+        self.rec_lattice = np.array([[float(y) for y in x.split()] for x in self.data[3:6]])
         self.values = np.array([float(x) for x in self.data[6:]])
         # counter += 1
         self.numProjections = int(
@@ -81,13 +73,10 @@ class FrmsfParser(BaseParser):
         self.bands = np.zeros(shape=[self.numkpoints, self.numBands])
         self.kpoints = np.zeros(shape=[self.numkpoints, 3])
 
-        self.projections = np.zeros(
-            shape=[int(self.numkpoints), int(self.numProjections)]
-        )
+        self.projections = np.zeros(shape=[int(self.numkpoints), int(self.numProjections)])
 
         counter = 0
         for iproperty in range(1, 3):
-
             for iband in range(self.numBands):
                 kpointCounter = 0
                 for i in range(1, self.numPoints[0] + 1):
@@ -104,9 +93,7 @@ class FrmsfParser(BaseParser):
                                     N3=self.numPoints[2],
                                 )
                             elif iproperty == 2:
-                                self.projections[kpointCounter, iband] = self.values[
-                                    counter
-                                ]
+                                self.projections[kpointCounter, iband] = self.values[counter]
 
                             kpointCounter += 1
                             counter += 1

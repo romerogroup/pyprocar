@@ -15,7 +15,7 @@ user_logger = logging.getLogger("user")
 logger = logging.getLogger(__name__)
 
 
-with open(os.path.join(ROOT, "pyprocar", "cfg", "unfold.yml"), "r") as file:
+with open(os.path.join(ROOT, "pyprocar", "cfg", "unfold.yml")) as file:
     plot_opt = yaml.safe_load(file)
 
 
@@ -78,7 +78,7 @@ def unfold(
     """
     set_verbose_level(verbose)
 
-    user_logger.info(f"If you want more detailed logs, set verbose to 2 or more")
+    user_logger.info("If you want more detailed logs, set verbose to 2 or more")
     user_logger.info("_" * 100)
 
     welcome()
@@ -106,7 +106,7 @@ def unfold(
     kpath = ebs.kpath
     structure = ebs.structure
     if fermi is not None:
-        ebs.shift_bands(-1*fermi, inplace=True)
+        ebs.shift_bands(-1 * fermi, inplace=True)
         ebs.shift_bands(fermi_shift, inplace=True)
         fermi_level = fermi_shift
         y_label = r"E - E$_F$ (eV)"
@@ -126,9 +126,7 @@ def unfold(
 
     if mode is not None:
         if ebs.projected_phase is None:
-            raise ValueError(
-                "The provided electronic band structure file does not include phases"
-            )
+            raise ValueError("The provided electronic band structure file does not include phases")
 
     if unfold_mode == "both":
         logger.info("Unfolding bands in both modes")
@@ -175,7 +173,6 @@ def unfold(
         )
         ebs_plot.handles = ebs_plot.handles[: ebs_plot.n_spins]
     elif mode in ["overlay", "overlay_species", "overlay_orbitals"]:
-
         weights = []
 
         if mode == "overlay_species":
@@ -218,9 +215,7 @@ def unfold(
                         if isinstance(it[ispc][0], str):
                             orbitals = []
                             for iorb in it[ispc]:
-                                orbitals = np.append(
-                                    orbitals, orbital_names[iorb]
-                                ).astype(int)
+                                orbitals = np.append(orbitals, orbital_names[iorb]).astype(int)
                             labels.append(ispc + "-" + "".join(it[ispc]))
                         else:
                             orbitals = it[ispc]
@@ -237,9 +232,7 @@ def unfold(
             atoms_str = atoms
             atoms = []
             for iatom in np.unique(atoms_str):
-                atoms = np.append(atoms, np.where(structure.atoms == iatom)[0]).astype(
-                    int
-                )
+                atoms = np.append(atoms, np.where(structure.atoms == iatom)[0]).astype(int)
 
         if orbitals is not None and isinstance(orbitals[0], str):
             orbital_str = orbitals
@@ -262,9 +255,7 @@ def unfold(
         projection_label += f"orbitals-{orbital_labels}"
         projection_labels.append(projection_label)
 
-        weights = ebs_plot.ebs.ebs_sum(
-            atoms=atoms, orbitals=orbitals, spins=spins
-        )
+        weights = ebs_plot.ebs.ebs_sum(atoms=atoms, orbitals=orbitals, spins=spins)
 
         if config.weighted_color:
             color_weights = weights
@@ -302,9 +293,7 @@ def unfold(
             )
 
         else:
-            user_logger.warning(
-                f"Selected mode {mode} not valid. Please check the spelling"
-            )
+            user_logger.warning(f"Selected mode {mode} not valid. Please check the spelling")
 
     ebs_plot.set_xticks(kticks, knames)
     ebs_plot.set_yticks(interval=elimit)

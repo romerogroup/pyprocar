@@ -165,8 +165,9 @@ class TestDoscar:
     def test_doscar_projected_dos_non_spin_available(self, non_spin_doscar: vasp.Doscar) -> None:
         assert non_spin_doscar.projected_dos is not None
 
-    def test_doscar_projected_dos_non_colinear_available(self, 
-                                                         non_colinear_doscar: vasp.Doscar) -> None:
+    def test_doscar_projected_dos_non_colinear_available(
+        self, non_colinear_doscar: vasp.Doscar
+    ) -> None:
         pdos = non_colinear_doscar.projected_dos
         assert isinstance(pdos, np.ndarray)
         assert pdos is not None
@@ -181,8 +182,9 @@ class TestDoscar:
         assert isinstance(pdos, np.ndarray)
         assert pdos.shape[1] == 1
 
-    def test_doscar_projected_dos_non_colinear_channels(self, 
-                                                        non_colinear_doscar: vasp.Doscar) -> None:
+    def test_doscar_projected_dos_non_colinear_channels(
+        self, non_colinear_doscar: vasp.Doscar
+    ) -> None:
         pdos = non_colinear_doscar.projected_dos
         assert isinstance(pdos, np.ndarray)
         assert pdos.shape[1] == 4
@@ -197,6 +199,7 @@ class TestDoscar:
         assert isinstance(pdos, np.ndarray)
         assert pdos.shape[0] == non_spin_doscar.nedos
 
-    def test_doscar_projected_dos_missing_returns_none(self, 
-                                                       total_dos_only_doscar: vasp.Doscar) -> None:
+    def test_doscar_projected_dos_missing_returns_none(
+        self, total_dos_only_doscar: vasp.Doscar
+    ) -> None:
         assert total_dos_only_doscar.projected_dos is None

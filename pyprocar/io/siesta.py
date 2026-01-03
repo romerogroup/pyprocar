@@ -3,24 +3,19 @@ __maintainer__ = "Logan Lang"
 __email__ = "lllang@mix.wvu.edu"
 __date__ = "March 31, 2020"
 
-import copy
-import math
-import os
 import re
-import xml.etree.ElementTree as ET
 from pathlib import Path
-from typing import Union
 
 import numpy as np
 
-from pyprocar.core import DensityOfStates, ElectronicBandStructure, KPath, Structure
+from pyprocar.core import KPath, Structure
 from pyprocar.io.base import BaseParser
 
 HARTREE_TO_EV = 27.211386245988  # eV/Hartree
 
 
 class SiestaParser(BaseParser):
-    def __init__(self, dirpath: Union[str, Path], fdf_filepath: Union[str, Path]):
+    def __init__(self, dirpath: str | Path, fdf_filepath: str | Path):
         """The class is used to parse information in a siesta calculation
 
         Parameters
@@ -29,7 +24,7 @@ class SiestaParser(BaseParser):
             The .fdf file that has the inputs for the Siesta calculation
         """
         super().__init__(dirpath)
-        fdf_filepath=Path(fdf_filepath)
+        fdf_filepath = Path(fdf_filepath)
         self.fdf_filepath = self.dirpath / fdf_filepath.name
 
         # Parse some initial information
@@ -42,7 +37,7 @@ class SiestaParser(BaseParser):
 
         # self._parse_struct_out(struct_out_file=f"{self.prefix}{os.sep}STRUCT_OUT")
 
-    def _parse_fdf(self, fdf_filepath: Union[str, Path]):
+    def _parse_fdf(self, fdf_filepath: str | Path):
         """A helper method to parse the infromation inside the fdf file
 
         Parameters
@@ -68,9 +63,7 @@ class SiestaParser(BaseParser):
         if is_bands_calc:
             self._parse_kpath(fdf_text=fdf_text)
 
-        is_dos_calc = (
-            len(re.findall("%block (ProjectedDensityOfStates)", fdf_text)) == 1
-        )
+        is_dos_calc = len(re.findall("%block (ProjectedDensityOfStates)", fdf_text)) == 1
         if is_dos_calc:
             self._parse_dos_info(fdf_text=fdf_text)
 
@@ -91,9 +84,7 @@ class SiestaParser(BaseParser):
             None
         """
         raw_kpath = (
-            re.findall(
-                "(?<=%block BandLines).*\n([\s\S]*?)(?=%endblock BandLines)", fdf_text
-            )[0]
+            re.findall("(?<=%block BandLines).*\n([\s\S]*?)(?=%endblock BandLines)", fdf_text)[0]
             .rstrip()
             .split("\n")
         )
@@ -127,7 +118,6 @@ class SiestaParser(BaseParser):
         self.special_kpoints = np.zeros(shape=(len(self.kticks) - 1, 2, 3))
         self.modified_knames = []
         for i, special_kpoint in enumerate(special_kpoints):
-
             if i != len(special_kpoints) - 1:
                 self.special_kpoints[i, 0, :] = special_kpoints[i]
                 self.special_kpoints[i, 1, :] = special_kpoints[i + 1]
@@ -207,12 +197,8 @@ class SiestaParser(BaseParser):
             .rstrip()
             .split("\n")
         )
-        atomic_coords_format = re.findall(
-            "AtomicCoordinatesFormat\s([A-Za-z]*)", fdf_text
-        )[0]
-        lattice_constant = float(
-            re.findall("LatticeConstant\s([0-9.]*\s)", fdf_text)[0]
-        )
+        atomic_coords_format = re.findall("AtomicCoordinatesFormat\s([A-Za-z]*)", fdf_text)[0]
+        lattice_constant = float(re.findall("LatticeConstant\s([0-9.]*\s)", fdf_text)[0])
 
         species_list = []
         index_species_mapping = {}
@@ -305,7 +291,7 @@ class SiestaParser(BaseParser):
 
         return None
 
-    def _parse_bands(self, bands_filepath: Union[str, Path]):
+    def _parse_bands(self, bands_filepath: str | Path):
         """
         A helper method to parse the density of states information
 
@@ -320,7 +306,6 @@ class SiestaParser(BaseParser):
             None
         """
         with open(bands_filepath) as f:
-
             bands_text = f.readlines()
 
             bands_info = bands_text[3]

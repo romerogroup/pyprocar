@@ -3,21 +3,14 @@ __maintainer__ = "Pedram Tavadze and Logan Lang"
 __email__ = "petavazohi@mail.wvu.edu, lllang@mix.wvu.edu"
 __date__ = "December 01, 2020"
 
-import copy
 import logging
-import os
 from enum import Enum
-from typing import List, Tuple, Union
 
 import matplotlib.pyplot as plt
-import numpy as np
-import yaml
-from matplotlib import cm
-from matplotlib import colors as mpcolors
 
 from pyprocar.core import FermiSurface
 from pyprocar.plotter import FermiSlicePlotter
-from pyprocar.utils import ROOT, data_utils, welcome
+from pyprocar.utils import welcome
 
 user_logger = logging.getLogger("user")
 logger = logging.getLogger(__name__)
@@ -28,32 +21,31 @@ class Fermi2DMode(Enum):
     plain_bands = "plain_bands"
     parametric = "parametric"
     spin_texture = "spin_texture"
-    
-    
+
 
 def fermi2D(
     code: str,
     dirname: str,
     mode: Fermi2DMode = Fermi2DMode.plain,
     fermi: float = None,
-    band_indices: List[List] = None,
-    spins: List[int] = None,
-    atoms: List[int] = None,
-    orbitals: List[int] = None,
+    band_indices: list[list] = None,
+    spins: list[int] = None,
+    atoms: list[int] = None,
+    orbitals: list[int] = None,
     energy: float = 0.0,
     k_z_plane: float = 0.0,
     show: bool = True,
     savefig: str = None,
-    extend_zone_directions: List[Union[List[int], tuple]] = None,
+    extend_zone_directions: list[list[int] | tuple] = None,
     show_colorbar: bool = True,
     plot_line_kwargs: dict = None,
     plot_arrows: bool = True,
     plot_arrows_kwargs: dict = None,
-    show_colorbar_kwargs:dict=None,
+    show_colorbar_kwargs: dict = None,
     use_cache: bool = False,
     verbose: int = 1,
     padding: int = 10,
-    figsize: Tuple[float, float] = (8, 6),
+    figsize: tuple[float, float] = (8, 6),
     dpi: int = 100,
     ax: plt.Axes = None,
 ):
@@ -66,20 +58,20 @@ def fermi2D(
     Parameters
     ----------
     code : str
-        The DFT code used for the calculation. Options include 'vasp', 'qe', 'elk', 
+        The DFT code used for the calculation. Options include 'vasp', 'qe', 'elk',
         'abinit', 'siesta', 'lobster', etc.
     dirname : str
         The directory path containing the DFT calculation files.
     mode : str, optional
-        The plotting mode. Options are 'plain', 'plain_bands', 'parametric', or 
+        The plotting mode. Options are 'plain', 'plain_bands', 'parametric', or
         'spin_texture', by default 'plain'
     use_cache : bool, optional
         Whether to use cached EBS data if available, by default False
     spin_projection : SpinProjection or str, optional
-        The spin projection component for spin texture mode. Options include 
+        The spin projection component for spin texture mode. Options include
         'x', 'y', 'z', 'x^2', 'y^2', 'z^2', by default 'z^2'
     fermi : float, optional
-        The Fermi energy in eV. If None, the Fermi energy from the calculation 
+        The Fermi energy in eV. If None, the Fermi energy from the calculation
         will be used, by default None
     fermi_shift : float, optional
         The fermi energy shift, by default 0.0
@@ -89,7 +81,7 @@ def fermi2D(
         A list of list that contains colors for the band index
         corresponding the band_indices for a given spin (Not implemented in new version)
     spins : List[int], optional
-        List of spin indices to include. For non-collinear calculations, 
+        List of spin indices to include. For non-collinear calculations,
         use [0], by default None (all spins)
     atoms : List[int], optional
         List of atom indices for atomic projections, by default None (all atoms)
@@ -107,7 +99,7 @@ def fermi2D(
     translate : List[int], optional
         Translation vector [x, y, z] to apply to k-points, by default [0, 0, 0]
     rotation : List[int], optional
-        Rotation parameters [angle, x, y, z] where angle is in degrees and 
+        Rotation parameters [angle, x, y, z] where angle is in degrees and
         [x, y, z] is the rotation axis, by default [0, 0, 0, 1]
     point_density : int, optional
         Density of points for spin texture interpolation, by default 10
@@ -209,7 +201,7 @@ def fermi2D(
     ...         spin_projection='z', plot_arrows=True)
     """
 
-    user_logger.info(f"If you want more detailed logs, set verbose to 2 or more")
+    user_logger.info("If you want more detailed logs, set verbose to 2 or more")
     user_logger.info("_" * 100)
 
     welcome()
@@ -239,19 +231,19 @@ def fermi2D(
     user_logger.info(message)
 
     user_logger.info("_" * 100)
-    
+
     # Create Fermi surface using the new implementation
     logger.info("Creating Fermi surface using the new implementation")
-    
+
     fs = FermiSurface.from_code(
-        code=code, 
-        dirpath=dirname, 
+        code=code,
+        dirpath=dirname,
         fermi=fermi,
         fermi_shift=energy,
         padding=padding,
-        use_cache=use_cache
+        use_cache=use_cache,
     )
-    
+
     logger.info(f"Created Fermi surface: {fs}")
 
     # Calculate slice properties based on mode and spin texture
@@ -264,10 +256,10 @@ def fermi2D(
     elif mode == Fermi2DMode.spin_texture.value and fs.ebs.is_non_collinear:
         property_name = "projected_sum_spin_texture"
         fs.get_property(property_name, atoms=atoms, orbitals=orbitals)
-        
+
     elif mode == Fermi2DMode.spin_texture.value and not fs.ebs.is_non_collinear:
         raise ValueError("Spin texture is only available for non-collinear calculations")
-        
+
     else:
         raise ValueError(f"Unknown mode: {mode}. Please choose from {modes_txt}.")
 
@@ -279,21 +271,14 @@ def fermi2D(
     # Create 2D slice plotter
     normal = (0, 0, 1)
     origin = (0, 0, k_z_plane)
-    
-    fsplt = FermiSlicePlotter(
-        fs,
-        normal=normal, 
-        origin=origin,
-        figsize=figsize,
-        dpi=dpi,
-        ax=ax
-    )
-    
+
+    fsplt = FermiSlicePlotter(fs, normal=normal, origin=origin, figsize=figsize, dpi=dpi, ax=ax)
+
     user_logger.info(f"Creating 2D slice at k_z = {k_z_plane}")
-    
+
     plot_arrows_kwargs = {} if plot_arrows_kwargs is None else plot_arrows_kwargs
     plot_line_kwargs = {} if plot_line_kwargs is None else plot_line_kwargs
-    
+
     # Plot the slice
     if mode == Fermi2DMode.plain.value or property_name is None:
         fsplt.plot(plot_arrows=plot_arrows, **plot_line_kwargs)
@@ -304,9 +289,9 @@ def fermi2D(
             vectors_name=property_name if mode == Fermi2DMode.spin_texture.value else None,
             plot_arrows=plot_arrows,
             plot_arrows_kwargs=plot_arrows_kwargs,
-            **plot_line_kwargs
+            **plot_line_kwargs,
         )
-        
+
         # Show colorbar for parametric modes
         if show_colorbar:
             show_colorbar_kwargs = {} if show_colorbar_kwargs is None else show_colorbar_kwargs
@@ -317,5 +302,5 @@ def fermi2D(
         user_logger.info(f"Plot saved to {savefig}")
     elif show:
         fsplt.show()
-        
+
     return fsplt.fig, fsplt.ax

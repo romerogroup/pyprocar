@@ -32,7 +32,7 @@ class Kpoints(Mapping[str, Any]):
         "kshift",
         "special_kpoints",
         "knames",
-        "cartesian"
+        "cartesian",
     )
 
     def __init__(
@@ -85,11 +85,7 @@ class Kpoints(Mapping[str, Any]):
     @cached_property
     def ngrids(self) -> list[int]:
         ngrids = self._raw_ngrid_values.copy()
-        if (
-            self.mode == "line"
-            and len(ngrids) == 1
-            and self.special_kpoints is not None
-        ):
+        if self.mode == "line" and len(ngrids) == 1 and self.special_kpoints is not None:
             ngrids = [ngrids[0]] * self.special_kpoints.shape[0]
         return ngrids
 
@@ -204,4 +200,3 @@ class Kpoints(Mapping[str, Any]):
     @override
     def __len__(self) -> int:
         return len(self._MAPPING_KEYS)
-

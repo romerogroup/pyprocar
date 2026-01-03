@@ -1,6 +1,6 @@
 import logging
+from collections.abc import Callable
 from pathlib import Path
-from typing import Callable
 
 import numpy as np
 import pytest
@@ -102,9 +102,7 @@ def kpoints_explicit_path(write_kpoints_file: Callable[[str, str], Path]) -> Pat
 
 
 @pytest.fixture
-def kpoints_line_mode_cartesian_path(
-    write_kpoints_file: Callable[[str, str], Path]
-) -> Path:
+def kpoints_line_mode_cartesian_path(write_kpoints_file: Callable[[str, str], Path]) -> Path:
     return write_kpoints_file("KPOINTS_line_cartesian", LINE_MODE_CARTESIAN)
 
 
@@ -180,9 +178,7 @@ class TestKpoints:
         expected_shape = (6, 2, 3)
         assert kpoints.special_kpoints.shape == expected_shape
 
-        np.testing.assert_allclose(
-            kpoints.special_kpoints[0, 0], [0.0, 0.0, 0.0]
-        )  # GAMMA
+        np.testing.assert_allclose(kpoints.special_kpoints[0, 0], [0.0, 0.0, 0.0])  # GAMMA
         np.testing.assert_allclose(kpoints.special_kpoints[0, 1], [0.5, -0.5, 0.5])  # H
 
         expected_knames_shape = (6, 2)
@@ -216,9 +212,7 @@ class TestKpoints:
         with pytest.raises(FileNotFoundError):
             _ = kpoints.comment
 
-    def test_kpoints_ngrids_single_value_expansion(
-        self, kpoints_line_mode_path: Path
-    ):
+    def test_kpoints_ngrids_single_value_expansion(self, kpoints_line_mode_path: Path):
         """Test that single ngrids value is expanded for multiple segments in line mode."""
         kpoints = vasp.Kpoints(kpoints_line_mode_path)
 
@@ -260,9 +254,7 @@ class TestKpoints:
         assert reciprocal.cartesian is False
         assert cartesian.cartesian is True
 
-    def test_kpoints_kshift_parsing(
-        self, kpoints_gamma_path: Path, kpoints_monkhorst_path: Path
-    ):
+    def test_kpoints_kshift_parsing(self, kpoints_gamma_path: Path, kpoints_monkhorst_path: Path):
         """Test parsing of k-point shifts."""
         kpoints_gamma = vasp.Kpoints(kpoints_gamma_path)
         kpoints_mp = vasp.Kpoints(kpoints_monkhorst_path)
@@ -270,9 +262,7 @@ class TestKpoints:
         assert kpoints_gamma.kshift == [0, 0, 0]
         assert kpoints_mp.kshift == [0, 0, 0]
 
-    def test_kpoints_special_points_array_structure(
-        self, kpoints_line_mode_path: Path
-    ):
+    def test_kpoints_special_points_array_structure(self, kpoints_line_mode_path: Path):
         """Test the structure of special k-points array for band calculations."""
         kpoints = vasp.Kpoints(filepath=kpoints_line_mode_path)
         assert isinstance(kpoints.special_kpoints, np.ndarray)

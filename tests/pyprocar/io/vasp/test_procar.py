@@ -506,7 +506,6 @@ charge 0.000          0.646          0.000          0.308          0.000        
 """
 
 
-
 HEADER_PATTERN = re.compile(
     r"# of k-points:\s+(?P<kpoints>\d+)\s+# of bands:\s+(?P<bands>\d+)\s+# of ions:\s+(?P<ions>\d+)"
 )
@@ -537,11 +536,11 @@ HEADER_PATTERN = re.compile(
 #     return filepath
 
 
-
 # 1. Define a container for your test case data
 class ProcarTestCase(NamedTuple):
     data: str
     id: str
+
 
 # 2. Create your test cases
 TEST_CASES = [
@@ -563,26 +562,27 @@ TEST_CASES = [
     ),
 ]
 
+
 class TestProcar:
     @pytest.fixture(params=TEST_CASES, ids=lambda c: c.id)
     def case(self, request: pytest.FixtureRequest) -> ProcarTestCase:
         return request.param
-    
+
     def test_n_kpoints(self, case: ProcarTestCase) -> None:
         procar = vasp.Procar(file_str=case.data)
         assert procar.n_kpoints == 2
-        
+
     def test_n_bands(self, case: ProcarTestCase) -> None:
         procar = vasp.Procar(file_str=case.data)
         assert procar.n_bands == 2
-        
+
     def test_n_atoms(self, case: ProcarTestCase) -> None:
         procar = vasp.Procar(file_str=case.data)
         if case.id == "with_phase":
             assert procar.n_atoms == 24
         else:
             assert procar.n_atoms == 5
-        
+
     def test_n_spins(self, case: ProcarTestCase) -> None:
         procar = vasp.Procar(file_str=case.data)
         if case.id == "spin_polarized":
@@ -594,168 +594,166 @@ class TestProcar:
 
     def test_is_spin_polarized(self, case: ProcarTestCase) -> None:
         procar = vasp.Procar(file_str=case.data)
-        
+
         if case.id == "spin_polarized":
             assert procar.is_spin_polarized
         else:
             assert not procar.is_spin_polarized
-            
+
     def test_is_non_colinear(self, case: ProcarTestCase) -> None:
         procar = vasp.Procar(file_str=case.data)
         if case.id == "non_colinear":
             assert procar.is_non_colinear
         else:
             assert not procar.is_non_colinear
-  
+
     def test_bands_shape(self, case: ProcarTestCase) -> None:
         procar = vasp.Procar(file_str=case.data)
         assert len(procar.bands.shape) == 3
         # For with_phase, we only have 1 k-point in the test data (incomplete)
-        
+
         assert procar.bands.shape[1] == 2  # bands
-        
+
         # Check spin dimension
         if case.id == "non_spin_polarized":
             assert procar.bands.shape[2] == 1  # non-spin-polarized has 1 spin channel
-            
-            assert procar.bands[0,0,0] == -29.06108337
-            assert procar.bands[0,1,0] == -14.30006222
-            assert procar.bands[1,0,0] == -29.06042255
-            assert procar.bands[1,1,0] == -14.29971681
+
+            assert procar.bands[0, 0, 0] == -29.06108337
+            assert procar.bands[0, 1, 0] == -14.30006222
+            assert procar.bands[1, 0, 0] == -29.06042255
+            assert procar.bands[1, 1, 0] == -14.29971681
         elif case.id == "spin_polarized":
             assert procar.bands.shape[2] == 2  # spin-polarized has 2 spin channels
-            
-            assert procar.bands[0,0,0] == -29.07152740
-            assert procar.bands[0,1,0] == -14.21369582
-            assert procar.bands[1,0,0] == -29.07374298
-            assert procar.bands[1,1,0] == -14.31830429
-            assert procar.bands[0,0,1] == -29.07502869
-            assert procar.bands[0,1,1] == -14.31861896
-            assert procar.bands[1,0,1] == -29.07024797
-            assert procar.bands[1,1,1] == -14.21369642
-            
+
+            assert procar.bands[0, 0, 0] == -29.07152740
+            assert procar.bands[0, 1, 0] == -14.21369582
+            assert procar.bands[1, 0, 0] == -29.07374298
+            assert procar.bands[1, 1, 0] == -14.31830429
+            assert procar.bands[0, 0, 1] == -29.07502869
+            assert procar.bands[0, 1, 1] == -14.31861896
+            assert procar.bands[1, 0, 1] == -29.07024797
+            assert procar.bands[1, 1, 1] == -14.21369642
+
         elif case.id == "non_colinear":
             assert procar.bands.shape == (2, 2, 4)
-            
-            assert procar.bands[0,0,0] == -29.07166634
-            assert procar.bands[0,1,0] == -29.06607067
-            assert procar.bands[1,0,0] == -29.07038051
-            assert procar.bands[1,1,0] == -29.06478989
-        elif case.id == "with_phase":
 
+            assert procar.bands[0, 0, 0] == -29.07166634
+            assert procar.bands[0, 1, 0] == -29.06607067
+            assert procar.bands[1, 0, 0] == -29.07038051
+            assert procar.bands[1, 1, 0] == -29.06478989
+        elif case.id == "with_phase":
             assert procar.bands.shape[0] == 2  # kpoints (incomplete test data)
-            assert procar.bands[0,0,0] == -36.91475819
-            assert procar.bands[0,1,0] == -36.91470789
-            assert procar.bands[1,0,0] == -36.91484274
-            assert procar.bands[1,1,0] == -36.91473865
- 
-            
+            assert procar.bands[0, 0, 0] == -36.91475819
+            assert procar.bands[0, 1, 0] == -36.91470789
+            assert procar.bands[1, 0, 0] == -36.91484274
+            assert procar.bands[1, 1, 0] == -36.91473865
+
     def test_has_phase(self, case: ProcarTestCase) -> None:
         procar = vasp.Procar(file_str=case.data)
         if case.id == "with_phase":
             assert procar.has_phase
         else:
             assert not procar.has_phase
-        
+
     def test_projected(self, case: ProcarTestCase) -> None:
         procar = vasp.Procar(file_str=case.data)
-        
+
         if case.id == "non_spin_polarized":
             assert procar.projected is not None
             assert procar.projected.shape == (2, 2, 1, 5, 9)
-            
-            assert procar.projected[0,0,0,0,0] == 0.972
-            assert procar.projected[0,1,0,0,0] == 0.011
-            assert procar.projected[0,1,0,1,0] == 0.137
-            assert procar.projected[0,1,0,2,0] == 0.235
-            assert procar.projected[0,1,0,3,0] == 0.235
-            assert procar.projected[0,1,0,4,0] == 0.235
-            
-            assert procar.projected[1,0,0,0,0] == 0.972
-            assert procar.projected[1,1,0,0,0] == 0.011
-            assert procar.projected[1,1,0,1,0] == 0.136
-            assert procar.projected[1,1,0,2,0] == 0.238
-            assert procar.projected[1,1,0,3,0] == 0.238
-            assert procar.projected[1,1,0,4,0] == 0.228  # Actual value in PROCAR data
+
+            assert procar.projected[0, 0, 0, 0, 0] == 0.972
+            assert procar.projected[0, 1, 0, 0, 0] == 0.011
+            assert procar.projected[0, 1, 0, 1, 0] == 0.137
+            assert procar.projected[0, 1, 0, 2, 0] == 0.235
+            assert procar.projected[0, 1, 0, 3, 0] == 0.235
+            assert procar.projected[0, 1, 0, 4, 0] == 0.235
+
+            assert procar.projected[1, 0, 0, 0, 0] == 0.972
+            assert procar.projected[1, 1, 0, 0, 0] == 0.011
+            assert procar.projected[1, 1, 0, 1, 0] == 0.136
+            assert procar.projected[1, 1, 0, 2, 0] == 0.238
+            assert procar.projected[1, 1, 0, 3, 0] == 0.238
+            assert procar.projected[1, 1, 0, 4, 0] == 0.228  # Actual value in PROCAR data
 
         elif case.id == "spin_polarized":
             assert procar.projected is not None
             assert procar.projected.shape == (2, 2, 2, 5, 9)
-            
-            assert procar.projected[0,0,0,0,0] == 0.972
-            assert procar.projected[0,1,0,0,0] == 0.011
-            assert procar.projected[0,1,0,1,0] == 0.140
-            assert procar.projected[0,1,0,2,0] == 0.234
-            assert procar.projected[0,1,0,3,0] == 0.234
-            assert procar.projected[0,1,0,4,0] == 0.234
-            
-            assert procar.projected[1,0,0,0,0] == 0.972
-            assert procar.projected[1,1,0,0,0] == 0.010
-            assert procar.projected[1,1,0,1,0] == 0.133
-            assert procar.projected[1,1,0,2,0] == 0.241
-            assert procar.projected[1,1,0,3,0] == 0.241
-            assert procar.projected[1,1,0,4,0] == 0.221
-            
-            assert procar.projected[0,0,1,0,0] == 0.972
-            assert procar.projected[0,1,1,0,0] == 0.011
-            assert procar.projected[0,1,1,1,0] == 0.135
-            assert procar.projected[0,1,1,2,0] == 0.236
-            assert procar.projected[0,1,1,3,0] == 0.236
-            assert procar.projected[0,1,1,4,0] == 0.236
-            
-            assert procar.projected[1,0,0,0,0] == 0.972  # Actual value in PROCAR data
-            assert procar.projected[1,1,0,0,0] == 0.010
-            assert procar.projected[1,1,0,1,0] == 0.133  # Actual value in PROCAR data
-            assert procar.projected[1,1,0,2,0] == 0.241  # Actual value in PROCAR data
-            assert procar.projected[1,1,0,3,0] == 0.241  # Actual value in PROCAR data
-            assert procar.projected[1,1,0,4,0] == 0.221  # Actual value in PROCAR data
-            
+
+            assert procar.projected[0, 0, 0, 0, 0] == 0.972
+            assert procar.projected[0, 1, 0, 0, 0] == 0.011
+            assert procar.projected[0, 1, 0, 1, 0] == 0.140
+            assert procar.projected[0, 1, 0, 2, 0] == 0.234
+            assert procar.projected[0, 1, 0, 3, 0] == 0.234
+            assert procar.projected[0, 1, 0, 4, 0] == 0.234
+
+            assert procar.projected[1, 0, 0, 0, 0] == 0.972
+            assert procar.projected[1, 1, 0, 0, 0] == 0.010
+            assert procar.projected[1, 1, 0, 1, 0] == 0.133
+            assert procar.projected[1, 1, 0, 2, 0] == 0.241
+            assert procar.projected[1, 1, 0, 3, 0] == 0.241
+            assert procar.projected[1, 1, 0, 4, 0] == 0.221
+
+            assert procar.projected[0, 0, 1, 0, 0] == 0.972
+            assert procar.projected[0, 1, 1, 0, 0] == 0.011
+            assert procar.projected[0, 1, 1, 1, 0] == 0.135
+            assert procar.projected[0, 1, 1, 2, 0] == 0.236
+            assert procar.projected[0, 1, 1, 3, 0] == 0.236
+            assert procar.projected[0, 1, 1, 4, 0] == 0.236
+
+            assert procar.projected[1, 0, 0, 0, 0] == 0.972  # Actual value in PROCAR data
+            assert procar.projected[1, 1, 0, 0, 0] == 0.010
+            assert procar.projected[1, 1, 0, 1, 0] == 0.133  # Actual value in PROCAR data
+            assert procar.projected[1, 1, 0, 2, 0] == 0.241  # Actual value in PROCAR data
+            assert procar.projected[1, 1, 0, 3, 0] == 0.241  # Actual value in PROCAR data
+            assert procar.projected[1, 1, 0, 4, 0] == 0.221  # Actual value in PROCAR data
+
         elif case.id == "non_colinear":
             assert procar.projected is not None
             assert procar.projected.shape == (2, 2, 4, 5, 9)
-            
-            assert procar.projected[0,0,0,0,0] == 0.972
-            assert procar.projected[0,0,1,0,0] == -0.561
-            assert procar.projected[0,0,2,0,0] == -0.561
-            assert procar.projected[0,0,3,0,0] == -0.561
-            
-            assert procar.projected[0,1,0,0,0] == 0.972
-            assert procar.projected[0,1,1,0,0] == 0.561
-            assert procar.projected[0,1,2,0,0] == 0.561
-            assert procar.projected[0,1,3,0,0] == 0.561
-            
-            assert procar.projected[1,0,0,0,0] == 0.972
-            assert procar.projected[1,0,1,0,0] == -0.561
-            assert procar.projected[1,0,2,0,0] == -0.561
-            assert procar.projected[1,0,3,0,0] == -0.561
-            
-            assert procar.projected[1,1,0,0,0] == 0.973
-            assert procar.projected[1,1,1,0,0] == 0.561
-            assert procar.projected[1,1,2,0,0] == 0.561
-            assert procar.projected[1,1,3,0,0] == 0.561
-            
+
+            assert procar.projected[0, 0, 0, 0, 0] == 0.972
+            assert procar.projected[0, 0, 1, 0, 0] == -0.561
+            assert procar.projected[0, 0, 2, 0, 0] == -0.561
+            assert procar.projected[0, 0, 3, 0, 0] == -0.561
+
+            assert procar.projected[0, 1, 0, 0, 0] == 0.972
+            assert procar.projected[0, 1, 1, 0, 0] == 0.561
+            assert procar.projected[0, 1, 2, 0, 0] == 0.561
+            assert procar.projected[0, 1, 3, 0, 0] == 0.561
+
+            assert procar.projected[1, 0, 0, 0, 0] == 0.972
+            assert procar.projected[1, 0, 1, 0, 0] == -0.561
+            assert procar.projected[1, 0, 2, 0, 0] == -0.561
+            assert procar.projected[1, 0, 3, 0, 0] == -0.561
+
+            assert procar.projected[1, 1, 0, 0, 0] == 0.973
+            assert procar.projected[1, 1, 1, 0, 0] == 0.561
+            assert procar.projected[1, 1, 2, 0, 0] == 0.561
+            assert procar.projected[1, 1, 3, 0, 0] == 0.561
+
         elif case.id == "with_phase":
             # with_phase test data is incomplete - skip detailed checks
             assert procar.projected is not None
-            assert procar.projected[0,0,0,1,1] == 0.045
-            assert procar.projected[0,0,0,2,1] == 0.151
-            assert procar.projected[0,0,0,3,1] == 0.151
-            
-            assert procar.projected[0,0,0,0,3] == 0.136
-            assert procar.projected[0,0,0,1,3] == 0.136
-            assert procar.projected[0,0,0,2,3] == 0.004
-            assert procar.projected[0,0,0,3,3] == 0.004
-            
-            assert procar.projected[0,1,0,0,1] == 0.141
-            assert procar.projected[0,1,0,1,1] == 0.141
-            assert procar.projected[0,1,0,2,1] == 0.016
-            assert procar.projected[0,1,0,3,1] == 0.016
-            
-            assert procar.projected[0,1,0,0,3] == 0.047
-            assert procar.projected[0,1,0,1,3] == 0.047
-            assert procar.projected[0,1,0,2,3] == 0.046
-            assert procar.projected[0,1,0,3,3] == 0.046
-            
+            assert procar.projected[0, 0, 0, 1, 1] == 0.045
+            assert procar.projected[0, 0, 0, 2, 1] == 0.151
+            assert procar.projected[0, 0, 0, 3, 1] == 0.151
+
+            assert procar.projected[0, 0, 0, 0, 3] == 0.136
+            assert procar.projected[0, 0, 0, 1, 3] == 0.136
+            assert procar.projected[0, 0, 0, 2, 3] == 0.004
+            assert procar.projected[0, 0, 0, 3, 3] == 0.004
+
+            assert procar.projected[0, 1, 0, 0, 1] == 0.141
+            assert procar.projected[0, 1, 0, 1, 1] == 0.141
+            assert procar.projected[0, 1, 0, 2, 1] == 0.016
+            assert procar.projected[0, 1, 0, 3, 1] == 0.016
+
+            assert procar.projected[0, 1, 0, 0, 3] == 0.047
+            assert procar.projected[0, 1, 0, 1, 3] == 0.047
+            assert procar.projected[0, 1, 0, 2, 3] == 0.046
+            assert procar.projected[0, 1, 0, 3, 3] == 0.046
+
     def test_projected_phase(self, case: ProcarTestCase) -> None:
         procar = vasp.Procar(file_str=case.data)
         if case.id == "with_phase":
@@ -766,50 +764,48 @@ class TestProcar:
             if procar.projected_phase is not None:
                 # Verify it's at least an array
                 assert isinstance(procar.projected_phase, np.ndarray)
-                
 
             assert procar.projected_phase is not None
-    
-            assert procar.projected_phase[0,0,0,0,1] == np.complex128(0.095, -0.186)
-            assert procar.projected_phase[0,0,0,1,1] == np.complex128(0.095, -0.186)
-            assert procar.projected_phase[0,0,0,2,1] == np.complex128(-0.174, 0.339)
-            assert procar.projected_phase[0,0,0,3,1] == np.complex128(-0.174, 0.339)
-            
-            assert procar.projected_phase[0,0,0,0,3] == np.complex128(-0.165,  0.322)
-            assert procar.projected_phase[0,0,0,1,3] == np.complex128(-0.165, 0.322)
-            assert procar.projected_phase[0,0,0,2,3] == np.complex128(0.027, -0.054)
-            assert procar.projected_phase[0,0,0,3,3] == np.complex128(0.027, -0.054)
-            
-            assert procar.projected_phase[0,1,0,0,1] == np.complex128(0.215, 0.298)
-            assert procar.projected_phase[0,1,0,1,1] == np.complex128(0.215, 0.298)
-            assert procar.projected_phase[0,1,0,2,1] == np.complex128(-0.071, -0.099)
-            assert procar.projected_phase[0,1,0,3,1] == np.complex128(-0.071, -0.099)
-            
-            assert procar.projected_phase[0,1,0,0,3] == np.complex128(0.124, 0.172)
-            assert procar.projected_phase[0,1,0,1,3] == np.complex128(0.124, 0.172)
-            assert procar.projected_phase[0,1,0,2,3] == np.complex128(0.123, 0.172)
-            assert procar.projected_phase[0,1,0,3,3] == np.complex128(0.123, 0.172)
-            
+
+            assert procar.projected_phase[0, 0, 0, 0, 1] == np.complex128(0.095, -0.186)
+            assert procar.projected_phase[0, 0, 0, 1, 1] == np.complex128(0.095, -0.186)
+            assert procar.projected_phase[0, 0, 0, 2, 1] == np.complex128(-0.174, 0.339)
+            assert procar.projected_phase[0, 0, 0, 3, 1] == np.complex128(-0.174, 0.339)
+
+            assert procar.projected_phase[0, 0, 0, 0, 3] == np.complex128(-0.165, 0.322)
+            assert procar.projected_phase[0, 0, 0, 1, 3] == np.complex128(-0.165, 0.322)
+            assert procar.projected_phase[0, 0, 0, 2, 3] == np.complex128(0.027, -0.054)
+            assert procar.projected_phase[0, 0, 0, 3, 3] == np.complex128(0.027, -0.054)
+
+            assert procar.projected_phase[0, 1, 0, 0, 1] == np.complex128(0.215, 0.298)
+            assert procar.projected_phase[0, 1, 0, 1, 1] == np.complex128(0.215, 0.298)
+            assert procar.projected_phase[0, 1, 0, 2, 1] == np.complex128(-0.071, -0.099)
+            assert procar.projected_phase[0, 1, 0, 3, 1] == np.complex128(-0.071, -0.099)
+
+            assert procar.projected_phase[0, 1, 0, 0, 3] == np.complex128(0.124, 0.172)
+            assert procar.projected_phase[0, 1, 0, 1, 3] == np.complex128(0.124, 0.172)
+            assert procar.projected_phase[0, 1, 0, 2, 3] == np.complex128(0.123, 0.172)
+            assert procar.projected_phase[0, 1, 0, 3, 3] == np.complex128(0.123, 0.172)
+
             # Kpoint 2
-            assert procar.projected_phase[1,0,0,0,1] == np.complex128(0.039, 0.084)
-            assert procar.projected_phase[1,0,0,1,1] == np.complex128(0.039, 0.084)
-            assert procar.projected_phase[1,0,0,2,1] == np.complex128(0.101, 0.216)
-            assert procar.projected_phase[1,0,0,3,1] == np.complex128(0.101, 0.216)
-            
-            assert procar.projected_phase[1,0,0,0,3] == np.complex128(0.158, 0.335)
-            assert procar.projected_phase[1,0,0,1,3] == np.complex128(0.158, 0.335)
-            assert procar.projected_phase[1,0,0,2,3] == np.complex128(0.087, 0.184)
-            assert procar.projected_phase[1,0,0,3,3] == np.complex128(0.087, 0.184)
-            
-            assert procar.projected_phase[1,1,0,0,1] == np.complex128(0.216, 0.346)
-            assert procar.projected_phase[1,1,0,1,1] == np.complex128(0.216, 0.346)
-            assert procar.projected_phase[1,1,0,2,1] == np.complex128(-0.172, -0.276)
-            assert procar.projected_phase[1,1,0,3,1] == np.complex128(-0.172, -0.276)
-            
-            assert procar.projected_phase[1,1,0,0,3] == np.complex128(-0.060, -0.096)
-            assert procar.projected_phase[1,1,0,1,3] == np.complex128(-0.060, -0.096)
-            assert procar.projected_phase[1,1,0,2,3] == np.complex128(0.134, 0.215)
-            assert procar.projected_phase[1,1,0,3,3] == np.complex128(0.134, 0.215)
+            assert procar.projected_phase[1, 0, 0, 0, 1] == np.complex128(0.039, 0.084)
+            assert procar.projected_phase[1, 0, 0, 1, 1] == np.complex128(0.039, 0.084)
+            assert procar.projected_phase[1, 0, 0, 2, 1] == np.complex128(0.101, 0.216)
+            assert procar.projected_phase[1, 0, 0, 3, 1] == np.complex128(0.101, 0.216)
+
+            assert procar.projected_phase[1, 0, 0, 0, 3] == np.complex128(0.158, 0.335)
+            assert procar.projected_phase[1, 0, 0, 1, 3] == np.complex128(0.158, 0.335)
+            assert procar.projected_phase[1, 0, 0, 2, 3] == np.complex128(0.087, 0.184)
+            assert procar.projected_phase[1, 0, 0, 3, 3] == np.complex128(0.087, 0.184)
+
+            assert procar.projected_phase[1, 1, 0, 0, 1] == np.complex128(0.216, 0.346)
+            assert procar.projected_phase[1, 1, 0, 1, 1] == np.complex128(0.216, 0.346)
+            assert procar.projected_phase[1, 1, 0, 2, 1] == np.complex128(-0.172, -0.276)
+            assert procar.projected_phase[1, 1, 0, 3, 1] == np.complex128(-0.172, -0.276)
+
+            assert procar.projected_phase[1, 1, 0, 0, 3] == np.complex128(-0.060, -0.096)
+            assert procar.projected_phase[1, 1, 0, 1, 3] == np.complex128(-0.060, -0.096)
+            assert procar.projected_phase[1, 1, 0, 2, 3] == np.complex128(0.134, 0.215)
+            assert procar.projected_phase[1, 1, 0, 3, 3] == np.complex128(0.134, 0.215)
         else:
             assert procar.projected_phase is None
-            

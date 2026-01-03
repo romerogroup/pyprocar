@@ -1,8 +1,6 @@
-import json
 import logging
 from pathlib import Path
 
-import numpy as np
 import pytest
 
 from pyprocar.io import vasp
@@ -38,7 +36,6 @@ for filepath in OUTCAR_DATA_DIR.glob("OUTCAR_*"):
 def outcar_filepath(request):
     """Fixture that provides OUTCAR file paths for testing."""
     return request.param
-
 
 
 OUTCAR_v544 = """ vasp.5.4.4.18Apr17-6-g9f103f2a35 (build Jun 02 2023 20:29:41) complex          
@@ -285,6 +282,8 @@ energy-cutoff  :      600.00
 
 
 """
+
+
 @pytest.fixture
 def outcar_v544(tmp_path):
     """Create a temporary PROJCAR file for testing."""
@@ -292,12 +291,14 @@ def outcar_v544(tmp_path):
     outcar_file.write_text(OUTCAR_v544)
     return outcar_file
 
+
 @pytest.fixture
 def outcar_v544_ibzkpt(tmp_path):
     """Create a temporary PROJCAR file for testing."""
     outcar_file = tmp_path / "OUTCAR_v544_ibzkpt"
     outcar_file.write_text(OUTCAR_v544_ibzkpt)
     return outcar_file
+
 
 @pytest.fixture
 def outcar_v544_reclat_issue(tmp_path):
@@ -314,6 +315,7 @@ def outcar_v642(tmp_path):
     outcar_file.write_text(OUTCAR_v642)
     return outcar_file
 
+
 @pytest.fixture
 def outcar_v643(tmp_path):
     """Create a temporary PROJCAR file for testing."""
@@ -321,8 +323,8 @@ def outcar_v643(tmp_path):
     outcar_file.write_text(OUTCAR_v643)
     return outcar_file
 
+
 class TestOutcar(BaseTest):
-    
     def test_outcar_v544(self, outcar_v544):
         outcar = vasp.Outcar(outcar_v544)
         assert outcar.version == "5.4.4"
@@ -336,7 +338,7 @@ class TestOutcar(BaseTest):
         assert outcar.get_symmetry_operations()[0]["gtrans"].shape == (3,)
         assert outcar.get_symmetry_operations()[0]["gtrans"].dtype == float
         assert outcar.get_symmetry_operations()[0]["gtrans"].tolist() == [0.0, 0.0, 0.0]
-        
+
     def test_outcar_v544(self, outcar_v544_ibzkpt):
         outcar = vasp.Outcar(outcar_v544_ibzkpt)
         assert outcar.version == "5.4.4"
@@ -349,8 +351,7 @@ class TestOutcar(BaseTest):
         assert outcar.get_symmetry_operations()[0]["gtrans"] is not None
         assert outcar.get_symmetry_operations()[0]["gtrans"].shape == (3,)
         assert outcar.get_symmetry_operations()[0]["gtrans"].dtype == float
-        
-        
+
     def test_outcar_v544_reclat_issue_get_reciprocal_lattice(self, outcar_v544_reclat_issue):
         outcar = vasp.Outcar(outcar_v544_reclat_issue)
         assert outcar.version == "5.4.4"
@@ -359,8 +360,12 @@ class TestOutcar(BaseTest):
         assert outcar.reciprocal_lattice is not None
         assert outcar.reciprocal_lattice.shape == (3, 3)
         assert outcar.reciprocal_lattice.dtype == float
-        assert outcar.reciprocal_lattice.tolist() == [[0.057120192, -0.032978358, 0.0], [0.057120192, 0.032978358, 0.0], [0.0, 0.0, 0.062500000]]
-        
+        assert outcar.reciprocal_lattice.tolist() == [
+            [0.057120192, -0.032978358, 0.0],
+            [0.057120192, 0.032978358, 0.0],
+            [0.0, 0.0, 0.062500000],
+        ]
+
     def test_outcar_v642(self, outcar_v642):
         outcar = vasp.Outcar(outcar_v642)
         assert outcar.version == "6.2.1"
@@ -373,7 +378,7 @@ class TestOutcar(BaseTest):
         assert outcar.get_symmetry_operations()[0]["gtrans"] is not None
         assert outcar.get_symmetry_operations()[0]["gtrans"].shape == (3,)
         assert outcar.get_symmetry_operations()[0]["gtrans"].dtype == float
-        
+
     def test_outcar_v643(self, outcar_v643):
         outcar = vasp.Outcar(outcar_v643)
         assert outcar.version == "6.4.3"
@@ -386,7 +391,7 @@ class TestOutcar(BaseTest):
         assert outcar.get_symmetry_operations()[0]["gtrans"] is not None
         assert outcar.get_symmetry_operations()[0]["gtrans"].shape == (3,)
         assert outcar.get_symmetry_operations()[0]["gtrans"].dtype == float
-        
+
     def test_outcar_from_str(self):
         outcar = vasp.Outcar.from_str(OUTCAR_v544)
         assert outcar.version == "5.4.4"
@@ -399,4 +404,3 @@ class TestOutcar(BaseTest):
         assert outcar.get_symmetry_operations()[0]["gtrans"] is not None
         assert outcar.get_symmetry_operations()[0]["gtrans"].shape == (3,)
         assert outcar.get_symmetry_operations()[0]["gtrans"].dtype == float
-        

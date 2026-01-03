@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 # Configuration file for the Sphinx documentation builder.
 #
@@ -53,20 +52,15 @@ shutil.copy(CONTRIBUTING_PATH, SRC_DIR / "CONTRIBUTING.md")
 
 
 if os.environ.get("READTHEDOCS") == "True":
-
     site_path = get_python_lib()
     ffmpeg_path = os.path.join(site_path, "imageio_ffmpeg", "binaries")
     print("########")
     print("good1")
-    [ffmpeg_bin] = [
-        file for file in os.listdir(ffmpeg_path) if file.startswith("ffmpeg-")
-    ]
+    [ffmpeg_bin] = [file for file in os.listdir(ffmpeg_path) if file.startswith("ffmpeg-")]
     print("########*****")
     print("good2")
     try:
-        os.symlink(
-            os.path.join(ffmpeg_path, ffmpeg_bin), os.path.join(ffmpeg_path, "ffmpeg")
-        )
+        os.symlink(os.path.join(ffmpeg_path, ffmpeg_bin), os.path.join(ffmpeg_path, "ffmpeg"))
     except FileExistsError:
         print("File is already there!!!!!!!")
     else:

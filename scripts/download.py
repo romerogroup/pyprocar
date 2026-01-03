@@ -33,11 +33,9 @@ Examples:
         print(f"Downloading files from: {args.relpath}")
         print(f"Output directory: {args.output_path}")
 
-        download_dir = download_test_data(
-            relpath=args.relpath, output_path=args.output_path
-        )
+        download_dir = download_test_data(relpath=args.relpath, output_path=args.output_path)
 
-        print(f"✅ Download completed successfully!")
+        print("✅ Download completed successfully!")
         print(f"Files downloaded to: {download_dir}")
 
     except Exception as e:

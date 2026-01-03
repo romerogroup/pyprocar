@@ -1,18 +1,16 @@
 import collections
-import glob
 import logging
 import os
 import re
 from functools import cached_property
 from pathlib import Path
-from typing import Union
 
 import numpy as np
 from numpy import array
 
 from pyprocar.core import DensityOfStates, ElectronicBandStructure, KPath, Structure
 from pyprocar.io.base import BaseParser
-from pyprocar.io.vasp import Kpoints, Procar, VaspParser
+from pyprocar.io.vasp import Kpoints, Procar
 from pyprocar.utils import elements
 
 logger = logging.getLogger(__name__)
@@ -24,8 +22,7 @@ class AbinitOutput(collections.abc.Mapping):
     lattice vectors and structure from the Abinit output file.
     """
 
-    def __init__(self, abinit_output_filepath: Union[str, Path]):
-
+    def __init__(self, abinit_output_filepath: str | Path):
         # variables
         self.abinit_output_filepath = Path(abinit_output_filepath)
         self.fermi = None
@@ -52,12 +49,10 @@ class AbinitOutput(collections.abc.Mapping):
     def _readFermi(self):
         """Reads the Fermi energy from the Abinit output file."""
 
-        with open(self.abinit_output_filepath, "r") as rf:
+        with open(self.abinit_output_filepath) as rf:
             data = rf.read()
             self.fermi = float(
-                re.findall(
-                    r"Fermi\w*.\(\w*.HOMO\)\s*\w*\s*\(\w*\)\s*\=\s*([0-9.+-]*)", data
-                )[0]
+                re.findall(r"Fermi\w*.\(\w*.HOMO\)\s*\w*\s*\(\w*\)\s*\=\s*([0-9.+-]*)", data)[0]
             )
 
             # Converting from Hartree to eV
@@ -73,7 +68,7 @@ class AbinitOutput(collections.abc.Mapping):
         from the Abinit output file. This is used to calculate
         the k-path in cartesian coordinates if required."""
 
-        with open(self.abinit_output_filepath, "r") as rf:
+        with open(self.abinit_output_filepath) as rf:
             data = rf.read()
             lattice_block = re.findall(r"G\([1,2,3]\)=\s*([0-9.\s-]*)", data)
             lattice_block = lattice_block[3:]
@@ -87,7 +82,7 @@ class AbinitOutput(collections.abc.Mapping):
     def _readCoordinates(self):
         """Reads the coordinates as given by the xred keyword."""
 
-        with open(self.abinit_output_filepath, "r") as rf:
+        with open(self.abinit_output_filepath) as rf:
             data = rf.read()
             coordinate_block = re.findall(r"xred\s*([+-.0-9E\s]*)", data)[-1].split()
 
@@ -107,7 +102,7 @@ class AbinitOutput(collections.abc.Mapping):
     def _readLattice(self):
         """Reads the lattice vectors from rprim keyword and scales with acell."""
 
-        with open(self.abinit_output_filepath, "r") as rf:
+        with open(self.abinit_output_filepath) as rf:
             data = rf.read()
 
             # acell
@@ -132,7 +127,7 @@ class AbinitOutput(collections.abc.Mapping):
     def _readAtoms(self):
         """Reads atomic elements used and puts them in an array according to their composition."""
 
-        with open(self.abinit_output_filepath, "r") as rf:
+        with open(self.abinit_output_filepath) as rf:
             data = rf.read()
 
             # Getting typat and znucl
@@ -170,9 +165,9 @@ class AbinitProcar(collections.abc.Mapping):
 
     def __init__(
         self,
-        dirpath: Union[str, Path],
-        infilepaths: Union[list, None] = None,
-        abinit_output_filepath: Union[str, Path] = None,
+        dirpath: str | Path,
+        infilepaths: list | None = None,
+        abinit_output_filepath: str | Path = None,
     ):
         self.dirpath = Path(dirpath)
         self.infilepaths = infilepaths
@@ -196,9 +191,7 @@ class AbinitProcar(collections.abc.Mapping):
         # Use VASP Procar parser following PROCAR merge
         self.abinitprocarobject = Procar(filepath=procar_filepath)
 
-    def _mergeparallel(
-        self, inputfilepaths=None, outputfilepath=None, abinit_output_filepath=None
-    ):
+    def _mergeparallel(self, inputfilepaths=None, outputfilepath=None, abinit_output_filepath=None):
         """This merges Procar files seperated between k-point ranges.
         Happens with parallel Abinit runs.
         """
@@ -207,12 +200,10 @@ class AbinitProcar(collections.abc.Mapping):
 
         # creating an instance of the AbinitParser class
         if abinit_output_filepath:
-            abinitparserobject = AbinitOutput(
-                abinit_output_filepath=abinit_output_filepath
-            )
+            abinitparserobject = AbinitOutput(abinit_output_filepath=abinit_output_filepath)
             nspin = int(abinitparserobject.nspin)
         else:
-            raise IOError("Abinit output file not found.")
+            raise OSError("Abinit output file not found.")
 
         if nspin != 2:
             with open(outputfilepath, "w") as outfile:
@@ -230,7 +221,7 @@ class AbinitProcar(collections.abc.Mapping):
 
             # reading the second line of the header to set as the separating line
             # in the colinear spin PROCAR.
-            fp = open(spinup_filepaths[0], "r")
+            fp = open(spinup_filepaths[0])
             header1 = fp.readline()
             header2 = fp.readline()
             fp.close()
@@ -265,12 +256,12 @@ class AbinitProcar(collections.abc.Mapping):
 
         ####### Fixing the parallel PROCARs from Abinit ##########
 
-        rf = open(inputfilepath, "r")
+        rf = open(inputfilepath)
         data = rf.read()
         rf.close()
 
         # reading headers
-        rffl = open(inputfilepath, "r")
+        rffl = open(inputfilepath)
         first_line = rffl.readline()
         rffl.close()
 
@@ -286,12 +277,9 @@ class AbinitProcar(collections.abc.Mapping):
         kpoints_raw = re.findall("k-point\s*[0-9]\s*:*.*", data)
 
         for kpoint_counter in range(len(kpoints_raw)):
-
             if kpoint_counter == (len(kpoints_raw) - 1):
                 # get bands of last k point
-                bands_raw = re.findall(
-                    kpoints_raw[kpoint_counter] + "([a-z0-9\s\n.+#-]*)", data
-                )[0]
+                bands_raw = re.findall(kpoints_raw[kpoint_counter] + "([a-z0-9\s\n.+#-]*)", data)[0]
 
             else:
                 # get bands between k point n and n+1
@@ -309,7 +297,6 @@ class AbinitProcar(collections.abc.Mapping):
             fp.write(kpoints_raw[kpoint_counter] + "\n\n")
 
             for band_counter in range(len(raw_bands)):
-
                 if band_counter == (len(raw_bands) - 1):
                     # the last band
                     single_band = re.findall(
@@ -411,7 +398,7 @@ class AbinitProcar(collections.abc.Mapping):
 class AbinitDOSParser:
     def __init__(
         self,
-        dirpath: Union[str, Path],
+        dirpath: str | Path,
     ):
         self.dirpath = Path(dirpath)
 
@@ -459,12 +446,8 @@ class AbinitDOSParser:
             dos_down = dos_text[n_down_start:n_down_end]
 
             # converting to floats
-            dos_down = np.array(
-                [[float(value) for value in line.split()] for line in dos_down]
-            )
-            dos_up = np.array(
-                [[float(value) for value in line.split()] for line in dos_up]
-            )
+            dos_down = np.array([[float(value) for value in line.split()] for line in dos_down])
+            dos_up = np.array([[float(value) for value in line.split()] for line in dos_up])
 
             # Keep dos column
             dos_down = dos_down[:, 1]
@@ -479,9 +462,7 @@ class AbinitDOSParser:
             dos_up = dos_text[n_up_start:n_up_end]
 
             # converting to floats
-            dos_up = np.array(
-                [[float(value) for value in line.split()] for line in dos_up]
-            )
+            dos_up = np.array([[float(value) for value in line.split()] for line in dos_up])
 
             # Keep dos column
             dos_up = dos_up[:, 1]
@@ -544,12 +525,8 @@ class AbinitDOSParser:
             dos_down = dos_text[n_down_start:n_down_end]
 
             # converting to floats
-            dos_down = np.array(
-                [[float(value) for value in line.split()] for line in dos_down]
-            )
-            dos_up = np.array(
-                [[float(value) for value in line.split()] for line in dos_up]
-            )
+            dos_down = np.array([[float(value) for value in line.split()] for line in dos_down])
+            dos_up = np.array([[float(value) for value in line.split()] for line in dos_up])
 
             # Keep only s,p,d projections
             dos_down = dos_down[:, 11:20]
@@ -564,9 +541,7 @@ class AbinitDOSParser:
             dos_up = dos_text[n_up_start:n_up_end]
 
             # converting to floats
-            dos_up = np.array(
-                [[float(value) for value in line.split()] for line in dos_up]
-            )
+            dos_up = np.array([[float(value) for value in line.split()] for line in dos_up])
 
             # Keep only s,p,d projections
             dos_up = dos_up[:, 11:20]
@@ -579,9 +554,9 @@ class AbinitDOSParser:
 class AbinitParser(BaseParser):
     def __init__(
         self,
-        dirpath: Union[str, Path],
-        abinit_output_filepath: Union[str, Path] = "abinit.out",
-        abinit_kpoints_filepath: Union[str, Path] = "KPOINTS",
+        dirpath: str | Path,
+        abinit_output_filepath: str | Path = "abinit.out",
+        abinit_kpoints_filepath: str | Path = "KPOINTS",
         **kwargs,
     ):
         super().__init__(dirpath=dirpath, **kwargs)
@@ -596,7 +571,7 @@ class AbinitParser(BaseParser):
 
         try:
             self.abinit_kpoints = AbinitKpoints(filepath=self.abinit_kpoints_filepath)
-        except FileNotFoundError as e:
+        except FileNotFoundError:
             logger.debug(f"No KPOINTS file found in {self.dirpath}")
             self.abinit_kpoints = None
 
@@ -607,11 +582,9 @@ class AbinitParser(BaseParser):
 
         try:
             self.abinit_dos = AbinitDOSParser(dirpath=self.dirpath)
-        except IndexError as e:
+        except IndexError:
             logger.debug(f"No DOS files found in {self.dirpath}")
             self.abinit_dos = None
-            
-        
 
     @cached_property
     def version(self):
@@ -668,18 +641,17 @@ class AbinitParser(BaseParser):
             )
             return None
         return self.abinit_output.structure
-    
+
     @property
     def kpath(self):
         if self.abinit_kpoints is None:
             return None
-        
-        
+
         kpoints = None
         if self.abinit_procar:
             procar = self.abinit_procar.abinitprocarobject
             kpoints = procar.kpoints
-            
+
         if self.abinit_kpoints.knames is None:
             return None
 
@@ -690,7 +662,6 @@ class AbinitParser(BaseParser):
             reciprocal_lattice=self.abinit_output.reclat,
         )
 
-    
     @property
     def kgrid(self):
         if self.abinit_kpoints is None:

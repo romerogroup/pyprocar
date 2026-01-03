@@ -5,7 +5,6 @@ __date__ = "March 31, 2020"
 
 import json
 import logging
-from typing import List
 
 import matplotlib as mpl
 import matplotlib.patches as mpatches
@@ -18,6 +17,7 @@ from matplotlib.ticker import MultipleLocator
 from pyprocar.core import ElectronicBandStructure, KPath
 
 logger = logging.getLogger(__name__)
+
 
 class EBSPlot:
     """
@@ -47,7 +47,7 @@ class EBSPlot:
         ebs: ElectronicBandStructure,
         kpath: KPath = None,
         ax: mpl.axes.Axes = None,
-        spins: List[int] = None,
+        spins: list[int] = None,
         kdirect: bool = True,
         config=None,
     ):
@@ -115,15 +115,13 @@ class EBSPlot:
 
         """
         logger.info("___Getting x values___")
-        self.values_dict[f"k_current"] = []
+        self.values_dict["k_current"] = []
         pos = 0
         if self.kpath is not None and self.kpath.nsegments == len(self.kpath.ngrids):
-            logger.info(
-                "Kpath exists and nsegments == ngrids. Creating path from kpath"
-            )
+            logger.info("Kpath exists and nsegments == ngrids. Creating path from kpath")
             logger.debug(f"ngrids: {self.kpath.ngrids}")
             logger.debug(f"nsegments: {self.kpath.nsegments}")
-            
+
             k_current = None
             for isegment in range(self.kpath.nsegments):
                 kstart, kend = self.kpath.special_kpoints[isegment]
@@ -135,7 +133,7 @@ class EBSPlot:
                 if isegment == 0:
                     x = np.linspace(pos, pos + distance, self.kpath.ngrids[isegment])
                     k_current = kstart
-                    self.values_dict[f"k_current"].append(k_current.tolist())
+                    self.values_dict["k_current"].append(k_current.tolist())
                 else:
                     x = np.append(
                         x,
@@ -146,13 +144,11 @@ class EBSPlot:
                 k_unit_dir = (kend - kstart) / distance
                 for i in range(x.shape[0]):
                     k_current += k_unit_dir * distance
-                    self.values_dict[f"k_current"].append(k_current.tolist())
+                    self.values_dict["k_current"].append(k_current.tolist())
 
                 pos += distance
         else:
-            logger.info(
-                "Kpath does not exist or nsegments != ngrids. Creating x from kpoints"
-            )
+            logger.info("Kpath does not exist or nsegments != ngrids. Creating x from kpoints")
 
             x = np.arange(0, self.ebs.kpoints.shape[0])
 
@@ -207,7 +203,7 @@ class EBSPlot:
         self,
         width_mask: np.ndarray = None,
         color_mask: np.ndarray = None,
-        spins: List[int] = None,
+        spins: list[int] = None,
         width_weights: np.ndarray = None,
         color_weights: np.ndarray = None,
         labels=None,
@@ -242,13 +238,9 @@ class EBSPlot:
 
         if width_mask is not None or color_mask is not None:
             if width_mask is not None:
-                mbands = np.ma.masked_array(
-                    self.ebs.bands, np.abs(width_weights) < width_mask
-                )
+                mbands = np.ma.masked_array(self.ebs.bands, np.abs(width_weights) < width_mask)
             if color_mask is not None:
-                mbands = np.ma.masked_array(
-                    self.ebs.bands, np.abs(color_weights) < color_mask
-                )
+                mbands = np.ma.masked_array(self.ebs.bands, np.abs(color_weights) < color_mask)
         else:
             # Faking a mask, all elemtnet are included
             mbands = np.ma.masked_array(self.ebs.bands, False)
@@ -303,9 +295,9 @@ class EBSPlot:
                 values_dict[f"bands__{band_name}"] = self.ebs.bands[:, iband, ispin]
                 projection_name = labels[0]
                 if color_weights is not None:
-                    values_dict[f"projections__{projection_name}__{band_name}"] = (
-                        color_weights[:, iband, ispin]
-                    )
+                    values_dict[f"projections__{projection_name}__{band_name}"] = color_weights[
+                        :, iband, ispin
+                    ]
 
         if self.config.plot_color_bar and color_weights is not None:
             self.cb = self.fig.colorbar(sc, ax=self.ax)
@@ -325,12 +317,12 @@ class EBSPlot:
 
     def plot_parameteric(
         self,
-        spins: List[int] = None,
+        spins: list[int] = None,
         width_mask: np.ndarray = None,
         color_mask: np.ndarray = None,
         width_weights: np.ndarray = None,
         color_weights: np.ndarray = None,
-        elimit: List[float] = None,
+        elimit: list[float] = None,
         labels=None,
     ):
         """A method to plot a scatter plot
@@ -382,20 +374,20 @@ class EBSPlot:
 
         if width_mask is not None or color_mask is not None:
             if width_mask is not None:
-                logger.info(f"___Applying width mask___")
+                logger.info("___Applying width mask___")
                 mbands = np.ma.masked_array(
                     self.ebs.bands,
                     np.abs(width_weights) < width_mask,
                 )
             if color_mask is not None:
-                logger.info(f"___Applying color mask___")
+                logger.info("___Applying color mask___")
                 mbands = np.ma.masked_array(
                     self.ebs.bands,
                     np.abs(color_weights) < color_mask,
                 )
         else:
             # Faking a mask, all elemtnet are included
-            logger.info(f"___No mask applied___")
+            logger.info("___No mask applied___")
             mbands = np.ma.masked_array(self.ebs.bands, False)
         if color_weights is not None:
             vmin = self.config.clim[0]
@@ -424,9 +416,7 @@ class EBSPlot:
                         segments, colors=color, linestyle=self.config.linestyle[ispin]
                     )
                 else:
-                    lc = LineCollection(
-                        segments, cmap=plt.get_cmap(self.config.cmap), norm=norm
-                    )
+                    lc = LineCollection(segments, cmap=plt.get_cmap(self.config.cmap), norm=norm)
                     lc.set_array(color_weights[:, iband, ispin])
                 lc.set_linewidth(width_weights[:, iband, ispin] * linewidth[ispin])
                 lc.set_linestyle(self.config.linestyle[ispin])
@@ -436,9 +426,9 @@ class EBSPlot:
                 projection_name = labels[0]
                 values_dict[f"bands__{band_name}"] = self.ebs.bands[:, iband, ispin]
                 if color_weights is not None:
-                    values_dict[f"projections__{projection_name}__{band_name}"] = (
-                        color_weights[:, iband, ispin]
-                    )
+                    values_dict[f"projections__{projection_name}__{band_name}"] = color_weights[
+                        :, iband, ispin
+                    ]
             # if color_weights is not None:
             #     handle.set_color(color_map[iweight][:-1].lower())
             handle.set_linewidth(linewidth)
@@ -463,7 +453,7 @@ class EBSPlot:
 
     def plot_parameteric_overlay(
         self,
-        spins: List[int] = None,
+        spins: list[int] = None,
         weights: np.ndarray = None,
         labels: str = None,
     ):
@@ -502,9 +492,7 @@ class EBSPlot:
             for ispin in spins:
                 # plotting
                 for iband in range(self.ebs.n_bands):
-                    points = np.array(
-                        [self.x, self.ebs.bands[:, iband, ispin]]
-                    ).T.reshape(-1, 1, 2)
+                    points = np.array([self.x, self.ebs.bands[:, iband, ispin]]).T.reshape(-1, 1, 2)
                     segments = np.concatenate([points[:-1], points[1:]], axis=1)
                     # this is to delete the segments on the high sym points
                     x = self.x
@@ -524,14 +512,12 @@ class EBSPlot:
                     projection_name = labels[iweight]
                     values_dict[f"bands__{band_name}"] = self.ebs.bands[:, iband, ispin]
                     if weights is not None:
-                        values_dict[f"projections__{projection_name}__{band_name}"] = (
-                            weight[:, iband, ispin]
-                        )
+                        values_dict[f"projections__{projection_name}__{band_name}"] = weight[
+                            :, iband, ispin
+                        ]
 
             self.handles.append(
-                mpatches.Patch(
-                    color=color_map[iweight][:-1].lower(), label=labels[iweight]
-                )
+                mpatches.Patch(color=color_map[iweight][:-1].lower(), label=labels[iweight])
             )
 
             if self.config.plot_color_bar:
@@ -551,12 +537,12 @@ class EBSPlot:
 
     def plot_atomic_levels(
         self,
-        spins: List[int] = None,
+        spins: list[int] = None,
         width_mask: np.ndarray = None,
         color_mask: np.ndarray = None,
         width_weights: np.ndarray = None,
         color_weights: np.ndarray = None,
-        elimit: List[float] = None,
+        elimit: list[float] = None,
         labels=None,
     ):
         """A method to plot a scatter plot
@@ -578,13 +564,13 @@ class EBSPlot:
         """
         if labels is None:
             labels = [""]
-        
+
         new_kpoints = np.vstack((self.ebs.kpoints, self.ebs.kpoints))
         self.ebs.update_points(new_kpoints)
         for prop_name, calc_name, gradient_order, prop_value in self.ebs.iter_properties():
             property = self.ebs.get_property(prop_name)
             property[calc_name, gradient_order] = np.vstack((self.ebs.bands, self.ebs.bands))
-            
+
         # self.ebs._properties["bands"] = np.vstack((self.ebs.bands, self.ebs.bands))
         # self.ebs._properties["projected"] = np.vstack((self.ebs.projected, self.ebs.projected))
         # self.ebs._kpoints = np.vstack((self.ebs._kpoints, self.ebs._kpoints))
@@ -664,8 +650,8 @@ class EBSPlot:
 
     def set_xticks(
         self,
-        tick_positions: List[int] = None,
-        tick_names: List[str] = None,
+        tick_positions: list[int] = None,
+        tick_names: list[str] = None,
         color: str = "black",
     ):
         """A method to set the x ticks
@@ -706,9 +692,7 @@ class EBSPlot:
 
         self.ax.tick_params(**self.config.major_x_tick_params)
 
-    def set_yticks(
-        self, major: float = None, minor: float = None, interval: List[float] = None
-    ):
+    def set_yticks(self, major: float = None, minor: float = None, interval: list[float] = None):
         """A method to set the y ticks
 
         Parameters
@@ -751,10 +735,7 @@ class EBSPlot:
         if self.config.multiple_locator_y_minor_value is not None:
             minor = self.config.multiple_locator_y_minor_value
 
-        if (
-            self.config.major_y_locator is not None
-            or self.config.minor_y_locator is not None
-        ):
+        if self.config.major_y_locator is not None or self.config.minor_y_locator is not None:
             if self.config.major_y_locator is not None:
                 self.ax.yaxis.set_major_locator(self.config.major_y_locator)
             if self.config.minor_y_locator is not None:
@@ -768,9 +749,7 @@ class EBSPlot:
         self.ax.tick_params(**self.config.major_y_tick_params)
         self.ax.tick_params(**self.config.minor_y_tick_params)
 
-    def set_xlim(
-        self, interval: List[float] = None, ktick_interval: List[float] = None
-    ):
+    def set_xlim(self, interval: list[float] = None, ktick_interval: list[float] = None):
         """A method to set the x limit
 
         Parameters
@@ -787,7 +766,7 @@ class EBSPlot:
 
         self.ax.set_xlim(interval)
 
-    def set_ylim(self, interval: List[float] = None):
+    def set_ylim(self, interval: list[float] = None):
         """A method to set the y limit
 
         Parameters
@@ -847,7 +826,7 @@ class EBSPlot:
             title = title
         else:
             title = self.config.colorbar_title
-            
+
         if not hasattr(self, "cb"):
             return None
 
@@ -866,7 +845,7 @@ class EBSPlot:
                 labelpad=self.config.colorbar_title_padding,
             )
 
-    def legend(self, labels: List[str] = None):
+    def legend(self, labels: list[str] = None):
         """A methdo to plot the legend
 
         Parameters
@@ -949,9 +928,7 @@ class EBSPlot:
 
         values_dict = {}
         for key, value in self.values_dict.items():
-            logger.debug(
-                "Column: %s, Type: %s, Shape: %s", key, type(value), len(value)
-            )
+            logger.debug("Column: %s, Type: %s, Shape: %s", key, type(value), len(value))
 
             if len(value) != 0:
                 values_dict[key] = value
@@ -960,18 +937,17 @@ class EBSPlot:
         sorted_column_names = [None] * len(column_names)
         index = 0
         for column_name in column_names:
-            if "kpath_values" == column_name:
+            if column_name == "kpath_values":
                 sorted_column_names[index] = column_name
                 index += 1
-            if "kpath_tick_names" == column_name:
+            if column_name == "kpath_tick_names":
                 sorted_column_names[index] = column_name
                 index += 1
-            if "k_current" == column_name:
+            if column_name == "k_current":
                 sorted_column_names[index] = column_name
                 index += 1
         for ispin in range(2):
             for column_name in column_names:
-
                 if "spinChannel-0" in column_name.split("_")[-1] and ispin == 0:
                     sorted_column_names[index] = column_name
                     index += 1

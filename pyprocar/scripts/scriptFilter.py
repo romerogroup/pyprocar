@@ -1,21 +1,18 @@
-
-from typing import List
-
 from pyprocar.utils.procarfilefilter import ProcarFileFilter
 from pyprocar.utils.splash import welcome
 
 
 def filter(
-    inFile:str,
-    outFile:str,
-    atoms:List[int]=None,
-    orbitals:List[int]=None,
-    orbital_names:List[str]=None,
-    bands:List[int]=None,
+    inFile: str,
+    outFile: str,
+    atoms: list[int] = None,
+    orbitals: list[int] = None,
+    orbital_names: list[str] = None,
+    bands: list[int] = None,
     spin=None,
     kpoints=None,
-    human_atoms:bool=False,
-    ):
+    human_atoms: bool = False,
+):
     """This module filters the PROCAR file and re-write a new one.
 
     Parameters

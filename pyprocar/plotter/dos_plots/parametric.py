@@ -3,8 +3,7 @@
 from __future__ import annotations
 
 import logging
-from collections.abc import Mapping, Sequence
-from typing import Dict, Iterable, Tuple
+from collections.abc import Iterable, Mapping, Sequence
 
 import matplotlib.cm as cm
 import matplotlib.colors as mcolors
@@ -12,9 +11,8 @@ import numpy as np
 from matplotlib import colormaps
 from matplotlib.collections import LineCollection
 
-from pyprocar.plotter.dos_plots.base import BasePlotter
-
 from pyprocar.core.property_store import Property
+from pyprocar.plotter.dos_plots.base import BasePlotter
 
 logger = logging.getLogger(__name__)
 
@@ -24,25 +22,25 @@ def _prepare_parametric_inputs(
     dos_values: Iterable[Iterable[float]] | np.ndarray,
     scalars: Iterable[Iterable[float]] | np.ndarray | None,
     labels: Iterable[str] | None,
-) -> tuple[np.ndarray, np.ndarray, np.ndarray, Tuple[str, ...]]:
+) -> tuple[np.ndarray, np.ndarray, np.ndarray, tuple[str, ...]]:
     energies_array = np.asarray(list(energies), dtype=np.float64)
     if energies_array.size < 2:
         raise ValueError("Parametric plots require at least two energy samples.")
 
     dos_array = np.asarray(dos_values, dtype=np.float64)
     if dos_array.ndim == 1:
-        dos_array = dos_array[:,np.newaxis]
+        dos_array = dos_array[:, np.newaxis]
 
     if scalars is None:
         scalars_array = dos_array
     else:
         scalars_array = np.asarray(scalars, dtype=np.float64)
         if scalars_array.ndim == 1:
-            scalars_array = scalars_array[:,np.newaxis]
+            scalars_array = scalars_array[:, np.newaxis]
         if scalars_array.shape != dos_array.shape:
             raise ValueError("scalars must have the same shape as dos_values.")
 
-    labels_tuple: Tuple[str, ...] = tuple(labels or ())
+    labels_tuple: tuple[str, ...] = tuple(labels or ())
     return energies_array, dos_array, scalars_array, labels_tuple
 
 
@@ -52,7 +50,7 @@ class ParametricPlot(BasePlotter):
     cmap: str | mcolors.Colormap = "plasma"
     clim: tuple[float | None, float | None] | None = None
     show_colorbar: bool = True
-    colorbar_kwargs: Dict[str, object] | None = None
+    colorbar_kwargs: dict[str, object] | None = None
     plot_total: bool = True
     total_line_kwargs: Mapping[str, object] | Sequence[Mapping[str, object]] | None = None
     fill_kwargs: Mapping[str, object] | None = None
@@ -65,7 +63,7 @@ class ParametricPlot(BasePlotter):
         *,
         labels: Iterable[str] | None = None,
         scale: bool = False,
-        mirror_spins = False,
+        mirror_spins=False,
         plot_total: bool | None = None,
         colorbar: bool | None = None,
         total_kwargs: Mapping[str, object] | Sequence[Mapping[str, object]] | None = None,
@@ -75,9 +73,9 @@ class ParametricPlot(BasePlotter):
             scalars = scalars.value
         if isinstance(dos_values, Property):
             dos_values = dos_values.value
-            
+
         n_spin_channels = dos_values.shape[1]
-        
+
         energies_array, dos_array, scalar_array, labels_tuple = _prepare_parametric_inputs(
             energies, dos_values, scalars, labels
         )
@@ -85,7 +83,7 @@ class ParametricPlot(BasePlotter):
         line_values = dos_array.copy()
         mirror = mirror_spins and n_spin_channels == 2
         if mirror:
-            line_values[:,1] *= -1.0
+            line_values[:, 1] *= -1.0
 
         colour_weights = scalar_array if not scale else scalar_array * line_values
 
@@ -100,31 +98,31 @@ class ParametricPlot(BasePlotter):
         fill_cfg.update(self.fill_kwargs or {})
         fill_cfg.update(fill_kwargs or {})
 
-        stored: Dict[str, np.ndarray] = {"energies": energies_array}
+        stored: dict[str, np.ndarray] = {"energies": energies_array}
 
         for i_spin in range(n_spin_channels):
             label = labels_tuple[i_spin] if i_spin < len(labels_tuple) else None
             self._plot_spin_series(
                 energies_array,
-                line_values[:,i_spin],
-                colour_weights[:,i_spin],
+                line_values[:, i_spin],
+                colour_weights[:, i_spin],
                 cmap=cmap_obj,
                 norm=norm,
                 fill_kwargs=fill_cfg,
             )
 
-            if (plot_total if plot_total is not None else self.plot_total):
+            if plot_total if plot_total is not None else self.plot_total:
                 kwargs = self._resolve_line_kwargs(
                     i_spin,
                     overrides=total_kwargs,
                 )
-                x_data, y_data = self.orient_line(energies_array, line_values[:,i_spin])
+                x_data, y_data = self.orient_line(energies_array, line_values[:, i_spin])
                 if label is not None:
                     kwargs.setdefault("label", label)
                 self.ax.plot(x_data, y_data, **kwargs)
 
-            stored[f"dos_total_{i_spin}"] = line_values[:,i_spin]
-            stored[f"dos_weight_{i_spin}"] = colour_weights[:,i_spin]
+            stored[f"dos_total_{i_spin}"] = line_values[:, i_spin]
+            stored[f"dos_weight_{i_spin}"] = colour_weights[:, i_spin]
 
         if colorbar if colorbar is not None else self.show_colorbar:
             self._draw_colorbar(norm, cmap_obj)
@@ -187,7 +185,7 @@ class ParametricPlot(BasePlotter):
         self,
         index: int,
         overrides: Mapping[str, object] | Sequence[Mapping[str, object]] | None,
-    ) -> Dict[str, object]:
+    ) -> dict[str, object]:
         base = dict(color="black", linewidth=1.2)
 
         configured = self.total_line_kwargs
@@ -220,21 +218,20 @@ class ParametricLinePlot(ParametricPlot):
         scalars: Iterable[Iterable[float]] | np.ndarray | None,
         *,
         labels: Iterable[str] | None = None,
-        mirror_spins = True,
+        mirror_spins=True,
         scale: bool = False,
         plot_total: bool | None = None,
         colorbar: bool | None = None,
         total_kwargs: Mapping[str, object] | Sequence[Mapping[str, object]] | None = None,
         line_kwargs: Mapping[str, object] | Sequence[Mapping[str, object]] | None = None,
     ):
-        
         if isinstance(scalars, Property):
             scalars = scalars.value
         if isinstance(dos_values, Property):
             dos_values = dos_values.value
-            
+
         n_spin_channels = dos_values.shape[1]
-            
+
         energies_array, dos_array, scalar_array, labels_tuple = _prepare_parametric_inputs(
             energies, dos_values, scalars, labels
         )
@@ -242,7 +239,7 @@ class ParametricLinePlot(ParametricPlot):
         line_values = dos_array.copy()
         mirror = mirror_spins and n_spin_channels == 2
         if mirror:
-            line_values[:,1] *= -1.0
+            line_values[:, 1] *= -1.0
 
         colour_weights = scalar_array if not scale else scalar_array * line_values
 
@@ -253,11 +250,11 @@ class ParametricLinePlot(ParametricPlot):
         except AttributeError:  # pragma: no cover - backward compatibility
             cmap_obj = cm.get_cmap(self.cmap)
 
-        stored: Dict[str, np.ndarray] = {"energies": energies_array}
+        stored: dict[str, np.ndarray] = {"energies": energies_array}
 
         for ispin in range(n_spin_channels):
             label = labels_tuple[ispin] if ispin < len(labels_tuple) else None
-            x_data, y_data = self.orient_data(energies_array, line_values[:,ispin])
+            x_data, y_data = self.orient_data(energies_array, line_values[:, ispin])
 
             points = np.column_stack([x_data, y_data]).reshape(-1, 1, 2)
             segments = np.concatenate([points[:-1], points[1:]], axis=1)
@@ -266,9 +263,7 @@ class ParametricLinePlot(ParametricPlot):
             lc.set_cmap(cmap_obj)
             lc.set_norm(norm)
 
-            segment_weights = 0.5 * (
-                colour_weights[:,ispin] + colour_weights[:,ispin]
-            )
+            segment_weights = 0.5 * (colour_weights[:, ispin] + colour_weights[:, ispin])
             lc.set_array(segment_weights)
 
             kwargs = self._resolve_line_collection_kwargs(
@@ -294,8 +289,8 @@ class ParametricLinePlot(ParametricPlot):
         self,
         index: int,
         overrides: Mapping[str, object] | Sequence[Mapping[str, object]] | None,
-    ) -> Dict[str, object]:
-        base: Dict[str, object] = {}
+    ) -> dict[str, object]:
+        base: dict[str, object] = {}
 
         configured = self.line_collection_kwargs
         if isinstance(configured, Sequence) and not isinstance(configured, (dict, str)):

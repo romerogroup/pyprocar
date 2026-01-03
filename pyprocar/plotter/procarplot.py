@@ -1,13 +1,10 @@
-import sys
-import re
-import logging
-
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
+
 
 class ProcarPlot:
-    """A depeciated class ot plot the band structure
-    """
+    """A depeciated class ot plot the band structure"""
+
     def __init__(self, bands, spd, kpoints=None):
         self.bands = bands.transpose()
         self.spd = spd.transpose()
@@ -24,7 +21,6 @@ class ProcarPlot:
         figsize=(13, 9),
         ax=None,
     ):
-
         if not ax:
             fig = plt.figure(figsize=figsize)
             fig.tight_layout()
@@ -124,8 +120,8 @@ class ProcarPlot:
         plot_bar=True,
         linewidth=1,
     ):
-        from matplotlib.collections import LineCollection
         import matplotlib
+        from matplotlib.collections import LineCollection
 
         # fig = plt.figure() # use plt.gca() since it won't create a new figure for band comparison
         if ax is None:
@@ -381,12 +377,12 @@ class ProcarPlot:
 
     def atomicPlot(self, cmap="hot_r", vmin=None, vmax=None, ax=None):
         """
-    Just a handler to parametricPlot. Useful to plot energy levels.
+        Just a handler to parametricPlot. Useful to plot energy levels.
 
-    It adds a fake k-point. Shouldn't be invoked with more than one
-    k-point
-    ax not implemented here, not need
-    """
+        It adds a fake k-point. Shouldn't be invoked with more than one
+        k-point
+        ax not implemented here, not need
+        """
 
         print("Atomic plot: bands.shape  :", self.bands.shape)
         print("Atomic plot: spd.shape    :", self.spd.shape)
@@ -399,7 +395,7 @@ class ProcarPlot:
         print("Atomic plot: bands.shape  :", self.bands.shape)
         print("Atomic plot: spd.shape    :", self.spd.shape)
         print("Atomic plot: kpoints.shape:", self.kpoints.shape)
-        
+
         print("Foooooooooooooooooo", self.kpoints)
 
         fig, ax1 = self.parametricPlot(cmap, vmin, vmax, ax=ax)
@@ -411,5 +407,5 @@ class ProcarPlot:
             # print i, self.bands[i]
             ax1.text(0, self.bands[i, 0], str(i + 1))
             bbox = txt.get_window_extent()
-            print('bbox', bbox)
+            print("bbox", bbox)
         return fig, ax1

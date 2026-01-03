@@ -1,5 +1,3 @@
-
-
 from .scriptAutoBandsplot import autobandsplot
 from .scriptBandGap import bandgap
 from .scriptBandsDosplot import bandsdosplot

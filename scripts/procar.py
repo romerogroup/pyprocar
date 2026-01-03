@@ -11,14 +11,16 @@ Francisco Munoz (fvmunoz@gmail.com).
 
 import argparse
 from argparse import RawTextHelpFormatter
-import pyprocar
+
 import numpy as np
+
+import pyprocar
 
 
 def call_bandsplot(args):
     """
-	This module calls the band structure plotting function.
-	"""
+    This module calls the band structure plotting function.
+    """
 
     pyprocar.bandsplot(
         args.file,
@@ -51,8 +53,8 @@ def call_bandsplot(args):
 
 def call_kpath(args):
     """
-	This module calls the k-path generation function.
-	"""
+    This module calls the k-path generation function.
+    """
 
     pyprocar.kpath(
         args.infile,
@@ -68,24 +70,22 @@ def call_kpath(args):
 
 def call_repair(args):
     """
-	This module calls the repair function.
-	"""
+    This module calls the repair function.
+    """
     pyprocar.repair(args.infile, args.outfile)
 
 
 def call_generate2dkmesh(args):
     """
-	This module calls the k-mesh generating function.
-	"""
-    pyprocar.generate2dkmesh(
-        args.x1, args.y1, args.x2, args.y2, args.z, args.nkx, args.nky
-    )
+    This module calls the k-mesh generating function.
+    """
+    pyprocar.generate2dkmesh(args.x1, args.y1, args.x2, args.y2, args.z, args.nkx, args.nky)
 
 
 def call_fermi2D(args):
     """
-	This module calls the fermi2D plotting function.
-	"""
+    This module calls the fermi2D plotting function.
+    """
     pyprocar.fermi2D(
         args.file,
         outcar=args.outcar,
@@ -108,8 +108,8 @@ def call_fermi2D(args):
 
 def call_fermi3D(args):
     """
-	This module calls the fermi3D plotting function.
-	"""
+    This module calls the fermi3D plotting function.
+    """
     pyprocar.fermi3D(
         args.procar,
         args.outcar,
@@ -123,8 +123,8 @@ def call_fermi3D(args):
 
 def call_filter(args):
     """
-	This module calls the filter function.
-	"""
+    This module calls the filter function.
+    """
 
     pyprocar.filter(
         args.infile,
@@ -140,29 +140,29 @@ def call_filter(args):
 
 def call_cat(args):
     """
-	This module calls the cat function.
-	"""
+    This module calls the cat function.
+    """
     pyprocar.cat(inFiles=args.inFiles, outFile=args.outFile, gz=args.gz)
 
 
 def call_mergeabinit(args):
     """
-	This module calls the mergeabinit function.
-	"""
+    This module calls the mergeabinit function.
+    """
     pyprocar.mergeabinit(args.outfile)
 
 
 def call_bandgap(args):
     """
-	This module calls the mergeabinit function.
-	"""
+    This module calls the mergeabinit function.
+    """
     pyprocar.bandgap(args.procar, args.outcar, args.code, args.fermi)
 
 
 def call_unfold(args):
     """
-	This module calls the band unfolding function.
-	"""
+    This module calls the band unfolding function.
+    """
     pyprocar.unfold(
         fname=args.fname,
         poscar=args.poscar,
@@ -184,13 +184,11 @@ def call_unfold(args):
 
 
 if __name__ == "__main__":
-
     import sys
 
     args = sys.argv[1:]
 
     if args:
-
         # Top level parser
         description = "PyProcar: A Python library for analyzing PROCAR files."
         parser = argparse.ArgumentParser(description=description)
@@ -217,9 +215,7 @@ if __name__ == "__main__":
 
         ################ mergeabinit ##################################
 
-        parsermergeabinit = subparsers.add_parser(
-            "mergeabinit", help="Merge Abinit PROCARs."
-        )
+        parsermergeabinit = subparsers.add_parser("mergeabinit", help="Merge Abinit PROCARs.")
         parsermergeabinit.add_argument("outfile", help="Merged PROCAR")
         parsermergeabinit.set_defaults(func=call_mergeabinit)
 
@@ -227,21 +223,17 @@ if __name__ == "__main__":
         parserunfold = subparsers.add_parser("unfold", help="Band unfolding.")
         parserunfold.add_argument("-fname", help="PROCAR filename.")
         parserunfold.add_argument("-poscar", help="POSCAR filename.")
-        parserunfold.add_argument(
-            "-outcar", help="OUTCAR filename. Used to get Fermi energy."
-        )
+        parserunfold.add_argument("-outcar", help="OUTCAR filename. Used to get Fermi energy.")
         parserunfold.add_argument(
             "-supercell_matrix",
             help="Supercell matrix from primitive cell to supercell.",
         )
         parserunfold.add_argument(
             "-ispin",
-            help="None - non spin polarized \n 1 - spin up" "\n 2 - spin down.",
+            help="None - non spin polarized \n 1 - spin up\n 2 - spin down.",
             choices=[None, 1, 2],
         )
-        parserunfold.add_argument(
-            "-efermi", help="Fermi energy. Only when no OUTCAR is given."
-        )
+        parserunfold.add_argument("-efermi", help="Fermi energy. Only when no OUTCAR is given.")
         parserunfold.add_argument("-elimit", help="Range of energy to be plotted.")
         parserunfold.add_argument(
             "-kticks",
@@ -261,12 +253,8 @@ if __name__ == "__main__":
             help="Whether to plot the bands before unfolding.",
             action="store_true",
         )
-        parserunfold.add_argument(
-            "-width", help="Width of the unfolded band.", type=float
-        )
-        parserunfold.add_argument(
-            "-color", help="Color of the unfolded band.", type=str
-        )
+        parserunfold.add_argument("-width", help="Width of the unfolded band.", type=float)
+        parserunfold.add_argument("-color", help="Color of the unfolded band.", type=str)
         parserunfold.add_argument(
             "-savetab",
             help="The csv file name of which the table of unfolding result will be written into",
@@ -303,9 +291,7 @@ if __name__ == "__main__":
             "it always is the 'tot' value from infile, regardless the selection"
             " of atoms."
         )
-        OptFilter.add_argument(
-            "-a", "--atoms", type=int, nargs="+", action="append", help=phelp
-        )
+        OptFilter.add_argument("-a", "--atoms", type=int, nargs="+", action="append", help=phelp)
 
         phelp = (
             "List of orbitals to group as a single entry. Each group of "
@@ -314,9 +300,7 @@ if __name__ == "__main__":
             "6 7 8`. Where 0=s, 1,2,3=px,py,pz, 4...9=dxx...dyz. Mind the last "
             "value (aka) 'tot' always is written."
         )
-        OptFilter.add_argument(
-            "-o", "--orbitals", help=phelp, type=int, nargs="+", action="append"
-        )
+        OptFilter.add_argument("-o", "--orbitals", help=phelp, type=int, nargs="+", action="append")
 
         phelp = (
             "Keeps only the bands between `min` and `max` indexes. To keep the "
@@ -383,12 +367,8 @@ if __name__ == "__main__":
         )
         parserFermi2D.add_argument("-o", "--orbitals", type=int, nargs="+", help=phelp)
 
-        phelp = (
-            "Energy for the surface. To plot the Fermi surface at Fermi Energy `-e 0`"
-        )
-        parserFermi2D.add_argument(
-            "-e", "--energy", help=phelp, type=float, required=True
-        )
+        phelp = "Energy for the surface. To plot the Fermi surface at Fermi Energy `-e 0`"
+        parserFermi2D.add_argument("-e", "--energy", help=phelp, type=float, required=True)
 
         phelp = (
             "Set the Fermi energy (or any reference energy) as zero. To get it "
@@ -419,9 +399,7 @@ if __name__ == "__main__":
             "usual). This is the first symmetry operation to be performed "
             "(i.e. rotations will take this point as the origin)."
         )
-        parserFermi2D.add_argument(
-            "--translate", help=phelp, nargs="+", default=[0, 0, 0]
-        )
+        parserFermi2D.add_argument("--translate", help=phelp, nargs="+", default=[0, 0, 0])
 
         phelp = (
             "A general rotation is applied to the data in the PROCAR. While this "
@@ -481,15 +459,11 @@ if __name__ == "__main__":
         parserfermi3D.add_argument(
             "bands", help="Array of bands to be included. -1 considers all.", default=-1
         )
-        parserfermi3D.add_argument(
-            "scale", help="Interpolation factor", type=float, default=1
-        )
+        parserfermi3D.add_argument("scale", help="Interpolation factor", type=float, default=1)
         parserfermi3D.add_argument(
             "mode", help="Plot mode.", choices=["plain", "parametric", "external"]
         )
-        parserfermi3D.add_argument(
-            "-st", help="Flag to set spin texture on.", action="store_true"
-        )
+        parserfermi3D.add_argument("-st", help="Flag to set spin texture on.", action="store_true")
         parserfermi3D.add_argument("kwargs", help="Additional arguments.", nargs="*")
         parserfermi3D.set_defaults(func=call_fermi3D)
 
@@ -522,20 +496,15 @@ if __name__ == "__main__":
         ################## k-mesh ########################################
         parsergenerate2dkmesh = subparsers.add_parser(
             "generate2dkmesh",
-            help="Generate a 2D k-mesh"
-            "centered at a given k-point in a given k-plane.",
+            help="Generate a 2D k-meshcentered at a given k-point in a given k-plane.",
         )
         parsergenerate2dkmesh.add_argument("x1", help="x1 coordinate")
         parsergenerate2dkmesh.add_argument("y1", help="y1 coordinate")
         parsergenerate2dkmesh.add_argument("x2", help="x2 coordinate")
         parsergenerate2dkmesh.add_argument("y2", help="y2 coordinate")
         parsergenerate2dkmesh.add_argument("z", help="z plane")
-        parsergenerate2dkmesh.add_argument(
-            "nkx", help="number of grids in the x direction"
-        )
-        parsergenerate2dkmesh.add_argument(
-            "nky", help="number of grids in the y direction"
-        )
+        parsergenerate2dkmesh.add_argument("nkx", help="number of grids in the x direction")
+        parsergenerate2dkmesh.add_argument("nky", help="number of grids in the y direction")
         parsergenerate2dkmesh.set_defaults(func=call_generate2dkmesh)
 
         ################## k-path ####################################################
@@ -604,9 +573,7 @@ if __name__ == "__main__":
             "  but useful to visualize energy level. Only 1 K-point!\n\n"
         )
         choices = ["scatter", "plain", "parametric", "atomic"]
-        parserBandsplot.add_argument(
-            "-m", "--mode", help=phelp, default="plain", choices=choices
-        )
+        parserBandsplot.add_argument("-m", "--mode", help=phelp, default="plain", choices=choices)
 
         phelp = "Color of the bands for plain mode."
         parserBandsplot.add_argument("-color", help=phelp, default="blue")
@@ -648,9 +615,7 @@ if __name__ == "__main__":
             "-a 0 2 :  select the 1st  and 3rd. rows (likely 1st and 3rd atoms)"
             "\n\n"
         )
-        parserBandsplot.add_argument(
-            "-a", "--atoms", type=int, nargs="+", help=phelp, default=None
-        )
+        parserBandsplot.add_argument("-a", "--atoms", type=int, nargs="+", help=phelp, default=None)
 
         phelp = (
             "Orbitals index(es) to be used, take a look to the PROCAR file, \n"
@@ -682,9 +647,7 @@ if __name__ == "__main__":
             "Min/Max energy to be ploted. Example:\n "
             "--elimit -1 1 : From -1 to 1 around Fermi energy (if given)\n\n"
         )
-        parserBandsplot.add_argument(
-            "--elimit", type=float, nargs=2, help=phelp, default=None
-        )
+        parserBandsplot.add_argument("--elimit", type=float, nargs=2, help=phelp, default=None)
 
         phelp = (
             "If given, it masks(hides) bands with values lowers than 'mask'.\n"
@@ -698,13 +661,8 @@ if __name__ == "__main__":
         )
         parserBandsplot.add_argument("--mask", type=float, help=phelp, default=None)
 
-        phelp = (
-            "Size of markers, if used. Each mode has it own scale,\n"
-            "just test them\n\n"
-        )
-        parserBandsplot.add_argument(
-            "--markersize", type=float, help=phelp, default=0.02
-        )
+        phelp = "Size of markers, if used. Each mode has it own scale,\njust test them\n\n"
+        parserBandsplot.add_argument("--markersize", type=float, help=phelp, default=0.02)
 
         phelp = (
             "Change the color scheme. Example:\n\n"
@@ -774,18 +732,14 @@ if __name__ == "__main__":
             'they should be `--knames "\$Gamma\$" X M`. As you can see \n'
             "LaTeX stuff works with a minimal mess (extra \\s)\n\n"
         )
-        parserBandsplot.add_argument(
-            "--knames", help=phelp, nargs="+", type=str, default=None
-        )
+        parserBandsplot.add_argument("--knames", help=phelp, nargs="+", type=str, default=None)
 
         phelp = (
             "Title, to use several words, use quotation marks\"\" or ''. Latex\n"
             " works if you scape the special characteres, ie: $\\alpha$ -> \n"
             "\$\\\\alpha\$"
         )
-        parserBandsplot.add_argument(
-            "-t", "--title", help=phelp, type=str, default=None
-        )
+        parserBandsplot.add_argument("-t", "--title", help=phelp, type=str, default=None)
 
         phelp = (
             "OUTCAR file where to find the reciprocal lattice vectors and\n "

@@ -4,7 +4,8 @@ from __future__ import annotations
 
 import logging
 from abc import ABC, abstractmethod
-from typing import Any, Dict, Iterable, Mapping, Sequence, Tuple
+from collections.abc import Iterable, Mapping, Sequence
+from typing import Any
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -16,10 +17,10 @@ def _is_property(obj: Any) -> bool:
     return isinstance(obj, property)
 
 
-def get_class_attributes(cls) -> Dict[str, Any]:
+def get_class_attributes(cls) -> dict[str, Any]:
     """Return the public data attributes defined on ``cls``."""
 
-    attributes: Dict[str, Any] = {}
+    attributes: dict[str, Any] = {}
     for name, value in cls.__dict__.items():
         if name.startswith("_"):
             continue
@@ -27,7 +28,6 @@ def get_class_attributes(cls) -> Dict[str, Any]:
             continue
         attributes[name] = value
     return attributes
-
 
 
 class BasePlotter(ABC):
@@ -47,7 +47,7 @@ class BasePlotter(ABC):
             self.ax = ax
             self.fig = ax.get_figure()
 
-        self._values: Dict[str, np.ndarray] = {}
+        self._values: dict[str, np.ndarray] = {}
         self.update_instance_params(**kwargs)
         self._validate_orientation()
 
@@ -60,27 +60,29 @@ class BasePlotter(ABC):
         return self._plot(*args, **kwargs)
 
     @abstractmethod
-    def _plot(self, 
-              energies: Iterable[float], 
-              dos_values: Iterable[Iterable[float]] | np.ndarray,
-              **kwargs):
+    def _plot(
+        self,
+        energies: Iterable[float],
+        dos_values: Iterable[Iterable[float]] | np.ndarray,
+        **kwargs,
+    ):
         raise NotImplementedError
 
     # ------------------------------------------------------------------
     # Configuration helpers
     # ------------------------------------------------------------------
     @property
-    def class_plot_params(self) -> Dict[str, Any]:
+    def class_plot_params(self) -> dict[str, Any]:
         return get_class_attributes(self.__class__)
 
     @property
-    def instance_plot_params(self) -> Dict[str, Any]:
+    def instance_plot_params(self) -> dict[str, Any]:
         attrs = {}
         for name in self.class_plot_params:
             attrs[name] = getattr(self, name, None)
         return attrs
 
-    def update_instance_params(self, **kwargs) -> Dict[str, Any]:
+    def update_instance_params(self, **kwargs) -> dict[str, Any]:
         for key, value in kwargs.items():
             if key == "legend":
                 self.legend_enabled = bool(value)
@@ -96,11 +98,12 @@ class BasePlotter(ABC):
     def _validate_orientation(self) -> None:
         if self.orientation not in {"horizontal", "vertical"}:
             raise ValueError(
-                "orientation must be either 'horizontal' or 'vertical', "
-                f"got {self.orientation!r}"
+                f"orientation must be either 'horizontal' or 'vertical', got {self.orientation!r}"
             )
 
-    def orient_data(self, energies: np.ndarray, values: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+    def orient_data(
+        self, energies: np.ndarray, values: np.ndarray
+    ) -> tuple[np.ndarray, np.ndarray]:
         energies = np.asarray(energies, dtype=np.float64).reshape(-1)
         values = np.asarray(values, dtype=np.float64).reshape(-1)
         if self.orientation == "horizontal":
@@ -122,53 +125,53 @@ class BasePlotter(ABC):
         return self.ax.fill_betweenx(energies, baseline, values, **kwargs)
 
     def set_dos_label(self, label: str = "DOS"):
-        if self.orientation == "horizontal":    
+        if self.orientation == "horizontal":
             self.set_ylabel(label)
         else:
             self.set_xlabel(label)
-            
+
     def set_dos_lim(self, lim: tuple[float, float] = None, data: np.ndarray = None):
         if data is not None:
             lim = (data.min(), data.max())
-            
+
         if self.orientation == "horizontal":
             self.set_ylim(lim)
         else:
             self.set_xlim(lim)
-            
+
     def set_dos_ticklabel(self, labels: Sequence[str] = None, positions: Sequence[float] = None):
         if self.orientation == "horizontal":
             self.set_yticklabel(labels, positions)
         else:
             self.set_xticklabel(labels, positions)
-            
+
     def set_dos_tick_params(self, which: str = "major", **kwargs):
         if self.orientation == "horizontal":
             self.set_ytick_params(which=which, **kwargs)
         else:
             self.set_xtick_params(which=which, **kwargs)
-    
+
     def set_energy_label(self, label: str = "Energy"):
         if self.orientation == "horizontal":
             self.set_xlabel(label)
         else:
             self.set_ylabel(label)
-            
+
     def set_energy_lim(self, lim: tuple[float, float] = None, data: np.ndarray = None):
         if data is not None:
             lim = (data.min(), data.max())
-            
+
         if self.orientation == "horizontal":
             self.set_xlim(lim)
         else:
             self.set_ylim(lim)
-            
+
     def set_energy_ticklabel(self, labels: Sequence[str] = None, positions: Sequence[float] = None):
         if self.orientation == "horizontal":
             self.set_xticklabel(labels, positions)
         else:
             self.set_yticklabel(labels, positions)
-            
+
     def set_energy_tick_params(self, which: str = "major", **kwargs):
         if self.orientation == "horizontal":
             self.set_xtick_params(which=which, **kwargs)
@@ -188,7 +191,6 @@ class BasePlotter(ABC):
         if dos_values.ndim > 1:
             dos_values = dos_values.reshape(-1)
 
-
         finite_mask = np.isfinite(dos_values)
         if not finite_mask.any():
             dos_values = np.zeros(1)
@@ -198,50 +200,44 @@ class BasePlotter(ABC):
         self.set_energy_label()
         self.set_energy_lim(data=energies)
         self.set_energy_tick_params()
-        
+
         self.set_dos_label()
         self.set_dos_lim(data=dos_values)
         self.set_dos_tick_params()
 
-
     # ------------------------------------------------------------------
     # Drawing helpers
     # ------------------------------------------------------------------
-    def draw_baseline(self, value: float, 
-                      color="black", 
-                      linewidth=0.8, 
-                      linestyle="--", 
-                      **kwargs) -> None:
-        
+    def draw_baseline(
+        self, value: float, color="black", linewidth=0.8, linestyle="--", **kwargs
+    ) -> None:
         all_kwargs = dict(color=color, linewidth=linewidth, linestyle=linestyle, **kwargs)
         if self.orientation == "horizontal":
             self.ax.axhline(value, **all_kwargs)
         else:
             self.ax.axvline(value, **all_kwargs)
 
-    def draw_fermi(self, value: float,
-                   color="tab:red", 
-                   linewidth=1.0, 
-                   linestyle="--", 
-                   **kwargs) -> None:
+    def draw_fermi(
+        self, value: float, color="tab:red", linewidth=1.0, linestyle="--", **kwargs
+    ) -> None:
         all_kwargs = dict(color=color, linewidth=linewidth, linestyle=linestyle, **kwargs)
         if self.orientation == "horizontal":
             self.ax.axvline(value, **all_kwargs)
         else:
             self.ax.axhline(value, **all_kwargs)
-            
+
     def show(self):
         plt.show()
 
     # ------------------------------------------------------------------
     # Public axis utilities
     # ------------------------------------------------------------------
-    def set_xlim(self, limits: Tuple[float, float] | None, **kwargs) -> None:
+    def set_xlim(self, limits: tuple[float, float] | None, **kwargs) -> None:
         if limits is None:
             return
         self.ax.set_xlim(limits, **kwargs)
 
-    def set_ylim(self, limits: Tuple[float, float] | None, **kwargs) -> None:
+    def set_ylim(self, limits: tuple[float, float] | None, **kwargs) -> None:
         if limits is None:
             return
         self.ax.set_ylim(limits, **kwargs)
@@ -295,7 +291,7 @@ class BasePlotter(ABC):
             self.ax.legend(handles, labels, **kwargs)
         else:
             self.ax.legend(**kwargs)
-            
+
     # ------------------------------------------------------------------
     # Data capture helpers
     # ------------------------------------------------------------------
@@ -303,5 +299,5 @@ class BasePlotter(ABC):
         self._values.update({key: np.asarray(value) for key, value in mapping.items()})
 
     @property
-    def values_dict(self) -> Dict[str, np.ndarray]:
+    def values_dict(self) -> dict[str, np.ndarray]:
         return dict(self._values)

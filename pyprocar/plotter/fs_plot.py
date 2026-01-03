@@ -1,7 +1,6 @@
 import logging
 import os
 from functools import partial
-from typing import List, Tuple, Union
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -21,7 +20,7 @@ user_logger = logging.getLogger("user")
 
 BZ_SCALE_FACTOR = 0.01
 
-FS_AREA_SCALE_FACTOR = (2*np.pi)**2
+FS_AREA_SCALE_FACTOR = (2 * np.pi) ** 2
 
 
 def find_nearest(array, value):
@@ -33,22 +32,21 @@ def find_nearest(array, value):
 def normalize_to_range(scalars, clim=(0, 1)):
     if clim is None:
         clim = (0, 1)
-    return (scalars - scalars.min()) / (scalars.max() - scalars.min()) * (
-        clim[1] - clim[0]
-    ) + clim[0]
+    return (scalars - scalars.min()) / (scalars.max() - scalars.min()) * (clim[1] - clim[0]) + clim[
+        0
+    ]
 
 
 def dHvA_frequency(A_max_angstrom2):
-    hbar = 1.0546e-27    # erg·s
-    e = 4.768e-10        # statcoulombs
-    c = 3.0e10           # cm/s
-    A_max_cm2 = A_max_angstrom2 * 1e16          # cm^-2
+    hbar = 1.0546e-27  # erg·s
+    e = 4.768e-10  # statcoulombs
+    c = 3.0e10  # cm/s
+    A_max_cm2 = A_max_angstrom2 * 1e16  # cm^-2
     F_max_theory = (hbar * A_max_cm2 * c) / (2 * np.pi * e)  # Gauss
     return F_max_theory
 
 
 class FermiPlotter(pv.Plotter):
-
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self._meshes = []
@@ -79,7 +77,7 @@ class FermiPlotter(pv.Plotter):
         add_mesh_args: dict = None,
         **kwargs,
     ):
-        logger.info(f"____Adding Surface to Plotter____")
+        logger.info("____Adding Surface to Plotter____")
 
         if add_texture_args is None:
             add_texture_args = {}
@@ -90,33 +88,33 @@ class FermiPlotter(pv.Plotter):
 
         if show_scalar_bar and fermi_surface.active_scalars_name is not None:
             active_scalar_name = fermi_surface.active_scalars_name
-            
+
             if active_scalar_name is None:
-                raise ValueError("No active scalar found for the Fermi surface. "
-                                 "Use the compute* methods on the FermiSurface object to compute the scalar data.")
-            
+                raise ValueError(
+                    "No active scalar found for the Fermi surface. "
+                    "Use the compute* methods on the FermiSurface object to compute the scalar data."
+                )
+
             if "norm" in active_scalar_name:
                 active_scalar_name = active_scalar_name.replace("-norm", "")
-            add_mesh_args["show_scalar_bar"] = add_mesh_args.get(
-                "show_scalar_bar", True
-            )
+            add_mesh_args["show_scalar_bar"] = add_mesh_args.get("show_scalar_bar", True)
             add_mesh_args["scalar_bar_args"] = add_mesh_args.get("scalar_bar_args", {})
             add_mesh_args["scalar_bar_args"]["title"] = add_mesh_args.get(
                 "scalar_bar_args", {}
             ).get("title", active_scalar_name)
 
         add_mesh_args["cmap"] = add_mesh_args.get("cmap", "plasma")
-        add_mesh_args["clim"] = add_mesh_args.get("clim", None)
+        add_mesh_args["clim"] = add_mesh_args.get("clim")
         add_mesh_args["name"] = add_mesh_args.get("name", "surface")
         add_mesh_args.update(kwargs)
 
-        clim = add_mesh_args.get("clim", None)
+        clim = add_mesh_args.get("clim")
         cmap = add_mesh_args.get("cmap", "plasma")
 
         if normalize:
             scalars = normalize_to_range(fermi_surface.active_scalars, clim=clim)
             add_mesh_args["scalars"] = scalars
-        add_mesh_args["scalars"] = add_mesh_args.get("scalars", None)
+        add_mesh_args["scalars"] = add_mesh_args.get("scalars")
 
         self.add_mesh(fermi_surface, **add_mesh_args)
 
@@ -130,13 +128,12 @@ class FermiPlotter(pv.Plotter):
     def add_texture(
         self,
         fermi_surface: pv.PolyData,
-        vectors: Union[str, bool] = True,
+        vectors: str | bool = True,
         factor: float = 1.0,
         add_mesh_args: dict = None,
         glyph_args: dict = None,
         **kwargs,
     ):
-
         active_vectors = fermi_surface.active_vectors
         if active_vectors is None:
             return None
@@ -148,8 +145,8 @@ class FermiPlotter(pv.Plotter):
         add_mesh_args["show_scalar_bar"] = add_mesh_args.get("show_scalar_bar", False)
         add_mesh_args["scalar_bar_args"] = add_mesh_args.get("scalar_bar_args", {})
         add_mesh_args["cmap"] = add_mesh_args.get("cmap", "plasma")
-        add_mesh_args["clim"] = add_mesh_args.get("clim", None)
-        add_mesh_args["color"] = add_mesh_args.get("color", None)
+        add_mesh_args["clim"] = add_mesh_args.get("clim")
+        add_mesh_args["color"] = add_mesh_args.get("color")
         add_mesh_args.update(kwargs)
 
         if glyph_args is None:
@@ -163,7 +160,7 @@ class FermiPlotter(pv.Plotter):
         factor = vector_scale_factor * BZ_SCALE_FACTOR * factor
 
         glyph_args["factor"] = factor
-        glyph_args["indices"] = glyph_args.get("indices", None)
+        glyph_args["indices"] = glyph_args.get("indices")
 
         arrows = fermi_surface.glyph(**glyph_args)
         self.add_mesh(arrows, **add_mesh_args)
@@ -179,7 +176,6 @@ class FermiPlotter(pv.Plotter):
         add_texture_args=None,
         **kwargs,
     ):
-
         if add_slider_widget_args is None:
             add_slider_widget_args = {}
 
@@ -268,7 +264,6 @@ class FermiPlotter(pv.Plotter):
             ),
             normal,
             origin,
-            
             **add_plane_widget_args,
         )
 
@@ -287,7 +282,7 @@ class FermiPlotter(pv.Plotter):
 
         if mesh is None:
             mesh = self._meshes[0]
-            
+
         add_text_args = add_text_args or {}
 
         slc = mesh.slice(normal=normal, origin=origin)
@@ -301,24 +296,27 @@ class FermiPlotter(pv.Plotter):
             add_surface_args["add_active_vectors"] = add_surface_args.get(
                 "add_active_vectors", True
             )
-            add_surface_args["add_texture_args"] = add_surface_args.get(
-                "add_texture_args", {}
-            )
+            add_surface_args["add_texture_args"] = add_surface_args.get("add_texture_args", {})
             add_surface_args["add_texture_args"]["name"] = "vectors"
             slc.set_active_vectors(active_vector_name)
 
         self.add_surface(slc, name="slice", **add_surface_args)
 
         if show_van_alphen_frequency and show_cross_section_area:
-            raise ValueError("show_van_alphen_frequency and show_cross_section_area cannot be True at the same time")
-        
+            raise ValueError(
+                "show_van_alphen_frequency and show_cross_section_area cannot be True at the same time"
+            )
+
         if show_van_alphen_frequency:
             surface = slc.delaunay_2d()
-            text = f"Van Alphen Frequency : {dHvA_frequency(surface.area*FS_AREA_SCALE_FACTOR):.4f}" + " Gauss"
+            text = (
+                f"Van Alphen Frequency : {dHvA_frequency(surface.area * FS_AREA_SCALE_FACTOR):.4f}"
+                + " Gauss"
+            )
             self.add_text(text, name="area_text", **add_text_args)
         elif show_cross_section_area:
             surface = slc.delaunay_2d()
-            text = f"Cross sectional area : {surface.area*FS_AREA_SCALE_FACTOR:.4f}" + " Ang^-2"
+            text = f"Cross sectional area : {surface.area * FS_AREA_SCALE_FACTOR:.4f}" + " Ang^-2"
             self.add_text(text, name="area_text", **add_text_args)
 
         return slc
@@ -375,7 +373,6 @@ class FermiPlotter(pv.Plotter):
         add_text_args=None,
         add_surface_args=None,
     ):
-
         if reverse:
             e_surfaces = e_surfaces[::-1]
 
@@ -406,13 +403,11 @@ class FermiPlotter(pv.Plotter):
 
         if add_plane_widget_args is None:
             add_plane_widget_args = {}
-            
+
         origin = np.array(origin)
         normal = np.array(normal)
 
-        add_surface_args["add_texture_args"] = add_surface_args.get(
-            "add_texture_args", {}
-        )
+        add_surface_args["add_texture_args"] = add_surface_args.get("add_texture_args", {})
         add_surface_args["add_texture_args"]["name"] = "vectors"
 
         add_surface_args["add_active_vectors"] = add_surface_args.get(
@@ -441,9 +436,11 @@ class FermiPlotter(pv.Plotter):
 
         self.add_box_widget(
             callback=partial(
-                self._box_callback, port=0, add_surface_args=add_surface_args, 
-                show_van_alphen_frequency=show_van_alphen_frequency, 
-                show_cross_section_area=show_cross_section_area
+                self._box_callback,
+                port=0,
+                add_surface_args=add_surface_args,
+                show_van_alphen_frequency=show_van_alphen_frequency,
+                show_cross_section_area=show_cross_section_area,
             ),
             bounds=surface.bounds,
             use_planes=True,
@@ -465,7 +462,14 @@ class FermiPlotter(pv.Plotter):
             **add_plane_widget_args,
         )
 
-    def _box_callback(self, planes, port=0, add_surface_args=None, show_van_alphen_frequency=False, show_cross_section_area=False):
+    def _box_callback(
+        self,
+        planes,
+        port=0,
+        add_surface_args=None,
+        show_van_alphen_frequency=False,
+        show_cross_section_area=False,
+    ):
         bounds = []
 
         for i in range(planes.GetNumberOfPlanes()):
@@ -529,7 +533,9 @@ class FermiSlicePlotter:
         Figure resolution in dots per inch, by default 100
     """
 
-    def __init__(self, fermi_surface:pv.PolyData, normal=None, origin=None, figsize=(8, 6), dpi=100, ax=None):
+    def __init__(
+        self, fermi_surface: pv.PolyData, normal=None, origin=None, figsize=(8, 6), dpi=100, ax=None
+    ):
         self.figsize = figsize
         self.dpi = dpi
 
@@ -538,90 +544,99 @@ class FermiSlicePlotter:
             self.fig, self.ax = plt.subplots(figsize=figsize, dpi=dpi)
 
         self.fermi_surface = fermi_surface
-        
-        
-        centroid = self.fermi_surface.points.mean(axis=0) 
-        
+
+        centroid = self.fermi_surface.points.mean(axis=0)
+
         self.origin = centroid if origin is None else origin
-        self.normal = np.array([0,0,1]) if normal is None else normal
+        self.normal = np.array([0, 0, 1]) if normal is None else normal
         if fermi_surface.is2d:
             self.origin = centroid
             n_kx = fermi_surface.ebs.n_kx
             n_ky = fermi_surface.ebs.n_ky
             n_kz = fermi_surface.ebs.n_kz
             if n_kz == 1:
-                self.normal = np.array([0,0,1])
+                self.normal = np.array([0, 0, 1])
             elif n_ky == 1:
-                self.normal = np.array([0,1,0])
+                self.normal = np.array([0, 1, 0])
             elif n_kx == 1:
-                self.normal = np.array([1,0,0])
-        
+                self.normal = np.array([1, 0, 0])
+
     def get_orthonormal_basis(self):
         if np.abs(np.dot(self.normal, [0, 0, 1])) < 0.99:
             v_temp = np.array([0, 0, 1])  # Not parallel to normal
         else:
             v_temp = np.array([0, 1, 0])  # Not parallel to normal
-            
+
         # u = np.cross(self.normal, v_temp).astype(np.float32)
-        u = np.cross(v_temp,self.normal).astype(np.float32)
+        u = np.cross(v_temp, self.normal).astype(np.float32)
         u /= np.linalg.norm(u)
         v = np.cross(self.normal, u).astype(np.float32)
         v /= np.linalg.norm(v)  # Ensure normalization
         return u, v
 
     def set_default_settings(self):
-        if np.isclose(self.origin, np.array([0, 0, 0])).all() and np.isclose(self.normal, np.array([0, 0, 1])).all():
+        if (
+            np.isclose(self.origin, np.array([0, 0, 0])).all()
+            and np.isclose(self.normal, np.array([0, 0, 1])).all()
+        ):
             x_label = "$k_x$ (1/$\AA$)"
             y_label = "$k_y$ (1/$\AA$)"
-            title=f"Fermi Surface Slice at $k_z$ = {self.origin[2]:.2f} (1/$\AA$)"
-        elif np.isclose(self.origin, np.array([0, 0, 0])).all() and np.isclose(self.normal, np.array([0, 1, 0])).all():
+            title = f"Fermi Surface Slice at $k_z$ = {self.origin[2]:.2f} (1/$\AA$)"
+        elif (
+            np.isclose(self.origin, np.array([0, 0, 0])).all()
+            and np.isclose(self.normal, np.array([0, 1, 0])).all()
+        ):
             x_label = "$k_x$ (1/$\AA$)"
             y_label = "$k_z$ (1/$\AA$)"
-            title=f"Fermi Surface Slice at $k_y$ = {self.origin[1]:.2f} (1/$\AA$)"
-        elif np.isclose(self.origin, np.array([0, 0, 0])).all() and np.isclose(self.normal, np.array([1, 0, 0])).all():
+            title = f"Fermi Surface Slice at $k_y$ = {self.origin[1]:.2f} (1/$\AA$)"
+        elif (
+            np.isclose(self.origin, np.array([0, 0, 0])).all()
+            and np.isclose(self.normal, np.array([1, 0, 0])).all()
+        ):
             x_label = "$k_y$ (1/$\AA$)"
             y_label = "$k_z$ (1/$\AA$)"
-            title=f"Fermi Surface Slice at $k_x$ = {self.origin[0]:.2f} (1/$\AA$)"
+            title = f"Fermi Surface Slice at $k_x$ = {self.origin[0]:.2f} (1/$\AA$)"
         else:
-            u,v = self.get_orthonormal_basis()
+            u, v = self.get_orthonormal_basis()
             x_label = "$k_u$ (1/$\AA$)"
             y_label = "$k_v$ (1/$\AA$)"
-            title=f"Fermi Surface Slice (origin={self.origin}, normal={self.normal}, u={u}, v={v})"
-        
+            title = (
+                f"Fermi Surface Slice (origin={self.origin}, normal={self.normal}, u={u}, v={v})"
+            )
+
         self.set_xlabel(x_label)
         self.set_ylabel(y_label)
         self.set_title(title)
         self.set_aspect("equal", adjustable="box")
         self.set_grid(visible=True, linestyle="--", alpha=0.6)
-    
-        
-    def set_xlabel(self, label:str, **kwargs):
+
+    def set_xlabel(self, label: str, **kwargs):
         self.ax.set_xlabel(label, **kwargs)
-        
-    def set_ylabel(self, label:str, **kwargs):
+
+    def set_ylabel(self, label: str, **kwargs):
         self.ax.set_ylabel(label, **kwargs)
-        
-    def set_title(self, label:str, **kwargs):
+
+    def set_title(self, label: str, **kwargs):
         self.ax.set_title(label, **kwargs)
-        
-    def set_grid(self, visible:bool=True, **kwargs):
+
+    def set_grid(self, visible: bool = True, **kwargs):
         self.ax.grid(visible, **kwargs)
-        
-    def set_aspect(self, aspect:str, **kwargs):
+
+    def set_aspect(self, aspect: str, **kwargs):
         self.ax.set_aspect(aspect, **kwargs)
 
     def _prepare_slice_data(
-        self, fermi_surface: pv.PolyData, scalars_name:str=None, vectors_name:str=None
+        self, fermi_surface: pv.PolyData, scalars_name: str = None, vectors_name: str = None
     ):
         """Slices the Fermi surface and stores the resulting data."""
-       
+
         slice_data = fermi_surface.slice(normal=self.normal, origin=self.origin)
         points = slice_data.points
         lines = slice_data.lines
-        
+
         logger.debug(f"Slice Data: \n {slice_data}")
         logger.debug(f"Slice Lines Shape: {slice_data.lines.shape}")
-        
+
         scalars = slice_data.active_scalars
         vectors = slice_data.active_vectors
         active_scalars_name = slice_data.active_scalars_name
@@ -635,14 +650,14 @@ class FermiSlicePlotter:
         else:
             scalars = scalars
             vectors = None
-            
+
         if scalars_name is not None and scalars_name in slice_data.point_data:
             scalars = slice_data.point_data[scalars_name]
         elif scalars_name is not None and scalars_name not in slice_data.point_data:
             msg = f"Scalars name {scalars_name} not found in slice data."
             msg += f"Using active scalars ({active_scalars_name}) instead."
             user_logger.warning(msg)
-            
+
         if vectors_name is not None and vectors_name in slice_data.point_data:
             vectors = slice_data.point_data[vectors_name]
         elif vectors_name is not None and vectors_name not in slice_data.point_data:
@@ -652,7 +667,7 @@ class FermiSlicePlotter:
 
         return lines, points, scalars, vectors
 
-    def _iter_segments(self, lines: List[int]):
+    def _iter_segments(self, lines: list[int]):
         """
         A generator that yields the start and end indices of each line segment.
 
@@ -660,9 +675,7 @@ class FermiSlicePlotter:
         PyVista `lines` array, correctly processing polylines.
         """
         if lines is None:
-            raise ValueError(
-                "Slice data is not prepared. Call a plotting method first."
-            )
+            raise ValueError("Slice data is not prepared. Call a plotting method first.")
 
         i = 0
         while i < len(lines):
@@ -681,9 +694,9 @@ class FermiSlicePlotter:
 
     def plot_lines(
         self,
-        fermi_surface:pv.PolyData|None=None,
-        scalars_name:str=None,
-        vectors_name:str=None,
+        fermi_surface: pv.PolyData | None = None,
+        scalars_name: str = None,
+        vectors_name: str = None,
         cmap: str = "plasma",
         **kwargs,
     ):
@@ -697,14 +710,14 @@ class FermiSlicePlotter:
         """
         if fermi_surface is None:
             fermi_surface = self.fermi_surface
-            
+
         if vectors_name is not None:
             self.vector_name = vectors_name
         elif fermi_surface.active_vectors_name is not None:
             self.vector_name = fermi_surface.active_vectors_name
         else:
             self.vector_name = "vector"
-            
+
         if scalars_name is not None:
             self.scalar_name = scalars_name
         elif fermi_surface.active_scalars_name is not None:
@@ -712,7 +725,9 @@ class FermiSlicePlotter:
         else:
             self.scalar_name = "scalar"
 
-        lines, points, scalars, vectors = self._prepare_slice_data(fermi_surface,scalars_name, vectors_name)
+        lines, points, scalars, vectors = self._prepare_slice_data(
+            fermi_surface, scalars_name, vectors_name
+        )
         if points is None or scalars is None:
             raise ValueError("Slice data is not available for plotting lines.")
 
@@ -744,9 +759,9 @@ class FermiSlicePlotter:
 
     def plot_points(
         self,
-        fermi_surface:pv.PolyData=None,
-        scalars_name:str=None,
-        vectors_name:str=None,
+        fermi_surface: pv.PolyData = None,
+        scalars_name: str = None,
+        vectors_name: str = None,
         cmap: str = "plasma",
         **kwargs,
     ):
@@ -758,7 +773,7 @@ class FermiSlicePlotter:
             self.vector_name = fermi_surface.active_vectors_name
         else:
             self.vector_name = "vector"
-            
+
         if scalars_name is not None:
             self.scalar_name = scalars_name
         elif fermi_surface.active_scalars_name is not None:
@@ -766,7 +781,9 @@ class FermiSlicePlotter:
         else:
             self.scalar_name = "scalar"
 
-        lines, points, scalars, vectors = self._prepare_slice_data(fermi_surface, scalars_name, vectors_name)
+        lines, points, scalars, vectors = self._prepare_slice_data(
+            fermi_surface, scalars_name, vectors_name
+        )
         if points is None:
             raise ValueError("Slice data is not available for plotting lines.")
 
@@ -779,17 +796,17 @@ class FermiSlicePlotter:
 
     def plot_arrows(
         self,
-        fermi_surface:pv.PolyData|None=None,
-        scalars_name:str=None,
-        vectors_name:str=None,
-        angles:str='uv',
+        fermi_surface: pv.PolyData | None = None,
+        scalars_name: str = None,
+        vectors_name: str = None,
+        angles: str = "uv",
         scale=None,
-        arrow_length_factor:float=1.0,
-        scale_units:str='inches',
-        units:str='inches',
+        arrow_length_factor: float = 1.0,
+        scale_units: str = "inches",
+        units: str = "inches",
         color=None,
         cmap: str = "plasma",
-        clim:Tuple[float, float]=None,
+        clim: tuple[float, float] = None,
         **kwargs,
     ):
         """
@@ -802,17 +819,17 @@ class FermiSlicePlotter:
         ----------
         factor : float, optional
             A scaling factor for the length of the arrows.
-        
+
         """
         if fermi_surface is None:
             fermi_surface = self.fermi_surface
-            
+
         if vectors_name is not None:
             self.vector_name = vectors_name
         elif fermi_surface.active_vectors_name is not None:
             self.vector_name = fermi_surface.active_vectors_name
             self.vector_name = "vector"
-            
+
         if scalars_name is not None:
             self.scalar_name = scalars_name
         elif fermi_surface.active_scalars_name is not None:
@@ -820,28 +837,29 @@ class FermiSlicePlotter:
         else:
             self.scalar_name = "scalar"
 
-        lines, points, scalars, vectors = self._prepare_slice_data(fermi_surface, scalars_name, vectors_name)
+        lines, points, scalars, vectors = self._prepare_slice_data(
+            fermi_surface, scalars_name, vectors_name
+        )
         if points is None or vectors is None:
             raise ValueError("Vector data is not available for plotting arrows.")
 
         # Use the generator to iterate
         vector_magnitude = np.linalg.norm(vectors, axis=1)
-        
+
         if scale is None:
-            scale = vector_magnitude.max()*3
+            scale = vector_magnitude.max() * 3
         scale = scale / arrow_length_factor
-        
+
         quiver_args = [points[:, 0], points[:, 1], vectors[:, 0], vectors[:, 1]]
         if color is not None:
             quiver_args.append(vector_magnitude)
-        
+
         cmap = plt.get_cmap(cmap)
         if clim is not None:
             norm = plt.Normalize(vmin=clim[0], vmax=clim[1])
         else:
-            norm=plt.Normalize(vmin=vector_magnitude.min(), vmax=vector_magnitude.max())
-        
-        
+            norm = plt.Normalize(vmin=vector_magnitude.min(), vmax=vector_magnitude.max())
+
         self.vector_plot = self.ax.quiver(
             points[:, 0],  # Arrow position x-component
             points[:, 1],  # Arrow position y-component
@@ -851,18 +869,18 @@ class FermiSlicePlotter:
             angles=angles,
             scale=scale,
             scale_units=scale_units,
-            units = units,
+            units=units,
             color=color,
             cmap=cmap,
             norm=norm,
-            **kwargs
+            **kwargs,
         )
 
     def plot(
         self,
-        fermi_surface: pv.PolyData|None=None,
-        vectors_name:str=None,
-        scalars_name:str=None,
+        fermi_surface: pv.PolyData | None = None,
+        vectors_name: str = None,
+        scalars_name: str = None,
         plot_arrows: bool = False,
         plot_arrows_kwargs: dict = None,
         **line_kwargs,
@@ -875,8 +893,10 @@ class FermiSlicePlotter:
         """
         if fermi_surface is None:
             fermi_surface = self.fermi_surface
-            
-        lines, points, scalars, vectors = self._prepare_slice_data(fermi_surface, scalars_name, vectors_name)
+
+        lines, points, scalars, vectors = self._prepare_slice_data(
+            fermi_surface, scalars_name, vectors_name
+        )
 
         # 2. Plot the contour lines
         self.plot_lines(fermi_surface, scalars_name, vectors_name, **line_kwargs)
@@ -888,9 +908,9 @@ class FermiSlicePlotter:
 
     def scatter(
         self,
-        fermi_surface: pv.PolyData|None=None,
-        scalars_name:str=None,
-        vectors_name:str=None,
+        fermi_surface: pv.PolyData | None = None,
+        scalars_name: str = None,
+        vectors_name: str = None,
         plot_arrows: bool = False,
         plot_arrows_kwargs: dict = None,
         arrow_factor: float = 1.0,
@@ -905,34 +925,44 @@ class FermiSlicePlotter:
         """
         if fermi_surface is None:
             fermi_surface = self.fermi_surface
-            
+
         # 1. Slice the data
-        lines, points, scalars, vectors = self._prepare_slice_data(fermi_surface, scalars_name, vectors_name)
-        
+        lines, points, scalars, vectors = self._prepare_slice_data(
+            fermi_surface, scalars_name, vectors_name
+        )
+
         # 2. Plot the contour lines
         self.plot_points(fermi_surface, scalars_name, vectors_name, cmap=cmap, **line_kwargs)
 
         # 3. Optionally plot the vector arrows
         plot_arrows_args = plot_arrows_args or {}
         if plot_arrows and vectors is not None:
-            self.plot_arrows(fermi_surface, scalars_name, vectors_name, factor=arrow_factor, cmap=cmap, **plot_arrows_kwargs)
+            self.plot_arrows(
+                fermi_surface,
+                scalars_name,
+                vectors_name,
+                factor=arrow_factor,
+                cmap=cmap,
+                **plot_arrows_kwargs,
+            )
 
-    def show_colorbar(self, 
-                      show_vectors:bool=False,
-                      show_scalars:bool=False,
-                      label:str="",
-                      vector_label:str="",
-                      scalar_label:str="",
-                      vector_colorbar_args:dict=None,
-                      scalar_colorbar_args:dict=None,
-                      **kwargs):
+    def show_colorbar(
+        self,
+        show_vectors: bool = False,
+        show_scalars: bool = False,
+        label: str = "",
+        vector_label: str = "",
+        scalar_label: str = "",
+        vector_colorbar_args: dict = None,
+        scalar_colorbar_args: dict = None,
+        **kwargs,
+    ):
         plot_handles = []
         labels = []
         colorbar_args_list = []
         vector_colorbar_args = vector_colorbar_args if vector_colorbar_args is not None else {}
         scalar_colorbar_args = scalar_colorbar_args if scalar_colorbar_args is not None else {}
-        
-        
+
         if show_vectors and show_scalars:
             plot_handles = [self.scalar_plot, self.vector_plot]
             labels = [scalar_label or f"{self.scalar_name}", vector_label or f"{self.vector_name}"]
@@ -949,13 +979,13 @@ class FermiSlicePlotter:
             tmp_colorbar_args = kwargs.copy()
             tmp_colorbar_args.update(vector_colorbar_args)
             colorbar_args_list = [tmp_colorbar_args]
-        elif show_scalars and hasattr(self, "scalar_plot"):
-            plot_handles = [self.scalar_plot]
-            labels = [label or f"{self.scalar_name}"]
-            tmp_colorbar_args = kwargs.copy()
-            tmp_colorbar_args.update(scalar_colorbar_args)
-            colorbar_args_list = [tmp_colorbar_args]
-        elif not show_vectors and not show_scalars and hasattr(self, "scalar_plot"):
+        elif (
+            show_scalars
+            and hasattr(self, "scalar_plot")
+            or not show_vectors
+            and not show_scalars
+            and hasattr(self, "scalar_plot")
+        ):
             plot_handles = [self.scalar_plot]
             labels = [label or f"{self.scalar_name}"]
             tmp_colorbar_args = kwargs.copy()
@@ -969,12 +999,10 @@ class FermiSlicePlotter:
             colorbar_args_list = [tmp_colorbar_args]
         else:
             raise ValueError("No plot to show colorbar for")
-        
-        
+
         self.colorbars = []
         for plot_handle, label, colorbar_args in zip(plot_handles, labels, colorbar_args_list):
             self.colorbars.append(self.fig.colorbar(plot_handle, label=label, **colorbar_args))
-        
-        
+
     def show(self):
         plt.show()

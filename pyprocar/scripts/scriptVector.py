@@ -1,6 +1,5 @@
 from pyprocar.core import FermiSurface, ProcarSelect
 from pyprocar.io import ProcarParser
-from pyprocar.plotter import ProcarPlot
 from pyprocar.utils import UtilsProcar, welcome
 
 
@@ -16,7 +15,6 @@ def Vector(
     code="vasp",
     repair=True,
 ):
-
     welcome()
 
     if code == "vasp" or code == "abinit":
@@ -34,7 +32,7 @@ def Vector(
     print("orbitals      : ", orbitals)
     print("scale factor  : ", scale)
 
-    if bands is [] and energy is None:
+    if bands == [] and energy is None:
         raise RuntimeError("You must provide the bands or energy.")
     if fermi == None and outcar == None:
         print("WARNING: Fermi's Energy not set")

@@ -53,9 +53,7 @@ def bandgap(
 
     if all(i >= 0 for i in subBands[:, idx]) or all(i <= 0 for i in subBands[:, idx]):
         possibleGap = posVal - negVal
-        if bandGap is None:
-            bandGap = possibleGap
-        elif possibleGap < bandGap:
+        if bandGap is None or possibleGap < bandGap:
             bandGap = possibleGap
     else:
         bandGap = 0

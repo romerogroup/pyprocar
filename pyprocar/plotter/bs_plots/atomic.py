@@ -3,47 +3,39 @@ __maintainer__ = "Pedram Tavadze and Logan Lang"
 __email__ = "petavazohi@mail.wvu.edu, lllang@mix.wvu.edu"
 __date__ = "March 31, 2020"
 
-import json
 import logging
-from dataclasses import asdict, dataclass, field
-from pathlib import Path
-from typing import List, Optional, Tuple, Union
 
-import matplotlib.cm as cm
 import matplotlib.colors as mpcolors
-import matplotlib.patches as mpatches
 import matplotlib.pyplot as plt
 import numpy as np
-import pandas as pd
-from matplotlib.collections import LineCollection, PathCollection
-from matplotlib.lines import Line2D
-from matplotlib.ticker import MultipleLocator
+from matplotlib.collections import LineCollection
 
 from pyprocar.core import KPath
 from pyprocar.plotter.bs_plots.base import BasePlotter
 
 logger = logging.getLogger(__name__)
 
+
 def get_class_attributes(cls):
     class_attributes = {}
     for name, value in cls.__dict__.items():
-        if not callable(value) and not name.startswith('__'):
+        if not callable(value) and not name.startswith("__"):
             class_attributes[name] = value
     return class_attributes
 
 
 class AtomicLevelsPlot(BasePlotter):
-    elimit: Tuple[float, float] = None
+    elimit: tuple[float, float] = None
     labels_prefix: str = "s"
     cmap: str = "plasma"
-    norm: Union[mpcolors.Normalize, type] = None
-    clim: Tuple[float, float] = (None, None)
+    norm: mpcolors.Normalize | type = None
+    clim: tuple[float, float] = (None, None)
     show_colorbar: bool | None = True
     colorbar_kwargs: dict | None = None
     linewidth: float = None
     line_collection_kwargs: dict | None = None
     show_text: bool = True
-    
+
     # Resolve colormap
     def _plot(self, kpath: KPath, bands: np.ndarray, scalars: np.ndarray = None, **kwargs):
         # Fake 2-point x-axis for drawing horizontal segments
@@ -66,7 +58,6 @@ class AtomicLevelsPlot(BasePlotter):
         # Remove x ticks for atomic levels and compute text bbox in data units
         self.ax.xaxis.set_major_locator(plt.NullLocator())
 
-        
         # Determine a representative text bbox in data coordinates
         n_bands = bands.shape[1]
         sample_text = f"{self.labels_prefix}-0 : b-{n_bands}"
@@ -80,11 +71,10 @@ class AtomicLevelsPlot(BasePlotter):
             # Fallback small sizes if renderer not ready
             w, h = 0.05, 0.05
         tmp_txt.remove()
-        
+
         # Ensure enough x-range to accommodate lateral shifts and keep labels inside
         x_base = self.x[0] + 0.2 * w
         self.set_xlim((self.x[0], self.x[-1]))
-        
 
         # Plot atomic levels
         last_lc = None
@@ -98,7 +88,7 @@ class AtomicLevelsPlot(BasePlotter):
             shift_state = 0  # 0: first column near left edge, 1: second column to the right
             for iband in range(n_bands):
                 y = float(energies[iband])
-     
+
                 pts = np.array([[self.x[0], y], [self.x[1], y]])
                 segments = np.array([pts])
                 lc = LineCollection(segments, **self.line_collection_kwargs)
@@ -118,9 +108,9 @@ class AtomicLevelsPlot(BasePlotter):
                     # Clamp inside current xlim
                     xmin, xmax = self.ax.get_xlim()
                     x_pos = min(max(x_pos, xmin + 0.05 * w), xmax - 0.05 * w)
-                    self.ax.text(x_pos, y, f"{self.labels_prefix}-{ispin} : b-{iband+1}")
+                    self.ax.text(x_pos, y, f"{self.labels_prefix}-{ispin} : b-{iband + 1}")
                     last_y = y
-        
+
         # Determine limits
         if elimit is None:
             ymin = float(bands.min())
@@ -141,9 +131,7 @@ class AtomicLevelsPlot(BasePlotter):
         self.values_dict["kpath_values"] = self.x
         self.values_dict["kpath_tick_names"] = ["", ""]
 
-    
 
-    
 # if __name__ == "__main__":
 #     scatter = Scatter(clim=(0, 10))
 #     print(scatter.class_plot_params)

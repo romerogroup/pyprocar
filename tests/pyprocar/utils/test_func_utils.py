@@ -12,7 +12,10 @@ def test_expand_grouped_params_to_dicts_no_groups():
 def test_expand_grouped_params_to_dicts_single_group():
     params = {"atoms": [[0, 2], [1]], "orbitals": [0, 1, 2]}
     result = expand_grouped_params_to_dicts(params)
-    assert result == [{"atoms": [0, 2], "orbitals": [0, 1, 2]}, {"atoms": [1], "orbitals": [0, 1, 2]}]
+    assert result == [
+        {"atoms": [0, 2], "orbitals": [0, 1, 2]},
+        {"atoms": [1], "orbitals": [0, 1, 2]},
+    ]
 
 
 def test_expand_grouped_params_to_dicts_aligned_groups():
@@ -25,4 +28,3 @@ def test_expand_grouped_params_to_dicts_mismatched_lengths():
     params = {"atoms": [[0], [1]], "orbitals": [[2, 3]]}
     with pytest.raises(ValueError):
         expand_grouped_params_to_dicts(params)
-

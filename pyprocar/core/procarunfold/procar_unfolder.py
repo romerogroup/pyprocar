@@ -1,12 +1,12 @@
 import numpy as np
 from ase.io import read
-from .unfolder import Unfolder
-import matplotlib.pyplot as plt
-from .fatband import plot_band_weight
+
 from ...io import ProcarParser
+from .fatband import plot_band_weight
+from .unfolder import Unfolder
 
 
-class ProcarUnfolder(object):
+class ProcarUnfolder:
     def __init__(self, procar, poscar, supercell_matrix, ispin=None):
         self.fname = procar
         self.supercell_matrix = supercell_matrix
@@ -18,8 +18,6 @@ class ProcarUnfolder(object):
     def _parse_procar(self, ispin=None):
         self.procar = ProcarParser()
         self.procar.readFile2(self.fname, phase=True, ispin=ispin)
-
-        
 
     def _prepare_unfold_basis(self, ispin=None):
         # basis, which are the name of the bands e.g. 'Ti|dxy|0'
@@ -47,11 +45,8 @@ class ProcarUnfolder(object):
                 for spin in range(self.procar.nspin):
                     # todo: what about spin?
                     self.basis.append("%s|%s|%s" % (None, orb, spin))
-                    self.positions.append(
-                        self.atoms.get_scaled_positions()[iatom])
-            
-            
-            
+                    self.positions.append(self.atoms.get_scaled_positions()[iatom])
+
     def unfold(self, ispin=None):
         # spd: spd[kpoint][band][ispin][atom][orbital]
         # bands[kpt][iband]
@@ -69,21 +64,21 @@ class ProcarUnfolder(object):
             phase=False,
         )
         w = self.unfolder.get_weights()
-        return w # , self.unfolder
+        return w  # , self.unfolder
 
     def plot(
-            self,
-            efermi=5.46,
-            ispin=None,
-            ylim=(-5, 10),
-            ktick=[0, 41, 83, 125, 200],
-            kname=["$\Gamma$", "X", "M", "R", "$\Gamma$"],
-            show_band=True,
-            shift_efermi=True,
-            width=4.0,
-            color="blue",
-            axis=None,
-            savetab=None,
+        self,
+        efermi=5.46,
+        ispin=None,
+        ylim=(-5, 10),
+        ktick=[0, 41, 83, 125, 200],
+        kname=["$\Gamma$", "X", "M", "R", "$\Gamma$"],
+        show_band=True,
+        shift_efermi=True,
+        width=4.0,
+        color="blue",
+        axis=None,
+        savetab=None,
     ):
         iispin = 0
         if ispin is not None:
@@ -100,8 +95,7 @@ class ProcarUnfolder(object):
                 tab,
                 delimiter=",",
                 fmt="%10.4f",
-                header=
-                "# nkpoints: %s   nbands:%s \n#E(k1) w(k1) E(k2) w(k2) E(k3) w(k3)..."
+                header="# nkpoints: %s   nbands:%s \n#E(k1) w(k1) E(k2) w(k2) E(k3) w(k3)..."
                 % (nk, nb),
             )
         axes = plot_band_weight(

@@ -1,8 +1,6 @@
 import logging
 import re
-import sys
 
-import matplotlib.pyplot as plt
 import numpy as np
 
 from pyprocar.utils.utilsprocar import UtilsProcar
@@ -10,50 +8,50 @@ from pyprocar.utils.utilsprocar import UtilsProcar
 
 class ProcarFileFilter:
     """Process a PROCAR file fields line-wise, specially useful for HUGE
-  files. This could be thought as pre-processing, writting a new
-  PROCAR-like file but reduced in some way.
+    files. This could be thought as pre-processing, writting a new
+    PROCAR-like file but reduced in some way.
 
-  A PROCAR File is basically an multi-dimmensional arrays of data, the
-  largest being:
-  spd_data[#kpoints][#band][#ispin][#atom][#orbital]
+    A PROCAR File is basically an multi-dimmensional arrays of data, the
+    largest being:
+    spd_data[#kpoints][#band][#ispin][#atom][#orbital]
 
-  while the number of Kpoints d'ont seems a target for reduction
-  (omission or averaging), the other fields can be reduced, for
-  instance: grouping the atoms by species or as "surtrate" and
-  "adsorbate", or just keeping the bands close to the Fermi energy, or
-  discarding the d-orbitals in a s-p system. You got the idea, rigth?
+    while the number of Kpoints d'ont seems a target for reduction
+    (omission or averaging), the other fields can be reduced, for
+    instance: grouping the atoms by species or as "surtrate" and
+    "adsorbate", or just keeping the bands close to the Fermi energy, or
+    discarding the d-orbitals in a s-p system. You got the idea, rigth?
 
-  Example:
+    Example:
 
-  -To group the "s", "p" y "d" orbitals from the file PROCAR and write
-   them in PROCAR-spd:
+    -To group the "s", "p" y "d" orbitals from the file PROCAR and write
+     them in PROCAR-spd:
 
-   >>> a = procar.ProcarFileFilter("PROCAR", "PROCAR-new")
-   >>> a.FilterOrbitals([[0],[1,2,3],[4,5,6,7,8]], ['s','p', 'd'])
+     >>> a = procar.ProcarFileFilter("PROCAR", "PROCAR-new")
+     >>> a.FilterOrbitals([[0],[1,2,3],[4,5,6,7,8]], ['s','p', 'd'])
 
-       The PROCAR-new will have just 3+1 columns (orbitals are colum-wise
-       , take a look to the file). If you omit the ['s', 'p', 'd'] list,
-       the new orbitals will have a generic meaningless name (o1, o2, o3)
+         The PROCAR-new will have just 3+1 columns (orbitals are colum-wise
+         , take a look to the file). If you omit the ['s', 'p', 'd'] list,
+         the new orbitals will have a generic meaningless name (o1, o2, o3)
 
-  -To group the atoms 1,2,5,6 and 3,4,7,8 from PROCAR and write them
-   in PROCAR-new (note the 0-based indexes):
+    -To group the atoms 1,2,5,6 and 3,4,7,8 from PROCAR and write them
+     in PROCAR-new (note the 0-based indexes):
 
-   >>> a = procar.ProcarFileFilter("PROCAR", "PROCAR-new")
-   >>> a.FilterAtoms([[0,1,4,5],[2,3,6,7]])
+     >>> a = procar.ProcarFileFilter("PROCAR", "PROCAR-new")
+     >>> a.FilterAtoms([[0,1,4,5],[2,3,6,7]])
 
-   -To select just the total density (ie: ignoring the spin-resolved stuff,
-    if any)from PROCAR and write it in PROCAR-new:
+     -To select just the total density (ie: ignoring the spin-resolved stuff,
+      if any)from PROCAR and write it in PROCAR-new:
 
-   >>> a = procar.ProcarFileFilter("PROCAR", "PROCAR-new")
-   >>> a.FilterSpin([0])
+     >>> a = procar.ProcarFileFilter("PROCAR", "PROCAR-new")
+     >>> a.FilterSpin([0])
 
-  """
+    """
 
     def __init__(self, infile=None, outfile=None, loglevel=logging.DEBUG):
         """Initialize the class.
 
-    Params: `infile=None`, input fileName
-    """
+        Params: `infile=None`, input fileName
+        """
         self.infile = infile
         self.outfile = outfile
 
@@ -63,9 +61,7 @@ class ProcarFileFilter:
         # This is a handler for logging, by now just keep it
         # untouched. Dont really matters its usage
         self.ch = logging.StreamHandler()
-        self.ch.setFormatter(
-            logging.Formatter("%(name)s::%(levelname)s:" " %(message)s")
-        )
+        self.ch.setFormatter(logging.Formatter("%(name)s::%(levelname)s: %(message)s"))
         self.ch.setLevel(logging.DEBUG)
         self.log.addHandler(self.ch)
         # At last, one message to the logger.
@@ -150,27 +146,27 @@ class ProcarFileFilter:
 
     def FilterOrbitals(self, orbitals, orbitalsNames):
         """
-    Reads the file already set by SetInFile() and writes a new
-    file already set by SetOutFile(). The new file only has the
-    selected/grouped orbitals.
+        Reads the file already set by SetInFile() and writes a new
+        file already set by SetOutFile(). The new file only has the
+        selected/grouped orbitals.
 
-    Args:
+        Args:
 
-    -orbitals: nested iterable with the orbitals indexes to be
-      considered. For example: [[0],[2]] means select the first
-      orbital ("s") and the second one ("pz").
-      [[0],[1,2,3],[4,5,6,7,8]] is ["s", "p", "d"].
+        -orbitals: nested iterable with the orbitals indexes to be
+          considered. For example: [[0],[2]] means select the first
+          orbital ("s") and the second one ("pz").
+          [[0],[1,2,3],[4,5,6,7,8]] is ["s", "p", "d"].
 
-    -orbitalsNames: The name to be put in each new orbital field (of a
-      orbital line). For example ["s","p","d"] is a good
-      `orbitalsName` for the `orbitals`=[[0],[1,2,3],[4,5,6,7,8]].
-      However, ["foo", "bar", "baz"] is equally valid.
+        -orbitalsNames: The name to be put in each new orbital field (of a
+          orbital line). For example ["s","p","d"] is a good
+          `orbitalsName` for the `orbitals`=[[0],[1,2,3],[4,5,6,7,8]].
+          However, ["foo", "bar", "baz"] is equally valid.
 
-    Note:
-      -The atom index is not counted as the first field.
-      -The last column ('tot') is so important that it is always
-       included. Do not needs to be called
-    """
+        Note:
+          -The atom index is not counted as the first field.
+          -The last column ('tot') is so important that it is always
+           included. Do not needs to be called
+        """
         # setting iostuff, this method -and class- should not made any
         # checking about IO, that is the job of the caller
         self.log.info("In File: " + self.infile)
@@ -204,29 +200,29 @@ class ProcarFileFilter:
 
     def FilterAtoms(self, atomsGroups):
         """
-    Reads the file already set by SetInFile() and writes a new
-    file already set by SetOutFile(). The new file only has the
-    selected/grouped atoms.
+        Reads the file already set by SetInFile() and writes a new
+        file already set by SetOutFile(). The new file only has the
+        selected/grouped atoms.
 
-    Args:
+        Args:
 
-    -atomsGroups: nested iterable with the atoms indexes (0-based) to
-      be considered. For example: [[0],[2]] means select the first and
-      the second atoms. While [[1,2,3],[4,5,6,7,8]] means select the
-      contribution of atoms 1+2+3 and 4+5+6+7+8
+        -atomsGroups: nested iterable with the atoms indexes (0-based) to
+          be considered. For example: [[0],[2]] means select the first and
+          the second atoms. While [[1,2,3],[4,5,6,7,8]] means select the
+          contribution of atoms 1+2+3 and 4+5+6+7+8
 
-    Note:
-      -The atom index is c-based (or python) beginning with 0
-      -The output has a dummy atom index, without any intrisic meaning
+        Note:
+          -The atom index is c-based (or python) beginning with 0
+          -The output has a dummy atom index, without any intrisic meaning
 
-    """
+        """
         # if the user forgot the [...], i.e. [0,[1,2]], we need to add them
         for i in range(len(atomsGroups)):
             try:
                 iter(atomsGroups[i])
             except TypeError:
                 atomsGroups[i] = [atomsGroups[i]]
-        
+
         # setting iostuff, this method -and class- should not made any
         # checking about IO, that is the job of the caller
         self.log.info("In File: " + self.infile)
@@ -283,21 +279,21 @@ class ProcarFileFilter:
 
     def FilterBands(self, Min, Max):
         """
-    Reads the file already set by SetInFile() and writes a new
-    file already set by SetOutFile(). The new file only has the
-    selected bands.
+        Reads the file already set by SetInFile() and writes a new
+        file already set by SetOutFile(). The new file only has the
+        selected bands.
 
-    Args:
+        Args:
 
-    -Min, Max:
-      the minimum/maximum band  index to be considered, the indexes
-      are the same used by vasp (ie written in the file).
+        -Min, Max:
+          the minimum/maximum band  index to be considered, the indexes
+          are the same used by vasp (ie written in the file).
 
 
-    Note: -Since bands are somewhat disordered in vasp you may like to
-      consider a large region and made some trial and error
+        Note: -Since bands are somewhat disordered in vasp you may like to
+          consider a large region and made some trial and error
 
-    """
+        """
         # setting iostuff, this method -and class- should not made any
         # checking about IO, that is the job of the caller
         self.log.info("In File: " + self.infile)
@@ -318,7 +314,6 @@ class ProcarFileFilter:
         replacement = "# of bands: " + str(Max - Min + 1)
         line = re.sub(pattern, replacement, line)
 
-        
         self.log.debug("The new line with # of bands is: " + line)
 
         fout.write(line + "\n")
@@ -341,22 +336,22 @@ class ProcarFileFilter:
 
     def FilterSpin(self, components):
         """Reads the file already set by SetInFile() and writes a new
-    file already set by SetOutFile(). The new file only has the
-    selected part of the density (sigma_i).
+        file already set by SetOutFile(). The new file only has the
+        selected part of the density (sigma_i).
 
-    Args:
+        Args:
 
-    -components: For non colinear spin calculations
-      the spin component block, for instante [0] menas just
-      the density, while [1,2] would be the the sigma_x and sigma_y.
-      For colinear spin polarized calculations [0] means spin up
-      component and [1] spin down component.
+        -components: For non colinear spin calculations
+          the spin component block, for instante [0] menas just
+          the density, while [1,2] would be the the sigma_x and sigma_y.
+          For colinear spin polarized calculations [0] means spin up
+          component and [1] spin down component.
 
 
-    UPDATE: Colinear spin calculation implemented. It uses regex to
-            check for the type of calculation. Hopefully, this won't
-            be an issue with memory nowadays.
-    """
+        UPDATE: Colinear spin calculation implemented. It uses regex to
+                check for the type of calculation. Hopefully, this won't
+                be an issue with memory nowadays.
+        """
         # setting iostuff, this method -and class- should not made any
         # checking about IO, that is the job of the caller
         self.log.info("In File: " + self.infile)
@@ -440,16 +435,16 @@ class ProcarFileFilter:
 
     def FilterKpoints(self, Min, Max):
         """
-    Reads the file already set by SetInFile() and writes a new
-    file already set by SetOutFile(). The new file the
-    selected bands.
+        Reads the file already set by SetInFile() and writes a new
+        file already set by SetOutFile(). The new file the
+        selected bands.
 
-    Args:
+        Args:
 
-    -Min, Max:
-      the minimum/maximum band  kpoint to be considered, the indexes
-      are the same used by vasp (i.e. written in the file). Not starting from zero
-    """
+        -Min, Max:
+          the minimum/maximum band  kpoint to be considered, the indexes
+          are the same used by vasp (i.e. written in the file). Not starting from zero
+        """
         # setting iostuff, this method -and class- should not made any
         # checking about IO, that is the job of the caller
         self.log.info("In File: " + self.infile)

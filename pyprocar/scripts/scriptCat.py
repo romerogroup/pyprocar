@@ -7,7 +7,6 @@ __date__ = "March 31, 2020"
 import glob
 import os
 import re
-from typing import List
 
 import numpy as np
 
@@ -17,7 +16,7 @@ from pyprocar.utils.utilsprocar import UtilsProcar
 
 
 def cat(
-    inFiles: List[str] = None,
+    inFiles: list[str] = None,
     outFile: str = "PROCAR_merged",
     gz: bool = False,
     mergeparallel: bool = False,
@@ -64,7 +63,6 @@ def cat(
     print("Output        : ", outFile)
 
     if mergeparallel == False and fixformat == False:
-
         if gz == True:
             print("out compressed: true")
 
@@ -121,7 +119,7 @@ def _mergeparallel(inputfiles=None, outputfile=None, nspin=1, abinit_output=None
 
         # reading the second line of the header to set as the separating line
         # in the colinear spin PROCAR.
-        fp = open(spinup_list[0], "r")
+        fp = open(spinup_list[0])
         header1 = fp.readline()
         header2 = fp.readline()
         fp.close()
@@ -157,12 +155,12 @@ def _fixformat(inputfile=None, outputfile=None):
 
     ####### Fixing the parallel PROCARs from Abinit ##########
 
-    rf = open(inputfile, "r")
+    rf = open(inputfile)
     data = rf.read()
     rf.close()
 
     # reading headers
-    rffl = open(inputfile, "r")
+    rffl = open(inputfile)
     first_line = rffl.readline()
     rffl.close()
 
@@ -178,12 +176,9 @@ def _fixformat(inputfile=None, outputfile=None):
     kpoints_raw = re.findall("k-point\s*[0-9]\s*:*.*", data)
 
     for kpoint_counter in range(len(kpoints_raw)):
-
         if kpoint_counter == (len(kpoints_raw) - 1):
             # get bands of last k point
-            bands_raw = re.findall(
-                kpoints_raw[kpoint_counter] + "([a-z0-9\s\n.+#-]*)", data
-            )[0]
+            bands_raw = re.findall(kpoints_raw[kpoint_counter] + "([a-z0-9\s\n.+#-]*)", data)[0]
 
         else:
             # get bands between k point n and n+1
@@ -201,19 +196,16 @@ def _fixformat(inputfile=None, outputfile=None):
         fp.write(kpoints_raw[kpoint_counter] + "\n\n")
 
         for band_counter in range(len(raw_bands)):
-
             if band_counter == (len(raw_bands) - 1):
                 # the last band
-                single_band = re.findall(
-                    raw_bands[band_counter] + "([a-z0-9.+\s\n-]*)", bands_raw
-                )[0]
+                single_band = re.findall(raw_bands[band_counter] + "([a-z0-9.+\s\n-]*)", bands_raw)[
+                    0
+                ]
 
             else:
                 # get a single band
                 single_band = re.findall(
-                    raw_bands[band_counter]
-                    + "([a-z0-9.+\s\n-]*)"
-                    + raw_bands[band_counter + 1],
+                    raw_bands[band_counter] + "([a-z0-9.+\s\n-]*)" + raw_bands[band_counter + 1],
                     bands_raw,
                 )[0]
 

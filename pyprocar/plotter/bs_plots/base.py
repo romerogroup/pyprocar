@@ -6,18 +6,12 @@ __date__ = "March 31, 2020"
 import json
 import logging
 from abc import ABC, abstractmethod
-from dataclasses import asdict, dataclass, field
-from pathlib import Path
-from typing import List, Optional, Tuple, Union
 
 import matplotlib.cm as cm
 import matplotlib.colors as mpcolors
-import matplotlib.patches as mpatches
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from matplotlib.collections import LineCollection, PathCollection
-from matplotlib.lines import Line2D
 from matplotlib.ticker import MultipleLocator
 
 from pyprocar.core import KPath
@@ -25,15 +19,16 @@ from pyprocar.core.property_store import Property
 
 logger = logging.getLogger(__name__)
 
+
 def get_class_attributes(cls):
     class_attributes = {}
     for name, value in cls.__dict__.items():
-        if not callable(value) and not name.startswith('__'):
+        if not callable(value) and not name.startswith("__"):
             class_attributes[name] = value
     return class_attributes
 
-class BasePlotter(ABC):
 
+class BasePlotter(ABC):
     def __init__(self, figsize=(8, 6), dpi=100, ax=None, **kwargs):
         self.figsize = figsize
         self.dpi = dpi
@@ -47,53 +42,49 @@ class BasePlotter(ABC):
         self.data_store = {}
         self.values_dict = {}
         self._legend_handles = []
-        
+
         self.x = None
         self.update_instance_params(**kwargs)
-        
+
     @abstractmethod
-    def _plot(self, kpath: KPath, bands: np.ndarray,  **kwargs):
+    def _plot(self, kpath: KPath, bands: np.ndarray, **kwargs):
         pass
-    
 
     @property
     def class_plot_params(self):
         class_attrs = get_class_attributes(self.__class__)
         tmp_attrs = class_attrs.copy()
         for attr_name, value in tmp_attrs.items():
-            if isinstance(value, property):
-                class_attrs.pop(attr_name)
-            elif attr_name == "_abc_impl":
+            if isinstance(value, property) or attr_name == "_abc_impl":
                 class_attrs.pop(attr_name)
         return class_attrs
-    
+
     @property
     def instance_plot_params(self):
         class_attrs = get_class_attributes(self.__class__)
-        
+
         instance_attrs = {}
         for attr_name, value in class_attrs.items():
             instance_attrs[attr_name] = getattr(self, attr_name, None)
 
         return instance_attrs
-    
+
     @property
     def plot_params(self):
         return self.instance_plot_params
-    
+
     def update_instance_params(self, **kwargs):
         plot_params = self.instance_plot_params
         for plot_param_name, plot_param_value in kwargs.items():
             if plot_param_name in plot_params:
                 setattr(self, plot_param_name, plot_param_value)
         return self.instance_plot_params
-        
-    
+
     def plot(self, kpath: KPath, bands: np.ndarray, **kwargs):
         self.update_instance_params(**kwargs)
         self._plot(kpath, bands, **kwargs)
         self.set_default_plot_parameters(bands)
-        
+
     def set_default_plot_parameters(self, bands: np.ndarray):
         self.set_xlim()
         ymin = float(bands.min())
@@ -104,14 +95,14 @@ class BasePlotter(ABC):
         self.set_xticks()
         self.set_xlabel()
         self.set_ylabel()
-        
-    def set_xlim(self, xlim:List[float] = None, **kwargs):
+
+    def set_xlim(self, xlim: list[float] = None, **kwargs):
         if xlim is None:
             xlim = (self.x[0], self.x[-1])
-            
+
         self.ax.set_xlim(xlim, **kwargs)
-        
-    def set_ylim(self, ylim:List[float] = None, **kwargs):
+
+    def set_ylim(self, ylim: list[float] = None, **kwargs):
         """Set y-axis limits, inferring from recorded bands if not provided."""
         if ylim is None:
             bands_cols = [v for k, v in self.values_dict.items() if k.startswith("bands__")]
@@ -125,7 +116,9 @@ class BasePlotter(ABC):
                 raise ValueError("Cannot infer ylim; pass explicit limits or plot first")
         self.ax.set_ylim(ylim, **kwargs)
 
-    def set_xticks(self, tick_positions: List[int] = None, tick_names: List[str] = None, color: str = "black"):
+    def set_xticks(
+        self, tick_positions: list[int] = None, tick_names: list[str] = None, color: str = "black"
+    ):
         """Set high-symmetry tick marks and labels using the current k-path.
 
         Parameters
@@ -154,7 +147,7 @@ class BasePlotter(ABC):
         if tick_names is not None:
             self.ax.set_xticklabels(tick_names)
 
-    def set_yticks(self, major: float = None, minor: float = None, interval: List[float] = None):
+    def set_yticks(self, major: float = None, minor: float = None, interval: list[float] = None):
         """Set y-axis tick locators using heuristics if not provided.
 
         Parameters
@@ -220,16 +213,31 @@ class BasePlotter(ABC):
             self.cb.ax.tick_params(labelsize=kwargs.pop("labelsize", None))
             self.cb.set_label(title, **kwargs)
 
-    def draw_fermi(self, fermi_level: float = 0.0, color: str = "k", linestyle: str = "--", linewidth: float = 1.0):
+    def draw_fermi(
+        self,
+        fermi_level: float = 0.0,
+        color: str = "k",
+        linestyle: str = "--",
+        linewidth: float = 1.0,
+    ):
         """Draw a horizontal Fermi level line."""
         self.ax.axhline(y=fermi_level, color=color, linestyle=linestyle, linewidth=linewidth)
 
-    def grid(self, enabled: bool = True, which: str = "both", color: str = "#cccccc", linestyle: str = ":", linewidth: float = 0.8):
+    def grid(
+        self,
+        enabled: bool = True,
+        which: str = "both",
+        color: str = "#cccccc",
+        linestyle: str = ":",
+        linewidth: float = 0.8,
+    ):
         """Configure grid display."""
         if enabled:
-            self.ax.grid(enabled, which=which, color=color, linestyle=linestyle, linewidth=linewidth)
+            self.ax.grid(
+                enabled, which=which, color=color, linestyle=linestyle, linewidth=linewidth
+            )
 
-    def legend(self, labels: List[str] = None, **kwargs):
+    def legend(self, labels: list[str] = None, **kwargs):
         """Show legend; uses stored handles when available.
 
         Parameters
@@ -246,7 +254,7 @@ class BasePlotter(ABC):
         else:
             self.ax.legend(labels, **kwargs)
 
-    def save(self, filename: str = "bands.pdf", dpi: Optional[int] = None, bbox_inches: str = "tight"):
+    def save(self, filename: str = "bands.pdf", dpi: int | None = None, bbox_inches: str = "tight"):
         """Save the current figure to disk."""
         plt.savefig(filename, dpi=(dpi or self.dpi), bbox_inches=bbox_inches)
         plt.clf()
@@ -313,52 +321,69 @@ class BasePlotter(ABC):
                         break
                 tick_names.append(name)
         self.values_dict["kpath_tick_names"] = tick_names
-        
+
     def show(self):
-        plt.show()    
-        
-    def _validate_data(self, 
-                               bands: np.ndarray | None, 
-                               scalars: np.ndarray | Property | None = None,
-                               vectors: np.ndarray | Property | None = None):
-        
+        plt.show()
+
+    def _validate_data(
+        self,
+        bands: np.ndarray | None,
+        scalars: np.ndarray | Property | None = None,
+        vectors: np.ndarray | Property | None = None,
+    ):
         if scalars is not None and isinstance(scalars, Property):
             scalars = scalars.value
         if vectors is not None and isinstance(vectors, Property):
             vectors = vectors.value
-            
+
         if bands.ndim == 2:
             bands = bands[..., np.newaxis]
         n_spin_channels = bands.shape[-1]
- 
+
         if scalars is not None and scalars.ndim == 2:
             scalars = scalars[..., np.newaxis]
         if scalars is not None and scalars.ndim != bands.ndim:
             error_message = "scalars must have the same number of dimensions as bands"
-            error_message += f"bands has {bands.ndim} dimensions, scalars has {scalars.ndim} dimensions"
-            error_message += f"Use a built in method in ElectronicBandStructurePath to get the scalars"
+            error_message += (
+                f"bands has {bands.ndim} dimensions, scalars has {scalars.ndim} dimensions"
+            )
+            error_message += (
+                "Use a built in method in ElectronicBandStructurePath to get the scalars"
+            )
             raise ValueError(error_message)
-        elif scalars is not None and scalars.ndim == bands.ndim and scalars.shape[-1] != n_spin_channels:
+        elif (
+            scalars is not None
+            and scalars.ndim == bands.ndim
+            and scalars.shape[-1] != n_spin_channels
+        ):
             error_message = "scalars must have the same number of spin channels as bands."
             error_message += f"bands has {n_spin_channels} spin channels, scalars has {scalars.shape[-1]} spin channels\n"
-            error_message += f"This error is likely due to a non-colinear calculation where the scalars can have spin components\n"
+            error_message += "This error is likely due to a non-colinear calculation where the scalars can have spin components\n"
             raise ValueError(error_message)
-        
+
         if vectors is not None and vectors.ndim == 2:
-            vectors = vectors[...,np.newaxis]
+            vectors = vectors[..., np.newaxis]
         if vectors is not None and vectors.ndim != bands.ndim:
             error_message = "vectors must have the same number of dimensions as bands"
-            error_message += f"bands has {bands.ndim} dimensions, vectors has {vectors.ndim} dimensions"
-            error_message += f"Use a built in method in ElectronicBandStructurePath to get the scalars"
+            error_message += (
+                f"bands has {bands.ndim} dimensions, vectors has {vectors.ndim} dimensions"
+            )
+            error_message += (
+                "Use a built in method in ElectronicBandStructurePath to get the scalars"
+            )
             raise ValueError(error_message)
-        elif vectors is not None and vectors.ndim == bands.ndim and vectors.shape[-1] != n_spin_channels:
+        elif (
+            vectors is not None
+            and vectors.ndim == bands.ndim
+            and vectors.shape[-1] != n_spin_channels
+        ):
             error_message = "vectors must have the same number of spin channels as bands."
             error_message += f"bands has {n_spin_channels} spin channels, vectors has {vectors.shape[1]} spin channels\n"
-            error_message += f"This error is likely due to a non-colinear calculation where the vectors can have spin components\n"
+            error_message += "This error is likely due to a non-colinear calculation where the vectors can have spin components\n"
             raise ValueError(error_message)
-        
+
         return bands, scalars, vectors
-    
+
     # def colorbar(self, **kwargs):
     #     if not hasattr(self, "scalar_mappable"):
     #         raise ValueError("No scalar mappable to plot colorbar for")
@@ -367,14 +392,15 @@ class BasePlotter(ABC):
     #     self.cb = self.fig.colorbar(self.scalar_mappable, ax=self.ax, **kwargs)
 
     #     return self.cb
-    
+
     # ---- color mapping resolver ----
-    def _resolve_colormap(self,
-                          data: np.ndarray | None,
-                          cmap: str | mpcolors.Colormap = "plasma",
-                          norm: str | mpcolors.Normalize | type | None = "auto",
-                          clim: Tuple[float | None, float | None] | None = None,
-                          ):
+    def _resolve_colormap(
+        self,
+        data: np.ndarray | None,
+        cmap: str | mpcolors.Colormap = "plasma",
+        norm: str | mpcolors.Normalize | type | None = "auto",
+        clim: tuple[float | None, float | None] | None = None,
+    ):
         """Resolve a Normalize and Colormap for the given data.
 
         - norm can be:
@@ -388,7 +414,7 @@ class BasePlotter(ABC):
         """
         if data is None:
             return None, None, None
-       
+
         vmin = None
         vmax = None
         if clim is not None:
@@ -412,7 +438,7 @@ class BasePlotter(ABC):
             # Snap heuristics: prefer +/-0.5 when near; otherwise use
             # integer floor/ceil to create clean colorbar bounds.
             half_tol = 0.05  # how close to 0.5/-0.5 to snap
-            int_pad = 0.0    # extra pad after floor/ceil
+            int_pad = 0.0  # extra pad after floor/ceil
 
             def _snap_min(value: float) -> float:
                 if np.isfinite(value):
@@ -461,10 +487,5 @@ class BasePlotter(ABC):
         scalar_mappable = cm.ScalarMappable(norm=norm_obj, cmap=cmap_obj)
         if data is not None:
             scalar_mappable.set_array(np.asarray(data).ravel())
-            
+
         return norm_obj, cmap_obj, scalar_mappable
-    
-    
-    
-    
-        

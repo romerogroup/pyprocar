@@ -4,9 +4,7 @@ __email__ = "petavazohi@mail.wvu.edu, lllang@mix.wvu.edu"
 __date__ = "March 31, 2020"
 
 import logging
-import os
 from enum import Enum
-from typing import List
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -14,13 +12,11 @@ import numpy as np
 from pyprocar.cfg import ConfigFactory, ConfigManager, PlotType
 from pyprocar.core import ElectronicBandStructurePath
 from pyprocar.plotter.bs_plot import BandStructurePlotter
-from pyprocar.utils import data_utils, np_utils, welcome
+from pyprocar.utils import np_utils, welcome
 from pyprocar.utils.info import orbital_names
-from pyprocar.utils.log_utils import set_verbose_level
 
 user_logger = logging.getLogger("user")
 logger = logging.getLogger(__name__)
-
 
 
 class BandStructureMode(Enum):
@@ -40,12 +36,13 @@ class BandStructureMode(Enum):
     OVERLAY : str
         Represents the band structure in an overlay plot, where the colors are the selected projections
     OVERLAY_SPECIES : str
-        Represents the band structure in an overlay plot, where the colors are 
+        Represents the band structure in an overlay plot, where the colors are
         the different projection of the species.
     OVERLAY_ORBITALS : str
-        Represents the band structure in an overlay plot, where  the colors are 
+        Represents the band structure in an overlay plot, where  the colors are
         the different projection of the orbitals.
     """
+
     PLAIN = "plain"
     PARAMETRIC = "parametric"
     SACATTER = "scatter"
@@ -54,14 +51,14 @@ class BandStructureMode(Enum):
     OVERLAY_SPECIES = "overlay_species"
     OVERLAY_ORBITALS = "overlay_orbitals"
     IPR = "ipr"
-    
+
     @classmethod
     def from_str(cls, mode: str):
         try:
             return cls[mode.upper()]
         except KeyError:
             raise ValueError(f"Invalid mode: {mode}. The modes available are: {cls.to_list()}")
-    
+
     @classmethod
     def to_list(cls):
         return [mode.value for mode in cls]
@@ -71,14 +68,13 @@ class BandStructureMode(Enum):
         return [cls.OVERLAY, cls.OVERLAY_SPECIES, cls.OVERLAY_ORBITALS]
 
 
-
 def bandsplot(
     code: str,
     dirname: str,
     mode: str = "plain",
-    spins: List[int] = None,
-    atoms: List[int] = None,
-    orbitals: List[int] = None,
+    spins: list[int] = None,
+    atoms: list[int] = None,
+    orbitals: list[int] = None,
     items: dict = {},
     fermi: float = None,
     fermi_shift: float = 0,
@@ -88,15 +84,15 @@ def bandsplot(
     kticks=None,
     knames=None,
     kdirect: bool = True,
-    elimit: List[float] = None,
+    elimit: list[float] = None,
     ax: plt.Axes = None,
     show: bool = True,
     savefig: str = None,
     print_plot_opts: bool = False,
     export_data_file: str = None,
     export_append_mode: bool = True,
-    ktick_limit: List[float] = None,
-    x_limit: List[float] = None,
+    ktick_limit: list[float] = None,
+    x_limit: list[float] = None,
     plot_kwargs: dict = {},
     scatter_kwargs: dict = {},
     parametric_kwargs: dict = {},
@@ -164,13 +160,12 @@ def bandsplot(
         Boolean to use cache for EBS
 
     """
-    
+
     if quiet_welcome:
         user_logger.setLevel(logging.ERROR)
 
-    user_logger.info(f"If you want more detailed logs, set verbose to 2 or more")
+    user_logger.info("If you want more detailed logs, set verbose to 2 or more")
     user_logger.info("_" * 100)
-
 
     welcome()
 
@@ -194,13 +189,12 @@ def bandsplot(
     user_logger.info("_" * 100)
 
     ebs = ElectronicBandStructurePath.from_code(code, dirname, use_cache=use_cache)
-    structure=ebs.structure
-    
+    structure = ebs.structure
+
     # Covers when kpath is single kpoint
-    kpath=None
+    kpath = None
     if hasattr(ebs, "kpath"):
-        kpath=ebs.kpath
-    
+        kpath = ebs.kpath
 
     codes_with_scf_fermi = ["qe", "elk"]
     if code in codes_with_scf_fermi and fermi is None:
@@ -210,7 +204,7 @@ def bandsplot(
     if fermi is not None:
         logger.info(f"Shifting Fermi energy to zero: {fermi}")
 
-        ebs.shift_bands(-1*fermi, inplace=True)
+        ebs.shift_bands(-1 * fermi, inplace=True)
         ebs.shift_bands(fermi_shift, inplace=True)
         fermi_level = fermi_shift
         y_label = r"E - E$_F$ (eV)"
@@ -238,17 +232,15 @@ def bandsplot(
             bands = bands[..., spins]
         except Exception:
             pass
-        
+
     n_spin_channels = bands.shape[-1]
     n_bands = bands.shape[1]
     n_kpoints = bands.shape[0]
-    
-    
-    
+
     if mode == BandStructureMode.PLAIN:
         user_logger.info("Plotting bands in plain mode")
         for i_spin_channel in range(n_spin_channels):
-                plotter.plot(kpath, bands[..., i_spin_channel], **plot_kwargs)
+            plotter.plot(kpath, bands[..., i_spin_channel], **plot_kwargs)
 
     elif mode == BandStructureMode.IPR:
         user_logger.info("Plotting bands in IPR mode")
@@ -276,9 +268,7 @@ def bandsplot(
                 labels.append(ispc)
                 atoms = np.where(structure.atoms == ispc)[0]
 
-                projection_label = f"atom-{ispc}_orbitals-" + ",".join(
-                    str(x) for x in orbitals
-                )
+                projection_label = f"atom-{ispc}_orbitals-" + ",".join(str(x) for x in orbitals)
                 projection_labels.append(projection_label)
                 w = ebs.ebs_sum(
                     atoms=atoms,
@@ -329,21 +319,15 @@ def bandsplot(
                         if isinstance(it[ispc][0], str):
                             orbitals = []
                             for iorb in it[ispc]:
-                                orbitals = np.append(
-                                    orbitals, orbital_names[iorb]
-                                ).astype(int)
+                                orbitals = np.append(orbitals, orbital_names[iorb]).astype(int)
                             labels.append(ispc + "-" + "".join(it[ispc]))
                         else:
                             orbitals = it[ispc]
-                            labels.append(
-                                ispc + "-" + "_".join(str(x) for x in it[ispc])
-                            )
+                            labels.append(ispc + "-" + "_".join(str(x) for x in it[ispc]))
 
                         atom_labels = ",".join(str(x) for x in atoms)
                         orbital_labels = ",".join(str(x) for x in orbitals)
-                        projection_label = (
-                            f"atoms-{atom_labels}_orbitals-{orbital_labels}"
-                        )
+                        projection_label = f"atoms-{atom_labels}_orbitals-{orbital_labels}"
                         projection_labels.append(projection_label)
                         w = ebs.ebs_sum(
                             atoms=atoms,
@@ -357,8 +341,11 @@ def bandsplot(
                                 pass
                         weights.append(w)
         plotter.plot_overlay(kpath, bands, weights=weights, labels=projection_labels)
-    elif mode in [BandStructureMode.PARAMETRIC, BandStructureMode.SACATTER, BandStructureMode.ATOMIC]:
-
+    elif mode in [
+        BandStructureMode.PARAMETRIC,
+        BandStructureMode.SACATTER,
+        BandStructureMode.ATOMIC,
+    ]:
         if atoms is not None and isinstance(atoms[0], str):
             atoms_str = atoms
             atoms = []
@@ -388,9 +375,7 @@ def bandsplot(
         projection_label += f"orbitals-{orbital_labels}"
         projection_labels.append(projection_label)
 
-        weights = ebs.ebs_sum(
-            atoms=atoms, orbitals=orbitals, spins=spins
-        )
+        weights = ebs.ebs_sum(atoms=atoms, orbitals=orbitals, spins=spins)
         if spins is not None and weights is not None and weights.ndim >= 3:
             try:
                 weights = weights[..., spins]

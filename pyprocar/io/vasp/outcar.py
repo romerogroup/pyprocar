@@ -9,26 +9,26 @@ import numpy as np
 
 logger = logging.getLogger(__name__)
 
+
 class Outcar(Mapping[str, Any]):
     """
     A class to parse the OUTCAR file from a VASP run and extract electronic structure data.
 
-    The OUTCAR file provides detailed output of a VASP run, 
+    The OUTCAR file provides detailed output of a VASP run,
     including a summary of used input parameters,
     information about electronic steps and KS-eigenvalues,
     stress tensors, forces on atoms, local charges
-    and magnetic moments, and dielectric properties. The amount of output written onto the 
+    and magnetic moments, and dielectric properties. The amount of output written onto the
     OUTCAR file can
     be chosen by modifying the NWRITE tag in the INCAR file.
 
-    The Outcar class acts as a Mapping, providing key-value access to the variables parsed from 
+    The Outcar class acts as a Mapping, providing key-value access to the variables parsed from
     the OUTCAR file.
     """
-    
 
     def __init__(self, filepath: str | Path | None = None, file_str: str = ""):
         """
-        Constructor method to initialize an Outcar object. Reads the file specified 
+        Constructor method to initialize an Outcar object. Reads the file specified
         by filename and stores its content.
 
         Parameters
@@ -57,7 +57,7 @@ class Outcar(Mapping[str, Any]):
         elif self._file_str == "" and self.filepath is None:
             raise ValueError("No file path or file string provided")
         return self._file_str
-    
+
     def _get_axes_nk(self):
         """
         n_kx
@@ -67,7 +67,7 @@ class Outcar(Mapping[str, Any]):
         n_kx
             n_kx
         """
-        
+
         raw_text = re.findall(r"generate\s*k-points\s*for:\s*(.*)", self.file_str)
         n_kx = None
         n_ky = None
@@ -78,19 +78,19 @@ class Outcar(Mapping[str, Any]):
             n_ky = int(raw_text.split()[1])
             n_kz = int(raw_text.split()[2])
         return n_kx, n_ky, n_kz
-    
+
     @cached_property
     def kgrid(self):
         return self._get_axes_nk()
-    
+
     @cached_property
     def n_kx(self):
         return self.kgrid[0]
-    
+
     @cached_property
     def n_ky(self):
         return self.kgrid[1]
-    
+
     @cached_property
     def n_kz(self):
         return self.kgrid[2]
@@ -134,9 +134,7 @@ class Outcar(Mapping[str, Any]):
             return the reciprocal lattice vectors
         """
 
-        match = re.search(
-            r"reciprocal lattice vectors[\s\S]+?(?=\n\s?\n\s?)", self.file_str
-        )
+        match = re.search(r"reciprocal lattice vectors[\s\S]+?(?=\n\s?\n\s?)", self.file_str)
         if match is None:
             raise ValueError("No reciprocal lattice vectors found")
         numbers = re.findall(r"[-]?\d+\.\d+", match.group(0))
@@ -172,9 +170,7 @@ class Outcar(Mapping[str, Any]):
         return np.array(rotations)
 
     def get_symmetry_operations(self) -> list[dict[str, Any]]:
-        raw_spg_ops = re.search(
-            r"Found\s+(\d+)\s+space group operations", self.file_str
-        )
+        raw_spg_ops = re.search(r"Found\s+(\d+)\s+space group operations", self.file_str)
 
         if raw_spg_ops is None:
             return []
@@ -184,9 +180,9 @@ class Outcar(Mapping[str, Any]):
         logger.debug(f"n_spg_operations: {n_spg_operations}")
 
         vasp54_block_match = re.search(
-            r"Space group operators:\s*\n"  + # header line
-            r"([ \t]*irot[\s\S]+?)" +  # from the column headers …
-            r"(?=\n\s?\n\s?)",  # … up to the next blank/non-indented line
+            r"Space group operators:\s*\n"  # header line
+            + r"([ \t]*irot[\s\S]+?)"  # from the column headers …
+            + r"(?=\n\s?\n\s?)",  # … up to the next blank/non-indented line
             self.file_str,
             flags=re.IGNORECASE,
         )
@@ -233,14 +229,12 @@ class Outcar(Mapping[str, Any]):
                 if i == 0:
                     headers = values
                     continue
-            
+
                 assert headers is not None
 
                 spg_operator: dict[str, Any] = {}
                 for ispg, value in enumerate(values):
-
-
-                    column_name:str = headers[ispg]
+                    column_name: str = headers[ispg]
                     value = int(value) if column_name == "irot" else float(value)
                     spg_operator[column_name] = value
 
@@ -287,9 +281,7 @@ class Outcar(Mapping[str, Any]):
                 )
 
                 R = (  # pyright: ignore[reportConstantRedefinition]
-                    np.linalg.inv(self.reciprocal_lattice.T)
-                    .dot(R)
-                    .dot(self.reciprocal_lattice.T)
+                    np.linalg.inv(self.reciprocal_lattice.T).dot(R).dot(self.reciprocal_lattice.T)
                 )
                 R = np.round(R, decimals=3)  # pyright: ignore[reportConstantRedefinition, reportUnknownVariableType]
 
@@ -364,5 +356,3 @@ class Outcar(Mapping[str, Any]):
 
     def __len__(self):
         return len(self.__dict__)
-
-

@@ -3,7 +3,15 @@ import numpy as np
 from pyprocar.utils import welcome
 
 
-def generate2dkmesh(x1:float, y1:float, x2:float, y2:float, z:float, nkx:int, nky:int,):
+def generate2dkmesh(
+    x1: float,
+    y1: float,
+    x2: float,
+    y2: float,
+    z: float,
+    nkx: int,
+    nky: int,
+):
     """_summary_
 
     Parameters
@@ -28,7 +36,7 @@ def generate2dkmesh(x1:float, y1:float, x2:float, y2:float, z:float, nkx:int, nk
     _type_
         _description_
     """
-    
+
     welcome()
 
     kx = np.linspace(x1, x2, nkx)
@@ -42,12 +50,8 @@ def generate2dkmesh(x1:float, y1:float, x2:float, y2:float, z:float, nkx:int, nk
         kpoints = []
         for ikx in kx:
             for iky in ky:
-                wf.write(
-                    " {: >12.7f}   {: >12.7f}   {: >12.7f}   {: >12.7f}\n".format(
-                        ikx, iky, z, 1.0
-                    )
-                )
-                kpoints.append([ikx,iky,z])
+                wf.write(f" {ikx: >12.7f}   {iky: >12.7f}   {z: >12.7f}   {1.0: >12.7f}\n")
+                kpoints.append([ikx, iky, z])
 
-    kpoints=np.array(kpoints)
+    kpoints = np.array(kpoints)
     return kpoints

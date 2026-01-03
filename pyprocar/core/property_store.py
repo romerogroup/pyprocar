@@ -1,36 +1,34 @@
-
-
-from collections.abc import Generator, MutableMapping
-from typing import Callable, Literal, Sequence, cast, Union
-import weakref
-import re
 import logging
-from typing import Any
+import re
+import weakref
+from collections.abc import Callable, Generator, Sequence
 from enum import Enum
+from typing import Any, Union, cast
+
 import numpy as np
 import numpy.typing as npt
-import pyvista as pv
-from typing_extensions import override
 import pandas as pd
+from typing_extensions import override
 
 from pyprocar.utils.math import np_round_to_half
 
 VALUE_ARRAY_TYPE = npt.NDArray[np.float64]
-GRADIENT_TYPE =  dict[int, VALUE_ARRAY_TYPE]
+GRADIENT_TYPE = dict[int, VALUE_ARRAY_TYPE]
 PROPERTY_KEY_TYPE = str | tuple[str, int]
 PROPERTY_VALUE_TYPE = VALUE_ARRAY_TYPE | GRADIENT_TYPE
 PROPERTY_DICT_TYPE = dict[str, PROPERTY_VALUE_TYPE]
 
 logger = logging.getLogger(__name__)
 
+
 def to_numpy_array(data, dtype=None):
     """
     Convert input data (list, numpy array, pandas Series) into a numpy array.
-    
+
     Args:
         data: list, np.ndarray, or pd.Series
         dtype: optional datatype for the resulting array.
-    
+
     Returns:
         np.ndarray
     """
@@ -43,7 +41,9 @@ def to_numpy_array(data, dtype=None):
     else:
         return np.asarray(data, dtype=dtype)
 
+
 # pyright: reportUnknownMemberType=false
+
 
 class GradientOrder(Enum):
     FIRST = 1
@@ -51,8 +51,9 @@ class GradientOrder(Enum):
     THIRD = 3
     FOURTH = 4
     OTHER = 0
+
     @classmethod
-    def from_int(cls, order:int) -> "GradientOrder":
+    def from_int(cls, order: int) -> "GradientOrder":
         if order == 1:
             return cls.FIRST
         elif order == 2:
@@ -63,7 +64,7 @@ class GradientOrder(Enum):
             return cls.FOURTH
         else:
             return cls.OTHER
-        
+
     def get_suffix(self) -> str:
         if self == self.FIRST:
             return "st"
@@ -74,11 +75,12 @@ class GradientOrder(Enum):
         else:
             return "th"
 
+
 class Property:
     name: str
     value: npt.NDArray[np.float64]
     gradients: dict[int, npt.NDArray[np.float64]]
-    
+
     _laplacian: npt.NDArray[np.float64] = np.array([])
     _divergence: npt.NDArray[np.float64] = np.array([])
     _curl: npt.NDArray[np.float64] = np.array([])
@@ -91,17 +93,19 @@ class Property:
     metadata: dict[str, Any] = {}
     data_lim: tuple[float | None, float | None] | None = None
 
-    def __init__(self, 
-                name:str, 
-                value: npt.NDArray[np.float64] | None = None, 
-                gradients: dict[int, npt.NDArray[np.float64]] | None = None,
-                points: npt.NDArray[np.float64] | None = None,
-                gradient_func: Callable = None,
-                units: str | None = None,
-                label: str | None = None,
-                point_set: Union["PointSet", None] = None,
-                metadata: dict[str, Any] | None = None,
-                data_lim: tuple[float | None, float | None] | None = None):
+    def __init__(
+        self,
+        name: str,
+        value: npt.NDArray[np.float64] | None = None,
+        gradients: dict[int, npt.NDArray[np.float64]] | None = None,
+        points: npt.NDArray[np.float64] | None = None,
+        gradient_func: Callable = None,
+        units: str | None = None,
+        label: str | None = None,
+        point_set: Union["PointSet", None] = None,
+        metadata: dict[str, Any] | None = None,
+        data_lim: tuple[float | None, float | None] | None = None,
+    ):
         self.name = name
         self.value = to_numpy_array(value)
         self.units = units
@@ -112,7 +116,7 @@ class Property:
         else:
             gradients = {1: to_numpy_array(None), 2: to_numpy_array(None)}
         self.gradients = gradients
-    
+
         if point_set is not None and points is None:
             self._validate_point_set(point_set)
             self._bind_owner(point_set)
@@ -122,7 +126,7 @@ class Property:
             self._point_set = point_set
         elif point_set is not None and points is not None:
             raise ValueError("Either point_set or points and gradient_func must be provided.")
-        
+
         self.label = label
         if self.label is None:
             self.label = name
@@ -131,69 +135,70 @@ class Property:
             self.metadata = metadata
 
         self._data_lim = data_lim
-        
-    
-    
+
     @property
     def point_set(self) -> "PointSet":
         if isinstance(self._point_set, weakref.ReferenceType):
             return self._point_set()
         else:
             return self._point_set
-    
+
     @property
     def points(self) -> npt.NDArray[np.float64]:
         return self.point_set.points
-    
+
     @property
     def points_label(self):
         return self.point_set.points_label
-    
+
     @property
     def points_units(self) -> str:
         return self.point_set.points_units
-    
-    def gradient(self, order:int, store:bool = False, value:npt.NDArray[np.float64] | None = None) -> npt.NDArray[np.float64]:
+
+    def gradient(
+        self, order: int, store: bool = False, value: npt.NDArray[np.float64] | None = None
+    ) -> npt.NDArray[np.float64]:
         if value is None:
             tmp_value = self.value
         else:
             tmp_value = value
-        
+
         if store and value is not None:
             raise ValueError("Value and store cannot be used together.")
-        
+
         if order < 0:
             raise ValueError(f"Gradient order must be greater than 0. Got {order}.")
-        
+
         if order == 0:
             return tmp_value
-        
+
         for i in range(1, order + 1):
             print(f"Calculating gradient of order {i}")
             tmp_value = self.point_set.gradient_func(self.points, tmp_value)
             if store:
                 self.gradients[i] = tmp_value
         return tmp_value
-    
-    def compute_gradient_property(self, order:int) -> "Property":
+
+    def compute_gradient_property(self, order: int) -> "Property":
         gradient = self.gradient(order=order)
         gradient_order = GradientOrder.from_int(order)
         order_suffix = gradient_order.get_suffix()
         return Property(
-            name=f"{self.name}_gradient_{order}", 
-            value=gradient, 
-            units=self.create_gradient_units(order), 
-            label=f"{self.label} "+ str(order) + "^{" + order_suffix + "}" + " Order Gradient",
-            point_set=self.point_set)
-    
+            name=f"{self.name}_gradient_{order}",
+            value=gradient,
+            units=self.create_gradient_units(order),
+            label=f"{self.label} " + str(order) + "^{" + order_suffix + "}" + " Order Gradient",
+            point_set=self.point_set,
+        )
+
     @property
     def n_points(self) -> int:
         return self.value.shape[0]
-    
+
     @property
     def is_vector(self) -> bool:
         return self.value.shape[-1] == 3
-    
+
     @property
     def magnitude(self) -> npt.NDArray[np.float64]:
         if self.is_vector:
@@ -210,70 +215,90 @@ class Property:
         else:
             divergence = np.array([])
         return divergence
-        
+
     @property
     def curl(self) -> npt.NDArray[np.float64]:
         if self.is_vector:
             gradient_1 = self.gradients[1]
-            x = gradient_1[...,2,1] - gradient_1[...,1,2]
-            y = gradient_1[...,0,2] - gradient_1[...,2,0]
-            z = gradient_1[...,1,0] - gradient_1[...,0,1]
+            x = gradient_1[..., 2, 1] - gradient_1[..., 1, 2]
+            y = gradient_1[..., 0, 2] - gradient_1[..., 2, 0]
+            z = gradient_1[..., 1, 0] - gradient_1[..., 0, 1]
             curl = np.stack([x, y, z], axis=-1)
         else:
             curl = np.array([])
         return curl
-        
+
     @property
     def divergence_gradient(self) -> npt.NDArray[np.float64]:
         if self.is_vector:
             gradient_2 = self.gradients[2]
-            x = gradient_2[...,0,0,0] + gradient_2[...,1,1,0] + gradient_2[...,2,2,0]
-            y = gradient_2[...,0,0,1] + gradient_2[...,1,1,1] + gradient_2[...,2,2,1]
-            z = gradient_2[...,0,0,2] + gradient_2[...,1,1,2] + gradient_2[...,2,2,2]
+            x = gradient_2[..., 0, 0, 0] + gradient_2[..., 1, 1, 0] + gradient_2[..., 2, 2, 0]
+            y = gradient_2[..., 0, 0, 1] + gradient_2[..., 1, 1, 1] + gradient_2[..., 2, 2, 1]
+            z = gradient_2[..., 0, 0, 2] + gradient_2[..., 1, 1, 2] + gradient_2[..., 2, 2, 2]
             divergence_gradient = np.stack([x, y, z], axis=-1)
         else:
             divergence_gradient = np.array([])
         return divergence_gradient
-        
+
     @property
     def curl_gradient(self) -> npt.NDArray[np.float64]:
         if self.is_vector:
             gradient_2 = self.gradients[2]
-            x = gradient_2[...,1,0,1] - gradient_2[...,0,1,1] - gradient_2[...,0,2,2] + gradient_2[...,2,0,2] 
-            y = gradient_2[...,1,0,0] - gradient_2[...,0,1,0] - gradient_2[...,2,1,2] + gradient_2[...,1,2,2]
-            z = gradient_2[...,2,0,0] - gradient_2[...,0,2,0] - gradient_2[...,2,1,1] + gradient_2[...,1,2,1]
+            x = (
+                gradient_2[..., 1, 0, 1]
+                - gradient_2[..., 0, 1, 1]
+                - gradient_2[..., 0, 2, 2]
+                + gradient_2[..., 2, 0, 2]
+            )
+            y = (
+                gradient_2[..., 1, 0, 0]
+                - gradient_2[..., 0, 1, 0]
+                - gradient_2[..., 2, 1, 2]
+                + gradient_2[..., 1, 2, 2]
+            )
+            z = (
+                gradient_2[..., 2, 0, 0]
+                - gradient_2[..., 0, 2, 0]
+                - gradient_2[..., 2, 1, 1]
+                + gradient_2[..., 1, 2, 1]
+            )
             curl_gradient = np.stack([x, y, z], axis=-1)
         else:
             curl_gradient = np.array([])
         return curl_gradient
-        
+
     @property
     def laplacian(self) -> npt.NDArray[np.float64]:
         gradient_2 = self.gradients[2]
         laplacian = np.trace(gradient_2, axis1=-2, axis2=-1)
         return laplacian
-    
+
     def _bind_owner(self, point_set: "PointSet") -> None:
         self._validate_point_set(point_set)
         self._point_set = weakref.ref(point_set)
-    
+
     def _validate_point_set(self, point_set: "PointSet") -> None:
         point_set_shape = point_set.points.shape
         value_shape = self.value.shape
         if point_set_shape[0] != value_shape[0]:
-            raise ValueError(f"point set and value have different number of points. Point set has {point_set_shape[0]} points, but value has {value_shape[0]} points.")
-        
+            raise ValueError(
+                f"point set and value have different number of points. Point set has {point_set_shape[0]} points, but value has {value_shape[0]} points."
+            )
+
     def __call__(self):
         return self.value
+
     @override
     def __eq__(self, other: object) -> bool:
         if isinstance(other, dict):
-            other = Property(name=cast(str, other["name"]), 
-                             value=cast(npt.NDArray[np.float64], other["value"]),
-                             gradients=cast(dict[int, npt.NDArray[np.float64]], other["gradients"]),
-                             divergence=cast(npt.NDArray[np.float64], other["divergence"]),
-                             vortex=cast(npt.NDArray[np.float64], other["vortex"]),
-                             laplacian=cast(npt.NDArray[np.float64], other["laplacian"]))
+            other = Property(
+                name=cast(str, other["name"]),
+                value=cast(npt.NDArray[np.float64], other["value"]),
+                gradients=cast(dict[int, npt.NDArray[np.float64]], other["gradients"]),
+                divergence=cast(npt.NDArray[np.float64], other["divergence"]),
+                vortex=cast(npt.NDArray[np.float64], other["vortex"]),
+                laplacian=cast(npt.NDArray[np.float64], other["laplacian"]),
+            )
         if not isinstance(other, Property):
             return False
 
@@ -287,34 +312,41 @@ class Property:
         is_equal = is_equal and np.allclose(a=self.laplacian, b=other.laplacian)
         return is_equal
 
-    def __getitem__(self, key:  str | tuple[str, int]) -> dict[int, npt.NDArray[np.float64]] | npt.NDArray[np.float64] | str:
-        
+    def __getitem__(
+        self, key: str | tuple[str, int]
+    ) -> dict[int, npt.NDArray[np.float64]] | npt.NDArray[np.float64] | str:
         calc_name, gradient_order = self._extract_key(key)
         if gradient_order == 0 and calc_name == "gradients":
-            return  self.gradients
+            return self.gradients
         elif gradient_order == 0 and calc_name == "name":
             return self.name
         elif gradient_order == 0 and calc_name in ["value", "divergence", "vortex", "laplacian"]:
             return cast(npt.NDArray[np.float64], getattr(self, calc_name))
         elif gradient_order > 0 and calc_name == "gradients":
             if gradient_order not in self.gradients:
-                error_message = f"Gradient order {gradient_order} not found for property {calc_name}."
+                error_message = (
+                    f"Gradient order {gradient_order} not found for property {calc_name}."
+                )
                 error_message += f"Assigned gradients are {list(self.gradients.keys())}"
                 raise ValueError(error_message)
             return self.gradients[gradient_order]
         else:
             raise ValueError(f"Invalid key: {key}. Must be a string or a tuple of two strings.")
 
-    def __setitem__(self, 
-                key:  str | tuple[str, int], 
-                value: npt.NDArray[np.float64] | dict[int, npt.NDArray[np.float64]] | str) -> None:
+    def __setitem__(
+        self,
+        key: str | tuple[str, int],
+        value: npt.NDArray[np.float64] | dict[int, npt.NDArray[np.float64]] | str,
+    ) -> None:
         calc_name, gradient_order = self._extract_key(key)
         if gradient_order == 0:
             self.__dict__[calc_name] = value
         elif gradient_order > 0 and isinstance(value, np.ndarray):
             self.gradients[gradient_order] = value
         else:
-            raise ValueError(f"Invalid gradient order: {gradient_order}. Must be a positive integer.")
+            raise ValueError(
+                f"Invalid gradient order: {gradient_order}. Must be a positive integer."
+            )
 
     def __delitem__(self, key: PROPERTY_KEY_TYPE) -> None:
         self[key] = np.array([])
@@ -322,13 +354,13 @@ class Property:
     def __str__(self) -> str:
         ret = f"{self.name} \n"
         ret += f" - Value: {self.value.shape}\n"
-        ret += f" - Gradients:\n"
+        ret += " - Gradients:\n"
         if self.gradients[2].shape[0] != 0:
             for gradient_order, gradient in self.gradients.items():
                 if gradient.shape[0] != 0:
                     ret += f"  - Gradients {gradient_order}: {gradient.shape}\n"
         return ret
-    
+
     def __repr__(self) -> str:
         tmp = self.__class__.__name__
         tmp += "("
@@ -343,7 +375,7 @@ class Property:
                 tmp += ", "
         tmp += ")"
         return tmp
-    
+
     def iter_arrays(self) -> Generator[tuple[str, int, npt.NDArray[np.float64]], None, None]:
         for key, value in self.items():
             if isinstance(value, np.ndarray) and value.shape[0] != 0:
@@ -359,7 +391,7 @@ class Property:
             return 1
         else:
             return self.value.shape[1]
-    
+
     @property
     def data_lim(self) -> tuple[float | None, float | None]:
         if self._data_lim is None:
@@ -368,7 +400,7 @@ class Property:
             data_lims = np.vstack([data_mins, data_maxs]).T
             return data_lims
         return self._data_lim
-    
+
     @property
     def rounded_data_lim(self) -> tuple[float | None, float | None]:
         if self._data_lim is None:
@@ -379,57 +411,63 @@ class Property:
             #         data_lims[i, j] = np_round_to_half(data_lims[i, j])
             return data_lims
         return self._data_lim
-    
-    def items(self) -> Generator[tuple[str, npt.NDArray[np.float64] | dict[int, npt.NDArray[np.float64]] | str], None, None]:
+
+    def items(
+        self,
+    ) -> Generator[
+        tuple[str, npt.NDArray[np.float64] | dict[int, npt.NDArray[np.float64]] | str], None, None
+    ]:
         """Return field names and values as tuples."""
         yield from self.__dict__.items()
 
-    def as_dict(self) -> dict[str, npt.NDArray[np.float64] | dict[int, npt.NDArray[np.float64]] | str]:
+    def as_dict(
+        self,
+    ) -> dict[str, npt.NDArray[np.float64] | dict[int, npt.NDArray[np.float64]] | str]:
         return self.__dict__
 
-    def _extract_key(self, key: str | tuple[str, int]) ->  tuple[str, int]:
+    def _extract_key(self, key: str | tuple[str, int]) -> tuple[str, int]:
         if isinstance(key, str):
             return key, 0
-  
+
         else:
             calc_name: str = key[0]
             gradient_order: int = key[1]
             if gradient_order == 0:
                 calc_name = "value"
             return calc_name, gradient_order
-        
+
     def to_series(self) -> pd.Series:
         return pd.Series(self.value, name=self.name)
-    
+
     def to_array(self) -> npt.NDArray[np.float64]:
         return self.value
-    
+
     def to_pandas(self) -> pd.DataFrame:
         return pd.DataFrame(self.value, columns=[self.name])
-    
+
     @property
     def has_denominator_unit(self) -> bool:
         return "\\frac{" in self.units
-    
+
     @property
     def denominator_unit(self) -> str:
         numerator_unit, denominator_unit = self._get_frac_units()
         return denominator_unit
-        
+
     @property
     def numerator_unit(self) -> str:
         numerator_unit, denominator_unit = self._get_frac_units()
         return numerator_unit
-        
+
     def _get_frac_units(self) -> tuple[str, str]:
         if self.has_denominator_unit:
             return parse_frac(self.units)
         else:
             return self.units, ""
 
-    def create_gradient_units(self, order:int) -> str:
+    def create_gradient_units(self, order: int) -> str:
         points_units = self.points_units
-        
+
         denominator_unit = self.denominator_unit
         numerator_unit = self.numerator_unit
         if denominator_unit == points_units:
@@ -439,28 +477,33 @@ class Property:
         elif denominator_unit != points_units and order > 1:
             denominator_unit = denominator_unit + " " + points_units + "^{" + str(order) + "}"
         else:
-            raise ValueError(f"Invalid denominator unit: {denominator_unit}. Must be {points_units}.")
-        
-        grad_unit = "$\\frac{" + numerator_unit  + "}{" + denominator_unit + "}$"
-        return grad_unit
-    
+            raise ValueError(
+                f"Invalid denominator unit: {denominator_unit}. Must be {points_units}."
+            )
 
-        
-        
-    
+        grad_unit = "$\\frac{" + numerator_unit + "}{" + denominator_unit + "}$"
+        return grad_unit
+
+
 class PointSet:
     _point_data: dict[str, Property]
-    _gradient_func: Callable[[npt.NDArray[np.float64], npt.NDArray[np.float64]], npt.NDArray[np.float64]]
+    _gradient_func: Callable[
+        [npt.NDArray[np.float64], npt.NDArray[np.float64]], npt.NDArray[np.float64]
+    ]
     _points: npt.NDArray[np.float64]
-    
-    def __init__(self, 
-                 points: npt.ArrayLike, 
-                 point_data: dict[str, Property] | Sequence[Property] | None = None, 
-                 gradient_func: Callable[[npt.NDArray[np.float64], npt.NDArray[np.float64]], npt.NDArray[np.float64]] | None = None,
-                 transform_matrix: npt.NDArray[np.float64] | None = None,
-                 points_label: str | None = None,
-                 points_units: str | None = None) -> None:
-        
+
+    def __init__(
+        self,
+        points: npt.ArrayLike,
+        point_data: dict[str, Property] | Sequence[Property] | None = None,
+        gradient_func: Callable[
+            [npt.NDArray[np.float64], npt.NDArray[np.float64]], npt.NDArray[np.float64]
+        ]
+        | None = None,
+        transform_matrix: npt.NDArray[np.float64] | None = None,
+        points_label: str | None = None,
+        points_units: str | None = None,
+    ) -> None:
         self._points = np.array(points)
         self._points_label = points_label
         self._points_units = points_units
@@ -475,8 +518,10 @@ class PointSet:
                 self.add_property(property=property)
 
         self.validate_point_data()
-        
-        self._gradient_func = gradient_func if gradient_func is not None else lambda x, y: np.zeros_like(x)
+
+        self._gradient_func = (
+            gradient_func if gradient_func is not None else lambda x, y: np.zeros_like(x)
+        )
 
     def __str__(self) -> str:
         ret = "\n Point Set     \n"
@@ -491,23 +536,23 @@ class PointSet:
         for prop_name, prop in self._point_data.items():
             ret += f"{prop_name}: \n{prop}\n"
         return ret
-    
+
     @property
     def points(self) -> npt.NDArray[np.float64]:
         return self._points
-    
+
     @property
     def points_label(self) -> str | None:
         return self._points_label
-    
+
     @property
     def points_units(self) -> str | None:
         return self._points_units
-    
+
     @property
     def n_points(self) -> int:
         return self._points.shape[0]
-    
+
     @property
     def point_data(self) -> dict[str, Property]:
         return self._point_data
@@ -521,25 +566,31 @@ class PointSet:
         return len(self._point_data)
 
     @property
-    def gradient_func(self) -> Callable[[npt.NDArray[np.float64], npt.NDArray[np.float64]], npt.NDArray[np.float64]]:
+    def gradient_func(
+        self,
+    ) -> Callable[[npt.NDArray[np.float64], npt.NDArray[np.float64]], npt.NDArray[np.float64]]:
         return self._gradient_func
-    
-    def validate_property_points(self, property:Property) -> None:
+
+    def validate_property_points(self, property: Property) -> None:
         if property.value.shape[0] != self._points.shape[0]:
             err_msg = f"Property ({property.name}) has {property.value.shape[0]} points. Expected {self._points.shape[0]} points."
             raise ValueError(err_msg)
-        
-    def validate_point_data(self, property_store:dict[str, Property] | None  = None) -> None:
+
+    def validate_point_data(self, property_store: dict[str, Property] | None = None) -> None:
         if property_store is None:
             property_store = self._point_data
         for prop_name, prop in property_store.items():
             self.validate_property_points(prop)
-       
-    def set_gradient_func(self, gradient_func: Callable[[npt.NDArray[np.float64], npt.NDArray[np.float64]], npt.NDArray[np.float64]]) -> None:
+
+    def set_gradient_func(
+        self,
+        gradient_func: Callable[
+            [npt.NDArray[np.float64], npt.NDArray[np.float64]], npt.NDArray[np.float64]
+        ],
+    ) -> None:
         self._gradient_func = gradient_func
 
-    def get_property(self, key = None) -> Property | None:
-        
+    def get_property(self, key=None) -> Property | None:
         prop_name, (calc_name, gradient_order) = self._extract_key(key)
         property = self._point_data.get(prop_name, None)
         if property is None:
@@ -555,12 +606,14 @@ class PointSet:
             return gradient
         else:
             return value
-    
-    def add_property(self, 
-                     property: Property | None = None,
-                     name:str | None = None,
-                     value:npt.ArrayLike | None = None,
-                     **kwargs) -> None:
+
+    def add_property(
+        self,
+        property: Property | None = None,
+        name: str | None = None,
+        value: npt.ArrayLike | None = None,
+        **kwargs,
+    ) -> None:
         if property is not None:
             logger.info("Adding property %s", property.name)
             if hasattr(property, "bind_owner"):
@@ -569,45 +622,45 @@ class PointSet:
                 property._bind_owner(self)
             self._point_data[property.name] = property
             return None
-        
+
         if name is None or value is None:
             raise ValueError("Name and value are required to add a property.")
-        
+
         logger.info("Adding property %s", name)
 
         property = self.point_data.get(name, None)
         if property is None:
             property = Property(name=name, **kwargs)
-        
+
         if value is not None:
             property.value = np.array(value)
-            
+
         self.validate_property_points(property)
-        
+
         if hasattr(property, "bind_owner"):
             property.bind_owner(self)
         else:
             property._bind_owner(self)
         self._point_data[name] = property
 
-    def update_property(self, 
-                        property: Property | None = None,
-                        name:str | None = None,
-                        value:npt.ArrayLike | None = None) -> None:
-        self.add_property(property=property, 
-                          name=name, 
-                          value=value)
-        
-    def update_points(self, points:npt.ArrayLike) -> None:
+    def update_property(
+        self,
+        property: Property | None = None,
+        name: str | None = None,
+        value: npt.ArrayLike | None = None,
+    ) -> None:
+        self.add_property(property=property, name=name, value=value)
+
+    def update_points(self, points: npt.ArrayLike) -> None:
         self._points = np.array(points)
-    
-    def transform_points(self, transform_matrix:npt.NDArray[np.float64]) -> None:
+
+    def transform_points(self, transform_matrix: npt.NDArray[np.float64]) -> None:
         self._points = self._points @ transform_matrix
-    
-    def remove_property(self, name:str) -> Property | None:
+
+    def remove_property(self, name: str) -> Property | None:
         return self._point_data.pop(name, None)
-    
-    def compute_gradients(self, gradient_order:int, names:list[str] | None = None) -> None:
+
+    def compute_gradients(self, gradient_order: int, names: list[str] | None = None) -> None:
         if names is None:
             names = list(self._point_data.keys())
         if gradient_order < 0:
@@ -621,11 +674,13 @@ class PointSet:
             else:
                 self.compute_gradients(gradient_order - 1, names=[name])
                 scalars = property.gradients[gradient_order - 1]
-            
+
             property.gradients[gradient_order] = self.gradient_func(self._points, scalars)
         return property.gradients[gradient_order]
-    
-    def iter_property_arrays(self, property_store:dict[str, Property] | None = None) -> Generator[tuple[str, str, int, npt.NDArray[np.float64]], None, None]:
+
+    def iter_property_arrays(
+        self, property_store: dict[str, Property] | None = None
+    ) -> Generator[tuple[str, str, int, npt.NDArray[np.float64]], None, None]:
         if property_store is None:
             property_store = self._point_data
         try:
@@ -634,24 +689,29 @@ class PointSet:
                     yield prop_name, calc_name, gradient_order, value_array
         finally:
             pass
-        
+
     def select_points(self, indices):
         if len(indices) == 0:
-            return PointSet(points=np.empty((0, 3)), property_store={}, gradient_func=self.gradient_func)
-        
+            return PointSet(
+                points=np.empty((0, 3)), property_store={}, gradient_func=self.gradient_func
+            )
+
         points = self.points[indices]
-        
+
         new_point_data = {}
         for prop_name, calc_name, gradient_order, value_array in self.iter_property_arrays():
             if prop_name not in new_point_data:
                 new_point_data[prop_name] = Property(name=prop_name)
-            
+
             new_point_data[prop_name][(calc_name, gradient_order)] = value_array[indices]
-            
-        return PointSet(points=points, property_store=new_point_data, gradient_func=self.gradient_func)
-            
-        
-    def _extract_key(self, key: str | tuple[str, int] | tuple[str,str] | tuple[str,str,int]) -> tuple[str, tuple[str | None, int]]:
+
+        return PointSet(
+            points=points, property_store=new_point_data, gradient_func=self.gradient_func
+        )
+
+    def _extract_key(
+        self, key: str | tuple[str, int] | tuple[str, str] | tuple[str, str, int]
+    ) -> tuple[str, tuple[str | None, int]]:
         if isinstance(key, str):
             prop_name = key
             calc_name = None
@@ -672,15 +732,16 @@ class PointSet:
             gradient_order = key[2]
         else:
             error_message = f"Invalid key: {key}. \n"
-            error_message += f"If you want to get a property, use the string key of the property. Example: 'bands' \n"
-            error_message += f"If you want to get a gradient of a specific order, use the tuple of two strings." 
-            error_message += f"Example: ('bands', 'gradients', 1) | ('bands', 1) | ('bands', 2) \n"
-            error_message += f"If you want to get a specific calculation for a property, use the tuple of two strings. \n"
-            error_message += f"Example: ('bands', 'value') | ('bands', 'gradients') | ('bands', 'vortices') | ('bands', 'divergences') | ('bands', 'laplacians') \n"
+            error_message += "If you want to get a property, use the string key of the property. Example: 'bands' \n"
+            error_message += (
+                "If you want to get a gradient of a specific order, use the tuple of two strings."
+            )
+            error_message += "Example: ('bands', 'gradients', 1) | ('bands', 1) | ('bands', 2) \n"
+            error_message += "If you want to get a specific calculation for a property, use the tuple of two strings. \n"
+            error_message += "Example: ('bands', 'value') | ('bands', 'gradients') | ('bands', 'vortices') | ('bands', 'divergences') | ('bands', 'laplacians') \n"
             raise ValueError(error_message)
 
         return prop_name, (calc_name, gradient_order)
-
 
 
 def parse_frac(latex_expr: str):
@@ -698,7 +759,7 @@ def parse_frac(latex_expr: str):
         (numerator, denominator) if found, else None.
     """
     # This regex assumes well-formed \frac{...}{...} with no nested braces
-    pattern = r'\\frac\{([^{}]+)\}\{([^{}]+)\}'
+    pattern = r"\\frac\{([^{}]+)\}\{([^{}]+)\}"
     match = re.search(pattern, latex_expr)
     if match:
         num, den = match.groups()

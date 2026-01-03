@@ -20,6 +20,7 @@ logger = logging.getLogger(__name__)
 
 ORBITAL_ORDERING = OrbitalIndexer()
 
+
 class VaspParser(BaseParser):
     def __init__(
         self,
@@ -32,7 +33,7 @@ class VaspParser(BaseParser):
         vasprun: str | Path | VaspXML | None = "vasprun.xml",
     ):
         super().__init__(dirpath)
-        
+
         # Initialize parser objects by checking if they are already parser instances or paths
         self.outcar: Outcar | None = self._initialize_parser(outcar, Outcar)
         self.procar: Procar | None = self._initialize_parser(procar, Procar)
@@ -40,45 +41,40 @@ class VaspParser(BaseParser):
         self.poscar: Poscar | None = self._initialize_parser(poscar, Poscar)
         self.vasprun: VaspXML | None = self._initialize_parser(vasprun, VaspXML)
         self.doscar: Doscar | None = self._initialize_parser(doscar, Doscar)
-        
-     
-          
-    
+
     @overload
     def _initialize_parser(
         self, param: str | Path | Outcar | None, parser_class: type[Outcar]
     ) -> Outcar | None: ...
-    
+
     @overload
     def _initialize_parser(
         self, param: str | Path | Procar | None, parser_class: type[Procar]
     ) -> Procar | None: ...
-    
+
     @overload
     def _initialize_parser(
         self, param: str | Path | Kpoints | None, parser_class: type[Kpoints]
     ) -> Kpoints | None: ...
-    
+
     @overload
     def _initialize_parser(
         self, param: str | Path | Poscar | None, parser_class: type[Poscar]
     ) -> Poscar | None: ...
-    
+
     @overload
     def _initialize_parser(
         self, param: str | Path | VaspXML | None, parser_class: type[VaspXML]
     ) -> VaspXML | None: ...
-    
+
     @overload
     def _initialize_parser(
         self, param: str | Path | Doscar | None, parser_class: type[Doscar]
     ) -> Doscar | None: ...
-    
+
     def _initialize_parser(
         self,
-        param: (
-            str | Path | Outcar | Procar | Kpoints | Poscar | VaspXML | Doscar | None
-        ),
+        param: (str | Path | Outcar | Procar | Kpoints | Poscar | VaspXML | Doscar | None),
         parser_class: (
             type[Outcar]
             | type[Procar]
@@ -90,14 +86,14 @@ class VaspParser(BaseParser):
     ) -> Outcar | Procar | Kpoints | Poscar | VaspXML | Doscar | None:
         """
         Initialize a parser object from either a path or an existing parser instance.
-        
+
         Parameters
         ----------
         param : str | Path | ParserType | None
             Either a file path or an already instantiated parser object
         parser_class : type
             The parser class to instantiate if param is a path
-            
+
         Returns
         -------
         ParserType | None
@@ -105,34 +101,35 @@ class VaspParser(BaseParser):
         """
         if param is None:
             return None
-        
+
         # Check if it's already a parser instance
         if isinstance(param, parser_class):
             return param
-        
+
         # It's a path (str or Path), so we need to create the parser
         if not isinstance(param, (str, Path)):
             return None
-            
+
         filepath = self.dirpath / Path(param) if self.dirpath else Path(param)
-        
+
         if filepath.exists():
             return parser_class(filepath)
-        
+
         return None
-            
+
     @classmethod
-    def from_str(cls, 
-                 outcar: str | None = None,
-                 procar: str | None = None,
-                 kpoints: str | None = None,
-                 poscar: str | None = None,
-                 vasprun: str | None = None,
-                 doscar: str | None = None,
-                 ) -> "VaspParser":
+    def from_str(
+        cls,
+        outcar: str | None = None,
+        procar: str | None = None,
+        kpoints: str | None = None,
+        poscar: str | None = None,
+        vasprun: str | None = None,
+        doscar: str | None = None,
+    ) -> "VaspParser":
         """
         Create a VaspParser from file content strings.
-        
+
         Parameters
         ----------
         outcar : str | None
@@ -147,7 +144,7 @@ class VaspParser(BaseParser):
             Content of vasprun.xml file
         doscar : str | None
             Content of DOSCAR file
-            
+
         Returns
         -------
         VaspParser
@@ -159,17 +156,17 @@ class VaspParser(BaseParser):
         poscar_obj = Poscar.from_str(poscar) if poscar else None
         vasprun_obj = VaspXML.from_str(vasprun) if vasprun else None
         doscar_obj = Doscar.from_str(doscar) if doscar else None
-        
+
         return cls(
             dirpath="",
-            outcar=outcar_obj, 
-            procar=procar_obj, 
-            kpoints=kpoints_obj, 
-            poscar=poscar_obj, 
-            vasprun=vasprun_obj, 
-            doscar=doscar_obj
+            outcar=outcar_obj,
+            procar=procar_obj,
+            kpoints=kpoints_obj,
+            poscar=poscar_obj,
+            vasprun=vasprun_obj,
+            doscar=doscar_obj,
         )
-            
+
     @cached_property
     def version(self) -> str | None:
         if self.outcar:
@@ -183,7 +180,7 @@ class VaspParser(BaseParser):
     @cached_property
     def version_tuple(self) -> tuple[int, int, int]:
         return tuple(int(x) for x in self.version.split("."))
-    
+
     @cached_property
     def is_spin_polarized(self) -> bool:
         if self.vasprun:
@@ -196,7 +193,7 @@ class VaspParser(BaseParser):
             return None
 
         kpoints = self.procar.kpoints if self.procar else None
-            
+
         if self.kpoints.knames is None:
             return None
 
@@ -206,25 +203,21 @@ class VaspParser(BaseParser):
             n_grids=self.kpoints.ngrids,
             reciprocal_lattice=self.outcar.reciprocal_lattice,
         )
-        
+
     @property
     def kgrid_info(self) -> kpoints_core.KGridInfo | None:
         if self.kpoints is None:
             return None
-        
+
         kgrid = self.kpoints.get("kgrid", None)
         kgrid_mode = self.kpoints.get("mode", None)
         k_shift = self.kpoints.get("kshift", None)
-        
+
         if kgrid is None or kgrid_mode is None or k_shift is None:
             return None
-        
-        return kpoints_core.KGridInfo(
-            kgrid=kgrid,
-            kgrid_mode=kgrid_mode,
-            kshift=k_shift
-            )
-        
+
+        return kpoints_core.KGridInfo(kgrid=kgrid, kgrid_mode=kgrid_mode, kshift=k_shift)
+
     @cached_property
     def fermi(self) -> float | None:
         if self.outcar is not None:
@@ -233,7 +226,7 @@ class VaspParser(BaseParser):
             fermi = self.vasprun.fermi
         else:
             fermi = None
-            
+
         return fermi
 
     @property
@@ -271,11 +264,11 @@ class VaspParser(BaseParser):
             energies = self.doscar.energies
         else:
             return None
-        
+
         # if self.is_spin_polarized:
         #     energies = np.repeat(energies, 2, axis=0)
         return energies
-    
+
     @cached_property
     def total_dos(self) -> np.ndarray | None:
         if self.vasprun is not None and self.vasprun.has_dos:
@@ -284,10 +277,10 @@ class VaspParser(BaseParser):
             total_dos = self.doscar.total
         else:
             return None
-        
-        total_dos = total_dos[...,np.newaxis] if len(total_dos.shape) == 1 else total_dos
+
+        total_dos = total_dos[..., np.newaxis] if len(total_dos.shape) == 1 else total_dos
         return total_dos
-    
+
     @cached_property
     def projected_dos(self) -> np.ndarray | None:
         if self.vasprun is not None and self.vasprun.has_dos:
@@ -298,10 +291,9 @@ class VaspParser(BaseParser):
             return self.doscar.projected_dos
         else:
             return None
-    
+
     @property
     def dos(self) -> DensityOfStates | None:
-
         try:
             dos = DensityOfStates(
                 energies=self.energies,
@@ -310,7 +302,7 @@ class VaspParser(BaseParser):
                 projected=self.projected_dos,
                 orbital_names=self.orbitals,
                 structure=self.structure,
-                )
+            )
         except Exception:
             msg = (
                 "Issue with parsing the DOS. "
@@ -319,7 +311,6 @@ class VaspParser(BaseParser):
             logger.warning(msg)
             dos = None
         return dos
-        
 
     @property
     def structure(self) -> Structure | None:
@@ -333,23 +324,23 @@ class VaspParser(BaseParser):
             atoms = self.vasprun.atoms
             fractional_coordinates = self.vasprun.initial_structure.positions
             lattice = self.vasprun.initial_structure.crystal.basis
-            
+
             return self.vasprun
         else:
             logger.warning(
                 "Issue with poscar file. Either it was not found or there is an issue with the parser"
             )
             return None
-        
+
         rotations = self.outcar.rotations if self.outcar else None
-        
+
         return Structure(
             atoms=atoms,
             fractional_coordinates=fractional_coordinates,
             lattice=lattice,
             rotations=rotations,
         )
-        
+
     @cached_property
     def orbitals(self) -> list[str]:
         return ORBITAL_ORDERING.flat_conventional

@@ -1,7 +1,6 @@
 import numpy as np
 
 from pyprocar.core.structure import Structure
-from pyprocar.utils import np_utils
 
 
 class Unfolder:
@@ -70,7 +69,6 @@ class Unfolder:
         # norm the atomic-orbital axis
         norm = np.linalg.norm(self.eigenvectors, ord=2, axis=-1)
         self.eigenvectors /= norm[:, :, None]
-        
 
         for iatom, chem in enumerate(self.structure.atoms):
             for iorb, orb in enumerate(self.ebs.orbital_names):
@@ -94,9 +92,7 @@ class Unfolder:
         can just ignore them? Will it change the energy spectrum?
 
         """
-        a1 = Structure(
-            atoms=["H"], fractional_coordinates=[[0, 0, 0]], lattice=np.diag([1, 1, 1])
-        )
+        a1 = Structure(atoms=["H"], fractional_coordinates=[[0, 0, 0]], lattice=np.diag([1, 1, 1]))
         sc = a1.transform(self.trans_mat)
         rs = sc.fractional_coordinates
 
@@ -116,9 +112,7 @@ class Unfolder:
                 for j_basis, Tpos in enumerate(Tpositions):
                     dpos = Tpos - pos
 
-                    if close_to_int(dpos) and (
-                        self.basis[i_basis] == self.basis[j_basis]
-                    ):
+                    if close_to_int(dpos) and (self.basis[i_basis] == self.basis[j_basis]):
                         indices[i, j_basis] = i_basis
         self.trans_rs = rs
         self.trans_indices = indices
@@ -147,16 +141,10 @@ class Unfolder:
         for r_i, ind in zip(self.trans_rs, self.trans_indices):
             if _phase:
                 weight += (
-                    np.vdot(evec, evec[ind])
-                    * np.exp(1j * 2 * np.pi * np.dot(qpt + G, r_i))
-                    / N
+                    np.vdot(evec, evec[ind]) * np.exp(1j * 2 * np.pi * np.dot(qpt + G, r_i)) / N
                 )
             else:
-                weight += (
-                    np.vdot(evec, evec[ind])
-                    * np.exp(-1j * 2 * np.pi * np.dot(G, r_i))
-                    / N
-                )
+                weight += np.vdot(evec, evec[ind]) * np.exp(-1j * 2 * np.pi * np.dot(G, r_i)) / N
 
         return weight.real
 
@@ -173,5 +161,5 @@ class Unfolder:
                     weights[iqpt, ifreq, ispin] = self._get_weight(
                         self.eigenvectors[iqpt, ifreq, ispin, :], self.qpoints[iqpt]
                     )
-                    
+
         return weights

@@ -6,8 +6,6 @@ __date__ = "March 31, 2020"
 import json
 import logging
 from dataclasses import asdict, dataclass, field
-from pathlib import Path
-from typing import List, Optional, Tuple, Union
 
 import matplotlib.cm as cm
 import matplotlib.colors as mpcolors
@@ -27,23 +25,22 @@ logger = logging.getLogger(__name__)
 
 # Simplified main plotter class
 
+
 @dataclass
 class PlainBandStyle:
     color: str = "black"
     linestyle: str = "-"
-    linewidth: float = 1.0 
+    linewidth: float = 1.0
     alpha: float = 1.0
     label: str = None
     extra_kwargs: dict = field(default_factory=dict)
-    
+
     @classmethod
     def from_dict(cls, style_dict: dict):
         return cls(**style_dict)
-    
+
     def to_dict(self):
         return {k: str(v) for k, v in asdict(self).items()}
-    
-    
 
 
 class BandStructurePlotter:
@@ -73,14 +70,10 @@ class BandStructurePlotter:
         self.values_dict = {}
         self.cb = None
         self._legend_handles = []
-        
+
         self.x = None
-        
-    def plot(self, 
-             kpath: KPath, 
-             bands: np.ndarray,
-             line_kwargs: dict | None = None,
-             **kwargs):
+
+    def plot(self, kpath: KPath, bands: np.ndarray, line_kwargs: dict | None = None, **kwargs):
         """Plot plain band structure lines.
 
         Parameters
@@ -97,19 +90,18 @@ class BandStructurePlotter:
         """
         self.kpath = kpath
         self.x = kpath.get_distances(as_segments=False)
-        
-        bands, _ , _ = self._validate_data(bands=bands)
-        
+
+        bands, _, _ = self._validate_data(bands=bands)
+
         # Merge kwargs: generic kwargs as fallback, line_kwargs override
         merged_line_kwargs = {}
- 
+
         if line_kwargs:
             merged_line_kwargs.update(kwargs)
         # Preserve previous default linestyle if user didn't supply one
         if "linestyle" not in merged_line_kwargs:
             merged_line_kwargs["linestyle"] = "-"
-            
-            
+
         created_lines: dict[tuple[int, int], Line2D] = {}
         n_bands = bands.shape[1]
         n_spin_channels = bands.shape[-1]
@@ -127,7 +119,7 @@ class BandStructurePlotter:
         self.set_xticks()
         self.set_xlabel()
         self.set_ylabel()
-        
+
         # Record exportable data
         for ispin in range(n_spin_channels):
             for iband in range(bands.shape[1]):
@@ -135,18 +127,20 @@ class BandStructurePlotter:
                 self.values_dict[key] = bands[:, iband, ispin]
         self._record_kpath_exports(kpath)
         return created_lines
-            
-    def plot_scatter(self, 
-             kpath: KPath, 
-             bands: np.ndarray, 
-             scalars: np.ndarray = None,
-             scatter_kwargs: dict | None = None,
-             cmap: str | mpcolors.Colormap = "plasma",
-             norm: str | mpcolors.Normalize | type | None = "auto",
-             clim: Tuple[float | None, float | None] | None = None,
-             show_colorbar: bool | None = True,
-             colorbar_kwargs: dict | None = None,
-             **kwargs):
+
+    def plot_scatter(
+        self,
+        kpath: KPath,
+        bands: np.ndarray,
+        scalars: np.ndarray = None,
+        scatter_kwargs: dict | None = None,
+        cmap: str | mpcolors.Colormap = "plasma",
+        norm: str | mpcolors.Normalize | type | None = "auto",
+        clim: tuple[float | None, float | None] | None = None,
+        show_colorbar: bool | None = True,
+        colorbar_kwargs: dict | None = None,
+        **kwargs,
+    ):
         """Plot band energies as scatter, optionally colored by `scalars`.
 
         Parameters
@@ -165,37 +159,37 @@ class BandStructurePlotter:
         """
         self.kpath = kpath
         self.x = kpath.get_distances(as_segments=False)
-        
+
         # Validate data
         bands, scalars, _ = self._validate_data(bands, scalars)
-        
+
         # Resolve colormap
         resolved_norm, resolved_cmap, scalar_mappable = self._resolve_colormap(
             data=scalars,
             cmap=cmap,
             norm=norm,
         )
-        
+
         # Merge kwargs for scatter
         merged_scatter_kwargs = {}
         if kwargs:
             merged_scatter_kwargs.update(kwargs)
         if scatter_kwargs:
             merged_scatter_kwargs.update(scatter_kwargs)
-            
+
         merged_scatter_kwargs["norm"] = resolved_norm
         merged_scatter_kwargs["cmap"] = resolved_cmap
 
         created_collections: dict[tuple[int, int], PathCollection] = {}
-        
+
         # Plot scatter
         n_spin_channels = bands.shape[-1]
         n_bands = bands.shape[1]
         for ispin in range(n_spin_channels):
-            data=None
+            data = None
             if scalars is not None:
                 data = scalars[..., ispin]
-                
+
             for iband in range(n_bands):
                 y = bands[:, iband, ispin]
                 c_vals = None if data is None else data[:, iband]
@@ -206,7 +200,7 @@ class BandStructurePlotter:
         if scalars is not None and show_colorbar:
             colorbar_kwargs = colorbar_kwargs or {}
             self.cb = self.fig.colorbar(scalar_mappable, ax=self.ax, **colorbar_kwargs)
-            
+
         self.set_xlim()
         ymin = float(bands.min())
         ymax = float(bands.max())
@@ -216,7 +210,7 @@ class BandStructurePlotter:
         self.set_xticks()
         self.set_xlabel()
         self.set_ylabel()
-        
+
         # Record exportable data
         for ispin in range(n_spin_channels):
             for iband in range(bands.shape[1]):
@@ -227,20 +221,21 @@ class BandStructurePlotter:
                     self.values_dict[pkey] = scalars[:, iband, ispin]
         self._record_kpath_exports(kpath)
         return created_collections
-            
-            
-    def plot_parametric(self, 
-             kpath: KPath, 
-             bands: np.ndarray, 
-             scalars: np.ndarray = None, 
-             cmap: str | mpcolors.Colormap = "plasma",
-             norm: str | mpcolors.Normalize | type | None = "auto",
-             clim:Tuple[float | None, float | None] | None = None,
-             linewidth:float = 2.0,
-             collection_kwargs: dict | None = None,
-             show_colorbar: bool | None = True,
-             colorbar_kwargs: dict | None = None,
-             **kwargs):
+
+    def plot_parametric(
+        self,
+        kpath: KPath,
+        bands: np.ndarray,
+        scalars: np.ndarray = None,
+        cmap: str | mpcolors.Colormap = "plasma",
+        norm: str | mpcolors.Normalize | type | None = "auto",
+        clim: tuple[float | None, float | None] | None = None,
+        linewidth: float = 2.0,
+        collection_kwargs: dict | None = None,
+        show_colorbar: bool | None = True,
+        colorbar_kwargs: dict | None = None,
+        **kwargs,
+    ):
         """Plot parametric bands colored by `scalars` via LineCollection.
 
         Parameters
@@ -268,13 +263,13 @@ class BandStructurePlotter:
             Additional LineCollection kwargs (fallback, merged under the
             hood; explicit `collection_kwargs` takes precedence).
         """
-        
+
         self.kpath = kpath
         self.x = kpath.get_distances(as_segments=False)
-        
+
         # Validate data
         bands, scalars, _ = self._validate_data(bands=bands, scalars=scalars)
-        
+
         # Resolve colormap
         resolved_norm, resolved_cmap, scalar_mappable = self._resolve_colormap(
             data=scalars,
@@ -282,7 +277,7 @@ class BandStructurePlotter:
             norm=norm,
             clim=clim,
         )
-        
+
         # Prepare data
         width_weights = np.ones_like(bands)
         mbands = np.ma.masked_array(bands, False)
@@ -298,18 +293,18 @@ class BandStructurePlotter:
         #         self.ebs.bands,
         #         np.abs(color_weights) < color_mask,
         #     )
-        
+
         # Merge kwargs for LineCollection
         merged_collection_kwargs = {}
         if kwargs:
             merged_collection_kwargs.update(kwargs)
         if collection_kwargs:
             merged_collection_kwargs.update(collection_kwargs)
-            
+
         # Plot parametric bands
         last_lc = None
         created_collections: dict[tuple[int, int], LineCollection] = {}
-        
+
         n_spin_channels = bands.shape[-1]
         n_bands = bands.shape[1]
         for ispin_channel in range(n_spin_channels):
@@ -317,24 +312,24 @@ class BandStructurePlotter:
                 points = np.array([self.x, mbands[:, iband, ispin_channel]]).T.reshape(-1, 1, 2)
                 segments = np.concatenate([points[:-1], points[1:]], axis=1)
 
-                lc = LineCollection(segments,  **merged_collection_kwargs)
-                
+                lc = LineCollection(segments, **merged_collection_kwargs)
+
                 # Handle colors
                 if scalars is not None:
                     lc.set_array(scalars[:, iband, ispin_channel])
                     lc.set_cmap(resolved_cmap)
                     lc.set_norm(resolved_norm)
-                    
+
                 lc.set_linewidth(width_weights[:, iband, ispin_channel] * linewidth)
                 self.ax.add_collection(lc)
                 last_lc = lc
                 created_collections[(iband, ispin_channel)] = lc
-                
+
         # Add colorbar if requested
         if scalars is not None and show_colorbar:
             colorbar_kwargs = colorbar_kwargs or {}
             self.cb = self.fig.colorbar(scalar_mappable, ax=self.ax, **colorbar_kwargs)
-        
+
         # Set default plot parameters
         self.set_xlim()
         ymin = float(bands.min())
@@ -345,7 +340,7 @@ class BandStructurePlotter:
         self.set_xticks()
         self.set_xlabel()
         self.set_ylabel()
-        
+
         # Record exportable data
         for ispin in range(n_spin_channels):
             for iband in range(n_bands):
@@ -357,24 +352,25 @@ class BandStructurePlotter:
         self._record_kpath_exports(kpath)
         return created_collections
 
-            
-    def plot_quiver(self, 
-            kpath: KPath, 
-            bands: np.ndarray, 
-            vectors: np.ndarray = None,
-            skip:int=1,
-            angles:str='uv',
-            scale=None,
-            scale_units:str='inches',
-            units:str='inches',
-            color=None,
-            cmap: str | mpcolors.Colormap = "plasma",
-            norm: str | mpcolors.Normalize | type | None = "auto",
-            clim:Tuple[float | None, float | None] | None = None,
-            quiver_kwargs: dict | None = None,
-            show_colorbar: bool | None = True,
-            colorbar_kwargs: dict | None = None,
-            **kwargs):
+    def plot_quiver(
+        self,
+        kpath: KPath,
+        bands: np.ndarray,
+        vectors: np.ndarray = None,
+        skip: int = 1,
+        angles: str = "uv",
+        scale=None,
+        scale_units: str = "inches",
+        units: str = "inches",
+        color=None,
+        cmap: str | mpcolors.Colormap = "plasma",
+        norm: str | mpcolors.Normalize | type | None = "auto",
+        clim: tuple[float | None, float | None] | None = None,
+        quiver_kwargs: dict | None = None,
+        show_colorbar: bool | None = True,
+        colorbar_kwargs: dict | None = None,
+        **kwargs,
+    ):
         """Plot vector-valued data (e.g., velocities) as arrows along bands.
 
         Parameters
@@ -400,10 +396,10 @@ class BandStructurePlotter:
 
         self.kpath = kpath
         self.x = kpath.get_distances(as_segments=False)
-        
+
         # Validate data
         bands, _, vectors = self._validate_data(bands=bands, vectors=vectors)
-        
+
         # Resolve colormap
         resolved_norm, resolved_cmap, scalar_mappable = self._resolve_colormap(
             data=vectors,
@@ -411,50 +407,51 @@ class BandStructurePlotter:
             norm=norm,
             clim=clim,
         )
-        
+
         # Merge kwargs and quiver_kwargs
         merged_collection_kwargs = {}
         if kwargs:
             merged_collection_kwargs.update(kwargs)
         if quiver_kwargs:
             merged_collection_kwargs.update(quiver_kwargs)
-            
+
         merged_collection_kwargs["norm"] = resolved_norm
         merged_collection_kwargs["cmap"] = resolved_cmap
-        
+
         # Plot quivers
         created_quivers: dict[tuple[int, int], object] = {}
         n_spin_channels = bands.shape[-1]
         n_bands = bands.shape[1]
         for ispin_channel in range(n_spin_channels):
-            u = vectors[...,ispin_channel]                # Arrow y-component
-            v = np.ones_like(vectors[...,ispin_channel])  # Arrow x-component
-            vector_norms = vectors[...,ispin_channel]
-            current_bands = bands[...,ispin_channel]
-        
+            u = vectors[..., ispin_channel]  # Arrow y-component
+            v = np.ones_like(vectors[..., ispin_channel])  # Arrow x-component
+            vector_norms = vectors[..., ispin_channel]
+            current_bands = bands[..., ispin_channel]
+
             for iband in range(n_bands):
-                band_u = u[...,iband]
-                band_v = v[...,iband]
-                band_current_bands = current_bands[...,iband]
-    
+                band_u = u[..., iband]
+                band_v = v[..., iband]
+                band_current_bands = current_bands[..., iband]
+
                 quiver_args = []
                 quiver_args.append(self.x[::skip])
                 quiver_args.append(band_current_bands[::skip])
                 quiver_args.append(band_u[::skip])
                 quiver_args.append(band_v[::skip])
                 if color is None:
-                    quiver_args.append(vector_norms[...,iband])
-                    
+                    quiver_args.append(vector_norms[..., iband])
+
                 qv = self.ax.quiver(
                     *quiver_args,
                     angles=angles,
                     scale=scale,
                     scale_units=scale_units,
-                    units = units,
+                    units=units,
                     color=color,
-                    **merged_collection_kwargs)
+                    **merged_collection_kwargs,
+                )
                 created_quivers[(iband, ispin_channel)] = qv
-                
+
         # Add colorbar if requested
         if vectors is not None and show_colorbar:
             colorbar_kwargs = colorbar_kwargs or {}
@@ -471,12 +468,12 @@ class BandStructurePlotter:
     def plot_atomic_levels(
         self,
         bands: np.ndarray,
-        elimit: Tuple[float, float] = None,
+        elimit: tuple[float, float] = None,
         labels_prefix: str = "s",
         scalars: np.ndarray = None,
         cmap: str = "plasma",
-        norm: Union[mpcolors.Normalize, type] = None,
-        clim: Tuple[float, float] = (None, None),
+        norm: mpcolors.Normalize | type = None,
+        clim: tuple[float, float] = (None, None),
         show_colorbar: bool | None = True,
         colorbar_kwargs: dict | None = None,
         linewidth: float = None,
@@ -529,18 +526,17 @@ class BandStructurePlotter:
             norm=norm,
             clim=clim,
         )
-        
+
         # Merge kwargs and line_collection_kwargs
         merged_collection_kwargs = {}
         if line_collection_kwargs:
             merged_collection_kwargs.update(line_collection_kwargs)
         merged_collection_kwargs["norm"] = resolved_norm
         merged_collection_kwargs["cmap"] = resolved_cmap
-        
+
         # Remove x ticks for atomic levels and compute text bbox in data units
         self.ax.xaxis.set_major_locator(plt.NullLocator())
 
-        
         # Determine a representative text bbox in data coordinates
         n_bands = bands.shape[1]
         sample_text = f"{labels_prefix}-0 : b-{n_bands}"
@@ -554,11 +550,10 @@ class BandStructurePlotter:
             # Fallback small sizes if renderer not ready
             w, h = 0.05, 0.05
         tmp_txt.remove()
-        
+
         # Ensure enough x-range to accommodate lateral shifts and keep labels inside
         x_base = self.x[0] + 0.2 * w
         self.set_xlim((self.x[0], self.x[-1]))
-        
 
         # Plot atomic levels
         last_lc = None
@@ -572,7 +567,7 @@ class BandStructurePlotter:
             shift_state = 0  # 0: first column near left edge, 1: second column to the right
             for iband in range(n_bands):
                 y = float(energies[iband])
-     
+
                 pts = np.array([[self.x[0], y], [self.x[1], y]])
                 segments = np.array([pts])
                 lc = LineCollection(segments, **merged_collection_kwargs)
@@ -592,23 +587,21 @@ class BandStructurePlotter:
                     # Clamp inside current xlim
                     xmin, xmax = self.ax.get_xlim()
                     x_pos = min(max(x_pos, xmin + 0.05 * w), xmax - 0.05 * w)
-                    self.ax.text(x_pos, y, f"{labels_prefix}-{ispin} : b-{iband+1}")
+                    self.ax.text(x_pos, y, f"{labels_prefix}-{ispin} : b-{iband + 1}")
                     last_y = y
-        
+
         # Add colorbar if requested
         if scalars is not None and show_colorbar:
             colorbar_kwargs = colorbar_kwargs or {}
             self.cb = self.fig.colorbar(scalar_mappable, ax=self.ax, **colorbar_kwargs)
-        
+
         # Determine limits
         if elimit is None:
             ymin = float(bands.min())
             ymax = float(bands.max())
             elimit = (ymin, ymax)
         self.set_ylim(elimit)
-        
-        
-        
+
         self.set_yticks()
         self.set_xticks()
         self.set_xlabel()
@@ -627,13 +620,13 @@ class BandStructurePlotter:
         self,
         kpath: KPath,
         bands: np.ndarray,
-        weights: List[np.ndarray],
-        labels: Optional[List[str]] = None,
-        colors: Optional[List[str]] = None,
+        weights: list[np.ndarray],
+        labels: list[str] | None = None,
+        colors: list[str] | None = None,
         norm: str | mpcolors.Normalize | type | None = "auto",
-        clim: Tuple[float | None, float | None] | None = None,
+        clim: tuple[float | None, float | None] | None = None,
         cmap: str | mpcolors.Colormap = "plasma",
-        cmap_list: Optional[List[str]] = None,
+        cmap_list: list[str] | None = None,
         fill_alpha: float = 0.3,
         linewidth: float = 1.0,
         fill_between_kwargs: dict | None = None,
@@ -682,10 +675,10 @@ class BandStructurePlotter:
                 cmap_name = cmap_list[i % len(cmap_list)]
                 cmap = plt.get_cmap(cmap_name)
                 colors.append(cmap(0.7))
-                
-            cmaps=[]
-            norms=[]
-            scalar_mappables=[]
+
+            cmaps = []
+            norms = []
+            scalar_mappables = []
             for i in range(len(weights)):
                 resolved_norm, resolved_cmap, scalar_mappable = self._resolve_colormap(
                     data=weights[i],
@@ -696,18 +689,16 @@ class BandStructurePlotter:
                 cmaps.append(resolved_cmap)
                 norms.append(resolved_norm)
                 scalar_mappables.append(scalar_mappable)
-                
-                
+
         # Merge kwargs and fill_between_kwargs
         merged_collection_kwargs = {}
         if kwargs:
             merged_collection_kwargs.update(kwargs)
         if fill_between_kwargs:
             merged_collection_kwargs.update(fill_between_kwargs)
-            
+
         merged_collection_kwargs["alpha"] = fill_alpha
         merged_collection_kwargs["linewidth"] = linewidth
-
 
         # Iterate over weights and fill between
         legend_handles = []
@@ -723,14 +714,14 @@ class BandStructurePlotter:
                 for iband in range(n_bands):
                     y = bands[:, iband, ispin]
                     width_arr = w[:, iband, ispin]
-                    
+
                     if colors is None:
                         cmap = cmaps[widx]
                         norm = norms[widx]
                     else:
                         cmap = None
                         norm = None
-                    
+
                     self.ax.fill_between(
                         self.x,
                         y - width_arr / 2.0,
@@ -740,9 +731,9 @@ class BandStructurePlotter:
                         norm=norm,
                         **merged_collection_kwargs,
                     )
-            legend_label = labels[widx] if labels and widx < len(labels) else f"overlay-{widx+1}"
+            legend_label = labels[widx] if labels and widx < len(labels) else f"overlay-{widx + 1}"
             legend_handles.append(mpatches.Patch(color=color, label=legend_label, alpha=fill_alpha))
-            
+
         # Add colorbar if requested
         if colors is not None and show_colorbar:
             colorbar_kwargs = colorbar_kwargs or {}
@@ -755,7 +746,7 @@ class BandStructurePlotter:
                 self.values_dict[key] = bands[:, iband, ispin]
         self._record_kpath_exports(kpath)
         self._legend_handles = legend_handles
-        
+
         self.set_xlim()
         self.set_ylim()
         self.set_yticks()
@@ -763,14 +754,14 @@ class BandStructurePlotter:
         self.set_xlabel()
         self.set_ylabel()
         self.legend()
-                        
-    def set_xlim(self, xlim:List[float] = None, **kwargs):
+
+    def set_xlim(self, xlim: list[float] = None, **kwargs):
         if xlim is None:
             xlim = (self.x[0], self.x[-1])
-            
+
         self.ax.set_xlim(xlim, **kwargs)
-        
-    def set_ylim(self, ylim:List[float] = None, **kwargs):
+
+    def set_ylim(self, ylim: list[float] = None, **kwargs):
         """Set y-axis limits, inferring from recorded bands if not provided."""
         if ylim is None:
             bands_cols = [v for k, v in self.values_dict.items() if k.startswith("bands__")]
@@ -784,7 +775,9 @@ class BandStructurePlotter:
                 raise ValueError("Cannot infer ylim; pass explicit limits or plot first")
         self.ax.set_ylim(ylim, **kwargs)
 
-    def set_xticks(self, tick_positions: List[int] = None, tick_names: List[str] = None, color: str = "black"):
+    def set_xticks(
+        self, tick_positions: list[int] = None, tick_names: list[str] = None, color: str = "black"
+    ):
         """Set high-symmetry tick marks and labels using the current k-path.
 
         Parameters
@@ -813,7 +806,7 @@ class BandStructurePlotter:
         if tick_names is not None:
             self.ax.set_xticklabels(tick_names)
 
-    def set_yticks(self, major: float = None, minor: float = None, interval: List[float] = None):
+    def set_yticks(self, major: float = None, minor: float = None, interval: list[float] = None):
         """Set y-axis tick locators using heuristics if not provided.
 
         Parameters
@@ -879,16 +872,31 @@ class BandStructurePlotter:
             self.cb.ax.tick_params(labelsize=kwargs.pop("labelsize", None))
             self.cb.set_label(title, **kwargs)
 
-    def draw_fermi(self, fermi_level: float = 0.0, color: str = "k", linestyle: str = "--", linewidth: float = 1.0):
+    def draw_fermi(
+        self,
+        fermi_level: float = 0.0,
+        color: str = "k",
+        linestyle: str = "--",
+        linewidth: float = 1.0,
+    ):
         """Draw a horizontal Fermi level line."""
         self.ax.axhline(y=fermi_level, color=color, linestyle=linestyle, linewidth=linewidth)
 
-    def grid(self, enabled: bool = True, which: str = "both", color: str = "#cccccc", linestyle: str = ":", linewidth: float = 0.8):
+    def grid(
+        self,
+        enabled: bool = True,
+        which: str = "both",
+        color: str = "#cccccc",
+        linestyle: str = ":",
+        linewidth: float = 0.8,
+    ):
         """Configure grid display."""
         if enabled:
-            self.ax.grid(enabled, which=which, color=color, linestyle=linestyle, linewidth=linewidth)
+            self.ax.grid(
+                enabled, which=which, color=color, linestyle=linestyle, linewidth=linewidth
+            )
 
-    def legend(self, labels: List[str] = None, **kwargs):
+    def legend(self, labels: list[str] = None, **kwargs):
         """Show legend; uses stored handles when available.
 
         Parameters
@@ -905,7 +913,7 @@ class BandStructurePlotter:
         else:
             self.ax.legend(labels, **kwargs)
 
-    def save(self, filename: str = "bands.pdf", dpi: Optional[int] = None, bbox_inches: str = "tight"):
+    def save(self, filename: str = "bands.pdf", dpi: int | None = None, bbox_inches: str = "tight"):
         """Save the current figure to disk."""
         plt.savefig(filename, dpi=(dpi or self.dpi), bbox_inches=bbox_inches)
         plt.clf()
@@ -972,55 +980,72 @@ class BandStructurePlotter:
                         break
                 tick_names.append(name)
         self.values_dict["kpath_tick_names"] = tick_names
-        
+
     def show(self):
         plt.show()
-        
 
-        
-    def _validate_data(self, 
-                               bands: np.ndarray | None, 
-                               scalars: np.ndarray | None = None,
-                               vectors: np.ndarray | None = None):
+    def _validate_data(
+        self,
+        bands: np.ndarray | None,
+        scalars: np.ndarray | None = None,
+        vectors: np.ndarray | None = None,
+    ):
         if bands.ndim == 2:
             bands = bands[..., np.newaxis]
         n_spin_channels = bands.shape[-1]
- 
+
         if scalars is not None and scalars.ndim == 2:
             scalars = scalars[..., np.newaxis]
         if scalars is not None and scalars.ndim != bands.ndim:
             error_message = "scalars must have the same number of dimensions as bands"
-            error_message += f"bands has {bands.ndim} dimensions, scalars has {scalars.ndim} dimensions"
-            error_message += f"Use a built in method in ElectronicBandStructurePath to get the scalars"
+            error_message += (
+                f"bands has {bands.ndim} dimensions, scalars has {scalars.ndim} dimensions"
+            )
+            error_message += (
+                "Use a built in method in ElectronicBandStructurePath to get the scalars"
+            )
             raise ValueError(error_message)
-        elif scalars is not None and scalars.ndim == bands.ndim and scalars.shape[-1] != n_spin_channels:
+        elif (
+            scalars is not None
+            and scalars.ndim == bands.ndim
+            and scalars.shape[-1] != n_spin_channels
+        ):
             error_message = "scalars must have the same number of spin channels as bands."
             error_message += f"bands has {n_spin_channels} spin channels, scalars has {scalars.shape[-1]} spin channels\n"
-            error_message += f"This error is likely due to a non-colinear calculation where the scalars can have spin components\n"
+            error_message += "This error is likely due to a non-colinear calculation where the scalars can have spin components\n"
             raise ValueError(error_message)
-        
+
         if vectors is not None and vectors.ndim == 2:
-            vectors = vectors[...,np.newaxis]
+            vectors = vectors[..., np.newaxis]
         if vectors is not None and vectors.ndim != bands.ndim:
             error_message = "vectors must have the same number of dimensions as bands"
-            error_message += f"bands has {bands.ndim} dimensions, vectors has {vectors.ndim} dimensions"
-            error_message += f"Use a built in method in ElectronicBandStructurePath to get the scalars"
+            error_message += (
+                f"bands has {bands.ndim} dimensions, vectors has {vectors.ndim} dimensions"
+            )
+            error_message += (
+                "Use a built in method in ElectronicBandStructurePath to get the scalars"
+            )
             raise ValueError(error_message)
-        elif vectors is not None and vectors.ndim == bands.ndim and vectors.shape[-1] != n_spin_channels:
+        elif (
+            vectors is not None
+            and vectors.ndim == bands.ndim
+            and vectors.shape[-1] != n_spin_channels
+        ):
             error_message = "vectors must have the same number of spin channels as bands."
             error_message += f"bands has {n_spin_channels} spin channels, vectors has {vectors.shape[1]} spin channels\n"
-            error_message += f"This error is likely due to a non-colinear calculation where the vectors can have spin components\n"
+            error_message += "This error is likely due to a non-colinear calculation where the vectors can have spin components\n"
             raise ValueError(error_message)
-        
+
         return bands, scalars, vectors
-    
+
     # ---- color mapping resolver ----
-    def _resolve_colormap(self,
-                          data: np.ndarray | None,
-                          cmap: str | mpcolors.Colormap = "plasma",
-                          norm: str | mpcolors.Normalize | type | None = "auto",
-                          clim: Tuple[float | None, float | None] | None = None,
-                          ):
+    def _resolve_colormap(
+        self,
+        data: np.ndarray | None,
+        cmap: str | mpcolors.Colormap = "plasma",
+        norm: str | mpcolors.Normalize | type | None = "auto",
+        clim: tuple[float | None, float | None] | None = None,
+    ):
         """Resolve a Normalize and Colormap for the given data.
 
         - norm can be:
@@ -1034,7 +1059,7 @@ class BandStructurePlotter:
         """
         if data is None:
             return None, None, None
-       
+
         vmin = None
         vmax = None
         if clim is not None:
@@ -1058,7 +1083,7 @@ class BandStructurePlotter:
             # Snap heuristics: prefer +/-0.5 when near; otherwise use
             # integer floor/ceil to create clean colorbar bounds.
             half_tol = 0.05  # how close to 0.5/-0.5 to snap
-            int_pad = 0.0    # extra pad after floor/ceil
+            int_pad = 0.0  # extra pad after floor/ceil
 
             def _snap_min(value: float) -> float:
                 if np.isfinite(value):
@@ -1107,5 +1132,5 @@ class BandStructurePlotter:
         scalar_mappable = cm.ScalarMappable(norm=norm_obj, cmap=cmap_obj)
         if data is not None:
             scalar_mappable.set_array(np.asarray(data).ravel())
-            
+
         return norm_obj, cmap_obj, scalar_mappable

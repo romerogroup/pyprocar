@@ -6,7 +6,6 @@ __date__ = "March 29, 2023"
 import os
 import re
 from pathlib import Path
-from typing import List, Optional, Tuple, Union
 
 import numpy as np
 import numpy.typing as npt
@@ -24,7 +23,7 @@ FLOAT = r"[-+]?(?:\d+\.\d*|\.\d+|\d+)(?:[Ee][-+]?\d+)?"
 float_re = re.compile(FLOAT)
 
 
-def parse_dos_block(dos_block: str) -> Tuple[np.ndarray, np.ndarray]:
+def parse_dos_block(dos_block: str) -> tuple[np.ndarray, np.ndarray]:
     """Parse the DOS block from elk output file.
 
     Parameters
@@ -44,11 +43,13 @@ def parse_dos_block(dos_block: str) -> Tuple[np.ndarray, np.ndarray]:
 
 
 class ElkParser(BaseParser):
-    def __init__(self, dirpath: Union[str, Path], elk_in_filepath: Union[str, Path] = "elk.in", kdirect: bool = True):
+    def __init__(
+        self, dirpath: str | Path, elk_in_filepath: str | Path = "elk.in", kdirect: bool = True
+    ):
         super().__init__(dirpath)
-        elk_in_filepath=Path(elk_in_filepath)
+        elk_in_filepath = Path(elk_in_filepath)
         self.elk_in_filepath = self.dirpath / elk_in_filepath.name
-        
+
         # elk specific input parameters
         self.dirpath = Path(dirpath)
         self.elkin_filepath = self.dirpath / "elk.in"
@@ -112,7 +113,6 @@ class ElkParser(BaseParser):
             self._read_bands()
         self._read_dos()
 
-
         # Checks if filepaths exists, if not it is not a bands calculation
         if self.is_bands_calculation:
             self._kpath = KPath(
@@ -135,19 +135,19 @@ class ElkParser(BaseParser):
             )
 
         return
-    
+
     @property
     def ebs(self):
         return self._ebs
-    
+
     @property
     def kpath(self):
         return self._kpath
-    
+
     @property
     def structure(self):
         return self._structure
-    
+
     @property
     def dos(self):
         return self._dos
@@ -163,9 +163,7 @@ class ElkParser(BaseParser):
         """
         Returns the tasks calculated by elk
         """
-        return [
-            int(x) for x in re.findall("tasks\s*([0-9\s\n]*)", self.elkin)[0].split()
-        ]
+        return [int(x) for x in re.findall("tasks\s*([0-9\s\n]*)", self.elkin)[0].split()]
 
     def _read_structure(self):
         raw_species = re.findall("'([A-Za-z]*).in'.*\n.*\n\s*([0-9.\s]*)", self.elkin)
@@ -204,30 +202,24 @@ class ElkParser(BaseParser):
         return (self.atoms, self.frac_coords, self.lattice)
 
     def _read_kpoints_info(self):
+        self.nkpoints = int(re.findall(r"plot1d\n\s*[0-9]*\s*([0-9]*)", self.elkin)[0])
 
-        self.nkpoints = int(re.findall(
-            r"plot1d\n\s*[0-9]*\s*([0-9]*)", self.elkin)[0])
-
-        raw_ticks = re.findall(
-            r"plot1d\n\s*([0-9]*)\s*([0-9]*)", self.elkin)[0]
+        raw_ticks = re.findall(r"plot1d\n\s*([0-9]*)\s*([0-9]*)", self.elkin)[0]
         self.nhigh_sym = int(raw_ticks[0])
         n_segments = self.nhigh_sym - 1
         grid_points = int(raw_ticks[1]) / n_segments
         self.ngrids = [grid_points for x in range(self.nhigh_sym)]
 
         raw_ticks = re.findall(
-            r"plot1d\n\s*[0-9]*\s*[0-9]*.*\n" +
-            self.nhigh_sym * ".*:(.*)\n", self.elkin
+            r"plot1d\n\s*[0-9]*\s*[0-9]*.*\n" + self.nhigh_sym * ".*:(.*)\n", self.elkin
         )[0]
         if len(raw_ticks) != self.nhigh_sym:
             knames = [str(x) for x in range(self.nhigh_sym)]
         else:
             knames = [
-                "$%s$" % (x.replace(",", "").replace(
-                    "vlvp1d", "").replace(" ", ""))
+                "$%s$" % (x.replace(",", "").replace("vlvp1d", "").replace(" ", ""))
                 for x in re.findall(
-                    r"plot1d\n\s*[0-9]*\s*[0-9]*.*\n" +
-                    self.nhigh_sym * ".*:(.*)\n",
+                    r"plot1d\n\s*[0-9]*\s*[0-9]*.*\n" + self.nhigh_sym * ".*:(.*)\n",
                     self.elkin,
                 )[0]
             ]
@@ -256,8 +248,8 @@ class ElkParser(BaseParser):
         path = self.dir_path / "elk.in"
         file_content = path.read_text()
         pattern_task = re.compile(
-            r"(?m)^[ \t]*tasks[ \t]*\n"       # “tasks” line
-            r"((?:[ \t]*\d+[ \t]*\n)+)"       # one or more lines of digits
+            r"(?m)^[ \t]*tasks[ \t]*\n"  # “tasks” line
+            r"((?:[ \t]*\d+[ \t]*\n)+)"  # one or more lines of digits
         )
         match = pattern_task.search(file_content)
         if not match:
@@ -272,10 +264,7 @@ class ElkParser(BaseParser):
             ispc = 1
             for spc in self.composition:
                 for iatom in range(self.composition[spc]):
-                    self.filepaths.append(
-                        self.dir_path /
-                        f"BAND_S{ispc:02d}_A{iatom + 1:04d}.OUT"
-                    )
+                    self.filepaths.append(self.dir_path / f"BAND_S{ispc:02d}_A{iatom + 1:04d}.OUT")
                 ispc += 1
 
         self.spinpol = re.findall(r"spinpol\s*([.a-zA-Z]*)", file_content)
@@ -288,7 +277,7 @@ class ElkParser(BaseParser):
         else:
             self.nspin = 1
 
-        if (self.dir_path/'GEOMETRY.OUT').exists():
+        if (self.dir_path / "GEOMETRY.OUT").exists():
             lattice = self._read_geometry_out()
 
     def _read_bands(self):
@@ -297,14 +286,13 @@ class ElkParser(BaseParser):
         and prepares the spd, bands and kpoints for bandsplot
         """
         if np.any([x in self.tasks for x in [20, 21, 22]]):
-
-            rf = open(self.filepaths[0], "r")
+            rf = open(self.filepaths[0])
             lines = rf.readlines()
             rf.close()
 
             raw_nbands = int(len(lines) / (self.nkpoints + 1))
 
-            rf = open(self.dir_path / "BANDLINES.OUT", "r")
+            rf = open(self.dir_path / "BANDLINES.OUT")
             bandLines = rf.readlines()
             rf.close()
 
@@ -339,7 +327,7 @@ class ElkParser(BaseParser):
             if not self.kdirect:
                 self.kpoints = np.dot(self.kpoints, self.reclat)
 
-            rf = open(self.filepaths[0], "r")
+            rf = open(self.filepaths[0])
             lines = rf.readlines()
             rf.close()
 
@@ -358,13 +346,12 @@ class ElkParser(BaseParser):
             elif self.nspin == 2:
                 self.nbands = raw_nbands // 2
 
-            self.bands = np.zeros(
-                shape=(self.nkpoints, self.nbands, self.nspin))
+            self.bands = np.zeros(shape=(self.nkpoints, self.nbands, self.nspin))
             if self.nspin == 1:
                 self.bands[:, :, 0] = raw_bands
             elif self.nspin == 2:
                 self.bands[:, :, 0] = raw_bands[:, : self.nbands]
-                self.bands[:, :, 1] = raw_bands[:, self.nbands:]
+                self.bands[:, :, 1] = raw_bands[:, self.nbands :]
             self.bands += self.fermi
 
             self.norbital = 16
@@ -385,34 +372,30 @@ class ElkParser(BaseParser):
                 del self.filepaths[idx_bands_out]
 
             for ifile in range(self.natom):
-                rf = open(self.filepaths[ifile], "r")
+                rf = open(self.filepaths[ifile])
                 lines = rf.readlines()
                 rf.close()
                 iline = 0
 
                 for iband in range(self.nbands):
                     for ikpoint in range(self.nkpoints):
-                        temp = np.array([float(x)
-                                        for x in lines[iline].split()])
+                        temp = np.array([float(x) for x in lines[iline].split()])
                         self.spd[ikpoint, iband, 0, ifile, 0] = ifile + 1
                         self.spd[ikpoint, iband, 0, ifile, 1:-1] = temp[2:]
                         iline += 1
                     if ikpoint == self.nkpoints - 1:
                         iline += 1
             # self.spd[:,:,:,-1,:] = self.spd.sum(axis=3)
-            self.spd[:, :, :, :, -
-                     1] = np.sum(self.spd[:, :, :, :, 1:-1], axis=4)
+            self.spd[:, :, :, :, -1] = np.sum(self.spd[:, :, :, :, 1:-1], axis=4)
             self.spd[:, :, :, -1, :] = self.spd.sum(axis=3)
             self.spd[:, :, 0, -1, 0] = 0
 
             if self.nspin == 2:
                 # spin up block for spin = 1
-                self.spd[:, : self.nbands // 2, 1, :, :] = self.spd[
-                    :, : self.nbands // 2, 0, :, :
-                ]
+                self.spd[:, : self.nbands // 2, 1, :, :] = self.spd[:, : self.nbands // 2, 0, :, :]
                 # spin down block for spin = 1
-                self.spd[:, self.nbands // 2:, 1, :, :] = (
-                    -1 * self.spd[:, self.nbands // 2:, 0, :, :]
+                self.spd[:, self.nbands // 2 :, 1, :, :] = (
+                    -1 * self.spd[:, self.nbands // 2 :, 0, :, :]
                 )
 
                 # manipulating spd array for spin polarized calculations.
@@ -440,14 +423,13 @@ class ElkParser(BaseParser):
             Returns a DensityOfStates object from pyprocar.core.dos
         """
         if not os.path.exists(self.dir_path / "TDOS.OUT"):
-
             return None
         tdos = []
         pdos = {}
         n_atoms = 0
         for i_file in self.dir_path.iterdir():
             if i_file.name == "TDOS.OUT":
-                with open(i_file, "r") as f:
+                with open(i_file) as f:
                     data = f.read()
                 blocks = re.split(r"\n\s*\n", data)
                 for i, block in enumerate(blocks):
@@ -462,7 +444,7 @@ class ElkParser(BaseParser):
                     pdos[spc] = {}
                 if atm not in pdos[spc]:
                     pdos[spc][atm] = {}
-                with open(i_file, "r") as f:
+                with open(i_file) as f:
                     data = f.read()
                 # parse all the blocks. Should be 16 * self.nspins.
                 # Remove last element as it is empty string
@@ -485,9 +467,7 @@ class ElkParser(BaseParser):
 
         n_orbitals = 16
         n_principals = 1
-        dos_projected = np.zeros(
-            (n_atoms, n_principals, n_orbitals, n_spins, len(energies))
-        )
+        dos_projected = np.zeros((n_atoms, n_principals, n_orbitals, n_spins, len(energies)))
         iatom = -1
         for i_spc in range(1, len(pdos) + 1):
             for i_atom_for_specie in range(1, len(pdos[f"S{i_spc:02d}"]) + 1):
@@ -495,10 +475,10 @@ class ElkParser(BaseParser):
                 iatom += 1
                 for i_orbital in range(n_orbitals):
                     for i_spin in range(n_spins):
-                        dos_projected[iatom, 0, i_orbital, i_spin, :] = pdos[
-                            f"S{i_spc:02d}"
-                        ][f"A{i_atom_for_specie:04d}"][i_orbital + i_spin * n_orbitals]
-        
+                        dos_projected[iatom, 0, i_orbital, i_spin, :] = pdos[f"S{i_spc:02d}"][
+                            f"A{i_atom_for_specie:04d}"
+                        ][i_orbital + i_spin * n_orbitals]
+
         # By default elk subtracts the fermi energy from the energies.
         # We add it back here.
         energies += self.fermi
@@ -510,7 +490,7 @@ class ElkParser(BaseParser):
         """
         Returns the fermi energy read from FERMI.OUT
         """
-        with open(self.dirpath / "fermi.OUT", "r") as rf:
+        with open(self.dirpath / "fermi.OUT") as rf:
             self.fermi = float(rf.readline().split()[0]) * HARTREE_TO_EV
         return self.fermi
 
@@ -522,7 +502,7 @@ class ElkParser(BaseParser):
         Return: return_description
         """
 
-        path_geometry_out = self.dir_path/'GEOMETRY.OUT'
+        path_geometry_out = self.dir_path / "GEOMETRY.OUT"
         content_geometry_out = path_geometry_out.read_text()
 
         # Read lattice
@@ -537,37 +517,31 @@ class ElkParser(BaseParser):
         lattice = np.fromstring(matrix_block_str, sep=" ").reshape(3, 3)
 
         # read atoms and coords
-        pattern_nspc = re.search(
-            r"(?m)^atoms\s*\r?\n\s*(\d+)",
-            content_geometry_out,
-            re.IGNORECASE
-        )
+        pattern_nspc = re.search(r"(?m)^atoms\s*\r?\n\s*(\d+)", content_geometry_out, re.IGNORECASE)
 
         nspecies = int(pattern_nspc.group(1)) if pattern_nspc else None
 
-        pattern_spc = re.compile(
-            r"(?mi)^\s*'([A-Za-z]+\.in)'[\s\S]*?^\s*(\d+).*\s")
+        pattern_spc = re.compile(r"(?mi)^\s*'([A-Za-z]+\.in)'[\s\S]*?^\s*(\d+).*\s")
 
-        atoms: List[str] = []
-        fractional_coords: Union[List[List[float]],
-                                 npt.NDArray[np.float64]] = []
+        atoms: list[str] = []
+        fractional_coords: list[list[float]] | npt.NDArray[np.float64] = []
         for m in pattern_spc.finditer(content_geometry_out):
             atom_count = int(m.group(2))
-            atom_symbols = [m.group(1).replace('.in', '')]*atom_count
+            atom_symbols = [m.group(1).replace(".in", "")] * atom_count
             atoms += atom_symbols
             start = m.end()
             tail = content_geometry_out[start:].splitlines()
 
             pos_lines = tail[:atom_count]
             for line in pos_lines:
-                fractional_coords += [[float(x)
-                                       for x in float_re.findall(line)]]
+                fractional_coords += [[float(x) for x in float_re.findall(line)]]
         fractional_coords = np.array(fractional_coords)
         if fractional_coords.shape[1] == 6:
             external_mag_field = fractional_coords[:, 3:]
             fractional_coords = fractional_coords[:, :3]
-        assert (len(set(atoms)) ==
-                nspecies), "Number of species in GEOMETRY.OUT does not match the parsed species."
+        assert len(set(atoms)) == nspecies, (
+            "Number of species in GEOMETRY.OUT does not match the parsed species."
+        )
         self.structure = Structure(
             atoms=atoms,
             lattice=lattice,

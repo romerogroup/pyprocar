@@ -4,19 +4,13 @@ __email__ = "petavazohi@mail.wvu.edu, lllang@mix.wvu.edu"
 __date__ = "March 31, 2020"
 
 import inspect
-from typing import List
 
-import matplotlib as mpl
 import matplotlib.pyplot as plt
-import numpy as np
 
-from pyprocar.io import Parser
-from pyprocar.plotter import DOSPlotter, EBSPlot
 from pyprocar.scripts.scriptBandsplot import bandsplot
 from pyprocar.scripts.scriptDosplot import dosplot
 from pyprocar.utils import welcome
 from pyprocar.utils.defaults import settings
-from pyprocar.utils.info import orbital_names
 
 bands_settings = {
     key: value
@@ -36,8 +30,8 @@ dos_settings = {
 def bandsdosplot(
     bands_settings: dict = bands_settings,
     dos_settings: dict = dos_settings,
-    dos_limit: List[int] = None,
-    elimit: List[int] = None,
+    dos_limit: list[int] = None,
+    elimit: list[int] = None,
     k_limit=None,
     grid: bool = False,
     code: str = "vasp",
@@ -103,18 +97,17 @@ def bandsdosplot(
 
     # parses old elements
     # bands_settings, dos_settings = parse_kwargs(kwargs,bands_settings, dos_settings)
-    
 
     # plots bandsplot and dosplot
-    
+
     plt.close("all")
     # fig = plt.figure(figsize=figsize, clear=True, dpi=dpi)
-    
+
     # fig, axes = plt.subplots(1, 2, figsize=figsize, clear=True, dpi=dpi)
-    
-    if "plain" != dos_settings["mode"] and "plain" != bands_settings["mode"]:
+
+    if dos_settings["mode"] != "plain" and bands_settings["mode"] != "plain":
         bands_settings["plot_color_bar"] = False
-        
+
     # Make the two axes share the y-axis (energy axis)
     fig, axes = plt.subplots(1, 2, figsize=figsize, clear=True, dpi=dpi, sharey=True)
     ebs_plot_fig, ebs_plot_ax = bandsplot(ax=axes[0], **bands_settings)
@@ -127,7 +120,7 @@ def bandsdosplot(
     ax_ebs = axes[0]
     ax_dos = axes[1]
     ax_dos.set_ylabel("")
-    
+
     # axes opitions
     if elimit is not None:
         ax_dos.set_ylim(elimit)
@@ -167,7 +160,6 @@ def bandsdosplot(
 
 
 def combine_axes(fig_ebs, fig_dos, fig, plot_color_bar=True):
-
     # Changes link of axes to old to new figure. Then adds the axes to the current figure
 
     ax_ebs = fig_ebs.axes[0]
@@ -276,7 +268,6 @@ def parse_kwargs(kwargs, bands_settings, dos_settings):
             bands_settings["vmax"] = value
             dos_settings["vmax"] = value
         if key == "cmap":
-
             dos_settings["cmap"] = value
 
         if key == "kdirect":

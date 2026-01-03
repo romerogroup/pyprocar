@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import logging
 from collections.abc import Iterable, Sequence
-from typing import Tuple
 
 import numpy as np
 
@@ -67,7 +66,6 @@ class DOSPlotter(BasePlotter):
         scale: bool = False,
         **kwargs,
     ):
-
         plotter = ParametricLinePlot(ax=self.ax, **self.instance_plot_params)
         return self._add_plotter(
             plotter,

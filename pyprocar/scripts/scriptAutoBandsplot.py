@@ -1,36 +1,29 @@
 #!/usr/bin/env python
 
-import matplotlib.pyplot as plt
 import numpy as np
 
 from pyprocar.core import ElectronicBandStructure
 from pyprocar.io import Parser
 from pyprocar.pyposcar.clusters import Clusters
 from pyprocar.pyposcar.defects import FindDefect
-from pyprocar.pyposcar.generalUtils import remove_flat_points
 from pyprocar.pyposcar.poscar import Poscar
 from pyprocar.scripts.scriptBandsplot import bandsplot
 
 try:
-    from sklearn.neighbors.kde import KernelDensity
+    pass
 except:
-    from sklearn.neighbors import KernelDensity
-
-from scipy.signal import argrelextrema
+    pass
 
 
 class AutoBandsPlot:
     def __init__(self, code="vasp", dirname=".", fermi: int = None, use_cache=False):
-
         self.parser = Parser(code=code, dirpath=dirname)
         self.code = code
         self.ebs = ElectronicBandStructure.from_code(code, dirname, use_cache=use_cache)
 
         codes_with_scf_fermi = ["qe", "elk"]
         if code in codes_with_scf_fermi and fermi is None:
-            logger.info(
-                f"No fermi given, using the found fermi energy: {self.ebs.fermi}"
-            )
+            logger.info(f"No fermi given, using the found fermi energy: {self.ebs.fermi}")
             fermi = self.ebs.fermi
         elif fermi is None:
             fermi = 0
@@ -241,9 +234,7 @@ class AutoBandsPlot:
         # print('clusters', c.clusters)
         return c.clusters
 
-    def find_defect_states(
-        self, defects=None, factor=0.70, IPR_threshold=None, k_threshold=0.25
-    ):
+    def find_defect_states(self, defects=None, factor=0.70, IPR_threshold=None, k_threshold=0.25):
         """Find those localized states which correlate with any given defect.
 
         Returns
@@ -348,9 +339,7 @@ class AutoBandsPlot:
             if self.ispin == 2:
                 states_down = self.defect_states[i][0]
                 if len(states_down) > 0:
-                    f.write(
-                        "Spin 1, defect " + str(i) + " " + str(self.defects[i]) + " \n"
-                    )
+                    f.write("Spin 1, defect " + str(i) + " " + str(self.defects[i]) + " \n")
                     if verbosity:
                         f.write("[kpoint index, band_index]\n")
                         f.write(str(states_down) + "\n\n")
@@ -363,9 +352,7 @@ class AutoBandsPlot:
         for i in range(len(self.clusters)):
             states_up = self.cluster_states[i][0]
             if len(states_up) > 0:
-                f.write(
-                    "Spin 0, cluster " + str(i) + " " + str(self.clusters[i]) + " \n"
-                )
+                f.write("Spin 0, cluster " + str(i) + " " + str(self.clusters[i]) + " \n")
                 if verbosity:
                     f.write("[kpoint index, band_index]\n")
                     f.write(str(states_up) + "\n\n")
@@ -375,13 +362,7 @@ class AutoBandsPlot:
             if self.ispin == 2:
                 states_down = self.cluster_states[i][0]
                 if len(states_down) > 0:
-                    f.write(
-                        "Spin 1, cluster "
-                        + str(i)
-                        + " "
-                        + str(self.clusters[i])
-                        + " \n"
-                    )
+                    f.write("Spin 1, cluster " + str(i) + " " + str(self.clusters[i]) + " \n")
                     if verbosity:
                         f.write("[kpoint index, band_index]\n")
                         f.write(str(states_down) + "\n\n")

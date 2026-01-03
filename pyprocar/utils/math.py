@@ -1,13 +1,11 @@
-# -*- coding: utf-8 -*-
 import logging
-from typing import Dict
 
 import numpy as np
-from scipy import ndimage
-from scipy.interpolate import RegularGridInterpolator, griddata
+from scipy.interpolate import RegularGridInterpolator
 from scipy.signal import find_peaks
 
 logger = logging.getLogger(__name__)
+
 
 def np_round_to_half(x):
     x = np.asarray(x)
@@ -90,9 +88,7 @@ def fft_interpolate(function, interpolation_factor=2, axis=None):
     if "complex" in function.dtype.name:
         interpolated = np.fft.ifftn(new_matrix) * (interpolation_factor * factor)
     else:
-        interpolated = np.real(np.fft.ifftn(new_matrix)) * (
-            interpolation_factor * factor
-        )
+        interpolated = np.real(np.fft.ifftn(new_matrix)) * (interpolation_factor * factor)
     return interpolated
 
 
@@ -121,9 +117,7 @@ def change_of_basis(tensor, A, B):
     return tensor_b
 
 
-def interpolate_nd_3dmesh(
-    x_values, y_values, z_values, mesh, interpolation_factor, **kwargs
-):
+def interpolate_nd_3dmesh(x_values, y_values, z_values, mesh, interpolation_factor, **kwargs):
     """Interpolate a Nd 3D mesh using FFT while preserving coordinate ranges and C-ordering.
 
     Parameters
@@ -248,9 +242,7 @@ def interpolate_3d_mesh(
     padded_y = np.pad(y_values, (padding_y, padding_y), "reflect", reflect_type="odd")
     padded_z = np.pad(z_values, (padding_z, padding_z), "reflect", reflect_type="odd")
 
-    interfunc = RegularGridInterpolator(
-        (padded_x, padded_y, padded_z), padded_mesh, **kwargs
-    )
+    interfunc = RegularGridInterpolator((padded_x, padded_y, padded_z), padded_mesh, **kwargs)
     new_x_mesh, new_y_mesh, new_z_mesh = np.meshgrid(new_z, new_y, new_x, indexing="ij")
     interpolated_values = interfunc((new_x_mesh, new_y_mesh, new_z_mesh))
     return interpolated_values
@@ -362,9 +354,7 @@ def fft_interpolate_mesh(function, interpolation_factor=2):
     new_fft[-nx_half:, -ny_half:, :nz_half] = eigen_fft[-nx_half:, -ny_half:, :nz_half]
     new_fft[-nx_half:, :ny_half, -nz_half:] = eigen_fft[-nx_half:, :ny_half, -nz_half:]
 
-    new_fft[-nx_half:, -ny_half:, -nz_half:] = eigen_fft[
-        -nx_half:, -ny_half:, -nz_half:
-    ]
+    new_fft[-nx_half:, -ny_half:, -nz_half:] = eigen_fft[-nx_half:, -ny_half:, -nz_half:]
 
     # Perform inverse FFT to get the interpolated result
     interpolated = np.real(np.fft.ifftn(new_fft)) * interpolation_factor**3
@@ -393,18 +383,14 @@ def calculate_central_differences_on_meshgrid_axis(scalar_mesh, axis):
     minus_one_indices[0] = n - 1
 
     if axis == 0:
-        return (
-            scalar_mesh[plus_one_indices, ...] - scalar_mesh[minus_one_indices, ...]
-        ) / 2
+        return (scalar_mesh[plus_one_indices, ...] - scalar_mesh[minus_one_indices, ...]) / 2
     elif axis == 1:
         return (
-            scalar_mesh[:, plus_one_indices, :, ...]
-            - scalar_mesh[:, minus_one_indices, :, ...]
+            scalar_mesh[:, plus_one_indices, :, ...] - scalar_mesh[:, minus_one_indices, :, ...]
         ) / 2
     elif axis == 2:
         return (
-            scalar_mesh[:, :, plus_one_indices, ...]
-            - scalar_mesh[:, :, minus_one_indices, ...]
+            scalar_mesh[:, :, plus_one_indices, ...] - scalar_mesh[:, :, minus_one_indices, ...]
         ) / 2
 
 
@@ -429,18 +415,14 @@ def calculate_forward_averages_on_meshgrid_axis(scalar_mesh, axis):
     zero_one_indices = np.arange(n)
     plus_one_indices[-1] = 0
     if axis == 0:
-        return (
-            scalar_mesh[zero_one_indices, ...] + scalar_mesh[plus_one_indices, ...]
-        ) / 2
+        return (scalar_mesh[zero_one_indices, ...] + scalar_mesh[plus_one_indices, ...]) / 2
     elif axis == 1:
         return (
-            scalar_mesh[:, zero_one_indices, :, ...]
-            + scalar_mesh[:, plus_one_indices, :, ...]
+            scalar_mesh[:, zero_one_indices, :, ...] + scalar_mesh[:, plus_one_indices, :, ...]
         ) / 2
     elif axis == 2:
         return (
-            scalar_mesh[:, :, zero_one_indices, ...]
-            + scalar_mesh[:, :, plus_one_indices, ...]
+            scalar_mesh[:, :, zero_one_indices, ...] + scalar_mesh[:, :, plus_one_indices, ...]
         ) / 2
 
 
@@ -627,9 +609,7 @@ def fourier_reciprocal_gradient(scalar_grid, reciprocal_lattice):
 
     wavenumbers = []
     for i in range(ndim):
-        wavenumbers_1d_full = (
-            np.fft.fftfreq(scalar_grid_shape[i], d=dk_values[i]) * 2 * np.pi
-        )
+        wavenumbers_1d_full = np.fft.fftfreq(scalar_grid_shape[i], d=dk_values[i]) * 2 * np.pi
         wavenumbers.append(wavenumbers_1d_full)
 
     freq_mesh = np.stack(np.meshgrid(*wavenumbers, indexing="ij"))
@@ -773,21 +753,24 @@ def get_padding_dims(n_coords, padding):
         return 1
     else:
         return n_coords + 2 * padding
-    
+
+
 def get_coord_diffs(coords):
     if len(coords) == 1:
         return 0
     else:
         return np.diff(coords)
-    
-    
+
+
 def get_grid_dims(points, num_bins=1000, height=1, coord_tol=0.01):
     grid = np.zeros(3, dtype=int)
-    
+
     for icoord in range(3):
         coords = points[:, icoord]
         coord_min, coord_max = np.min(coords), np.max(coords)
-        hist, bin_edges = np.histogram(coords, bins=num_bins, range=(coord_min-coord_tol, coord_max+coord_tol))
+        hist, bin_edges = np.histogram(
+            coords, bins=num_bins, range=(coord_min - coord_tol, coord_max + coord_tol)
+        )
 
         peaks, _ = find_peaks(hist, height=height)
         grid[icoord] = len(peaks)

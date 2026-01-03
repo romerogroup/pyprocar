@@ -2,12 +2,8 @@ from typing import NamedTuple
 
 import numpy as np
 import pytest
-from pathlib import Path
-from lxml import etree
 
 from pyprocar.io.vasp.vasprun import VaspXML
-
-
 
 PARAMETER_ELEMENT = """<parameters>
   <separator name="general" >
@@ -344,15 +340,15 @@ PARAMETER_ELEMENT = """<parameters>
  </parameters>
 """
 
+
 class TestVaspXMLParameters:
-    
     def test_parse_general_parameters(self) -> None:
         vaspxml = VaspXML.from_str(PARAMETER_ELEMENT)
         assert vaspxml.general_parameters is not None
         assert isinstance(vaspxml.general_parameters, dict)
         assert vaspxml.general_parameters["SYSTEM"] == "Default"
         assert vaspxml.general_parameters["LCOMPAT"] is False
-    
+
     def test_electronic_parameters(self) -> None:
         vaspxml = VaspXML.from_str(PARAMETER_ELEMENT)
         assert vaspxml.electronic_parameters is not None
@@ -372,7 +368,7 @@ class TestVaspXMLParameters:
         assert vaspxml.electronic_parameters["NREBOOT"] == 0
         assert vaspxml.electronic_parameters["NMIN"] == 0
         assert vaspxml.electronic_parameters["EREF"] == 0.00000000
-        
+
     def test_electronic_smearing_parameters(self) -> None:
         vaspxml = VaspXML.from_str(PARAMETER_ELEMENT)
         assert vaspxml.electronic_smearing_parameters is not None
@@ -382,17 +378,20 @@ class TestVaspXMLParameters:
         assert vaspxml.electronic_smearing_parameters["KSPACING"] == 0.50000000
         assert vaspxml.electronic_smearing_parameters["KGAMMA"] is True
         assert vaspxml.electronic_smearing_parameters["KBLOWUP"] is True
-        
+
     def test_electronic_projectors_parameters(self) -> None:
         vaspxml = VaspXML.from_str(PARAMETER_ELEMENT)
         assert vaspxml.electronic_projectors_parameters is not None
         assert isinstance(vaspxml.electronic_projectors_parameters, dict)
         assert vaspxml.electronic_projectors_parameters["LREAL"] is True
-        assert np.allclose(vaspxml.electronic_projectors_parameters["ROPT"], np.array([-0.00025000, -0.00025000, -0.00025000]))
+        assert np.allclose(
+            vaspxml.electronic_projectors_parameters["ROPT"],
+            np.array([-0.00025000, -0.00025000, -0.00025000]),
+        )
         assert vaspxml.electronic_projectors_parameters["LMAXPAW"] == -100
         assert vaspxml.electronic_projectors_parameters["LMAXMIX"] == 4
         assert vaspxml.electronic_projectors_parameters["NLSPLINE"] is False
-        
+
     def test_electronic_startup_parameters(self) -> None:
         vaspxml = VaspXML.from_str(PARAMETER_ELEMENT)
         assert vaspxml.electronic_startup_parameters is not None
@@ -400,27 +399,29 @@ class TestVaspXMLParameters:
         assert vaspxml.electronic_startup_parameters["ISTART"] == 0
         assert vaspxml.electronic_startup_parameters["ICHARG"] == 11
         assert vaspxml.electronic_startup_parameters["INIWAV"] == 1
-        
+
     def test_electronic_spin_parameters(self) -> None:
         vaspxml = VaspXML.from_str(PARAMETER_ELEMENT)
         assert vaspxml.electronic_spin_parameters is not None
         assert isinstance(vaspxml.electronic_spin_parameters, dict)
         assert vaspxml.electronic_spin_parameters["ISPIN"] == 1
         assert vaspxml.electronic_spin_parameters["LNONCOLLINEAR"] is False
-        assert np.allclose(vaspxml.electronic_spin_parameters["MAGMOM"], np.array([1.0, 1.0, 1.0, 1.0, 1.0]))
+        assert np.allclose(
+            vaspxml.electronic_spin_parameters["MAGMOM"], np.array([1.0, 1.0, 1.0, 1.0, 1.0])
+        )
         assert vaspxml.electronic_spin_parameters["NUPDOWN"] == -1.00000000
         assert vaspxml.electronic_spin_parameters["LSORBIT"] is False
         assert np.allclose(vaspxml.electronic_spin_parameters["SAXIS"], np.array([0.0, 0.0, 1.0]))
         assert vaspxml.electronic_spin_parameters["LSPIRAL"] is False
         assert np.allclose(vaspxml.electronic_spin_parameters["QSPIRAL"], np.array([0.0, 0.0, 0.0]))
         assert vaspxml.electronic_spin_parameters["LZEROZ"] is False
-        
+
     def test_electronic_exchange_correlation_parameters(self) -> None:
         vaspxml = VaspXML.from_str(PARAMETER_ELEMENT)
         assert vaspxml.electronic_exchange_correlation_parameters is not None
         assert isinstance(vaspxml.electronic_exchange_correlation_parameters, dict)
         assert vaspxml.electronic_exchange_correlation_parameters["LASPH"] is True
-        
+
     def test_electronic_convergence_parameters(self) -> None:
         vaspxml = VaspXML.from_str(PARAMETER_ELEMENT)
         assert vaspxml.electronic_convergence_parameters is not None
@@ -429,7 +430,7 @@ class TestVaspXMLParameters:
         assert vaspxml.electronic_convergence_parameters["NELMDL"] == -5
         assert vaspxml.electronic_convergence_parameters["NELMIN"] == 8
         assert vaspxml.electronic_convergence_parameters["ENINI"] == 600.00000000
-        
+
     def test_electronic_convergence_detail_parameters(self) -> None:
         vaspxml = VaspXML.from_str(PARAMETER_ELEMENT)
         assert vaspxml.electronic_convergence_detail_parameters is not None
@@ -441,7 +442,7 @@ class TestVaspXMLParameters:
         assert vaspxml.electronic_convergence_detail_parameters["DEPER"] == 0.30000000
         assert vaspxml.electronic_convergence_detail_parameters["NRMM"] == 4
         assert vaspxml.electronic_convergence_detail_parameters["TIME"] == 0.40000000
-        
+
     def test_electronic_mixer_parameters(self) -> None:
         vaspxml = VaspXML.from_str(PARAMETER_ELEMENT)
         assert vaspxml.electronic_mixer_parameters is not None
@@ -451,7 +452,7 @@ class TestVaspXMLParameters:
         assert vaspxml.electronic_mixer_parameters["AMIN"] == 0.10000000
         assert vaspxml.electronic_mixer_parameters["AMIX_MAG"] == 1.60000000
         assert vaspxml.electronic_mixer_parameters["BMIX_MAG"] == 1.00000000
-        
+
     def test_electronic_mixer_details_parameters(self) -> None:
         vaspxml = VaspXML.from_str(PARAMETER_ELEMENT)
         assert vaspxml.electronic_mixer_details_parameters is not None
@@ -463,7 +464,7 @@ class TestVaspXMLParameters:
         assert vaspxml.electronic_mixer_details_parameters["INIMIX"] == 1
         assert vaspxml.electronic_mixer_details_parameters["MIXPRE"] == 1
         assert vaspxml.electronic_mixer_details_parameters["MREMOVE"] == 5
-        
+
     def test_electronic_dipolcorrection_parameters(self) -> None:
         vaspxml = VaspXML.from_str(PARAMETER_ELEMENT)
         assert vaspxml.electronic_dipolcorrection_parameters is not None
@@ -472,10 +473,13 @@ class TestVaspXMLParameters:
         assert vaspxml.electronic_dipolcorrection_parameters["LMONO"] is False
         assert vaspxml.electronic_dipolcorrection_parameters["IDIPOL"] == 0
         assert vaspxml.electronic_dipolcorrection_parameters["EPSILON"] == 1.00000000
-        assert np.allclose(vaspxml.electronic_dipolcorrection_parameters["DIPOL"], np.array([-100.0, -100.0, -100.0]))
+        assert np.allclose(
+            vaspxml.electronic_dipolcorrection_parameters["DIPOL"],
+            np.array([-100.0, -100.0, -100.0]),
+        )
         assert vaspxml.electronic_dipolcorrection_parameters["EFIELD"] == 0.00000000
         assert vaspxml.electronic_dipolcorrection_parameters["LVACPOTAV"] is False
-        
+
     def test_grids_parameters(self) -> None:
         vaspxml = VaspXML.from_str(PARAMETER_ELEMENT)
         assert vaspxml.grids_parameters is not None
@@ -487,7 +491,7 @@ class TestVaspXMLParameters:
         assert vaspxml.grids_parameters["NGYF"] == 64
         assert vaspxml.grids_parameters["NGZF"] == 64
         assert vaspxml.grids_parameters["ADDGRID"] is True
-        
+
     def test_ionic_parameters(self) -> None:
         vaspxml = VaspXML.from_str(PARAMETER_ELEMENT)
         assert vaspxml.ionic_parameters is not None
@@ -502,7 +506,7 @@ class TestVaspXMLParameters:
         assert vaspxml.ionic_parameters["POTIM"] == 0.50000000
         assert vaspxml.ionic_parameters["SMASS"] == -3.00000000
         assert vaspxml.ionic_parameters["SCALEE"] == 1.00000000
-        
+
     def test_ionic_md_parameters(self) -> None:
         vaspxml = VaspXML.from_str(PARAMETER_ELEMENT)
         assert vaspxml.ionic_md_parameters is not None
@@ -513,14 +517,14 @@ class TestVaspXMLParameters:
         assert vaspxml.ionic_md_parameters["KBLOCK"] == 1
         assert vaspxml.ionic_md_parameters["NPACO"] == 256
         assert vaspxml.ionic_md_parameters["APACO"] == 10.00000000
-        
+
     def test_symmetry_parameters(self) -> None:
         vaspxml = VaspXML.from_str(PARAMETER_ELEMENT)
         assert vaspxml.symmetry_parameters is not None
         assert isinstance(vaspxml.symmetry_parameters, dict)
         assert vaspxml.symmetry_parameters["ISYM"] == 2
         assert vaspxml.symmetry_parameters["SYMPREC"] == 0.00001000
-        
+
     def test_dos_parameters(self) -> None:
         vaspxml = VaspXML.from_str(PARAMETER_ELEMENT)
         assert vaspxml.dos_parameters is not None
@@ -531,7 +535,7 @@ class TestVaspXMLParameters:
         assert vaspxml.dos_parameters["EMIN"] == 10.00000000
         assert vaspxml.dos_parameters["EMAX"] == -10.00000000
         assert vaspxml.dos_parameters["EFERMI"] == 0.00000000
-        
+
     def test_writing_parameters(self) -> None:
         vaspxml = VaspXML.from_str(PARAMETER_ELEMENT)
         assert vaspxml.writing_parameters is not None
@@ -545,8 +549,10 @@ class TestVaspXMLParameters:
         assert vaspxml.writing_parameters["LVHAR"] is False
         assert vaspxml.writing_parameters["LELF"] is False
         assert vaspxml.writing_parameters["LOPTICS"] is False
-        assert np.allclose(vaspxml.writing_parameters["STM"], np.array([0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]))
-        
+        assert np.allclose(
+            vaspxml.writing_parameters["STM"], np.array([0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
+        )
+
     def test_performance_parameters(self) -> None:
         vaspxml = VaspXML.from_str(PARAMETER_ELEMENT)
         assert vaspxml.performance_parameters is not None
@@ -560,7 +566,7 @@ class TestVaspXMLParameters:
         assert vaspxml.performance_parameters["LSCALU"] is False
         assert vaspxml.performance_parameters["LASYNC"] is False
         assert vaspxml.performance_parameters["LORBITALREAL"] is False
-        
+
     def test_miscellaneous_parameters(self) -> None:
         vaspxml = VaspXML.from_str(PARAMETER_ELEMENT)
         assert vaspxml.miscellaneous_parameters is not None
@@ -568,11 +574,14 @@ class TestVaspXMLParameters:
         assert vaspxml.miscellaneous_parameters["IDIOT"] == 3
         assert vaspxml.miscellaneous_parameters["PHON_NSTRUCT"] == -1
         assert vaspxml.miscellaneous_parameters["LMUSIC"] is False
-        assert np.allclose(vaspxml.miscellaneous_parameters["POMASS"], np.array([87.62000000, 50.94100000, 16.00000000]))
+        assert np.allclose(
+            vaspxml.miscellaneous_parameters["POMASS"],
+            np.array([87.62000000, 50.94100000, 16.00000000]),
+        )
         assert np.allclose(vaspxml.miscellaneous_parameters["DARWINR"], np.array([0.0, 0.0, 0.0]))
         assert np.allclose(vaspxml.miscellaneous_parameters["DARWINV"], np.array([1.0, 1.0, 1.0]))
         assert vaspxml.miscellaneous_parameters["LCORR"] is True
-        
+
     def test_ldau_parameters(self) -> None:
         vaspxml = VaspXML.from_str(PARAMETER_ELEMENT)
         assert vaspxml.ldau_parameters is not None
@@ -587,7 +596,7 @@ class TestVaspXMLParameters:
         assert np.allclose(vaspxml.ldau_parameters["LDAUJ"], np.array([0.0]))
         assert vaspxml.ldau_parameters["LDAUPRINT"] == 2
         assert vaspxml.ldau_parameters["I_CONSTRAINED_M"] == 0
-        
+
     def test_exchange_correlation_parameters(self) -> None:
         vaspxml = VaspXML.from_str(PARAMETER_ELEMENT)
         assert vaspxml.exchange_correlation_parameters is not None
@@ -627,7 +636,7 @@ class TestVaspXMLParameters:
         assert vaspxml.exchange_correlation_parameters["HFSCREEN"] == 0.00000000
         assert vaspxml.exchange_correlation_parameters["HFSCREENC"] == 0.00000000
         assert vaspxml.exchange_correlation_parameters["NBANDSGWLOW"] == 0
-        
+
     def test_vdw_dft_parameters(self) -> None:
         vaspxml = VaspXML.from_str(PARAMETER_ELEMENT)
         assert vaspxml.vdw_dft_parameters is not None
@@ -642,7 +651,7 @@ class TestVaspXMLParameters:
         assert vaspxml.vdw_dft_parameters["PARAM2"] == 1.00000000
         assert vaspxml.vdw_dft_parameters["BPARAM"] == 6.30000000
         assert vaspxml.vdw_dft_parameters["CPARAM"] == 0.00930000
-        
+
     def test_model_gw_parameters(self) -> None:
         vaspxml = VaspXML.from_str(PARAMETER_ELEMENT)
         assert vaspxml.model_gw_parameters is not None
@@ -650,7 +659,7 @@ class TestVaspXMLParameters:
         assert vaspxml.model_gw_parameters["MODEL_GW"] == 0
         assert vaspxml.model_gw_parameters["MODEL_EPS0"] == 6.82944215
         assert vaspxml.model_gw_parameters["MODEL_ALPHA"] == 1.00000000
-        
+
     def test_linear_response_parameters(self) -> None:
         vaspxml = VaspXML.from_str(PARAMETER_ELEMENT)
         assert vaspxml.linear_response_parameters is not None
@@ -665,10 +674,11 @@ class TestVaspXMLParameters:
         assert vaspxml.linear_response_parameters["RTIME"] == -0.10000000
         assert vaspxml.linear_response_parameters["WPLASMAI"] == 0.00000000
         assert np.allclose(vaspxml.linear_response_parameters["DFIELD"], np.array([0.0, 0.0, 0.0]))
-        assert np.allclose(vaspxml.linear_response_parameters["WPLASMA"], np.array([0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]))
-  
-        
-    
+        assert np.allclose(
+            vaspxml.linear_response_parameters["WPLASMA"],
+            np.array([0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]),
+        )
+
     def test_parse_orbital_magnetization_parameters(self) -> None:
         vaspxml = VaspXML.from_str(PARAMETER_ELEMENT)
         assert vaspxml.orbital_magnetization_parameters is not None
@@ -680,9 +690,13 @@ class TestVaspXMLParameters:
         assert vaspxml.orbital_magnetization_parameters["LCHIMAG"] is False
         assert vaspxml.orbital_magnetization_parameters["LGAUGE"] is True
         assert vaspxml.orbital_magnetization_parameters["MAGATOM"] == 0
-        assert np.allclose(vaspxml.orbital_magnetization_parameters["MAGDIPOL"], np.array([0.0, 0.0, 0.0]))
-        assert np.allclose(vaspxml.orbital_magnetization_parameters["AVECCONST"], np.array([0.0, 0.0, 0.0]))
-        
+        assert np.allclose(
+            vaspxml.orbital_magnetization_parameters["MAGDIPOL"], np.array([0.0, 0.0, 0.0])
+        )
+        assert np.allclose(
+            vaspxml.orbital_magnetization_parameters["AVECCONST"], np.array([0.0, 0.0, 0.0])
+        )
+
     def test_response_functions_parameters(self) -> None:
         vaspxml = VaspXML.from_str(PARAMETER_ELEMENT)
         assert vaspxml.response_functions_parameters is not None
@@ -696,7 +710,9 @@ class TestVaspXMLParameters:
         assert vaspxml.response_functions_parameters["LFXC"] is False
         assert vaspxml.response_functions_parameters["LHARTREE"] is True
         assert vaspxml.response_functions_parameters["IBSE"] == 0
-        assert np.array_equal(vaspxml.response_functions_parameters["KPOINT"], np.array([-1, 0, 0, 0]))
+        assert np.array_equal(
+            vaspxml.response_functions_parameters["KPOINT"], np.array([-1, 0, 0, 0])
+        )
         assert vaspxml.response_functions_parameters["LTCTC"] is False
         assert vaspxml.response_functions_parameters["LTCTE"] is False
         assert vaspxml.response_functions_parameters["LTETE"] is False
@@ -749,26 +765,27 @@ class TestVaspXMLParameters:
         assert vaspxml.response_functions_parameters["NOMEGAPAR"] == -1
         assert vaspxml.response_functions_parameters["DAMP_NEWTON"] == 0.80000001
         assert vaspxml.response_functions_parameters["LAMBDA"] == 1.00000000
-        
+
     def test_external_order_field_parameters(self) -> None:
         vaspxml = VaspXML.from_str(PARAMETER_ELEMENT)
         assert vaspxml.external_order_field_parameters is not None
         assert isinstance(vaspxml.external_order_field_parameters, dict)
         assert vaspxml.external_order_field_parameters["OFIELD_KAPPA"] == 0.00000000
-        assert np.allclose(vaspxml.external_order_field_parameters["OFIELD_K"], np.array([0.0, 0.0, 0.0]))
+        assert np.allclose(
+            vaspxml.external_order_field_parameters["OFIELD_K"], np.array([0.0, 0.0, 0.0])
+        )
         assert vaspxml.external_order_field_parameters["OFIELD_Q6_NEAR"] == 0.00000000
         assert vaspxml.external_order_field_parameters["OFIELD_Q6_FAR"] == 0.00000000
         assert vaspxml.external_order_field_parameters["OFIELD_A"] == 0.00000000
-        
+
     def test_optional_k_points_parameters(self) -> None:
         vaspxml = VaspXML.from_str(PARAMETER_ELEMENT)
         assert vaspxml.optional_k_points_parameters is not None
         assert isinstance(vaspxml.optional_k_points_parameters, dict)
         assert vaspxml.optional_k_points_parameters["KPOINTS_OPT_MODE"] == 1
         assert vaspxml.optional_k_points_parameters["LKPOINTS_OPT"] is False
-       
-       
-       
+
+
 ATOM_INFO = """<atominfo>
   <atoms>       5 </atoms>
   <types>       3 </types>
@@ -800,9 +817,11 @@ ATOM_INFO = """<atominfo>
  </atominfo> 
 """
 
+
 def parse_atom_info_element():
     parser = VaspXML.from_str(ATOM_INFO)
     assert False
+
 
 PRIMITIVE_CELL_ELEMENT = """<primitive_cell>
   <structure name="primitive_cell" >
@@ -854,19 +873,24 @@ KPOINTS_ELEMENT = """ <kpoints>
  </kpoints>
 """
 
+
 def parse_kpoints_element():
     parser = VaspXML.from_str(KPOINTS_ELEMENT)
-    
+
     assert np.allclose(parser.kpoints.weights, np.array([0.00500000, 0.00500000]))
-    assert np.allclose(parser.kpoints.kpointlist, np.array([[0.00000000, 0.00000000, 0.00000000], 
-                                                            [0.00000000, 0.01282051, 0.00000000]]))
-    
+    assert np.allclose(
+        parser.kpoints.kpointlist,
+        np.array([[0.00000000, 0.00000000, 0.00000000], [0.00000000, 0.01282051, 0.00000000]]),
+    )
+
     assert parser.kpoints.comment == "listgenerated"
     assert parser.kpoints.mode == "listgenerated"
     assert parser.kpoints.ngrids == 2
     assert parser.kpoints.automatic == False
     assert parser.kpoints.kgrid == [2, 2, 2]
     assert parser.kpoints.kshift == [0, 0, 0]
+
+
 INCAR_ELEMENT = """<incar>
   <i type="string" name="SYSTEM">Default</i>
   <i type="int" name="ISTART">     0</i>
@@ -927,8 +951,8 @@ class TestVaspXMLIncar:
         assert vaspxml.incar_parameters["LDAUU"] == [0.00000000, 5.00000000, 0.00000000]
         assert vaspxml.incar_parameters["LDAUJ"] == [0.00000000, 0.00000000, 0.00000000]
         assert vaspxml.incar_parameters["LDAUPRINT"] == 2
-        
-        
+
+
 GENERATOR_ELEMENT = """<generator>
   <i name="program" type="string">vasp </i>
   <i name="version" type="string">6.4.3  </i>
@@ -939,18 +963,22 @@ GENERATOR_ELEMENT = """<generator>
  </generator>
 """
 
+
 def test_parse_generator_element():
     vaspxml = VaspXML.from_str(GENERATOR_ELEMENT)
     assert vaspxml.generator_parameters is not None
-    
+
     assert vaspxml.generator_parameters.program == "vasp"
     assert vaspxml.generator_parameters.version == "6.4.3"
-    assert vaspxml.generator_parameters.subversion == "19Mar24 (build Nov 30 2024 18:10:10) complex                          parallel"
+    assert (
+        vaspxml.generator_parameters.subversion
+        == "19Mar24 (build Nov 30 2024 18:10:10) complex                          parallel"
+    )
     assert vaspxml.generator_parameters.platform == "LinuxIFC"
     assert vaspxml.generator_parameters.date == "2025 03 10"
     assert vaspxml.generator_parameters.time == "13:01:41"
-    
-    
+
+
 STRUCTURE_ELEMENT = """ <structure name="initialpos" >
   <crystal>
    <varray name="basis" >
@@ -974,21 +1002,35 @@ STRUCTURE_ELEMENT = """ <structure name="initialpos" >
   </varray>
  </structure>
 """
-    
+
+
 def test_parse_structure_element():
     vaspxml = VaspXML.from_str(STRUCTURE_ELEMENT)
     assert vaspxml.structure_element is not None
     assert isinstance(vaspxml.structure_element, dict)
-    
+
     assert vaspxml.structure_element["name"] == "initialpos"
-    
-    assert vaspxml.structure_element["crystal"]["basis"] == [[3.84652000, 0.00000000, 0.00000000], [0.00000000, 3.84652000, 0.00000000], [0.00000000, 0.00000000, 3.84652000]]
+
+    assert vaspxml.structure_element["crystal"]["basis"] == [
+        [3.84652000, 0.00000000, 0.00000000],
+        [0.00000000, 3.84652000, 0.00000000],
+        [0.00000000, 0.00000000, 3.84652000],
+    ]
     assert vaspxml.structure_element["crystal"]["volume"] == 56.91201793
-    assert vaspxml.structure_element["crystal"]["rec_basis"] == [[0.25997525, 0.00000000, 0.00000000], [0.00000000, 0.25997525, 0.00000000], [0.00000000, 0.00000000, 0.25997525]]
-    assert vaspxml.structure_element["positions"] == [[0.00000000, 0.00000000, 0.00000000], [0.50000000, 0.50000000, 0.50000000], [0.50000000, 0.50000000, 0.00000000], [0.50000000, 0.00000000, 0.50000000], [0.00000000, 0.50000000, 0.50000000]]
-    
-    
-    
+    assert vaspxml.structure_element["crystal"]["rec_basis"] == [
+        [0.25997525, 0.00000000, 0.00000000],
+        [0.00000000, 0.25997525, 0.00000000],
+        [0.00000000, 0.00000000, 0.25997525],
+    ]
+    assert vaspxml.structure_element["positions"] == [
+        [0.00000000, 0.00000000, 0.00000000],
+        [0.50000000, 0.50000000, 0.50000000],
+        [0.50000000, 0.50000000, 0.00000000],
+        [0.50000000, 0.00000000, 0.50000000],
+        [0.00000000, 0.50000000, 0.50000000],
+    ]
+
+
 CALCULATION_ELEMENT = """ <calculation>
   <scstep>
    <time name="dav">    1.53    1.62</time>
@@ -1101,17 +1143,18 @@ CALCULATION_ELEMENT = """ <calculation>
  </calculation>
 """
 
+
 def parse_calculation_self_consistent_steps():
     parser = VaspXML.from_str(CALCULATION_ELEMENT)
     assert len(parser.self_consistent_steps) == 10
-    
+
     for step in parser.self_consistent_steps:
         assert isinstance(step.time.dav, float)
         assert isinstance(step.time.total, float)
         assert isinstance(step.energy.e_fr_energy, float)
         assert isinstance(step.energy.e_wo_entrp, float)
         assert isinstance(step.energy.e_0_energy, float)
-        
+
     initial_step = parser.self_consistent_steps[0]
     assert initial_step.time.dav == 1.53
     assert initial_step.time.total == 1.78
@@ -1127,7 +1170,6 @@ def parse_calculation_self_consistent_steps():
     assert initial_step.energy.e_fr_energy == 184.93671151
     assert initial_step.energy.e_wo_entrp == 184.93671151
     assert initial_step.energy.e_0_energy == 184.93671151
-    
 
     final_step = parser.self_consistent_steps[-1]
     assert final_step.time.dav == 1.14
@@ -1168,13 +1210,18 @@ INITIAL_STRUCTURE_ELEMENT = """ <calculation> <structure>
   </calculation>
 """
 
+
 def parse_initial_structure_element():
     parser = VaspXML.from_str(INITIAL_STRUCTURE_ELEMENT)
     assert parser.initial_structure.crystal.basis.shape == (3, 3)
     assert parser.initial_structure.crystal.volume == 56.91201793
     assert parser.initial_structure.crystal.rec_basis.shape == (3, 3)
     assert parser.initial_structure.positions.shape == (2, 3)
-    assert np.allclose(parser.initial_structure.positions, np.array([[0.00000000, 0.00000000, 0.00000000], [0.50000000, 0.50000000, 0.50000000]]))
+    assert np.allclose(
+        parser.initial_structure.positions,
+        np.array([[0.00000000, 0.00000000, 0.00000000], [0.50000000, 0.50000000, 0.50000000]]),
+    )
+
 
 FORCES_ELEMENT = """ <calculation> <forces>
    <varray name="forces" >
@@ -1185,10 +1232,17 @@ FORCES_ELEMENT = """ <calculation> <forces>
  </calculation>
 """
 
+
 def parse_forces_element():
     parser = VaspXML.from_str(FORCES_ELEMENT)
     assert parser.forces.shape == (2, 3)
-    assert np.allclose(parser.forces, np.array([[-0.00000000, -5.00000000, -0.00000000], [-0.00000000, -5.00000000, -5.00000000]]))
+    assert np.allclose(
+        parser.forces,
+        np.array(
+            [[-0.00000000, -5.00000000, -0.00000000], [-0.00000000, -5.00000000, -5.00000000]]
+        ),
+    )
+
 
 STRESS_ELEMENT = """ <calculation> <stress>
    <varray name="stress" >
@@ -1200,11 +1254,20 @@ STRESS_ELEMENT = """ <calculation> <stress>
  </calculation>
 """
 
+
 def parse_stress_element():
     parser = VaspXML.from_str(STRESS_ELEMENT)
-    assert np.allclose(parser.stress, np.array([[229.62291361, 0.00000000, -0.00000000], 
-                                                [0.00000000, 229.62291361, 0.00000000], 
-                                                [0.00000000, 0.00000000, 229.62291361]]))
+    assert np.allclose(
+        parser.stress,
+        np.array(
+            [
+                [229.62291361, 0.00000000, -0.00000000],
+                [0.00000000, 229.62291361, 0.00000000],
+                [0.00000000, 0.00000000, 229.62291361],
+            ]
+        ),
+    )
+
 
 ENERGY_ELEMENT = """ <calculation> <energy>
    <i name="e_fr_energy">    -31.30993216 </i>
@@ -1213,6 +1276,7 @@ ENERGY_ELEMENT = """ <calculation> <energy>
   </energy>
  </calculation>
 """
+
 
 def parse_energy_element():
     parser = VaspXML.from_str(ENERGY_ELEMENT)
@@ -1243,8 +1307,8 @@ NON_SPIN_POLARIZED_EIGENVALUES_ELEMENT = """<eigenvalues>
    </array>
 </eigenvalues>
 """
-    
-    
+
+
 SPIN_POLARIZED_CONVERGED_EIGENVALUES_ELEMENT = """ <eigenvalues>
    <array>
     <dimension dim="1">band</dimension>
@@ -1278,6 +1342,7 @@ SPIN_POLARIZED_CONVERGED_EIGENVALUES_ELEMENT = """ <eigenvalues>
   </eigenvalues>
 """
 
+
 class VaspXMLEigenvaluesTestCase(NamedTuple):
     data: str
     id: str
@@ -1286,14 +1351,12 @@ class VaspXMLEigenvaluesTestCase(NamedTuple):
 
 TEST_CASES = [
     VaspXMLEigenvaluesTestCase(
-        data=NON_SPIN_POLARIZED_EIGENVALUES_ELEMENT,
-        id="non_spin_polarized_eigenvalues",
-        n_spins=1
+        data=NON_SPIN_POLARIZED_EIGENVALUES_ELEMENT, id="non_spin_polarized_eigenvalues", n_spins=1
     ),
     VaspXMLEigenvaluesTestCase(
         data=SPIN_POLARIZED_CONVERGED_EIGENVALUES_ELEMENT,
         id="spin_polarized_eigenvalues",
-        n_spins=2
+        n_spins=2,
     ),
 ]
 
@@ -1302,11 +1365,10 @@ class TestVasprunEigenvalues:
     @pytest.fixture(params=TEST_CASES, ids=lambda c: c.id)
     def case(self, request: pytest.FixtureRequest) -> VaspXMLEigenvaluesTestCase:
         return request.param
-    
+
     def test_eigenvalues_shape(self, case: VaspXMLEigenvaluesTestCase) -> None:
         vaspxml = VaspXML.from_str(case.data)
         assert vaspxml.eigenvalues.shape == (2, 2, case.n_spins)
-
 
 
 NON_SPIN_POLARIZED_TOTAL_DOS_ELEMENT = """ <total>
@@ -1377,6 +1439,7 @@ NON_COLINEAR_TOTAL_DOS_ELEMENT = """
 </total>
 """
 
+
 class VaspXMLTotalTestCase(NamedTuple):
     data: str
     id: str
@@ -1385,20 +1448,12 @@ class VaspXMLTotalTestCase(NamedTuple):
 
 TEST_CASES = [
     VaspXMLTotalTestCase(
-        data=NON_SPIN_POLARIZED_TOTAL_DOS_ELEMENT,
-        id="non_spin_polarized_total",
-        n_spins=1
+        data=NON_SPIN_POLARIZED_TOTAL_DOS_ELEMENT, id="non_spin_polarized_total", n_spins=1
     ),
     VaspXMLTotalTestCase(
-        data=SPIN_POLARIZED_TOTAL_DOS_ELEMENT,
-        id="spin_polarized_total",
-        n_spins=2
+        data=SPIN_POLARIZED_TOTAL_DOS_ELEMENT, id="spin_polarized_total", n_spins=2
     ),
-    VaspXMLTotalTestCase(
-        data=NON_COLINEAR_TOTAL_DOS_ELEMENT,
-        id="non_colinear_total",
-        n_spins=4
-    )
+    VaspXMLTotalTestCase(data=NON_COLINEAR_TOTAL_DOS_ELEMENT, id="non_colinear_total", n_spins=4),
 ]
 
 
@@ -1406,7 +1461,7 @@ class TestVasprunTotal:
     @pytest.fixture(params=TEST_CASES, ids=lambda c: c.id)
     def case(self, request: pytest.FixtureRequest) -> VaspXMLTotalTestCase:
         return request.param
-    
+
     def test_total_shape(self, case: VaspXMLTotalTestCase) -> None:
         vaspxml = VaspXML.from_str(case.data)
         assert vaspxml.total.shape == (2, case.n_spins)
@@ -1544,6 +1599,7 @@ NON_COLINEAR_PARTIAL_DOS_ELEMENT = """<partial>
    </partial>
 """
 
+
 class VaspXMLPartialTestCase(NamedTuple):
     data: str
     id: str
@@ -1552,20 +1608,14 @@ class VaspXMLPartialTestCase(NamedTuple):
 
 TEST_CASES = [
     VaspXMLPartialTestCase(
-        data=NON_SPIN_POLARIZED_PARTIAL_DOS_ELEMENT,
-        id="non_spin_polarized_partial",
-        n_spins=1
+        data=NON_SPIN_POLARIZED_PARTIAL_DOS_ELEMENT, id="non_spin_polarized_partial", n_spins=1
     ),
     VaspXMLPartialTestCase(
-        data=SPIN_POLARIZED_PARTIAL_DOS_ELEMENT,
-        id="spin_polarized_partial",
-        n_spins=2
+        data=SPIN_POLARIZED_PARTIAL_DOS_ELEMENT, id="spin_polarized_partial", n_spins=2
     ),
     VaspXMLPartialTestCase(
-        data=NON_COLINEAR_PARTIAL_DOS_ELEMENT,
-        id="non_colinear_partial",
-        n_spins=4
-    )
+        data=NON_COLINEAR_PARTIAL_DOS_ELEMENT, id="non_colinear_partial", n_spins=4
+    ),
 ]
 
 
@@ -1573,12 +1623,12 @@ class TestVasprunPartial:
     @pytest.fixture(params=TEST_CASES, ids=lambda c: c.id)
     def case(self, request: pytest.FixtureRequest) -> VaspXMLPartialTestCase:
         return request.param
-    
+
     def test_partial_shape(self, case: VaspXMLPartialTestCase) -> None:
         vaspxml = VaspXML.from_str(case.data)
         assert vaspxml.partial.shape == (2, case.n_spins, 2, 9)
 
-  
+
 NON_SPIN_POLARIZED_PROJ_ELEMENT = """ <projected>
    <eigenvalues>
     <array>
@@ -1641,9 +1691,9 @@ NON_SPIN_POLARIZED_PROJ_ELEMENT = """ <projected>
     </set>
    </array>
 </projected>
-"""   
-        
-        
+"""
+
+
 SPIN_POLARIZED_PROJ_ELEMENT = """ <projected>
    <eigenvalues>
     <array>
@@ -1910,20 +1960,10 @@ class VaspXMLProjTestCase(NamedTuple):
 
 TEST_CASES = [
     VaspXMLProjTestCase(
-        data=NON_SPIN_POLARIZED_PROJ_ELEMENT,
-        id="non_spin_polarized_proj",
-        n_spins=1
+        data=NON_SPIN_POLARIZED_PROJ_ELEMENT, id="non_spin_polarized_proj", n_spins=1
     ),
-    VaspXMLProjTestCase(
-        data=SPIN_POLARIZED_PROJ_ELEMENT,
-        id="spin_polarized_proj",
-        n_spins=2
-    ),
-    VaspXMLProjTestCase(
-        data=NON_COLINEAR_PROJ_ELEMENT,
-        id="non_colinear_proj",
-        n_spins=4
-    )
+    VaspXMLProjTestCase(data=SPIN_POLARIZED_PROJ_ELEMENT, id="spin_polarized_proj", n_spins=2),
+    VaspXMLProjTestCase(data=NON_COLINEAR_PROJ_ELEMENT, id="non_colinear_proj", n_spins=4),
 ]
 
 
@@ -1931,14 +1971,12 @@ class TestVasprunProj:
     @pytest.fixture(params=TEST_CASES, ids=lambda c: c.id)
     def case(self, request: pytest.FixtureRequest) -> VaspXMLProjTestCase:
         return request.param
-    
+
     def test_proj_shape(self, case: VaspXMLProjTestCase) -> None:
         vaspxml = VaspXML.from_str(case.data)
         assert vaspxml.projected.shape == (2, 2, case.n_spins, 2, 9)
 
 
-
-    
 FINAL_STRUCTURE_ELEMENT = """ <structure name="finalpos" >
   <crystal>
    <varray name="basis" >
@@ -1962,6 +2000,7 @@ FINAL_STRUCTURE_ELEMENT = """ <structure name="finalpos" >
   </varray>
  </structure>
 """
+
 
 def parse_final_structure_element():
     parser = VaspXML.from_str(FINAL_STRUCTURE_ELEMENT)

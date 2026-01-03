@@ -1,7 +1,6 @@
 import os
 from pathlib import Path
 
-import numpy as np
 import yaml
 from dotenv import load_dotenv
 
@@ -14,7 +13,7 @@ class ConfigManager:
 
     def _load_config(self, file_path: str) -> dict:
         """Load configuration from a YAML file."""
-        with open(file_path, "r") as file:
+        with open(file_path) as file:
             return yaml.safe_load(file)
 
     def update_config(self, new_config: dict):
@@ -41,5 +40,5 @@ if DATA_DIR is None:
 CONFIG_FILE = os.path.join(PKG_DIR, "cfg", "package.yml")
 
 # Load config from yaml file
-with open(CONFIG_FILE, "r") as f:
+with open(CONFIG_FILE) as f:
     CONFIG = yaml.safe_load(f)

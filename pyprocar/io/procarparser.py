@@ -1,8 +1,6 @@
 import logging
 import re
-import sys
 
-import matplotlib.pyplot as plt
 import numpy as np
 
 from pyprocar.utils.utilsprocar import UtilsProcar
@@ -119,9 +117,7 @@ class ProcarParser:
         self.log = logging.getLogger("ProcarParser")
         self.log.setLevel(loglevel)
         self.ch = logging.StreamHandler()
-        self.ch.setFormatter(
-            logging.Formatter("%(name)s::%(levelname)s:" " %(message)s")
-        )
+        self.ch.setFormatter(logging.Formatter("%(name)s::%(levelname)s: %(message)s"))
         self.ch.setLevel(logging.DEBUG)
         self.log.addHandler(self.ch)
         # At last, one message to the logger.
@@ -187,9 +183,7 @@ class ProcarParser:
         if len(self.kpoints) != self.kpointsCount:
             # if they do not match, may means two things a spin polarized
             # case or a bad file, lets check
-            self.log.debug(
-                "Number of kpoints do not match, looking for a " "spin-polarized case"
-            )
+            self.log.debug("Number of kpoints do not match, looking for a spin-polarized case")
             # lets start testing if it is spin polarized, if so, there
             # should be 2 identical blocks of kpoints.
             up, down = np.vsplit(self.kpoints, 2)
@@ -209,9 +203,7 @@ class ProcarParser:
 
         # checking again, for compatibility,
         if len(self.kpoints) != self.kpointsCount:
-            raise RuntimeError(
-                "Kpoints number do not match with metadata (header of PROCAR)"
-            )
+            raise RuntimeError("Kpoints number do not match with metadata (header of PROCAR)")
 
         self.log.debug(str(self.kpoints))
         self.log.info("The kpoints shape is " + str(self.kpoints.shape))
@@ -235,9 +227,7 @@ class ProcarParser:
             return
 
         # finding all bands
-        self.bands = re.findall(
-            r"band\s*(\d+)\s*#\s*energy\s*([-.\d\s]+)", self.fileStr
-        )
+        self.bands = re.findall(r"band\s*(\d+)\s*#\s*energy\s*([-.\d\s]+)", self.fileStr)
         self.log.debug(
             str(len(self.bands))
             + " bands headers found, bands*Kpoints = "
@@ -293,20 +283,20 @@ class ProcarParser:
 
     def _readOrbital(self):
         """Reads all the spd-projected data. A typical/expected block is:
-    ion      s     py     pz     px    dxy    dyz    dz2    dxz    dx2    tot
-      1  0.079  0.000  0.001  0.000  0.000  0.000  0.000  0.000  0.000  0.079
-      2  0.152  0.000  0.000  0.000  0.000  0.000  0.000  0.000  0.000  0.152
-      3  0.079  0.000  0.001  0.000  0.000  0.000  0.000  0.000  0.000  0.079
-      4  0.188  0.000  0.000  0.000  0.000  0.000  0.000  0.000  0.000  0.188
-      5  0.188  0.000  0.000  0.000  0.000  0.000  0.000  0.000  0.000  0.188
-    tot  0.686  0.000  0.002  0.000  0.000  0.000  0.000  0.000  0.000  0.688
-    (x2 for spin-polarized -akwardkly formatted-, x4 non-collinear -nicely
-    formatted-).
+        ion      s     py     pz     px    dxy    dyz    dz2    dxz    dx2    tot
+          1  0.079  0.000  0.001  0.000  0.000  0.000  0.000  0.000  0.000  0.079
+          2  0.152  0.000  0.000  0.000  0.000  0.000  0.000  0.000  0.000  0.152
+          3  0.079  0.000  0.001  0.000  0.000  0.000  0.000  0.000  0.000  0.079
+          4  0.188  0.000  0.000  0.000  0.000  0.000  0.000  0.000  0.000  0.188
+          5  0.188  0.000  0.000  0.000  0.000  0.000  0.000  0.000  0.000  0.188
+        tot  0.686  0.000  0.002  0.000  0.000  0.000  0.000  0.000  0.000  0.688
+        (x2 for spin-polarized -akwardkly formatted-, x4 non-collinear -nicely
+        formatted-).
 
-    The data is stored in an array self.spd[kpoint][band][ispin][atom][orbital]
+        The data is stored in an array self.spd[kpoint][band][ispin][atom][orbital]
 
-    Undefined behavior in case of phase factors (LORBIT = 12).
-    """
+        Undefined behavior in case of phase factors (LORBIT = 12).
+        """
         self.log.debug("readOrbital")
         if not self.fileStr:
             self.log.warning("You should invoke `procar.readFile()` instead. Returning")
@@ -324,11 +314,7 @@ class ProcarParser:
         StdOrbs = self.orbitalName[: size - 1] + self.orbitalName[-1:]
         StdOrbs_short = self.orbitalName_short[: size - 1] + self.orbitalName_short[-1:]
         StdOrbs_old = self.orbitalName_old[: size - 1] + self.orbitalName_old[-1:]
-        if (
-            FoundOrbs != (StdOrbs)
-            and FoundOrbs != (StdOrbs_short)
-            and FoundOrbs != (StdOrbs_old)
-        ):
+        if FoundOrbs != (StdOrbs) and FoundOrbs != (StdOrbs_short) and FoundOrbs != (StdOrbs_old):
             self.log.warning(
                 str(size) + " orbitals. (Some of) They are unknow (if "
                 "you did 'filter' them it is OK)."
@@ -336,8 +322,7 @@ class ProcarParser:
         self.orbitalCount = size
         self.orbitalNames = self.spd[0].split()
         self.log.debug(
-            "Anyway, I will use the following set of orbitals: "
-            + str(self.orbitalNames)
+            "Anyway, I will use the following set of orbitals: " + str(self.orbitalNames)
         )
 
         # Now reading the bulk of data
@@ -363,9 +348,7 @@ class ProcarParser:
 
         self.log.debug("Number of entries found: " + str(len(self.spd)))
         expected = self.bandsCount * self.kpointsCount
-        self.log.debug(
-            "The number of entries for a non magnetic calc. is: " + str(expected)
-        )
+        self.log.debug("The number of entries for a non magnetic calc. is: " + str(expected))
         if expected == len(self.spd):
             self.log.info("Both numbers match, ok, going ahead")
         # catching a non-collinear calc.
@@ -373,9 +356,7 @@ class ProcarParser:
             self.log.info("non-collinear calculation found")
             # testing if previous ispin value is ok
             if self.ispin != 1:
-                self.log.warning(
-                    "Incompatible data: self.ispin= " + str(self.ispin) + ". Now is 4"
-                )
+                self.log.warning("Incompatible data: self.ispin= " + str(self.ispin) + ". Now is 4")
             self.ispin = 4
         else:
             self.log.error("The parser or data is wrong!!!")
@@ -452,28 +433,28 @@ class ProcarParser:
 
     def readFile(self, procar=None, phase=False, permissive=False, recLattice=None):
         """Reads and parses the whole PROCAR file. This method is a sort
-    of metamethod: it opens the file, reads the meta data and call the
-    respective functions for parsing kpoints, bands, and projected
-    data.
+        of metamethod: it opens the file, reads the meta data and call the
+        respective functions for parsing kpoints, bands, and projected
+        data.
 
-    Args:
+        Args:
 
-    -procar: The file name, if `None` or a directory, a suitable set
-     of defaults will be used. Default=None
+        -procar: The file name, if `None` or a directory, a suitable set
+         of defaults will be used. Default=None
 
-    -permissive: turn on (or off) some features to deal with badly
-     written PROCAR files (stupid fortran), up to now just ignores the
-     kpoints coordinates, which -as side effect- prevent he rigth
-     space between kpoints. Default=False (off)
+        -permissive: turn on (or off) some features to deal with badly
+         written PROCAR files (stupid fortran), up to now just ignores the
+         kpoints coordinates, which -as side effect- prevent he rigth
+         space between kpoints. Default=False (off)
 
 
-    -recLattice: a 3x3 array containing the reciprocal vectors, to
-     change the Kpoints from rec. coordinates to cartesians. Rarely
-     given by hand, see `UtilsProcar.RecLatProcar`. If given, the
-     kpoints will be converted from direct coordinates to cartesian
-     ones. Default=None
+        -recLattice: a 3x3 array containing the reciprocal vectors, to
+         change the Kpoints from rec. coordinates to cartesians. Rarely
+         given by hand, see `UtilsProcar.RecLatProcar`. If given, the
+         kpoints will be converted from direct coordinates to cartesian
+         ones. Default=None
 
-    """
+        """
         self.log.debug("readFile...")
 
         self.recLattice = recLattice
@@ -651,7 +632,7 @@ class ProcarParser:
         """
         # Fall back to readFile function if no phase
         self.bands = None
-        
+
         if ispin is None:
             nspin = 1
         else:
@@ -672,9 +653,7 @@ class ProcarParser:
                 self.kpoints = np.zeros([self.kpointsCount, 3])
                 self.kweights = np.zeros(self.kpointsCount)
                 if self.bands is None:
-                    self.bands = np.zeros(
-                        [nspin, self.kpointsCount, self.bandsCount]
-                    )
+                    self.bands = np.zeros([nspin, self.kpointsCount, self.bandsCount])
             if line.strip().startswith("k-point"):
                 ss = line.strip().split()
                 ikpt = int(ss[1]) - 1
@@ -726,9 +705,7 @@ class ProcarParser:
                     line = next(lines)
                     t = line.strip().split()
                     if len(t) == self.orbitalCount + 2:
-                        self.projections[ikpt, iband, iispin, :] = [
-                            float(x) for x in t[1:-1]
-                        ]
+                        self.projections[ikpt, iband, iispin, :] = [float(x) for x in t[1:-1]]
                     elif len(t) == self.orbitalCount * 2 + 2:
                         self.carray[ikpt, iband, iispin, i, :] += np.array(
                             [float(x) for x in t[1:-1:2]]
@@ -748,6 +725,4 @@ class ProcarParser:
                             [float(x) for x in t[1:]]
                         )
                     else:
-                        raise Exception(
-                            "Cannot parse line to projection: %s" % line
-                        )
+                        raise Exception("Cannot parse line to projection: %s" % line)

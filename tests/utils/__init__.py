@@ -1,5 +1,6 @@
-from pathlib import Path
 import logging
+from pathlib import Path
+
 from tests.utils.base_test import BaseTest
 
 logger = logging.getLogger("pyprocar")

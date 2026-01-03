@@ -2,11 +2,12 @@
 
 from __future__ import annotations
 
-from collections.abc import Iterable as ABCIterable, Mapping as ABCMapping
 import re
-
+from collections.abc import Iterable, Mapping, Sequence
+from collections.abc import Iterable as ABCIterable
+from collections.abc import Mapping as ABCMapping
 from dataclasses import dataclass, field
-from typing import Dict, Iterable, List, Mapping, Sequence, Tuple, Union, TYPE_CHECKING
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from pyprocar.core.structure import Structure
@@ -60,14 +61,14 @@ NONCOLINEAR_AZIMUTHAL_ORBITAL_ORDER = [
     {"l": 3, "j": 3.5, "m_j": 3.5},
 ]
 
-PRIMARY_ORBITAL_GROUPS: Tuple[Tuple[str, Tuple[int, ...]], ...] = (
+PRIMARY_ORBITAL_GROUPS: tuple[tuple[str, tuple[int, ...]], ...] = (
     ("s", (0,)),
     ("p", (1, 2, 3)),
     ("d", (4, 5, 6, 7, 8)),
     ("f", (9, 10, 11, 12, 13, 14, 15)),
 )
 
-ORBITAL_INDEX_LABEL_MAP: Dict[Union[int, Tuple[int, ...]], str] = {
+ORBITAL_INDEX_LABEL_MAP: dict[int | tuple[int, ...], str] = {
     0: "s",
     1: "p_y",
     2: "p_z",
@@ -92,14 +93,14 @@ ORBITAL_INDEX_LABEL_MAP: Dict[Union[int, Tuple[int, ...]], str] = {
     tuple(range(0, 16)): "all",
 }
 
-ORBITAL_INDEX_TO_LABEL: Dict[int, str] = {
+ORBITAL_INDEX_TO_LABEL: dict[int, str] = {
     key: value for key, value in ORBITAL_INDEX_LABEL_MAP.items() if isinstance(key, int)
 }
-ORBITAL_GROUP_LABELS: Dict[Tuple[int, ...], str] = {
+ORBITAL_GROUP_LABELS: dict[tuple[int, ...], str] = {
     key: value for key, value in ORBITAL_INDEX_LABEL_MAP.items() if isinstance(key, tuple)
 }
 
-ORBITAL_LATEX_MAP: Dict[str, str] = {
+ORBITAL_LATEX_MAP: dict[str, str] = {
     "s": "s",
     "p": "p",
     "py": "p_{y}",
@@ -127,7 +128,7 @@ ORBITAL_LATEX_MAP: Dict[str, str] = {
     "eg": "e_g",
 }
 
-LEGACY_ORBITAL_NAMES: Dict[str, Union[int, List[int]]] = {
+LEGACY_ORBITAL_NAMES: dict[str, int | list[int]] = {
     "p": [1, 2, 3],
     "d": [4, 5, 6, 7, 8],
     "f": [9, 10, 11, 12, 13, 14, 15],
@@ -150,7 +151,7 @@ LEGACY_ORBITAL_NAMES: Dict[str, Union[int, List[int]]] = {
 }
 
 
-def _normalize_indices(indices: Iterable[int] | None) -> List[int]:
+def _normalize_indices(indices: Iterable[int] | None) -> list[int]:
     if indices is None:
         return []
     try:
@@ -165,7 +166,7 @@ def format_index_ranges(indices: Sequence[int] | None) -> str:
     if not normalized:
         return ""
 
-    ranges: List[Tuple[int, int]] = []
+    ranges: list[tuple[int, int]] = []
     start = prev = normalized[0]
     for value in normalized[1:]:
         if value == prev + 1:
@@ -175,7 +176,7 @@ def format_index_ranges(indices: Sequence[int] | None) -> str:
         start = prev = value
     ranges.append((start, prev))
 
-    parts: List[str] = []
+    parts: list[str] = []
     for lower, upper in ranges:
         if lower == upper:
             parts.append(str(lower))
@@ -194,47 +195,45 @@ class OrbitalIndexer:
     conventional_order: Mapping[str, Sequence[str]] = field(
         default_factory=lambda: dict(CONVENTIONAL_CUBIC_ORBITAL_ORDER)
     )
-    flat_soc_order: Sequence[Mapping[str, Union[int, float]]] = field(
+    flat_soc_order: Sequence[Mapping[str, int | float]] = field(
         default_factory=lambda: list(NONCOLINEAR_AZIMUTHAL_ORBITAL_ORDER)
     )
-    index_label_map: Mapping[int, str] = field(
-        default_factory=lambda: dict(ORBITAL_INDEX_TO_LABEL)
-    )
-    group_label_map: Mapping[Tuple[int, ...], str] = field(
+    index_label_map: Mapping[int, str] = field(default_factory=lambda: dict(ORBITAL_INDEX_TO_LABEL))
+    group_label_map: Mapping[tuple[int, ...], str] = field(
         default_factory=lambda: dict(ORBITAL_GROUP_LABELS)
     )
 
     @property
-    def flat_azimuthal(self) -> List[str]:
+    def flat_azimuthal(self) -> list[str]:
         return self._flatten_order(self.azimuthal_order)
 
     @property
-    def flat_conventional(self) -> List[str]:
+    def flat_conventional(self) -> list[str]:
         return self._flatten_order(self.conventional_order)
 
     @property
-    def az_to_conv_map(self) -> Dict[int, int]:
+    def az_to_conv_map(self) -> dict[int, int]:
         return self._build_index_map(self.flat_azimuthal, self.flat_conventional)
 
     @property
-    def conv_to_az_map(self) -> Dict[int, int]:
+    def conv_to_az_map(self) -> dict[int, int]:
         return {v: k for k, v in self.az_to_conv_map.items()}
 
     @property
-    def az_to_flat_index(self) -> Dict[str, int]:
+    def az_to_flat_index(self) -> dict[str, int]:
         return {orbital_name: i for i, orbital_name in enumerate(self.flat_azimuthal)}
 
     @property
-    def conv_to_flat_index(self) -> Dict[str, int]:
+    def conv_to_flat_index(self) -> dict[str, int]:
         return {orbital_name: i for i, orbital_name in enumerate(self.flat_conventional)}
 
     @property
-    def l_orbital_map(self) -> Dict[str, int]:
+    def l_orbital_map(self) -> dict[str, int]:
         return {l_orbital_name: i for i, l_orbital_name in enumerate(self.azimuthal_order.keys())}
 
     @property
-    def az_to_lm_records(self) -> List[Dict[str, int]]:
-        az_to_lm_records: List[Dict[str, int]] = []
+    def az_to_lm_records(self) -> list[dict[str, int]]:
+        az_to_lm_records: list[dict[str, int]] = []
         for l_orbital_name in self.azimuthal_order.keys():
             for i_m, _ in enumerate(self.azimuthal_order[l_orbital_name]):
                 az_to_lm_records.append(
@@ -393,17 +392,15 @@ class OrbitalIndexer:
         }
         return f"$\\{replacements.get(orbital, orbital)}$"
 
-    def _flatten_order(self, order_dict: Mapping[str, Sequence[str]]) -> List[str]:
-        flat_list: List[str] = []
+    def _flatten_order(self, order_dict: Mapping[str, Sequence[str]]) -> list[str]:
+        flat_list: list[str] = []
         for l_type in ("s", "p", "d", "f"):
             if l_type in order_dict:
                 flat_list.extend(order_dict[l_type])
         return flat_list
 
-    def _build_index_map(
-        self, list_a: Sequence[str], list_b: Sequence[str]
-    ) -> Dict[int, int]:
-        mapping: Dict[int, int] = {}
+    def _build_index_map(self, list_a: Sequence[str], list_b: Sequence[str]) -> dict[int, int]:
+        mapping: dict[int, int] = {}
         for i, orb in enumerate(list_a):
             if orb in list_b:
                 mapping[i] = list_b.index(orb)
@@ -445,7 +442,7 @@ class AtomIndexer:
     @classmethod
     def from_structure(
         cls, structure: Structure | None, *, max_indices_for_ranges: int = 12
-    ) -> "AtomIndexer":
+    ) -> AtomIndexer:
         if structure is None:
             return cls(species_per_atom=None, max_indices_for_ranges=max_indices_for_ranges)
         return cls(
@@ -478,7 +475,7 @@ class AtomIndexer:
             return f"{len(resolved)} atoms"
 
         grouped = self._group_by_species(resolved, normalized_species)
-        labels: List[str] = []
+        labels: list[str] = []
         for specie, idxs in grouped:
             range_str = format_index_ranges(idxs)
             if specie:
@@ -488,8 +485,8 @@ class AtomIndexer:
         return "".join(labels)
 
     def _resolve_indices(
-        self, indices: Sequence[int] | None, species_list: List[str] | None
-    ) -> Tuple[int, ...]:
+        self, indices: Sequence[int] | None, species_list: list[str] | None
+    ) -> tuple[int, ...]:
         selected = set(_normalize_indices(indices))
         if species_list:
             species_indices = self._indices_for_species(species_list)
@@ -499,17 +496,15 @@ class AtomIndexer:
                 selected = species_indices
         return tuple(sorted(selected))
 
-    def _indices_for_species(self, species_list: List[str]) -> set[int]:
+    def _indices_for_species(self, species_list: list[str]) -> set[int]:
         if not self.species_per_atom:
             return set()
         targets = set(species_list)
-        return {
-            idx for idx, specie in enumerate(self.species_per_atom) if specie in targets
-        }
+        return {idx for idx, specie in enumerate(self.species_per_atom) if specie in targets}
 
     def _group_by_species(
-        self, indices: Tuple[int, ...], species_order: List[str] | None
-    ) -> List[Tuple[str, List[int]]]:
+        self, indices: tuple[int, ...], species_order: list[str] | None
+    ) -> list[tuple[str, list[int]]]:
         if not indices:
             return []
         if not self.species_per_atom:
@@ -524,20 +519,18 @@ class AtomIndexer:
                 if specie not in ordered_species:
                     ordered_species.append(specie)
 
-        grouped: List[Tuple[str, List[int]]] = []
+        grouped: list[tuple[str, list[int]]] = []
         for specie in ordered_species:
-            specie_indices = [
-                idx for idx in indices if self.species_per_atom[idx] == specie
-            ]
+            specie_indices = [idx for idx in indices if self.species_per_atom[idx] == specie]
             if specie_indices:
                 grouped.append((specie, specie_indices))
         return grouped
 
     def _species_names_from_indices(
-        self, indices: Tuple[int, ...], species_order: List[str] | None
-    ) -> List[str]:
+        self, indices: tuple[int, ...], species_order: list[str] | None
+    ) -> list[str]:
         if self.species_per_atom:
-            ordered: List[str] = []
+            ordered: list[str] = []
             for idx in indices:
                 specie = self.species_per_atom[idx]
                 if specie not in ordered:
@@ -545,14 +538,16 @@ class AtomIndexer:
             return ordered
         return species_order or []
 
-    def _normalize_species(self, species: Sequence[str] | str | None) -> List[str] | None:
+    def _normalize_species(self, species: Sequence[str] | str | None) -> list[str] | None:
         if species is None:
             return None
         if isinstance(species, str):
             return [species]
         return [str(item) for item in species]
 
-    def species_atom_map(self, species: Sequence[str] | str | None = None) -> dict[str, tuple[int, ...]]:
+    def species_atom_map(
+        self, species: Sequence[str] | str | None = None
+    ) -> dict[str, tuple[int, ...]]:
         if self.species_per_atom is None:
             raise ValueError("Species information is not available for atom indexing")
 
@@ -586,13 +581,11 @@ class SpinIndexer:
     names: Sequence[str]
 
     @classmethod
-    def from_projection_names(cls, names: Sequence[str]) -> "SpinIndexer":
+    def from_projection_names(cls, names: Sequence[str]) -> SpinIndexer:
         return cls(tuple(names))
 
     @classmethod
-    def from_counts(
-        cls, n_spins: int, *, is_non_colinear: bool = False
-    ) -> "SpinIndexer":
+    def from_counts(cls, n_spins: int, *, is_non_colinear: bool = False) -> SpinIndexer:
         if is_non_colinear:
             return cls(("total", "x", "y", "z"))
         if n_spins == 2:
@@ -605,7 +598,7 @@ class SpinIndexer:
         normalized = _normalize_indices(spins)
         if not normalized:
             return ""
-        labels: List[str] = []
+        labels: list[str] = []
         for idx in normalized:
             if 0 <= idx < len(self.names):
                 labels.append(self.names[idx])
@@ -758,7 +751,9 @@ class ProjectionLabelBuilder:
 
         prefix_plain = atom_label
         if orbital_label:
-            prefix_plain = f"{prefix_plain}-({orbital_label})" if prefix_plain else f"({orbital_label})"
+            prefix_plain = (
+                f"{prefix_plain}-({orbital_label})" if prefix_plain else f"({orbital_label})"
+            )
 
         prefix_latex = atom_label_latex
         if orbital_label_latex:
@@ -774,9 +769,7 @@ class ProjectionLabelBuilder:
 
         species_label = ",".join(species_list) if species_list else ""
         species_label_latex = (
-            ",".join(self._species_to_latex(item) for item in species_list)
-            if species_list
-            else ""
+            ",".join(self._species_to_latex(item) for item in species_list) if species_list else ""
         )
 
         combined_plain = label_plain or "all"
@@ -821,9 +814,7 @@ class ProjectionLabelBuilder:
 
         return re.sub(r"([A-Z][a-z]?)", replacer, label)
 
-    def _normalize_species(
-        self, species: Sequence[str] | str | None
-    ) -> List[str] | None:
+    def _normalize_species(self, species: Sequence[str] | str | None) -> list[str] | None:
         if species is None:
             return None
         if isinstance(species, str):
@@ -862,8 +853,12 @@ class ProjectionSelectionResolver:
         orbitals: Sequence[int] | int | None = None,
         spins: Sequence[int] | int | None = None,
         species: Sequence[str] | str | None = None,
-        species_orbital_map: Sequence[Mapping[str, Iterable[int]]] | Mapping[str, Iterable[int]] | None = None,
-        atoms_orbital_map: Sequence[Mapping[Iterable[int] | int, Iterable[int]]] | Mapping[Iterable[int] | int, Iterable[int]] | None = None,
+        species_orbital_map: Sequence[Mapping[str, Iterable[int]]]
+        | Mapping[str, Iterable[int]]
+        | None = None,
+        atoms_orbital_map: Sequence[Mapping[Iterable[int] | int, Iterable[int]]]
+        | Mapping[Iterable[int] | int, Iterable[int]]
+        | None = None,
     ) -> ProjectionSelectionResult:
         self._validate_exclusive_inputs(
             atoms=atoms,
@@ -928,7 +923,9 @@ class ProjectionSelectionResolver:
 
         atoms_tuple = tuple(sorted(atoms_set)) if atoms_set is not None else tuple()
         orbitals_tuple = (
-            tuple(sorted(orbitals_set)) if orbitals_set is not None and len(orbitals_set) > 0 else None
+            tuple(sorted(orbitals_set))
+            if orbitals_set is not None and len(orbitals_set) > 0
+            else None
         )
         spins_tuple = tuple(sorted(spins_set)) if spins_set is not None else None
         species_tuple = tuple(species_list) if species_list is not None else tuple()
@@ -956,9 +953,7 @@ class ProjectionSelectionResolver:
             return None
         return {int(item) for item in self._flatten_ints(values)}
 
-    def _normalize_species_sequence(
-        self, species: Sequence[str] | str | None
-    ) -> list[str] | None:
+    def _normalize_species_sequence(self, species: Sequence[str] | str | None) -> list[str] | None:
         if species is None:
             return None
         if isinstance(species, str):
@@ -977,7 +972,9 @@ class ProjectionSelectionResolver:
 
     def _normalize_atoms_orbital_map(
         self,
-        mapping: Sequence[Mapping[Iterable[int] | int, Iterable[int]]] | Mapping[Iterable[int] | int, Iterable[int]] | None,
+        mapping: Sequence[Mapping[Iterable[int] | int, Iterable[int]]]
+        | Mapping[Iterable[int] | int, Iterable[int]]
+        | None,
     ) -> list[Mapping[Iterable[int] | int, Iterable[int]]] | None:
         if mapping is None:
             return None
@@ -1018,8 +1015,12 @@ class ProjectionSelectionResolver:
         atoms: Sequence[int] | int | None,
         orbitals: Sequence[int] | int | None,
         species: Sequence[str] | str | None,
-        species_orbital_map: Sequence[Mapping[str, Iterable[int]]] | Mapping[str, Iterable[int]] | None,
-        atoms_orbital_map: Sequence[Mapping[Iterable[int] | int, Iterable[int]]] | Mapping[Iterable[int] | int, Iterable[int]] | None,
+        species_orbital_map: Sequence[Mapping[str, Iterable[int]]]
+        | Mapping[str, Iterable[int]]
+        | None,
+        atoms_orbital_map: Sequence[Mapping[Iterable[int] | int, Iterable[int]]]
+        | Mapping[Iterable[int] | int, Iterable[int]]
+        | None,
     ) -> None:
         if species is not None and atoms is not None:
             raise ValueError("atoms and species cannot be specified together")

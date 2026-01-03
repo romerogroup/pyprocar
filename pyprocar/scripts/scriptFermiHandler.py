@@ -4,19 +4,14 @@ __email__ = "lllang@mix.wvu.edu"
 __date__ = "March 31, 2020"
 
 import logging
-import os
 import sys
-from typing import List, Tuple
 
 import numpy as np
-import yaml
 
 from pyprocar.cfg import ConfigFactory, ConfigManager, PlotType
 from pyprocar.core.fermisurface import FermiSurface
-from pyprocar.io import Parser
 from pyprocar.plotter import FermiPlotter
-from pyprocar.utils import ROOT, data_utils, welcome
-from pyprocar.utils.log_utils import set_verbose_level
+from pyprocar.utils import welcome
 
 user_logger = logging.getLogger("user")
 logger = logging.getLogger(__name__)
@@ -30,9 +25,7 @@ def find_nearest(array, value):
     return idx
 
 
-
 class FermiHandler:
-
     def __init__(
         self,
         code: str,
@@ -64,21 +57,20 @@ class FermiHandler:
             Boolean to use cached Pickle files, by default True
         """
 
-
         welcome()
 
         user_logger.info("_" * 100)
 
         self.default_config = ConfigFactory.create_config(PlotType.FERMI_SURFACE_3D)
-        
+
         # Store parameters for creating FermiSurface objects
         self.code = code
         self.dirname = dirname
         self.ebs_interpolation_factor = ebs_interpolation_factor
-        
+
         # Create a sample FermiSurface to get default fermi energy
         sample_fs = FermiSurface.from_code(code, dirname)
-        
+
         if fermi is None:
             self.e_fermi = sample_fs.fermi
             user_logger.warning(
@@ -100,10 +92,12 @@ class FermiHandler:
                 Here is a list modes : {modes_txt}
                 Here is a list of properties: {props_txt}"""
 
-    def _map_mode_to_property(self, mode, bands=None, atoms=None, orbitals=None, spins=None, spin_texture=False):
+    def _map_mode_to_property(
+        self, mode, bands=None, atoms=None, orbitals=None, spins=None, spin_texture=False
+    ):
         """
         Maps old mode system to new property system
-        
+
         Parameters
         ----------
         mode : str
@@ -118,7 +112,7 @@ class FermiHandler:
             A list of spins, by default None
         spin_texture : bool, optional
             Boolean to plot spin texture, by default False
-            
+
         Returns
         -------
         str or None
@@ -141,11 +135,13 @@ class FermiHandler:
         else:
             user_logger.warning(f"Unknown mode: {mode}. Using plain mode.")
             return None
-    
-    def _create_fermi_surface(self, fermi=None, fermi_shift=0.0, bands=None, atoms=None, orbitals=None, spins=None):
+
+    def _create_fermi_surface(
+        self, fermi=None, fermi_shift=0.0, bands=None, atoms=None, orbitals=None, spins=None
+    ):
         """
         Creates a FermiSurface object with the stored parameters
-        
+
         Parameters
         ----------
         fermi : float, optional
@@ -160,7 +156,7 @@ class FermiHandler:
             Orbitals for projections, by default None
         spins : List[int], optional
             Spins for projections, by default None
-            
+
         Returns
         -------
         FermiSurface
@@ -168,14 +164,11 @@ class FermiHandler:
         """
         if fermi is None:
             fermi = self.e_fermi
-            
+
         fermi_surface = FermiSurface.from_code(
-            self.code, 
-            self.dirname, 
-            fermi=fermi, 
-            fermi_shift=fermi_shift
+            self.code, self.dirname, fermi=fermi, fermi_shift=fermi_shift
         )
-        
+
         return fermi_surface
 
     def plot_fermi_surface(
@@ -237,37 +230,43 @@ class FermiHandler:
         user_logger.info("_" * 100)
 
         # Create FermiSurface object
-        fermi_surface = self._create_fermi_surface(fermi_shift=fermi_shift, bands=bands, atoms=atoms, orbitals=orbitals, spins=spins)
+        fermi_surface = self._create_fermi_surface(
+            fermi_shift=fermi_shift, bands=bands, atoms=atoms, orbitals=orbitals, spins=spins
+        )
 
         if fermi_surface.n_points == 0:
             user_logger.warning(
-                f"No Fermi surface found for the given parameters. Skipping plotting."
+                "No Fermi surface found for the given parameters. Skipping plotting."
             )
             return None
 
         # Determine and compute property based on mode
-        property_name = self._map_mode_to_property(mode, bands, atoms, orbitals, spins, spin_texture)
+        property_name = self._map_mode_to_property(
+            mode, bands, atoms, orbitals, spins, spin_texture
+        )
         if property_name and mode != "plain":
             fermi_surface.get_property(property_name, atoms=atoms, orbitals=orbitals, spins=spins)
 
         # Create plotter and add components
-        fsplt = FermiPlotter(**{k:v for k,v in kwargs.items() if k in ['off_screen', 'window_size', 'theme']})
-        
+        fsplt = FermiPlotter(
+            **{k: v for k, v in kwargs.items() if k in ["off_screen", "window_size", "theme"]}
+        )
+
         if config.show_brillouin_zone:
             fsplt.add_brillouin_zone(fermi_surface.brillouin_zone)
 
         # Add the surface with appropriate settings
         add_active_vectors = spin_texture or property_name == "fermi_velocity"
         fsplt.add_surface(
-            fermi_surface, 
+            fermi_surface,
             show_scalar_bar=(property_name is not None or show_colorbar),
             scalars=property_name if mode == "plain" else None,
             add_active_vectors=add_active_vectors,
             cmap=config.surface_cmap,
             clim=config.surface_clim,
-            opacity=config.surface_opacity
+            opacity=config.surface_opacity,
         )
-        
+
         if not (property_name is not None or show_colorbar) or mode == "plain":
             fsplt.remove_scalar_bar()
 
@@ -288,10 +287,10 @@ class FermiHandler:
 
         if save_gif is not None:
             user_logger.warning("GIF saving not yet implemented in new API")
-            
+
         if save_mp4:
             user_logger.warning("MP4 saving not yet implemented in new API")
-            
+
         if save_3d:
             user_logger.warning("3D mesh saving not yet implemented in new API")
 
@@ -300,7 +299,7 @@ class FermiHandler:
         mode,
         iso_range: float = None,
         iso_surfaces: int = None,
-        iso_values: List[float] = None,
+        iso_values: list[float] = None,
         bands=None,
         atoms=None,
         orbitals=None,
@@ -360,36 +359,42 @@ class FermiHandler:
             raise ValueError("Either iso_surfaces and iso_range or iso_values must be provided")
 
         # Determine property to compute based on mode
-        property_name = self._map_mode_to_property(mode, bands, atoms, orbitals, spins, spin_texture)
-        
+        property_name = self._map_mode_to_property(
+            mode, bands, atoms, orbitals, spins, spin_texture
+        )
+
         # Create FermiSurface objects for each energy value
         fermi_surfaces = []
         for e_value in energy_values:
-            fs = self._create_fermi_surface(fermi=e_value, bands=bands, atoms=atoms, orbitals=orbitals, spins=spins)
-            
+            fs = self._create_fermi_surface(
+                fermi=e_value, bands=bands, atoms=atoms, orbitals=orbitals, spins=spins
+            )
+
             # Compute property if needed
             if property_name:
                 fs.get_property(property_name, atoms=atoms, orbitals=orbitals, spins=spins)
-            
+
             fermi_surfaces.append(fs)
 
             logger.debug(f"___Generated surface for energy {e_value}___")
             logger.debug(f"Surface has {fs.n_points} points")
 
         # Create plotter and add isoslider
-        fsplt = FermiPlotter(**{k:v for k,v in kwargs.items() if k in ['off_screen', 'window_size', 'theme']})
-        
+        fsplt = FermiPlotter(
+            **{k: v for k, v in kwargs.items() if k in ["off_screen", "window_size", "theme"]}
+        )
+
         add_active_vectors = spin_texture or property_name == "fermi_velocity"
         fsplt.add_isoslider(
-            fermi_surfaces, 
+            fermi_surfaces,
             energy_values,
             add_active_vectors=add_active_vectors,
             add_surface_args={
-                'show_scalar_bar': config.show_scalar_bar and property_name is not None,
-                'cmap': config.surface_cmap,
-                'clim': config.surface_clim,
-                'opacity': config.surface_opacity
-            }
+                "show_scalar_bar": config.show_scalar_bar and property_name is not None,
+                "cmap": config.surface_cmap,
+                "clim": config.surface_clim,
+                "opacity": config.surface_opacity,
+            },
         )
 
         # Handle saving and showing
@@ -405,7 +410,7 @@ class FermiHandler:
         mode,
         iso_range: float = None,
         iso_surfaces: int = None,
-        iso_values: List[float] = None,
+        iso_values: list[float] = None,
         bands=None,
         atoms=None,
         orbitals=None,
@@ -462,17 +467,21 @@ class FermiHandler:
             raise ValueError("Either iso_surfaces and iso_range or iso_values must be provided")
 
         # Determine property to compute based on mode
-        property_name = self._map_mode_to_property(mode, bands, atoms, orbitals, spins, spin_texture)
-        
+        property_name = self._map_mode_to_property(
+            mode, bands, atoms, orbitals, spins, spin_texture
+        )
+
         # Create FermiSurface objects for each energy value
         fermi_surfaces = []
         for e_value in energy_values:
-            fs = self._create_fermi_surface(fermi=e_value, bands=bands, atoms=atoms, orbitals=orbitals, spins=spins)
-            
+            fs = self._create_fermi_surface(
+                fermi=e_value, bands=bands, atoms=atoms, orbitals=orbitals, spins=spins
+            )
+
             # Compute property if needed
             if property_name:
                 fs.get_property(property_name, atoms=atoms, orbitals=orbitals, spins=spins)
-            
+
             fermi_surfaces.append(fs)
 
             logger.debug(f"___Generated surface for energy {e_value}___")
@@ -484,27 +493,27 @@ class FermiHandler:
 
         # Create plotter and add isovalue gif
         fsplt = FermiPlotter(off_screen=True)
-        
+
         add_active_vectors = spin_texture or property_name == "fermi_velocity"
         fsplt.add_isovalue_gif(
-            fermi_surfaces, 
+            fermi_surfaces,
             save_gif,
             add_active_vectors=add_active_vectors,
             add_surface_args={
-                'show_scalar_bar': config.show_scalar_bar and property_name is not None,
-                'cmap': config.surface_cmap,
-                'clim': config.surface_clim,
-                'opacity': config.surface_opacity
-            }
+                "show_scalar_bar": config.show_scalar_bar and property_name is not None,
+                "cmap": config.surface_cmap,
+                "clim": config.surface_clim,
+                "opacity": config.surface_opacity,
+            },
         )
-        
+
         user_logger.info(f"GIF saved to {save_gif}")
 
     def plot_fermi_cross_section(
         self,
         mode,
-        slice_normal: Tuple[float, float, float] = (1, 0, 0),
-        slice_origin: Tuple[float, float, float] = (0, 0, 0),
+        slice_normal: tuple[float, float, float] = (1, 0, 0),
+        slice_origin: tuple[float, float, float] = (0, 0, 0),
         show_van_alphen_frequency: bool = False,
         show_cross_section_area: bool = False,
         bands=None,
@@ -557,31 +566,39 @@ class FermiHandler:
         user_logger.info("_" * 100)
 
         # Create FermiSurface object
-        fermi_surface = self._create_fermi_surface(bands=bands, atoms=atoms, orbitals=orbitals, spins=spins)
+        fermi_surface = self._create_fermi_surface(
+            bands=bands, atoms=atoms, orbitals=orbitals, spins=spins
+        )
 
         if fermi_surface.n_points == 0:
             user_logger.warning(
-                f"No Fermi surface found for the given parameters. Skipping plotting."
+                "No Fermi surface found for the given parameters. Skipping plotting."
             )
             return None
 
         # Determine and compute property based on mode
-        property_name = self._map_mode_to_property(mode, bands, atoms, orbitals, spins, spin_texture)
+        property_name = self._map_mode_to_property(
+            mode, bands, atoms, orbitals, spins, spin_texture
+        )
         if property_name:
             fermi_surface.get_property(property_name, atoms=atoms, orbitals=orbitals, spins=spins)
 
         # Create plotter and add slicer
-        fsplt = FermiPlotter(**{k:v for k,v in kwargs.items() if k in ['off_screen', 'window_size', 'theme']})
-        
+        fsplt = FermiPlotter(
+            **{k: v for k, v in kwargs.items() if k in ["off_screen", "window_size", "theme"]}
+        )
+
         add_active_vectors = spin_texture or property_name == "fermi_velocity"
-        
-        fsplt.add_surface(fermi_surface,
-                          add_active_vectors=add_active_vectors,
-                          show_scalar_bar=False,
-                          cmap=config.surface_cmap,
-                          clim=config.surface_clim,
-                          opacity=config.surface_opacity)
-        
+
+        fsplt.add_surface(
+            fermi_surface,
+            add_active_vectors=add_active_vectors,
+            show_scalar_bar=False,
+            cmap=config.surface_cmap,
+            clim=config.surface_clim,
+            opacity=config.surface_opacity,
+        )
+
         fsplt.add_slicer(
             fermi_surface,
             normal=slice_normal,
@@ -589,12 +606,12 @@ class FermiHandler:
             show_van_alphen_frequency=show_van_alphen_frequency,
             show_cross_section_area=show_cross_section_area,
             add_surface_args={
-                'show_scalar_bar': config.show_scalar_bar and property_name is not None,
-                'add_active_vectors': add_active_vectors,
-                'cmap': config.surface_cmap,
-                'clim': config.surface_clim,
-                'opacity': config.surface_opacity
-            }
+                "show_scalar_bar": config.show_scalar_bar and property_name is not None,
+                "add_active_vectors": add_active_vectors,
+                "cmap": config.surface_cmap,
+                "clim": config.surface_clim,
+                "opacity": config.surface_opacity,
+            },
         )
 
         # Handle saving and showing
@@ -604,15 +621,15 @@ class FermiHandler:
 
         if show:
             fsplt.show()
-            
+
         if save_2d_slice:
             user_logger.warning("2D slice saving not yet implemented in new API")
 
     def plot_fermi_cross_section_box_widget(
         self,
         mode,
-        slice_normal: Tuple[float, float, float] = (1, 0, 0),
-        slice_origin: Tuple[float, float, float] = (0, 0, 0),
+        slice_normal: tuple[float, float, float] = (1, 0, 0),
+        slice_origin: tuple[float, float, float] = (0, 0, 0),
         show_cross_section_area: bool = False,
         show_van_alphen_frequency: bool = False,
         bands=None,
@@ -666,32 +683,40 @@ class FermiHandler:
         user_logger.info("_" * 100)
 
         # Create FermiSurface object
-        fermi_surface = self._create_fermi_surface(bands=bands, atoms=atoms, orbitals=orbitals, spins=spins)
+        fermi_surface = self._create_fermi_surface(
+            bands=bands, atoms=atoms, orbitals=orbitals, spins=spins
+        )
 
         if fermi_surface.n_points == 0:
             user_logger.warning(
-                f"No Fermi surface found for the given parameters. Skipping plotting."
+                "No Fermi surface found for the given parameters. Skipping plotting."
             )
             return None
 
         # Determine and compute property based on mode
-        property_name = self._map_mode_to_property(mode, bands, atoms, orbitals, spins, spin_texture)
+        property_name = self._map_mode_to_property(
+            mode, bands, atoms, orbitals, spins, spin_texture
+        )
         if property_name:
             fermi_surface.get_property(property_name, atoms=atoms, orbitals=orbitals, spins=spins)
 
         user_logger.info(f"Generated Fermi surface with {fermi_surface.n_points} points")
 
         # Create plotter and add box slicer
-        fsplt = FermiPlotter(**{k:v for k,v in kwargs.items() if k in ['off_screen', 'window_size', 'theme']})
-        
+        fsplt = FermiPlotter(
+            **{k: v for k, v in kwargs.items() if k in ["off_screen", "window_size", "theme"]}
+        )
+
         add_active_vectors = spin_texture or property_name == "fermi_velocity"
-        fsplt.add_surface(fermi_surface,
-                          add_active_vectors=add_active_vectors,
-                          show_scalar_bar=False,
-                          cmap=config.surface_cmap,
-                          clim=config.surface_clim,
-                          opacity=config.surface_opacity)
-        
+        fsplt.add_surface(
+            fermi_surface,
+            add_active_vectors=add_active_vectors,
+            show_scalar_bar=False,
+            cmap=config.surface_cmap,
+            clim=config.surface_clim,
+            opacity=config.surface_opacity,
+        )
+
         fsplt.add_box_slicer(
             fermi_surface,
             normal=slice_normal,
@@ -701,14 +726,14 @@ class FermiHandler:
             show_cross_section_area=show_cross_section_area,
             show_van_alphen_frequency=show_van_alphen_frequency,
             add_surface_args={
-                'show_scalar_bar': config.show_scalar_bar and property_name is not None,
-                'add_active_vectors': add_active_vectors,
-                'cmap': config.surface_cmap,
-                'clim': config.surface_clim,
-                'opacity': config.surface_opacity
-            }
+                "show_scalar_bar": config.show_scalar_bar and property_name is not None,
+                "add_active_vectors": add_active_vectors,
+                "cmap": config.surface_cmap,
+                "clim": config.surface_clim,
+                "opacity": config.surface_opacity,
+            },
         )
-        
+
         if not (property_name is not None or show_colorbar) or mode == "plain":
             fsplt.remove_scalar_bar()
 

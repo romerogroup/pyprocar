@@ -42,11 +42,11 @@ class Locproj(Mapping[str, Any]):
           with complex dtype
     """
 
-    def __init__(self, filepath: str | Path | None = None, file_str: str  = ""):
+    def __init__(self, filepath: str | Path | None = None, file_str: str = ""):
         logger.info(f"Initializing Locproj parser for {filepath}")
         self._filepath: str | Path | None = filepath
         self._file_str: str = file_str
-        
+
     @classmethod
     def from_str(cls, input: str) -> "Locproj":
         return cls(file_str=input)
@@ -74,7 +74,7 @@ class Locproj(Mapping[str, Any]):
         Parse dimensions from the first line.
 
         Format: n_spins  n_k  n_bands  n_proj  # optional comment
-        
+
         Returns
         -------
         tuple
@@ -83,7 +83,7 @@ class Locproj(Mapping[str, Any]):
         logger.debug("Parsing LOCPROJ dimensions")
 
         lines = self.file_str.split("\n")
-        
+
         # Find first non-empty line
         first_line = ""
         for line in lines:
@@ -103,8 +103,8 @@ class Locproj(Mapping[str, Any]):
 
         if len(numbers) < 4:
             raise ValueError(
-                "First line should contain 4 numbers (n_spins n_k n_bands n_proj), " +
-                f"got: {first_line}"
+                "First line should contain 4 numbers (n_spins n_k n_bands n_proj), "
+                + f"got: {first_line}"
             )
 
         n_spins = int(numbers[0])
@@ -113,10 +113,9 @@ class Locproj(Mapping[str, Any]):
         n_proj = int(numbers[3])
 
         logger.debug(
-            "Dimensions: n_spins={n_spins}, n_k={n_k}, " +
-            f"n_bands={n_bands}, n_proj={n_proj}"
+            "Dimensions: n_spins={n_spins}, n_k={n_k}, " + f"n_bands={n_bands}, n_proj={n_proj}"
         )
-        
+
         return (n_spins, n_k, n_bands, n_proj)
 
     @cached_property
@@ -149,7 +148,7 @@ class Locproj(Mapping[str, Any]):
 
         Example:
         ISITE:     1    R=      0.0000000     0.0000000     0.0000000  Hydrogen-like    :     py
-        
+
         Returns
         -------
         tuple
@@ -170,8 +169,8 @@ class Locproj(Mapping[str, Any]):
 
         if len(matches) != self.n_proj:
             logger.warning(
-                "Number of ISITE lines ({len(matches)}) does not match " +
-                f"n_proj from header ({self.n_proj})"
+                "Number of ISITE lines ({len(matches)}) does not match "
+                + f"n_proj from header ({self.n_proj})"
             )
 
         logger.debug(f"Found {len(matches)} localized orbital specifications")
@@ -182,7 +181,6 @@ class Locproj(Mapping[str, Any]):
         radial_specs_list: list[dict[str, str | dict[str, float]]] = []
 
         for match in matches:
-
             x, y, z = float(match[1]), float(match[2]), float(match[3])
             radial_type_str = match[4].strip()
             orbital_str = match[5].strip()
@@ -205,7 +203,7 @@ class Locproj(Mapping[str, Any]):
         logger.debug(f"Parsed {len(frac_coords_list)} projections")
         logger.debug(f"Fractional coordinates shape: {frac_coords.shape}")
         logger.debug(f"Angular types: {angular_types}")
-        
+
         return (frac_coords, angular_types, radial_specs)
 
     @cached_property
@@ -280,7 +278,7 @@ class Locproj(Mapping[str, Any]):
             <proj_idx> <real> <imag>
             <proj_idx> <real> <imag>
             ...
-            
+
         Returns
         -------
         np.ndarray
@@ -326,9 +324,7 @@ class Locproj(Mapping[str, Any]):
                 and 0 <= k_idx < self.n_k
                 and 0 <= band_idx < self.n_bands
             ):
-                logger.warning(
-                    f"Index out of bounds: spin={spin}, k={k}, band={band}, skipping"
-                )
+                logger.warning(f"Index out of bounds: spin={spin}, k={k}, band={band}, skipping")
                 continue
 
             # Extract projection values after this match
@@ -344,12 +340,16 @@ class Locproj(Mapping[str, Any]):
             self._parse_orbital_block(block_str, k_idx, band_idx, spin_idx, projections_array)
 
         logger.debug(f"Projections array shape: {projections_array.shape}")
-        
+
         return projections_array
 
     def _parse_orbital_block(
-        self, block_str: str, k_idx: int, band_idx: int, spin_idx: int, 
-        projections_array: np.ndarray
+        self,
+        block_str: str,
+        k_idx: int,
+        band_idx: int,
+        spin_idx: int,
+        projections_array: np.ndarray,
     ) -> None:
         """
         Parse a single orbital block containing projection values.
@@ -374,9 +374,7 @@ class Locproj(Mapping[str, Any]):
                 continue
 
             # Store complex value
-            projections_array[k_idx, band_idx, spin_idx, proj_idx] = complex(
-                real_val, imag_val
-            )
+            projections_array[k_idx, band_idx, spin_idx, proj_idx] = complex(real_val, imag_val)
 
     def _validate_file(self, filepath: str | Path) -> Path:
         """
@@ -460,4 +458,3 @@ class Locproj(Mapping[str, Any]):
     @override
     def __len__(self) -> int:
         return len(self.__dict__)
-

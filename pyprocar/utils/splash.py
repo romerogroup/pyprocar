@@ -4,6 +4,7 @@ import pyprocar
 
 user_logger = logging.getLogger("user")
 
+
 def welcome():
     user_logger.info(
         " ____        ____\n|  _ \ _   _|  _ \ _ __ ___   ___ __ _ _ __ \n| |_) | | | | |_) | '__/ _ \ / __/ _` | '__|\n|  __/| |_| |  __/| | | (_) | (_| (_| | |   \n|_|    \__, |_|   |_|  \___/ \___\__,_|_|\n       |___/"

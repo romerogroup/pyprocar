@@ -3,26 +3,17 @@ __maintainer__ = "Logan Lang"
 __email__ = "lllang@mix.wvu.edu"
 __date__ = "March 31, 2020"
 
-import copy
 import logging
-import os
 import sys
-from itertools import product
-from typing import List, Tuple
 
-import matplotlib.pyplot as plt
 import numpy as np
 import pyvista as pv
-import yaml
-from matplotlib import cm
-from matplotlib import colors as mpcolors
 
 # from pyprocar.fermisurface3d import fermisurface3D
 from pyprocar.cfg import ConfigFactory, ConfigManager, PlotType
 from pyprocar.core import ElectronicBandStructure
-from pyprocar.io import Parser
 from pyprocar.plotter import BandStructure2DataHandler, BandStructure2DVisualizer
-from pyprocar.utils import ROOT, data_utils, welcome
+from pyprocar.utils import welcome
 from pyprocar.utils.log_utils import set_verbose_level
 
 user_logger = logging.getLogger("user")
@@ -34,7 +25,6 @@ np.set_printoptions(threshold=sys.maxsize)
 
 
 class BandStructure2DHandler:
-
     def __init__(
         self,
         code: str,
@@ -70,7 +60,7 @@ class BandStructure2DHandler:
         """
         set_verbose_level(verbose)
 
-        user_logger.info(f"If you want more detailed logs, set verbose to 2 or more")
+        user_logger.info("If you want more detailed logs, set verbose to 2 or more")
         user_logger.info("_" * 100)
 
         welcome()
@@ -98,16 +88,14 @@ class BandStructure2DHandler:
 
         codes_with_scf_fermi = ["qe", "elk"]
         if code in codes_with_scf_fermi and fermi is None:
-            logger.info(
-                f"No fermi given, using the found fermi energy: {self.ebs.fermi}"
-            )
+            logger.info(f"No fermi given, using the found fermi energy: {self.ebs.fermi}")
 
             fermi = self.ebs.fermi
 
         if fermi is not None:
             logger.info(f"Shifting Fermi energy to zero: {fermi}")
 
-            self.ebs.shift_bands(-1*fermi, inplace=True)
+            self.ebs.shift_bands(-1 * fermi, inplace=True)
             self.ebs.shift_bands(fermi_shift, inplace=True)
             self.fermi_level = fermi_shift
             self.energy_label = r"E - E$_F$ (eV)"
@@ -129,9 +117,7 @@ class BandStructure2DHandler:
         spins=None,
         spin_texture=False,
     ):
-        self.data_handler.process_data(
-            mode, bands, atoms, orbitals, spins, spin_texture
-        )
+        self.data_handler.process_data(mode, bands, atoms, orbitals, spins, spin_texture)
 
     def plot_band_structure(
         self,
@@ -224,9 +210,7 @@ class BandStructure2DHandler:
             spins=spins,
             spin_texture=spin_texture,
         )
-        band_structure_surface = self.data_handler.get_surface_data(
-            property_name=property_name
-        )
+        band_structure_surface = self.data_handler.get_surface_data(property_name=property_name)
         visualizer = BandStructure2DVisualizer(self.data_handler, config=config)
         visualizer.plotter.off_screen = render_offscreen
 
@@ -241,9 +225,7 @@ class BandStructure2DHandler:
             visualizer.add_brillouin_zone(band_structure_surface)
 
         if config.clip_brillouin_zone:
-            band_structure_surface = visualizer.clip_brillouin_zone(
-                band_structure_surface
-            )
+            band_structure_surface = visualizer.clip_brillouin_zone(band_structure_surface)
 
         if (
             visualizer.data_handler.scalars_name == "spin_magnitude"

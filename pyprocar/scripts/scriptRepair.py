@@ -3,7 +3,7 @@ from pyprocar.utils.utilsprocar import UtilsProcar
 
 
 # calls ProcarRepair
-def repair(infile:str, outfile:str):
+def repair(infile: str, outfile: str):
     """This module calls ProcarRepair to repair the PROCAR file.
 
     Parameters

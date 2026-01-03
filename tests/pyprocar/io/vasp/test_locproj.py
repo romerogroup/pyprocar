@@ -108,7 +108,6 @@ orbital     1     2     2      -34.3663568191        1.0000000000
 """
 
 
-
 @pytest.fixture
 def locproj_filepath(tmp_path: Path) -> Path:
     """Create a temporary LOCPROJ file for testing."""
@@ -131,13 +130,13 @@ class TestLocproj:
     def test_locproj_frac_coords(self, locproj_filepath: Path) -> None:
         """Test that fractional coordinates are correctly parsed."""
         locproj = vasp.Locproj(locproj_filepath)
-        
+
         assert locproj.frac_coords.shape == (16, 3)
         assert locproj.frac_coords.dtype == np.float64
-        
+
         # Check first coordinate (all zeros)
         assert np.allclose(locproj.frac_coords[0], [0.0, 0.0, 0.0])
-        
+
         # Check 9th coordinate (second atom)
         assert np.allclose(locproj.frac_coords[8], [-0.5, -0.5, -0.5])
 
@@ -148,7 +147,7 @@ class TestLocproj:
         # From LOCPROJ_STRING, we have 8 orbitals per atom × 2 atoms
         # py, pz, px, dxy, dyz, dz2, dxz, dx2-y2 (repeated twice)
         expected_orbitals = ["py", "pz", "px", "dxy", "dyz", "dz2", "dxz", "dx2-y2"]
-        
+
         assert len(locproj.angular_types) == 16
         assert locproj.angular_types[:8] == expected_orbitals
         assert locproj.angular_types[8:16] == expected_orbitals
@@ -156,9 +155,9 @@ class TestLocproj:
     def test_locproj_radial_specs(self, locproj_filepath: Path) -> None:
         """Test that radial specifications are correctly parsed."""
         locproj = vasp.Locproj(locproj_filepath)
-        
+
         assert len(locproj.radial_specs) == 16
-        
+
         # All should be Hydrogen-like in this test case
         for spec in locproj.radial_specs:
             assert spec["type"] == "Hydrogen-like"
@@ -167,7 +166,7 @@ class TestLocproj:
     def test_locproj_projections_shape(self, locproj_filepath: Path) -> None:
         """Test that projections array has correct shape and dtype."""
         locproj = vasp.Locproj(locproj_filepath)
-        
+
         assert locproj.projections.shape == (2, 2, 1, 16)
         assert locproj.projections.dtype in [np.complex128, np.complex64]
         assert np.iscomplexobj(locproj.projections)
@@ -175,7 +174,7 @@ class TestLocproj:
     def test_locproj_projections_values(self, locproj_filepath: Path) -> None:
         """Test that projections contain expected values."""
         locproj = vasp.Locproj(locproj_filepath)
-        
+
         # Check first projection value for k=1, band=1, spin=1, proj=1
         # From LOCPROJ_STRING: "1       -0.0328454260       -0.0085019871"
         expected_val = complex(-0.0328454260, -0.0085019871)
@@ -185,7 +184,7 @@ class TestLocproj:
     def test_locproj_from_str(self) -> None:
         """Test parsing from string."""
         locproj = vasp.Locproj.from_str(LOCPROJ_STRING)
-        
+
         assert locproj.n_spins == 1
         assert locproj.n_k == 2
         assert locproj.n_bands == 2
@@ -204,7 +203,7 @@ class TestLocproj:
         assert "angular_types" in data
         assert "radial_specs" in data
         assert "projections" in data
-        
+
         assert isinstance(data["frac_coords"], np.ndarray)
         assert isinstance(data["angular_types"], list)
         assert isinstance(data["radial_specs"], list)
@@ -213,29 +212,29 @@ class TestLocproj:
     def test_locproj_real_file(self):
         """Test parsing a real LOCPROJ file from test data."""
         locproj_path = DATA_DIR / "examples" / "other" / "FULL3d" / "LOCPROJ"
-        
+
         if not locproj_path.exists():
             pytest.skip(f"Real LOCPROJ test file not found at {locproj_path}")
-        
+
         locproj = vasp.Locproj(locproj_path)
-        
+
         # Verify that data was parsed
         assert locproj.n_proj > 0
         assert locproj.n_k > 0
         assert locproj.n_bands > 0
         assert locproj.n_spins > 0
-        
+
         # Verify array shapes
         assert locproj.frac_coords.shape[0] == locproj.n_proj
         assert len(locproj.angular_types) == locproj.n_proj
         assert len(locproj.radial_specs) == locproj.n_proj
         assert locproj.projections.shape == (
-            locproj.n_k, 
-            locproj.n_bands, 
-            locproj.n_spins, 
-            locproj.n_proj
+            locproj.n_k,
+            locproj.n_bands,
+            locproj.n_spins,
+            locproj.n_proj,
         )
-        
+
         # Verify data types
         assert locproj.projections.dtype in [np.complex128, np.complex64]
         assert np.iscomplexobj(locproj.projections)

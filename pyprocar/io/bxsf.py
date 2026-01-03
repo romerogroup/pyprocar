@@ -5,7 +5,6 @@ __date__ = "March 31, 2020"
 
 import re
 from pathlib import Path
-from typing import List, Union
 
 import numpy as np
 
@@ -26,15 +25,15 @@ class BxsfParser(BaseParser):
 
     """
 
-    def __init__(self, dirpath: Union[str, Path], filepaths: Union[List[Path], Path] = Path("in.bxsf")):
+    def __init__(self, dirpath: str | Path, filepaths: list[Path] | Path = Path("in.bxsf")):
         super().__init__(dirpath)
-        
+
         if isinstance(filepaths, Path) or isinstance(filepaths, str):
-            self.filepaths=Path(filepaths)
+            self.filepaths = Path(filepaths)
         elif isinstance(filepaths, list):
             for filepath in filepaths:
-                filepath=Path(filepath)
-                filepath=self.dirpath / filepath.name
+                filepath = Path(filepath)
+                filepath = self.dirpath / filepath.name
                 self.filepaths.append(filepath)
         else:
             raise ValueError(f"Invalid filepaths type: {type(filepaths)}")
@@ -54,11 +53,11 @@ class BxsfParser(BaseParser):
         self.bands = None
 
         self.parse_bxsf(filepaths=filepaths)
-        
-        nx=np.unique(self.kpoints[:,0])
-        ny=np.unique(self.kpoints[:,1])
-        nz=np.unique(self.kpoints[:,2])
-        self._kgrid=(nx,ny,nz)
+
+        nx = np.unique(self.kpoints[:, 0])
+        ny = np.unique(self.kpoints[:, 1])
+        nz = np.unique(self.kpoints[:, 2])
+        self._kgrid = (nx, ny, nz)
 
         self._ebs = ElectronicBandStructure.from_data(
             kpoints=self.kpoints,
@@ -73,24 +72,24 @@ class BxsfParser(BaseParser):
             structure=None,
         )
         return None
-    
+
     @property
     def ebs(self):
         return self._ebs
-    
+
     @property
     def kpath(self):
         return None
-    
+
     @property
     def structure(self):
         return None
-    
+
     @property
     def dos(self):
         return None
 
-    def parse_bxsf(self, filepaths: Union[list[Path], Path]):
+    def parse_bxsf(self, filepaths: list[Path] | Path):
         """A Helper method to parse bxsf files
 
         Parameters
@@ -102,14 +101,12 @@ class BxsfParser(BaseParser):
         band_labels = []
         # If 2 bxsf files search for total number of bands in both files
         for ispin, filepath in enumerate(filepaths):
-            with open(filepath, "r") as f:
+            with open(filepath) as f:
                 data = f.read()
             band_labels_spin = re.findall("BAND\:\s*(.*)", data)
 
             band_labels_spin = [int(band_label) for band_label in band_labels_spin]
-            raw_nkfs = re.findall("BEGIN\_BLOCK\_BANDGRID\_3D\n.*\n.*\n.*\n(.*)", data)[
-                0
-            ]
+            raw_nkfs = re.findall("BEGIN\_BLOCK\_BANDGRID\_3D\n.*\n.*\n.*\n(.*)", data)[0]
             self.nkfs_dim = np.array([int(x) for x in raw_nkfs.split()])
             self.nkfs = np.product(self.nkfs_dim)
 
@@ -126,14 +123,14 @@ class BxsfParser(BaseParser):
 
         # populates bands array and kpoints
         for ispin, filepath in enumerate(filepaths):
-            with open(filepath, "r") as f:
+            with open(filepath) as f:
                 data = f.read()
 
             self.e_fermi = float(re.findall("Fermi\sEnergy:\s*([\d.]*)", data)[0])
 
-            self.origin = re.findall(
-                "BEGIN\_BLOCK\_BANDGRID\_3D\n.*\n.*\n.*\n.*\n(.*)", data
-            )[0].split()
+            self.origin = re.findall("BEGIN\_BLOCK\_BANDGRID\_3D\n.*\n.*\n.*\n.*\n(.*)", data)[
+                0
+            ].split()
             self.origin = np.array([float(x) for x in self.origin])
 
             self.reciprocal_lattice = re.findall(
@@ -145,9 +142,7 @@ class BxsfParser(BaseParser):
             )
 
             # Bxsf format adds extra redundant +1 dimension-size nkfs is including this dimension
-            raw_nkfs = re.findall("BEGIN\_BLOCK\_BANDGRID\_3D\n.*\n.*\n.*\n(.*)", data)[
-                0
-            ]
+            raw_nkfs = re.findall("BEGIN\_BLOCK\_BANDGRID\_3D\n.*\n.*\n.*\n(.*)", data)[0]
             self.nkfs_dim = np.array([int(x) for x in raw_nkfs.split()])
             self.nkfs = np.product(self.nkfs_dim)
 
@@ -157,9 +152,7 @@ class BxsfParser(BaseParser):
             self.band_labels = re.findall("BAND\:\s*(.*)", data)
 
             # Number of bands
-            self.n_bands = int(
-                re.findall("BEGIN\_BLOCK\_BANDGRID\_3D\n.*\n.*\n\s*(\d*)", data)[0]
-            )
+            self.n_bands = int(re.findall("BEGIN\_BLOCK\_BANDGRID\_3D\n.*\n.*\n\s*(\d*)", data)[0])
 
             band_labels = re.findall("BAND\:\s*(.*)", data)
             band_labels = [int(band_label) for band_label in band_labels_spin]
@@ -181,7 +174,6 @@ class BxsfParser(BaseParser):
                 for i in range(self.nkfs_dim[0]):
                     for j in range(self.nkfs_dim[1]):
                         for k in range(self.nkfs_dim[2]):
-
                             self.bands[i_kpoint, iband, ispin] = band_energies[i_kpoint]
                             self.kpoints[i_kpoint, :] = np.array(
                                 [

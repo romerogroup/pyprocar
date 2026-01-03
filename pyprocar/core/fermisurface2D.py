@@ -5,14 +5,9 @@ __date__ = "December 01, 2020"
 
 import logging
 import os
-import re
-import sys
-from typing import List
 
-import matplotlib.colors as colors
 import matplotlib.pyplot as plt
 import numpy as np
-import yaml
 from matplotlib import cm
 from matplotlib import colors as mpcolors
 from matplotlib.collections import LineCollection
@@ -68,11 +63,10 @@ class FermiSurface2D:
         kpoints,
         bands,
         spd,
-        band_indices: List[List] = None,
-        band_colors: List[List] = None,
+        band_indices: list[list] = None,
+        band_colors: list[list] = None,
         **kwargs,
     ):
-
         # Since some time ago Kpoints are in cartesian coords (ready to use)
         self.kpoints = kpoints
         self.bands = bands
@@ -183,9 +177,7 @@ class FermiSurface2D:
         xmax, xmin = x.max(), x.min()
         ymax, ymin = y.max(), y.min()
         logger.debug("xlim = " + str([xmin, xmax]) + "  ylim = " + str([ymin, ymax]))
-        xnew, ynew = np.mgrid[
-            xmin : xmax : interpolation * 1j, ymin : ymax : interpolation * 1j
-        ]
+        xnew, ynew = np.mgrid[xmin : xmax : interpolation * 1j, ymin : ymax : interpolation * 1j]
 
         unique_x = xnew[:, 0]
         unique_y = ynew[0, :]
@@ -195,12 +187,8 @@ class FermiSurface2D:
         for i_spin in range(n_spins):
             # transpose so bands axis is first
             if self.band_indices is None:
-                bands = self.bands[
-                    :, self.useful_bands_by_spins[i_spin], i_spin
-                ].transpose()
-                spd = self.spd[
-                    :, self.useful_bands_by_spins[i_spin], i_spin
-                ].transpose()
+                bands = self.bands[:, self.useful_bands_by_spins[i_spin], i_spin].transpose()
+                spd = self.spd[:, self.useful_bands_by_spins[i_spin], i_spin].transpose()
                 band_labels = np.unique(self.useful_bands_by_spins[i_spin])
             else:
                 bands = self.bands[:, self.band_indices[i_spin], i_spin].transpose()
@@ -223,7 +211,6 @@ class FermiSurface2D:
             bnew = []
             logger.debug("Interpolating ...")
             for i_band, band in enumerate(bands):
-
                 bnew.append(griddata((x, y), band, (xnew, ynew), method="cubic"))
             bnew = np.array(bnew)
 
@@ -235,9 +222,7 @@ class FermiSurface2D:
             else:
                 factor = 0
             solid_color_surface = np.arange(n_bands) / n_bands + factor
-            band_colors = np.array(
-                [cmap(norm(x)) for x in solid_color_surface[:]]
-            ).reshape(-1, 4)
+            band_colors = np.array([cmap(norm(x)) for x in solid_color_surface[:]]).reshape(-1, 4)
             plots = []
 
             for i_band, band_energies in enumerate(bnew):
@@ -248,12 +233,8 @@ class FermiSurface2D:
                     # We need to interpolate the values to the original kmesh
                     x_vals = contour[:, 0]
                     y_vals = contour[:, 1]
-                    x_interp = np.interp(
-                        x_vals, np.arange(0, unique_x.shape[0]), unique_x
-                    )
-                    y_interp = np.interp(
-                        y_vals, np.arange(0, unique_y.shape[0]), unique_y
-                    )
+                    x_interp = np.interp(x_vals, np.arange(0, unique_x.shape[0]), unique_x)
+                    y_interp = np.interp(y_vals, np.arange(0, unique_y.shape[0]), unique_y)
                     points = np.array([[x_interp, y_interp]])
                     points = np.moveaxis(points, -1, 0)
 
@@ -279,9 +260,7 @@ class FermiSurface2D:
                                 label = f"Band {band_labels[i_band]}"
                             lc.set_label(label)
                     if mode == "parametric":
-                        c = griddata(
-                            (x, y), spd[i_band, :], (x_interp, y_interp), method="cubic"
-                        )
+                        c = griddata((x, y), spd[i_band, :], (x_interp, y_interp), method="cubic")
                         lc = LineCollection(
                             segments,
                             cmap=plt.get_cmap(self.config["cmap"]["value"]),
@@ -357,9 +336,7 @@ class FermiSurface2D:
 
         logger.debug("xlim = " + str([xmin, xmax]) + "  ylim = " + str([ymin, ymax]))
 
-        xnew, ynew = np.mgrid[
-            xmin : xmax : interpolation * 1j, ymin : ymax : interpolation * 1j
-        ]
+        xnew, ynew = np.mgrid[xmin : xmax : interpolation * 1j, ymin : ymax : interpolation * 1j]
 
         # interpolation
         bnew = []
@@ -483,7 +460,6 @@ class FermiSurface2D:
                             color=c,
                         )
                     else:
-
                         plt.quiver(
                             points[::arrow_density, 0],  # Arrow position x-component
                             points[::arrow_density, 1],  # Arrow position y-component

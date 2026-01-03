@@ -1,6 +1,6 @@
 from dataclasses import asdict, dataclass, field
-from enum import Enum, auto
-from typing import Any, Dict, List, Optional, Tuple
+from enum import Enum
+from typing import Any
 
 from pyprocar.cfg.base import BaseConfig, PlotType
 
@@ -148,10 +148,10 @@ class DensityOfStatesConfig(BaseConfig):
     >>> custom_config = DensityOfStatesConfig(colors=['red', 'blue'], fermi_color='black', fermi_linestyle='dotted')
     """
 
-    modes: List[str] = field(default_factory=lambda: [mode.value for mode in DOSMode])
+    modes: list[str] = field(default_factory=lambda: [mode.value for mode in DOSMode])
     # Basic Plot Settings
     cmap: str = "jet"
-    colors: List[str] = field(
+    colors: list[str] = field(
         default_factory=lambda: [
             "red",
             "green",
@@ -176,7 +176,7 @@ class DensityOfStatesConfig(BaseConfig):
     fermi_color: str = "black"
     fermi_linestyle: str = "dotted"
     fermi_linewidth: float = 1
-    figure_size: Tuple[int, int] = (9, 6)
+    figure_size: tuple[int, int] = (9, 6)
     font: str = "Arial"
     font_size: int = 16
     grid: bool = False
@@ -186,7 +186,7 @@ class DensityOfStatesConfig(BaseConfig):
     grid_linewidth: float = 1
     grid_which: str = "major"
     draw_baseline: bool = True
-    baseline_params: Dict[str, Any] = field(
+    baseline_params: dict[str, Any] = field(
         default_factory=lambda: {
             "color": "black",
             "alpha": 0.3,
@@ -196,38 +196,36 @@ class DensityOfStatesConfig(BaseConfig):
     )
 
     legend: bool = True
-    linestyle: List[str] = field(default_factory=lambda: ["solid", "dashed"])
-    linewidth: List[float] = field(default_factory=lambda: [1, 1])
-    marker: List[str] = field(default_factory=lambda: ["o", "v", "^", "D"])
-    markersize: List[float] = field(default_factory=lambda: [0.2, 0.2])
-    opacity: List[float] = field(default_factory=lambda: [1.0, 1.0])
+    linestyle: list[str] = field(default_factory=lambda: ["solid", "dashed"])
+    linewidth: list[float] = field(default_factory=lambda: [1, 1])
+    marker: list[str] = field(default_factory=lambda: ["o", "v", "^", "D"])
+    markersize: list[float] = field(default_factory=lambda: [0.2, 0.2])
+    opacity: list[float] = field(default_factory=lambda: [1.0, 1.0])
     plot_bar: bool = True
     plot_color_bar: bool = True
     plot_total: bool = True
-    savefig: Optional[str] = None
-    spin_colors: List[str] = field(default_factory=lambda: ["black", "red"])
-    spin_labels: List[str] = field(
-        default_factory=lambda: [r"$\uparrow$", r"$\downarrow$"]
-    )
-    title: Optional[str] = None
-    title_params: Dict[str, Any] = field(default_factory=lambda: {})
+    savefig: str | None = None
+    spin_colors: list[str] = field(default_factory=lambda: ["black", "red"])
+    spin_labels: list[str] = field(default_factory=lambda: [r"$\uparrow$", r"$\downarrow$"])
+    title: str | None = None
+    title_params: dict[str, Any] = field(default_factory=lambda: {})
     verbose: bool = True
     weighted_color: bool = True
     weighted_width: bool = False
-    clim: Optional[Tuple[float, float]] = None
+    clim: tuple[float, float] | None = None
     stack_y_label: str = "DOS"
     x_label: str = ""
     y_label: str = ""
     dpi: int = 300
 
-    x_label_params: Dict[str, Any] = field(default_factory=lambda: {})
-    y_label_params: Dict[str, Any] = field(default_factory=lambda: {})
-    legend_params: Dict[str, Any] = field(default_factory=lambda: {})
+    x_label_params: dict[str, Any] = field(default_factory=lambda: {})
+    y_label_params: dict[str, Any] = field(default_factory=lambda: {})
+    legend_params: dict[str, Any] = field(default_factory=lambda: {})
 
-    major_x_tick_params: Dict[str, Any] = field(default_factory=lambda: {})
-    minor_x_tick_params: Dict[str, Any] = field(default_factory=lambda: {})
-    major_y_tick_params: Dict[str, Any] = field(default_factory=lambda: {})
-    minor_y_tick_params: Dict[str, Any] = field(default_factory=lambda: {})
+    major_x_tick_params: dict[str, Any] = field(default_factory=lambda: {})
+    minor_x_tick_params: dict[str, Any] = field(default_factory=lambda: {})
+    major_y_tick_params: dict[str, Any] = field(default_factory=lambda: {})
+    minor_y_tick_params: dict[str, Any] = field(default_factory=lambda: {})
 
     def __post_init__(self):
         """This method is immediately called after the object is initialized.

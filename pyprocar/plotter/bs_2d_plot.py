@@ -1,25 +1,9 @@
-import copy
 import logging
 import os
 from functools import partial
-from typing import List, Tuple, Union
 
 import numpy as np
 import pyvista as pv
-from matplotlib import cm
-from matplotlib import colors as mpcolors
-
-from pyprocar.core import BandStructure2D
-from pyprocar.plotter.ebs_utils import (
-    find_plane_limits,
-    get_orthonormal_basis,
-    get_transformation_matrix,
-    get_uv_grid,
-    get_uv_grid_kpoints,
-    get_uv_grid_points,
-    get_uv_transformation_matrix,
-    transform_points_to_uv,
-)
 
 logger = logging.getLogger(__name__)
 
@@ -44,30 +28,28 @@ def find_nearest(array, value):
 def normalize_to_range(scalars, clim=(0, 1)):
     if clim is None:
         clim = (0, 1)
-    return (scalars - scalars.min()) / (scalars.max() - scalars.min()) * (
-        clim[1] - clim[0]
-    ) + clim[0]
+    return (scalars - scalars.min()) / (scalars.max() - scalars.min()) * (clim[1] - clim[0]) + clim[
+        0
+    ]
 
 
 def get_uv_bands_grid(
-    grid_interpolation:tuple[int, int],
-    u_limits:tuple[float, float],
-    v_limits:tuple[float, float],
-    ):
+    grid_interpolation: tuple[int, int],
+    u_limits: tuple[float, float],
+    v_limits: tuple[float, float],
+):
     grid_u, grid_v = np.mgrid[
         u_limits[0] : u_limits[1] : complex(0, grid_interpolation[0]),
         v_limits[0] : v_limits[1] : complex(0, grid_interpolation[1]),
     ]
     return grid_u, grid_v
 
-class BS2DPlotter(pv.Plotter):
 
-    def __init__(self, 
-                 bandstructure2d,
-                 **kwargs):
+class BS2DPlotter(pv.Plotter):
+    def __init__(self, bandstructure2d, **kwargs):
         super().__init__(**kwargs)
         self.bs2d = bandstructure2d
-        
+
     def add_brillouin_zone(
         self,
         brillouin_zone: pv.PolyData = None,
@@ -96,7 +78,7 @@ class BS2DPlotter(pv.Plotter):
         add_mesh_args: dict = None,
         **kwargs,
     ):
-        logger.info(f"____Adding Surface to Plotter____")
+        logger.info("____Adding Surface to Plotter____")
 
         if add_texture_args is None:
             add_texture_args = {}
@@ -109,30 +91,27 @@ class BS2DPlotter(pv.Plotter):
             active_scalar_name = surface.active_scalars_name
             if "norm" in active_scalar_name:
                 active_scalar_name = active_scalar_name.replace("-norm", "")
-            add_mesh_args["show_scalar_bar"] = add_mesh_args.get(
-                "show_scalar_bar", True
-            )
+            add_mesh_args["show_scalar_bar"] = add_mesh_args.get("show_scalar_bar", True)
             add_mesh_args["scalar_bar_args"] = add_mesh_args.get("scalar_bar_args", {})
             add_mesh_args["scalar_bar_args"]["title"] = add_mesh_args.get(
                 "scalar_bar_args", {}
             ).get("title", active_scalar_name)
 
         add_mesh_args["cmap"] = add_mesh_args.get("cmap", "plasma")
-        add_mesh_args["clim"] = add_mesh_args.get("clim", None)
+        add_mesh_args["clim"] = add_mesh_args.get("clim")
         add_mesh_args["name"] = add_mesh_args.get("name", "surface")
         add_mesh_args.update(kwargs)
 
-        clim = add_mesh_args.get("clim", None)
+        clim = add_mesh_args.get("clim")
         cmap = add_mesh_args.get("cmap", "plasma")
 
         if normalize:
             scalars = normalize_to_range(surface.active_scalars, clim=clim)
             add_mesh_args["scalars"] = scalars
-        add_mesh_args["scalars"] = add_mesh_args.get("scalars", None)
-        
+        add_mesh_args["scalars"] = add_mesh_args.get("scalars")
+
         if clip_surface:
             surface = self.clip_surface(surface, self.brillouin_zone)
-        
 
         self.add_mesh(surface, **add_mesh_args)
 
@@ -144,25 +123,22 @@ class BS2DPlotter(pv.Plotter):
             self.add_texture(surface, **add_texture_args)
 
     def clip_surface(self, surface: pv.PolyData, brillouin_zone: pv.PolyData):
-        
         for normal, center in zip(brillouin_zone.face_normals, brillouin_zone.centers):
             surface = surface.clip(origin=center, normal=normal, inplace=False)
             if surface.points.shape[0] == 0:
                 break
-            
-        return surface
 
+        return surface
 
     def add_texture(
         self,
         surface: pv.PolyData,
-        vectors: Union[str, bool] = True,
+        vectors: str | bool = True,
         factor: float = 1.0,
         add_mesh_args: dict = None,
         glyph_args: dict = None,
         **kwargs,
     ):
-
         active_vectors = surface.active_vectors
         if active_vectors is None:
             return None
@@ -174,8 +150,8 @@ class BS2DPlotter(pv.Plotter):
         add_mesh_args["show_scalar_bar"] = add_mesh_args.get("show_scalar_bar", False)
         add_mesh_args["scalar_bar_args"] = add_mesh_args.get("scalar_bar_args", {})
         add_mesh_args["cmap"] = add_mesh_args.get("cmap", "plasma")
-        add_mesh_args["clim"] = add_mesh_args.get("clim", None)
-        add_mesh_args["color"] = add_mesh_args.get("color", None)
+        add_mesh_args["clim"] = add_mesh_args.get("clim")
+        add_mesh_args["color"] = add_mesh_args.get("color")
         add_mesh_args.update(kwargs)
 
         if glyph_args is None:
@@ -189,7 +165,7 @@ class BS2DPlotter(pv.Plotter):
         factor = vector_scale_factor * BZ_SCALE_FACTOR * factor
 
         glyph_args["factor"] = factor
-        glyph_args["indices"] = glyph_args.get("indices", None)
+        glyph_args["indices"] = glyph_args.get("indices")
 
         arrows = surface.glyph(**glyph_args)
         self.add_mesh(arrows, **add_mesh_args)
@@ -251,9 +227,7 @@ class BS2DPlotter(pv.Plotter):
             add_surface_args["add_active_vectors"] = add_surface_args.get(
                 "add_active_vectors", True
             )
-            add_surface_args["add_texture_args"] = add_surface_args.get(
-                "add_texture_args", {}
-            )
+            add_surface_args["add_texture_args"] = add_surface_args.get("add_texture_args", {})
             add_surface_args["add_texture_args"]["name"] = "vectors"
             slc.set_active_vectors(active_vector_name)
 
@@ -287,9 +261,7 @@ class BS2DPlotter(pv.Plotter):
         if add_plane_widget_args is None:
             add_plane_widget_args = {}
 
-        add_surface_args["add_texture_args"] = add_surface_args.get(
-            "add_texture_args", {}
-        )
+        add_surface_args["add_texture_args"] = add_surface_args.get("add_texture_args", {})
         add_surface_args["add_texture_args"]["name"] = "vectors"
 
         add_surface_args["add_active_vectors"] = add_surface_args.get(
@@ -317,9 +289,7 @@ class BS2DPlotter(pv.Plotter):
         # Initialize box widget
 
         self.add_box_widget(
-            callback=partial(
-                self._box_callback, port=0, add_surface_args=add_surface_args
-            ),
+            callback=partial(self._box_callback, port=0, add_surface_args=add_surface_args),
             bounds=surface.bounds,
             use_planes=True,
             interaction_event="end",

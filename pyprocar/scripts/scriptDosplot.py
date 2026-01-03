@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 __author__ = "Pedram Tavadze and Logan Lang"
 __maintainer__ = "Pedram Tavadze and Logan Lang"
 __email__ = "petavazohi@mail.wvu.edu, lllang@mix.wvu.edu"
@@ -6,18 +5,13 @@ __date__ = "March 31, 2020"
 
 import logging
 import os
-from typing import List, Tuple
 
 import matplotlib.pyplot as plt
 import numpy as np
-import yaml
 
 from pyprocar.cfg import ConfigFactory, ConfigManager, PlotType
 from pyprocar.io import Parser
-from pyprocar.plotter import DOSPlotter
-from pyprocar.utils import ROOT, data_utils, welcome
-from pyprocar.utils.info import orbital_names
-from pyprocar.utils.log_utils import set_verbose_level
+from pyprocar.utils import data_utils, welcome
 
 user_logger = logging.getLogger("user")
 logger = logging.getLogger(__name__)
@@ -28,17 +22,17 @@ def dosplot(
     dirname: str = None,
     mode: str = "plain",
     orientation: str = "horizontal",
-    spins: List[int] = None,
-    atoms: List[int] = None,
-    orbitals: List[int] = None,
+    spins: list[int] = None,
+    atoms: list[int] = None,
+    orbitals: list[int] = None,
     items: dict = {},
     normalize_dos_mode: str = None,
     fermi: float = None,
     fermi_shift: float = 0,
-    elimit: List[float] = None,
-    dos_limit: List[float] = None,
+    elimit: list[float] = None,
+    dos_limit: list[float] = None,
     savefig: str = None,
-    labels: List[str] = None,
+    labels: list[str] = None,
     projection_mask=None,
     ax: plt.Axes = None,
     show: bool = True,
@@ -276,7 +270,7 @@ def dosplot(
 
     """
 
-    user_logger.info(f"If you want more detailed logs, set verbose to 2 or more")
+    user_logger.info("If you want more detailed logs, set verbose to 2 or more")
     user_logger.info("_" * 100)
 
     welcome()
@@ -360,9 +354,7 @@ def dosplot(
         elimit = [dos.energies.min(), dos.energies.max()]
 
     # Creating DOSPlot object
-    edos_plot = DOSPlot(
-        dos=dos, structure=structure, ax=ax, orientation=orientation, config=config
-    )
+    edos_plot = DOSPlot(dos=dos, structure=structure, ax=ax, orientation=orientation, config=config)
 
     if atoms is None:
         atoms = list(np.arange(edos_plot.structure.natoms, dtype=int))
@@ -381,7 +373,6 @@ def dosplot(
         values_dict = edos_plot.plot_dos(spins=spins)
 
     elif mode in ["parametric", "parametric_line"]:
-
         if mode == "parametric":
             user_logger.info("Plotting DOS in parametric mode")
             edos_plot.plot_parametric(

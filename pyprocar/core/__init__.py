@@ -40,5 +40,5 @@ __all__ = [
     "Structure",
     "Surface",
     "boolean_add",
-    "PointSet"
+    "PointSet",
 ]

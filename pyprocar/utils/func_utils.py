@@ -1,53 +1,70 @@
 import inspect
-from collections.abc import Sequence, Iterable
+from collections.abc import Callable, Iterable
 from functools import wraps
 from itertools import product
-from typing import Any, Callable, TypeVar, Union, Literal
+from typing import Any, Literal, TypeVar, Union
 
 
 def example_func(a, b, c=10, d=20, *, e=30, f=40, **kwargs):
     pass
 
-        
+
 def get_kwargs(func, defaults=True):
     sig = inspect.signature(func)
     return {
         name: param.default if param.default is not param.empty else None
         for name, param in sig.parameters.items()
-        if param.default is not param.empty or param.kind in (
+        if param.default is not param.empty
+        or param.kind
+        in (
             inspect.Parameter.KEYWORD_ONLY,
             inspect.Parameter.VAR_KEYWORD,
         )
     }
-    
-    
+
+
 def get_args(func, defaults=True):
     sig = inspect.signature(func)
-    return [name for name, param in sig.parameters.items() if param.default is param.empty and name != "kwargs"]
-    
+    return [
+        name
+        for name, param in sig.parameters.items()
+        if param.default is param.empty and name != "kwargs"
+    ]
+
+
 def get_params(func, defaults=True):
     sig = inspect.signature(func)
     return {name: param for name, param in sig.parameters.items()}
-    
-def keep_func_kwargs(kwargs, func, ):
+
+
+def keep_func_kwargs(
+    kwargs,
+    func,
+):
     func_kwargs = get_kwargs(func)
     return {k: v for k, v in kwargs.items() if k in func_kwargs}
-    
+
+
 def keep_func_args(args, func, defaults=True):
     func_args = get_args(func, defaults)
     return [v for v in args if v in func_args]
-    
+
+
 def keep_func_kwargs_and_args(kwargs, func, defaults=True):
     func_kwargs = get_kwargs(func, defaults)
     func_args = get_args(func, defaults)
-    return [v for k, v in kwargs.items() if k in func_args], {k: v for k, v in kwargs.items() if k in func_kwargs}, 
-    
+    return (
+        [v for k, v in kwargs.items() if k in func_args],
+        {k: v for k, v in kwargs.items() if k in func_kwargs},
+    )
+
+
 def keep_func_params(params, func, defaults=True):
     func_params = get_params(func, defaults)
     func_param_keys = set(func_params.keys())
     return {k: v for k, v in params.items() if k in func_param_keys}
-    
-    
+
+
 T = TypeVar("T")
 Mode = Literal["grouped", "explode"]
 
@@ -55,9 +72,10 @@ Mode = Literal["grouped", "explode"]
 
 _SPECIAL_NESTED_KEYS = ("kwargs", "options", "config", "params")
 
-def _flatten_special_kwargs(d: dict[str, Any],
-                            keys: tuple[str, ...] = _SPECIAL_NESTED_KEYS,
-                            deep: bool = True) -> dict[str, Any]:
+
+def _flatten_special_kwargs(
+    d: dict[str, Any], keys: tuple[str, ...] = _SPECIAL_NESTED_KEYS, deep: bool = True
+) -> dict[str, Any]:
     out = dict(d)
     while True:
         expanded = False
@@ -70,6 +88,7 @@ def _flatten_special_kwargs(d: dict[str, Any],
             break
     return out
 
+
 def _is_seq(x: Any) -> bool:
     # treat numpy arrays / lists / tuples as sequences; exclude str/bytes
     try:
@@ -77,6 +96,7 @@ def _is_seq(x: Any) -> bool:
     except Exception:
         Iterable = tuple  # fallback, shouldn't happen
     return isinstance(x, Iterable) and not isinstance(x, (str, bytes))
+
 
 def _check_for_groups(x: Any) -> bool:
     """Sequence of sequences? e.g., [[...],[...]]"""
@@ -89,6 +109,7 @@ def _check_for_groups(x: Any) -> bool:
         return False
     return _is_seq(first)
 
+
 def _as_selection_default(x: Any) -> Any:
     """
     Normalize a single selection. If you need int-> [int] behavior for
@@ -97,16 +118,14 @@ def _as_selection_default(x: Any) -> Any:
     return x
 
 
-def expand_grouped_params_to_dicts(
-    params: dict[str, Any]
-) -> list[dict[str, Any]]:
+def expand_grouped_params_to_dicts(params: dict[str, Any]) -> list[dict[str, Any]]:
     """
     Expand grouped parameters into a list of parameter dictionaries.
-    
+
     Groups are aligned by index, not Cartesian product. If one parameter
     is grouped (list of lists/dicts), others are broadcast to match.
     If multiple parameters are grouped, they must have the same length.
-    
+
     Parameters
     ----------
     params
@@ -114,19 +133,19 @@ def expand_grouped_params_to_dicts(
         Values can be:
         - Single values (int, list, dict, None)
         - Grouped values (list of lists or list of dicts)
-        
+
     Returns
     -------
     list[dict[str, Any]]
         List of parameter dictionaries, one per group index.
         If no grouped params, returns list with single dict.
-        
+
     Examples
     --------
     >>> params = {"atoms": [[0,2], [1]], "orbitals": [0,1,2]}
     >>> expand_grouped_params_to_dicts(params)
     [{"atoms": [0,2], "orbitals": [0,1,2]}, {"atoms": [1], "orbitals": [0,1,2]}]
-    
+
     >>> params = {"atoms": [[0,2], [1]], "orbitals": [[0,1,2], [4,5,6,7,8]]}
     >>> expand_grouped_params_to_dicts(params)
     [{"atoms": [0,2], "orbitals": [0,1,2]}, {"atoms": [1], "orbitals": [4,5,6,7,8]}]
@@ -136,22 +155,20 @@ def expand_grouped_params_to_dicts(
     for key, value in params.items():
         if _check_for_groups(value):
             grouped_params[key] = value
-    
+
     # Determine number of groups
     if not grouped_params:
         # No grouped params, return single dict
         return [params.copy()]
-    
+
     # Validate: all grouped params must have same length
     group_lengths = {key: len(value) for key, value in grouped_params.items()}
     if len(set(group_lengths.values())) > 1:
         lengths_str = ", ".join(f"{k}={v}" for k, v in group_lengths.items())
-        raise ValueError(
-            f"Grouped parameters must have the same length. Found: {lengths_str}"
-        )
-    
+        raise ValueError(f"Grouped parameters must have the same length. Found: {lengths_str}")
+
     n_groups = list(group_lengths.values())[0]
-    
+
     # Build list of parameter dicts
     result = []
     for i in range(n_groups):
@@ -164,8 +181,9 @@ def expand_grouped_params_to_dicts(
                 # Broadcast single value to all groups
                 param_dict[key] = value
         result.append(param_dict)
-    
+
     return result
+
 
 def _to_groups_grouped(x: Any, as_selection: Callable[[Any], Any]) -> list[Any]:
     """
@@ -174,6 +192,7 @@ def _to_groups_grouped(x: Any, as_selection: Callable[[Any], Any]) -> list[Any]:
     if _check_for_groups(x):
         return [as_selection(g) for g in x]
     return [as_selection(x)]
+
 
 def _to_groups_explode(x: Any, as_selection: Callable[[Any], Any]) -> list[Any]:
     """
@@ -189,9 +208,11 @@ def _to_groups_explode(x: Any, as_selection: Callable[[Any], Any]) -> list[Any]:
         return [as_selection(v) for v in x]
     return [as_selection(x)]
 
+
 # --- decorator -------------------------------------------------------------
 
 ParamSpec = Union[str, tuple[str, Mode]]
+
 
 def expand_grouped_params(
     *params: ParamSpec,
@@ -199,7 +220,7 @@ def expand_grouped_params(
     selection_normalizers: dict[str, Callable[[Any], Any]] | None = None,
     use_all: bool = False,
     exclude: Iterable[str] = (),
-) -> Callable[[Callable[..., T]], Callable[..., Union[T, list[T]]]]:
+) -> Callable[[Callable[..., T]], Callable[..., T | list[T]]]:
     """
     Expand specified parameters into a Cartesian product of 'groups'.
 
@@ -236,7 +257,7 @@ def expand_grouped_params(
     selection_normalizers = selection_normalizers or {}
     exclude = set(exclude) | {"self", "cls"}
 
-    def decorator(func: Callable[..., T]) -> Callable[..., Union[T, list[T]]]:
+    def decorator(func: Callable[..., T]) -> Callable[..., T | list[T]]:
         try:
             sig = inspect.signature(func)
         except Exception:
@@ -258,7 +279,7 @@ def expand_grouped_params(
                 specs.append((name, mode))
 
         @wraps(func)
-        def wrapper(*args: Any, **kwargs: Any) -> Union[T, list[T]]:
+        def wrapper(*args: Any, **kwargs: Any) -> T | list[T]:
             # 1) flatten nested kwargs at entry
             kwargs = _flatten_special_kwargs(kwargs)
 
@@ -299,7 +320,9 @@ def expand_grouped_params(
             return results[0] if len(results) == 1 else results
 
         return wrapper
+
     return decorator
+
 
 if __name__ == "__main__":
     print(get_kwargs(example_func))

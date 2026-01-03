@@ -4,7 +4,6 @@ __email__ = "petavazohi@mail.wvu.edu, lllang@mix.wvu.edu"
 __date__ = "March 31, 2020"
 
 import logging
-from typing import List
 
 import numpy as np
 import pyvista as pv
@@ -78,11 +77,11 @@ class Isosurface(Surface):
         V_matrix=None,
         algorithm: str = "lewiner",
         interpolation_factor: int = 1,
-        padding: List[int] = None,
+        padding: list[int] = None,
         transform_matrix: np.ndarray = None,
         boundaries=None,
     ):
-        logger.info(f"____ Initializing Isosurface ____")
+        logger.info("____ Initializing Isosurface ____")
         logger.debug(f"XYZ shape: {np.array(XYZ).shape}")
         logger.debug(f"isovalue: {isovalue}")
         if V is not None:
@@ -228,7 +227,7 @@ class Isosurface(Surface):
             DESCRIPTION. [(mins[0],maxs[0]),(mins[1],maxs[1]),(mins[2],maxs[2])]
 
         """
-        logger.debug(f"____ Getting surface boundaries ____")
+        logger.debug("____ Getting surface boundaries ____")
 
         padding_x = self.padding[0]
         padding_y = self.padding[1]
@@ -240,20 +239,16 @@ class Isosurface(Surface):
             "wrap",
         )
         try:
-            verts, faces, normals, values = measure.marching_cubes(
-                eigen_matrix, self.isovalue
-            )
+            verts, faces, normals, values = measure.marching_cubes(eigen_matrix, self.isovalue)
             for ix in range(3):
                 verts[:, ix] -= verts[:, ix].min()
-                verts[:, ix] -= (
-                    verts[:, ix].max() - verts[:, ix].min()
-                ) / 2  # +self.origin[ix]
+                verts[:, ix] -= (verts[:, ix].max() - verts[:, ix].min()) / 2  # +self.origin[ix]
                 verts[:, ix] *= self.dxyz[ix]
             mins = verts.min(axis=0)
             maxs = verts.max(axis=0)
 
             return [(mins[0], maxs[0]), (mins[1], maxs[1]), (mins[2], maxs[2])]
-        except Exception as e:
+        except Exception:
             # print(e)
             # print("No isosurface for this band")
             return None
@@ -324,12 +319,10 @@ class Isosurface(Surface):
             The faces of the surface
         """
         if transform_matrix is not None:
-            logger.debug(f"____ Applying transform matrix ____")
+            logger.debug("____ Applying transform matrix ____")
             verts = np.dot(verts, transform_matrix)
             column_of_verts_of_triangles = [3 for _ in range(len(faces[:, 0]))]
-            faces = np.insert(
-                arr=faces, obj=0, values=column_of_verts_of_triangles, axis=1
-            )
+            faces = np.insert(arr=faces, obj=0, values=column_of_verts_of_triangles, axis=1)
         return verts, faces
 
     def _apply_boundaries(self, boundaries, verts, faces):
@@ -353,7 +346,7 @@ class Isosurface(Surface):
             The faces of the surface
         """
         if boundaries is not None:
-            logger.debug(f"____ Applying boundaries ____")
+            logger.debug("____ Applying boundaries ____")
             supercell_surface = pv.PolyData(var_inp=verts, faces=faces)
             for normal, center in zip(boundaries.face_normals, boundaries.centers):
                 supercell_surface.clip(origin=center, normal=normal, inplace=True)
@@ -384,11 +377,9 @@ class Isosurface(Surface):
         faces : np.ndarray
             The faces of the surface
         """
-        logger.debug(f"____ Processing isosurface ____")
+        logger.debug("____ Processing isosurface ____")
         if verts is not None and faces is not None:
-            verts, faces = self._apply_transform_matrix(
-                self.transform_matrix, verts, faces
-            )
+            verts, faces = self._apply_transform_matrix(self.transform_matrix, verts, faces)
             verts, faces = self._apply_boundaries(self.boundaries, verts, faces)
 
         return verts, faces
@@ -430,7 +421,7 @@ class Isosurface(Surface):
         bnd = self.surface_boundaries
 
         if interp_factor != 1:
-            logger.debug(f"____ Interpolating isosurface ____")
+            logger.debug("____ Interpolating isosurface ____")
             # Fourier interpolate the mapped function E(x,y,z)
 
             eigen_matrix = fft_interpolate(eigen_matrix, interp_factor)
@@ -440,14 +431,12 @@ class Isosurface(Surface):
             # eigen_matrix = np.roll(eigen_matrix, 4, axis=[0, 1, 2])
 
         try:
-            logger.debug(f"____ Applying marching cubes ____")
+            logger.debug("____ Applying marching cubes ____")
             logger.debug(f"eigen_matrix shape: {eigen_matrix.shape}")
             logger.debug(f"isovalue: {self.isovalue}")
-            verts, faces, normals, values = measure.marching_cubes(
-                eigen_matrix, self.isovalue
-            )
+            verts, faces, normals, values = measure.marching_cubes(eigen_matrix, self.isovalue)
 
-        except Exception as e:
+        except Exception:
             # print(e)
             # print("No isosurface for this band")
             return None, None, None, None
@@ -482,7 +471,7 @@ def map2matrix(XYZ, V):
         The points of the regular grid.
 
     """
-    logger.debug(f"____ Mapping irregular grid to matrix to regular grid ____")
+    logger.debug("____ Mapping irregular grid to matrix to regular grid ____")
     XYZ = XYZ
     V = V
 
@@ -511,11 +500,9 @@ def map2matrix(XYZ, V):
 
             # print(count)
             for iz in range(len(Z)):
-
                 condition3 = XYZ[:, 2] == Z[iz]
                 tot_cond = np.all([condition1, condition2, condition3], axis=0)
                 if len(V[tot_cond]) != 0:
-
                     mapped_func[ix, iy, iz] = V[tot_cond][0]
                     # kpoint_matrix[ikx, iky, ikz] = [
                     #     kx[ikx], ky[iky], kz[ikz]]
@@ -581,9 +568,7 @@ def fft_interpolate(function, interpolation_factor=2):
     new_fft[-nx_half:, :ny_half, :nz_half] = eigen_fft[-nx_half:, :ny_half, :nz_half]
     new_fft[-nx_half:, :ny_half, -nz_half:] = eigen_fft[-nx_half:, :ny_half, -nz_half:]
     new_fft[-nx_half:, -ny_half:, :nz_half] = eigen_fft[-nx_half:, -ny_half:, :nz_half]
-    new_fft[-nx_half:, -ny_half:, -nz_half:] = eigen_fft[
-        -nx_half:, -ny_half:, -nz_half:
-    ]
+    new_fft[-nx_half:, -ny_half:, -nz_half:] = eigen_fft[-nx_half:, -ny_half:, -nz_half:]
 
     # Perform inverse FFT to get the interpolated result
     interpolated = np.real(np.fft.ifftn(new_fft)) * interpolation_factor**3

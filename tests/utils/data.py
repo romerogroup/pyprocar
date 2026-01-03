@@ -1,15 +1,10 @@
-import json
 import logging
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
 
-import numpy as np
-import pytest
-
-from pyprocar import io
 from pyprocar.utils.log_utils import set_verbose_level
-from tests.utils import DATA_DIR, BaseTest
+from tests.utils import DATA_DIR
 
 logger = logging.getLogger(__name__)
 

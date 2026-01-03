@@ -1,18 +1,11 @@
-# -*- coding: utf-8 -*-
-
 from pyprocar.core.atomic_orbital_index import (
-    AZIMUTHAL_ORBITAL_ORDER,
-    CONVENTIONAL_CUBIC_ORBITAL_ORDER,
-    LEGACY_ORBITAL_NAMES as orbital_names,
-    NONCOLINEAR_AZIMUTHAL_ORBITAL_ORDER,
     ORBITAL_INDEX_LABEL_MAP,
     OrbitalIndexer,
 )
 
-
 orbital_index_name_map = ORBITAL_INDEX_LABEL_MAP
 OrbitalOrdering = OrbitalIndexer
-
+orbital_names = OrbitalOrdering().flat_conventional
 
 elements = {
     "H": 1,
@@ -123,4 +116,5 @@ elements = {
     "Sg": 106,
     "Bh": 107,
     "Hs": 108,
-    "Mt": 109}
+    "Mt": 109,
+}

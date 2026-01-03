@@ -1,10 +1,9 @@
-from abc import ABC, abstractmethod
+from abc import ABC
 from pathlib import Path
-from typing import Union
 
 
 class BaseParser(ABC):
-    def __init__(self, dirpath: Union[str, Path]):
+    def __init__(self, dirpath: str | Path):
         self.dirpath = Path(dirpath).resolve()
 
     @property
@@ -14,14 +13,11 @@ class BaseParser(ABC):
     @property
     def dos(self):
         pass
-    
+
     @property
     def structure(self):
         pass
-    
+
     @property
     def kpath(self):
         pass
-
-    
-    

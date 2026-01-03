@@ -1,7 +1,5 @@
 import matplotlib.colors as mcolors
 import matplotlib.pyplot as plt
-import matplotlib as mpl
-from cycler import cycler
 
 # Credits to https://github.com/karthik/wesanderson
 wes_anderson_palettes = {
@@ -56,9 +54,7 @@ wes_anderson_palettes = {
 # Function to set a specific color palette
 def set_palette(palette_name):
     if palette_name in wes_anderson_palettes:
-        plt.rcParams["axes.prop_cycle"] = plt.cycler(
-            color=wes_anderson_palettes[palette_name]
-        )
+        plt.rcParams["axes.prop_cycle"] = plt.cycler(color=wes_anderson_palettes[palette_name])
     else:
         print(f"Palette '{palette_name}' not found.")
 

@@ -27,31 +27,29 @@ class CodeParser(Enum):
     vasp = VaspParser
     elk = ElkParser
     dftbplus = DFTBParser
-    
+
     @classmethod
     def as_list(cls):
         return [code.name for code in cls]
 
 
-def get_parser(code: str, 
-               dirpath: Union[str, Path],
-               custom_parser: BaseParser = None,
-               **kwargs):
+def get_parser(code: str, dirpath: str | Path, custom_parser: BaseParser = None, **kwargs):
     """Handles which DFT parser to use"""
 
     is_lobster_calc = code.split("_")[0] == "lobster"
-    
+
     if code in CodeParser.as_list():
         parser = CodeParser[code].value(dirpath=dirpath, **kwargs)
     elif custom_parser is not None:
         parser = custom_parser(dirpath=dirpath, **kwargs)
     else:
-        msg=f"Invalid code: {code}. Valid codes are: \n"
+        msg = f"Invalid code: {code}. Valid codes are: \n"
         for code in CodeParser.as_list():
             msg += f"    {code}\n"
         raise ValueError(msg)
 
     return parser
+
 
 class Parser(BaseParser):
     """
@@ -60,16 +58,15 @@ class Parser(BaseParser):
     The bands must not be shifted so that the fermi energy 0.0
     """
 
-    def __init__(self, code: str, dirpath: Union[str, Path], **kwargs):
+    def __init__(self, code: str, dirpath: str | Path, **kwargs):
         super().__init__(dirpath=dirpath)
         self.code = code
-        self.parser=get_parser(code, self.dirpath, **kwargs)
+        self.parser = get_parser(code, self.dirpath, **kwargs)
 
-    
     @property
     def version(self):
         return self.parser.version
-    
+
     @property
     def version_tuple(self):
         return self.parser.version_tuple
@@ -77,21 +74,19 @@ class Parser(BaseParser):
     @property
     def ebs(self):
         return self.parser.ebs
-    
+
     @property
     def dos(self):
         return self.parser.dos
-    
+
     @property
     def structure(self):
         return self.parser.structure
-    
+
     @property
     def kpath(self):
         return self.parser.kpath
-    
+
     @property
     def reciprocal_lattice(self):
         return self.parser.reciprocal_lattice
-    
-    

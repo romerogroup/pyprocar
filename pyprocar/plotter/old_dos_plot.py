@@ -5,17 +5,13 @@ __date__ = "March 31, 2020"
 
 import json
 import logging
-import os
-from typing import List
 
 import matplotlib as mpl
 import matplotlib.patches as mpatches
 import matplotlib.pylab as plt
 import numpy as np
 import pandas as pd
-import yaml
 from matplotlib.collections import LineCollection
-from matplotlib.ticker import AutoMinorLocator, FormatStrFormatter, MultipleLocator
 
 from pyprocar.core import DensityOfStates, Structure
 
@@ -53,7 +49,6 @@ class DOSPlot:
         orientation: str = "horizontal",
         config=None,
     ):
-
         self.config = config
 
         self.dos = dos
@@ -79,17 +74,14 @@ class DOSPlot:
 
         return None
 
-    def plot_dos(self, spins: List[int] = None, **kwargs):
+    def plot_dos(self, spins: list[int] = None, **kwargs):
         values_dict = {}
-        spin_projections, spin_channels = self._get_spins_projections_and_channels(
-            spins
-        )
+        spin_projections, spin_channels = self._get_spins_projections_and_channels(spins)
         energies = self.dos.energies
         dos_total = self.dos.total
 
         self._set_plot_limits(spin_channels)
         for ispin, spin_channel in enumerate(spin_channels):
-
             # flip the sign of the total dos if there are 2 spin channels
             dos_total_spin = dos_total[spin_channel, :] * (-1 if ispin > 0 else 1)
             self._plot_total_dos(energies, dos_total_spin, spin_channel)
@@ -100,25 +92,17 @@ class DOSPlot:
         return values_dict
 
     def plot_parametric(
-        self,
-        atoms: List[int] = None,
-        orbitals: List[int] = None,
-        spins: List[int] = None,
-        **kwargs
+        self, atoms: list[int] = None, orbitals: list[int] = None, spins: list[int] = None, **kwargs
     ):
         values_dict = {}
-        spin_projections, spin_channels = self._get_spins_projections_and_channels(
-            spins
-        )
+        spin_projections, spin_channels = self._get_spins_projections_and_channels(spins)
         dos_total, dos_total_projected, dos_projected = self._calculate_parametric_dos(
             atoms, orbitals, spin_projections
         )
 
         orbital_string = ":".join([str(orbital) for orbital in orbitals])
         atom_string = ":".join([str(atom) for atom in atoms])
-        spin_string = ":".join(
-            [str(spin_projection) for spin_projection in spin_projections]
-        )
+        spin_string = ":".join([str(spin_projection) for spin_projection in spin_projections])
 
         self._setup_colorbar(dos_projected, dos_total_projected)
         self._set_plot_limits(spin_channels)
@@ -126,14 +110,16 @@ class DOSPlot:
         for ispin, spin_channel in enumerate(spin_channels):
             energies, dos_spin_total, normalized_dos_spin_projected = (
                 self._prepare_parametric_spin_data(
-                    spin_channel, ispin, dos_total, dos_projected, dos_total_projected,
-                    scale=kwargs.get("scale", False)
+                    spin_channel,
+                    ispin,
+                    dos_total,
+                    dos_projected,
+                    dos_total_projected,
+                    scale=kwargs.get("scale", False),
                 )
             )
 
-            self._plot_spin_data_parametric(
-                energies, dos_spin_total, normalized_dos_spin_projected
-            )
+            self._plot_spin_data_parametric(energies, dos_spin_total, normalized_dos_spin_projected)
 
             if self.config.plot_total:
                 self._plot_total_dos(energies, dos_spin_total, spin_channel)
@@ -152,35 +138,30 @@ class DOSPlot:
         return values_dict
 
     def plot_parametric_line(
-        self,
-        atoms: List[int] = None,
-        orbitals: List[int] = None,
-        spins: List[int] = None,
-        **kwargs
+        self, atoms: list[int] = None, orbitals: list[int] = None, spins: list[int] = None, **kwargs
     ):
         values_dict = {}
-        spin_projections, spin_channels = self._get_spins_projections_and_channels(
-            spins
-        )
+        spin_projections, spin_channels = self._get_spins_projections_and_channels(spins)
         dos_total, dos_total_projected, dos_projected = self._calculate_parametric_dos(
             atoms, orbitals, spin_projections
         )
 
         orbital_string = ":".join([str(orbital) for orbital in orbitals])
         atom_string = ":".join([str(atom) for atom in atoms])
-        spin_string = ":".join(
-            [str(spin_projection) for spin_projection in spin_projections]
-        )
+        spin_string = ":".join([str(spin_projection) for spin_projection in spin_projections])
 
         self._setup_colorbar(dos_projected, dos_total_projected)
         self._set_plot_limits(spin_channels)
 
         for ispin, spin_channel in enumerate(spin_channels):
-
             energies, dos_spin_total, normalized_dos_spin_projected = (
                 self._prepare_parametric_spin_data(
-                    spin_channel, ispin, dos_total, dos_projected, dos_total_projected,
-                    scale=kwargs.get("scale", False)
+                    spin_channel,
+                    ispin,
+                    dos_total,
+                    dos_projected,
+                    dos_total_projected,
+                    scale=kwargs.get("scale", False),
                 )
             )
 
@@ -203,15 +184,13 @@ class DOSPlot:
 
     def plot_stack_species(
         self,
-        orbitals: List[int] = None,
-        spins: List[int] = None,
+        orbitals: list[int] = None,
+        spins: list[int] = None,
         overlay_mode: bool = False,
-        **kwargs
+        **kwargs,
     ):
         values_dict = {}
-        spin_projections, spin_channels = self._get_spins_projections_and_channels(
-            spins
-        )
+        spin_projections, spin_channels = self._get_spins_projections_and_channels(spins)
 
         orbital_label = self._get_stack_species_labels(orbitals)
 
@@ -224,18 +203,16 @@ class DOSPlot:
 
             orbital_string = ":".join([str(orbital) for orbital in orbitals])
             atom_string = ":".join([str(atom) for atom in atoms])
-            spin_string = ":".join(
-                [str(spin_projection) for spin_projection in spin_projections]
+            spin_string = ":".join([str(spin_projection) for spin_projection in spin_projections])
+
+            dos_total, dos_total_projected, dos_projected = self._calculate_parametric_dos(
+                atoms, orbitals, spin_projections
             )
 
-            dos_total, dos_total_projected, dos_projected = (
-                self._calculate_parametric_dos(
-                    atoms, orbitals, spin_projections
-                )
+            logger.debug(
+                f"dos_projected for specie {self.structure.species[specie]}: {np.mean(dos_projected)}"
             )
-            
-            logger.debug(f"dos_projected for specie {self.structure.species[specie]}: {np.mean(dos_projected)}")
-            
+
             if np.mean(dos_projected) == 0:
                 continue
 
@@ -286,37 +263,26 @@ class DOSPlot:
         return values_dict
 
     def plot_stack_orbitals(
-        self,
-        atoms: List[int] = None,
-        spins: List[int] = None,
-        overlay_mode: bool = False,
-        **kwargs
+        self, atoms: list[int] = None, spins: list[int] = None, overlay_mode: bool = False, **kwargs
     ):
         values_dict = {}
-        spin_projections, spin_channels = self._get_spins_projections_and_channels(
-            spins
-        )
+        spin_projections, spin_channels = self._get_spins_projections_and_channels(spins)
 
         atom_names, orb_names, orb_l = self._get_stack_orbitals_labels(atoms)
 
         self._set_plot_limits(spin_channels)
         bottom_value = 0
         for iorb in range(len(orb_l)):
-
             orbital_string = ":".join([str(orbital) for orbital in orb_l[iorb]])
             atom_string = ":".join([str(atom) for atom in atoms])
-            spin_string = ":".join(
-                [str(spin_projection) for spin_projection in spin_projections]
+            spin_string = ":".join([str(spin_projection) for spin_projection in spin_projections])
+
+            dos_total, dos_total_projected, dos_projected = self._calculate_parametric_dos(
+                atoms=atoms,
+                orbitals=orb_l[iorb],
+                spin_projections=spin_projections,
             )
 
-            dos_total, dos_total_projected, dos_projected = (
-                self._calculate_parametric_dos(
-                    atoms=atoms,
-                    orbitals=orb_l[iorb],
-                    spin_projections=spin_projections,
-                )
-            )
-            
             # Skips plotting if the projected dos is zero. This is a workaround for a bug in quantum espresso stack orbitals mode
             if np.mean(dos_projected) == 0:
                 continue
@@ -367,11 +333,7 @@ class DOSPlot:
         return values_dict
 
     def plot_stack(
-        self,
-        items: dict = None,
-        spins: List[int] = None,
-        overlay_mode: bool = False,
-        **kwargs
+        self, items: dict = None, spins: list[int] = None, overlay_mode: bool = False, **kwargs
     ):
         values_dict = {}
         if len(items) is None:
@@ -381,9 +343,7 @@ class DOSPlot:
                 will plot the stacked plots of p orbitals of Sr and
                 d orbitals of Oxygen."""
             )
-        spin_projections, spin_channels = self._get_spins_projections_and_channels(
-            spins
-        )
+        spin_projections, spin_channels = self._get_spins_projections_and_channels(spins)
         self._set_plot_limits(spin_channels)
         # Defining color per specie
         counter = 0
@@ -401,20 +361,16 @@ class DOSPlot:
 
             orbital_string = ":".join([str(orbital) for orbital in orbitals])
             atom_string = ":".join([str(atom) for atom in atoms])
-            spin_string = ":".join(
-                [str(spin_projection) for spin_projection in spin_projections]
+            spin_string = ":".join([str(spin_projection) for spin_projection in spin_projections])
+
+            dos_total, dos_total_projected, dos_projected = self._calculate_parametric_dos(
+                atoms=atoms,
+                orbitals=orbitals,
+                spin_projections=spin_projections,
             )
 
-            dos_total, dos_total_projected, dos_projected = (
-                self._calculate_parametric_dos(
-                    atoms=atoms,
-                    orbitals=orbitals,
-                    spin_projections=spin_projections,
-                )
-            )
-            
             logger.debug(f"dos_projected: {np.mean(dos_projected)}")
-            
+
             if np.mean(dos_projected) == 0:
                 continue
 
@@ -463,9 +419,7 @@ class DOSPlot:
 
         return values_dict
 
-    def _calculate_parametric_dos(
-        self, atoms, orbitals, spin_projections
-    ):
+    def _calculate_parametric_dos(self, atoms, orbitals, spin_projections):
         dos_total = np.array(self.dos.total)
         if self.dos.n_spins == 4:
             dos_total_projected = self.dos.dos_sum(spins=spin_projections)
@@ -476,7 +430,7 @@ class DOSPlot:
             orbitals=orbitals,
             spins=spin_projections,
         )
-            
+
         return dos_total, dos_total_projected, dos_projected
 
     def _get_spins_projections_and_channels(self, spins):
@@ -508,10 +462,7 @@ class DOSPlot:
 
     def _get_stack_species_labels(self, orbitals):
         # This condition will depend on which orbital basis is being used.
-        if (
-            self.dos.is_non_collinear
-            and len(self.dos.projected[0][0]) == 2 + 2 + 4 + 4 + 6 + 6 + 8
-        ):
+        if self.dos.is_non_collinear and len(self.dos.projected[0][0]) == 2 + 2 + 4 + 4 + 6 + 6 + 8:
             spins = [0]
             if orbitals:
                 print("The plot only considers orbitals", orbitals)
@@ -570,12 +521,17 @@ class DOSPlot:
 
         logger.debug(f"self.dos.projected[0][0]: {len(self.dos.projected[0][0])}")
         logger.debug(f"self.dos.is_non_collinear: {self.dos.is_non_collinear}")
-        
-        if (
-            self.dos.is_non_collinear
-            and len(self.dos.projected[0][0]) == 2 + 2 + 4 + 4 + 6 + 6 + 8
-        ):
-            orb_names = ["s-j=0.5", "p-j=0.5", "p-j=1.5", "d-j=1.5", "d-j=2.5", "f-j=2.5", "f-j=3.5"]
+
+        if self.dos.is_non_collinear and len(self.dos.projected[0][0]) == 2 + 2 + 4 + 4 + 6 + 6 + 8:
+            orb_names = [
+                "s-j=0.5",
+                "p-j=0.5",
+                "p-j=1.5",
+                "d-j=1.5",
+                "d-j=2.5",
+                "f-j=2.5",
+                "f-j=3.5",
+            ]
             orb_l = [
                 [0, 1],
                 [2, 3],
@@ -583,7 +539,7 @@ class DOSPlot:
                 [8, 9, 10, 11],
                 [12, 13, 14, 15, 16, 17],
                 [18, 19, 20, 21, 22, 23],
-                [24, 25, 26, 27, 28, 29, 30, 31]
+                [24, 25, 26, 27, 28, 29, 30, 31],
             ]
         elif len(self.dos.projected[0][0]) == 1 + 3 + 5:
             orb_names = ["s", "p", "d"]
@@ -595,10 +551,7 @@ class DOSPlot:
         return atom_names, orb_names, orb_l
 
     def _get_stack_labels(self, orbitals):
-        if (
-            self.dos.is_non_collinear
-            and len(self.dos.projected[0][0]) == 2 + 2 + 4 + 4 + 6 + 6 + 8
-        ):
+        if self.dos.is_non_collinear and len(self.dos.projected[0][0]) == 2 + 2 + 4 + 4 + 6 + 6 + 8:
             if len(self.dos.projected[0][0]) == 2 + 2 + 4 + 4 + 6 + 6 + 8:
                 all_orbitals = "-spdf-j=0.5,1.5,2.5,3.5"
             else:
@@ -645,15 +598,12 @@ class DOSPlot:
         return label
 
     def _setup_colorbar(self, dos_projected, dos_total_projected):
-
         vmin, vmax = self._get_color_limits(dos_projected, dos_total_projected)
         cmap = mpl.cm.get_cmap(self.config.cmap)
 
         if self.config.plot_bar:
             norm = mpl.colors.Normalize(vmin=vmin, vmax=vmax)
-            cb = self.fig.colorbar(
-                mpl.cm.ScalarMappable(norm=norm, cmap=cmap), ax=self.ax
-            )
+            cb = self.fig.colorbar(mpl.cm.ScalarMappable(norm=norm, cmap=cmap), ax=self.ax)
             cb.ax.tick_params(labelsize=self.config.colorbar_tick_labelsize)
             cb.set_label(
                 self.config.colorbar_title,
@@ -682,19 +632,11 @@ class DOSPlot:
             x_label = self.config.x_label
             y_label = self.config.y_label
             xlim = [self.dos.energies.min(), self.dos.energies.max()]
-            ylim = (
-                [-self.dos.total.max(), total_max]
-                if len(spin_channels) == 2
-                else [0, total_max]
-            )
+            ylim = [-self.dos.total.max(), total_max] if len(spin_channels) == 2 else [0, total_max]
         elif self.orientation == "vertical":
             x_label = self.config.y_label
             y_label = self.config.x_label
-            xlim = (
-                [-self.dos.total.max(), total_max]
-                if len(spin_channels) == 2
-                else [0, total_max]
-            )
+            xlim = [-self.dos.total.max(), total_max] if len(spin_channels) == 2 else [0, total_max]
             ylim = [self.dos.energies.min(), self.dos.energies.max()]
 
         self.set_xlabel(x_label)
@@ -746,14 +688,13 @@ class DOSPlot:
 
         # Should be between 0 and 1
         normalized_dos_projected = dos_projected / dos_total_projected
-        
+
         # assert normalized_dos_projected.min() >= 0 and normalized_dos_projected.max() <= 1, "Issue with the normalization of the projected DOS"
         # Removing issues points due to divisions by zero
         normalized_dos_projected = np.nan_to_num(normalized_dos_projected, 0)
         threshold = max(abs(dos_total)) + 1
         normalized_dos_projected[np.abs(normalized_dos_projected) > threshold] = 0
-        
-    
+
         if ispin > 0 and len(self.dos.total) > 1:
             dos_total *= -1
             dos_projected *= -1
@@ -844,7 +785,6 @@ class DOSPlot:
     def _plot_spin_data_parametric_line(
         self, energies, dos_total_spin, normalized_dos_spin_projected, spin_channel
     ):
-
         data = self._set_data_to_orientation(energies, dos_total_spin)
         points = np.array([data["x"], data["y"]]).T.reshape(-1, 1, 2)
 
@@ -860,23 +800,16 @@ class DOSPlot:
         handle = self.ax.add_collection(lc)
         self.handles.append(handle)
 
-    def _plot_fill_between(
-        self, x, y, fill_func, bottom_value=0, bar_color=None, color=None
-    ):
+    def _plot_fill_between(self, x, y, fill_func, bottom_value=0, bar_color=None, color=None):
         if color:
             final_color = color
             handle = fill_func(x, y + bottom_value, bottom_value, color=final_color)
         if bar_color:
             for i in range(len(x) - 1):
-                handle = fill_func(
-                    [x[i], x[i + 1]], [y[i], y[i + 1]], color=bar_color[i]
-                )
+                handle = fill_func([x[i], x[i + 1]], [y[i], y[i + 1]], color=bar_color[i])
         return handle
 
-    def _plot_spin_stack(
-        self, energies, scaled_projected_dos, bottom_value=0, color=None
-    ):
-
+    def _plot_spin_stack(self, energies, scaled_projected_dos, bottom_value=0, color=None):
         data = self._set_data_to_orientation(energies, scaled_projected_dos)
         handle = self._plot_fill_between(
             x=data["energies"],
@@ -889,10 +822,7 @@ class DOSPlot:
         bottom_value = data["dos_value"]
         return bottom_value, handle
 
-    def _plot_spin_overlay(
-        self, energies, scaled_projected_dos, spin_channel, color=None
-    ):
-
+    def _plot_spin_overlay(self, energies, scaled_projected_dos, spin_channel, color=None):
         data = self._set_data_to_orientation(energies, scaled_projected_dos)
 
         (handle,) = self.ax.plot(
@@ -907,9 +837,7 @@ class DOSPlot:
 
         return handle
 
-    def set_xticks(
-        self, tick_positions: List[int] = None, tick_names: List[str] = None
-    ):
+    def set_xticks(self, tick_positions: list[int] = None, tick_names: list[str] = None):
         """A method to set the xticks of the plot
 
         Parameters
@@ -931,9 +859,7 @@ class DOSPlot:
             self.ax.tick_params(**self.config.minor_x_tick_params)
         return None
 
-    def set_yticks(
-        self, tick_positions: List[int] = None, tick_names: List[str] = None
-    ):
+    def set_yticks(self, tick_positions: list[int] = None, tick_names: list[str] = None):
         """A method to set the yticks of the plot
 
         Parameters
@@ -955,7 +881,7 @@ class DOSPlot:
             self.ax.tick_params(**self.config.minor_y_tick_params)
         return None
 
-    def set_xlim(self, interval: List[int] = None):
+    def set_xlim(self, interval: list[int] = None):
         """A method to set the xlim of the plot
 
         Parameters
@@ -967,7 +893,7 @@ class DOSPlot:
             self.ax.set_xlim(interval)
         return None
 
-    def set_ylim(self, interval: List[int] = None):
+    def set_ylim(self, interval: list[int] = None):
         """A method to set the ylim of the plot
 
         Parameters
@@ -1017,7 +943,7 @@ class DOSPlot:
         else:
             self.ax.set_ylabel(label, **self.config.y_label_params)
 
-    def legend(self, labels: List[str] = None):
+    def legend(self, labels: list[str] = None):
         """A method to include the legend
 
         Parameters
@@ -1039,10 +965,9 @@ class DOSPlot:
                 )
             self.ax.legend(self.handles, labels, **self.config.legend_params)
         return None
-    
+
     def set_title(self, title: str = ""):
-        """A method to set the title of the plot
-        """
+        """A method to set the title of the plot"""
         if self.config.title:
             title = self.config.title
         self.ax.set_title(title, **self.config.title_params)
@@ -1183,7 +1108,6 @@ class DOSPlot:
                 index += 1
         for ispin in range(2):
             for column_name in column_names:
-
                 if "spinChannel-0" in column_name.split("_")[0] and ispin == 0:
                     sorted_column_names[index] = column_name
                     index += 1

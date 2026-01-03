@@ -1,7 +1,5 @@
 import re
-import xml.etree.ElementTree as ET
 from pathlib import Path
-from typing import Union
 
 import numpy as np
 
@@ -46,17 +44,16 @@ class LobsterParser(BaseParser):
 
     def __init__(
         self,
-        dirpath: Union[str, Path] = "",
+        dirpath: str | Path = "",
         code: str = "qe",
-        lobsterin_filepath: Union[str, Path] = Path("lobsterin"),
-        lobsterout_filepath: Union[str, Path] = Path("lobsterout"),
-        scfin_filepath: Union[str, Path] = Path("scf.in"),
-        outcar_filepath: Union[str, Path] = Path("OUTCAR"),
-        poscar_filepath: Union[str, Path] = Path("POSCAR"),
-        procar_filepath: Union[str, Path] = Path("PROCAR"),
+        lobsterin_filepath: str | Path = Path("lobsterin"),
+        lobsterout_filepath: str | Path = Path("lobsterout"),
+        scfin_filepath: str | Path = Path("scf.in"),
+        outcar_filepath: str | Path = Path("OUTCAR"),
+        poscar_filepath: str | Path = Path("POSCAR"),
+        procar_filepath: str | Path = Path("PROCAR"),
         dos_interpolation_factor: int = None,
     ):
-
         # Convert dirpath to Path object
         self.dirpath = Path(dirpath)
 
@@ -64,11 +61,11 @@ class LobsterParser(BaseParser):
 
         # Use Path for file operations
         lobsterin_filepath = self.dirpath / lobsterin_filepath.name
-        with open(lobsterin_filepath, "r") as rf:
+        with open(lobsterin_filepath) as rf:
             self.lobsterin = rf.read()
 
         lobsterout_filepath = self.dirpath / lobsterout_filepath.name
-        with open(lobsterout_filepath, "r") as rf:
+        with open(lobsterout_filepath) as rf:
             self.lobsterout = rf.read()
 
         self.orbitals = [
@@ -328,9 +325,7 @@ class LobsterParser(BaseParser):
                 dos_projected[name] = {"energies": energies}
                 if self.nspin != 1:
                     dos_projected[name]["Spin-up"] = self.data["projected"][i][:, 1:, 0]
-                    dos_projected[name]["Spin-down"] = self.data["projected"][i][
-                        :, 1:, 1
-                    ]
+                    dos_projected[name]["Spin-down"] = self.data["projected"][i][:, 1:, 1]
                 else:
                     dos_projected[name]["Spin-up"] = self.data["projected"][i][:, 1:, 0]
 
@@ -381,16 +376,12 @@ class LobsterParser(BaseParser):
             labels = ["Energy", "Spin-Up", "Spin-Down"]
             new_orbitals = []
             for ispin in spin:
-                new_orbitals.append(
-                    list(orbitals + ispin * (len(projected[0].labels) - 1) // 2)
-                )
+                new_orbitals.append(list(orbitals + ispin * (len(projected[0].labels) - 1) // 2))
 
             orbitals = new_orbitals
 
         else:
-
             for x in orbitals:
-
                 if x + 1 > (len(projected[0].labels) - 1) // 2:
                     print("listed wrong amount of orbitals")
                     print(
@@ -440,7 +431,7 @@ class LobsterParser(BaseParser):
         ValueError
             DOSCAR seems truncated
         """
-        with open(filename, "r") as rf:
+        with open(filename) as rf:
             data = rf.readlines()
 
         if len(data) < 5:
@@ -464,13 +455,11 @@ class LobsterParser(BaseParser):
             spins = ["dos_up", "dos_down"]
         # In case there are more lines of data, they are the projected DOS
         if len(data) > iline:
-
             projected_dos = []
             proj_orbitals = []
             ion_index = 0
 
             while iline < len(data):
-
                 header = [float(x) for x in data[iline].split(";")[0].split()]
 
                 # print(header)
@@ -488,9 +477,7 @@ class LobsterParser(BaseParser):
 
                 ndos = int(header[2])
                 iline += 1
-                tmp_dos = [
-                    [float(x) for x in y.split()] for y in data[iline : iline + ndos]
-                ]
+                tmp_dos = [[float(x) for x in y.split()] for y in data[iline : iline + ndos]]
                 tmp_dos = np.array(tmp_dos)
 
                 projected_dos.append(tmp_dos)
@@ -574,7 +561,6 @@ class LobsterParser(BaseParser):
             }
 
         else:
-
             return {"total": total_dos}
 
     def _readFileNames(self):
@@ -608,7 +594,7 @@ class LobsterParser(BaseParser):
         None
             None
         """
-        with open(self.filepaths[0], "r") as rf:
+        with open(self.filepaths[0]) as rf:
             projFile = rf.read()
 
         ##########################################################################################
@@ -637,7 +623,7 @@ class LobsterParser(BaseParser):
 
         self.bands = np.zeros(shape=(self.kpointsCount, self.bandsCount, self.nspin))
         for file in range(len(self.filepaths)):
-            with open(self.filepaths[file], "r") as rf:
+            with open(self.filepaths[file]) as rf:
                 projFile = rf.read()
 
             fatbands_info = re.findall("#\sFATBAND\sfor(.*)", projFile)[0].split()
@@ -655,24 +641,17 @@ class LobsterParser(BaseParser):
 
             fatbands = re.split("# K-Point", projFile)[1:]
             for ik, fatband in enumerate(fatbands[:]):
-
                 for iband, band in enumerate(fatband.split("\n")[1:-1]):
                     if self.nspin == 2:
                         if iband < self.bandsCount:
                             self.bands[ik, iband, 0] = float(band.split()[1])
                             self.bands[ik, iband, 1] = float(
-                                fatband.split("\n")[1:][
-                                    iband + self.bandsCount
-                                ].split()[1]
+                                fatband.split("\n")[1:][iband + self.bandsCount].split()[1]
                             )
 
-                            self.spd[ik, iband, 0, iion, iorbital] = float(
-                                band.split()[2]
-                            )
+                            self.spd[ik, iband, 0, iion, iorbital] = float(band.split()[2])
                             self.spd[ik, iband, 1, iion, iorbital] = float(
-                                fatband.split("\n")[1:-1][
-                                    iband + self.bandsCount
-                                ].split()[2]
+                                fatband.split("\n")[1:-1][iband + self.bandsCount].split()[2]
                             )
 
                     else:
@@ -762,9 +741,7 @@ class LobsterParser(BaseParser):
             if itick != len(self.kticks) - 1:
                 self.special_kpoints[itick, 0, :] = self.kpoints[self.kticks[itick]]
                 self.special_kpoints[itick, 1, :] = self.kpoints[self.kticks[itick + 1]]
-                self.modified_knames.append(
-                    [self.knames[itick], self.knames[itick + 1]]
-                )
+                self.modified_knames.append([self.knames[itick], self.knames[itick + 1]])
 
         has_time_reversal = True
 
@@ -801,7 +778,6 @@ class LobsterParser(BaseParser):
             tickCountIndex = 0
             for x in raw_kpoints:
                 if len(x.split()) == 5:
-
                     raw_high_symmetry.append(
                         (float(x.split()[0]), float(x.split()[1]), float(x.split()[2]))
                     )
@@ -890,7 +866,7 @@ class LobsterParser(BaseParser):
 
         elif self.code == "qe":
             scfin_filepath = self.dirpath / self.scfin_filepath.name
-            with open(scfin_filepath, "r") as rf:
+            with open(scfin_filepath) as rf:
                 self.scfIn = rf.read()
 
             if self.dirpath is None:
@@ -898,9 +874,7 @@ class LobsterParser(BaseParser):
 
             parser = qe.QEParser(
                 scfIn_filename="scf.in",
-                dirpath=str(
-                    self.dirpath
-                ),  # Convert to string for QEParser compatibility
+                dirpath=str(self.dirpath),  # Convert to string for QEParser compatibility
                 dos_interpolation_factor=None,
             )
             self.prefix = parser.prefix
