@@ -211,6 +211,54 @@ SPIN_POLARIZED_PROJWFC_OUT = """
 =------------------------------------------------------------------------------=
 """
 
+NON_COLINEAR_PROJWFC_OUT = """
+
+     Program PROJWFC v.7.2 starts on  1Jan2026 at 12: 0: 0 
+
+     Parallel version (MPI), running on     1 processors
+
+     Calling projwave .... 
+
+     Atomic states used for projection
+     (read from pseudopotential files):
+
+     state #   1: atom   1 (Sr ), wfc  1 (l=0 j=0.5 m_j=-0.5)
+     state #   2: atom   1 (Sr ), wfc  1 (l=0 j=0.5 m_j= 0.5)
+     state #   3: atom   1 (Sr ), wfc  2 (l=0 j=0.5 m_j=-0.5)
+     state #   4: atom   1 (Sr ), wfc  2 (l=0 j=0.5 m_j= 0.5)
+     state #   5: atom   1 (Sr ), wfc  3 (l=1 j=0.5 m_j=-0.5)
+     state #   6: atom   1 (Sr ), wfc  3 (l=1 j=0.5 m_j= 0.5)
+     state #   7: atom   1 (Sr ), wfc  4 (l=1 j=1.5 m_j=-1.5)
+     state #   8: atom   1 (Sr ), wfc  4 (l=1 j=1.5 m_j=-0.5)
+     state #   9: atom   1 (Sr ), wfc  4 (l=1 j=1.5 m_j= 0.5)
+     state #  10: atom   1 (Sr ), wfc  4 (l=1 j=1.5 m_j= 1.5)
+     state #  11: atom   2 (V  ), wfc  1 (l=2 j=1.5 m_j=-1.5)
+     state #  12: atom   2 (V  ), wfc  1 (l=2 j=1.5 m_j=-0.5)
+     state #  13: atom   2 (V  ), wfc  1 (l=2 j=1.5 m_j= 0.5)
+     state #  14: atom   2 (V  ), wfc  1 (l=2 j=1.5 m_j= 1.5)
+     state #  15: atom   2 (V  ), wfc  2 (l=2 j=2.5 m_j=-2.5)
+     state #  16: atom   2 (V  ), wfc  2 (l=2 j=2.5 m_j=-1.5)
+     state #  17: atom   2 (V  ), wfc  2 (l=2 j=2.5 m_j=-0.5)
+     state #  18: atom   2 (V  ), wfc  2 (l=2 j=2.5 m_j= 0.5)
+     state #  19: atom   2 (V  ), wfc  2 (l=2 j=2.5 m_j= 1.5)
+     state #  20: atom   2 (V  ), wfc  2 (l=2 j=2.5 m_j= 2.5)
+
+     Calling projwave .... 
+
+     natomwfc =   20
+     nbnd     =   50
+     nkstot   =  151
+
+     k =   0.0000   0.0000   0.0000
+     k =   0.0500   0.0000   0.0000
+
+     PROJWFC      :      1.00s CPU      1.10s WALL
+
+=------------------------------------------------------------------------------=
+   JOB DONE.
+=------------------------------------------------------------------------------=
+"""
+
 PW_INPUT_FILE = """
 &CONTROL
   calculation = 'scf'
@@ -273,6 +321,20 @@ def spin_polarized_filepath(tmp_path: Path) -> Path:
 def spin_polarized_parser(spin_polarized_filepath: Path) -> ProjwfcOut:
     """Create parser instance for spin-polarized test."""
     return ProjwfcOut(filepath=spin_polarized_filepath)
+
+
+@pytest.fixture
+def non_colinear_filepath(tmp_path: Path) -> Path:
+    """Create temporary file for non-colinear test."""
+    filepath = tmp_path / "projwfc.out"
+    filepath.write_text(NON_COLINEAR_PROJWFC_OUT)
+    return filepath
+
+
+@pytest.fixture
+def non_colinear_parser(non_colinear_filepath: Path) -> ProjwfcOut:
+    """Create parser instance for non-colinear test."""
+    return ProjwfcOut(filepath=non_colinear_filepath)
 
 
 @pytest.fixture
@@ -374,3 +436,91 @@ def test_atomic_wfc_info_contains_m_quantum_number(non_spin_parser: ProjwfcOut) 
     """Test that atm_wfcs contains m quantum number."""
     first_wfc = non_spin_parser.atm_wfcs[0]
     assert first_wfc["m"] == 1
+
+
+# =============================================================================
+# Tests: Non-colinear Detection
+# =============================================================================
+
+
+def test_is_non_colinear_true_for_non_colinear(
+    non_colinear_parser: ProjwfcOut,
+) -> None:
+    """Test that is_non_colinear is True for non-colinear calculation."""
+    assert non_colinear_parser.is_non_colinear is True
+
+
+def test_is_non_colinear_false_for_colinear(non_spin_parser: ProjwfcOut) -> None:
+    """Test that is_non_colinear is False for colinear calculation."""
+    assert non_spin_parser.is_non_colinear is False
+
+
+# =============================================================================
+# Tests: Non-colinear Quantum Numbers
+# =============================================================================
+
+
+def test_atomic_wfc_info_contains_j_quantum_number(
+    non_colinear_parser: ProjwfcOut,
+) -> None:
+    """Test that atm_wfcs contains j quantum number for non-colinear."""
+    first_wfc = non_colinear_parser.atm_wfcs[0]
+    assert first_wfc["j"] == pytest.approx(0.5)
+
+
+def test_atomic_wfc_info_contains_m_j_quantum_number(
+    non_colinear_parser: ProjwfcOut,
+) -> None:
+    """Test that atm_wfcs contains m_j quantum number for non-colinear."""
+    first_wfc = non_colinear_parser.atm_wfcs[0]
+    assert first_wfc["m_j"] == pytest.approx(-0.5)
+
+
+def test_atomic_wfc_info_j_is_none_for_colinear(non_spin_parser: ProjwfcOut) -> None:
+    """Test that atm_wfcs j is None for colinear calculation."""
+    first_wfc = non_spin_parser.atm_wfcs[0]
+    assert first_wfc["j"] is None
+
+
+def test_atomic_wfc_info_m_j_is_none_for_colinear(non_spin_parser: ProjwfcOut) -> None:
+    """Test that atm_wfcs m_j is None for colinear calculation."""
+    first_wfc = non_spin_parser.atm_wfcs[0]
+    assert first_wfc["m_j"] is None
+
+
+def test_atomic_wfc_info_m_is_none_for_non_colinear(
+    non_colinear_parser: ProjwfcOut,
+) -> None:
+    """Test that atm_wfcs m is None for non-colinear calculation."""
+    first_wfc = non_colinear_parser.atm_wfcs[0]
+    assert first_wfc["m"] is None
+
+
+def test_n_atomic_wfc_non_colinear(non_colinear_parser: ProjwfcOut) -> None:
+    """Test that natomwfc parses correctly for non-colinear."""
+    assert non_colinear_parser.natomwfc == 20
+
+
+def test_atomic_wfc_info_length_matches_n_atomic_wfc_non_colinear(
+    non_colinear_parser: ProjwfcOut,
+) -> None:
+    """Test that atm_wfcs list length matches natomwfc for non-colinear."""
+    assert len(non_colinear_parser.atm_wfcs) == non_colinear_parser.natomwfc
+
+
+def test_atomic_wfc_info_d_orbital_j_1_5(non_colinear_parser: ProjwfcOut) -> None:
+    """Test that d orbital with j=1.5 is parsed correctly."""
+    # State 11 is atom 2 (V), wfc 1, l=2, j=1.5, m_j=-1.5
+    wfc_11 = non_colinear_parser.atm_wfcs[10]  # 0-indexed
+    assert wfc_11["l"] == 2
+    assert wfc_11["j"] == pytest.approx(1.5)
+    assert wfc_11["m_j"] == pytest.approx(-1.5)
+
+
+def test_atomic_wfc_info_d_orbital_j_2_5(non_colinear_parser: ProjwfcOut) -> None:
+    """Test that d orbital with j=2.5 is parsed correctly."""
+    # State 15 is atom 2 (V), wfc 2, l=2, j=2.5, m_j=-2.5
+    wfc_15 = non_colinear_parser.atm_wfcs[14]  # 0-indexed
+    assert wfc_15["l"] == 2
+    assert wfc_15["j"] == pytest.approx(2.5)
+    assert wfc_15["m_j"] == pytest.approx(-2.5)

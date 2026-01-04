@@ -203,12 +203,14 @@ def test_fermi_energy_spin_polarized(spin_polarized_parser: AtomicProjXML) -> No
 def test_eigenvalues_shape_non_spin_polarized(non_spin_parser: AtomicProjXML) -> None:
     """Test that bands shape is (n_kpoints, n_bands, n_spin_channels) for non-spin-polarized."""
     bands = non_spin_parser.bands
+    assert bands is not None
     assert bands.shape == (2, 2, 1)
 
 
 def test_eigenvalues_shape_spin_polarized(spin_polarized_parser: AtomicProjXML) -> None:
     """Test that bands shape is (n_kpoints, n_bands, n_spin_channels) for spin-polarized."""
     bands = spin_polarized_parser.bands
+    assert bands is not None
     assert bands.shape == (2, 2, 2)
 
 
@@ -220,12 +222,14 @@ def test_eigenvalues_shape_spin_polarized(spin_polarized_parser: AtomicProjXML) 
 def test_kpoints_returns_correct_shape(non_spin_parser: AtomicProjXML) -> None:
     """Test that kpoints has shape (n_kpoints, 3)."""
     kpoints = non_spin_parser.kpoints
+    assert kpoints is not None
     assert kpoints.shape == (2, 3)
 
 
 def test_kpoints_first_is_gamma(non_spin_parser: AtomicProjXML) -> None:
     """Test that first k-point is gamma point."""
     kpoints = non_spin_parser.kpoints
+    assert kpoints is not None
     np.testing.assert_array_almost_equal(kpoints[0], [0.0, 0.0, 0.0])
 
 
@@ -237,6 +241,7 @@ def test_kpoints_first_is_gamma(non_spin_parser: AtomicProjXML) -> None:
 def test_projections_shape_non_spin_polarized(non_spin_parser: AtomicProjXML) -> None:
     """Test that projections shape is (n_kpoints, n_bands, n_spin_projections, n_atm_wfc)."""
     projections = non_spin_parser.projections
+    assert projections is not None
     # n_spin_projections = n_spin_channels for colinear case
     assert projections.shape == (2, 2, 1, 2)
 
@@ -244,6 +249,7 @@ def test_projections_shape_non_spin_polarized(non_spin_parser: AtomicProjXML) ->
 def test_projections_are_complex(non_spin_parser: AtomicProjXML) -> None:
     """Test that projections are complex-valued."""
     projections = non_spin_parser.projections
+    assert projections is not None
     assert np.iscomplexobj(projections)
 
 
@@ -255,11 +261,13 @@ def test_projections_are_complex(non_spin_parser: AtomicProjXML) -> None:
 def test_weights_returns_correct_shape(non_spin_parser: AtomicProjXML) -> None:
     """Test that weights has correct shape."""
     weights = non_spin_parser.weights
+    assert weights is not None
     assert weights.shape == (2,)
 
 
 def test_weights_values_match_fixture(non_spin_parser: AtomicProjXML) -> None:
     """Test that weight values match the fixture values."""
     weights = non_spin_parser.weights
+    assert weights is not None
     assert pytest.approx(weights[0]) == 0.001
     assert pytest.approx(weights[1]) == 0.008
