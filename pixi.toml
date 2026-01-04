@@ -166,7 +166,7 @@ ruff-format = { cmd = "ruff format --exit-non-zero-on-format --force-exclude --c
 ruff-lint = { cmd = "ruff check --fix --exit-non-zero-on-fix --force-exclude --config $PIXI_PROJECT_ROOT/.config/.ruff.toml" }
 toml-format = { cmd = "taplo fmt", env = { RUST_LOG = "warn" } }
 toml-lint = "taplo lint --verbose **/pixi.toml --config $PIXI_PROJECT_ROOT/.config/.taplo.toml"
-typecheck-python = "basedpyright --project $PIXI_PROJECT_ROOT/.config/pyrightconfig.json"
+typecheck-python = "basedpyright --project pyrightconfig.json"
 typos = "typos --force-exclude --config $PIXI_PROJECT_ROOT/.config/.typos.toml"
 
 [feature.rust.dependencies]
