@@ -2,7 +2,7 @@
 
 PyProcar is a Python library for electronic structure pre/post-processing of DFT calculations (VASP, Quantum ESPRESSO, Abinit, Elk, Lobster). The codebase follows a **layered dataflow architecture** with four distinct layers: Input/Extraction, Parser/Adapter, Data, and Visualization. Core domain objects share a common `PointSet`/`Property` interface for consistent data handling.
 
-## Detailed Findings
+## Project Details
 
 ### 1. Project Overview
 
@@ -74,8 +74,6 @@ PyProcar is a Python library for electronic structure pre/post-processing of DFT
 
 ### 4. Code Style Conventions
 
-From `AGENTS.md`:
-
 - **Formatting**: Black with line length 88, isort for imports
 - **Naming**:
   - Variables/functions: `snake_case`
@@ -106,20 +104,7 @@ logging.getLogger("user")
 
 ### 6. Testing Patterns
 
-**Structure**: `tests/` mirrors `pyprocar/` structure
-
-**Common Patterns**:
-1. **BaseTest class**: Provides `tmp_path` fixture, changes working directory
-2. **Inline fixtures**: String constants for test file contents
-3. **Fixture chaining**: Build complex objects from simple fixtures
-4. **Generated data**: Programmatic NumPy array generation
-5. **Parametrized fixtures**: `@pytest.fixture(params=get_all_dirs())`
-
-**Guidelines**:
-- Run single test files, not full suite
-- Use generated test data
-- One assert per test preferred
-- Test different execution paths
+- Whenever creating test reference the `testing-python` skill
 
 ### 7. Development Environment
 
