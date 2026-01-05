@@ -29,8 +29,8 @@ class Lines:
                 [self.faces[iface][0], self.faces[iface][-1]]
             )  # to connect the 1st and last point
             for ipoint in range(len(self.faces[iface]) - 1):
-                point_1 = self.faces[ipoint]
-                point_2 = self.faces[ipoint + 1]
+                point_1 = self.faces[iface][ipoint]
+                point_2 = self.faces[iface][ipoint + 1]
                 self.connectivity.append([point_1, point_2])
 
     # def _create_pyvista(self):
@@ -40,11 +40,11 @@ class Lines:
     #     self.pyvista_line.lines = cell
 
     def _create_trimesh(self):
-        entries = []
+        entities = []
         for iline in self.connectivity:
-            entries.append(trimesh.path.entries.Line(iline))
+            entities.append(trimesh.path.entities.Line(iline))
 
-            self.trimesh_line = trimesh.path.path.Path(entries=entries, vertices=self.verts)
+        self.trimesh_line = trimesh.path.Path3D(entities=entities, vertices=self.verts)
 
 
 class BrillouinZone(pv.PolyData):
