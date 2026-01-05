@@ -8,16 +8,12 @@ from pyprocar.core.ebs import (
     get_ebs_from_code,
     get_ebs_from_data,
 )
-from pyprocar.core.fermisurface import FermiSurface
-from pyprocar.core.fermisurface2D import FermiSurface2D
-from pyprocar.core.fermisurface3D import FermiSurface3D
-from pyprocar.core.isosurface import Isosurface
+from pyprocar.core.fermisurface import FermiSurface, FSNormMode
 from pyprocar.core.kpoints import KPath
 from pyprocar.core.procarselect import ProcarSelect
 from pyprocar.core.procarsymmetry import ProcarSymmetry
 from pyprocar.core.property_store import PointSet, Property
 from pyprocar.core.structure import Structure
-from pyprocar.core.surface import Surface, boolean_add
 
 __all__ = [
     "BandStructure2D",
@@ -30,15 +26,11 @@ __all__ = [
     "get_ebs_from_code",
     "get_ebs_from_data",
     "FermiSurface",
-    "FermiSurface2D",
-    "FermiSurface3D",
-    "Isosurface",
+    "FSNormMode",
     "KPath",
     "ProcarSelect",
     "ProcarSymmetry",
     "Property",
     "Structure",
-    "Surface",
-    "boolean_add",
     "PointSet",
 ]

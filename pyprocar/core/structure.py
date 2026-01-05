@@ -7,11 +7,11 @@ import logging
 from pathlib import Path
 
 import numpy as np
+import pyvista as pv
 import spglib
 from scipy.spatial import ConvexHull
 
 from pyprocar.core.serializer import get_serializer
-from pyprocar.core.surface import Surface
 from pyprocar.utils import elements
 
 # TODO add __str__ method
@@ -516,8 +516,11 @@ class Structure:
         """
         A method to plot the the convex hull
         """
-        surface = Surface(verts=self.cell_convex_hull.points, faces=self.cell_convex_hull.simplices)
-        surface.pyvista_obj.plot()
+        hull = self.cell_convex_hull
+        # Convert simplices to pyvista face format (prepend count to each face)
+        faces = np.hstack([[3] + list(face) for face in hull.simplices])
+        surface = pv.PolyData(hull.points, faces)
+        surface.plot()
         return None
 
     def get_spglib_symmetry_dataset(self, symprec=1e-5):

@@ -1,5 +1,9 @@
+from __future__ import annotations
+
 import copy
 import logging
+from collections.abc import Iterable, Mapping, Sequence
+from enum import Enum
 from functools import cached_property
 from typing import Any
 
@@ -8,12 +12,75 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pyvista as pv
 
+from pyprocar.core.atomic_orbital_index import (
+    AtomIndexer,
+    OrbitalIndexer,
+    ProjectionLabelBuilder,
+    ProjectionSelectionResolver,
+    ProjectionSelectionResult,
+    SpinIndexer,
+)
 from pyprocar.core.brillouin_zone import BrillouinZone
 from pyprocar.core.ebs import ElectronicBandStructureMesh
 from pyprocar.core.property_store import PointSet, Property
 from pyprocar.utils.physics import *
 
 logger = logging.getLogger(__name__)
+
+
+class FSNormMode(Enum):
+    """Normalization modes for Fermi surface properties."""
+
+    RAW = "raw"
+    MAX = "max"
+    TOTAL = "total"
+    INTEGRAL = "integral"
+
+    @classmethod
+    def from_input(cls, input: str | "FSNormMode" | None) -> "FSNormMode":
+        """Convert string/None input to FSNormMode enum."""
+        if isinstance(input, FSNormMode):
+            return input
+        if input is None:
+            return cls.RAW
+        if not isinstance(input, str):
+            raise ValueError(f"Invalid normalization mode: {input}")
+
+        lower_input = input.lower()
+        mode_map = {
+            "raw": cls.RAW,
+            "max": cls.MAX,
+            "total": cls.TOTAL,
+            "integral": cls.INTEGRAL,
+        }
+        if lower_input in mode_map:
+            return mode_map[lower_input]
+
+        valid_modes = ", ".join(mode_map.keys())
+        raise ValueError(f"Invalid normalization mode: {input}. Valid modes: {valid_modes}")
+
+    @classmethod
+    def list_modes(cls) -> list[str]:
+        """Return list of valid mode strings."""
+        return [mode.value for mode in cls]
+
+    @staticmethod
+    def get_normed_name(mode: "FSNormMode", name: str) -> str:
+        """Return property name with normalization prefix."""
+        if mode == FSNormMode.RAW:
+            return name
+        return f"{mode.value}_{name}"
+
+    @staticmethod
+    def get_mode_prefix(mode: "FSNormMode") -> str:
+        """Return display prefix for normalization mode."""
+        prefixes = {
+            FSNormMode.RAW: "",
+            FSNormMode.MAX: "Max-Normed",
+            FSNormMode.TOTAL: "Total-Normed",
+            FSNormMode.INTEGRAL: "Integral-Normed",
+        }
+        return prefixes.get(mode, "")
 
 
 class FermiSurface(pv.PolyData):
@@ -59,6 +126,14 @@ class FermiSurface(pv.PolyData):
         self._original_ebs = original_ebs
         self._ebs = ebs
         self._point_set = point_set
+
+        # Projection selection infrastructure (lazy initialized)
+        self._projection_label_builder: ProjectionLabelBuilder | None = None
+        self._projection_selection_resolver: ProjectionSelectionResolver | None = None
+
+        # Cache invalidation tracking
+        self._ebs_cache_version: int = 0
+        self._cached_properties: dict[str, int] = {}  # property_name -> cache_version
 
         if "spin_band_index" not in point_set.property_store.keys():
             raise ValueError("spin_band_index not found in point_set.property_store")
@@ -258,6 +333,612 @@ class FermiSurface(pv.PolyData):
     @property
     def is2d(self):
         return self.original_ebs.is2d
+
+    def _invalidate_cache(self) -> None:
+        """Invalidate all cached interpolated properties."""
+        self._ebs_cache_version += 1
+        logger.debug(f"Cache invalidated, new version: {self._ebs_cache_version}")
+
+    def _is_cache_valid(self, property_name: str) -> bool:
+        """Check if cached property is still valid."""
+        if property_name not in self._cached_properties:
+            return False
+        return self._cached_properties[property_name] == self._ebs_cache_version
+
+    def _mark_cached(self, property_name: str) -> None:
+        """Mark property as cached at current version."""
+        self._cached_properties[property_name] = self._ebs_cache_version
+
+    def _get_projection_label_builder(self) -> ProjectionLabelBuilder:
+        """Lazily initialize and return the projection label builder."""
+        if self._projection_label_builder is None:
+            atom_indexer = None
+            if self.ebs.structure is not None:
+                atom_indexer = AtomIndexer.from_structure(self.ebs.structure)
+
+            spin_projection_names = getattr(self.ebs, "spin_projection_names", None)
+            if spin_projection_names is not None:
+                spin_indexer = SpinIndexer.from_projection_names(spin_projection_names)
+            else:
+                spin_indexer = SpinIndexer()
+
+            self._projection_label_builder = ProjectionLabelBuilder(
+                atom_indexer=atom_indexer,
+                orbital_indexer=OrbitalIndexer(),
+                spin_indexer=spin_indexer,
+            )
+        return self._projection_label_builder
+
+    def _get_projection_selection_resolver(self) -> ProjectionSelectionResolver:
+        """Lazily initialize and return the projection selection resolver."""
+        if self._projection_selection_resolver is None:
+            label_builder = self._get_projection_label_builder()
+            orbital_names = getattr(self.ebs, "orbital_names", None)
+            is_non_colinear = getattr(self.ebs, "is_non_colinear", False)
+            self._projection_selection_resolver = ProjectionSelectionResolver(
+                label_builder=label_builder,
+                orbital_names=orbital_names,
+                is_non_colinear=is_non_colinear if is_non_colinear is not None else False,
+            )
+        return self._projection_selection_resolver
+
+    def _resolve_projection_selection(
+        self,
+        *,
+        atoms: Sequence[int] | int | None = None,
+        orbitals: Sequence[int] | int | None = None,
+        spins: Sequence[int] | int | None = None,
+        species: Sequence[str] | str | None = None,
+        species_orbital_map: Mapping[str, Iterable[int]] | None = None,
+        atoms_orbital_map: Mapping[int | Iterable[int], Iterable[int]] | None = None,
+    ) -> ProjectionSelectionResult:
+        """
+        Resolve projection selection parameters to canonical indices and labels.
+
+        Parameters
+        ----------
+        atoms : Sequence[int] | int | None
+            Atom indices to select
+        orbitals : Sequence[int] | int | None
+            Orbital indices to select
+        spins : Sequence[int] | int | None
+            Spin channel indices to select
+        species : Sequence[str] | str | None
+            Species names to select (resolves to atom indices)
+        species_orbital_map : Mapping[str, Iterable[int]] | None
+            Map from species to orbital indices
+        atoms_orbital_map : Mapping[int | Iterable[int], Iterable[int]] | None
+            Map from atom indices to orbital indices
+
+        Returns
+        -------
+        ProjectionSelectionResult
+            Resolved indices and labels
+        """
+        resolver = self._get_projection_selection_resolver()
+        return resolver.resolve(
+            atoms=atoms,
+            orbitals=orbitals,
+            spins=spins,
+            species=species,
+            species_orbital_map=species_orbital_map,
+            atoms_orbital_map=atoms_orbital_map,
+        )
+
+    def compute_projected_sum(
+        self,
+        atoms: Sequence[int] | int | None = None,
+        orbitals: Sequence[int] | int | None = None,
+        spins: Sequence[int] | int | None = None,
+        species: Sequence[str] | str | None = None,
+        species_orbital_map: Mapping[str, Iterable[int]] | None = None,
+        atoms_orbital_map: Mapping[int | Iterable[int], Iterable[int]] | None = None,
+        norm_mode: str | FSNormMode | None = "raw",
+        label: str = "Projected Sum",
+        name: str = "projected_sum",
+        **kwargs: Any,
+    ) -> Property:
+        """
+        Compute projected sum over selected atoms, orbitals, and spins on the Fermi surface.
+
+        The projection is computed on the EBS grid and then interpolated onto the
+        Fermi surface mesh.
+
+        Parameters
+        ----------
+        atoms : Sequence[int] | int | None
+            Atom indices to include in sum
+        orbitals : Sequence[int] | int | None
+            Orbital indices to include in sum
+        spins : Sequence[int] | int | None
+            Spin channels to include in sum
+        species : Sequence[str] | str | None
+            Species names to include (resolved to atom indices)
+        species_orbital_map : Mapping[str, Iterable[int]] | None
+            Map species to specific orbitals
+        atoms_orbital_map : Mapping[int | Iterable[int], Iterable[int]] | None
+            Map atoms to specific orbitals
+        norm_mode : str | FSNormMode | None
+            Normalization mode: 'raw', 'max', 'total', 'integral'
+        label : str
+            Display label for the property
+        name : str
+            Internal name for the property
+
+        Returns
+        -------
+        Property
+            Property object with projected sum values and metadata
+        """
+        # Check if projections are available
+        if not hasattr(self.ebs, "projected") or self.ebs.projected is None:
+            raise ValueError("Projected band structure data not available")
+
+        # Resolve selection parameters
+        has_selection = any(
+            x is not None
+            for x in [atoms, orbitals, spins, species, species_orbital_map, atoms_orbital_map]
+        )
+
+        selection = None
+        if has_selection:
+            selection = self._resolve_projection_selection(
+                atoms=atoms,
+                orbitals=orbitals,
+                spins=spins,
+                species=species,
+                species_orbital_map=species_orbital_map,
+                atoms_orbital_map=atoms_orbital_map,
+            )
+            atoms_list = list(selection.atoms) if selection.atoms else None
+            orbitals_list = list(selection.orbitals) if selection.orbitals else None
+            spins_list = list(selection.spins) if selection.spins else None
+        else:
+            atoms_list = None
+            orbitals_list = None
+            spins_list = None
+
+        # Compute projected sum on EBS grid
+        ebs_property = self.ebs.compute_projected_sum(
+            atoms=atoms_list,
+            orbitals=orbitals_list,
+            spins=spins_list,
+            norm_mode="raw",  # We'll normalize after interpolation
+        )
+
+        # Interpolate to surface
+        surface_values = self.interpolate_to_surface(ebs_property.value)
+
+        # Build property with metadata
+        prop = self._build_property(
+            values=surface_values,
+            label=label,
+            name=name,
+            norm_mode=norm_mode,
+            selection=selection,
+            **kwargs,
+        )
+
+        # Cache in PointSet
+        self.point_set.add_property(prop)
+        self._mark_cached(prop.name)
+
+        # Sync to PyVista
+        self.set_values(prop.name, prop.value)
+
+        return prop
+
+    def normalize(
+        self,
+        mode: str | FSNormMode | None,
+        values_array: np.ndarray,
+        **kwargs: Any,
+    ) -> np.ndarray:
+        """
+        Normalize values array according to specified mode.
+
+        Parameters
+        ----------
+        mode : str | FSNormMode | None
+            Normalization mode
+        values_array : np.ndarray
+            Values to normalize
+
+        Returns
+        -------
+        np.ndarray
+            Normalized values
+        """
+        mode = FSNormMode.from_input(mode)
+
+        if mode == FSNormMode.RAW:
+            return values_array
+        elif mode == FSNormMode.MAX:
+            return self._normalize_max(values_array, **kwargs)
+        elif mode == FSNormMode.TOTAL:
+            return self._normalize_total(values_array, **kwargs)
+        elif mode == FSNormMode.INTEGRAL:
+            return self._normalize_integral(values_array, **kwargs)
+        else:
+            raise ValueError(f"Unknown normalization mode: {mode}")
+
+    def _normalize_max(self, values_array: np.ndarray, **kwargs: Any) -> np.ndarray:
+        """Normalize by maximum absolute value."""
+        values_array = np.asarray(values_array, dtype=np.float64)
+
+        # Find max along all axes except the first (points axis)
+        max_val = np.max(np.abs(values_array))
+        if max_val == 0:
+            return values_array
+
+        return values_array / max_val
+
+    def _normalize_total(self, values_array: np.ndarray, **kwargs: Any) -> np.ndarray:
+        """Normalize by sum of all values."""
+        values_array = np.asarray(values_array, dtype=np.float64)
+
+        total = np.sum(np.abs(values_array))
+        if total == 0:
+            return values_array
+
+        return values_array / total
+
+    def _normalize_integral(self, values_array: np.ndarray, **kwargs: Any) -> np.ndarray:
+        """
+        Normalize by surface integral approximation.
+
+        Uses cell areas from the mesh to weight contributions.
+        """
+        values_array = np.asarray(values_array, dtype=np.float64)
+
+        # Compute cell areas for weighting
+        cell_sizes = self.compute_cell_sizes()
+        if cell_sizes is None or len(cell_sizes) == 0:
+            # Fallback to simple sum if cell sizes unavailable
+            return self._normalize_total(values_array, **kwargs)
+
+        # Map cell areas to points (average of adjacent cells)
+        point_weights = np.zeros(self.n_points)
+        cell_count = np.zeros(self.n_points)
+
+        for i, cell in enumerate(self.cell):
+            for point_idx in cell:
+                point_weights[point_idx] += cell_sizes[i]
+                cell_count[point_idx] += 1
+
+        # Average weights
+        nonzero_mask = cell_count > 0
+        point_weights[nonzero_mask] /= cell_count[nonzero_mask]
+
+        # Compute weighted integral
+        if values_array.ndim == 1:
+            integral = np.sum(values_array * point_weights)
+        else:
+            integral = np.sum(values_array * point_weights[:, np.newaxis])
+
+        if integral == 0:
+            return values_array
+
+        return values_array / integral
+
+    def _build_property(
+        self,
+        values: np.ndarray,
+        label: str,
+        name: str,
+        norm_mode: str | FSNormMode | None = None,
+        selection: ProjectionSelectionResult | None = None,
+        include_normal_label: bool = False,
+        **kwargs: Any,
+    ) -> Property:
+        """
+        Build a Property object with rich metadata.
+
+        Parameters
+        ----------
+        values : np.ndarray
+            Property values
+        label : str
+            Display label
+        name : str
+            Internal property name
+        norm_mode : str | FSNormMode | None
+            Normalization mode to apply
+        selection : ProjectionSelectionResult | None
+            Projection selection info for metadata
+        include_normal_label : bool
+            Whether to include normalization in label
+
+        Returns
+        -------
+        Property
+            Property with values and metadata
+        """
+        # Resolve and apply normalization
+        norm_mode = FSNormMode.from_input(norm_mode)
+        normed_name = FSNormMode.get_normed_name(norm_mode, name)
+
+        values = self.normalize(mode=norm_mode, values_array=values, **kwargs)
+
+        # Compute data limits
+        data_min = float(np.min(values))
+        data_max = float(np.max(values))
+        data_lim = (data_min, data_max)
+
+        # Build base metadata
+        metadata: dict[str, Any] = {
+            "norm_mode": norm_mode,
+            "data_lim": data_lim,
+            "scalar_label": label,
+            "label": label,
+            "label_plain": label,
+            "include_normal_label": include_normal_label,
+        }
+
+        # Add normalization prefix to label if requested
+        if include_normal_label and norm_mode != FSNormMode.RAW:
+            prefix = FSNormMode.get_mode_prefix(norm_mode)
+            metadata["label"] = f"{prefix} {label}"
+            metadata["label_plain"] = f"{prefix} {label}"
+
+        # Add selection metadata if present
+        if selection is not None:
+            label_plain_list, label_latex_list = self._format_selection_label(
+                selection=selection,
+                normalize=norm_mode != FSNormMode.RAW,
+                include_normal_label=include_normal_label,
+            )
+
+            metadata.update(
+                {
+                    "atoms": list(selection.atoms) if selection.atoms else None,
+                    "orbitals": list(selection.orbitals) if selection.orbitals else None,
+                    "spins": list(selection.spins) if selection.spins else None,
+                    "species": list(selection.species) if selection.species else None,
+                    "atom_label": selection.labels.atom,
+                    "atom_label_latex": selection.labels.atom_latex,
+                    "orbital_label": selection.labels.orbital,
+                    "orbital_label_latex": selection.labels.orbital_latex,
+                    "spin_label": selection.labels.spin,
+                    "spin_label_latex": selection.labels.spin_latex,
+                    "species_label": selection.labels.species,
+                    "species_label_latex": selection.labels.species_latex,
+                    "label_prefix": selection.labels.prefix_plain,
+                    "label_prefix_latex": selection.labels.prefix_latex,
+                    "label_combined": selection.labels.combined,
+                    "label_combined_latex": selection.labels.combined_latex,
+                    "label": label_latex_list,
+                    "label_plain": label_plain_list,
+                }
+            )
+
+        # Merge additional kwargs
+        if kwargs:
+            # Filter out normalization-related kwargs
+            extra_metadata = {k: v for k, v in kwargs.items() if k not in ("atoms", "orbitals", "spins")}
+            metadata.update(extra_metadata)
+
+        # Construct Property
+        prop = Property(
+            name=normed_name,
+            value=values,
+            point_set=self.point_set,
+            metadata=metadata,
+            label=label,
+        )
+
+        return prop
+
+    @staticmethod
+    def _format_selection_label(
+        selection: ProjectionSelectionResult,
+        *,
+        normalize: bool,
+        include_normal_label: bool = False,
+    ) -> tuple[list[str], list[str]]:
+        """
+        Format selection into plain and LaTeX labels.
+
+        Parameters
+        ----------
+        selection : ProjectionSelectionResult
+            Resolved selection with labels
+        normalize : bool
+            Whether normalization is applied
+        include_normal_label : bool
+            Whether to include normalization mode in label
+
+        Returns
+        -------
+        tuple[list[str], list[str]]
+            (plain_labels, latex_labels)
+        """
+        mode_plain = "fraction" if normalize else "raw"
+        mode_latex = r"\mathrm{fraction}" if normalize else r"\mathrm{raw}"
+
+        prefix_plain = selection.labels.prefix_plain
+        prefix_latex = selection.labels.prefix_latex
+
+        spin_components = selection.labels.spin_components or ("",)
+        spin_components_latex = selection.labels.spin_components_latex or ("",)
+
+        labels_plain: list[str] = []
+        labels_latex: list[str] = []
+
+        normal_suffix_plain = f" [{mode_plain}]" if include_normal_label else ""
+        normal_suffix_latex = f" [{mode_latex}]" if include_normal_label else ""
+
+        for component_plain, component_latex in zip(spin_components, spin_components_latex):
+            body_plain = prefix_plain
+            if component_plain:
+                body_plain = f"{body_plain}[{component_plain}]" if body_plain else component_plain
+            body_plain = body_plain or "all"
+            labels_plain.append(f"{body_plain}{normal_suffix_plain}")
+
+            body_latex = prefix_latex
+            if component_latex:
+                body_latex = f"{body_latex}[{component_latex}]" if body_latex else f"[{component_latex}]"
+            body_latex = body_latex or r"\mathrm{all}"
+            labels_latex.append(f"${body_latex}{normal_suffix_latex}$")
+
+        return labels_plain, labels_latex
+
+    def save(self, path: str) -> None:
+        """
+        Save FermiSurface to file.
+
+        Parameters
+        ----------
+        path : str
+            Output file path. Extension determines format (.pkl, .npz, etc.)
+
+        Note
+        ----
+        This saves the surface geometry and point data. The EBS objects are
+        also saved but may need to be reloaded from the original calculation
+        for full functionality.
+        """
+        import pickle
+        from pathlib import Path
+        import copy
+
+        path_obj = Path(path)
+
+        # Serialize point_set properties to avoid weak reference issues
+        point_set_data = {
+            "points": self.point_set.points.copy(),
+            "properties": {},
+        }
+        for prop_name, prop in self.point_set.property_store.items():
+            point_set_data["properties"][prop_name] = {
+                "value": prop.value.copy(),
+                "gradients": {k: v.copy() for k, v in prop.gradients.items() if v is not None and len(v) > 0},
+                "units": prop.units,
+                "label": prop.label,
+                "metadata": copy.deepcopy(prop.metadata) if prop.metadata else {},
+                "data_lim": prop.data_lim,
+            }
+
+        # Serialize band_isosurfaces - just store the geometry
+        band_isosurfaces_data = {}
+        for key, surface in self.band_isosurfaces.items():
+            band_isosurfaces_data[key] = {
+                "points": np.array(surface.points),
+                "faces": np.array(surface.faces),
+            }
+
+        # Collect all data needed for reconstruction
+        save_data = {
+            "points": self.points.copy(),
+            "faces": self.faces.copy(),
+            "isovalue": self.isovalue,
+            "point_data": {k: np.array(v) for k, v in self.point_data.items()},
+            "cell_data": {k: np.array(v) for k, v in self.cell_data.items()},
+            "field_data": dict(self.field_data),
+            "point_set_data": point_set_data,
+            "band_isosurfaces_data": band_isosurfaces_data,
+            # Note: EBS objects are not saved due to weak reference issues
+            # Users should keep a reference to EBS or reload from calculation
+        }
+
+        with open(path_obj, "wb") as f:
+            pickle.dump(save_data, f, protocol=pickle.HIGHEST_PROTOCOL)
+
+        logger.info(f"FermiSurface saved to {path}")
+
+    @classmethod
+    def load(cls, path: str, ebs: ElectronicBandStructureMesh | None = None) -> "FermiSurface":
+        """
+        Load FermiSurface from file.
+
+        Parameters
+        ----------
+        path : str
+            Input file path
+        ebs : ElectronicBandStructureMesh | None
+            Optional EBS to associate with the loaded surface. If not provided,
+            property computation methods will not be available.
+
+        Returns
+        -------
+        FermiSurface
+            Loaded FermiSurface instance
+
+        Note
+        ----
+        The loaded surface has full visualization capabilities. For property
+        computation (compute_projected_sum, etc.), you need to either pass the
+        original EBS or reload it from the calculation directory.
+        """
+        import pickle
+        from pathlib import Path
+
+        path_obj = Path(path)
+
+        with open(path_obj, "rb") as f:
+            save_data = pickle.load(f)
+
+        # Reconstruct point_set from serialized data
+        point_set_data = save_data["point_set_data"]
+        point_set = PointSet(points=point_set_data["points"])
+
+        # Reconstruct properties
+        for prop_name, prop_data in point_set_data["properties"].items():
+            prop = Property(
+                name=prop_name,
+                value=prop_data["value"],
+                gradients=prop_data.get("gradients"),
+                units=prop_data.get("units"),
+                label=prop_data.get("label"),
+                point_set=point_set,
+                metadata=prop_data.get("metadata"),
+                data_lim=prop_data.get("data_lim"),
+            )
+            point_set.add_property(prop)
+
+        # Reconstruct band_isosurfaces from saved geometry
+        band_isosurfaces = {}
+        for key, surface_data in save_data["band_isosurfaces_data"].items():
+            surface = pv.PolyData(surface_data["points"], surface_data["faces"])
+            band_isosurfaces[key] = surface
+
+        # Create a temporary PolyData with all the saved data
+        temp_polydata = pv.PolyData(save_data["points"], save_data["faces"])
+
+        # Add point/cell/field data to temp before shallow_copy
+        for k, v in save_data["point_data"].items():
+            temp_polydata.point_data[k] = v
+        for k, v in save_data["cell_data"].items():
+            temp_polydata.cell_data[k] = v
+        temp_polydata.field_data.update(save_data["field_data"])
+
+        # Create the FermiSurface by calling the parent class constructor
+        # and then manually setting our attributes
+        fs = pv.PolyData.__new__(cls)
+        fs.shallow_copy(temp_polydata)
+
+        # Copy PyVista-specific internal state that isn't handled by VTK's shallow_copy
+        # This is required for point_data/cell_data access to work properly
+        for attr in ["_association_bitarray_names", "_association_complex_names"]:
+            if hasattr(temp_polydata, attr):
+                setattr(fs, attr, getattr(temp_polydata, attr).copy())
+
+        fs._band_isosurfaces = band_isosurfaces
+        fs._isovalue = save_data["isovalue"]
+        fs._original_ebs = ebs  # type: ignore[assignment]
+        fs._ebs = ebs  # type: ignore[assignment]
+        fs._point_set = point_set
+
+        # Projection selection infrastructure (lazy initialized)
+        fs._projection_label_builder = None
+        fs._projection_selection_resolver = None
+
+        # Cache invalidation tracking
+        fs._ebs_cache_version = 0
+        fs._cached_properties = {}
+
+        logger.info(f"FermiSurface loaded from {path}")
+        return fs
 
     def get_brillouin_zone(self, supercell: list[int]):
         """Returns the BrillouinZone of the material

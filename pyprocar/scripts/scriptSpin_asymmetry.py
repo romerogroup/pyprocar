@@ -5,12 +5,14 @@ Created on Tue Aug 18 11:14:17 2020
 @author: petavazohi
 """
 
+import warnings
+
 import numpy as np
 import pyvista
 from matplotlib import cm
 from matplotlib import colors as mpcolors
 
-from pyprocar.core import FermiSurface3D, ProcarSelect, boolean_add
+from pyprocar.core import ProcarSelect
 from pyprocar.io import ProcarParser
 from pyprocar.utils.splash import welcome
 from pyprocar.utils.utilsprocar import UtilsProcar
@@ -49,6 +51,13 @@ def spin_asymmetry(
     widget=None,
     show=True,
 ):
+    raise NotImplementedError(
+        "The spin_asymmetry function has been deprecated. "
+        "The underlying FermiSurface3D and boolean_add classes have been removed. "
+        "Please use the FermiSurface class with the FermiHandler for Fermi surface "
+        "visualization instead."
+    )
+
     welcome()
 
     if show:

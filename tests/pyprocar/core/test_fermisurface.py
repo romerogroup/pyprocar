@@ -312,3 +312,141 @@ class TestFermiSurface:
         assert isinstance(fs.band_isosurfaces, dict)
         assert fs.isovalue == fs.ebs.fermi
         assert fs.fermi_shift == 0.0
+
+
+class TestFermiSurfaceNormalization:
+    """Tests for FermiSurface normalization system."""
+
+    def test_normalize_raw(self, fermisurface_3d_non_spin_polarized):
+        """Test that raw normalization returns unchanged values."""
+        fs = fermisurface_3d_non_spin_polarized
+        values = np.array([1.0, 2.0, 3.0, 4.0, 5.0])
+
+        result = fs.normalize("raw", values)
+
+        np.testing.assert_array_equal(result, values)
+
+    def test_normalize_max(self, fermisurface_3d_non_spin_polarized):
+        """Test max normalization produces values in [-1, 1]."""
+        fs = fermisurface_3d_non_spin_polarized
+        values = np.array([1.0, 2.0, 3.0, 4.0, 5.0])
+
+        result = fs.normalize("max", values)
+
+        assert np.max(np.abs(result)) == 1.0
+        assert result[-1] == 1.0  # Max value normalized to 1
+
+    def test_normalize_total(self, fermisurface_3d_non_spin_polarized):
+        """Test total normalization produces values that sum to 1."""
+        fs = fermisurface_3d_non_spin_polarized
+        values = np.array([1.0, 2.0, 3.0, 4.0, 5.0])
+
+        result = fs.normalize("total", values)
+
+        assert np.isclose(np.sum(result), 1.0)
+
+    def test_fsnormmode_from_input(self):
+        """Test FSNormMode.from_input conversion."""
+        from pyprocar.core.fermisurface import FSNormMode
+
+        assert FSNormMode.from_input("raw") == FSNormMode.RAW
+        assert FSNormMode.from_input("max") == FSNormMode.MAX
+        assert FSNormMode.from_input("MAX") == FSNormMode.MAX  # Case insensitive
+        assert FSNormMode.from_input(None) == FSNormMode.RAW
+        assert FSNormMode.from_input(FSNormMode.TOTAL) == FSNormMode.TOTAL
+
+    def test_fsnormmode_list_modes(self):
+        """Test FSNormMode.list_modes returns all modes."""
+        from pyprocar.core.fermisurface import FSNormMode
+
+        modes = FSNormMode.list_modes()
+        assert "raw" in modes
+        assert "max" in modes
+        assert "total" in modes
+        assert "integral" in modes
+        assert len(modes) == 4
+
+    def test_fsnormmode_invalid_input(self):
+        """Test FSNormMode.from_input raises error on invalid input."""
+        from pyprocar.core.fermisurface import FSNormMode
+
+        with pytest.raises(ValueError):
+            FSNormMode.from_input("invalid_mode")
+
+
+class TestFermiSurfaceSerialization:
+    """Tests for FermiSurface save/load functionality."""
+
+    def test_save_load_roundtrip(self, fermisurface_3d_non_spin_polarized, tmp_path):
+        """Test that save/load preserves all data."""
+        fs = fermisurface_3d_non_spin_polarized
+        save_path = tmp_path / "test_fs.pkl"
+
+        # Save
+        fs.save(str(save_path))
+        assert save_path.exists()
+
+        # Load
+        fs2 = FermiSurface.load(str(save_path))
+
+        # Verify
+        assert fs2.n_points == fs.n_points
+        np.testing.assert_array_almost_equal(fs2.points, fs.points)
+        assert fs2.isovalue == fs.isovalue
+
+    def test_save_load_preserves_point_data(self, fermisurface_3d_non_spin_polarized, tmp_path):
+        """Test that point_data is preserved through save/load."""
+        fs = fermisurface_3d_non_spin_polarized
+
+        # Add some point data
+        test_data = np.random.rand(fs.n_points)
+        fs.point_data["test_scalar"] = test_data
+
+        save_path = tmp_path / "test_fs_data.pkl"
+        fs.save(str(save_path))
+        fs2 = FermiSurface.load(str(save_path))
+
+        assert "test_scalar" in fs2.point_data
+        np.testing.assert_array_almost_equal(fs2.point_data["test_scalar"], test_data)
+
+    def test_save_load_preserves_band_isosurfaces(self, fermisurface_3d_non_spin_polarized, tmp_path):
+        """Test that band_isosurfaces are preserved through save/load."""
+        fs = fermisurface_3d_non_spin_polarized
+        original_keys = set(fs.band_isosurfaces.keys())
+
+        save_path = tmp_path / "test_fs_bands.pkl"
+        fs.save(str(save_path))
+        fs2 = FermiSurface.load(str(save_path))
+
+        assert set(fs2.band_isosurfaces.keys()) == original_keys
+
+
+class TestFermiSurfaceCache:
+    """Tests for FermiSurface caching system."""
+
+    def test_cache_invalidation(self, fermisurface_3d_non_spin_polarized):
+        """Test that cache invalidation works."""
+        fs = fermisurface_3d_non_spin_polarized
+
+        # Mark something as cached
+        fs._mark_cached("test_prop")
+        assert fs._is_cache_valid("test_prop")
+
+        # Invalidate
+        fs._invalidate_cache()
+        assert not fs._is_cache_valid("test_prop")
+
+    def test_cache_version_increments(self, fermisurface_3d_non_spin_polarized):
+        """Test that cache version increments on invalidation."""
+        fs = fermisurface_3d_non_spin_polarized
+
+        initial_version = fs._ebs_cache_version
+        fs._invalidate_cache()
+
+        assert fs._ebs_cache_version == initial_version + 1
+
+    def test_uncached_property_invalid(self, fermisurface_3d_non_spin_polarized):
+        """Test that uncached properties are detected as invalid."""
+        fs = fermisurface_3d_non_spin_polarized
+
+        assert not fs._is_cache_valid("nonexistent_property")
