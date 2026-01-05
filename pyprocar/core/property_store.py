@@ -693,7 +693,7 @@ class PointSet:
     def select_points(self, indices):
         if len(indices) == 0:
             return PointSet(
-                points=np.empty((0, 3)), property_store={}, gradient_func=self.gradient_func
+                points=np.empty((0, 3)), point_data={}, gradient_func=self.gradient_func
             )
 
         points = self.points[indices]
@@ -706,7 +706,7 @@ class PointSet:
             new_point_data[prop_name][(calc_name, gradient_order)] = value_array[indices]
 
         return PointSet(
-            points=points, property_store=new_point_data, gradient_func=self.gradient_func
+            points=points, point_data=new_point_data, gradient_func=self.gradient_func
         )
 
     def _extract_key(
