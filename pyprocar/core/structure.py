@@ -49,32 +49,79 @@ class Structure:
         lattice=None,
         rotations=None,
     ):
+        # Validate that we have at least some data
+        if atoms is None and lattice is None and fractional_coordinates is None and cartesian_coordinates is None:
+            raise ValueError("Structure requires at least atoms or lattice to be provided")
+
+        # Handle atoms - convert to array and validate
+        if atoms is not None:
+            self.atoms = np.array(atoms)
+            if self.atoms.ndim == 0 or self.atoms.shape[0] == 0:
+                raise ValueError("atoms must be a non-empty list")
+        else:
+            self.atoms = None
+
+        # Handle lattice - convert to array if provided
+        if lattice is not None:
+            self.lattice = np.array(lattice)
+            if self.lattice.ndim < 2 or self.lattice.shape[0] == 0:
+                raise ValueError("lattice must be a non-empty 2D array")
+        else:
+            self.lattice = None
+
+        # Handle coordinates
         if fractional_coordinates is not None:
-            self.fractional_coordinates = np.array(fractional_coordinates)
-            self.cartesian_coordinates = np.dot(fractional_coordinates, lattice)
+            fractional_coordinates = np.array(fractional_coordinates)
+            if fractional_coordinates.ndim < 2 or fractional_coordinates.shape[0] == 0:
+                raise ValueError("fractional_coordinates must be a non-empty 2D array")
+            self.fractional_coordinates = fractional_coordinates
+            if self.lattice is not None:
+                self.cartesian_coordinates = np.dot(fractional_coordinates, self.lattice)
+            else:
+                self.cartesian_coordinates = None
         elif cartesian_coordinates is not None:
+            cartesian_coordinates = np.array(cartesian_coordinates)
+            if cartesian_coordinates.ndim < 2 or cartesian_coordinates.shape[0] == 0:
+                raise ValueError("cartesian_coordinates must be a non-empty 2D array")
             self.cartesian_coordinates = cartesian_coordinates
-            self.fractional_coordinates = np.dot(cartesian_coordinates, np.linalg.inv(lattice))
+            if self.lattice is not None:
+                self.fractional_coordinates = np.dot(cartesian_coordinates, np.linalg.inv(self.lattice))
+            else:
+                self.fractional_coordinates = None
         else:
             self.cartesian_coordinates = None
             self.fractional_coordinates = None
-        self.atoms = np.array(atoms)
-        self.lattice = np.array(lattice)
 
-        if self.atoms.shape[0] == 0:
-            raise ValueError("atoms must be a non-empty list")
-        if self.fractional_coordinates.shape[0] == 0:
-            raise ValueError("fractional_coordinates must be a non-empty list")
-        if self.lattice.shape[0] == 0:
-            raise ValueError("lattice must be a non-empty list")
-        if self.atoms.shape[0] != self.fractional_coordinates.shape[0]:
-            raise ValueError("atoms and fractional_coordinates must have the same length")
+        # Validate consistency between atoms and coordinates
+        if self.atoms is not None and self.fractional_coordinates is not None:
+            if self.atoms.shape[0] != self.fractional_coordinates.shape[0]:
+                raise ValueError("atoms and fractional_coordinates must have the same length")
 
+        # Initialize private attributes for lazy-loaded properties
+        self._wyckoff_positions = None
+        self._group = None
+
+        # Handle rotations
         self._rotations = rotations
         if self._rotations is None:
             self._rotations = np.empty(shape=(0, 3, 3))
 
-        return None
+    @property
+    def has_complete_data(self):
+        """
+        Check if the structure has complete data for calculations.
+
+        Returns
+        -------
+        bool
+            True if atoms, lattice, and coordinates are all set, False otherwise.
+        """
+        return (
+            self.atoms is not None
+            and self.lattice is not None
+            and self.fractional_coordinates is not None
+            and len(self.atoms) > 0
+        )
 
     def __repr__(self):
         """Unambiguous representation with essential details for debugging."""
@@ -417,8 +464,8 @@ class Structure:
                     wyckoff_positions[i] = str(multiplicity) + iwyckoff
                     group[i] = counter
                 counter += 1
-        self.wyckoff_positions = wyckoff_positions
-        self.group = group
+        self._wyckoff_positions = wyckoff_positions
+        self._group = group
         return wyckoff_positions
 
     def _get_lattice_corners(self, lattice):
@@ -512,7 +559,7 @@ class Structure:
             return None
         scale = int(scale)
         new_lattice = np.dot(self.lattice, transformation_matrix)
-        temp_structure = Structure(lattice=new_lattice)
+        temp_structure = Structure(atoms=["X"], fractional_coordinates=[[0, 0, 0]], lattice=new_lattice)
         new_atoms = []
         new_fractional = []
         for iatom, atom_coord in enumerate(self.cartesian_coordinates):
