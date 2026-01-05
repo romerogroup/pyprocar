@@ -258,7 +258,7 @@ class VaspParser(BaseParser):
     @cached_property
     def energies(self) -> np.ndarray | None:
         if self.vasprun is not None and self.vasprun.has_dos:
-            energies = self.vasprun.dos_total["energies"]
+            energies = self.vasprun.dos_energies
 
         elif self.doscar is not None and self.doscar.has_dos:
             energies = self.doscar.energies
@@ -272,7 +272,7 @@ class VaspParser(BaseParser):
     @cached_property
     def total_dos(self) -> np.ndarray | None:
         if self.vasprun is not None and self.vasprun.has_dos:
-            total_dos = np.moveaxis(self.vasprun.total, (0), (-1))
+            total_dos = self.vasprun.total  # shape: (n_energies, n_spins)
         elif self.doscar is not None and self.doscar.has_dos:
             total_dos = self.doscar.total
         else:
@@ -285,7 +285,7 @@ class VaspParser(BaseParser):
     def projected_dos(self) -> np.ndarray | None:
         if self.vasprun is not None and self.vasprun.has_dos:
             logger.info("Using vasprun projected dos")
-            return np.moveaxis(self.vasprun.projected, (0, 1, 2, 3), (2, 3, 1, 0))
+            return self.vasprun.partial  # shape: (n_energies, n_spins, n_atoms, n_orbitals)
         elif self.doscar is not None and self.doscar.has_dos:
             logger.info("Using doscar projected dos")
             return self.doscar.projected_dos

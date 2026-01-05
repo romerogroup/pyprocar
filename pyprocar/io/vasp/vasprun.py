@@ -694,6 +694,52 @@ class VaspXML(Mapping[str, Any]):
         return arr
 
     @cached_property
+    def dos_energies(self) -> np.ndarray | None:
+        """Parse DOS energy grid from vasprun.xml
+
+        Returns array with shape (n_energies,)
+        """
+        tag_list = self.root.xpath("//total")
+        assert isinstance(tag_list, Iterable)
+        if not tag_list:
+            return None
+
+        element = tag_list[0]
+        assert isinstance(element, etree._Element)
+
+        # Find the array element
+        array_elem = None
+        for child in element:
+            if child.tag == "array":
+                array_elem = child
+                break
+
+        if array_elem is None:
+            return None
+
+        # Find the set element
+        set_elem = None
+        for child in array_elem:
+            if child.tag == "set":
+                set_elem = child
+                break
+
+        if set_elem is None:
+            return None
+
+        # Get energies from first spin set
+        for spin_set in set_elem:
+            if spin_set.tag == "set":
+                energy_data: list[float] = []
+                for r_elem in spin_set:
+                    if r_elem.tag == "r" and r_elem.text:
+                        values = r_elem.text.split()
+                        energy_data.append(float(values[0]))  # energy is first value
+                return np.array(energy_data)
+
+        return None
+
+    @cached_property
     def partial(self) -> np.ndarray | None:
         """Parse partial DOS from vasprun.xml
 
