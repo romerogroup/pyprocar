@@ -8,10 +8,12 @@ import pyvista as pv
 
 from pyprocar.core import kpoints
 from pyprocar.core.ebs import (
+    EBSNormMode,
     ElectronicBandStructure,
     ElectronicBandStructureMesh,
     ElectronicBandStructurePath,
 )
+from pyprocar.core.property_store import Property
 from tests.utils import DATA_DIR
 
 logger = logging.getLogger("pyprocar")
@@ -262,23 +264,33 @@ class TestElectronicBandStructure:
 
     def test_compute_ebs_ipr(self, sample_ebs):
         """Test IPR computation."""
-        ipr = sample_ebs.compute_ebs_ipr()
+        ipr_prop = sample_ebs.compute_ebs_ipr()
 
-        assert ipr is not None
-        assert ipr.shape == (8, 4, 2)
-        assert np.all(ipr >= 0)  # IPR should be non-negative
-        assert np.all(ipr <= 1)  # IPR should be <= 1
+        assert ipr_prop is not None
+        assert isinstance(ipr_prop, Property)
+        assert ipr_prop.value.shape == (8, 4, 2)
+        assert np.all(ipr_prop.value >= 0)  # IPR should be non-negative
+        assert np.all(ipr_prop.value <= 1)  # IPR should be <= 1
+        assert ipr_prop.metadata.get("description") == "Inverse Participation Ratio"
 
     def test_compute_projected_sum(self, sample_ebs):
         """Test projected sum computation."""
-        proj_sum = sample_ebs.compute_projected_sum()
+        proj_sum_prop = sample_ebs.compute_projected_sum()
 
-        assert proj_sum is not None
-        assert proj_sum.shape == (8, 4, 2)
+        assert proj_sum_prop is not None
+        assert isinstance(proj_sum_prop, Property)
+        assert proj_sum_prop.value.shape == (8, 4, 2)
 
         # Test with specific atoms
-        proj_sum_atoms = sample_ebs.compute_projected_sum(atoms=[0])
-        assert proj_sum_atoms.shape == (8, 4, 2)
+        proj_sum_atoms_prop = sample_ebs.compute_projected_sum(atoms=[0])
+        assert isinstance(proj_sum_atoms_prop, Property)
+        assert proj_sum_atoms_prop.value.shape == (8, 4, 2)
+        assert proj_sum_atoms_prop.metadata.get("atoms") == [0]
+
+        # Test with normalization
+        proj_sum_normalized = sample_ebs.compute_projected_sum(norm_mode="max")
+        assert isinstance(proj_sum_normalized, Property)
+        assert np.max(proj_sum_normalized.value) <= 1.0 + 1e-6
 
     def test_reduce_bands_near_fermi(self, sample_ebs):
         """Test reducing bands near Fermi energy."""
