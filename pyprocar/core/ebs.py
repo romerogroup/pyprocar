@@ -2377,7 +2377,7 @@ class ElectronicBandStructureMesh(
             property[calc_name, gradient_order] = interpolated_value
 
         ebs.update_points(new_kpoints)
-        ebs._mesh = ebs.to_pyvista_grid()
+        ebs._mesh = ebs.to_mesh()
         return ebs
 
     def expand_single_dimension(self, inplace=False, fill_tol=0.1):
