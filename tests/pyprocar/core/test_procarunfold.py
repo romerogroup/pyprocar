@@ -16,13 +16,11 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pytest
 
-from tests.utils import DATA_DIR
-
 # Import classes to test
 from pyprocar.core.procarunfold import ProcarUnfolder
 from pyprocar.core.procarunfold.fatband import plot_band_weight
 from pyprocar.core.procarunfold.unfolder import Unfolder
-
+from tests.utils import DATA_DIR
 
 # ==============================================================================
 # Fixtures for Synthetic Data (Unit Tests)

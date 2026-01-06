@@ -5,7 +5,6 @@ Created on Tue Aug 18 11:14:17 2020
 @author: petavazohi
 """
 
-import warnings
 
 import numpy as np
 import pyvista

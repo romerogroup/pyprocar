@@ -33,7 +33,7 @@ class AbinitOutput(Mapping[str, Any]):
     def is_file_of_type(cls, filepath: str | Path) -> bool:
         """Check if file is an ABINIT output file by content."""
         try:
-            with open(filepath, "r", errors="ignore") as f:
+            with open(filepath, errors="ignore") as f:
                 for _ in range(10):
                     line = f.readline()
                     if "Version" in line and "ABINIT" in line:

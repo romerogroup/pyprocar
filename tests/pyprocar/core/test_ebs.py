@@ -7,13 +7,12 @@ import pytest
 import pyvista as pv
 
 from pyprocar.core import kpoints
-from pyprocar.core.kpoints import KGRID_MODE, KGridInfo
 from pyprocar.core.ebs import (
-    EBSNormMode,
     ElectronicBandStructure,
     ElectronicBandStructureMesh,
     ElectronicBandStructurePath,
 )
+from pyprocar.core.kpoints import KGRID_MODE, KGridInfo
 from pyprocar.core.property_store import Property
 from tests.utils import DATA_DIR
 

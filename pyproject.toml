@@ -1,49 +1,47 @@
 [project]
 name = "PyProcar"
 authors = [
-    {name = "Francisco Muñoz", email = "fvmunoz@gmail.com"},
-    {name = "Logan Lang", email = "lllang@mix.wvu.edu"},
-    {name = "Aldo Romero", email = "alromero@mail.wvu.edu"},
-    {name = "Sobhit Singh", email = "smsingh@mix.wvu.edu"},
-    {name = "Uthpala Herath", email = "ukh0001@mix.wvu.edu"},
-    {name = "Pedram Tavadze", email = "petavazohi@mix.wvu.edu"},
-    {name = "Eric Bousquet", email = "eric.bousquet@uliege.be"},
-    {name = "Xu He", email = "mailhexu@gmail.com"},
-    {name = "Reese Boucher"},
-    {name = "Freddy Farah"}
+  { name = "Francisco Muñoz", email = "fvmunoz@gmail.com" },
+  { name = "Logan Lang", email = "lllang@mix.wvu.edu" },
+  { name = "Aldo Romero", email = "alromero@mail.wvu.edu" },
+  { name = "Sobhit Singh", email = "smsingh@mix.wvu.edu" },
+  { name = "Uthpala Herath", email = "ukh0001@mix.wvu.edu" },
+  { name = "Pedram Tavadze", email = "petavazohi@mix.wvu.edu" },
+  { name = "Eric Bousquet", email = "eric.bousquet@uliege.be" },
+  { name = "Xu He", email = "mailhexu@gmail.com" },
+  { name = "Reese Boucher" },
+  { name = "Freddy Farah" },
 ]
 
 description = "A Python library for electronic structure pre/post-processing."
-readme = {file = "README.md", content-type = "text/markdown"}  # Ensure this matches the file used
+readme = { file = "README.md", content-type = "text/markdown" }                # Ensure this matches the file used
 license = "MIT"
 license-files = ["LICENSE"]
 keywords = ["materials", "science", "plotting", "electronic structure", "DFT"]
-classifiers = [
-    "Programming Language :: Python :: 3",
-]
+classifiers = ["Programming Language :: Python :: 3"]
 
 dynamic = ["version"]
 
 requires-python = ">=3.8"
 dependencies = [
-    "matplotlib>=3.8",
-    "numpy",
-    "pandas",
-    "scikit-image",
-    "scikit-learn",
-    "scipy",
-    "sympy",
-    "trimesh",
-    "spglib",
-    "seekpath",
-    "ase",
-    "PyYAML",
-    "gdown",
-    "dill",
-    "variconfig",
-    "huggingface_hub",
-    "pyvista[jupyter]>0.44.0",
-    "vtk"
+  "matplotlib>=3.8",
+  "numpy",
+  "pandas",
+  "scikit-image",
+  "scikit-learn",
+  "scipy",
+  "sympy",
+  "trimesh",
+  "spglib",
+  "seekpath",
+  "ase",
+  "PyYAML",
+  "gdown",
+  "dill",
+  "variconfig",
+  "huggingface_hub",
+  "pyvista[jupyter]>0.44.0",
+  "vtk",
 ]
 
 
@@ -61,7 +59,6 @@ pyprocar-download = "scripts.download:main"
 where = ["."]
 include = ["pyprocar*", "scripts*"]
 exclude = ["pyprocar.tests*"]
-
 
 
 [build-system]

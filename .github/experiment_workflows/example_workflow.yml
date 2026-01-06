@@ -4,7 +4,7 @@ on:
   workflow_run:
     workflows: ["Workflow A"]
     types:
-      - completed  # Runs when workflow A completes
+      - completed # Runs when workflow A completes
 
 jobs:
   trigger:

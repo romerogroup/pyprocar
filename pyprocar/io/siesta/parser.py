@@ -7,9 +7,9 @@ from pathlib import Path
 import numpy as np
 
 from pyprocar.core import KPath, Structure
-from pyprocar.core.kpoints import normalize_kpoint_name
 from pyprocar.core.dos import DensityOfStates
 from pyprocar.core.ebs import ElectronicBandStructure, get_ebs_from_data
+from pyprocar.core.kpoints import normalize_kpoint_name
 from pyprocar.io.base import BaseParser
 from pyprocar.io.siesta.bands import Bands
 from pyprocar.io.siesta.fdf import FDF

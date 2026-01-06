@@ -4,7 +4,6 @@ import numpy as np
 
 from pyprocar.io.siesta import FDF
 
-
 FDF_STR = """
 SystemLabel silicon
 

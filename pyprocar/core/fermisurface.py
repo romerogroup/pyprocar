@@ -37,7 +37,7 @@ class FSNormMode(Enum):
     INTEGRAL = "integral"
 
     @classmethod
-    def from_input(cls, input: str | "FSNormMode" | None) -> "FSNormMode":
+    def from_input(cls, input: str | FSNormMode | None) -> FSNormMode:
         """Convert string/None input to FSNormMode enum."""
         if isinstance(input, FSNormMode):
             return input
@@ -65,14 +65,14 @@ class FSNormMode(Enum):
         return [mode.value for mode in cls]
 
     @staticmethod
-    def get_normed_name(mode: "FSNormMode", name: str) -> str:
+    def get_normed_name(mode: FSNormMode, name: str) -> str:
         """Return property name with normalization prefix."""
         if mode == FSNormMode.RAW:
             return name
         return f"{mode.value}_{name}"
 
     @staticmethod
-    def get_mode_prefix(mode: "FSNormMode") -> str:
+    def get_mode_prefix(mode: FSNormMode) -> str:
         """Return display prefix for normalization mode."""
         prefixes = {
             FSNormMode.RAW: "",
@@ -798,9 +798,9 @@ class FermiSurface(pv.PolyData):
         also saved but may need to be reloaded from the original calculation
         for full functionality.
         """
+        import copy
         import pickle
         from pathlib import Path
-        import copy
 
         path_obj = Path(path)
 
@@ -847,7 +847,7 @@ class FermiSurface(pv.PolyData):
         logger.info(f"FermiSurface saved to {path}")
 
     @classmethod
-    def load(cls, path: str, ebs: ElectronicBandStructureMesh | None = None) -> "FermiSurface":
+    def load(cls, path: str, ebs: ElectronicBandStructureMesh | None = None) -> FermiSurface:
         """
         Load FermiSurface from file.
 

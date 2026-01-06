@@ -4,8 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from pyprocar.io.siesta import Bands, FDF, SiestaParser
-
+from pyprocar.io.siesta import FDF, Bands, SiestaParser
 
 FDF_STR = """
 SystemLabel silicon

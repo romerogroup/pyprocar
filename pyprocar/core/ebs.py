@@ -14,16 +14,15 @@ import itertools
 import logging
 import re
 from abc import ABC, abstractmethod
+from collections.abc import Iterable, Mapping, Sequence
 from enum import Enum
 from pathlib import Path
+from typing import Any
 
 import numpy as np
 import numpy.typing as npt
 import pyvista as pv
 from typing_extensions import override
-
-from collections.abc import Iterable, Mapping, Sequence
-from typing import Any
 
 from pyprocar.core import kpoints
 from pyprocar.core.atomic_orbital_index import (
@@ -39,7 +38,7 @@ from pyprocar.core.property_store import PointSet, Property
 from pyprocar.core.serializer import get_serializer
 from pyprocar.core.structure import Structure
 from pyprocar.utils import math, np_utils, physics
-from pyprocar.utils.info import orbital_index_name_map, orbital_names
+from pyprocar.utils.info import orbital_names
 from pyprocar.utils.math import np_round_to_half
 from pyprocar.utils.unfolder import Unfolder
 
@@ -70,7 +69,7 @@ class EBSNormMode(Enum):
     TOTAL_PROJECTION = "total_projection"
 
     @classmethod
-    def from_input(cls, input: str | "EBSNormMode" | None) -> "EBSNormMode":
+    def from_input(cls, input: str | EBSNormMode | None) -> EBSNormMode:
         if isinstance(input, EBSNormMode):
             return input
         if input is None:
@@ -97,7 +96,7 @@ class EBSNormMode(Enum):
         return [mode.value for mode in cls]
 
     @classmethod
-    def get_mode_prefix(cls, mode: "EBSNormMode") -> str:
+    def get_mode_prefix(cls, mode: EBSNormMode) -> str:
         mode = cls.from_input(mode)
         prefixes = {
             cls.RAW: "",
@@ -108,7 +107,7 @@ class EBSNormMode(Enum):
         return prefixes.get(mode, "")
 
     @classmethod
-    def get_normed_name(cls, mode: "EBSNormMode", name: str) -> str:
+    def get_normed_name(cls, mode: EBSNormMode, name: str) -> str:
         mode = cls.from_input(mode)
         prefix = cls.get_mode_prefix(mode)
         if prefix:
@@ -116,7 +115,7 @@ class EBSNormMode(Enum):
         return name
 
     @classmethod
-    def get_normed_units(cls, mode: "EBSNormMode") -> str:
+    def get_normed_units(cls, mode: EBSNormMode) -> str:
         """Return units after normalization.
 
         Projection weights are dimensionless, so normalization
@@ -128,7 +127,7 @@ class EBSNormMode(Enum):
         return "$1$"  # normalized to dimensionless
 
     @classmethod
-    def get_mode_footnote(cls, mode: "EBSNormMode") -> str:
+    def get_mode_footnote(cls, mode: EBSNormMode) -> str:
         mode = cls.from_input(mode)
         footnotes = {
             cls.RAW: "",

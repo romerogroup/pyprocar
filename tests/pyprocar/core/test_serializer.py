@@ -12,13 +12,12 @@ import numpy as np
 import pytest
 
 from pyprocar.core.serializer import (
+    SERIALIZERS,
     BaseSerializer,
     JSONSerializer,
     PickleSerializer,
-    SERIALIZERS,
     get_serializer,
 )
-
 
 # =============================================================================
 # Helper Classes for Testing

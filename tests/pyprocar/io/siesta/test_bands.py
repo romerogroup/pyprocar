@@ -4,7 +4,6 @@ import numpy as np
 
 from pyprocar.io.siesta import Bands
 
-
 # Minimal .bands file: 2 k-points, 3 bands, 1 spin
 BANDS_STR = """
 -5.5000

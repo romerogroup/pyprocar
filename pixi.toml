@@ -55,7 +55,7 @@ variconfig = "*"
 huggingface_hub = "*"
 pyvista = ">0.44.0"
 vtk = "*"
-lxml="*"
+lxml = "*"
 
 [feature.pyprocar.dependencies]
 pyprocar = { path = "." }
@@ -152,16 +152,18 @@ typos = ">=1.38.1,<2"
 actionlint = { cmd = "actionlint", env = { SHELLCHECK_OPTS = "-e SC2086" } }
 dprint-check = { cmd = "dprint check --allow-no-files --config $PIXI_PROJECT_ROOT/.config/.dprint.jsonc", description = "Check formatting with dprint" }
 dprint-fmt = { cmd = "dprint fmt --allow-no-files --incremental=false --config $PIXI_PROJECT_ROOT/.config/.dprint.jsonc", description = "Format with dprint" }
-lefthook = { cmd = "lefthook", description = "Run lefthook" }
-lefthook-reinstall = { cmd = "lefthook uninstall && lefthook install", description = "Reinstall lefthook" }
 lint = { depends-on = [
   "lint-fast",
   "lint-slow",
 ], description = "Run all linters and formatters on all code" }
-lint-fast = { cmd = "lefthook run pre-commit --all-files --force", description = "Run all fast linters and formatters on all code (no clippy)" }
-lint-slow = { cmd = "lefthook run pre-push --all-files --force", description = "Run all slow linters and formatters on all code" }
-pre-commit-install = "lefthook install"
-pre-commit-install-minimal = "lefthook install pre-commit"
+lint-fast = { depends-on = [
+  "ruff-lint",
+  "toml-format",
+], description = "Run all fast linters and formatters on all code (no clippy)" }
+lint-slow = { depends-on = [
+  "typecheck-python",
+], description = "Run all slow linters and formatters on all code" }
+
 ruff-format = { cmd = "ruff format --exit-non-zero-on-format --force-exclude --config $PIXI_PROJECT_ROOT/.config/.ruff.toml" }
 ruff-lint = { cmd = "ruff check --fix --exit-non-zero-on-fix --force-exclude --config $PIXI_PROJECT_ROOT/.config/.ruff.toml" }
 toml-format = { cmd = "taplo fmt", env = { RUST_LOG = "warn" } }
@@ -197,7 +199,6 @@ vs2017_win-64 = ">=19.16.27033,<20"
 get-version = "hatch version"
 
 
-
 ###############################################################
 # Virtual Environments Definitions
 ###############################################################
@@ -224,5 +225,5 @@ dev = { features = [
   "build",
   "dev",
   "llm",
-  "pyprocar"
-], no-default-feature = true, solve-group = "default" } 
+  "pyprocar",
+], no-default-feature = true, solve-group = "default" }

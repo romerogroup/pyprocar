@@ -1,6 +1,5 @@
 import logging
 
-import numpy as np
 import pytest
 
 from tests.pyprocar.io.abinit import ABINIT_DATA_DIR, CALC_TYPES
