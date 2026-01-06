@@ -9,10 +9,9 @@ import sys
 import numpy as np
 import pyvista as pv
 
-# from pyprocar.fermisurface3d import fermisurface3D
 from pyprocar.cfg import ConfigFactory, ConfigManager, PlotType
-from pyprocar.core import ElectronicBandStructure
-from pyprocar.plotter import BandStructure2DataHandler, BandStructure2DVisualizer
+from pyprocar.core import BandStructure2D
+from pyprocar.plotter import BS2DPlotter
 from pyprocar.utils import welcome
 from pyprocar.utils.log_utils import set_verbose_level
 
@@ -25,36 +24,33 @@ np.set_printoptions(threshold=sys.maxsize)
 
 
 class BandStructure2DHandler:
+    """Handler for 2D band structure plotting.
+
+    This class provides methods to create and visualize 2D band structure
+    surfaces using the modernized BandStructure2D class.
+    """
+
     def __init__(
         self,
         code: str,
         dirname: str = "",
-        fermi: float = None,
+        fermi: float | None = None,
         fermi_shift: float = 0,
-        use_cache: bool = False,
         verbose: int = 1,
     ):
         """
-        This class handles the plotting of the fermi surface. Initialize by specifying the code and directory name where the data is stored.
-        Then call one of the plotting methods provided.
+        Initialize the BandStructure2D handler.
 
         Parameters
         ----------
         code : str
-            The code name
+            The DFT code name ('vasp', 'qe', etc.)
         dirname : str, optional
-            the directory name where the calculation is, by default ""
-        fermi : float, optional
-            The fermi energy. This will overide the default fermi value used found in the given directory, by default None
+            Directory containing the calculation files, by default ""
+        fermi : float | None, optional
+            The Fermi energy. If provided, bands will be shifted, by default None
         fermi_shift : float, optional
-            The fermi energy shift, by default 0
-        repair : bool, optional
-            Boolean to repair the PROCAR file, by default False
-        apply_symmetry : bool, optional
-            Boolean to apply symmetry to the fermi sruface.
-            This is used when only symmetry reduced kpoints used in the calculation, by default True
-        use_cache : bool, optional
-            Boolean to use cached Pickle files, by default True
+            Additional Fermi energy shift, by default 0
         verbose : int, optional
             Verbosity level, by default 1
         """
@@ -69,12 +65,12 @@ class BandStructure2DHandler:
 
         self.default_config = ConfigFactory.create_config(PlotType.BAND_STRUCTURE_2D)
 
-        modes = ["plain", "parametric", "spin_texture", "overlay"]
+        modes = ["plain", "parametric", "spin_texture"]
         props = ["bands_speed", "bands_velocity", "avg_inv_effective_mass"]
         modes_txt = " , ".join(modes)
         props_txt = " , ".join(props)
         self.notification_message = f"""
-                There are additional plot options that are defined in a configuration file. 
+                There are additional plot options that are defined in a configuration file.
                 You can change these configurations by passing the keyword argument to the function
                 To print a list of plot options set print_plot_opts=True
 
@@ -84,19 +80,11 @@ class BandStructure2DHandler:
 
         self.code = code
         self.dirname = dirname
-        self.ebs = ElectronicBandStructure.from_code(code, dirname, use_cache=use_cache)
+        self.fermi = fermi
+        self.fermi_shift = fermi_shift
 
-        codes_with_scf_fermi = ["qe", "elk"]
-        if code in codes_with_scf_fermi and fermi is None:
-            logger.info(f"No fermi given, using the found fermi energy: {self.ebs.fermi}")
-
-            fermi = self.ebs.fermi
-
+        # Set up energy labels based on Fermi level
         if fermi is not None:
-            logger.info(f"Shifting Fermi energy to zero: {fermi}")
-
-            self.ebs.shift_bands(-1 * fermi, inplace=True)
-            self.ebs.shift_bands(fermi_shift, inplace=True)
             self.fermi_level = fermi_shift
             self.energy_label = r"E - E$_F$ (eV)"
             self.fermi_message = None
@@ -104,72 +92,75 @@ class BandStructure2DHandler:
             self.energy_label = r"E (eV)"
             self.fermi_level = None
             self.fermi_message = (
-                "`fermi` is not set! Set `fermi={value}`."
+                "`fermi` is not set! Set `fermi={value}`. "
                 "The plot did not shift the bands by the Fermi energy."
             )
 
-    def process_data(
-        self,
-        mode,
-        bands=None,
-        atoms=None,
-        orbitals=None,
-        spins=None,
-        spin_texture=False,
-    ):
-        self.data_handler.process_data(mode, bands, atoms, orbitals, spins, spin_texture)
-
     def plot_band_structure(
         self,
-        mode,
-        bands=None,
-        atoms=None,
-        orbitals=None,
-        spins=None,
-        spin_texture=False,
-        property_name=None,
-        k_z_plane=0,
-        k_z_plane_tol=0.0001,
-        show=True,
-        k_plane_scale=2 * np.pi,
-        render_offscreen=False,
-        save_2d=None,
-        save_gif=None,
-        save_mp4=None,
-        save_3d=None,
+        mode: str,
+        bands: list[int] | None = None,
+        atoms: list[int] | None = None,
+        orbitals: list[int] | None = None,
+        spins: list[int] | None = None,
+        spin_texture: bool = False,
+        property_name: str | None = None,
+        normal: tuple[float, float, float] = (0, 0, 1),
+        origin: tuple[float, float, float] = (0, 0, 0),
+        grid_interpolation: tuple[int, int] = (120, 120),
+        show: bool = True,
+        k_plane_scale: float = 2 * np.pi,
+        render_offscreen: bool = False,
+        save_2d: str | None = None,
+        save_gif: str | None = None,
+        save_mp4: str | None = None,
+        save_3d: str | None = None,
         print_plot_opts: bool = False,
         **kwargs,
     ):
-        """A method to plot the 3d fermi surface
+        """Plot 2D band structure surface.
 
         Parameters
         ----------
         mode : str
-            The mode to calculate
-        bands : List[int], optional
-            A list of band indexes to plot, by default None
-        atoms : List[int], optional
-            A list of atoms, by default None
-        orbitals : List[int], optional
-            A list of orbitals, by default None
-        spins : List[int], optional
-            A list of spins, by default None
+            The plotting mode ('plain', 'parametric', 'spin_texture')
+        bands : list[int] | None, optional
+            List of band indices to plot, by default None (uses bands near Fermi)
+        atoms : list[int] | None, optional
+            List of atom indices for projections, by default None
+        orbitals : list[int] | None, optional
+            List of orbital indices for projections, by default None
+        spins : list[int] | None, optional
+            List of spin indices, by default None
         spin_texture : bool, optional
-            Boolean to plot spin texture, by default False
-        print_plot_opts: bool, optional
-            Boolean to print the plotting options
-        render_offscreen: bool, optional
-            Boolean to render the plot offscreen, by default False
-        save_2d: str, optional
-            The path to save the 2d plot, by default None
-        save_gif: str, optional
-            The path to save the gif, by default None
-        save_mp4: str, optional
-            The path to save the mp4, by default None
-        save_3d: str, optional
-            The path to save the 3d plot, by default None
+            Whether to plot spin texture, by default False
+        property_name : str | None, optional
+            Property to compute and display, by default None
+        normal : tuple, optional
+            Normal vector defining the cutting plane, by default (0, 0, 1)
+        origin : tuple, optional
+            Origin point of the cutting plane, by default (0, 0, 0)
+        grid_interpolation : tuple, optional
+            Number of grid points in (u, v) directions, by default (120, 120)
+        show : bool, optional
+            Whether to show the plot, by default True
+        k_plane_scale : float, optional
+            Scale factor for k-plane, by default 2π
+        render_offscreen : bool, optional
+            Whether to render offscreen, by default False
+        save_2d : str | None, optional
+            Path to save 2D screenshot, by default None
+        save_gif : str | None, optional
+            Path to save GIF animation, by default None
+        save_mp4 : str | None, optional
+            Path to save MP4 video, by default None
+        save_3d : str | None, optional
+            Path to save 3D mesh, by default None
+        print_plot_opts : bool, optional
+            Whether to print plotting options, by default False
+        **kwargs
+            Additional keyword arguments for configuration
         """
-
         config = ConfigManager.merge_configs(self.default_config, kwargs)
         config = ConfigManager.merge_config(config, "mode", mode)
 
@@ -181,99 +172,88 @@ class BandStructure2DHandler:
 
         if self.fermi_message:
             user_logger.info(self.fermi_message)
-        user_logger.warning(
-            f"Make sure the kmesh has kz points with kz={k_z_plane} +- {k_z_plane_tol}"
-        )
 
-        # Process the data
-        print(self.ebs.bands.shape)
-        if bands is not None:
-            self.ebs.reduce_bands_by_index(bands, inplace=True)
-        print(self.ebs.bands.shape)
-        self.ebs.reduce_bands_near_fermi(tolerance=0.7, inplace=True)
-        print(self.ebs.bands.shape)
-        self.ebs.pad(inplace=True)
-        print(self.ebs.bands.shape)
-        if property_name is not None:
-            self.ebs.get_property(property_name)
-        print(self.ebs)
-        ebs = self.ebs.reduce_kpoints_to_axis_plane(0.0, axis=2)
-        print(ebs)
-        print(ebs.bands.shape)
-        self.data_handler = BandStructure2DataHandler(ebs, config=config)
-
-        self.data_handler.process_data(
-            mode,
+        # Create BandStructure2D using modernized factory
+        bs2d = BandStructure2D.from_code(
+            code=self.code,
+            dirpath=self.dirname,
+            normal=normal,
+            origin=origin,
+            grid_interpolation=grid_interpolation,
+            reduce_bands_near_fermi=True,
             bands=bands,
-            atoms=atoms,
-            orbitals=orbitals,
-            spins=spins,
-            spin_texture=spin_texture,
+            scale_factor=k_plane_scale,
         )
-        band_structure_surface = self.data_handler.get_surface_data(property_name=property_name)
-        visualizer = BandStructure2DVisualizer(self.data_handler, config=config)
-        visualizer.plotter.off_screen = render_offscreen
 
-        k_plane_scale_transform = np.eye(4)
+        # Compute requested property
+        if property_name is not None:
+            bs2d.get_property(property_name)
 
-        k_plane_scale_transform[0, 0] = k_plane_scale * k_plane_scale_transform[0, 0]
-        k_plane_scale_transform[1, 1] = k_plane_scale * k_plane_scale_transform[1, 1]
-        band_structure_surface.transform(k_plane_scale_transform)
+        # Create plotter
+        plotter = BS2DPlotter(bs2d, **kwargs)
+        plotter.off_screen = render_offscreen
 
-        band_structure_surface.brillouin_zone.transform(k_plane_scale_transform)
+        # Add Brillouin zone if configured
         if config.show_brillouin_zone:
-            visualizer.add_brillouin_zone(band_structure_surface)
+            bz = bs2d.get_2d_brillouin_zone(e_min=-2, e_max=2, scale_factor=k_plane_scale)
+            plotter.add_brillouin_zone(bz)
 
-        if config.clip_brillouin_zone:
-            band_structure_surface = visualizer.clip_brillouin_zone(band_structure_surface)
+        # Clip to Brillouin zone if configured
+        if config.clip_brillouin_zone and hasattr(plotter, "brillouin_zone"):
+            bs2d = plotter.clip_surface(bs2d, plotter.brillouin_zone)
 
-        if (
-            visualizer.data_handler.scalars_name == "spin_magnitude"
-            or visualizer.data_handler.scalars_name == "Band Velocity Vector_magnitude"
-        ):
-            visualizer.add_texture(
-                band_structure_surface,
-                scalars_name=visualizer.data_handler.scalars_name,
-                vector_name=visualizer.data_handler.vector_name,
+        # Add surface to plotter
+        plotter.add_surface(bs2d)
+
+        # Add scalar bar if needed
+        if (mode != "plain" or spin_texture) and config.show_scalar_bar:
+            plotter.add_scalar_bar()
+
+        # Add grid if configured
+        if config.show_grid:
+            plotter.show_grid(zlabel=self.energy_label)
+
+        # Add axes if configured
+        if config.show_axes:
+            plotter.add_axes()
+
+        # Add Fermi plane if available
+        if self.fermi_level is not None:
+            plotter.add_mesh(
+                pv.Plane(
+                    center=(0, 0, self.fermi_level),
+                    direction=(0, 0, 1),
+                    i_size=10,
+                    j_size=10,
+                ),
+                color="red",
+                opacity=0.5,
+                name="fermi_plane",
             )
 
-        visualizer.add_surface(band_structure_surface)
+        plotter.set_background(color="white")
 
-        if (mode != "plain" or spin_texture) and config.show_scalar_bar:
-            visualizer.add_scalar_bar(name=visualizer.data_handler.scalars_name)
-
-        if config.show_grid:
-            visualizer.add_grid(z_label=self.energy_label)
-
-        if config.show_axes:
-            visualizer.add_axes()
-
-        if self.fermi_level is not None:
-            visualizer.add_fermi_plane(value=self.fermi_level)
-
-        visualizer.set_background_color()
-
+        # Handle output
         if save_2d:
-            visualizer.savefig(filename=save_2d)
+            plotter.screenshot(filename=save_2d)
+            plotter.close()
             return None
 
-            # save and showing setting
-        if show and (save_gif is None and save_mp4 is None and save_3d is None):
-            user_message = visualizer.show()
-            user_logger.info(user_message)
+        if show and not (save_gif or save_mp4 or save_3d):
+            plotter.show()
 
         if save_gif:
-            visualizer.save_gif(filename=save_gif, **config.save_gif_config)
+            plotter.open_gif(save_gif)
+            plotter.orbit_on_path(step=0.05)
+            plotter.close()
         if save_mp4:
-            visualizer.save_mp4(filename=save_mp4, **config.save_mp4_config)
+            plotter.open_movie(save_mp4)
+            plotter.orbit_on_path(step=0.05)
+            plotter.close()
         if save_3d:
-            visualizer.save_mesh(
-                filename=save_3d,
-                surface=band_structure_surface,
-                **config.save_mesh_config,
-            )
+            bs2d.save(save_3d)
 
-        visualizer.close()
+        plotter.close()
 
     def print_default_settings(self):
         """

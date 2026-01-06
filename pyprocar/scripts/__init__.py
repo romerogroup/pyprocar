@@ -13,4 +13,4 @@ from .scriptRepair import repair
 from .scriptSpin_asymmetry import spin_asymmetry
 from .scriptUnfold import unfold
 
-# from .scriptBandStructure2DHandler import BandStructure2DHandler
+from .scriptBandStructure2DHandler import BandStructure2DHandler

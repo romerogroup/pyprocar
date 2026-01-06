@@ -6,6 +6,8 @@ __date__ = "March 31, 2020"
 import copy
 import logging
 import sys
+from dataclasses import dataclass
+from typing import Any
 
 import numpy as np
 import pyvista as pv
@@ -21,6 +23,27 @@ logger = logging.getLogger(__name__)
 
 # TODO: method to reduce number of points for interpolation need to be modified since the tolerance on the space
 # is not lonmg soley reciprocal space, but energy and reciprocal space
+
+
+@dataclass
+class PlaneInfo:
+    """Container for 2D plane cut parameters.
+
+    This dataclass holds all the computed parameters needed to define
+    a 2D cutting plane through k-space for band structure visualization.
+    """
+
+    normal: np.ndarray
+    origin: np.ndarray
+    u: np.ndarray  # First orthonormal basis vector
+    v: np.ndarray  # Second orthonormal basis vector
+    u_limits: tuple[float, float]
+    v_limits: tuple[float, float]
+    grid_interpolation: tuple[int, int]
+    u_grid: np.ndarray
+    v_grid: np.ndarray
+    uv_grid_points: np.ndarray
+    as_cartesian: bool
 
 
 def get_orthonormal_basis(normal):
@@ -92,119 +115,644 @@ def get_transformation_matrix(u: np.ndarray, v: np.ndarray, normal: np.ndarray):
     return transformation_matrix
 
 
-class BandStructure2D(pv.PolyData):
-    """
-    The object is used to store and manapulate a 3d fermi surface.
+def compute_plane_info(
+    ebs: ElectronicBandStructureMesh,
+    normal: tuple[float, float, float],
+    origin: tuple[float, float, float],
+    grid_interpolation: tuple[int, int],
+    as_cartesian: bool,
+) -> PlaneInfo:
+    """Compute plane parameters from EBS and plane specification.
 
     Parameters
     ----------
-    ebs : ElectronicBandStructure
-        The ElectronicBandStructure object
-    interpolation_factor : int
-        The default is 1. number of kpoints in every direction
-        will increase by this factor.
-    projection_accuracy : str, optional
-        Controls the accuracy of the projects. 2 types ('high', normal)
-        The default is ``projection_accuracy=normal``.
-    supercell : list int
-        This is used to add padding to the array
-        to assist in the calculation of the isosurface.
+    ebs : ElectronicBandStructureMesh
+        The padded/expanded electronic band structure
+    normal : tuple[float, float, float]
+        Normal vector defining the cutting plane
+    origin : tuple[float, float, float]
+        Origin point of the cutting plane
+    grid_interpolation : tuple[int, int]
+        Number of grid points in (u, v) directions
+    as_cartesian : bool
+        Whether to interpret coordinates in Cartesian space
+
+    Returns
+    -------
+    PlaneInfo
+        Computed plane parameters
+    """
+    normal_arr = np.array(normal)
+    origin_arr = np.array(origin)
+
+    slice_mesh = ebs.slice(normal=normal_arr, origin=origin_arr, as_cartesian=as_cartesian)
+    u, v = get_orthonormal_basis(normal=normal_arr)
+    plane_points = transform_points_to_uv(slice_mesh.points, u, v)
+    u_limits, v_limits = find_plane_limits(plane_points)
+    u_grid, v_grid = get_uv_grid(
+        grid_interpolation=grid_interpolation,
+        u_limits=u_limits,
+        v_limits=v_limits,
+    )
+    uv_grid_points = get_uv_grid_points(u_grid, v_grid)
+
+    return PlaneInfo(
+        normal=normal_arr,
+        origin=origin_arr,
+        u=u,
+        v=v,
+        u_limits=u_limits,
+        v_limits=v_limits,
+        grid_interpolation=grid_interpolation,
+        u_grid=u_grid,
+        v_grid=v_grid,
+        uv_grid_points=uv_grid_points,
+        as_cartesian=as_cartesian,
+    )
+
+
+def _generate_single_band_surface(
+    scalars: np.ndarray,
+    u_grid: np.ndarray,
+    v_grid: np.ndarray,
+) -> pv.PolyData:
+    """Generate surface mesh for a single band's scalar values.
+
+    Parameters
+    ----------
+    scalars : np.ndarray
+        1D array of energy values at grid points
+    u_grid : np.ndarray
+        2D array of u-coordinates
+    v_grid : np.ndarray
+        2D array of v-coordinates
+
+    Returns
+    -------
+    pv.PolyData
+        Surface mesh with z-values set to energy
+    """
+    n_grid_points = u_grid.size
+    surface_points = np.zeros((n_grid_points, 3))
+    surface_points[:, 0] = u_grid.ravel()
+    surface_points[:, 1] = v_grid.ravel()
+    surface_points[:, 2] = scalars
+
+    grid = pv.StructuredGrid()
+    grid.points = surface_points
+    grid.dimensions = (u_grid.shape[0], v_grid.shape[0], 1)
+    unstructured = grid.cast_to_unstructured_grid()
+    surface = unstructured.extract_surface()
+    if not isinstance(surface, pv.PolyData):
+        raise TypeError(f"Expected PolyData, got {type(surface)}")
+    return surface
+
+
+def _merge_band_surfaces(
+    surfaces: list[pv.PolyData],
+    surface_band_spin_map: dict[int, tuple[int, int]],
+) -> tuple[pv.PolyData, np.ndarray, np.ndarray, dict[tuple[int, int], np.ndarray]]:
+    """Merge individual band surfaces with tracking arrays.
+
+    Parameters
+    ----------
+    surfaces : list[pv.PolyData]
+        List of individual band surfaces
+    surface_band_spin_map : dict[int, tuple[int, int]]
+        Mapping from surface index to (band_index, spin_index)
+
+    Returns
+    -------
+    merged : pv.PolyData
+        Merged surface
+    spin_index_array : np.ndarray
+        Array tracking spin index for each point
+    spin_band_index_array : np.ndarray
+        Array tracking surface index for each point
+    band_spin_mask : dict[tuple[int, int], np.ndarray]
+        Mask arrays for each (band, spin) pair
+    """
+    if not surfaces:
+        return pv.PolyData(), np.empty(0), np.empty(0), {}
+
+    # Build tracking arrays
+    spin_band_index_array = np.empty(0, dtype=np.int32)
+    spin_index_array = np.empty(0, dtype=np.int32)
+
+    for surface_idx, surface in enumerate(surfaces):
+        iband, ispin = surface_band_spin_map[surface_idx]
+        n_points = surface.points.shape[0]
+
+        # spin index identifier
+        current_spin_index_array = np.full(n_points, ispin, dtype=np.int32)
+        spin_index_array = np.insert(spin_index_array, 0, current_spin_index_array, axis=0)
+
+        # spin band index identifier
+        current_spin_band_index_array = np.full(n_points, surface_idx, dtype=np.int32)
+        spin_band_index_array = np.insert(
+            spin_band_index_array, 0, current_spin_band_index_array, axis=0
+        )
+
+    # Build band_spin_mask
+    band_spin_mask = {}
+    band_spin_surface_map = {v: k for k, v in surface_band_spin_map.items()}
+    for (iband, ispin), surface_idx in band_spin_surface_map.items():
+        mask = spin_band_index_array == surface_idx
+        band_spin_mask[(iband, ispin)] = mask
+
+    # Merge surfaces
+    merged = surfaces[0]
+    for surface in surfaces[1:]:
+        merged = merged.merge(surface, merge_points=False)
+
+    merged.point_data["spin_index"] = spin_index_array
+    merged.point_data["spin_band_index"] = spin_band_index_array
+
+    return merged, spin_index_array, spin_band_index_array, band_spin_mask
+
+
+def _compute_scalar_grid(
+    ebs: ElectronicBandStructureMesh,
+    scalars: np.ndarray,
+    plane_info: PlaneInfo,
+) -> np.ndarray:
+    """Interpolate scalar values onto the 2D grid.
+
+    Parameters
+    ----------
+    ebs : ElectronicBandStructureMesh
+        The electronic band structure
+    scalars : np.ndarray
+        Scalar values to interpolate
+    plane_info : PlaneInfo
+        Plane parameters
+
+    Returns
+    -------
+    np.ndarray
+        Interpolated scalar values on the grid
+    """
+    scalars_shape = scalars.shape
+    slice_mesh = ebs.slice(
+        normal=plane_info.normal,
+        origin=plane_info.origin,
+        scalars=("scalars", scalars.reshape(scalars_shape[0], -1)),
+        as_cartesian=plane_info.as_cartesian,
+    )
+
+    # Get slice points in UV coordinates for interpolation
+    plane_points = transform_points_to_uv(slice_mesh.points, plane_info.u, plane_info.v)
+
+    scalar_grid_points_flat = slice_mesh.active_scalars
+    n_grid_points = plane_info.uv_grid_points.shape[0]
+    new_scalars_grid_points_flat = np.zeros(
+        shape=(n_grid_points, scalar_grid_points_flat.shape[-1])
+    )
+
+    for iscalar in range(scalar_grid_points_flat.shape[-1]):
+        interpolator = LinearNDInterpolator(
+            plane_points, scalar_grid_points_flat[..., iscalar]
+        )
+        new_scalars_grid_points_flat[..., iscalar] = interpolator(plane_info.uv_grid_points)
+
+    new_scalars_grid_points = new_scalars_grid_points_flat.reshape(
+        (n_grid_points, *scalars_shape[1:])
+    )
+    return new_scalars_grid_points
+
+
+def generate_band_2d_surfaces(
+    ebs: ElectronicBandStructureMesh,
+    plane_info: PlaneInfo,
+    original_ebs: ElectronicBandStructureMesh | None = None,
+    scale_factor: float = 2 * np.pi,
+) -> tuple[pv.PolyData, dict[tuple[int, int], pv.PolyData], PointSet]:
+    """Generate 2D band structure surfaces for all bands and spins.
+
+    Parameters
+    ----------
+    ebs : ElectronicBandStructureMesh
+        The padded/expanded electronic band structure
+    plane_info : PlaneInfo
+        Computed plane parameters
+    original_ebs : ElectronicBandStructureMesh | None
+        Original EBS for value clipping (optional)
+    scale_factor : float
+        K-plane scale factor (default: 2π)
+
+    Returns
+    -------
+    combined_surface : pv.PolyData
+        Merged surface containing all bands
+    band_surfaces : dict[tuple[int, int], pv.PolyData]
+        Individual surfaces keyed by (band_index, spin_index)
+    point_set : PointSet
+        PointSet with spin_index and spin_band_index properties
+    """
+    bands = ebs.get_property("bands")
+    if bands is None:
+        raise ValueError("bands property not found in EBS")
+    new_bands = _compute_scalar_grid(ebs, bands.value, plane_info)
+
+    # Clip to original range if provided
+    if original_ebs is not None:
+        original_bands = original_ebs.get_property("bands")
+        if original_bands is not None:
+            new_bands = np.clip(
+                new_bands, original_bands.value.min(), original_bands.value.max()
+            )
+
+    band_surfaces_list = []
+    band_surfaces_dict: dict[tuple[int, int], pv.PolyData] = {}
+    band_spin_surface_map: dict[tuple[int, int], int] = {}
+    surface_band_spin_map: dict[int, tuple[int, int]] = {}
+
+    _, n_bands, n_spin_channels = new_bands.shape
+
+    for iband in range(n_bands):
+        for ispin in range(n_spin_channels):
+            band_scalars = new_bands[..., iband, ispin]
+            try:
+                surface = _generate_single_band_surface(
+                    band_scalars, plane_info.u_grid, plane_info.v_grid
+                )
+                if surface.points.shape[0] > 0:
+                    logger.debug(
+                        f"Surface for band {iband}, spin {ispin} has {surface.points.shape[0]} points"
+                    )
+                    band_surfaces_list.append(surface)
+                    surface_idx = len(band_surfaces_list) - 1
+
+                    band_surfaces_dict[(iband, ispin)] = surface
+                    band_spin_surface_map[(iband, ispin)] = surface_idx
+                    surface_band_spin_map[surface_idx] = (iband, ispin)
+
+            except Exception as e:
+                logger.exception(
+                    f"Failed to generate surface for band {iband}, spin {ispin}: {e}"
+                )
+                continue
+
+    if not band_surfaces_list:
+        logger.warning("No band surfaces generated")
+        empty_surface = pv.PolyData()
+        empty_point_set = PointSet(np.zeros((0, 3)))
+        empty_point_set.add_property(
+            Property(name="spin_index", value=np.empty(0, dtype=np.float64))
+        )
+        empty_point_set.add_property(
+            Property(name="spin_band_index", value=np.empty(0, dtype=np.float64))
+        )
+        return empty_surface, {}, empty_point_set
+
+    logger.info(f"___Generated {len(band_surfaces_list)} band surfaces___")
+
+    # Merge surfaces
+    combined_surface, spin_index_array, spin_band_index_array, _ = _merge_band_surfaces(
+        band_surfaces_list, surface_band_spin_map
+    )
+
+    # Apply k-plane scaling
+    k_plane_scale_transform = np.eye(4)
+    k_plane_scale_transform[0, 0] = scale_factor
+    k_plane_scale_transform[1, 1] = scale_factor
+    combined_surface.transform(k_plane_scale_transform, inplace=True)
+
+    # Also scale individual surfaces
+    for surface in band_surfaces_dict.values():
+        surface.transform(k_plane_scale_transform, inplace=True)
+
+    # Clean up PyVista internal arrays
+    combined_surface.point_data.pop("vtkOriginalPointIds", None)
+    combined_surface.cell_data.pop("vtkOriginalCellIds", None)
+
+    # Create PointSet with required properties
+    point_set = PointSet(combined_surface.points)
+    point_set.add_property(
+        Property(name="spin_index", value=spin_index_array.astype(np.float64))
+    )
+    point_set.add_property(
+        Property(name="spin_band_index", value=spin_band_index_array.astype(np.float64))
+    )
+
+    # Store band_spin_mask in field_data for later access
+    combined_surface.field_data["band_spin_surface_map"] = list(band_spin_surface_map.keys())
+    combined_surface.field_data["surface_band_spin_map"] = list(surface_band_spin_map.keys())
+
+    combined_surface.set_active_scalars("spin_band_index")
+
+    return combined_surface, band_surfaces_dict, point_set
+
+
+class BandStructure2D(pv.PolyData):
+    """
+    2D band structure visualization from a plane cut through k-space.
+
+    This class represents a 2D slice of the electronic band structure,
+    visualized as a 3D surface where the z-axis represents energy.
+
+    Use the factory methods `from_code()` or `from_ebs()` to create instances.
     """
 
     def __init__(
         self,
+        points: np.ndarray,
+        faces: np.ndarray,
+        band_surfaces: dict[tuple[int, int], pv.PolyData],
+        point_set: PointSet,
+        original_ebs: ElectronicBandStructureMesh,
         ebs: ElectronicBandStructureMesh,
-        normal=(0, 0, 1),
-        origin=(0, 0, 0),
-        grid_interpolation=(20, 20),
-        as_cartesian=True,
-        padding=15,
-        **kwargs,
+        plane_info: PlaneInfo,
+        point_data: dict[str, np.ndarray] | None = None,
+        cell_data: dict[str, np.ndarray] | None = None,
+        field_data: dict[str, Any] | None = None,
     ):
+        """
+        Initialize BandStructure2D with pre-computed surface data.
+
+        Use from_code() or from_ebs() factory methods to create instances.
+        """
         super().__init__()
-        self._original_ebs = copy.copy(ebs)
-        self._ebs = ebs.pad(padding=padding, inplace=False)
-        self._ebs = self._ebs.expand_single_dimension(inplace=False)
 
-        self.as_cartesian = as_cartesian
+        self.points = points
+        self.faces = faces
+        self._band_surfaces = band_surfaces
+        self._point_set = point_set
+        self._original_ebs = original_ebs
+        self._ebs = ebs
+        self._plane_info = plane_info
 
-        slice = self.ebs.slice(normal=normal, origin=origin, as_cartesian=self.as_cartesian)
+        # Cache invalidation tracking
+        self._ebs_cache_version: int = 0
+        self._cached_properties: dict[str, int] = {}
 
-        #  # Initialize storage for surface data
-        self.band_spin_surface_map = {}
-        self.surface_band_spin_map = {}
-        self.band_spin_mask = {}
+        # Validate required properties
+        if "spin_band_index" not in point_set.property_store.keys():
+            raise ValueError("spin_band_index not found in point_set.property_store")
+        if "spin_index" not in point_set.property_store.keys():
+            raise ValueError("spin_index not found in point_set.property_store")
 
+        # Apply point/cell/field data
+        point_data = point_data if point_data is not None else {}
+        cell_data = cell_data if cell_data is not None else {}
+        field_data = field_data if field_data is not None else {}
+
+        self.point_data.update(point_data)
+        self.cell_data.update(cell_data)
+        self.field_data.update(field_data)
+
+        # Set default active scalars
+        if "spin_band_index" in self.point_data:
+            self.set_active_scalars("spin_band_index", preference="point")
+
+        # Compute transformation matrices (for reciprocal space conversions)
         self.transform_to_cart = np.eye(4)
         self.transform_to_frac = np.eye(4)
-        self.transform_to_cart[:3, :3] = self.ebs.reciprocal_lattice.T
-        self.transform_to_frac[:3, :3] = np.linalg.inv(self.ebs.reciprocal_lattice.T)
+        self.transform_to_cart[:3, :3] = self._ebs.reciprocal_lattice.T
+        self.transform_to_frac[:3, :3] = np.linalg.inv(self._ebs.reciprocal_lattice.T)
 
-        self.normal = normal
-        self.origin = origin
-        self.grid_interpolation = grid_interpolation
-        self.u, self.v = get_orthonormal_basis(normal=normal)
-        self.plane_points = transform_points_to_uv(slice.points, self.u, self.v)
+        logger.info("___BandStructure2D initialization complete___")
 
-        u_limits, v_limits = find_plane_limits(self.plane_points)
+    # -------------------------------------------------------------------------
+    # Cache invalidation methods
+    # -------------------------------------------------------------------------
 
-        self.u_grid, self.v_grid = get_uv_grid(
-            grid_interpolation=grid_interpolation, u_limits=u_limits, v_limits=v_limits
+    def _invalidate_cache(self) -> None:
+        """Invalidate all cached interpolated properties."""
+        self._ebs_cache_version += 1
+        logger.debug(f"Cache invalidated, new version: {self._ebs_cache_version}")
+
+    def _is_cache_valid(self, property_name: str) -> bool:
+        """Check if cached property is still valid."""
+        if property_name not in self._cached_properties:
+            return False
+        return self._cached_properties[property_name] == self._ebs_cache_version
+
+    def _mark_cached(self, property_name: str) -> None:
+        """Mark property as cached at current version."""
+        self._cached_properties[property_name] = self._ebs_cache_version
+
+    @classmethod
+    def from_ebs(
+        cls,
+        ebs: ElectronicBandStructureMesh,
+        normal: tuple[float, float, float] = (0, 0, 1),
+        origin: tuple[float, float, float] = (0, 0, 0),
+        grid_interpolation: tuple[int, int] = (20, 20),
+        as_cartesian: bool = True,
+        padding: int = 15,
+        scale_factor: float = 2 * np.pi,
+        **kwargs,
+    ) -> "BandStructure2D":
+        """
+        Create BandStructure2D from an ElectronicBandStructureMesh.
+
+        This factory method performs all heavy computation:
+        - Pads the EBS
+        - Computes plane parameters
+        - Generates band surfaces
+
+        Parameters
+        ----------
+        ebs : ElectronicBandStructureMesh
+            Electronic band structure on a uniform k-grid
+        normal : tuple
+            Normal vector defining the cutting plane
+        origin : tuple
+            Origin point of the cutting plane
+        grid_interpolation : tuple
+            Number of grid points in (u, v) directions
+        as_cartesian : bool
+            Whether to interpret coordinates in Cartesian space
+        padding : int
+            Number of k-points to pad in each direction
+        scale_factor : float
+            Scale factor for k-plane (default: 2π)
+
+        Returns
+        -------
+        BandStructure2D
+            The constructed 2D band structure surface
+        """
+        original_ebs = copy.copy(ebs)
+        padded_ebs = ebs.pad(padding=padding, inplace=False)
+        padded_ebs = padded_ebs.expand_single_dimension(inplace=False)
+
+        plane_info = compute_plane_info(
+            ebs=padded_ebs,
+            normal=normal,
+            origin=origin,
+            grid_interpolation=grid_interpolation,
+            as_cartesian=as_cartesian,
         )
 
-        self.uv_grid_points = get_uv_grid_points(self.u_grid, self.v_grid)
+        combined_surface, band_surfaces, point_set = generate_band_2d_surfaces(
+            ebs=padded_ebs,
+            plane_info=plane_info,
+            original_ebs=original_ebs,
+            scale_factor=scale_factor,
+        )
 
-        self.n_grid_points = self.uv_grid_points.shape[0]
+        return cls(
+            points=combined_surface.points,
+            faces=combined_surface.faces,
+            band_surfaces=band_surfaces,
+            point_set=point_set,
+            original_ebs=original_ebs,
+            ebs=padded_ebs,
+            plane_info=plane_info,
+            point_data=dict(combined_surface.point_data),
+            cell_data=dict(combined_surface.cell_data),
+            field_data=dict(combined_surface.field_data),
+        )
 
-        logger.debug(f"Normal: {self.normal}")
-        logger.debug(f"Origin: {self.origin}")
-        logger.debug(f"Grid Interpolation: {self.grid_interpolation}")
-        logger.debug(f"U: {self.u}")
-        logger.debug(f"V: {self.v}")
-        logger.debug(f"U Limits: {u_limits}")
-        logger.debug(f"V Limits: {v_limits}")
-        logger.debug(f"N_grid_points: {self.n_grid_points}")
-
-        self._generate_band_surfaces()
-
-        self.point_set = PointSet(self.n_grid_points)
-        self.scale_kplane()
-        return None
+    # -------------------------------------------------------------------------
+    # Properties
+    # -------------------------------------------------------------------------
 
     @property
-    def ebs(self):
+    def ebs(self) -> ElectronicBandStructureMesh:
+        """The padded electronic band structure mesh."""
         return self._ebs
 
     @property
-    def original_ebs(self):
+    def original_ebs(self) -> ElectronicBandStructureMesh:
+        """The original (unpadded) electronic band structure mesh."""
         return self._original_ebs
 
-    def get_property(self, key, **kwargs):
-        prop_name, (calc_name, gradient_order) = self.ebs._extract_key(key)
+    @property
+    def point_set(self) -> PointSet:
+        """PointSet containing surface properties."""
+        return self._point_set
 
-        if prop_name not in self.point_set.property_store:
+    @property
+    def plane_info(self) -> PlaneInfo:
+        """Plane parameters for the 2D cut."""
+        return self._plane_info
+
+    @property
+    def normal(self) -> np.ndarray:
+        """Normal vector of the cutting plane."""
+        return self._plane_info.normal
+
+    @property
+    def origin(self) -> np.ndarray:
+        """Origin point of the cutting plane."""
+        return self._plane_info.origin
+
+    @property
+    def u(self) -> np.ndarray:
+        """First orthonormal basis vector in the plane."""
+        return self._plane_info.u
+
+    @property
+    def v(self) -> np.ndarray:
+        """Second orthonormal basis vector in the plane."""
+        return self._plane_info.v
+
+    @property
+    def n_grid_points(self) -> int:
+        """Number of grid points in the 2D plane."""
+        return self._plane_info.uv_grid_points.shape[0]
+
+    @property
+    def band_surfaces(self) -> dict[tuple[int, int], pv.PolyData]:
+        """Individual band surfaces keyed by (band_index, spin_index)."""
+        return self._band_surfaces
+
+    @property
+    def band_spin_surface_map(self) -> dict[tuple[int, int], int]:
+        """Mapping from (band, spin) to surface index."""
+        return {key: idx for idx, key in enumerate(self._band_surfaces.keys())}
+
+    @property
+    def surface_band_spin_map(self) -> dict[int, tuple[int, int]]:
+        """Mapping from surface index to (band, spin)."""
+        return {idx: key for idx, key in enumerate(self._band_surfaces.keys())}
+
+    @property
+    def band_spin_mask(self) -> dict[tuple[int, int], np.ndarray]:
+        """Boolean masks for each (band, spin) pair."""
+        spin_band_index = self._point_set.get_property("spin_band_index").value
+        return {key: spin_band_index == idx for key, idx in self.band_spin_surface_map.items()}
+
+    # -------------------------------------------------------------------------
+    # Backwards-compatible attribute accessors
+    # -------------------------------------------------------------------------
+
+    @property
+    def u_grid(self) -> np.ndarray:
+        """U-coordinate grid (for backwards compatibility)."""
+        return self._plane_info.u_grid
+
+    @property
+    def v_grid(self) -> np.ndarray:
+        """V-coordinate grid (for backwards compatibility)."""
+        return self._plane_info.v_grid
+
+    @property
+    def uv_grid_points(self) -> np.ndarray:
+        """UV grid points (for backwards compatibility)."""
+        return self._plane_info.uv_grid_points
+
+    @property
+    def as_cartesian(self) -> bool:
+        """Whether coordinates are in Cartesian space."""
+        return self._plane_info.as_cartesian
+
+    @property
+    def grid_interpolation(self) -> tuple[int, int]:
+        """Grid interpolation parameters."""
+        return self._plane_info.grid_interpolation
+
+    @property
+    def plane_points(self) -> np.ndarray:
+        """Points on the slice plane in UV coordinates."""
+        slice_mesh = self._ebs.slice(
+            normal=self.normal, origin=self.origin, as_cartesian=self.as_cartesian
+        )
+        return transform_points_to_uv(slice_mesh.points, self.u, self.v)
+
+    # -------------------------------------------------------------------------
+    # Core methods
+    # -------------------------------------------------------------------------
+
+    def get_property(self, key: str, **kwargs) -> np.ndarray:
+        """Get property values, computing if necessary.
+
+        Uses cache invalidation to track property staleness.
+        """
+        prop_name, _ = self.ebs._extract_key(key)
+
+        # Check if property exists and cache is valid
+        if prop_name in self.point_set.property_store and self._is_cache_valid(prop_name):
+            prop = self.point_set.get_property(prop_name)
+            property_value = prop.value if prop is not None else self.compute_property(prop_name, **kwargs)
+        else:
+            # Compute and cache the property
             property_value = self.compute_property(prop_name, **kwargs)
-            property = Property(name=prop_name, value=property_value)
-            self.point_set.add_property(property)
+            prop = Property(name=prop_name, value=property_value)
+            self.point_set.add_property(prop)
+            self._mark_cached(prop_name)
 
         self.set_values(prop_name, property_value)
         return property_value
 
     def compute_gradients(
-        self, gradient_order: int, names: list[str] | None = None, **kwargs
+        self, gradient_order: int, names: list[str] | None = None
     ) -> None:
+        """Compute property gradients on the surface."""
         if names is None:
-            names = list(self.point_set._property_store.keys())
+            names = list(self.point_set.property_store.keys())
         if gradient_order < 0:
             raise ValueError(f"Gradient order must be greater than 0. Got {gradient_order}.")
         self.ebs.compute_gradients(gradient_order=gradient_order, names=names)
 
-        for prop_name, calc_name, gradient_order, value_array in self.ebs.iter_properties():
-            property = self.point_set.get_property(prop_name)
-            surface_points = self.interpolate_values(value_array)
-            property[calc_name, gradient_order] = surface_points
-
-        return None
+        for prop_name, calc_name, grad_order, value_array in self.ebs.iter_properties():
+            prop = self.point_set.get_property(prop_name)
+            if prop is not None:
+                surface_points = self.interpolate_values(value_array)
+                prop[calc_name, grad_order] = surface_points
 
     def compute_property(self, name: str, **kwargs):
         property = self.ebs.get_property(name, **kwargs)
@@ -251,24 +799,21 @@ class BandStructure2D(pv.PolyData):
             reciprocal_lattice=self.ebs.reciprocal_lattice * scale_factor,
         )
 
-    def set_surface_point_data(self, name: str, values: np.ndarray):
-        if values.shape[-1] == 3:
-            last_dim = 3
-        else:
-            last_dim = 1
-
+    def set_surface_point_data(self, name: str, values: np.ndarray) -> None:
+        """Set point data on the surface, handling band-resolved data."""
         if self.ebs.is_band_property(values):
-            logger.debug(f"Adding band resolved to fermi surface point_data: {name}")
-            point_data_array = None
-            for (iband, ispin), surface_idx in self.band_spin_surface_map.items():
+            logger.debug(f"Adding band resolved to surface point_data: {name}")
+            point_data_array: np.ndarray | None = None
+            for (iband, ispin), _ in self.band_spin_surface_map.items():
                 values_band_values = values[:, iband, ispin, ...]
                 if point_data_array is None:
                     point_data_array = values_band_values
                 else:
                     point_data_array = np.insert(point_data_array, 0, values_band_values, axis=0)
-            self.point_data[name] = point_data_array
+            if point_data_array is not None:
+                self.point_data[name] = point_data_array
         else:
-            logger.debug(f"Adding scalar to fermi surface point_data: {name}")
+            logger.debug(f"Adding scalar to surface point_data: {name}")
             self.point_data[name] = values
 
     def set_scalars(self, name: str, value: np.ndarray):
@@ -316,160 +861,55 @@ class BandStructure2D(pv.PolyData):
         )
         return new_scalars_grid_points
 
-    def _generate_band_surface(self, scalars):
-        logger.info(f"Generating band surface for {scalars.shape} scalars")
-        surface_points = np.zeros((self.n_grid_points, 3))
-        surface_points[:, 0] = self.u_grid.ravel()
-        surface_points[:, 1] = self.v_grid.ravel()
-        surface_points[:, 2] = scalars
-        surface = pv.StructuredGrid()
-
-        surface.points = surface_points
-        surface.dimensions = (self.u_grid.shape[0], self.v_grid.shape[0], 1)
-        surface = surface.cast_to_unstructured_grid()
-        surface = surface.extract_surface()
-        return surface
-
-    def _generate_band_surfaces(self):
-        bands = self.ebs.get_property("bands")
-        new_bands = self.compute_scalar_grid(bands.value)
-
-        band_surfaces = []
-        n_grid_points, n_bands, n_spin_channels = new_bands.shape
-        for iband in range(n_bands):
-            for ispin in range(n_spin_channels):
-                band_scalars = new_bands[..., iband, ispin]
-                try:
-                    surface = self._generate_band_surface(band_scalars)
-                    if surface.points.shape[0] > 0:
-                        logger.debug(
-                            f"Surface for band {iband}, spin {ispin} has {surface.points.shape[0]} points"
-                        )
-                        band_surfaces.append(surface)
-                        surface_idx = len(band_surfaces) - 1
-
-                        surface_idx = len(band_surfaces) - 1
-                        self.band_spin_surface_map[(iband, ispin)] = surface_idx
-                        self.surface_band_spin_map[surface_idx] = (iband, ispin)
-
-                except Exception as e:
-                    logger.exception(
-                        f"Failed to generate surface for band {iband}, spin {ispin}: {e}"
-                    )
-                    continue
-
-        if band_surfaces:
-            logger.info(f"___Generated {len(band_surfaces)} band surfaces___")
-            # Combine all surfaces
-            combined_surface = self._merge_surfaces(band_surfaces)
-
-            self.points = combined_surface.points
-            self.faces = combined_surface.faces
-
-            for key in combined_surface.point_data.keys():
-                self.point_data[key] = combined_surface.point_data[key]
-            for key in combined_surface.cell_data.keys():
-                self.cell_data[key] = combined_surface.cell_data[key]
-
-            self.field_data["band_spin_surface_map"] = self.band_spin_surface_map
-            self.field_data["surface_band_spin_map"] = self.surface_band_spin_map
-
-            self.set_active_scalars("spin_band_index")
-
-            self.point_data.pop("vtkOriginalPointIds", None)
-            self.cell_data.pop("vtkOriginalCellIds", None)
-
-    def _merge_surfaces(self, surfaces: list[pv.PolyData]) -> pv.PolyData:
-        """
-        Merge multiple Fermi surfaces into a single surface with band and spin information.
-
-        This method combines multiple PyVista PolyData objects representing different
-        Fermi surfaces (from different bands and spins) into a single PolyData object.
-        It adds point data arrays to track which points belong to which band and spin.
-
-        Parameters
-        ----------
-        surfaces : List[pv.PolyData]
-            List of PyVista PolyData objects representing Fermi surfaces for different
-            bands and spins.
-
-        Returns
-        -------
-        pv.PolyData
-            A merged PyVista PolyData object containing all surfaces with added
-            point data arrays 'spin_index' and 'spin_band_index' to identify the
-            original band and spin of each point.
-
-        """
-        if not surfaces:
-            return pv.PolyData()
-
-        # Add band and spin indices to each surface before merging
-        spin_band_index_array = np.empty(0, dtype=np.int32)
-        spin_index_array = np.empty(0, dtype=np.int32)
-        for surface_idx, surface in enumerate(surfaces):
-            iband, ispin = self.surface_band_spin_map[surface_idx]
-            n_points = surface.points.shape[0]
-
-            # spin index identifier
-            current_spin_index_array = np.full(n_points, ispin, dtype=np.int32)
-            spin_index_array = np.insert(spin_index_array, 0, current_spin_index_array, axis=0)
-
-            # spin band index identifier
-            current_spin_band_index_array = np.full(n_points, surface_idx, dtype=np.int32)
-            spin_band_index_array = np.insert(
-                spin_band_index_array, 0, current_spin_band_index_array, axis=0
-            )
-
-        for (iband, ispin), surface_idx in self.band_spin_surface_map.items():
-            mask = spin_band_index_array == surface_idx
-            self.band_spin_mask[(iband, ispin)] = mask
-
-        merged = surfaces[0]
-        for surface in surfaces[1:]:
-            merged = merged.merge(surface, merge_points=False)
-
-        merged.point_data["spin_index"] = spin_index_array
-        merged.point_data["spin_band_index"] = spin_band_index_array
-
-        return merged
-
-    def _get_brilloin_zone(self, supercell: list[int], zlim=[-2, 2]):
-        """Returns the BrillouinZone of the material
-
-        Returns
-        -------
-        pyprocar.core.BrillouinZone
-            The BrillouinZone of the material
-        """
-
-        e_min = zlim[0]
-        e_max = zlim[1]
-
-        return BrillouinZone2D(e_min, e_max, self.ebs.reciprocal_lattice, supercell)
-
-    def scale_kplane(self, scale_factor: float = 2 * np.pi):
-        k_plane_scale_transform = np.eye(4)
-
-        k_plane_scale_transform[0, 0] = scale_factor * k_plane_scale_transform[0, 0]
-        k_plane_scale_transform[1, 1] = scale_factor * k_plane_scale_transform[1, 1]
-        self.transform(k_plane_scale_transform, inplace=True)
-
     @classmethod
     def from_code(
         cls,
         code: str,
         dirpath: str,
-        normal: np.ndarray,
-        origin: np.ndarray,
-        reduce_bands_near_energy: float = None,
+        normal: tuple[float, float, float] = (0, 0, 1),
+        origin: tuple[float, float, float] = (0, 0, 0),
+        reduce_bands_near_energy: float | None = None,
         reduce_bands_near_fermi: bool = True,
-        bands: list[int] = None,
-        grid_interpolation: tuple = (120, 120),
+        bands: list[int] | None = None,
+        grid_interpolation: tuple[int, int] = (120, 120),
         padding: int = 15,
-        as_cartesian=False,
+        as_cartesian: bool = False,
+        scale_factor: float = 2 * np.pi,
         **kwargs,
-    ):
+    ) -> "BandStructure2D":
+        """
+        Create BandStructure2D from DFT output files.
+
+        Parameters
+        ----------
+        code : str
+            DFT code name ('vasp', 'qe', etc.)
+        dirpath : str
+            Path to calculation directory
+        normal : tuple
+            Normal vector defining the cutting plane
+        origin : tuple
+            Origin point of the cutting plane
+        reduce_bands_near_energy : float | None
+            Energy value to reduce bands around
+        reduce_bands_near_fermi : bool
+            Whether to reduce bands near Fermi level (default True)
+        bands : list[int] | None
+            Specific band indices to include
+        grid_interpolation : tuple
+            Number of grid points in (u, v) directions
+        padding : int
+            Number of k-points to pad in each direction
+        as_cartesian : bool
+            Whether to interpret coordinates in Cartesian space
+        scale_factor : float
+            Scale factor for k-plane (default: 2π)
+
+        Returns
+        -------
+        BandStructure2D
+            The constructed 2D band structure surface
+        """
         ebs = ElectronicBandStructureMesh.from_code(code=code, dirpath=dirpath)
 
         if reduce_bands_near_energy is not None:
@@ -479,12 +919,198 @@ class BandStructure2D(pv.PolyData):
         elif bands is not None:
             ebs.reduce_bands_by_index(bands)
 
-        return cls(
+        return cls.from_ebs(
             ebs,
             normal=normal,
             origin=origin,
             grid_interpolation=grid_interpolation,
             as_cartesian=as_cartesian,
             padding=padding,
+            scale_factor=scale_factor,
             **kwargs,
         )
+
+    # -------------------------------------------------------------------------
+    # Serialization methods
+    # -------------------------------------------------------------------------
+
+    def save(self, path: str) -> None:
+        """
+        Save BandStructure2D to file.
+
+        Parameters
+        ----------
+        path : str
+            Output file path. Extension determines format (.pkl).
+
+        Note
+        ----
+        EBS objects are not saved due to weak reference complexity.
+        Users should keep a reference to EBS or reload from calculation.
+        """
+        import pickle
+        from pathlib import Path
+
+        path_obj = Path(path)
+
+        # Serialize point_set properties
+        point_set_data = {
+            "points": self._point_set.points.copy(),
+            "properties": {},
+        }
+        for prop_name, prop in self._point_set.property_store.items():
+            point_set_data["properties"][prop_name] = {
+                "value": prop.value.copy(),
+                "gradients": {
+                    k: v.copy() for k, v in prop.gradients.items() if v is not None and len(v) > 0
+                },
+                "units": prop.units,
+                "label": prop.label,
+                "metadata": copy.deepcopy(prop.metadata) if prop.metadata else {},
+                "data_lim": prop.data_lim,
+            }
+
+        # Serialize band surfaces (geometry only)
+        band_surfaces_data = {}
+        for key, surface in self._band_surfaces.items():
+            band_surfaces_data[key] = {
+                "points": np.array(surface.points),
+                "faces": np.array(surface.faces),
+            }
+
+        # Serialize plane_info
+        plane_info_data = {
+            "normal": self._plane_info.normal.copy(),
+            "origin": self._plane_info.origin.copy(),
+            "u": self._plane_info.u.copy(),
+            "v": self._plane_info.v.copy(),
+            "u_limits": self._plane_info.u_limits,
+            "v_limits": self._plane_info.v_limits,
+            "grid_interpolation": self._plane_info.grid_interpolation,
+            "u_grid": self._plane_info.u_grid.copy(),
+            "v_grid": self._plane_info.v_grid.copy(),
+            "uv_grid_points": self._plane_info.uv_grid_points.copy(),
+            "as_cartesian": self._plane_info.as_cartesian,
+        }
+
+        save_data = {
+            "points": self.points.copy(),
+            "faces": self.faces.copy(),
+            "point_data": {k: np.array(v) for k, v in self.point_data.items()},
+            "cell_data": {k: np.array(v) for k, v in self.cell_data.items()},
+            "field_data": dict(self.field_data),
+            "point_set_data": point_set_data,
+            "band_surfaces_data": band_surfaces_data,
+            "plane_info_data": plane_info_data,
+        }
+
+        with open(path_obj, "wb") as f:
+            pickle.dump(save_data, f, protocol=pickle.HIGHEST_PROTOCOL)
+
+        logger.info(f"BandStructure2D saved to {path}")
+
+    @classmethod
+    def load(
+        cls,
+        path: str,
+        ebs: ElectronicBandStructureMesh | None = None,
+    ) -> "BandStructure2D":
+        """
+        Load BandStructure2D from file.
+
+        Parameters
+        ----------
+        path : str
+            Input file path
+        ebs : ElectronicBandStructureMesh | None
+            Optional EBS to associate. If not provided, property computation
+            methods will not be available.
+
+        Returns
+        -------
+        BandStructure2D
+            Loaded instance
+        """
+        import pickle
+        from pathlib import Path
+
+        path_obj = Path(path)
+
+        with open(path_obj, "rb") as f:
+            save_data = pickle.load(f)
+
+        # Reconstruct point_set
+        point_set_data = save_data["point_set_data"]
+        point_set = PointSet(points=point_set_data["points"])
+
+        for prop_name, prop_data in point_set_data["properties"].items():
+            prop = Property(
+                name=prop_name,
+                value=prop_data["value"],
+                gradients=prop_data.get("gradients"),
+                units=prop_data.get("units"),
+                label=prop_data.get("label"),
+                point_set=point_set,
+                metadata=prop_data.get("metadata"),
+                data_lim=prop_data.get("data_lim"),
+            )
+            point_set.add_property(prop)
+
+        # Reconstruct band_surfaces
+        band_surfaces: dict[tuple[int, int], pv.PolyData] = {}
+        for key, surface_data in save_data["band_surfaces_data"].items():
+            surface = pv.PolyData(surface_data["points"], surface_data["faces"])
+            band_surfaces[key] = surface
+
+        # Reconstruct plane_info
+        pi_data = save_data["plane_info_data"]
+        plane_info = PlaneInfo(
+            normal=pi_data["normal"],
+            origin=pi_data["origin"],
+            u=pi_data["u"],
+            v=pi_data["v"],
+            u_limits=pi_data["u_limits"],
+            v_limits=pi_data["v_limits"],
+            grid_interpolation=pi_data["grid_interpolation"],
+            u_grid=pi_data["u_grid"],
+            v_grid=pi_data["v_grid"],
+            uv_grid_points=pi_data["uv_grid_points"],
+            as_cartesian=pi_data["as_cartesian"],
+        )
+
+        # Reconstruct via shallow copy pattern (like FermiSurface)
+        temp_polydata = pv.PolyData(save_data["points"], save_data["faces"])
+        for k, v in save_data["point_data"].items():
+            temp_polydata.point_data[k] = v
+        for k, v in save_data["cell_data"].items():
+            temp_polydata.cell_data[k] = v
+        temp_polydata.field_data.update(save_data["field_data"])
+
+        bs2d = pv.PolyData.__new__(cls)
+        bs2d.shallow_copy(temp_polydata)
+
+        # Copy PyVista internal state
+        for attr in ["_association_bitarray_names", "_association_complex_names"]:
+            if hasattr(temp_polydata, attr):
+                setattr(bs2d, attr, getattr(temp_polydata, attr).copy())
+
+        bs2d._band_surfaces = band_surfaces
+        bs2d._point_set = point_set
+        bs2d._original_ebs = ebs
+        bs2d._ebs = ebs
+        bs2d._plane_info = plane_info
+        bs2d._ebs_cache_version = 0
+        bs2d._cached_properties = {}
+
+        # Initialize transformation matrices if EBS is provided
+        if ebs is not None and ebs.reciprocal_lattice is not None:
+            bs2d.transform_to_cart = np.eye(4)
+            bs2d.transform_to_frac = np.eye(4)
+            bs2d.transform_to_cart[:3, :3] = ebs.reciprocal_lattice.T
+            bs2d.transform_to_frac[:3, :3] = np.linalg.inv(ebs.reciprocal_lattice.T)
+        else:
+            bs2d.transform_to_cart = np.eye(4)
+            bs2d.transform_to_frac = np.eye(4)
+
+        logger.info(f"BandStructure2D loaded from {path}")
+        return bs2d
