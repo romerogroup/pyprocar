@@ -8,9 +8,7 @@ from pyprocar.io.base import BaseParser
 from pyprocar.io.bxsf import BxsfParser
 from pyprocar.io.dftbplus import DFTBParser
 from pyprocar.io.elk import ElkParser
-
-# from . import bsxf
-# from . import frmsf
+from pyprocar.io.frmsf import FrmsfParser
 from pyprocar.io.lobster import LobsterParser
 from pyprocar.io.procarparser import ProcarParser
 from pyprocar.io.qe import QEParser
@@ -22,6 +20,7 @@ class CodeParser(Enum):
     lobster = LobsterParser
     abinit = AbinitParser
     bxsf = BxsfParser
+    frmsf = FrmsfParser
     qe = QEParser
     siesta = SiestaParser
     vasp = VaspParser
