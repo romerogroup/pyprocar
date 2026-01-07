@@ -1753,6 +1753,45 @@ class ElectronicBandStructurePath(
     def special_kpoint_names(self):
         return self.kpath.special_kpoint_names
 
+    @property
+    def bands_property(self) -> Property:
+        """Return bands as a Property with kpath metadata.
+
+        The Property includes pre-computed kpath information in its metadata:
+        - k_distances: Cumulative k-path distances for x-axis
+        - tick_positions: Indices of high-symmetry points
+        - tick_names: Labels for high-symmetry points
+        - tick_names_latex: LaTeX-formatted tick labels
+
+        Returns
+        -------
+        Property
+            Property with bands data and kpath metadata
+        """
+        prop = self.get_property("bands")
+        if prop is None:
+            return None
+
+        # Add kpath metadata to a copy of the property
+        kpath_metadata = {
+            "k_distances": self.kpath.get_distances(as_segments=False),
+            "tick_positions": list(self.kpath.tick_positions),
+            "tick_names": list(self.kpath.tick_names),
+            "tick_names_latex": list(self.kpath.tick_names_latex),
+        }
+
+        # Create new Property with merged metadata
+        merged_metadata = {**prop.metadata, "kpath": kpath_metadata}
+
+        return Property(
+            name=prop.name,
+            value=prop.value,
+            point_set=prop.point_set,
+            units=prop.units,
+            label=prop.label,
+            metadata=merged_metadata,
+        )
+
     def to_mesh(
         self,
         scalars: tuple[str, np.ndarray] | None = None,

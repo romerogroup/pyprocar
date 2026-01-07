@@ -706,6 +706,40 @@ class TestElectronicBandStructurePath:
         assert ebs_path is not None
         assert isinstance(ebs_path, ElectronicBandStructurePath)
 
+    def test_bands_property(self, sample_ebs_path):
+        """Test bands_property returns Property with kpath metadata."""
+        bands_prop = sample_ebs_path.bands_property
+
+        # Check that it returns a Property
+        assert bands_prop is not None
+        assert isinstance(bands_prop, Property)
+
+        # Check bands data matches
+        assert np.array_equal(bands_prop.value, sample_ebs_path.bands)
+
+        # Check kpath metadata exists
+        assert "kpath" in bands_prop.metadata
+
+        kpath_meta = bands_prop.metadata["kpath"]
+
+        # Check k_distances shape
+        assert "k_distances" in kpath_meta
+        k_distances = kpath_meta["k_distances"]
+        assert isinstance(k_distances, np.ndarray)
+        assert k_distances.shape == (sample_ebs_path.n_kpoints,)
+
+        # Check tick_positions matches
+        assert "tick_positions" in kpath_meta
+        assert kpath_meta["tick_positions"] == list(sample_ebs_path.kpath.tick_positions)
+
+        # Check tick_names matches
+        assert "tick_names" in kpath_meta
+        assert kpath_meta["tick_names"] == list(sample_ebs_path.kpath.tick_names)
+
+        # Check tick_names_latex matches
+        assert "tick_names_latex" in kpath_meta
+        assert kpath_meta["tick_names_latex"] == list(sample_ebs_path.kpath.tick_names_latex)
+
 
 class TestElectronicBandStructureMesh:
     """Test class for ElectronicBandStructureMesh functionality."""
