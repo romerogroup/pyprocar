@@ -19,5 +19,4 @@ PyProcar has the following data types:
 
     bandsplot
     dosplot
-    procarplot
     
