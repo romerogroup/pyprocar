@@ -106,6 +106,7 @@ git-cliff-init = "git-cliff --init --config $PIXI_PROJECT_ROOT/.config/cliff.tom
 
 [feature.dev.dependencies]
 pandas-stubs = "*"
+scipy-stubs = "*"
 tbump = ">=6.9.0,<7"
 
 [feature.pytest.dependencies]
