@@ -6,6 +6,7 @@ __date__ = "March 31, 2020"
 import json
 import logging
 from dataclasses import asdict, dataclass, field
+from typing import Any
 
 import matplotlib.cm as cm
 import matplotlib.colors as mpcolors
@@ -43,6 +44,30 @@ class PlainBandStyle:
         return {k: str(v) for k, v in asdict(self).items()}
 
 
+@dataclass
+class BandSeries:
+    """Container for a single band's plotting data.
+
+    Similar to DOSPlotter's Series, but for band structure data.
+    Each BandSeries represents one (band, spin) combination.
+    """
+
+    x: np.ndarray  # k-path distances
+    y: np.ndarray  # band energies
+    scalars: np.ndarray | None  # optional scalar coloring data
+    scalars_label: str | None
+    scalars_unit: str | None
+    scalars_lim: tuple[float, float] | None
+    vectors: np.ndarray | None  # optional vector data (spin texture)
+    vectors_label: str | None
+    vectors_unit: str | None
+    vectors_lim: tuple[float, float] | None
+    label: str | None  # legend label
+    band_index: int  # which band this is
+    spin_index: int  # which spin channel
+    additional_kwargs: dict[str, Any] = field(default_factory=dict)
+
+
 class BandStructurePlotter:
     """Visualizer for band-structure arrays from a model layer.
 
@@ -73,11 +98,470 @@ class BandStructurePlotter:
 
         self.x = None
 
-    def plot(self, kpath: KPath, bands: np.ndarray, line_kwargs: dict | None = None, **kwargs):
-        """Plot plain band structure lines.
+        # Phase 2/3: Attributes for Property-based plotting
+        self._tick_positions: list[int] = []
+        self._tick_names: list[str] = []
+        self._k_distances: np.ndarray | None = None
+        self.colorbar = None
+
+    def _to_series_list(
+        self,
+        point_data,
+        scalars_data,
+        vectors_data,
+        channel_mode: str = "normal",
+        **kwargs,
+    ) -> list[BandSeries]:
+        """Convert Property objects to list of BandSeries for plotting.
+
+        Args:
+            point_data: Property containing bands with kpath metadata
+            scalars_data: Optional Property for scalar coloring
+            vectors_data: Optional Property for vector arrows
+            channel_mode: "normal" or "flip" for spin channel handling
+            **kwargs: Additional kwargs to distribute to series
+
+        Returns:
+            List of BandSeries, one per (band, spin) combination
+        """
+        # Extract kpath metadata
+        kpath_meta = point_data.metadata.get("kpath", {})
+        x_data = kpath_meta.get("k_distances")
+        if x_data is None:
+            raise ValueError("point_data must have kpath metadata with k_distances")
+
+        # Extract bands array: shape (n_kpoints, n_bands, n_spins)
+        bands = point_data.to_array()
+        if bands.ndim == 2:
+            bands = bands[:, :, np.newaxis]  # Add spin dimension if missing
+        n_kpoints, n_bands, n_spins = bands.shape
+
+        # Extract scalars if provided
+        scalars = scalars_data.to_array() if scalars_data is not None else None
+        s_label = scalars_data.label if scalars_data else None
+        s_unit = scalars_data.units if scalars_data else None
+        s_lims = getattr(scalars_data, "rounded_data_lim", None) if scalars_data else None
+
+        # Extract vectors if provided
+        vectors = vectors_data.to_array() if vectors_data is not None else None
+        v_label = vectors_data.label if vectors_data else None
+        v_unit = vectors_data.units if vectors_data else None
+        v_lims = getattr(vectors_data, "rounded_data_lim", None) if vectors_data else None
+
+        # Build kwargs per channel
+        kwargs_per_channel = self._distribute_kwargs(kwargs, n_spins)
+
+        # Build series list
+        series_list: list[BandSeries] = []
+        for iband in range(n_bands):
+            for ispin in range(n_spins):
+                y = bands[:, iband, ispin].copy()
+
+                # Apply channel mode (flip second spin)
+                if channel_mode == "flip" and ispin != 0:
+                    y *= -1.0
+
+                # Extract scalar slice for this band/spin
+                s = None
+                s_lim = None
+                if scalars is not None:
+                    if scalars.ndim == 3:
+                        s = scalars[:, iband, ispin]
+                    elif scalars.ndim == 2:
+                        s = scalars[:, iband]
+                    else:
+                        s = scalars
+                    if s_lims is not None and len(s_lims) > ispin:
+                        s_lim = s_lims[ispin]
+
+                # Extract vector slice for this band/spin
+                v = None
+                v_lim = None
+                if vectors is not None:
+                    if vectors.ndim == 3:
+                        v = vectors[:, iband, ispin]
+                    elif vectors.ndim == 2:
+                        v = vectors[:, iband]
+                    else:
+                        v = vectors
+                    if v_lims is not None and len(v_lims) > ispin:
+                        v_lim = v_lims[ispin]
+
+                # Build label
+                label = self._build_series_label(point_data, iband, ispin, n_bands, n_spins)
+
+                series_list.append(
+                    BandSeries(
+                        x=x_data,
+                        y=y,
+                        scalars=s,
+                        scalars_label=s_label,
+                        scalars_unit=s_unit,
+                        scalars_lim=s_lim,
+                        vectors=v,
+                        vectors_label=v_label,
+                        vectors_unit=v_unit,
+                        vectors_lim=v_lim,
+                        label=label,
+                        band_index=iband,
+                        spin_index=ispin,
+                        additional_kwargs=kwargs_per_channel[ispin],
+                    )
+                )
+
+        return series_list
+
+    def _distribute_kwargs(self, kwargs: dict, n_channels: int) -> list[dict]:
+        """Distribute kwargs to channels, handling list values."""
+        kwargs_per_channel = []
+        for i_channel in range(n_channels):
+            channel_kwargs = {}
+            for key, value in kwargs.items():
+                if isinstance(value, list) and len(value) == n_channels:
+                    channel_kwargs[key] = value[i_channel]
+                else:
+                    channel_kwargs[key] = value
+            kwargs_per_channel.append(channel_kwargs)
+        return kwargs_per_channel
+
+    def _build_series_label(
+        self,
+        point_data,
+        iband: int,
+        ispin: int,
+        n_bands: int,
+        n_spins: int,
+    ) -> str | None:
+        """Build label for a single band series."""
+        # Check for per-channel labels in metadata
+        labels = point_data.metadata.get("label")
+        if labels and isinstance(labels, list) and len(labels) > ispin:
+            return labels[ispin]
+
+        # Default labeling
+        if n_spins > 1:
+            spin_label = "↑" if ispin == 0 else "↓"
+            return f"Band {iband} {spin_label}"
+        return None  # Don't label single-spin bands by default
+
+    def plot(
+        self,
+        point_data,
+        scalars_data=None,
+        vectors_data=None,
+        scalars_mode: str = "none",  # "none", "scatter", "parametric"
+        channel_mode: str = "normal",  # "normal", "flip"
+        scalars_cmap: str = "plasma",
+        scalars_clim: tuple[float, float] | None = None,
+        scalars_show_colorbar: str = "single",  # "single", "none"
+        line_kwargs: dict | None = None,
+        scatter_kwargs: dict | None = None,
+        collection_kwargs: dict | None = None,
+        **kwargs,
+    ) -> dict[tuple[int, int], Any]:
+        """Plot band structure from Property objects.
+
+        This is the unified entry point for band structure plotting,
+        following the same pattern as DOSPlotter.plot().
 
         Parameters
-        ----
+        ----------
+        point_data : Property
+            Property containing bands with kpath metadata.
+            Must have metadata["kpath"] with k_distances, tick_positions, tick_names.
+        scalars_data : Property, optional
+            Property for scalar coloring (e.g., projections).
+        vectors_data : Property, optional
+            Property for vector arrows (e.g., spin texture).
+        scalars_mode : str
+            How to render scalar data:
+            - "none": Plain line plot (ignore scalars_data)
+            - "scatter": Scatter plot with scalar coloring
+            - "parametric": LineCollection with segment coloring
+        channel_mode : str
+            How to handle spin channels:
+            - "normal": All channels positive
+            - "flip": Second channel negated (for spin visualization)
+        scalars_cmap : str
+            Colormap for scalar coloring.
+        scalars_clim : tuple of float, optional
+            Color limits for scalars. None = auto.
+        scalars_show_colorbar : str
+            "single" or "none".
+        line_kwargs : dict, optional
+            kwargs for line plots.
+        scatter_kwargs : dict, optional
+            kwargs for scatter plots.
+        collection_kwargs : dict, optional
+            kwargs for LineCollection.
+        **kwargs
+            Additional kwargs passed to all plot methods.
+
+        Returns
+        -------
+        dict[tuple[int, int], Any]
+            Dict mapping (band_index, spin_index) to matplotlib artists.
+        """
+        # Store kpath metadata for axis configuration
+        kpath_meta = point_data.metadata.get("kpath", {})
+        self._tick_positions = kpath_meta.get("tick_positions", [])
+        self._tick_names = kpath_meta.get("tick_names", [])
+        self._k_distances = kpath_meta.get("k_distances")
+
+        # Convert Property objects to series list
+        series_list = self._to_series_list(
+            point_data, scalars_data, vectors_data, channel_mode, **kwargs
+        )
+
+        # Resolve color scaling across all series
+        if scalars_data is not None and scalars_mode != "none":
+            clim = self._resolve_clim(series_list, scalars_clim)
+            cmap = scalars_cmap
+        else:
+            clim = None
+            cmap = None
+
+        # Validate scalars_mode early
+        valid_modes = ("none", "scatter", "parametric")
+        if scalars_mode not in valid_modes:
+            raise ValueError(f"Unknown scalars_mode: {scalars_mode}. Must be one of {valid_modes}")
+
+        # Plot each series
+        artists: dict[tuple[int, int], Any] = {}
+        for series in series_list:
+            key = (series.band_index, series.spin_index)
+
+            if scalars_mode == "none" or series.scalars is None:
+                # Plain line plot
+                artist = self._add_line(series, line_kwargs or {})
+            elif scalars_mode == "scatter":
+                # Scatter with scalar coloring (cmap/clim are set when scalars_mode != "none")
+                assert cmap is not None and clim is not None
+                artist = self._add_scatter(series, cmap, clim, scatter_kwargs or {})
+            else:  # scalars_mode == "parametric"
+                # LineCollection with segment coloring
+                assert cmap is not None and clim is not None
+                artist = self._add_line_collection(series, cmap, clim, collection_kwargs or {})
+
+            artists[key] = artist
+
+        # Store x data for axis methods
+        if self._k_distances is not None:
+            self.x = self._k_distances
+
+        # Add colorbar if requested
+        if scalars_mode != "none" and scalars_show_colorbar == "single" and clim is not None:
+            assert cmap is not None  # cmap is set when scalars_mode != "none" and scalars_data exists
+            self._add_colorbar(cmap, clim, scalars_data.label if scalars_data else None)
+
+        # Draw vertical lines at high-symmetry points
+        self._draw_high_symmetry_lines()
+
+        # Record exportable data
+        bands = point_data.to_array()
+        if bands.ndim == 2:
+            bands = bands[:, :, np.newaxis]
+        n_spin_channels = bands.shape[-1]
+        n_bands = bands.shape[1]
+        for ispin in range(n_spin_channels):
+            for iband in range(n_bands):
+                key_str = f"bands__band-{iband}_spinChannel-{ispin}"
+                self.values_dict[key_str] = bands[:, iband, ispin]
+        if self._k_distances is not None:
+            self._record_kpath_metadata_exports()
+
+        return artists
+
+    def _resolve_clim(
+        self,
+        series_list: list[BandSeries],
+        user_clim: tuple[float, float] | None,
+    ) -> tuple[float, float]:
+        """Resolve color limits from series data or user override."""
+        if user_clim is not None:
+            return user_clim
+
+        # Compute global min/max from all series scalars
+        all_scalars = [s.scalars for s in series_list if s.scalars is not None]
+        if not all_scalars:
+            return (0.0, 1.0)
+
+        combined = np.concatenate([s.ravel() for s in all_scalars])
+        finite = combined[np.isfinite(combined)]
+        if len(finite) == 0:
+            return (0.0, 1.0)
+
+        return (float(finite.min()), float(finite.max()))
+
+    def _add_line(self, series: BandSeries, line_kwargs: dict) -> Line2D:
+        """Add a simple line plot for one band."""
+        merged_kwargs = {**series.additional_kwargs, **line_kwargs}
+        lines = self.ax.plot(series.x, series.y, **merged_kwargs)
+        return lines[0]
+
+    def _add_scatter(
+        self,
+        series: BandSeries,
+        cmap: str,
+        clim: tuple[float, float],
+        scatter_kwargs: dict,
+    ) -> PathCollection:
+        """Add scatter plot with scalar coloring for one band."""
+        merged_kwargs = {**series.additional_kwargs, **scatter_kwargs}
+        merged_kwargs.setdefault("s", 10)  # default marker size
+
+        scatter = self.ax.scatter(
+            series.x,
+            series.y,
+            c=series.scalars,
+            cmap=cmap,
+            vmin=clim[0],
+            vmax=clim[1],
+            **merged_kwargs,
+        )
+        return scatter
+
+    def _add_line_collection(
+        self,
+        series: BandSeries,
+        cmap: str,
+        clim: tuple[float, float],
+        collection_kwargs: dict,
+    ) -> LineCollection:
+        """Add LineCollection with segment coloring for one band."""
+        # Create segments from consecutive point pairs
+        points = np.array([series.x, series.y]).T.reshape(-1, 1, 2)
+        segments = np.concatenate([points[:-1], points[1:]], axis=1)
+
+        # Use midpoint scalars for segment colors
+        if series.scalars is not None:
+            segment_scalars = (series.scalars[:-1] + series.scalars[1:]) / 2
+        else:
+            segment_scalars = None
+
+        merged_kwargs = {**series.additional_kwargs, **collection_kwargs}
+        merged_kwargs.setdefault("linewidth", 2.0)
+
+        lc = LineCollection(
+            segments,
+            cmap=cmap,
+            norm=plt.Normalize(clim[0], clim[1]),
+            **merged_kwargs,
+        )
+        if segment_scalars is not None:
+            lc.set_array(segment_scalars)
+
+        self.ax.add_collection(lc)
+        return lc
+
+    def _add_colorbar(
+        self,
+        cmap: str,
+        clim: tuple[float, float],
+        label: str | None,
+    ) -> None:
+        """Add colorbar to the plot."""
+        sm = plt.cm.ScalarMappable(cmap=cmap, norm=plt.Normalize(clim[0], clim[1]))
+        sm.set_array([])
+        cbar = self.fig.colorbar(sm, ax=self.ax)
+        if label:
+            cbar.set_label(label)
+        self.colorbar = cbar
+
+    def _draw_high_symmetry_lines(self) -> None:
+        """Draw vertical lines at high-symmetry k-points."""
+        if self._k_distances is None or not self._tick_positions:
+            return
+
+        for pos in self._tick_positions:
+            if 0 <= pos < len(self._k_distances):
+                x = self._k_distances[pos]
+                self.ax.axvline(x=x, color="gray", linestyle="--", linewidth=0.5, alpha=0.7)
+
+    def _record_kpath_metadata_exports(self) -> None:
+        """Record kpath metadata for export."""
+        self.values_dict["kpath_values"] = self._k_distances
+        tick_names = []
+        for i, _x in enumerate(self._k_distances):
+            name = ""
+            for i_tick, pos in enumerate(self._tick_positions):
+                if i == pos:
+                    name = self._tick_names[i_tick] if i_tick < len(self._tick_names) else ""
+                    break
+            tick_names.append(name)
+        self.values_dict["kpath_tick_names"] = tick_names
+
+    # ---- Property wrapper helpers for legacy API compatibility ----
+
+    def _wrap_as_property(self, kpath: KPath, bands: np.ndarray):
+        """Wrap arrays and KPath into a Property object.
+
+        This helper enables the legacy array-based API to use the new
+        Property-based plot() method internally.
+
+        Parameters
+        ----------
+        kpath : KPath
+            K-path object with high-symmetry point information.
+        bands : np.ndarray
+            Band energies with shape (n_kpoints, n_bands) or (n_kpoints, n_bands, n_spins).
+
+        Returns
+        -------
+        Property
+            Property containing bands with kpath metadata.
+        """
+        from pyprocar.core.property_store import Property
+
+        # Ensure 3D shape
+        if bands.ndim == 2:
+            bands = bands[:, :, np.newaxis]
+
+        kpath_metadata = {
+            "k_distances": kpath.get_distances(as_segments=False),
+            "tick_positions": list(kpath.tick_positions),
+            "tick_names": list(kpath.tick_names),
+            "tick_names_latex": list(kpath.tick_names_latex),
+        }
+
+        return Property(
+            name="bands",
+            value=bands,
+            units="eV",
+            label="Energy",
+            metadata={"kpath": kpath_metadata},
+        )
+
+    def _wrap_scalars_as_property(self, scalars: np.ndarray, label: str = "Projection"):
+        """Wrap scalar array into a Property object.
+
+        Parameters
+        ----------
+        scalars : np.ndarray
+            Scalar data (e.g., projections) with shape matching bands.
+        label : str, optional
+            Label for the scalars. Default is "Projection".
+
+        Returns
+        -------
+        Property
+            Property containing scalar data.
+        """
+        from pyprocar.core.property_store import Property
+
+        return Property(
+            name="scalars",
+            value=scalars,
+            units="",
+            label=label,
+            metadata={},
+        )
+
+    def plot_plain(self, kpath: KPath, bands: np.ndarray, line_kwargs: dict | None = None, **kwargs):
+        """Plot plain band structure lines (legacy array-based interface).
+
+        Parameters
+        ----------
         kpath : KPath
             K-path defining cumulative distances along x.
         bands : ndarray
