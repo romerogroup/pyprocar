@@ -7,7 +7,6 @@ import pytest
 
 from pyprocar.io.bxsf import Bxsf
 
-
 # Minimal valid BXSF file: 2x2x2 k-grid (3x3x3 including boundary), 1 band
 BXSF_STR_MINIMAL = """\
 BEGIN_INFO

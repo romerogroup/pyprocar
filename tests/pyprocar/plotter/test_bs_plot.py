@@ -16,16 +16,15 @@ import matplotlib
 
 matplotlib.use("Agg")
 
-import numpy as np
-import pytest
 from unittest.mock import Mock
 
 import matplotlib.pyplot as plt
+import numpy as np
+import pytest
+from matplotlib.collections import LineCollection, PathCollection
 from matplotlib.lines import Line2D
-from matplotlib.collections import PathCollection, LineCollection
 
-from pyprocar.plotter.bs_plot import BandStructurePlotter, BandSeries
-
+from pyprocar.plotter.bs_plot import BandSeries, BandStructurePlotter
 
 # =============================================================================
 # Mock Fixtures and Factories

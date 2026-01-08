@@ -1,9 +1,7 @@
 """Tests for LobsterOut extractor."""
 
-import pytest
 
 from pyprocar.io.lobster import LobsterOut
-
 
 LOBSTEROUT_CONTENT = """LOBSTER v4.1.0
 detecting used PAW program... VASP

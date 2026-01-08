@@ -7,7 +7,6 @@ import pytest
 
 from pyprocar.io.frmsf import Frmsf
 
-
 # Minimal valid FrmSrf file: 2x2x2 k-grid, 2 bands, method 1 (gamma-centered)
 # Format: grid dims, method, n_bands, reciprocal lattice (3 lines), band data
 FRMSF_STR_MINIMAL = """\

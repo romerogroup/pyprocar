@@ -1,18 +1,18 @@
 """Tests for EBSPlanePlotter class."""
 
-import numpy as np
-import pytest
 import matplotlib
 import matplotlib.pyplot as plt
+import numpy as np
+import pytest
 
 matplotlib.use("Agg")  # Use non-interactive backend for testing
 
+from pyprocar.core.property_store import Property
 from pyprocar.plotter.ebs_plane_plot import (
     EBSPlanePlotter,
-    PlaneSeries,
     PlaneScalarsMode,
+    PlaneSeries,
 )
-from pyprocar.core.property_store import Property
 
 
 class TestPlaneScalarsMode:

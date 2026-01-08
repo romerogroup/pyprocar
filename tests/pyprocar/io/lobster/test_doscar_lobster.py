@@ -1,10 +1,8 @@
 """Tests for DoscarLobster extractor."""
 
-import numpy as np
 import pytest
 
 from pyprocar.io.lobster import DoscarLobster
-
 
 # Minimal DOSCAR.lobster content (non-spin-polarized)
 DOSCAR_CONTENT = """   2   2   0   1

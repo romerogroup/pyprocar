@@ -1,10 +1,7 @@
 """Tests for Fatband extractor."""
 
-import numpy as np
-import pytest
 
 from pyprocar.io.lobster import Fatband
-
 
 FATBAND_CONTENT = """# FATBAND for Fe (s)
 # NBANDS 4

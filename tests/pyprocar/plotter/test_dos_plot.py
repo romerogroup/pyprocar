@@ -2,14 +2,15 @@ import matplotlib
 
 matplotlib.use("Agg")
 
+from unittest.mock import MagicMock, Mock
+
 import matplotlib.pyplot as plt
 import numpy as np
 import pytest
-from unittest.mock import Mock, MagicMock
 from matplotlib.collections import LineCollection
 
 from pyprocar.core.dos import DensityOfStates
-from pyprocar.plotter.dos_plot import DOSPlotter, AxesOrientation
+from pyprocar.plotter.dos_plot import AxesOrientation, DOSPlotter
 
 
 def _make_dos(n_spins: int = 2) -> DensityOfStates:

@@ -242,8 +242,10 @@ class TestElectronicBandStructure:
         assert sample_ebs.bands is not None
         assert sample_ebs.projected is not None
         assert isinstance(sample_ebs.kpoints, np.ndarray)
+        assert isinstance(sample_ebs.bands, Property)
+        assert isinstance(sample_ebs.projected, Property)
         assert sample_ebs.kpoints.shape == (8, 3)
-        assert sample_ebs.bands.shape == (8, 4, 2)
+        assert sample_ebs.bands.shape == (8, 4, 2)  # Property delegates .shape
         assert sample_ebs.projected.shape == (8, 4, 2, 2, 3)
 
     def test_spin_properties(self, sample_ebs):
@@ -307,9 +309,9 @@ class TestElectronicBandStructure:
 
     def test_reduce_bands_near_fermi(self, sample_ebs):
         """Test reducing bands near Fermi energy."""
-        # Set some bands closer to Fermi
-        sample_ebs.bands[:, 0, :] = 0.1  # Close to Fermi
-        sample_ebs.bands[:, 1, :] = 0.2  # Close to Fermi
+        # Set some bands closer to Fermi - access underlying array through property_store
+        sample_ebs.property_store["bands"].value[:, 0, :] = 0.1  # Close to Fermi
+        sample_ebs.property_store["bands"].value[:, 1, :] = 0.2  # Close to Fermi
 
         reduced_ebs = sample_ebs.reduce_bands_near_fermi(tolerance=0.5, inplace=False)
 
@@ -329,12 +331,12 @@ class TestElectronicBandStructure:
 
         # Check that the bands data is correctly sliced
         expected_bands = sample_ebs.bands[:, bands_to_keep, :]
-        assert np.allclose(reduced_ebs.bands, expected_bands)
+        assert np.allclose(reduced_ebs.bands.to_array(), expected_bands)
 
         # Check projected data is also sliced if it exists
         if sample_ebs.projected is not None:
             expected_projected = sample_ebs.projected[:, bands_to_keep, :, :, :]
-            assert np.allclose(reduced_ebs.projected, expected_projected)
+            assert np.allclose(reduced_ebs.projected.to_array(), expected_projected)
 
     def test_shift_kpoints_to_fbz(self, sample_ebs):
         """Test shifting kpoints to first Brillouin zone."""
@@ -419,18 +421,18 @@ class TestElectronicBandStructure:
     def test_shift_bands(self, sample_ebs):
         """Test shifting bands."""
         shift_value = 1.0
-        original_bands = sample_ebs.bands.copy()
+        original_bands = sample_ebs.bands.to_array().copy()
 
         shifted_ebs = sample_ebs.shift_bands(shift_value, inplace=False)
 
-        assert np.allclose(shifted_ebs.bands, original_bands + shift_value)
+        assert np.allclose(shifted_ebs.bands.to_array(), original_bands + shift_value)
 
     def test_equality(self, sample_ebs):
         """Test equality comparison."""
         ebs_copy = ElectronicBandStructure(
             kpoints=sample_ebs.kpoints,
-            bands=sample_ebs.bands,
-            projected=sample_ebs.projected,
+            bands=sample_ebs.bands.to_array(),
+            projected=sample_ebs.projected.to_array(),
             fermi=sample_ebs.fermi,
             reciprocal_lattice=sample_ebs.reciprocal_lattice,
             orbital_names=sample_ebs.orbital_names,
@@ -604,7 +606,7 @@ class TestElectronicBandStructurePath:
         # Test get_property
         bands_prop = sample_ebs_path.get_property("bands")
         assert bands_prop is not None
-        assert np.array_equal(bands_prop.value, sample_ebs_path.bands)
+        assert np.array_equal(bands_prop.value, sample_ebs_path.bands.to_array())
 
         # Test add_property
         test_property = np.random.rand(
@@ -715,7 +717,7 @@ class TestElectronicBandStructurePath:
         assert isinstance(bands_prop, Property)
 
         # Check bands data matches
-        assert np.array_equal(bands_prop.value, sample_ebs_path.bands)
+        assert np.array_equal(bands_prop.value, sample_ebs_path.bands.to_array())
 
         # Check kpath metadata exists
         assert "kpath" in bands_prop.metadata

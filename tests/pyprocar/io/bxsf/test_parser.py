@@ -8,7 +8,6 @@ from pyprocar.core.ebs import ElectronicBandStructureMesh
 from pyprocar.core.kpoints import KGRID_MODE
 from pyprocar.io.bxsf import BxsfParser
 
-
 BXSF_STR = """\
 BEGIN_INFO
   Fermi Energy: 5.5000

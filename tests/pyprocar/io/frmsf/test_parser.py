@@ -8,7 +8,6 @@ from pyprocar.core.ebs import ElectronicBandStructureMesh
 from pyprocar.core.kpoints import KGRID_MODE
 from pyprocar.io.frmsf import FrmsfParser
 
-
 # FrmSrf file: 2x2x2 k-grid, 2 bands, method 1 (gamma-centered)
 FRMSF_STR = """\
 2 2 2
