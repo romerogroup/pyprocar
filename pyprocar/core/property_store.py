@@ -196,6 +196,16 @@ class Property:
         return self.value.shape[0]
 
     @property
+    def shape(self) -> tuple[int, ...]:
+        """Return the shape of the underlying value array.
+
+        This property delegates to the underlying numpy array's shape,
+        allowing Property objects to be used in places where array shape
+        access is expected.
+        """
+        return self.value.shape
+
+    @property
     def is_vector(self) -> bool:
         return self.value.shape[-1] == 3
 
@@ -313,25 +323,42 @@ class Property:
         return is_equal
 
     def __getitem__(
-        self, key: str | tuple[str, int]
+        self, key: str | tuple[str, int] | Any
     ) -> dict[int, npt.NDArray[np.float64]] | npt.NDArray[np.float64] | str:
-        calc_name, gradient_order = self._extract_key(key)
-        if gradient_order == 0 and calc_name == "gradients":
-            return self.gradients
-        elif gradient_order == 0 and calc_name == "name":
-            return self.name
-        elif gradient_order == 0 and calc_name in ["value", "divergence", "vortex", "laplacian"]:
-            return cast(npt.NDArray[np.float64], getattr(self, calc_name))
-        elif gradient_order > 0 and calc_name == "gradients":
-            if gradient_order not in self.gradients:
-                error_message = (
-                    f"Gradient order {gradient_order} not found for property {calc_name}."
-                )
-                error_message += f"Assigned gradients are {list(self.gradients.keys())}"
-                raise ValueError(error_message)
-            return self.gradients[gradient_order]
-        else:
-            raise ValueError(f"Invalid key: {key}. Must be a string or a tuple of two strings.")
+        # Check if key is a string for property access
+        if isinstance(key, str):
+            if key == "gradients":
+                return self.gradients
+            elif key == "name":
+                return self.name
+            elif key in ["value", "divergence", "vortex", "laplacian"]:
+                return cast(npt.NDArray[np.float64], getattr(self, key))
+            else:
+                raise ValueError(f"Invalid string key: {key}")
+
+        # Check if key is a tuple of (str, int) for gradient access
+        if isinstance(key, tuple) and len(key) == 2 and isinstance(key[0], str):
+            calc_name, gradient_order = self._extract_key(key)
+            if gradient_order == 0 and calc_name == "gradients":
+                return self.gradients
+            elif gradient_order == 0 and calc_name == "name":
+                return self.name
+            elif gradient_order == 0 and calc_name in ["value", "divergence", "vortex", "laplacian"]:
+                return cast(npt.NDArray[np.float64], getattr(self, calc_name))
+            elif gradient_order > 0 and calc_name == "gradients":
+                if gradient_order not in self.gradients:
+                    error_message = (
+                        f"Gradient order {gradient_order} not found for property {calc_name}."
+                    )
+                    error_message += f"Assigned gradients are {list(self.gradients.keys())}"
+                    raise ValueError(error_message)
+                return self.gradients[gradient_order]
+            else:
+                raise ValueError(f"Invalid key: {key}. Must be a string or a tuple of (str, int).")
+
+        # For all other key types (int, slice, tuple of indices, etc.),
+        # delegate to the underlying value array for numpy-style indexing
+        return self.value[key]
 
     def __setitem__(
         self,
