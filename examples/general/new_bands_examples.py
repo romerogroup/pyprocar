@@ -1,97 +1,128 @@
-NON_SPIN_POLARIZED_DIR = ROOT_DIR / "tests" / "data" / "examples" / "bands" / "non-spin-polarized"
-SPIN_POLARIZED_DIR = ROOT_DIR / "tests" / "data" / "examples" / "bands" / "spin-polarized"
-NON_COLINEAR_DIR = ROOT_DIR / "tests" / "data" / "examples" / "bands" / "non-colinear"
+import logging
+import time
+
+start_time = time.time()
+import os
+from pathlib import Path
+
+logger = logging.getLogger("pyprocar")
+logger.setLevel(logging.DEBUG)
 
 
-DOS_NON_SPIN_POLARIZED_DIR = ROOT_DIR / "tests" / "data" / "examples" / "dos" / "non-spin-polarized"
-DOS_SPIN_POLARIZED_DIR = ROOT_DIR / "tests" / "data" / "examples" / "dos" / "spin-polarized"
-DOS_NON_COLINEAR_DIR = ROOT_DIR / "tests" / "data" / "examples" / "dos" / "non-colinear"
+from dotenv import load_dotenv
+
+load_dotenv()
 
 
-GAMMA_POINT_DIR = ROOT_DIR / "tests" / "data" / "examples" / "bands" / "atomic_levels" / "hBN-C2"
+print(os.getenv("DATA_DIR"))
+DATA_DIR = Path(os.getenv("DATA_DIR"))
+
+
+NON_SPIN_POLARIZED_DIR = DATA_DIR / "examples" / "bands" / "non-spin-polarized"
+SPIN_POLARIZED_DIR = DATA_DIR / "examples" / "bands" / "spin-polarized"
+NON_COLINEAR_DIR = DATA_DIR / "examples" / "bands" / "non-colinear"
+
+
+DOS_NON_SPIN_POLARIZED_DIR = DATA_DIR / "examples" / "dos" / "non-spin-polarized"
+DOS_SPIN_POLARIZED_DIR = DATA_DIR / "examples" / "dos" / "spin-polarized"
+DOS_NON_COLINEAR_DIR = DATA_DIR / "examples" / "dos" / "non-colinear"
+
+
+GAMMA_POINT_DIR = DATA_DIR / "examples" / "bands" / "atomic_levels" / "hBN-C2"
+
+# Results directory for saving plots
+RESULTS_DIR = Path(__file__).parent / "results" / "bands"
+RESULTS_DIR.mkdir(parents=True, exist_ok=True)
+
+import matplotlib.pyplot as plt
 
 from pyprocar.core.ebs import ElectronicBandStructurePath
+from pyprocar.plotter.bs_plot import BandStructurePlotter
+
+
+def save_plot(name: str):
+    """Save the current plot to RESULTS_DIR and close the figure."""
+    plt.tight_layout()
+    output_path = RESULTS_DIR / f"{name}.png"
+    plt.savefig(output_path, dpi=150)
+    plt.close()
+    print(f"Saved to {output_path}")
+
 
 ebs = ElectronicBandStructurePath.from_code(code="vasp", dirpath=NON_SPIN_POLARIZED_DIR)
-
-from pyprocar.plotter.bs_plots import (
-    BandsPlotter,
-)
 
 
 def test_bsplot_scatter(ebs: ElectronicBandStructurePath):
     projection_weights = ebs.compute_projected_sum(atoms=[1], orbitals=[4, 5, 6, 7, 8])
-    bands_velocity = ebs.get_property("bands_velocity")
 
-    p = BandsPlotter(scatter_kwargs={"s": 2})
-    p.scatter(ebs.kpath, ebs.bands, scalars=projection_weights)
-    p.show()
-
-
-test_bsplot_scatter(ebs)
+    p = BandStructurePlotter()
+    p.plot_scatter(ebs.kpath, ebs.bands, scalars=projection_weights.to_array(), s=2)
+    save_plot("test_bsplot_scatter")
 
 
 def test_bsplot_quiver(ebs: ElectronicBandStructurePath):
     bands_velocity = ebs.get_property("bands_velocity")
 
-    p = BandsPlotter(scatter_kwargs={"s": 2})
-    p.quiver(ebs.kpath, ebs.bands, vectors=bands_velocity)
-    p.show()
-
-
-test_bsplot_quiver(ebs)
+    p = BandStructurePlotter()
+    p.plot_quiver(ebs.kpath, ebs.bands, vectors=bands_velocity.to_array())
+    save_plot("test_bsplot_quiver")
 
 
 def test_bsplot_overlay_species(ebs: ElectronicBandStructurePath):
-    weights, labels = ebs.build_overlay_species_weights(orbitals=[4, 5, 6, 7, 8])
-    p = BandsPlotter()
-    p.overlay(ebs.kpath, ebs.bands, weights, labels=labels)
-    p.show()
-
-
-test_bsplot_overlay_species(ebs)
+    properties = ebs.build_overlay_species_weights(orbitals=[4, 5, 6, 7, 8])
+    weights = [prop.to_array() for prop in properties]
+    labels = [prop.label for prop in properties]
+    p = BandStructurePlotter()
+    p.plot_overlay(ebs.kpath, ebs.bands, weights, labels=labels)
+    save_plot("test_bsplot_overlay_species")
 
 
 def test_bsplot_overlay_orbitals(ebs: ElectronicBandStructurePath):
-    weights, labels = ebs.build_overlay_orbitals_weights(atoms=[2, 3, 4])
-    p = BandsPlotter()
-    p.overlay(ebs.kpath, ebs.bands, weights, labels=labels)
-    p.show()
+    properties = ebs.build_overlay_orbitals_weights(atoms=[2, 3, 4])
+    weights = [prop.to_array() for prop in properties]
+    labels = [prop.label for prop in properties]
+    p = BandStructurePlotter()
+    p.plot_overlay(ebs.kpath, ebs.bands, weights, labels=labels)
+    save_plot("test_bsplot_overlay_orbitals")
 
 
-test_bsplot_overlay_orbitals(ebs)
-
-
-# # generic overlay
 def test_bsplot_overlay_generic(ebs: ElectronicBandStructurePath):
     items = {"V": [4, 5, 6, 7, 8]}
-    weights, labels = ebs.build_overlay_weights(items, orbitals_as_names=True)
-    p = BandsPlotter()
-    p.overlay(ebs.kpath, ebs.bands, weights, labels=labels)
-    p.show()
-
-
-test_bsplot_overlay_generic(ebs)
+    properties = ebs.build_overlay_weights(items)
+    weights = [prop.to_array() for prop in properties]
+    labels = [prop.label for prop in properties]
+    p = BandStructurePlotter()
+    p.plot_overlay(ebs.kpath, ebs.bands, weights, labels=labels)
+    save_plot("test_bsplot_overlay_generic")
 
 
 def test_bsplot_parametric(ebs: ElectronicBandStructurePath):
     projection_weights = ebs.compute_projected_sum(atoms=[1], orbitals=[4, 5, 6, 7, 8])
-    p = BandsPlotter()
-    p.parametric(ebs.kpath, ebs.bands, scalars=projection_weights)
-    p.show()
-
-
-test_bsplot_parametric(ebs)
+    p = BandStructurePlotter()
+    p.plot(ebs.bands, scalars=projection_weights)
+    # p.plot_parametric(ebs.kpath, ebs.bands, scalars=projection_weights.to_array())
+    # save_plot("test_bsplot_parametric")
 
 
 def test_bsplot_multi_method_call(ebs: ElectronicBandStructurePath):
     projection_weights = ebs.compute_projected_sum(atoms=[1], orbitals=[4, 5, 6, 7, 8])
     bands_velocity = ebs.get_property("bands_velocity")
 
-    p = BandsPlotter(scatter_kwargs={"s": 2})
-    p.scatter(ebs.kpath, ebs.bands, scalars=projection_weights)
-    p.quiver(ebs.kpath, ebs.bands, vectors=bands_velocity)
-    p.show()
+    p = BandStructurePlotter()
+    p.plot_scatter(ebs.kpath, ebs.bands, scalars=projection_weights.to_array(), s=2)
+    p.plot_quiver(ebs.kpath, ebs.bands, vectors=bands_velocity.to_array())
+    save_plot("test_bsplot_multi_method_call")
 
 
-test_bsplot_multi_method_call(ebs)
+###########################################################
+# Run tests
+###########################################################
+# test_bsplot_scatter(ebs)
+# test_bsplot_quiver(ebs)
+# test_bsplot_overlay_species(ebs)
+# test_bsplot_overlay_orbitals(ebs)  # Bug in build_overlay_orbitals_weights
+# test_bsplot_overlay_generic(ebs)  # Bug in build_overlay_weights
+test_bsplot_parametric(ebs)
+# test_bsplot_multi_method_call(ebs)
+
+print(f"Time taken: {time.time() - start_time} seconds")

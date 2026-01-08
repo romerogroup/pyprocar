@@ -186,3 +186,4 @@ pixi.lock
 hack/
 skills/
 thoughts/
+examples/**/results/

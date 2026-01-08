@@ -30,20 +30,33 @@ DOS_NON_COLINEAR_DIR = DATA_DIR / "examples" / "dos" / "non-colinear"
 
 GAMMA_POINT_DIR = DATA_DIR / "examples" / "bands" / "atomic_levels" / "hBN-C2"
 
+# Results directory for saving plots
+RESULTS_DIR = Path(__file__).parent / "results" / "dos"
+RESULTS_DIR.mkdir(parents=True, exist_ok=True)
+
+import matplotlib.pyplot as plt
 
 from pyprocar.core.dos import DensityOfStates
 from pyprocar.plotter.dos_plot import DOSPlotter
 
 
+def save_plot(name: str):
+    """Save the current plot to RESULTS_DIR and close the figure."""
+    plt.tight_layout()
+    output_path = RESULTS_DIR / f"{name}.png"
+    plt.savefig(output_path, dpi=150)
+    plt.close()
+    print(f"Saved to {output_path}")
+
+
 def test_plot_horizontal_total_line():
-    print("test_plot_horizontal_total_line")
     dos_non_spin_polarized = DensityOfStates.from_code(
         code="vasp", dirpath=DOS_NON_SPIN_POLARIZED_DIR
     )
     total = dos_non_spin_polarized.total
     plotter = DOSPlotter(orientation="horizontal")
     plotter.plot(total)
-    plotter.show()
+    save_plot("test_plot_horizontal_total_line")
 
 
 def test_plot_horizontal_projected_sum_line():
@@ -62,7 +75,7 @@ def test_plot_horizontal_projected_sum_line():
     plotter.plot(total)
     plotter.plot(projected_sum)
     plotter.legend()
-    plotter.show()
+    save_plot("test_plot_horizontal_projected_sum_line")
 
 
 def test_plot_horizontal_projected_sum_line_integral_normalized():
@@ -76,7 +89,7 @@ def test_plot_horizontal_projected_sum_line_integral_normalized():
     )
     plotter = DOSPlotter(orientation="horizontal")
     plotter.plot(projected_sum)
-    plotter.show()
+    save_plot("test_plot_horizontal_projected_sum_line_integral_normalized")
 
 
 def test_plot_horizontal_total_with_projected_sum_scalars_line():
@@ -93,7 +106,7 @@ def test_plot_horizontal_total_with_projected_sum_scalars_line():
 
     plotter = DOSPlotter(orientation="horizontal")
     plotter.plot(total, scalars_data=projected_sum, scalars_mode="line")
-    plotter.show()
+    save_plot("test_plot_horizontal_total_with_projected_sum_scalars_line")
 
 
 def test_plot_horizontal_total_with_projected_sum_scalars_line_flip_channel_mode_per_channel_colorbar():
@@ -114,7 +127,7 @@ def test_plot_horizontal_total_with_projected_sum_scalars_line_flip_channel_mode
         channel_mode="flip",
         scalars_show_colorbar="per_channel",
     )
-    plotter.show()
+    save_plot("test_plot_horizontal_total_with_projected_sum_scalars_line_flip_channel_mode_per_channel_colorbar")
 
 
 def test_plot_horizontal_projected_sum_with_grouped_kwargs():
@@ -133,7 +146,7 @@ def test_plot_horizontal_projected_sum_with_grouped_kwargs():
     plotter.plot(total)
 
     plotter.legend()
-    plotter.show()
+    save_plot("test_plot_horizontal_projected_sum_with_grouped_kwargs")
 
 
 def test_plot_horizontal_total_with_projected_sum_scalars_line_with_grouped_kwargs():
@@ -154,7 +167,7 @@ def test_plot_horizontal_total_with_projected_sum_scalars_line_with_grouped_kwar
         linewidth=[1.0, 2.0],
         alpha=[0.5, 1.0],
     )
-    plotter.show()
+    save_plot("test_plot_horizontal_total_with_projected_sum_scalars_line_with_grouped_kwargs")
 
 
 def test_plot_horizontal_total_with_projected_sum_scalars_line_flip_channel_mode():
@@ -176,7 +189,7 @@ def test_plot_horizontal_total_with_projected_sum_scalars_line_flip_channel_mode
         alpha=[0.5, 1.0],
         channel_mode="flip",
     )
-    plotter.show()
+    save_plot("test_plot_horizontal_total_with_projected_sum_scalars_line_flip_channel_mode")
 
 
 def test_plot_horizontal_total_with_projected_sum_scalars_fill_flip_channel_mode():
@@ -198,7 +211,7 @@ def test_plot_horizontal_total_with_projected_sum_scalars_fill_flip_channel_mode
         alpha=[0.5, 1.0],
         channel_mode="flip",
     )
-    plotter.show()
+    save_plot("test_plot_horizontal_total_with_projected_sum_scalars_fill_flip_channel_mode")
 
 
 def test_plot_horizontal_total_with_projected_sum_scalars_fill_with_grouped_kwargs():
@@ -215,7 +228,7 @@ def test_plot_horizontal_total_with_projected_sum_scalars_fill_with_grouped_kwar
     plot_kwargs = [{"alpha": 0.5}, {"alpha": 1.0}]
 
     plotter.plot(total, scalars_data=projected_sum, scalars_mode="fill", plot_kwargs=plot_kwargs)
-    plotter.show()
+    save_plot("test_plot_horizontal_total_with_projected_sum_scalars_fill_with_grouped_kwargs")
 
 
 def test_plot_horizontal_total_with_projected_sum_scalars_fill():
@@ -233,7 +246,7 @@ def test_plot_horizontal_total_with_projected_sum_scalars_fill():
 
     plotter = DOSPlotter(orientation="horizontal")
     plotter.plot(total, scalars_data=projected_sum, scalars_mode="fill")
-    plotter.show()
+    save_plot("test_plot_horizontal_total_with_projected_sum_scalars_fill")
 
 
 def test_plot_vertical_total_with_projected_sum_scalars_line():
@@ -251,7 +264,7 @@ def test_plot_vertical_total_with_projected_sum_scalars_line():
 
     plotter = DOSPlotter(orientation="vertical")
     plotter.plot(total, scalars_data=projected_sum, scalars_mode="line")
-    plotter.show()
+    save_plot("test_plot_vertical_total_with_projected_sum_scalars_line")
 
 
 def test_plot_vertical_total_with_projected_sum_scalars_fill():
@@ -269,7 +282,7 @@ def test_plot_vertical_total_with_projected_sum_scalars_fill():
 
     plotter = DOSPlotter(orientation="vertical")
     plotter.plot(total, scalars_data=projected_sum, scalars_mode="fill")
-    plotter.show()
+    save_plot("test_plot_vertical_total_with_projected_sum_scalars_fill")
 
 
 def test_non_spin_polarized_total_with_gradients_line(**kwargs):
@@ -282,7 +295,7 @@ def test_non_spin_polarized_total_with_gradients_line(**kwargs):
 
     plotter = DOSPlotter(orientation="horizontal")
     plotter.plot(total, vectors_data=total_gradient, channel_mode="flip", **kwargs)
-    plotter.show()
+    save_plot("test_non_spin_polarized_total_with_gradients_line")
 
 
 # --------------------------------------------------------
@@ -302,7 +315,7 @@ def test_spin_polarized_plot_total_with_projected_sum_scalars_line():
 
     plotter = DOSPlotter(orientation="horizontal")
     plotter.plot(total, scalars_data=projected_sum, scalars_mode="line")
-    plotter.show()
+    save_plot("test_spin_polarized_plot_total_with_projected_sum_scalars_line")
 
 
 def test_non_colinear_plot_total_with_projected_sum_scalars_line():
@@ -317,7 +330,7 @@ def test_non_colinear_plot_total_with_projected_sum_scalars_line():
 
     plotter = DOSPlotter(orientation="horizontal")
     plotter.plot(total, scalars_data=projected_sum, scalars_mode="line")
-    plotter.show()
+    save_plot("test_non_colinear_plot_total_with_projected_sum_scalars_line")
 
 
 ###########################################################
@@ -333,7 +346,7 @@ def test_non_colinear_plot_total_with_magnetization_scalars_line():
 
     plotter = DOSPlotter(orientation="horizontal")
     plotter.plot(total, scalars_data=magnetization, scalars_mode="line")
-    plotter.show()
+    save_plot("test_non_colinear_plot_total_with_magnetization_scalars_line")
 
 
 def test_non_colinear_plot_total_with_spin_texture_norm_mode_magnetization_scalars_line():
@@ -348,7 +361,7 @@ def test_non_colinear_plot_total_with_spin_texture_norm_mode_magnetization_scala
 
     plotter = DOSPlotter(orientation="horizontal")
     plotter.plot(total, scalars_data=magnetization, scalars_mode="line")
-    plotter.show()
+    save_plot("test_non_colinear_plot_total_with_spin_texture_norm_mode_magnetization_scalars_line")
 
 
 def test_non_colinear_plot_total_with_mag_norm_mode_magnetization_from_total_line():
@@ -363,7 +376,7 @@ def test_non_colinear_plot_total_with_mag_norm_mode_magnetization_from_total_lin
 
     plotter = DOSPlotter(orientation="horizontal")
     plotter.plot(total, scalars_data=magnetization, scalars_mode="line")
-    plotter.show()
+    save_plot("test_non_colinear_plot_total_with_mag_norm_mode_magnetization_from_total_line")
 
 
 ###########################################################
@@ -381,7 +394,7 @@ def test_non_colinear_plot_total_with_spin_texture_magnitude_scalars_line(**kwar
 
     plotter = DOSPlotter(orientation="horizontal")
     plotter.plot(total, scalars_data=spin_texture_magnitude, scalars_mode="line")
-    plotter.show()
+    save_plot("test_non_colinear_plot_total_with_spin_texture_magnitude_scalars_line")
 
 
 def test_non_colinear_plot_total_with_spin_mag_norm_mode_spin_texture_magnitude_scalars_line(
@@ -399,7 +412,7 @@ def test_non_colinear_plot_total_with_spin_mag_norm_mode_spin_texture_magnitude_
     plotter = DOSPlotter(orientation="horizontal")
     array = spin_texture_magnitude.to_array()
     plotter.plot(total, scalars_data=spin_texture_magnitude, scalars_mode="line")
-    plotter.show()
+    save_plot("test_non_colinear_plot_total_with_spin_mag_norm_mode_spin_texture_magnitude_scalars_line")
 
 
 def test_non_colinear_plot_total_with_mag_norm_mode_spin_texture_magnitude_scalars_line(**kwargs):
@@ -414,7 +427,7 @@ def test_non_colinear_plot_total_with_mag_norm_mode_spin_texture_magnitude_scala
 
     plotter = DOSPlotter(orientation="horizontal")
     plotter.plot(total, scalars_data=spin_texture_magnitude, scalars_mode="line")
-    plotter.show()
+    save_plot("test_non_colinear_plot_total_with_mag_norm_mode_spin_texture_magnitude_scalars_line")
 
 
 def test_non_colinear_plot_total_with_spin_mag_norm_mode_spin_texture_magnitude_from_total_scalars_line(
@@ -433,7 +446,7 @@ def test_non_colinear_plot_total_with_spin_mag_norm_mode_spin_texture_magnitude_
     plotter = DOSPlotter(orientation="horizontal")
 
     plotter.plot(total, scalars_data=spin_texture_magnitude, scalars_mode="line")
-    plotter.show()
+    save_plot("test_non_colinear_plot_total_with_spin_mag_norm_mode_spin_texture_magnitude_from_total_scalars_line")
 
 
 ###########################################################
@@ -451,7 +464,7 @@ def test_non_colinear_plot_total_with_sx_magnitude_scalars_line():
 
     plotter = DOSPlotter(orientation="horizontal")
     plotter.plot(total, scalars_data=sx, scalars_mode="line")
-    plotter.show()
+    save_plot("test_non_colinear_plot_total_with_sx_magnitude_scalars_line")
 
 
 def test_non_spin_polarized():
@@ -473,39 +486,42 @@ def test_non_spin_polarized():
     plotter.plot(
         total, scalars_data=projected_sum, scalars_mode="line", alpha=[0.5, 1.0], b=[0.1, 5.0]
     )
-    plotter.show()
+    save_plot("test_non_spin_polarized")
 
     # sx = dos_non_spin_polarized.compute_spin_texture(atoms=atoms, orbitals=orbitals, spins=[1])
 
-
 # test_non_spin_polarized()
+
+
+
+
 ###########################################################
 # Basic plots testing
 ###########################################################
 test_plot_horizontal_total_line()
-# test_plot_horizontal_projected_sum_line()
-# test_plot_horizontal_projected_sum_line_integral_normalized()
+test_plot_horizontal_projected_sum_line()
+test_plot_horizontal_projected_sum_line_integral_normalized()
 
-# test_plot_horizontal_total_with_projected_sum_scalars_line_with_grouped_kwargs()
-# test_plot_horizontal_total_with_projected_sum_scalars_line_flip_channel_mode()
-# test_plot_horizontal_total_with_projected_sum_scalars_fill_flip_channel_mode()
-# test_plot_horizontal_projected_sum_with_grouped_kwargs()
-# test_plot_horizontal_total_with_projected_sum_scalars_fill_with_grouped_kwargs()
+test_plot_horizontal_total_with_projected_sum_scalars_line_with_grouped_kwargs()
+test_plot_horizontal_total_with_projected_sum_scalars_line_flip_channel_mode()
+test_plot_horizontal_total_with_projected_sum_scalars_fill_flip_channel_mode()
+test_plot_horizontal_projected_sum_with_grouped_kwargs()
+test_plot_horizontal_total_with_projected_sum_scalars_fill_with_grouped_kwargs()
 
-# test_plot_horizontal_total_with_projected_sum_scalars_line_flip_channel_mode_per_channel_colorbar()
+test_plot_horizontal_total_with_projected_sum_scalars_line_flip_channel_mode_per_channel_colorbar()
 
 ###########################################################
 # Orientation testing
 ###########################################################
-# test_plot_horizontal_total_with_projected_sum_scalars_line()
-# test_plot_horizontal_total_with_projected_sum_scalars_fill()
+test_plot_horizontal_total_with_projected_sum_scalars_line()
+test_plot_horizontal_total_with_projected_sum_scalars_fill()
 
-# test_plot_vertical_total_with_projected_sum_scalars_line()
-# test_plot_vertical_total_with_projected_sum_scalars_fill()
+test_plot_vertical_total_with_projected_sum_scalars_line()
+test_plot_vertical_total_with_projected_sum_scalars_fill()
 
 
 # Gradient testing
-# test_non_spin_polarized_total_with_gradients_line()
+test_non_spin_polarized_total_with_gradients_line()
 
 
 ###########################################################
@@ -513,33 +529,33 @@ test_plot_horizontal_total_line()
 ###########################################################
 
 # # Projected sum
-# test_non_colinear_plot_total_with_projected_sum_scalars_line()
+test_non_colinear_plot_total_with_projected_sum_scalars_line()
 
 
-# # Magnetization
-# test_non_colinear_plot_total_with_magnetization_scalars_line()
-# test_non_colinear_plot_total_with_mag_norm_mode_magnetization_from_total_line()
-# test_non_colinear_plot_total_with_spin_texture_norm_mode_magnetization_scalars_line()  # This should produce values greater than one  since sum |m| <= total M
+# Magnetization
+test_non_colinear_plot_total_with_magnetization_scalars_line()
+test_non_colinear_plot_total_with_mag_norm_mode_magnetization_from_total_line()
+test_non_colinear_plot_total_with_spin_texture_norm_mode_magnetization_scalars_line()  # This should produce values greater than one  since sum |m| <= total M
 
 # # Spin texture magnitude
-# test_non_colinear_plot_total_with_spin_texture_magnitude_scalars_line()
-# test_non_colinear_plot_total_with_spin_mag_norm_mode_spin_texture_magnitude_scalars_line(fill_value=0.0)
-# test_non_colinear_plot_total_with_spin_mag_norm_mode_spin_texture_magnitude_from_total_scalars_line(fill_value=0.0)  # Should result in 0.0 for all values as the total spin channels are 0.0
+test_non_colinear_plot_total_with_spin_texture_magnitude_scalars_line()
+test_non_colinear_plot_total_with_spin_mag_norm_mode_spin_texture_magnitude_scalars_line(fill_value=0.0)
+test_non_colinear_plot_total_with_spin_mag_norm_mode_spin_texture_magnitude_from_total_scalars_line(fill_value=0.0)  # Should result in 0.0 for all values as the total spin channels are 0.0
 
-# test_non_colinear_plot_total_with_mag_norm_mode_spin_texture_magnitude_scalars_line()   # This should be less than one  since sum |m| <= total M
+test_non_colinear_plot_total_with_mag_norm_mode_spin_texture_magnitude_scalars_line()   # This should be less than one  since sum |m| <= total M
 
-# test_non_colinear_plot_total_with_sx_magnitude_scalars_line()
+test_non_colinear_plot_total_with_sx_magnitude_scalars_line()
 
 
 # --------------------------------------------------------
 # Gradient testing
 # --------------------------------------------------------
-# test_non_spin_polarized_total_with_gradients_line(
-#     # scale = [1.0,1.0]
-#     # plot_kwargs = [{ "scale": 1.0}, { "scale": 1.0}]
-#     # scale = [0.001,0.001]
-#     scale = [500,500]
-#     )
+test_non_spin_polarized_total_with_gradients_line(
+    # scale = [1.0,1.0]
+    # plot_kwargs = [{ "scale": 1.0}, { "scale": 1.0}]
+    # scale = [0.001,0.001]
+    scale = [500,500]
+    )
 
 
 print(f"Time taken: {time.time() - start_time} seconds")
