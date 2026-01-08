@@ -350,12 +350,24 @@ class ElectronicBandStructure(PointSet, PyvistaInterface):
         return ret
 
     def __eq__(self, other):
+        if not isinstance(other, ElectronicBandStructure):
+            return False
+
         kpoints_equal = math.compare_arrays(self.kpoints, other.kpoints)
-        bands_equal = math.compare_arrays(self.bands, other.bands)
         fermi_equal = self.fermi == other.fermi
-        projected_equal = math.compare_arrays(self.projected, other.projected)
-        projected_phase_equal = math.compare_arrays(self.projected_phase, other.projected_phase)
-        weights_equal = math.compare_arrays(self.weights, other.weights)
+
+        # Helper to extract array from Property or use directly
+        def _get_array(prop):
+            if prop is None:
+                return None
+            return prop.to_array() if hasattr(prop, "to_array") else prop
+
+        bands_equal = math.compare_arrays(_get_array(self.bands), _get_array(other.bands))
+        projected_equal = math.compare_arrays(_get_array(self.projected), _get_array(other.projected))
+        projected_phase_equal = math.compare_arrays(
+            _get_array(self.projected_phase), _get_array(other.projected_phase)
+        )
+        weights_equal = math.compare_arrays(_get_array(self.weights), _get_array(other.weights))
 
         is_ebs_equal = (
             kpoints_equal
@@ -372,32 +384,20 @@ class ElectronicBandStructure(PointSet, PyvistaInterface):
         return self._points
 
     @property
-    def bands(self):
-        prop = self.get_property("bands")
-        if prop is None:
-            return None
-        return prop.value
+    def bands(self) -> Property | None:
+        return self.get_property("bands")
 
     @property
-    def projected(self):
-        prop = self.get_property("projected")
-        if prop is None:
-            return None
-        return prop.value
+    def projected(self) -> Property | None:
+        return self.get_property("projected")
 
     @property
-    def projected_phase(self):
-        prop = self.get_property("projected_phase")
-        if prop is None:
-            return None
-        return prop.value
+    def projected_phase(self) -> Property | None:
+        return self.get_property("projected_phase")
 
     @property
-    def weights(self):
-        prop = self.get_property("weights")
-        if prop is None:
-            return None
-        return prop.value
+    def weights(self) -> Property | None:
+        return self.get_property("weights")
 
     @property
     def orbital_names(self):
@@ -610,16 +610,15 @@ class ElectronicBandStructure(PointSet, PyvistaInterface):
         return names
 
     @property
-    def ebs_ipr(self):
+    def ebs_ipr(self) -> Property | None:
         prop = self.get_property("ebs_ipr")
         if prop is not None:
-            return prop.value
+            return prop
 
-        ebs_ipr = self.compute_ebs_ipr()
-        return ebs_ipr
+        return self.compute_ebs_ipr()
 
     @property
-    def ebs_ipr_atom(self):
+    def ebs_ipr_atom(self) -> Property | None:
         """
         It returns the atom-resolved , pIPR:
 
@@ -634,16 +633,15 @@ class ElectronicBandStructure(PointSet, PyvistaInterface):
 
         Returns
         -------
-        ret : list float
-            The IPR projections
+        ret : Property | None
+            The IPR projections as a Property object
 
         """
         prop = self.get_property("ebs_ipr_atom")
         if prop is not None:
-            return prop.value
+            return prop
 
-        ebs_ipr_atom = self.compute_ebs_ipr_atom()
-        return ebs_ipr_atom
+        return self.compute_ebs_ipr_atom()
 
     @property
     def spin_texture(self):
@@ -655,13 +653,12 @@ class ElectronicBandStructure(PointSet, PyvistaInterface):
         return spin_texture
 
     @property
-    def projected_sum(self):
+    def projected_sum(self) -> Property | None:
         prop = self.get_property("projected_sum")
         if prop is not None:
-            return prop.value
+            return prop
 
-        projected_sum = self.compute_projected_sum()
-        return projected_sum
+        return self.compute_projected_sum()
 
     @property
     def projected_sum_spin_texture(self):
@@ -1754,10 +1751,10 @@ class ElectronicBandStructurePath(
         return self.kpath.special_kpoint_names
 
     @property
-    def bands_property(self) -> Property:
+    def bands(self) -> Property | None:
         """Return bands as a Property with kpath metadata.
 
-        The Property includes pre-computed kpath information in its metadata:
+        Overrides the base class to include pre-computed kpath information:
         - k_distances: Cumulative k-path distances for x-axis
         - tick_positions: Indices of high-symmetry points
         - tick_names: Labels for high-symmetry points
