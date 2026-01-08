@@ -140,13 +140,53 @@ class BandStructurePlotter:
         scalars = scalars_data.to_array() if scalars_data is not None else None
         s_label = scalars_data.label if scalars_data else None
         s_unit = scalars_data.units if scalars_data else None
-        s_lims = getattr(scalars_data, "rounded_data_lim", None) if scalars_data else None
+        s_lims_raw = getattr(scalars_data, "rounded_data_lim", None) if scalars_data else None
+
+        # Compute global scalar limits per spin channel
+        # Property.data_lim returns shape (n_spins, n_bands * 2) for 3D data
+        # where first n_bands values are mins and last n_bands are maxs.
+        # For 2D data (like DOS), shape is (n_spins, 2) with [:, 0]=min, [:, 1]=max.
+        s_lims_per_spin: list[tuple[float, float] | None] = [None] * n_spins
+        if s_lims_raw is not None:
+            s_lims_arr = np.asarray(s_lims_raw)
+            if s_lims_arr.ndim == 2 and s_lims_arr.shape[1] > 2:
+                # Shape: (n_spins, n_bands * 2) -> compute global (min, max) per spin
+                # First half are mins, second half are maxs
+                half = s_lims_arr.shape[1] // 2
+                for ispin in range(min(n_spins, s_lims_arr.shape[0])):
+                    mins_per_band = s_lims_arr[ispin, :half]
+                    maxs_per_band = s_lims_arr[ispin, half:]
+                    global_min = float(np.min(mins_per_band))
+                    global_max = float(np.max(maxs_per_band))
+                    s_lims_per_spin[ispin] = (global_min, global_max)
+            elif s_lims_arr.ndim == 2 and s_lims_arr.shape[1] == 2:
+                # Shape: (n_spins, 2) -> use directly (min, max per spin)
+                for ispin in range(min(n_spins, s_lims_arr.shape[0])):
+                    s_lims_per_spin[ispin] = (float(s_lims_arr[ispin, 0]), float(s_lims_arr[ispin, 1]))
 
         # Extract vectors if provided
         vectors = vectors_data.to_array() if vectors_data is not None else None
         v_label = vectors_data.label if vectors_data else None
         v_unit = vectors_data.units if vectors_data else None
-        v_lims = getattr(vectors_data, "rounded_data_lim", None) if vectors_data else None
+        v_lims_raw = getattr(vectors_data, "rounded_data_lim", None) if vectors_data else None
+
+        # Compute global vector limits per spin channel (same logic as scalars)
+        v_lims_per_spin: list[tuple[float, float] | None] = [None] * n_spins
+        if v_lims_raw is not None:
+            v_lims_arr = np.asarray(v_lims_raw)
+            if v_lims_arr.ndim == 2 and v_lims_arr.shape[1] > 2:
+                # Shape: (n_spins, n_bands * 2) -> compute global (min, max) per spin
+                half = v_lims_arr.shape[1] // 2
+                for ispin in range(min(n_spins, v_lims_arr.shape[0])):
+                    mins_per_band = v_lims_arr[ispin, :half]
+                    maxs_per_band = v_lims_arr[ispin, half:]
+                    global_min = float(np.min(mins_per_band))
+                    global_max = float(np.max(maxs_per_band))
+                    v_lims_per_spin[ispin] = (global_min, global_max)
+            elif v_lims_arr.ndim == 2 and v_lims_arr.shape[1] == 2:
+                # Shape: (n_spins, 2) -> use directly
+                for ispin in range(min(n_spins, v_lims_arr.shape[0])):
+                    v_lims_per_spin[ispin] = (float(v_lims_arr[ispin, 0]), float(v_lims_arr[ispin, 1]))
 
         # Build kwargs per channel
         kwargs_per_channel = self._distribute_kwargs(kwargs, n_spins)
@@ -163,7 +203,6 @@ class BandStructurePlotter:
 
                 # Extract scalar slice for this band/spin
                 s = None
-                s_lim = None
                 if scalars is not None:
                     if scalars.ndim == 3:
                         s = scalars[:, iband, ispin]
@@ -171,12 +210,12 @@ class BandStructurePlotter:
                         s = scalars[:, iband]
                     else:
                         s = scalars
-                    if s_lims is not None and len(s_lims) > ispin:
-                        s_lim = s_lims[ispin]
+
+                # Use pre-computed global limit for this spin channel
+                s_lim = s_lims_per_spin[ispin]
 
                 # Extract vector slice for this band/spin
                 v = None
-                v_lim = None
                 if vectors is not None:
                     if vectors.ndim == 3:
                         v = vectors[:, iband, ispin]
@@ -184,8 +223,9 @@ class BandStructurePlotter:
                         v = vectors[:, iband]
                     else:
                         v = vectors
-                    if v_lims is not None and len(v_lims) > ispin:
-                        v_lim = v_lims[ispin]
+
+                # Use pre-computed global limit for this spin channel
+                v_lim = v_lims_per_spin[ispin]
 
                 # Build label
                 label = self._build_series_label(point_data, iband, ispin, n_bands, n_spins)
@@ -315,7 +355,19 @@ class BandStructurePlotter:
 
         # Resolve color scaling across all series
         if scalars_data is not None and scalars_mode != "none":
-            clim = self._resolve_clim(series_list, scalars_clim)
+            # Get global clim from series (uses rounded_data_lim via _to_series_list)
+            if scalars_clim is not None:
+                clim = scalars_clim
+            else:
+                # Compute global clim from all series scalars_lim (already rounded)
+                all_lims = [s.scalars_lim for s in series_list if s.scalars_lim is not None]
+                if all_lims:
+                    clim = (
+                        min(lim[0] for lim in all_lims),
+                        max(lim[1] for lim in all_lims),
+                    )
+                else:
+                    clim = self._resolve_clim(series_list, scalars_clim)
             cmap = scalars_cmap
         else:
             clim = None
@@ -369,6 +421,14 @@ class BandStructurePlotter:
                 self.values_dict[key_str] = bands[:, iband, ispin]
         if self._k_distances is not None:
             self._record_kpath_metadata_exports()
+
+        # Configure axes (following dos_plot.py:325-334 pattern)
+        self.set_xlim()
+        self.set_ylim()
+        self.set_yticks()
+        self.set_xticks()
+        self.set_xlabel()
+        self.set_ylabel()
 
         return artists
 
@@ -464,9 +524,18 @@ class BandStructurePlotter:
         sm = plt.cm.ScalarMappable(cmap=cmap, norm=plt.Normalize(clim[0], clim[1]))
         sm.set_array([])
         cbar = self.fig.colorbar(sm, ax=self.ax)
-        if label:
-            cbar.set_label(label)
         self.colorbar = cbar
+        if label:
+            self.set_colorbar_label(label)
+
+    def set_colorbar_label(self, label: str, rotation: int = 270, labelpad: int = 12, **kwargs):
+        """Set colorbar label with proper orientation.
+
+        Following dos_plot.py pattern, uses rotation=270 for top-to-bottom readability.
+        """
+        if self.colorbar is None:
+            return
+        self.colorbar.ax.set_ylabel(label, rotation=rotation, labelpad=labelpad, **kwargs)
 
     def _draw_high_symmetry_lines(self) -> None:
         """Draw vertical lines at high-symmetry k-points."""
@@ -1277,10 +1346,15 @@ class BandStructurePlotter:
         """
         if self.x is None:
             raise ValueError("x not initialized; call a plotting method first")
+        # First try self.kpath (legacy methods), then self._tick_positions (new plot() method)
         if tick_positions is None and hasattr(self, "kpath") and self.kpath is not None:
             tick_positions = self.kpath.tick_positions
+        elif tick_positions is None and self._tick_positions:
+            tick_positions = self._tick_positions
         if tick_names is None and hasattr(self, "kpath") and self.kpath is not None:
             tick_names = self.kpath.tick_names
+        elif tick_names is None and self._tick_names:
+            tick_names = self._tick_names
 
         if tick_positions is not None:
             for ipos in tick_positions:
