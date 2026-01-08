@@ -802,13 +802,7 @@ class FermiPlotter(pv.Plotter):
                 for mesh in self._meshes[1:]:
                     combined = combined.merge(mesh)
                 combined.save(filename)
-        elif ext == ".ply":
-            if self._meshes:
-                combined = self._meshes[0]
-                for mesh in self._meshes[1:]:
-                    combined = combined.merge(mesh)
-                combined.save(filename)
-        elif ext == ".stl":
+        elif ext == ".ply" or ext == ".stl":
             if self._meshes:
                 combined = self._meshes[0]
                 for mesh in self._meshes[1:]:
