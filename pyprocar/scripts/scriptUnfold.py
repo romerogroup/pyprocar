@@ -6,7 +6,6 @@ import yaml
 
 from pyprocar.cfg import ConfigFactory, ConfigManager, PlotType
 from pyprocar.core import ElectronicBandStructure
-from pyprocar.plotter import EBSPlot
 from pyprocar.utils import ROOT, welcome
 from pyprocar.utils.info import orbital_names
 from pyprocar.utils.log_utils import set_verbose_level
@@ -120,7 +119,7 @@ def unfold(
         )
     ebs = ebs.unfold(transformation_matrix=transformation_matrix, structure=structure)
 
-    ebs_plot = EBSPlot(ebs, kpath, ax, spins, config=config)
+    ebs_plot = BandsStructurePlotter(ebs, kpath, ax, spins, config=config)
 
     labels = None
 
