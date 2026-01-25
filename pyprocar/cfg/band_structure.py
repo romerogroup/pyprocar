@@ -165,7 +165,7 @@ class BandStructureConfig(BaseConfig):
     modes: list[str] = field(default_factory=lambda: [mode.value for mode in BandStructureMode])
     # Basic Plot Settings
     color: str = "black"
-    spin_colors: tuple[str] = field(default_factory=lambda: ("blue", "red"))
+    spin_colors: tuple[str, ...] = field(default_factory=lambda: ("blue", "red"))
 
     # Colorbar Configuration
     colorbar_title: str = "Atomic Orbital Projections"
@@ -185,13 +185,13 @@ class BandStructureConfig(BaseConfig):
     grid_linestyle: str = "solid"
     grid_linewidth: float = 1
     grid_which: str = "major"
-    label: tuple[str] = field(default_factory=lambda: (r"$\uparrow$", r"$\downarrow$"))
+    label: tuple[str, ...] = field(default_factory=lambda: (r"$\uparrow$", r"$\downarrow$"))
     legend: bool = True
-    linestyle: tuple[str] = field(default_factory=lambda: ("solid", "dashed"))
-    linewidth: tuple[float] = field(default_factory=lambda: (1.0, 1.0))
-    marker: tuple[str] = field(default_factory=lambda: ("o", "v", "^", "D"))
-    markersize: tuple[float] = field(default_factory=lambda: (0.2, 0.2))
-    opacity: tuple[float] = field(default_factory=lambda: (1.0, 1.0))
+    linestyle: tuple[str, ...] = field(default_factory=lambda: ("solid", "dashed"))
+    linewidth: tuple[float, ...] = field(default_factory=lambda: (1.0, 1.0))
+    marker: tuple[str, ...] = field(default_factory=lambda: ("o", "v", "^", "D"))
+    markersize: tuple[float, ...] = field(default_factory=lambda: (0.2, 0.2))
+    opacity: tuple[float, ...] = field(default_factory=lambda: (1.0, 1.0))
     plot_color_bar: bool = True
     savefig: str | None = None
     title: str | None = None

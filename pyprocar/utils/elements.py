@@ -226,32 +226,37 @@ atomic_masses = {
 }
 
 
-def atomic_mass(element):
-    """
-    Given a element symbol or element atomic number returns atomic mass.
+def atomic_mass(element: str | int) -> float | None:
+    """Return the atomic mass given an element symbol or atomic number.
+
     Parameters
     ----------
-    element : int,str
-        atomic symbol or atomic number.
+    element : str | int
+        Atomic symbol or atomic number.
+
     Returns
     -------
-    float
-        atomic mass.
+    float | None
+        Atomic mass, or None if not found.
     """
-    # if type(element) is str:
     if isinstance(element, str):
-        return atomic_masses[element]
-    elif type(element) is int:
-        return atomic_masses[elements_reversed[element]]
+        return atomic_masses.get(element)
+    elif isinstance(element, int):
+        symbol = elements_reversed.get(element)
+        if symbol is not None:
+            return atomic_masses.get(symbol)
+        return None
+    return None
 
 
-def atomic_number(element):
-    """
-    Given element symbol returns atomic number.
+def atomic_number(element: str) -> int:
+    """Return the atomic number given an element symbol.
+
     Parameters
     ----------
     element : str
         Atomic symbol.
+
     Returns
     -------
     int
@@ -260,16 +265,17 @@ def atomic_number(element):
     return elements[element]
 
 
-def atomic_symbol(atomic_number):
-    """
-    Given atomic number returns atomic symbol.
+def atomic_symbol(atomic_num: int) -> str:
+    """Return the atomic symbol given an atomic number.
+
     Parameters
     ----------
-    atomic_number : int
+    atomic_num : int
         Atomic number.
+
     Returns
     -------
     str
         Atomic symbol.
     """
-    return elements_reversed[atomic_number]
+    return elements_reversed[atomic_num]

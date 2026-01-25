@@ -19,9 +19,13 @@ import numpy.typing as npt
 import pyvista as pv
 
 from pyprocar.core.brillouin_zone import BrillouinZone
-from pyprocar.utils import math, np_utils
+from pyprocar.utils import math
 
 logger = logging.getLogger(__name__)
+
+# Type aliases for kpoints arrays
+KPOINTS_DTYPE = npt.NDArray[np.float64]
+RECIPROCAL_LATTICE_DTYPE = npt.NDArray[np.float64]
 
 
 class KGRID_MODE(Enum):
@@ -190,7 +194,6 @@ class KPath:
     _special_kpoint_names: list[str]
     discontinuity_threshold: float
     zero_diff_threshold: float
-    special_kpoint_names: list[str]
 
     def __init__(
         self,
@@ -249,12 +252,20 @@ class KPath:
         self._reciprocal_lattice = reciprocal_lattice
 
         # Normalizing kpoint names to canonical form
-        segment_names = self._normalize_kpoint_names(segment_names)
+        if segment_names is not None:
+            segment_names = self._normalize_kpoint_names(segment_names)
         self._segment_names = segment_names
 
         # Generate kpoints if not provided
-        self._kpoints = kpoints
-        if self._kpoints is None:
+        if kpoints is not None:
+            self._kpoints = kpoints
+        else:
+            if segment_names is None:
+                raise ValueError("segment_names must be provided when kpoints is None")
+            if special_kpoint_map is None:
+                raise ValueError("special_kpoint_map must be provided when kpoints is None")
+            if n_grids is None:
+                raise ValueError("n_grids must be provided when kpoints is None")
             self._kpoints = self.generate_points(segment_names, special_kpoint_map, n_grids)
         logger.debug(f"Kpoints shape: {self._kpoints.shape}")
 
@@ -331,7 +342,9 @@ class KPath:
 
     @property
     def brillouin_zone(self) -> BrillouinZone:
-        return BrillouinZone(self.reciprocal_lattice, transformation_matrix=[1, 1, 1])
+        if self._reciprocal_lattice is None:
+            raise ValueError("reciprocal_lattice must be set to compute brillouin_zone")
+        return BrillouinZone(self._reciprocal_lattice, transformation_matrix=[1, 1, 1])
 
     @property
     def kpoints(self) -> npt.NDArray[np.float64]:
@@ -339,7 +352,10 @@ class KPath:
 
     @property
     def k_distances(self) -> npt.NDArray[np.float64]:
-        return self.get_distances(as_segments=False)
+        distances = self.get_distances(as_segments=False)
+        # When as_segments=False, get_distances always returns an array
+        assert isinstance(distances, np.ndarray)
+        return distances
 
     @property
     def segment_indices(self) -> list[npt.NDArray[np.intp]]:
@@ -564,26 +580,30 @@ class KPath:
     def get_segment_indices(
         self,
     ) -> tuple[list[npt.NDArray[np.intp]], list[int], list[int]]:
-        if self._kpoints is None or len(self._kpoints) == 0:
+        if len(self._kpoints) == 0:
             return [], [], []
 
         # Compute differences between consecutive kpoints
-        k_diffs = np.diff(self._kpoints, axis=0)
+        k_diffs: npt.NDArray[np.float64] = np.diff(self._kpoints, axis=0)
 
         # Calculate the norm of differences
-        k_diff_norms = np.linalg.norm(k_diffs, axis=1)
+        k_diff_norms: npt.NDArray[np.float64] = np.linalg.norm(k_diffs, axis=1)
 
         # Find indices where difference is 0 (or very close to 0)
-        continuous_end_indices = list(np.where(k_diff_norms < self.zero_diff_threshold)[0])
-        discontinuity_end_indices = list(np.where(k_diff_norms > self.discontinuity_threshold)[0])
+        continuous_end_indices: list[int] = [
+            int(i) for i in np.where(k_diff_norms < self.zero_diff_threshold)[0]
+        ]
+        discontinuity_end_indices: list[int] = [
+            int(i) for i in np.where(k_diff_norms > self.discontinuity_threshold)[0]
+        ]
 
-        segment_end_indices = (
+        segment_end_indices: list[int] = (
             continuous_end_indices + discontinuity_end_indices + [len(self._kpoints) - 1]
         )
         segment_end_indices.sort()
 
-        indices = []
-        for i, segment_end_index in enumerate(segment_end_indices):
+        indices: list[npt.NDArray[np.intp]] = []
+        for i in range(len(segment_end_indices)):
             if i == 0:
                 indices.append(np.arange(0, segment_end_indices[i] + 1))
             else:
@@ -593,14 +613,14 @@ class KPath:
 
         return indices, continuous_end_indices, discontinuity_end_indices
 
-    def get_continuous_segments(self):
-        continuous_segments = []
+    def get_continuous_segments(self) -> list[npt.NDArray[np.intp]]:
+        continuous_segments: list[npt.NDArray[np.intp]] = []
         for isegment, segment_indices in enumerate(self.segment_indices):
             if isegment == 0:
                 continuous_segments.append(segment_indices)
                 continue
 
-            previous_segment_end_index = self.segment_indices[isegment - 1][-1]
+            previous_segment_end_index = int(self.segment_indices[isegment - 1][-1])
 
             if previous_segment_end_index in self.discontinuity_start_indices:
                 continuous_segments.append(segment_indices)
@@ -618,49 +638,48 @@ class KPath:
 
     def generate_points(
         self,
-        segment_names: list[tuple[str, str]] = None,
-        special_kpoints_map: dict[str, np.ndarray] = None,
-        n_grids: list[int] = None,
-    ):
+        segment_names: list[tuple[str, str]],
+        special_kpoints_map: dict[str, npt.NDArray[np.float64]],
+        n_grids: list[int],
+    ) -> npt.NDArray[np.float64]:
+        """Generate the kpath points from segment definitions.
+
+        Parameters
+        ----------
+        segment_names : list[tuple[str, str]]
+            List of tuples containing the names of the segments.
+        special_kpoints_map : dict[str, npt.NDArray[np.float64]]
+            A dictionary containing the special kpoints.
+        n_grids : list[int]
+            The number of grid points for each segment.
+
+        Returns
+        -------
+        npt.NDArray[np.float64]
+            The generated kpoints along the path.
         """
-        Generate the kpath points
-        """
+        logger.info("Generating kpoints from special kpoints and ngrids")
 
-        kpoints_on_path = []
-        if self.kpoints is not None:
-            for isegment in range(self.n_segments):
-                kstart, kend = self.special_kpoints[isegment]
-                kpoints = np.linspace(kstart, kend, self.n_grids[isegment])
+        kpoints_on_path: npt.NDArray[np.float64] | None = None
+        for isegment, segment_name in enumerate(segment_names):
+            kstart_label, kend_label = segment_name
+            kstart = special_kpoints_map[kstart_label]
+            kend = special_kpoints_map[kend_label]
+            kpoints: npt.NDArray[np.float64] = np.linspace(kstart, kend, n_grids[isegment])
 
-                if len(kpoints_on_path) == 0:
-                    kpoints_on_path = kpoints
-                else:
-                    kpoints_on_path = np.concatenate((kpoints_on_path, kpoints))
+            if kpoints_on_path is None:
+                kpoints_on_path = kpoints
+            else:
+                kpoints_on_path = np.concatenate((kpoints_on_path, kpoints))
 
-        else:
-            logger.info("No kpoints provided. Generating kpoints from special kpoints and ngrids")
-
-            if n_grids is None:
-                raise ValueError("n_grids must be provided")
-            if segment_names is None:
-                raise ValueError("segment_names must be provided")
-            if special_kpoints_map is None:
-                raise ValueError("special_kpoints_map must be provided")
-
-            for isegment, segment_name in enumerate(segment_names):
-                kstart_label, kend_label = segment_name
-                kstart = special_kpoints_map[kstart_label]
-                kend = special_kpoints_map[kend_label]
-                kpoints = np.linspace(kstart, kend, n_grids[isegment])
-
-                if len(kpoints_on_path) == 0:
-                    kpoints_on_path = kpoints
-                else:
-                    kpoints_on_path = np.concatenate((kpoints_on_path, kpoints))
+        if kpoints_on_path is None:
+            return np.array([], dtype=np.float64)
         return kpoints_on_path
 
-    def _normalize_kpoint_names(self, segment_names: list[tuple[str, str]]):
-        new_segment_names = []
+    def _normalize_kpoint_names(
+        self, segment_names: list[tuple[str, str]]
+    ) -> list[tuple[str, str]]:
+        new_segment_names: list[tuple[str, str]] = []
         for segment_name in segment_names:
             kstart_label, kend_label = segment_name
             normalized_kstart_label = normalize_kpoint_name(kstart_label)
@@ -668,63 +687,82 @@ class KPath:
             new_segment_names.append((normalized_kstart_label, normalized_kend_label))
         return new_segment_names
 
-    def get_optimized_kpoints_transformed(self, transformation_matrix, same_grid_size=False):
-        """
-        A method to get the optimized kpoints after a transformation
+    def get_optimized_kpoints_transformed(
+        self, transformation_matrix: npt.NDArray[np.float64], same_grid_size: bool = False
+    ) -> KPath:
+        """Get the optimized kpoints after a transformation.
 
         Parameters
         ----------
-        transformation_matrix : np.ndarray
-            The transformmation matrix.
+        transformation_matrix : npt.NDArray[np.float64]
+            The transformation matrix.
         same_grid_size : bool
             Boolean to determine if the grid should retain the same size
 
         Returns
         -------
-        pyprocar.core.KPath
+        KPath
             The transformed KPath
         """
+        if self.n_grids is None:
+            raise ValueError("n_grids must be set to use get_optimized_kpoints_transformed")
 
-        new_special_kpoints = np.dot(self.special_kpoints, transformation_matrix)
-        new_ngrids = self.n_grids.copy()
+        new_special_kpoints: npt.NDArray[np.float64] = np.dot(
+            self.special_kpoints, transformation_matrix
+        )
+        new_ngrids: list[int] = self.n_grids.copy()
         for isegment in range(self.n_segments):
-            kstart = new_special_kpoints[isegment][0]
-            kend = new_special_kpoints[isegment][1]
-            kpoints_old = np.linspace(
-                self.special_kpoints[isegment][0],
-                self.special_kpoints[isegment][1],
+            # Extract segment endpoints
+            segment_start_new: npt.NDArray[np.float64] = np.asarray(
+                new_special_kpoints[isegment][0], dtype=np.float64
+            )
+            segment_end_new: npt.NDArray[np.float64] = np.asarray(
+                new_special_kpoints[isegment][1], dtype=np.float64
+            )
+            segment_start_old: npt.NDArray[np.float64] = np.asarray(
+                self.special_kpoints[isegment][0], dtype=np.float64
+            )
+            segment_end_old: npt.NDArray[np.float64] = np.asarray(
+                self.special_kpoints[isegment][1], dtype=np.float64
+            )
+            kstart: npt.NDArray[np.float64] = segment_start_new
+            kend: npt.NDArray[np.float64] = segment_end_new
+            kpoints_old: npt.NDArray[np.float64] = np.linspace(
+                segment_start_old,
+                segment_end_old,
                 self.n_grids[isegment],
             )
 
-            dk_vector_old = kpoints_old[-1] - kpoints_old[-2]
-            dk_old = np.linalg.norm(dk_vector_old)
+            dk_vector_old: npt.NDArray[np.float64] = kpoints_old[-1] - kpoints_old[-2]
+            dk_old: float = float(np.linalg.norm(dk_vector_old))
 
             # this part is to find the direction
-            distance = kend - kstart
+            distance: npt.NDArray[np.float64] = kend - kstart
 
             # this part is to find the high symmetry points on the path
-            expand = (np.linspace(kstart, kend, 1000) * 2).round(0) / 2
+            expand: npt.NDArray[np.float64] = (np.linspace(kstart, kend, 1000) * 2).round(0) / 2
 
-            unique_indexes = np.sort(np.unique(expand, return_index=True, axis=0)[1])
-            symm_kpoints_path = expand[unique_indexes]
+            unique_indexes: npt.NDArray[np.intp] = np.sort(
+                np.unique(expand, return_index=True, axis=0)[1]
+            )
+            symm_kpoints_path: npt.NDArray[np.float64] = expand[unique_indexes]
 
-            # this part is to only select poits that are after kstart and not before
-
-            angles = np.array(
+            # this part is to only select points that are after kstart and not before
+            angles: npt.NDArray[np.float64] = np.array(
                 [math.get_angle(x, distance, radians=False) for x in (symm_kpoints_path - kstart)]
             ).round()
             symm_kpoints_path = symm_kpoints_path[angles == 0]
             if len(symm_kpoints_path) < 2:
                 continue
-            suggested_kstart = symm_kpoints_path[0]
-            suggested_kend = symm_kpoints_path[1]
+            suggested_kstart: npt.NDArray[np.float64] = symm_kpoints_path[0]
+            suggested_kend: npt.NDArray[np.float64] = symm_kpoints_path[1]
 
             if np.linalg.norm(distance) > np.linalg.norm(suggested_kend - suggested_kstart):
                 new_special_kpoints[isegment][0] = suggested_kstart
                 new_special_kpoints[isegment][1] = suggested_kend
 
-            # this part is to get the number of gird points in the to have the
-            # same spacing is before the transformation
+            # this part is to get the number of grid points in the to have the
+            # same spacing as before the transformation
             if same_grid_size:
                 new_ngrids[isegment] = int(
                     (
@@ -735,37 +773,44 @@ class KPath:
                     ).round(4)
                     + 1
                 )
-        return KPath(special_kpoints=new_special_kpoints, n_grids=new_ngrids)
+        return KPath(kpoints=new_special_kpoints, n_grids=new_ngrids)
 
     def get_kpoints_transformed(
         self,
-        transformation_matrix,
-    ):
-        """A method to get the transformed kpoints
+        transformation_matrix: npt.NDArray[np.float64],
+    ) -> KPath:
+        """Get the transformed kpoints.
 
         Parameters
         ----------
-        transformation_matrix : np.ndarray
+        transformation_matrix : npt.NDArray[np.float64]
             The transformation matrix
 
         Returns
         -------
-        pyprocar.core.KPath
+        KPath
             The transformed KPath
         """
-        new_special_kpoints = np.dot(self.special_kpoints, transformation_matrix)
+        new_special_kpoints: npt.NDArray[np.float64] = np.dot(
+            self.special_kpoints, transformation_matrix
+        )
         return KPath(kpoints=new_special_kpoints, reciprocal_lattice=transformation_matrix)
 
-    def write_to_file(self, filename="KPOINTS", fmt="vasp"):
-        """Write the kpath to a file. Only supports vasp at the moment
+    def write_to_file(self, filename: str = "KPOINTS", fmt: str = "vasp") -> None:
+        """Write the kpath to a file. Only supports vasp at the moment.
 
         Parameters
         ----------
         filename : str, optional
-            _description_, by default "KPOINTS"
+            The output filename, by default "KPOINTS"
         fmt : str, optional
-            _description_, by default "vasp"
+            The output format, by default "vasp"
         """
+        if self.n_grids is None:
+            raise ValueError("n_grids must be set to write to file")
+        if self._segment_names is None:
+            raise ValueError("segment_names must be set to write to file")
+
         with open(filename, "w") as wf:
             if fmt == "vasp":
                 wf.write("! Generated by pyprocar\n")
@@ -776,33 +821,29 @@ class KPath:
                 wf.write("Line-mode\n")
                 wf.write("reciprocal\n")
                 for isegment in range(self.n_segments):
+                    segment_name = self._segment_names[isegment]
                     wf.write(
                         " ".join([f"  {x:8.4f}" for x in self.special_kpoints[isegment][0]])
                         + "   ! "
-                        + self.special_kpoint_names[isegment][0].replace("$", "")
+                        + segment_name[0].replace("$", "")
                         + "\n"
                     )
                     wf.write(
                         " ".join([f"  {x:8.4f}" for x in self.special_kpoints[isegment][1]])
                         + "   ! "
-                        + self.special_kpoint_names[isegment][1].replace("$", "")
+                        + segment_name[1].replace("$", "")
                         + "\n"
                     )
                     wf.write("\n")
 
-        return None
-
     def plot(
         self,
-        add_point_labels_args: dict = None,
-        bz_add_mesh_args: dict = None,
+        add_point_labels_args: dict[str, Any] | None = None,
+        bz_add_mesh_args: dict[str, Any] | None = None,
         as_cartesian: bool = False,
-        **kwargs,
-    ):
-        """
-        Plots the band structure.
-
-        """
+        **kwargs: Any,
+    ) -> None:
+        """Plot the k-path in the Brillouin zone."""
         add_point_labels_args = add_point_labels_args or {}
         bz_add_mesh_args = bz_add_mesh_args or {}
 

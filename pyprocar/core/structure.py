@@ -1,12 +1,17 @@
 # __author__ = "Pedram Tavadze and Logan Lang"
+from __future__ import annotations
+
 __maintainer__ = "Pedram Tavadze and Logan Lang"
 __email__ = "petavazohi@mail.wvu.edu, lllang@mix.wvu.edu"
 __date__ = "March 31, 2020"
 
 import logging
+from collections.abc import Sequence
 from pathlib import Path
+from typing import Any
 
 import numpy as np
+import numpy.typing as npt
 import pyvista as pv
 import spglib
 from scipy.spatial import ConvexHull
@@ -22,40 +27,51 @@ logger = logging.getLogger(__name__)
 
 
 class Structure:
-    """
-    Class to define a peridic crystal structure.
+    """Class to define a periodic crystal structure.
 
     Parameters
     ----------
-    atoms : list str
+    atoms : Sequence[str] | None
         A list of atomic symbols, with the same order as the
         ``fractional_coordinates``.
-    fractional_coordinates : list (n,3) float.
-        A (natom,3) list of fractional coordinatesd of atoms.
-    lattice : list (3,3) float.
+    fractional_coordinates : npt.ArrayLike | None
+        A (natom,3) array of fractional coordinates of atoms.
+    lattice : npt.ArrayLike | None
         A (3,3) matrix representing the lattice vectors.
-
-    Returns
-    -------
-    None.
-
+    cartesian_coordinates : npt.ArrayLike | None
+        A (natom,3) array of cartesian coordinates of atoms.
+    rotations : npt.ArrayLike | None
+        Rotation matrices for symmetry operations.
     """
+
+    atoms: npt.NDArray[np.str_] | None
+    lattice: npt.NDArray[np.float64] | None
+    cartesian_coordinates: npt.NDArray[np.float64] | None
+    fractional_coordinates: npt.NDArray[np.float64] | None
+    _rotations: npt.NDArray[np.float64]
+    _wyckoff_positions: npt.NDArray[np.str_] | None
+    _group: npt.NDArray[np.intp] | None
 
     def __init__(
         self,
-        atoms=None,
-        cartesian_coordinates=None,
-        fractional_coordinates=None,
-        lattice=None,
-        rotations=None,
-    ):
+        atoms: Sequence[str] | npt.ArrayLike | None = None,
+        cartesian_coordinates: npt.ArrayLike | None = None,
+        fractional_coordinates: npt.ArrayLike | None = None,
+        lattice: npt.ArrayLike | None = None,
+        rotations: npt.ArrayLike | None = None,
+    ) -> None:
         # Validate that we have at least some data
-        if atoms is None and lattice is None and fractional_coordinates is None and cartesian_coordinates is None:
+        if (
+            atoms is None
+            and lattice is None
+            and fractional_coordinates is None
+            and cartesian_coordinates is None
+        ):
             raise ValueError("Structure requires at least atoms or lattice to be provided")
 
         # Handle atoms - convert to array and validate
         if atoms is not None:
-            self.atoms = np.array(atoms)
+            self.atoms = np.asarray(atoms, dtype=np.str_)
             if self.atoms.ndim == 0 or self.atoms.shape[0] == 0:
                 raise ValueError("atoms must be a non-empty list")
         else:
@@ -63,7 +79,7 @@ class Structure:
 
         # Handle lattice - convert to array if provided
         if lattice is not None:
-            self.lattice = np.array(lattice)
+            self.lattice = np.asarray(lattice, dtype=np.float64)
             if self.lattice.ndim < 2 or self.lattice.shape[0] == 0:
                 raise ValueError("lattice must be a non-empty 2D array")
         else:
@@ -71,21 +87,25 @@ class Structure:
 
         # Handle coordinates
         if fractional_coordinates is not None:
-            fractional_coordinates = np.array(fractional_coordinates)
-            if fractional_coordinates.ndim < 2 or fractional_coordinates.shape[0] == 0:
+            frac_coords: npt.NDArray[np.float64] = np.asarray(
+                fractional_coordinates, dtype=np.float64
+            )
+            if frac_coords.ndim < 2 or frac_coords.shape[0] == 0:
                 raise ValueError("fractional_coordinates must be a non-empty 2D array")
-            self.fractional_coordinates = fractional_coordinates
+            self.fractional_coordinates = frac_coords
             if self.lattice is not None:
-                self.cartesian_coordinates = np.dot(fractional_coordinates, self.lattice)
+                self.cartesian_coordinates = np.dot(frac_coords, self.lattice)
             else:
                 self.cartesian_coordinates = None
         elif cartesian_coordinates is not None:
-            cartesian_coordinates = np.array(cartesian_coordinates)
-            if cartesian_coordinates.ndim < 2 or cartesian_coordinates.shape[0] == 0:
+            cart_coords: npt.NDArray[np.float64] = np.asarray(
+                cartesian_coordinates, dtype=np.float64
+            )
+            if cart_coords.ndim < 2 or cart_coords.shape[0] == 0:
                 raise ValueError("cartesian_coordinates must be a non-empty 2D array")
-            self.cartesian_coordinates = cartesian_coordinates
+            self.cartesian_coordinates = cart_coords
             if self.lattice is not None:
-                self.fractional_coordinates = np.dot(cartesian_coordinates, np.linalg.inv(self.lattice))
+                self.fractional_coordinates = np.dot(cart_coords, np.linalg.inv(self.lattice))
             else:
                 self.fractional_coordinates = None
         else:
@@ -102,14 +122,14 @@ class Structure:
         self._group = None
 
         # Handle rotations
-        self._rotations = rotations
-        if self._rotations is None:
-            self._rotations = np.empty(shape=(0, 3, 3))
+        if rotations is not None:
+            self._rotations = np.asarray(rotations, dtype=np.float64)
+        else:
+            self._rotations = np.empty(shape=(0, 3, 3), dtype=np.float64)
 
     @property
-    def has_complete_data(self):
-        """
-        Check if the structure has complete data for calculations.
+    def has_complete_data(self) -> bool:
+        """Check if the structure has complete data for calculations.
 
         Returns
         -------
@@ -123,7 +143,7 @@ class Structure:
             and len(self.atoms) > 0
         )
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         """Unambiguous representation with essential details for debugging."""
         return (
             f"Structure(natoms={self.natoms}, "
@@ -133,7 +153,7 @@ class Structure:
             f"spacegroup='{self.get_space_group_international() if self.has_complete_data else 'N/A'}')"
         )
 
-    def __str__(self):
+    def __str__(self) -> str:
         """Human-readable summary of the structure."""
         header = f"Structure with {self.natoms} atoms and {self.nspecies} species"
         species_line = f"Species: {', '.join(self.species)}"
@@ -141,240 +161,254 @@ class Structure:
         angle_line = f"Angles (α, β, γ): {self.alpha:.2f}°, {self.beta:.2f}°, {self.gamma:.2f}°"
 
         # Only show first few fractional coords for readability
-        frac_preview = "\n".join(
-            f"  {atom}: {coord}" for atom, coord in zip(self.atoms, self.fractional_coordinates)
-        )
+        if self.atoms is not None and self.fractional_coordinates is not None:
+            frac_preview = "\n".join(
+                f"  {atom}: {coord}"
+                for atom, coord in zip(self.atoms, self.fractional_coordinates)
+            )
+        else:
+            frac_preview = "  N/A"
 
         return "\n".join(
             [header, species_line, volume_line, angle_line, "Fractional coordinates:", frac_preview]
         )
 
-    def __eq__(self, other):
-        atoms_equal = all(self.atoms == other.atoms)
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, Structure):
+            return False
+        atoms_equal = (
+            self.atoms is not None
+            and other.atoms is not None
+            and all(self.atoms == other.atoms)
+        )
 
         fractional_coordinates_equal = True
         if self.fractional_coordinates is not None and other.fractional_coordinates is not None:
-            fractional_coordinates_equal = np.allclose(
-                self.fractional_coordinates, other.fractional_coordinates
+            fractional_coordinates_equal = bool(
+                np.allclose(self.fractional_coordinates, other.fractional_coordinates)
             )
 
         lattice_equal = True
         if self.lattice is not None and other.lattice is not None:
-            lattice_equal = np.allclose(self.lattice, other.lattice)
+            lattice_equal = bool(np.allclose(self.lattice, other.lattice))
 
         structure_equal = atoms_equal and fractional_coordinates_equal and lattice_equal
         return structure_equal
 
     @property
-    def rotations(self):
+    def rotations(self) -> npt.NDArray[np.float64]:
         return self._rotations
 
     @property
-    def wyckoff_positions(self):
+    def wyckoff_positions(self) -> npt.NDArray[np.str_] | None:
         if self._wyckoff_positions is None:
             self.get_wyckoff_positions()
         return self._wyckoff_positions
 
     @property
-    def group(self):
+    def group(self) -> npt.NDArray[np.intp] | None:
         if self._group is None:
             self.get_wyckoff_positions()
         return self._group
 
     @property
-    def volume(self):
-        """
-        Volume of the unit cell.
+    def volume(self) -> float:
+        """Volume of the unit cell.
 
         Returns
         -------
         float
-            Volume of the unit cell(m).
-
+            Volume of the unit cell (m^3).
         """
-        return abs(np.linalg.det(self.lattice)) * 1e-30
+        if self.lattice is None:
+            raise ValueError("lattice must be set to calculate volume")
+        return float(abs(np.linalg.det(self.lattice))) * 1e-30
 
     @property
-    def masses(self):
-        """
-        list of masses of each atom.
+    def masses(self) -> list[float]:
+        """List of masses of each atom.
 
         Returns
         -------
-        list float
-            Masses of each atom.
-
+        list[float]
+            Masses of each atom (kg).
         """
-        return [elements.atomic_mass(x) * 1.0e-3 for x in self.atoms]
+        if self.atoms is None:
+            raise ValueError("atoms must be set to calculate masses")
+        result: list[float] = []
+        for x in self.atoms:
+            mass = elements.atomic_mass(str(x))
+            if mass is None:
+                raise ValueError(f"Unknown atomic mass for element: {x}")
+            result.append(float(mass) * 1.0e-3)
+        return result
 
     @property
-    def density(self):
-        """
-        Density of the cell.
-
-        Returns
-        -------
-        float
-            Density of the cell.
-
-        """
-        return np.sum(self.masses) / (self.volume * N_AVOGADRO)
-
-    @property
-    def a(self):
-        """
-        The magnitude of the first crystal lattice vector
+    def density(self) -> float:
+        """Density of the cell.
 
         Returns
         -------
         float
-            The magnitude of the first crystal lattice vector
-
+            Density of the cell (kg/m^3).
         """
-        return np.linalg.norm(self.lattice[0, :])
+        return float(np.sum(self.masses)) / (self.volume * N_AVOGADRO)
 
     @property
-    def b(self):
-        """
-        The magnitude of the second crystal lattice vector
+    def a(self) -> float:
+        """The magnitude of the first crystal lattice vector.
 
         Returns
         -------
         float
-            The magnitude of the second crystal lattice vector
-
+            The magnitude of the first crystal lattice vector.
         """
-        return np.linalg.norm(self.lattice[1, :])
+        if self.lattice is None:
+            raise ValueError("lattice must be set to calculate lattice parameter a")
+        return float(np.linalg.norm(self.lattice[0, :]))
 
     @property
-    def c(self):
-        """
-        The magnitude of the third crystal lattice vector
+    def b(self) -> float:
+        """The magnitude of the second crystal lattice vector.
 
         Returns
         -------
         float
-            The magnitude of the third crystal lattice vector
-
+            The magnitude of the second crystal lattice vector.
         """
-        return np.linalg.norm(self.lattice[2, :])
+        if self.lattice is None:
+            raise ValueError("lattice must be set to calculate lattice parameter b")
+        return float(np.linalg.norm(self.lattice[1, :]))
 
     @property
-    def alpha(self):
-        """
-        The angle between the of the second and third crystal lattice vectors
+    def c(self) -> float:
+        """The magnitude of the third crystal lattice vector.
 
         Returns
         -------
         float
-            The angle between the of the second and third crystal lattice vectors
-
+            The magnitude of the third crystal lattice vector.
         """
-        return np.rad2deg(
-            np.arccos(np.dot(self.lattice[1, :], self.lattice[2, :]) / (self.b * self.c))
+        if self.lattice is None:
+            raise ValueError("lattice must be set to calculate lattice parameter c")
+        return float(np.linalg.norm(self.lattice[2, :]))
+
+    @property
+    def alpha(self) -> float:
+        """The angle between the second and third crystal lattice vectors.
+
+        Returns
+        -------
+        float
+            The angle in degrees.
+        """
+        if self.lattice is None:
+            raise ValueError("lattice must be set to calculate angle alpha")
+        return float(
+            np.rad2deg(np.arccos(np.dot(self.lattice[1, :], self.lattice[2, :]) / (self.b * self.c)))
         )
 
     @property
-    def beta(self):
-        """
-        The angle between the of the first and third crystal lattice vectors
+    def beta(self) -> float:
+        """The angle between the first and third crystal lattice vectors.
 
         Returns
         -------
         float
-            The angle between the of the first and third crystal lattice vectors
-
+            The angle in degrees.
         """
-        return np.rad2deg(
-            np.arccos(np.dot(self.lattice[0, :], self.lattice[2, :]) / (self.a * self.c))
+        if self.lattice is None:
+            raise ValueError("lattice must be set to calculate angle beta")
+        return float(
+            np.rad2deg(np.arccos(np.dot(self.lattice[0, :], self.lattice[2, :]) / (self.a * self.c)))
         )
 
     @property
-    def gamma(self):
-        """
-        The angle between the of the first and second crystal lattice vectors
+    def gamma(self) -> float:
+        """The angle between the first and second crystal lattice vectors.
 
         Returns
         -------
         float
-            The angle between the of the first and second crystal lattice vectors
-
+            The angle in degrees.
         """
-        return np.rad2deg(
-            np.arccos(np.dot(self.lattice[0, :], self.lattice[1, :]) / (self.a * self.b))
+        if self.lattice is None:
+            raise ValueError("lattice must be set to calculate angle gamma")
+        return float(
+            np.rad2deg(np.arccos(np.dot(self.lattice[0, :], self.lattice[1, :]) / (self.a * self.b)))
         )
 
     @property
-    def species(self):
-        """
-        list of different species present in the cell.
+    def species(self) -> npt.NDArray[np.str_]:
+        """List of different species present in the cell.
 
         Returns
         -------
-        list str
-            List of different species present in the cell.
-
+        npt.NDArray[np.str_]
+            Array of unique species in the cell.
         """
+        if self.atoms is None:
+            return np.array([], dtype=np.str_)
         return np.unique(self.atoms)
 
     @property
-    def nspecies(self):
-        """
-        Number of species present in the cell.
+    def nspecies(self) -> int:
+        """Number of species present in the cell.
 
         Returns
         -------
         int
             Number of species present in the cell.
-
         """
         return len(self.species)
 
     @property
-    def natoms(self):
-        """
-        Number of atoms
+    def natoms(self) -> int:
+        """Number of atoms.
 
         Returns
         -------
         int
             Number of atoms.
-
         """
+        if self.atoms is None:
+            return 0
         return len(self.atoms)
 
     @property
-    def atomic_numbers(self):
-        """
-        List of atomic numbers
+    def atomic_numbers(self) -> list[int]:
+        """List of atomic numbers.
 
         Returns
         -------
-        list
+        list[int]
             List of atomic numbers.
-
         """
-        return [elements.atomic_number(x) for x in self.atoms]
+        if self.atoms is None:
+            raise ValueError("atoms must be set to get atomic numbers")
+        return [int(elements.atomic_number(str(x))) for x in self.atoms]
 
     @property
-    def reciprocal_lattice(self):
-        """The reciprocal lattice matrix corresponding the the crystal lattice
+    def reciprocal_lattice(self) -> npt.NDArray[np.float64]:
+        """The reciprocal lattice matrix corresponding to the crystal lattice.
 
         Returns
         -------
-        np.ndarray
-            The reciprocal lattice matrix corresponding the the crystal lattice
+        npt.NDArray[np.float64]
+            The reciprocal lattice matrix.
         """
-        reciprocal_lattice = np.zeros_like(self.lattice)
+        if self.lattice is None:
+            raise ValueError("lattice must be set to calculate reciprocal lattice")
+        reciprocal_lattice: npt.NDArray[np.float64] = np.zeros_like(self.lattice)
 
         a = self.lattice[0, :]
         b = self.lattice[1, :]
         c = self.lattice[2, :]
         volume = self.volume * 1e30
 
-        a_star = np.cross(b, c) / volume
-        b_star = np.cross(c, a) / volume
-        c_star = np.cross(a, b) / volume
+        a_star: npt.NDArray[np.float64] = np.cross(b, c) / volume
+        b_star: npt.NDArray[np.float64] = np.cross(c, a) / volume
+        c_star: npt.NDArray[np.float64] = np.cross(a, b) / volume
 
         reciprocal_lattice[0, :] = a_star
         reciprocal_lattice[1, :] = b_star
@@ -383,195 +417,230 @@ class Structure:
         return reciprocal_lattice
 
     @property
-    def _spglib_cell(self):
-        """Return the structure in spglib format
+    def _spglib_cell(
+        self,
+    ) -> tuple[
+        Sequence[Sequence[float]], Sequence[Sequence[float]], Sequence[int]
+    ]:
+        """Return the structure in spglib format.
 
         Returns
         -------
-        Tuple
-            Return the structure in spglib format (lattice, frac_coords, atomic_numbers)
+        tuple
+            (lattice, frac_coords, atomic_numbers)
         """
-        return (self.lattice, self.fractional_coordinates, self.atomic_numbers)
+        if self.lattice is None:
+            raise ValueError("lattice must be set for spglib cell")
+        if self.fractional_coordinates is None:
+            raise ValueError("fractional_coordinates must be set for spglib cell")
+        return (
+            self.lattice.tolist(),
+            self.fractional_coordinates.tolist(),
+            self.atomic_numbers,
+        )
 
-    def get_space_group_number(self, symprec=1e-5):
-        """Returns the Space Group Number of the material
+    def get_space_group_number(self, symprec: float = 1e-5) -> int:
+        """Return the Space Group Number of the material.
 
         Parameters
         ----------
         symprec : float, optional
-            tolerence for symmetry, by default 1e-5
+            Tolerance for symmetry, by default 1e-5
 
         Returns
         -------
         int
             The Space Group Number
         """
-        return spglib.get_symmetry_dataset(self._spglib_cell, symprec).number
+        dataset = spglib.get_symmetry_dataset(self._spglib_cell, symprec)
+        if dataset is None:
+            raise ValueError("Failed to determine space group")
+        return int(dataset.number)
 
-    def get_space_group_international(self, symprec=1e-5):
-        """Returns the international Space Group Number of the material
+    def get_space_group_international(self, symprec: float = 1e-5) -> str:
+        """Return the international Space Group symbol of the material.
 
         Parameters
         ----------
         symprec : float, optional
-            tolerence for symmetry, by default 1e-5
+            Tolerance for symmetry, by default 1e-5
 
         Returns
         -------
         str
-            The international Space Group Number
+            The international Space Group symbol
         """
-        return spglib.get_symmetry_dataset(self._spglib_cell, symprec).international
+        dataset = spglib.get_symmetry_dataset(self._spglib_cell, symprec)
+        if dataset is None:
+            raise ValueError("Failed to determine space group")
+        return str(dataset.international)
 
-    def get_wyckoff_positions(self, symprec=1e-5):
-        """Returns the wyckoff positions
+    def get_wyckoff_positions(self, symprec: float = 1e-5) -> npt.NDArray[np.str_] | None:
+        """Return the Wyckoff positions.
 
         Parameters
         ----------
         symprec : float, optional
-            tolerence for symmetry, by default 1e-5
+            Tolerance for symmetry, by default 1e-5
 
         Returns
         -------
-        np.ndarray
-            The wyckoff positions
+        npt.NDArray[np.str_] | None
+            The Wyckoff positions
         """
         if self.lattice is None or self.fractional_coordinates is None or self.atoms is None:
             raise ValueError(
                 "Lattice, fractional coordinates, and atoms must be set to get wyckoff positions"
             )
 
-        wyckoff_positions = np.empty(shape=(self.natoms), dtype="<U4")
+        wyckoff_positions: npt.NDArray[np.str_] = np.empty(shape=(self.natoms,), dtype="<U4")
 
         spglib_dataset = spglib.get_symmetry_dataset(self._spglib_cell, symprec)
+        if spglib_dataset is None:
+            return None
 
         if hasattr(spglib_dataset, "wyckoffs"):
-            wyckoffs_temp = np.array(spglib_dataset.wyckoffs)
+            wyckoffs_temp: npt.NDArray[np.str_] = np.array(spglib_dataset.wyckoffs)
         elif isinstance(spglib_dataset, dict):
             wyckoffs_temp = np.array(spglib_dataset["wyckoffs"])
         else:
             return None
 
-        group = np.zeros(shape=(self.natoms), dtype=int)
+        group: npt.NDArray[np.intp] = np.zeros(shape=(self.natoms,), dtype=np.intp)
         counter = 0
         for iwyckoff in np.unique(wyckoffs_temp):
             idx = np.where(wyckoffs_temp == iwyckoff)[0]
             for ispc in np.unique(self.atoms[idx]):
                 idx2 = np.where(self.atoms[idx] == ispc)[0]
                 multiplicity = len(idx2)
-                wyckoff_positions[idx][idx2]
                 for i in idx[idx2]:
-                    wyckoff_positions[i] = str(multiplicity) + iwyckoff
+                    wyckoff_positions[i] = str(multiplicity) + str(iwyckoff)
                     group[i] = counter
                 counter += 1
         self._wyckoff_positions = wyckoff_positions
         self._group = group
         return wyckoff_positions
 
-    def _get_lattice_corners(self, lattice):
-        """Returns the corners of the crystal lattice
+    def _get_lattice_corners(
+        self, lattice: npt.NDArray[np.float64]
+    ) -> npt.NDArray[np.float64]:
+        """Return the corners of the crystal lattice.
 
         Parameters
         ----------
-        lattice : np.ndarray
+        lattice : npt.NDArray[np.float64]
             The crystal lattice
 
         Returns
         -------
-        np.ndarray
-            Returns the corners of the crystal lattice
+        npt.NDArray[np.float64]
+            The corners of the crystal lattice
         """
-        origin = np.array([0, 0, 0])
-        edges = []
+        origin: npt.NDArray[np.float64] = np.array([0.0, 0.0, 0.0])
+        edges: list[npt.NDArray[np.float64]] = []
         for x in range(2):
             for y in range(2):
                 for z in range(2):
-                    new_point = origin + lattice[0, :] * x + lattice[1, :] * y + lattice[2, :] * z
+                    new_point: npt.NDArray[np.float64] = (
+                        origin + lattice[0, :] * x + lattice[1, :] * y + lattice[2, :] * z
+                    )
                     edges.append(new_point)
         return np.array(edges)
 
     @property
-    def lattice_corners(self):
-        """Returns the corners of the crystal lattice
+    def lattice_corners(self) -> npt.NDArray[np.float64]:
+        """Return the corners of the crystal lattice.
 
         Returns
         -------
-        np.ndarray
-            Returns the corners of the crystal lattice
+        npt.NDArray[np.float64]
+            The corners of the crystal lattice
         """
+        if self.lattice is None:
+            raise ValueError("lattice must be set to get lattice corners")
         return self._get_lattice_corners(self.lattice)
 
     @property
-    def cell_convex_hull(self):
-        """Returns the cell convex hull
+    def cell_convex_hull(self) -> ConvexHull:
+        """Return the cell convex hull.
 
         Returns
         -------
-        scipy.spatial.ConvexHull
-            Returns the cell convex hull
+        ConvexHull
+            The cell convex hull
         """
         return ConvexHull(self.lattice_corners)
 
-    def plot_cell_convex_hull(self):
-        """
-        A method to plot the the convex hull
-        """
+    def plot_cell_convex_hull(self) -> None:
+        """Plot the convex hull."""
         hull = self.cell_convex_hull
         # Convert simplices to pyvista face format (prepend count to each face)
-        faces = np.hstack([[3] + list(face) for face in hull.simplices])
+        faces: npt.NDArray[np.intp] = np.hstack([[3] + list(face) for face in hull.simplices])
         surface = pv.PolyData(hull.points, faces)
         surface.plot()
-        return None
 
-    def get_spglib_symmetry_dataset(self, symprec=1e-5):
-        """Returns the spglib symmetry dataset
+    def get_spglib_symmetry_dataset(self, symprec: float = 1e-5) -> Any:
+        """Return the spglib symmetry dataset.
 
         Parameters
         ----------
         symprec : float, optional
-            tolerence for symmetry, by default 1e-5
+            Tolerance for symmetry, by default 1e-5
 
         Returns
         -------
-        dict
+        Any
             spglib symmetry dataset
         """
         return spglib.get_symmetry_dataset(self._spglib_cell, symprec)
 
-    def transform(self, transformation_matrix=np.array([[1, 0, 0], [0, 1, 0], [0, 0, 1]])):
-        """Transform the crystla lattice by a transformation matrix
+    def transform(
+        self,
+        transformation_matrix: npt.NDArray[np.float64] | None = None,
+    ) -> Structure:
+        """Transform the crystal lattice by a transformation matrix.
 
         Parameters
         ----------
-        transformation_matrix : np.ndarray, optional
-            The transformation matrix, by default np.array([[1, 0, 0], [0, 1, 0], [0, 0, 1]])
+        transformation_matrix : npt.NDArray[np.float64] | None, optional
+            The transformation matrix, by default identity matrix
 
         Returns
         -------
-        pyprocar.core.Structure
+        Structure
             The transformed structure
 
         Raises
         ------
         ValueError
-            Raise error if the transform is not proper
+            If the transform is not proper
         """
+        if transformation_matrix is None:
+            transformation_matrix = np.array([[1, 0, 0], [0, 1, 0], [0, 0, 1]], dtype=np.float64)
+
+        if self.lattice is None:
+            raise ValueError("lattice must be set to transform structure")
+        if self.cartesian_coordinates is None:
+            raise ValueError("cartesian_coordinates must be set to transform structure")
+        if self.atoms is None:
+            raise ValueError("atoms must be set to transform structure")
+
         scale = np.linalg.det(transformation_matrix).round(2)
-        if not scale.is_integer() or (1 / scale).is_integer():
+        if not float(scale).is_integer() or float(1 / scale).is_integer():
             raise ValueError("This transform is not proper.")
-            return None
-        scale = int(scale)
-        new_lattice = np.dot(self.lattice, transformation_matrix)
-        temp_structure = Structure(atoms=["X"], fractional_coordinates=[[0, 0, 0]], lattice=new_lattice)
-        new_atoms = []
-        new_fractional = []
+        scale_int = int(scale)
+        new_lattice: npt.NDArray[np.float64] = np.dot(self.lattice, transformation_matrix)
+        temp_structure = Structure(
+            atoms=["X"], fractional_coordinates=[[0, 0, 0]], lattice=new_lattice
+        )
+        new_atoms_list: list[list[str]] = []
+        new_fractional_list: list[npt.NDArray[np.float64]] = []
         for iatom, atom_coord in enumerate(self.cartesian_coordinates):
-            new_atoms_cartesian = []
-            p = atom_coord
-            for x in range(-1 * scale, scale):
-                for y in range(-1 * scale, scale):
-                    for z in range(-1 * scale, scale):
-                        p = (
+            new_atoms_cartesian: list[npt.NDArray[np.float64]] = []
+            for x in range(-1 * scale_int, scale_int):
+                for y in range(-1 * scale_int, scale_int):
+                    for z in range(-1 * scale_int, scale_int):
+                        p: npt.NDArray[np.float64] = (
                             x * self.lattice[0, :]
                             + y * self.lattice[1, :]
                             + z * self.lattice[2, :]
@@ -579,63 +648,72 @@ class Structure:
                         )
                         if temp_structure.is_point_inside(p):
                             new_atoms_cartesian.append(p)
-            new_atoms_cartesian = np.array(new_atoms_cartesian)
-            new_atoms_fractional = np.dot(new_atoms_cartesian, np.linalg.inv(new_lattice))
+            new_atoms_cart_arr: npt.NDArray[np.float64] = np.array(new_atoms_cartesian)
+            new_atoms_fractional: npt.NDArray[np.float64] = np.dot(
+                new_atoms_cart_arr, np.linalg.inv(new_lattice)
+            )
             new_atoms_fractional[new_atoms_fractional >= 1] -= 1
             new_atoms_fractional = np.unique(new_atoms_fractional, axis=0)
-            new_fractional.append(new_atoms_fractional)
-            new_atoms.append([self.atoms[iatom]] * len(new_atoms_fractional))
-        new_atoms = np.reshape(new_atoms, (-1,))
-        new_fractional = np.reshape(new_fractional, (-1, 3))
+            new_fractional_list.append(new_atoms_fractional)
+            new_atoms_list.append([str(self.atoms[iatom])] * len(new_atoms_fractional))
+        new_atoms_flat = np.reshape(new_atoms_list, (-1,))
+        new_fractional_flat: npt.NDArray[np.float64] = np.reshape(
+            np.array(new_fractional_list, dtype=object), (-1, 3)
+        ).astype(np.float64)
         return Structure(
-            atoms=new_atoms, fractional_coordinates=new_fractional, lattice=new_lattice
+            atoms=new_atoms_flat.tolist(),
+            fractional_coordinates=new_fractional_flat,
+            lattice=new_lattice,
         )
 
-    def is_point_inside(self, point, lattice=None):
-        """A method to determine if a point is inside the unitcell
+    def is_point_inside(
+        self, point: npt.NDArray[np.float64], lattice: npt.NDArray[np.float64] | None = None
+    ) -> bool:
+        """Determine if a point is inside the unit cell.
 
         Parameters
         ----------
-        point : np.ndarray
+        point : npt.NDArray[np.float64]
             The point in question
-        lattice : np.ndarray, optional
-            The crystal lattice matrix, by default None
+        lattice : npt.NDArray[np.float64] | None, optional
+            The crystal lattice matrix, by default None (uses self.lattice)
 
         Returns
         -------
         bool
-            Boolean if a point is inside the unitcell
+            True if the point is inside the unit cell
         """
         if lattice is None:
-            lattic = self.lattice
-        edges = self._get_lattice_corners(lattic).tolist()
+            if self.lattice is None:
+                raise ValueError("lattice must be set to check if point is inside")
+            lattice = self.lattice
+        edges: list[Any] = self._get_lattice_corners(lattice).tolist()
         edges.append(point)
         new_convex_hull = ConvexHull(edges)
-        if new_convex_hull.area == self.cell_convex_hull.area:
-            return True
-        else:
-            return False
+        return bool(new_convex_hull.area == self.cell_convex_hull.area)
 
-    def supercell(self, matrix):
-        """A method to transform the Structure to a supercell
+    def supercell(self, matrix: npt.NDArray[np.float64]) -> Structure:
+        """Transform the Structure to a supercell.
 
         Parameters
         ----------
-        matrix : np.ndarray
-            The matrix to transform the Structure
+        matrix : npt.NDArray[np.float64]
+            The transformation matrix
 
         Returns
         -------
-        pyprocar.core.Structure
+        Structure
             The transformed structure
         """
         return self.transform(matrix)
 
-    def save(self, path: Path):
+    def save(self, path: Path) -> None:
+        """Save the structure to a file."""
         serializer = get_serializer(path)
         serializer.save(self, path)
 
     @classmethod
-    def load(cls, path: Path):
+    def load(cls, path: Path) -> Structure:
+        """Load a structure from a file."""
         serializer = get_serializer(path)
         return serializer.load(path)

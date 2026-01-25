@@ -1,4 +1,4 @@
-from typing import Any, Dict
+from typing import Any
 
 from pyprocar.cfg.band_structure import BandStructureConfig
 from pyprocar.cfg.band_structure_2d import Bandstructure2DConfig
@@ -37,7 +37,7 @@ class ConfigFactory:
     """
 
     @staticmethod
-    def create_config(plot_type: PlotType, **kwargs):
+    def create_config(plot_type: PlotType, **kwargs: Any) -> BaseConfig:
         if plot_type == PlotType.FERMI_SURFACE_3D:
             return FermiSurface3DConfig(plot_type=plot_type, **kwargs)
         elif plot_type == PlotType.BAND_STRUCTURE:

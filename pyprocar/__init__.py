@@ -2,9 +2,9 @@
 from pyprocar._version import __version__
 from pyprocar.io import *
 from pyprocar.scripts import *
-from pyprocar.utils import physics, welcome
-from pyprocar.utils.defaults import Settings
-from pyprocar.utils.download_examples import download_from_hf, download_test_data
+from pyprocar.utils import physics as physics, welcome as welcome
+from pyprocar.utils.defaults import Settings as Settings
+from pyprocar.utils.download_examples import download_from_hf as download_from_hf, download_test_data as download_test_data
 from pyprocar.utils.physics import *
 from pyprocar.version import author as __author__
 from pyprocar.version import copyright as __copyright__
