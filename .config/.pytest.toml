@@ -31,7 +31,7 @@ addopts = [
 
 # "-qq",
 "--maxfail=1", 
-"--numprocesses=auto", 
+"--numprocesses=8", 
 "--tb=short",
 "--xfail-tb", 
 "--no-header",

@@ -23,7 +23,7 @@ for arg in "$@"; do
 done
 
 # Build the command
-command="pytest -s --numprocesses=auto tests --config-file $PIXI_PROJECT_ROOT/.config/.pytest.toml"
+command="pytest -s tests --config-file $PIXI_PROJECT_ROOT/.config/.pytest.toml"
 if [[ -n "$test_pattern" ]]; then
     command="$command -k '$test_pattern'"
 fi
