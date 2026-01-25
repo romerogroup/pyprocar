@@ -1791,7 +1791,7 @@ class DensityOfStates(PointSet):
         if isinstance(computed, Property):
             computed.name = name
             if getattr(computed, "_point_set", None) is None:
-                computed._bind_owner(self)
+                computed.bind_owner(self)
             return computed
 
         return Property(

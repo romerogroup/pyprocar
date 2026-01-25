@@ -1,18 +1,23 @@
+from __future__ import annotations
+
 import logging
 
 import numpy as np
+import numpy.typing as npt
 from scipy.interpolate import RegularGridInterpolator
 from scipy.signal import find_peaks
 
 logger = logging.getLogger(__name__)
 
 
-def np_round_to_half(x):
-    x = np.asarray(x)
-    s = np.where(x >= 0, 1.0, -1.0)
-    y = np.abs(x)
-    k = np.floor(y / 0.5 + 0.5)  # integer after cast
-    return s * (0.5 * k).astype(float)
+def np_round_to_half(x: npt.ArrayLike) -> npt.NDArray[np.float64]:
+    """Round values to the nearest half (0.5 increments)."""
+    arr: npt.NDArray[np.float64] = np.asarray(x, dtype=np.float64)
+    s: npt.NDArray[np.float64] = np.where(arr >= 0, 1.0, -1.0)
+    y: npt.NDArray[np.float64] = np.abs(arr)
+    k: npt.NDArray[np.float64] = np.floor(y / 0.5 + 0.5)
+    result: npt.NDArray[np.float64] = s * (0.5 * k)
+    return result
 
 
 def get_angle(v, w, radians=False):

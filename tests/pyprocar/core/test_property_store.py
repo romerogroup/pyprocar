@@ -128,10 +128,10 @@ class TestProperty:
         value = property[("value", 0)]
         assert np.allclose(value, sin_data["sin"])
 
-    def test_bind_owner(self, sin_data):
+    def testbind_owner(self, sin_data):
         point_set = PointSet(points=sin_data["x"])
         property = Property(name="sin", value=sin_data["sin"])
-        property._bind_owner(point_set)
+        property.bind_owner(point_set)
         assert np.allclose(property.point_set.points, sin_data["x"])
 
     def test_gradient(self, sin_data):
@@ -139,7 +139,7 @@ class TestProperty:
             points=sin_data["x"], gradient_func=lambda x, y: np.gradient(y, x, edge_order=2)
         )
         property = Property(name="sin", value=sin_data["sin"])
-        property._bind_owner(point_set)
+        property.bind_owner(point_set)
         gradients = property.gradient(1)
         assert np.allclose(gradients, sin_data["cos"], atol=1e-2)
 
@@ -148,7 +148,7 @@ class TestProperty:
             points=sin_data["x"], gradient_func=lambda x, y: np.gradient(y, x, edge_order=2)
         )
         property = Property(name="sin", value=sin_data["sin"])
-        property._bind_owner(point_set)
+        property.bind_owner(point_set)
         with pytest.raises(ValueError):
             property.gradient(-1)
         # assert np.allclose(gradients, sin_data["cos"], atol=1e-2)
