@@ -5,7 +5,7 @@ from __future__ import annotations
 import logging
 import re
 from collections import Counter
-from collections.abc import Iterable, Mapping, Sequence
+from collections.abc import Callable, Iterable, Mapping, Sequence
 from enum import Enum
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
@@ -60,11 +60,12 @@ def get_dos_from_code(
 
     dos_filepath = Path(dirpath) / filename
 
+    dos: DensityOfStates
     if not use_cache or not dos_filepath.exists():
         logger.info("Parsing DOS calculation directory: %s", dirpath)
         parser = Parser(code=code, dirpath=dirpath)
-        dos = parser.dos
-        if use_cache:
+        dos = parser.dos  # pyright: ignore[reportAssignmentType]
+        if use_cache and dos is not None:
             dos.save(dos_filepath)
     else:
         logger.info("Loading DOS from cache: %s", dos_filepath)
@@ -101,13 +102,13 @@ def _strip_dollars(s: str) -> str:
     return s.strip().strip("$")
 
 
-def _parse_product(s: str) -> Counter:
+def _parse_product(s: str) -> Counter[str]:
     """
     Parse a product like 'states eV^2' or 'states' into a Counter({'states':1,'eV':2})
     Accepts optional space separators.
     """
     s = s.strip()
-    units = Counter()
+    units: Counter[str] = Counter()
     if not s or s == "1":
         return units
     # split by whitespace or \cdot without losing tokens
@@ -126,7 +127,7 @@ def _parse_product(s: str) -> Counter:
     return units
 
 
-def _parse_units(u: str) -> Counter:
+def _parse_units(u: str) -> Counter[str]:
     """
     Supports forms like:
       '$\\frac{states}{eV^2}$', 'states', '$\\frac{1}{eV}$'
@@ -139,7 +140,7 @@ def _parse_units(u: str) -> Counter:
     m = _FRAC_RE.search(u)
     if m:
         num, den = m.group(1), m.group(2)
-        units = _parse_product(num) - _parse_product(den)  # subtract den exponents
+        units: Counter[str] = _parse_product(num) - _parse_product(den)
     else:
         units = _parse_product(u)
     # drop zero exponents
@@ -149,23 +150,23 @@ def _parse_units(u: str) -> Counter:
     return units
 
 
-def _format_units(units: Counter) -> str:
+def _format_units(units: Counter[str]) -> str:
     """Return a compact LaTeX string like '$\\frac{states}{eV}$' or '$1$'."""
-    num = {k: v for k, v in units.items() if v > 0}
-    den = {k: -v for k, v in units.items() if v < 0}
+    num: dict[str, int] = {k: v for k, v in units.items() if v > 0}
+    den: dict[str, int] = {k: -v for k, v in units.items() if v < 0}
 
-    def fmt_side(d: dict) -> str:
+    def fmt_side(d: dict[str, int]) -> str:
         if not d:
             return "1"
         # put 'states' first if present, then alphabetical for stability
         keys = sorted(d.keys(), key=lambda k: (k != "states", k))
-        parts = []
-        for k in keys:
-            p = d[k]
+        parts: list[str] = []
+        for key in keys:
+            p = d[key]
             if p == 1:
-                parts.append(k)
+                parts.append(key)
             else:
-                parts.append(f"{k}^{{{p}}}")
+                parts.append(f"{key}^{{{p}}}")
         return r"\cdot ".join(parts)
 
     if den:
@@ -179,14 +180,14 @@ def _format_units(units: Counter) -> str:
         return "$1$" if s == "1" else f"${s}$"
 
 
-def _units_divide(u_input: str, u_norm: str | None) -> str:
+def _units_divide(u_input: str, u_norm: str | None) -> str | None:
     """Compute simplified units = input / normalizer."""
     if not u_norm:
         # e.g. MAX: divide by a value with same units → unitless
         return None
     ui = _parse_units(u_input or "")
     un = _parse_units(u_norm or "")
-    simplified = ui - un
+    simplified: Counter[str] = ui - un
     # drop zeros
     for k in list(simplified.keys()):
         if simplified[k] == 0:
@@ -208,14 +209,13 @@ class NormMode(Enum):
     MAGNETIZATION = "magnetization"
 
     @classmethod
-    def from_input(cls, input: str | NormMode | None) -> NormMode:
+    def from_input(cls, input: str | NormMode | None) -> NormMode:  # noqa: A002
         if isinstance(input, NormMode):
             return input
         if input is None:
             return cls.RAW
-        if not isinstance(input, str):
-            raise ValueError(f"Invalid normalization mode: {input}")
-        input_mode = None
+        # input must be str at this point due to the union type
+        input_mode: NormMode | None = None
         lower_input = input.lower()
         if lower_input == "raw":
             input_mode = cls.RAW
@@ -397,6 +397,9 @@ class NormMode(Enum):
             return ""
 
 
+GradientFunc = Callable[[npt.NDArray[np.float64], npt.NDArray[np.float64]], npt.NDArray[np.float64]]
+
+
 class DensityOfStates(PointSet):
     """Data-centric representation of a density of states calculation."""
 
@@ -407,7 +410,7 @@ class DensityOfStates(PointSet):
         fermi: float = 0.0,
         projected: npt.ArrayLike | None = None,
         orbital_names: list[str] | None = None,
-        gradient_func=None,
+        gradient_func: GradientFunc | None = None,
         structure: Structure | None = None,
     ) -> None:
         energies_array = energies
@@ -432,7 +435,7 @@ class DensityOfStates(PointSet):
             total_metadata["label"] = ["$Total$", "$Total - S_x$", "$Total - S_y$", "$Total - S_z$"]
         else:
             raise ValueError(
-                f"Total array has {self.total_array.shape[1]} spin channels, which is not supported"
+                f"Total array has {total_array.shape[1]} spin channels, which is not supported"
             )
 
         self.add_property(
@@ -473,19 +476,18 @@ class DensityOfStates(PointSet):
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, DensityOfStates):
             return False
-        arrays_equal = np.allclose(self.energies, other.energies) and np.allclose(
-            self.total, other.total
+        arrays_equal = bool(
+            np.allclose(self.energies, other.energies)
+            and np.allclose(self.total.to_array(), other.total.to_array())
         )
         proj_equal = True
-        if self.projected is not None or other.projected is not None:
-            proj_equal = np.allclose(self.projected, other.projected)
         raw_self = self.projected
         raw_other = other.projected
         if raw_self is not None or raw_other is not None:
             if raw_self is None or raw_other is None:
                 return False
-            proj_equal = proj_equal and np.allclose(raw_self, raw_other)
-        return arrays_equal and proj_equal and np.isclose(self.fermi, other.fermi)
+            proj_equal = bool(np.allclose(raw_self.to_array(), raw_other.to_array()))
+        return arrays_equal and proj_equal and bool(np.isclose(self.fermi, other.fermi))
 
     # -------------------------------------------------------------------
     # Class methods / Constructors
@@ -530,15 +532,19 @@ class DensityOfStates(PointSet):
         return self._structure
 
     @property
-    def atoms(self) -> npt.NDArray[np.int_]:
+    def atoms(self) -> npt.NDArray[np.str_] | None:
+        if self.structure is None:
+            return None
         return self.structure.atoms
 
     @property
-    def species(self) -> list[str]:
-        return self.structure.species
+    def species(self) -> list[str] | None:
+        if self.structure is None:
+            return None
+        return list(self.structure.species)
 
     @property
-    def orbitals(self) -> list[str]:
+    def orbitals(self) -> list[str] | None:
         return self.orbital_names
 
     # -------------------------------------------------------------------
@@ -546,40 +552,55 @@ class DensityOfStates(PointSet):
     # -------------------------------------------------------------------
 
     @property
-    def total(self) -> npt.NDArray[np.float64]:
-        return self.get_property("total")
+    def total(self) -> Property:
+        prop = self.get_property("total")
+        if prop is None or not isinstance(prop, Property):
+            raise ValueError("total property not set")
+        return prop
 
     @property
-    def projected(self) -> npt.NDArray[np.float64] | None:
-        return self.get_property("projected")
+    def projected(self) -> Property | None:
+        prop = self.get_property("projected")
+        if prop is None:
+            return None
+        if not isinstance(prop, Property):
+            return None
+        return prop
 
     @property
     def spin_texture(self) -> Property | None:
-        return self.get_property("spin_texture")
+        prop = self.get_property("spin_texture")
+        return prop if isinstance(prop, Property) else None
 
     @property
     def spin_texture_magnitude(self) -> Property | None:
-        return self.get_property("spin_texture_magnitude")
+        prop = self.get_property("spin_texture_magnitude")
+        return prop if isinstance(prop, Property) else None
 
     @property
     def spin_magnitude(self) -> Property | None:
-        return self.get_property("spin_magnitude")
+        prop = self.get_property("spin_magnitude")
+        return prop if isinstance(prop, Property) else None
 
     @property
     def magnetization(self) -> Property | None:
-        return self.get_property("magnetization")
+        prop = self.get_property("magnetization")
+        return prop if isinstance(prop, Property) else None
 
     @property
     def cumulative_total(self) -> Property | None:
-        return self.get_property("cumulative_total")
+        prop = self.get_property("cumulative_total")
+        return prop if isinstance(prop, Property) else None
 
     @property
     def normalized_total(self) -> Property | None:
-        return self.get_property("normalized_total")
+        prop = self.get_property("normalized_total")
+        return prop if isinstance(prop, Property) else None
 
     @property
     def projected_total(self) -> Property | None:
-        return self.get_property("projected_total")
+        prop = self.get_property("projected_total")
+        return prop if isinstance(prop, Property) else None
 
     # -------------------------------------------------------------------
     # Properties
@@ -595,33 +616,33 @@ class DensityOfStates(PointSet):
 
     @property
     def n_energies(self) -> int:
-        return self.points.shape[0]
+        return int(self.points.shape[0])
 
     @property
     def n_spin_channels(self) -> int:
-        return self.total.to_array().shape[1]
+        return int(self.total.to_array().shape[1])
 
     @property
     def n_spins(self) -> int:
         if self.projected is None:
             return self.n_spin_channels
-        return self.projected.to_array().shape[1]
+        return int(self.projected.to_array().shape[1])
 
     @property
     def n_atoms(self) -> int:
         if self.projected is None:
             return 0
-        return self.projected.to_array().shape[2]
+        return int(self.projected.to_array().shape[2])
 
     @property
     def n_orbitals(self) -> int:
         if self.projected is None:
             return 0
-        return self.projected.to_array().shape[3]
+        return int(self.projected.to_array().shape[3])
 
     @property
-    def spin_channels(self) -> npt.NDArray[np.int_]:
-        return np.arange(self.n_spin_channels, dtype=int)
+    def spin_channels(self) -> npt.NDArray[np.intp]:
+        return np.arange(self.n_spin_channels, dtype=np.intp)
 
     @property
     def is_non_spin_polarized(self) -> bool:
@@ -637,7 +658,7 @@ class DensityOfStates(PointSet):
             return False
         if self.n_spins in (3, 4):
             return True
-        if self.projected.to_array().shape[-1] == 2 + 2 + 4 + 4 + 6 + 6 + 8:
+        if int(self.projected.to_array().shape[-1]) == 2 + 2 + 4 + 4 + 6 + 6 + 8:
             return True
         return False
 
