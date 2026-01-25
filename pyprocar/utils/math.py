@@ -20,34 +20,36 @@ def np_round_to_half(x: npt.ArrayLike) -> npt.NDArray[np.float64]:
     return result
 
 
-def get_angle(v, w, radians=False):
-    """
-    Calculates angle between two vectors
+def get_angle(
+    v: npt.NDArray[np.float64], w: npt.NDArray[np.float64], radians: bool = False
+) -> float:
+    """Calculate the angle between two vectors.
 
     Parameters
     ----------
-    v : float
-        vector 1.
-    w : float
-        vector 1.
+    v : npt.NDArray[np.float64]
+        First vector.
+    w : npt.NDArray[np.float64]
+        Second vector.
     radians : bool, optional
-        To return the result in radians or degrees. The default is False.
+        If True, return the result in radians. Otherwise return degrees.
+        The default is False.
 
     Returns
     -------
     float
         Angle between v and w.
-
     """
-
-    if np.linalg.norm(v) == 0 or np.linalg.norm(w) == 0 or np.all(v == w):
-        return 0
-    cosine = np.dot(v, w) / (np.linalg.norm(v) * np.linalg.norm(w))
+    v_norm = float(np.linalg.norm(v))
+    w_norm = float(np.linalg.norm(w))
+    if v_norm == 0 or w_norm == 0 or np.all(v == w):
+        return 0.0
+    cosine: float = float(np.dot(v, w)) / (v_norm * w_norm)
 
     if radians:
-        return np.arccos(cosine)
+        return float(np.arccos(cosine))
     else:
-        return np.rad2deg(np.arccos(cosine))
+        return float(np.rad2deg(np.arccos(cosine)))
 
 
 def fft_interpolate(function, interpolation_factor=2, axis=None):
@@ -767,8 +769,28 @@ def get_coord_diffs(coords):
         return np.diff(coords)
 
 
-def get_grid_dims(points, num_bins=1000, height=1, coord_tol=0.01):
-    grid = np.zeros(3, dtype=int)
+def get_grid_dims(
+    points: npt.NDArray[np.float64], num_bins: int = 1000, height: int = 1, coord_tol: float = 0.01
+) -> npt.NDArray[np.int_]:
+    """Determine grid dimensions from point coordinates.
+
+    Parameters
+    ----------
+    points : npt.NDArray[np.float64]
+        Array of shape (n_points, 3) with point coordinates.
+    num_bins : int, optional
+        Number of bins for histogram, by default 1000.
+    height : int, optional
+        Minimum peak height, by default 1.
+    coord_tol : float, optional
+        Coordinate tolerance, by default 0.01.
+
+    Returns
+    -------
+    npt.NDArray[np.int_]
+        Array of shape (3,) with grid dimensions.
+    """
+    grid: npt.NDArray[np.int_] = np.zeros(3, dtype=int)
 
     for icoord in range(3):
         coords = points[:, icoord]
@@ -782,9 +804,26 @@ def get_grid_dims(points, num_bins=1000, height=1, coord_tol=0.01):
     return grid
 
 
-def compare_arrays(array1: np.ndarray, array2: np.ndarray) -> bool:
+def compare_arrays(
+    array1: npt.NDArray[np.floating[npt.NBitBase]] | None,
+    array2: npt.NDArray[np.floating[npt.NBitBase]] | None,
+) -> bool:
+    """Compare two arrays for near-equality.
+
+    Parameters
+    ----------
+    array1 : npt.NDArray | None
+        First array.
+    array2 : npt.NDArray | None
+        Second array.
+
+    Returns
+    -------
+    bool
+        True if both arrays are None or both are close, False otherwise.
+    """
     if array1 is not None and array2 is not None:
-        return np.allclose(array1, array2)
+        return bool(np.allclose(array1, array2))
     elif array1 is None and array2 is None:
         return True
     else:
