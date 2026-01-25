@@ -52,23 +52,33 @@ def save_plot(name: str):
 ebs = ElectronicBandStructurePath.from_code(code="vasp", dirpath=NON_SPIN_POLARIZED_DIR)
 
 
+def test_bsplot_plain(ebs: ElectronicBandStructurePath):
+    """Plot plain band structure using .plot() with scalars_mode='none'."""
+    p = BandStructurePlotter()
+    p.plot(ebs.bands, scalars_mode="none")
+    save_plot("test_bsplot_plain")
+
+
 def test_bsplot_scatter(ebs: ElectronicBandStructurePath):
+    """Plot scatter band structure using .plot() with scalars_mode='scatter'."""
     projection_weights = ebs.compute_projected_sum(atoms=[1], orbitals=[4, 5, 6, 7, 8])
 
     p = BandStructurePlotter()
-    p.plot_scatter(ebs.kpath, ebs.bands, scalars=projection_weights.to_array(), s=2)
+    p.plot(ebs.bands, scalars_data=projection_weights, scalars_mode="scatter", scatter_kwargs={"s": 2, "c": "red"})
     save_plot("test_bsplot_scatter")
 
 
 def test_bsplot_quiver(ebs: ElectronicBandStructurePath):
+    """Plot quiver band structure using plot_quiver() (specialized method for vectors)."""
     bands_velocity = ebs.get_property("bands_velocity")
 
     p = BandStructurePlotter()
-    p.plot_quiver(ebs.kpath, ebs.bands, vectors=bands_velocity.to_array())
+    p.plot(ebs.bands, vectors_data=bands_velocity, vectors_mode="quiver")
     save_plot("test_bsplot_quiver")
 
 
 def test_bsplot_overlay_species(ebs: ElectronicBandStructurePath):
+    """Plot overlay by species using plot_overlay() (specialized method for multi-weight fills)."""
     properties = ebs.build_overlay_species_weights(orbitals=[4, 5, 6, 7, 8])
     weights = [prop.to_array() for prop in properties]
     labels = [prop.label for prop in properties]
@@ -78,6 +88,7 @@ def test_bsplot_overlay_species(ebs: ElectronicBandStructurePath):
 
 
 def test_bsplot_overlay_orbitals(ebs: ElectronicBandStructurePath):
+    """Plot overlay by orbitals using plot_overlay() (specialized method for multi-weight fills)."""
     properties = ebs.build_overlay_orbitals_weights(atoms=[2, 3, 4])
     weights = [prop.to_array() for prop in properties]
     labels = [prop.label for prop in properties]
@@ -87,6 +98,7 @@ def test_bsplot_overlay_orbitals(ebs: ElectronicBandStructurePath):
 
 
 def test_bsplot_overlay_generic(ebs: ElectronicBandStructurePath):
+    """Plot overlay with generic items using plot_overlay() (specialized method for multi-weight fills)."""
     items = {"V": [4, 5, 6, 7, 8]}
     properties = ebs.build_overlay_weights(items)
     weights = [prop.to_array() for prop in properties]
@@ -97,14 +109,15 @@ def test_bsplot_overlay_generic(ebs: ElectronicBandStructurePath):
 
 
 def test_bsplot_parametric(ebs: ElectronicBandStructurePath):
+    """Plot parametric band structure using .plot() with scalars_mode='parametric'."""
     projection_weights = ebs.compute_projected_sum(atoms=[1], orbitals=[4, 5, 6, 7, 8])
     p = BandStructurePlotter()
-    p.plot(ebs.bands, scalars=projection_weights)
-    # p.plot_parametric(ebs.kpath, ebs.bands, scalars=projection_weights.to_array())
-    # save_plot("test_bsplot_parametric")
+    p.plot(ebs.bands, scalars_data=projection_weights, scalars_mode="parametric")
+    save_plot("test_bsplot_parametric")
 
 
 def test_bsplot_multi_method_call(ebs: ElectronicBandStructurePath):
+    """Demonstrate chaining multiple specialized plot methods on the same plotter."""
     projection_weights = ebs.compute_projected_sum(atoms=[1], orbitals=[4, 5, 6, 7, 8])
     bands_velocity = ebs.get_property("bands_velocity")
 
@@ -117,12 +130,16 @@ def test_bsplot_multi_method_call(ebs: ElectronicBandStructurePath):
 ###########################################################
 # Run tests
 ###########################################################
-# test_bsplot_scatter(ebs)
-# test_bsplot_quiver(ebs)
-# test_bsplot_overlay_species(ebs)
-# test_bsplot_overlay_orbitals(ebs)  # Bug in build_overlay_orbitals_weights
-# test_bsplot_overlay_generic(ebs)  # Bug in build_overlay_weights
+# Tests using unified .plot() method with scalars_mode
+test_bsplot_plain(ebs)
+test_bsplot_scatter(ebs)
 test_bsplot_parametric(ebs)
-# test_bsplot_multi_method_call(ebs)
+
+# Tests using specialized methods (quiver, overlay)
+test_bsplot_quiver(ebs)
+test_bsplot_overlay_species(ebs)
+test_bsplot_overlay_orbitals(ebs)  # Bug in build_overlay_orbitals_weights
+test_bsplot_overlay_generic(ebs)  # Bug in build_overlay_weights
+test_bsplot_multi_method_call(ebs)
 
 print(f"Time taken: {time.time() - start_time} seconds")
