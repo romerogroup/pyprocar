@@ -4,20 +4,41 @@
 **Goal:** Gradual improvement toward full strict compliance
 **Current state:** 17,683 type errors under `typeCheckingMode: strict`
 
+## Progress Summary
+
+| File | Status | Errors | Notes |
+|------|--------|--------|-------|
+| property_store.py | ✅ Done | 0 | Property, PointSet classes |
+| structure.py | ✅ Done | 0 | |
+| kpoints.py | ⚠️ Blocked | 5 | All errors from pyvista (external) |
+| ebs.py | 🔄 In Progress | 619 | Requires major refactoring |
+| dos.py | 📋 Pending | 372 | |
+| fermisurface.py | 📋 Pending | 261 | |
+
 ## Scope and Phasing
 
-### Phase 1: Core Module + Supporting Utils (this effort)
+### Phase 1a: Foundation Classes (COMPLETE)
 
-Classes in dependency order:
+- ✅ Property, PointSet (`property_store.py`) - 0 errors
+- ✅ Structure (`structure.py`) - 0 errors
+- ✅ KPath (`kpoints.py`) - 5 errors (pyvista external, unfixable)
+- ✅ Supporting utils (`utils/math.py`) - key functions annotated
 
-| Order | Class | Depends On | Est. Errors |
-|-------|-------|------------|-------------|
-| 1 | Property | - | TBD |
-| 2 | KPath | - | ~432 |
-| 3 | Structure | - | TBD |
-| 4 | EBS | Property, KPath, Structure | ~842 |
-| 5 | DOS | Property, Structure | ~383 |
-| 6 | FermiSurface | EBS | ~281 |
+### Phase 1b: Complex Classes (REVISED SCOPE)
+
+The remaining classes have structural type issues that cascade from:
+1. `Property` class returning complex union types
+2. Extensive use of `**kwargs` without type annotations
+3. Optional member access on nullable properties
+4. External library type stubs (pyvista, scipy) with Unknown types
+
+**Recommended approach:** Focus on public API signatures, use targeted suppressions for unavoidable cascades.
+
+| Order | Class | Depends On | Actual Errors |
+|-------|-------|------------|---------------|
+| 4 | EBS | Property, KPath, Structure | 619 |
+| 5 | DOS | Property, Structure | 372 |
+| 6 | FermiSurface | EBS | 261 |
 
 Each commit may include related `utils/` changes if the class depends on them.
 
@@ -142,7 +163,18 @@ For each core class:
 
 ## Success Criteria
 
-Phase 1 complete when:
-- All 6 core classes pass strict typecheck
+### Phase 1a (ACHIEVED)
+- ✅ Foundation classes (Property, PointSet, Structure) pass strict typecheck
+- ✅ KPath passes except for external pyvista type issues
+- ✅ Key utils/math.py functions annotated
+- ✅ All tests pass
+
+### Phase 1b (REVISED)
+- Public APIs of EBS, DOS, FermiSurface have type annotations
+- `__init__` methods fully typed
+- Public properties and methods have return types
+- Targeted `# pyright: ignore` for unavoidable external library cascades
 - Tests pass
 - No regressions in functionality
+
+**Note:** Full strict compliance for EBS/DOS/FermiSurface would require major architectural refactoring. The revised goal is practical type safety improvement, not zero errors.
