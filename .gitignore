@@ -180,7 +180,6 @@ pypi_info.txt
 detailedCommitMessageTemporaryFile.txt
 
 .pixi/
-pixi.lock
 
 .claude/
 hack/
