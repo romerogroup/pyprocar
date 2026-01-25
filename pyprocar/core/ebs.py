@@ -205,19 +205,24 @@ def get_ebs_from_code(
 
     ebs_filepath = Path(dirpath) / ebs_filename
 
+    ebs: ElectronicBandStructure
     if not use_cache or not ebs_filepath.exists():
         logger.info(f"Parsing EBS calculation directory: {dirpath}")
         parser = Parser(code=code, dirpath=dirpath)
-        ebs: ElectronicBandStructure = parser.ebs
-        ebs.save(ebs_filepath)
+        parser_ebs = parser.ebs  # pyright: ignore[reportUnknownMemberType, reportUnknownVariableType]
+        if parser_ebs is None:
+            raise ValueError("Parser returned no EBS data")
+        ebs = parser_ebs  # pyright: ignore[reportAssignmentType]
+        ebs.save(ebs_filepath)  # pyright: ignore[reportUnknownMemberType]
     else:
         logger.info(f"Loading EBS  from picklefile: {ebs_filepath}")
         ebs = ElectronicBandStructure.load(ebs_filepath)
 
-    return ebs
+    return ebs  # pyright: ignore[reportUnknownVariableType]
 
 
-PropertyKey = str | tuple[str, str, int]
+# Property key compatible with PointSet.get_property
+PropertyKey = str | tuple[str, int] | tuple[str, str] | tuple[str, str, int]
 
 
 class DifferentiablePropertyInterface(ABC):
@@ -335,7 +340,8 @@ class ElectronicBandStructure(PointSet, PyvistaInterface):
         shifted_to_fermi: bool = False,
         structure: Structure | None = None,
     ):
-        super().__init__(kpoints)
+        # kpoints=None results in an empty array via np.array() in PointSet
+        super().__init__(kpoints)  # pyright: ignore[reportArgumentType]
 
         logger.info("Initializing ElectronicBandStructure")
 
@@ -453,7 +459,8 @@ class ElectronicBandStructure(PointSet, PyvistaInterface):
 
     @property
     def brillouin_zone(self) -> BrillouinZone:
-        return BrillouinZone(self.reciprocal_lattice, np.array([1, 1, 1]))
+        # reciprocal_lattice may be None, but BrillouinZone handles it
+        return BrillouinZone(self.reciprocal_lattice, np.array([1, 1, 1]))  # pyright: ignore[reportArgumentType]
 
     @property
     def fermi(self) -> float:
@@ -667,7 +674,7 @@ class ElectronicBandStructure(PointSet, PyvistaInterface):
     @property
     def ebs_ipr(self) -> Property | None:
         prop = self.get_property("ebs_ipr")
-        if prop is not None:
+        if isinstance(prop, Property):
             return prop
 
         return self.compute_ebs_ipr()
@@ -692,7 +699,7 @@ class ElectronicBandStructure(PointSet, PyvistaInterface):
 
         """
         prop = self.get_property("ebs_ipr_atom")
-        if prop is not None:
+        if isinstance(prop, Property):
             return prop
 
         return self.compute_ebs_ipr_atom()
@@ -708,7 +715,7 @@ class ElectronicBandStructure(PointSet, PyvistaInterface):
     @property
     def projected_sum(self) -> Property | None:
         prop = self.get_property("projected_sum")
-        if prop is not None:
+        if isinstance(prop, Property):
             return prop
 
         return self.compute_projected_sum()
@@ -722,7 +729,7 @@ class ElectronicBandStructure(PointSet, PyvistaInterface):
         return self.compute_projected_sum_spin_texture()
 
     @override
-    def get_property(
+    def get_property(  # pyright: ignore[reportIncompatibleMethodOverride]
         self, key: PropertyKey | None = None, **kwargs: Any
     ) -> Property | npt.NDArray[np.float64] | None:
         prop_name, _ = self._extract_key(key)  # pyright: ignore[reportArgumentType]
@@ -737,7 +744,7 @@ class ElectronicBandStructure(PointSet, PyvistaInterface):
                     self.add_property(name=prop_name, value=computed)
         return super().get_property(key)  # pyright: ignore[reportArgumentType]
 
-    def to_mesh(
+    def to_mesh(  # pyright: ignore[reportIncompatibleMethodOverride]
         self,
         scalars: tuple[str, npt.NDArray[Any]] | None = None,
         vectors: tuple[str, npt.NDArray[Any]] | None = None,

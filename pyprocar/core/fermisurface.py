@@ -106,18 +106,18 @@ class FermiSurface(pv.PolyData):
 
     def __init__(
         self,
-        points: np.ndarray,
-        faces: np.ndarray,
+        points: np.ndarray[Any, np.dtype[np.float64]],
+        faces: np.ndarray[Any, np.dtype[Any]],
         band_isosurfaces: dict[tuple[int, int], pv.PolyData],
         isovalue: float,
         original_ebs: ElectronicBandStructureMesh,
         ebs: ElectronicBandStructureMesh,
         point_set: PointSet,
-        point_data: dict[str | tuple[int, int], np.ndarray] = None,
-        cell_data: dict[str | tuple[int, int], np.ndarray] = None,
-        field_data: dict[str | tuple[int, int], Any] = None,
-    ):
-        super().__init__()
+        point_data: dict[str, np.ndarray[Any, np.dtype[Any]]] | None = None,
+        cell_data: dict[str, np.ndarray[Any, np.dtype[Any]]] | None = None,
+        field_data: dict[str, Any] | None = None,
+    ) -> None:
+        super().__init__()  # pyright: ignore[reportUnknownMemberType]
 
         self.points = points
         self.faces = faces
@@ -141,13 +141,13 @@ class FermiSurface(pv.PolyData):
         if "spin_index" not in point_set.property_store.keys():
             raise ValueError("spin_index not found in point_set.property_store")
 
-        point_data = point_data if point_data is not None else {}
-        cell_data = cell_data if cell_data is not None else {}
-        field_data = field_data if field_data is not None else {}
+        point_data_dict = point_data if point_data is not None else {}
+        cell_data_dict = cell_data if cell_data is not None else {}
+        field_data_dict = field_data if field_data is not None else {}
 
-        self.point_data.update(point_data)
-        self.cell_data.update(cell_data)
-        self.field_data.update(field_data)
+        self.point_data.update(point_data_dict)  # pyright: ignore[reportUnknownMemberType, reportArgumentType]
+        self.cell_data.update(cell_data_dict)  # pyright: ignore[reportUnknownMemberType, reportArgumentType]
+        self.field_data.update(field_data_dict)  # pyright: ignore[reportUnknownMemberType, reportArgumentType]
 
         logger.debug(f"Fermi Surface: \n {self}")
         logger.debug(f"Fermi Surface Point Data: \n {self.point_data}")
@@ -157,23 +157,22 @@ class FermiSurface(pv.PolyData):
     @classmethod
     def from_code(
         cls,
-        code,
-        dirpath,
+        code: str,
+        dirpath: str,
         use_cache: bool = False,
         ebs_filename: str = "ebs.pkl",
         reduce_bands_near_fermi: bool = False,
-        reduce_bands_near_energy: float = None,
-        reduce_bands_by_index: list[int] = None,
+        reduce_bands_near_energy: float | None = None,
+        reduce_bands_by_index: list[int] | None = None,
         padding: int = 10,
-        fermi: float = None,
+        fermi: float | None = None,
         fermi_shift: float = 0.0,
-        **kwargs,
-    ):
+        **kwargs: Any,
+    ) -> FermiSurface:
         ebs = ElectronicBandStructureMesh.from_code(
             code, dirpath, use_cache=use_cache, ebs_filename=ebs_filename
-        )
-        if fermi is None:
-            fermi = ebs.fermi
+        )  # pyright: ignore[reportArgumentType]
+        fermi_val = fermi if fermi is not None else ebs.fermi
 
         if reduce_bands_near_fermi:
             ebs.reduce_bands_near_fermi()
@@ -181,7 +180,7 @@ class FermiSurface(pv.PolyData):
             ebs.reduce_bands_near_energy(reduce_bands_near_energy)
         elif reduce_bands_by_index is not None:
             ebs.reduce_bands_by_index(reduce_bands_by_index)
-        return cls.from_ebs(ebs, padding=padding, isovalue=fermi, isovalue_shift=fermi_shift)
+        return cls.from_ebs(ebs, padding=padding, isovalue=fermi_val, isovalue_shift=fermi_shift)  # pyright: ignore[reportUnknownMemberType]
 
     @classmethod
     def from_ebs(
@@ -190,35 +189,34 @@ class FermiSurface(pv.PolyData):
         padding: int = 10,
         isovalue: float | None = None,
         isovalue_shift: float | None = None,
-        **kwargs,
-    ):
-        if isovalue is None:
-            isovalue = ebs.fermi
+        **kwargs: Any,
+    ) -> FermiSurface:
+        iso_val = isovalue if isovalue is not None else ebs.fermi
         if isovalue_shift is not None:
-            isovalue += isovalue_shift
-        results = generate_band_isosurfaces(ebs, isovalue=isovalue, padding=padding)
-        combined_surface = results[0]
-        band_isosurfaces = results[1]
-        isovalue = results[2]
-        ebs = results[3]
-        padded_ebs = results[4]
-        point_set = results[5]
-        return cls(
+            iso_val += isovalue_shift
+        results = generate_band_isosurfaces(ebs, isovalue=iso_val, padding=padding)  # pyright: ignore[reportUnknownVariableType]
+        combined_surface = results[0]  # pyright: ignore[reportUnknownVariableType]
+        band_isosurfaces = results[1]  # pyright: ignore[reportUnknownVariableType]
+        result_isovalue = results[2]  # pyright: ignore[reportUnknownVariableType]
+        original_ebs = results[3]  # pyright: ignore[reportUnknownVariableType]
+        padded_ebs = results[4]  # pyright: ignore[reportUnknownVariableType]
+        point_set = results[5]  # pyright: ignore[reportUnknownVariableType]
+        return cls(  # pyright: ignore[reportUnknownArgumentType, reportUnknownMemberType]
             points=combined_surface.points,
             faces=combined_surface.faces,
             band_isosurfaces=band_isosurfaces,
-            isovalue=isovalue,
-            original_ebs=ebs,
+            isovalue=result_isovalue,
+            original_ebs=original_ebs,
             ebs=padded_ebs,
             point_set=point_set,
         )
 
     @property
-    def original_ebs(self):
+    def original_ebs(self) -> ElectronicBandStructureMesh:
         return self._original_ebs
 
     @property
-    def ebs(self):
+    def ebs(self) -> ElectronicBandStructureMesh:
         return self._ebs
 
     @property

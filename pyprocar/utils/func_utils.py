@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import inspect
 from collections.abc import Callable, Iterable
 from functools import wraps
@@ -9,7 +11,7 @@ def example_func(a, b, c=10, d=20, *, e=30, f=40, **kwargs):
     pass
 
 
-def get_kwargs(func, defaults=True):
+def get_kwargs(func: Callable[..., Any], defaults: bool = True) -> dict[str, Any]:
     sig = inspect.signature(func)
     return {
         name: param.default if param.default is not param.empty else None
@@ -23,7 +25,7 @@ def get_kwargs(func, defaults=True):
     }
 
 
-def get_args(func, defaults=True):
+def get_args(func: Callable[..., Any], defaults: bool = True) -> list[str]:
     sig = inspect.signature(func)
     return [
         name
@@ -32,15 +34,17 @@ def get_args(func, defaults=True):
     ]
 
 
-def get_params(func, defaults=True):
+def get_params(
+    func: Callable[..., Any], defaults: bool = True
+) -> dict[str, inspect.Parameter]:
     sig = inspect.signature(func)
     return {name: param for name, param in sig.parameters.items()}
 
 
 def keep_func_kwargs(
-    kwargs,
-    func,
-):
+    kwargs: dict[str, Any],
+    func: Callable[..., Any],
+) -> dict[str, Any]:
     func_kwargs = get_kwargs(func)
     return {k: v for k, v in kwargs.items() if k in func_kwargs}
 

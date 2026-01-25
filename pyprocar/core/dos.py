@@ -64,8 +64,11 @@ def get_dos_from_code(
     if not use_cache or not dos_filepath.exists():
         logger.info("Parsing DOS calculation directory: %s", dirpath)
         parser = Parser(code=code, dirpath=dirpath)
-        dos = parser.dos  # pyright: ignore[reportAssignmentType]
-        if use_cache and dos is not None:
+        parser_dos = parser.dos  # pyright: ignore[reportUnknownMemberType, reportUnknownVariableType]
+        if parser_dos is None:
+            raise ValueError("Parser returned no DOS data")
+        dos = parser_dos  # pyright: ignore[reportAssignmentType]
+        if use_cache:
             dos.save(dos_filepath)
     else:
         logger.info("Loading DOS from cache: %s", dos_filepath)
@@ -289,7 +292,8 @@ class NormMode(Enum):
             return input_units
         norm_units = cls.normalizer_units(mode, input_units)
         norm_units = _units_divide(input_units, norm_units)
-        return _units_divide(input_units, norm_units)
+        result = _units_divide(input_units, norm_units)
+        return result if result is not None else "$1$"
 
     @classmethod
     def get_normed_name(cls, mode: NormMode, name: str) -> str:
@@ -672,23 +676,32 @@ class DensityOfStates(PointSet):
 
     @property
     def n_electrons(self) -> float:
-        return self.integrate(self.total)
+        result = self.integrate(self.total.to_array())
+        # integrate returns NDArray, but for total it should be a single value
+        return float(result) if isinstance(result, (int, float)) else float(result.sum())
 
     # -------------------------------------------------------------------
     # Useful getters
     # -------------------------------------------------------------------
 
-    def get_species_atom_map(self, species: list[str] | str | None = None) -> dict[str, list[int]]:
+    def get_species_atom_map(
+        self, species: list[str] | str | None = None
+    ) -> dict[str, tuple[int, ...]]:
         atoms_array = np.asarray(self.atoms)
+        species_list: list[str]
         if species is None:
-            species = self.species
-        if isinstance(species, str):
-            species = [species]
+            if self.species is None:
+                return {}
+            species_list = list(self.species)
+        elif isinstance(species, str):
+            species_list = [species]
+        else:
+            species_list = species
 
-        species_atoms_list = {}
-        for specie in species:
-            species_atoms_list[specie] = tuple(np.where(atoms_array == specie)[0].tolist())
-        return species_atoms_list
+        species_atoms_map: dict[str, tuple[int, ...]] = {}
+        for specie in species_list:
+            species_atoms_map[specie] = tuple(np.where(atoms_array == specie)[0].tolist())
+        return species_atoms_map
 
     # ------------------------------------------------------------------
     # Operations

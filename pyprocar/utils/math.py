@@ -485,9 +485,9 @@ def calculate_scalar_differences_2(scalar_mesh, transform_matrix):
 
 
 def calculate_3d_mesh_scalar_gradients(
-    scalar_array,
-    reciprocal_lattice,
-):
+    scalar_array: npt.NDArray[np.float64],
+    reciprocal_lattice: npt.NDArray[np.float64],
+) -> npt.NDArray[np.float64]:
     """Transforms the derivatives to cartesian coordinates
         (n,j,k,...)->(n,j,k,...,3)
 
@@ -553,7 +553,9 @@ def calculate_3d_mesh_scalar_gradients(
     return scalar_gradients
 
 
-def calculate_3d_mesh_scalar_integral(scalar_mesh, reciprocal_lattice):
+def calculate_3d_mesh_scalar_integral(
+    scalar_mesh: npt.NDArray[np.float64], reciprocal_lattice: npt.NDArray[np.float64]
+) -> npt.NDArray[np.float64]:
     """Calculate the scalar integral"""
     n1, n2, n3 = scalar_mesh.shape[:3]
     volume_reduced_vector = np.array([1, 1, 1])
@@ -690,7 +692,9 @@ def ravel_array(mesh_grid):
     return mesh_grid
 
 
-def array_to_mesh(array, nkx, nky, nkz, order="F"):
+def array_to_mesh(
+    array: npt.NDArray[np.float64], nkx: int, nky: int, nkz: int, order: str = "F"
+) -> npt.NDArray[np.float64]:
     """
     Converts a list to a mesh that corresponds to ebs.kpoints
     [n_kx*n_ky*n_kz,...]->[n_kx,n_ky,n_kz,...]. Make sure array is sorted by lexisort
@@ -720,7 +724,7 @@ def array_to_mesh(array, nkx, nky, nkz, order="F"):
     ) + array.shape[1:]
 
     try:
-        scalar_grid = array.reshape(prop_shape, order=order)
+        scalar_grid: npt.NDArray[np.float64] = array.reshape(prop_shape, order=order)
     except ValueError:
         error_msg = "This array can not be converted to a 3d mesh.\n"
         error_msg += f"Array shape: {array.shape}\n"
@@ -731,7 +735,9 @@ def array_to_mesh(array, nkx, nky, nkz, order="F"):
     return scalar_grid
 
 
-def mesh_to_array(mesh, order="F"):
+def mesh_to_array(
+    mesh: npt.NDArray[np.float64] | None, order: str = "F"
+) -> npt.NDArray[np.float64] | None:
     """
     Converts a mesh to a list that corresponds to ebs.kpoints
     [n_kx,n_ky,n_kz,...]->[n_kx*n_ky*n_kz,...]
@@ -751,7 +757,7 @@ def mesh_to_array(mesh, order="F"):
         return None
     nkx, nky, nkz = mesh.shape[:3]
     prop_shape = (nkx * nky * nkz,) + mesh.shape[3:]
-    array = mesh.reshape(prop_shape, order=order)
+    array: npt.NDArray[np.float64] = mesh.reshape(prop_shape, order=order)
     return array
 
 
@@ -805,8 +811,8 @@ def get_grid_dims(
 
 
 def compare_arrays(
-    array1: npt.NDArray[np.floating[npt.NBitBase]] | None,
-    array2: npt.NDArray[np.floating[npt.NBitBase]] | None,
+    array1: npt.NDArray[np.float64] | None,
+    array2: npt.NDArray[np.float64] | None,
 ) -> bool:
     """Compare two arrays for near-equality.
 
