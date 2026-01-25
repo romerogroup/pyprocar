@@ -200,7 +200,8 @@ def test_plot_line_uses_metadata_labels_per_channel():
     plotter.plot(projected_sum)
 
     expected_labels = projected_sum.metadata["label"]
-    actual_labels = [line.get_label() for line in plotter.ax.lines]
+    # Filter out matplotlib internal lines (baseline, etc.) that have auto-generated labels starting with '_'
+    actual_labels = [line.get_label() for line in plotter.ax.lines if not line.get_label().startswith("_")]
 
     assert actual_labels == expected_labels
     plt.close(plotter.fig)
@@ -213,7 +214,9 @@ def test_plot_line_creates_line_for_each_channel():
     plotter = DOSPlotter()
     plotter.plot(projected_sum)
 
-    assert len(plotter.ax.lines) == projected_sum.to_array().shape[1]
+    # Filter out matplotlib internal lines (baseline, etc.) that have auto-generated labels starting with '_'
+    data_lines = [line for line in plotter.ax.lines if not line.get_label().startswith("_")]
+    assert len(data_lines) == projected_sum.to_array().shape[1]
     plt.close(plotter.fig)
 
 

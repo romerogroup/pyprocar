@@ -709,8 +709,8 @@ class TestElectronicBandStructurePath:
         assert isinstance(ebs_path, ElectronicBandStructurePath)
 
     def test_bands_property(self, sample_ebs_path):
-        """Test bands_property returns Property with kpath metadata."""
-        bands_prop = sample_ebs_path.bands_property
+        """Test bands property returns Property with kpath metadata."""
+        bands_prop = sample_ebs_path.bands
 
         # Check that it returns a Property
         assert bands_prop is not None

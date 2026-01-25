@@ -11,7 +11,7 @@ from scipy.interpolate import LinearNDInterpolator
 
 from pyprocar.core.property_store import Property
 from pyprocar.plotter.dos_plot import ShowColorbar
-from pyprocar.plotter.ebs_utils import (
+from pyprocar.core.bandstructure2D import (
     find_plane_limits,
     get_orthonormal_basis,
     get_uv_grid,
