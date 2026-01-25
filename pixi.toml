@@ -14,6 +14,16 @@ preview = ["pixi-build"]
 
 version = "6.5.0"
 
+[dependencies]
+git = ">=2.51.0,<3"
+python = ">=3.10,<3.14"
+
+[tasks]
+bump = "tbump --only-patch $RELEASE_VERSION --config $PIXI_PROJECT_ROOT/.config/tbump.toml"
+
+build-release = "hatch build --hooks-only"
+init = "python scripts/init-template.py"
+release = "python scripts/release.py"
 ###############################################################
 # Package Definition
 ###############################################################
@@ -57,30 +67,19 @@ pyvista = ">0.44.0"
 vtk = "*"
 lxml = "*"
 
+
+###############################################################
+# PyProcar feature set dependencies
+###############################################################
+
 [feature.pyprocar.dependencies]
 pyprocar = { path = "." }
 
 
 ###############################################################
-# Default workspace Feature Set Dependencies
-###############################################################
-# Default dependencies
-[dependencies]
-git = ">=2.51.0,<3"
-python = ">=3.10,<3.14"
-
-[tasks]
-bump = "tbump --only-patch $RELEASE_VERSION --config $PIXI_PROJECT_ROOT/.config/tbump.toml"
-
-build-release = "hatch build --hooks-only"
-init = "python scripts/init-template.py"
-release = "python scripts/release.py"
-
-test = { depends-on = ["test-all"], description = "Run all tests" }
-###############################################################
-# Additional workspace Feature Set Definitions
-###############################################################
 # Docs feature set dependencies
+###############################################################
+
 [feature.docs.dependencies]
 furo = "*"
 git-cliff = ">=2.10.0,<3"
@@ -105,6 +104,11 @@ bump-changelog = { cmd = "git-cliff --unreleased --prepend CHANGELOG.md --tag $R
 git-cliff-init = "git-cliff --init --config $PIXI_PROJECT_ROOT/.config/cliff.toml"
 
 
+###############################################################
+# Pytest feature set dependencies
+###############################################################
+
+
 [feature.pytest.dependencies]
 dirty-equals = "*"
 filelock = "*"
@@ -120,13 +124,14 @@ rich = "*"
 tomli-w = "*"
 types-pyyaml = "*"
 
-###############################
-# pytest feature set dependencies
-###############################
-
 [feature.pytest.tasks]
 
 test = { cmd = "bash $PIXI_PROJECT_ROOT/.config/run_silent_pytest.sh {{ test_pattern }} {{ verbose }}", args = [{ arg = "test_pattern", default = "" }, { arg = "verbose", default = "" }], description = "Run tests (optional: test_pattern, --verbose|-v)" }
+
+
+###############################################################
+# Lint feature set dependencies
+###############################################################
 
 [feature.lint.dependencies]
 actionlint = "*"
@@ -173,6 +178,10 @@ depends-on = ["lint-src", "lint-tests"]
 description = "Run all linters and formatters on all code"
 
 
+###############################################################
+# Dev feature set dependencies
+###############################################################
+
 [feature.dev.dependencies]
 tbump = "*"
 pandas-stubs = "*"
@@ -195,4 +204,4 @@ ci-check = "pixi run -q -e ci typecheck && pixi run -q -e ci test && pixi run -q
 default = { features = ["pyprocar"], solve-group = "default" }
 docs = { features = ["pyprocar", "docs"], no-default-feature = true, solve-group = "default" }
 lint = { features = ["pyprocar", "lint"], no-default-feature = true, solve-group = "default" }
-dev = { features = ["pyprocar", "lint", "pytest", "dev", ], no-default-feature = true, solve-group = "default" }
+dev = { features = ["pyprocar", "lint", "pytest", "dev" ], no-default-feature = true, solve-group = "default" }
