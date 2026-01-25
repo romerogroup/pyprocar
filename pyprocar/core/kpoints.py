@@ -1,25 +1,27 @@
+"""K-points and K-path handling for band structure calculations."""
+
+from __future__ import annotations
+
 __author__ = "Pedram Tavadze and Logan Lang"
 __maintainer__ = "Pedram Tavadze and Logan Lang"
 __email__ = "petavazohi@mail.wvu.edu, lllang@mix.wvu.edu"
 __date__ = "March 31, 2020"
 
-
 import logging
+from collections.abc import Sequence
 from dataclasses import dataclass
 from enum import Enum
 from functools import cached_property
-from typing import Literal
+from typing import Any
 
 import numpy as np
+import numpy.typing as npt
 import pyvista as pv
 
 from pyprocar.core.brillouin_zone import BrillouinZone
 from pyprocar.utils import math, np_utils
 
 logger = logging.getLogger(__name__)
-
-KPOINTS_DTYPE = np.ndarray[tuple[int, Literal[3]], np.dtype[np_utils.FLOAT_DTYPE]]
-RECIPROCAL_LATTICE_DTYPE = np.ndarray[tuple[Literal[3], Literal[3]], np.dtype[np_utils.FLOAT_DTYPE]]
 
 
 class KGRID_MODE(Enum):
@@ -36,7 +38,7 @@ class KGridInfo:
 
 def generate_gamma_centered_kpoints(
     kgrid: tuple[int, int, int], kshift: tuple[float, float, float] = (0.0, 0.0, 0.0)
-):
+) -> npt.NDArray[np.float64]:
     n_kx = kgrid[0]
     n_ky = kgrid[1]
     n_kz = kgrid[2]
@@ -45,14 +47,16 @@ def generate_gamma_centered_kpoints(
     ky_shift = kshift[1]
     kz_shift = kshift[2]
 
-    kx_vals = (np.arange(0, n_kx) + kx_shift) / n_kx
-    ky_vals = (np.arange(0, n_ky) + ky_shift) / n_ky
-    kz_vals = (np.arange(0, n_kz) + kz_shift) / n_kz
+    kx_vals: npt.NDArray[np.float64] = (np.arange(0, n_kx) + kx_shift) / n_kx
+    ky_vals: npt.NDArray[np.float64] = (np.arange(0, n_ky) + ky_shift) / n_ky
+    kz_vals: npt.NDArray[np.float64] = (np.arange(0, n_kz) + kz_shift) / n_kz
 
-    meshgrid = np.array(np.meshgrid(kx_vals, ky_vals, kz_vals, indexing="ij"))
-    move_axis = np.swapaxes(meshgrid, 0, -1)
-    grid_points = move_axis.reshape(-1, 3)
-    fbz_points = -np.fmod(grid_points + 6.5, 1) + 0.5
+    meshgrid: npt.NDArray[np.float64] = np.array(
+        np.meshgrid(kx_vals, ky_vals, kz_vals, indexing="ij")
+    )
+    move_axis: npt.NDArray[np.float64] = np.swapaxes(meshgrid, 0, -1)
+    grid_points: npt.NDArray[np.float64] = move_axis.reshape(-1, 3)
+    fbz_points: npt.NDArray[np.float64] = -np.fmod(grid_points + 6.5, 1) + 0.5
     sorted_kpoints = sort_kpoints(fbz_points, order="F")
 
     return sorted_kpoints
@@ -60,7 +64,7 @@ def generate_gamma_centered_kpoints(
 
 def monkhorst_pack_kpoints(
     kgrid: tuple[int, int, int], kshift: tuple[float, float, float] = (0.0, 0.0, 0.0)
-):
+) -> npt.NDArray[np.float64]:
     n_kx = kgrid[0]
     n_ky = kgrid[1]
     n_kz = kgrid[2]
@@ -69,21 +73,23 @@ def monkhorst_pack_kpoints(
     ky_shift = kshift[1]
     kz_shift = kshift[2]
 
-    kpoints = np.zeros((np.prod(kgrid), 3))
-    kx_vals = (np.arange(0, n_kx) + kx_shift + (1 - n_kx) / 2) / n_kx
-    ky_vals = (np.arange(0, n_ky) + ky_shift + (1 - n_ky) / 2) / n_ky
-    kz_vals = (np.arange(0, n_kz) + kz_shift + (1 - n_kz) / 2) / n_kz
+    kx_vals: npt.NDArray[np.float64] = (np.arange(0, n_kx) + kx_shift + (1 - n_kx) / 2) / n_kx
+    ky_vals: npt.NDArray[np.float64] = (np.arange(0, n_ky) + ky_shift + (1 - n_ky) / 2) / n_ky
+    kz_vals: npt.NDArray[np.float64] = (np.arange(0, n_kz) + kz_shift + (1 - n_kz) / 2) / n_kz
 
-    kx_vals, ky_vals, kz_vals = np.meshgrid(kx_vals, ky_vals, kz_vals, indexing="ij")
+    kx_grid, ky_grid, kz_grid = np.meshgrid(kx_vals, ky_vals, kz_vals, indexing="ij")
 
-    return np.stack([kx_vals.flatten(), ky_vals.flatten(), kz_vals.flatten()], axis=-1)
+    result: npt.NDArray[np.float64] = np.stack(
+        [kx_grid.flatten(), ky_grid.flatten(), kz_grid.flatten()], axis=-1
+    )
+    return result
 
 
 def get_kpoints_from_kgrid(
     kgrid: tuple[int, int, int],
     kshift: tuple[float, float, float] = (0.0, 0.0, 0.0),
     mode: str = "monkhorst",
-):
+) -> npt.NDArray[np.float64]:
     if mode.lower()[0] == "m":
         return monkhorst_pack_kpoints(kgrid, kshift)
     elif mode.lower()[0] == "g":
@@ -93,27 +99,32 @@ def get_kpoints_from_kgrid(
 
 
 def reduced_to_cartesian(
-    kpoints: KPOINTS_DTYPE, reciprocal_lattice: RECIPROCAL_LATTICE_DTYPE
-) -> KPOINTS_DTYPE:
+    kpoints: npt.NDArray[np.float64], reciprocal_lattice: npt.NDArray[np.float64] | None
+) -> npt.NDArray[np.float64] | None:
     if reciprocal_lattice is not None:
-        return np.dot(kpoints, reciprocal_lattice)
+        result: npt.NDArray[np.float64] = np.dot(kpoints, reciprocal_lattice)
+        return result
     else:
         print("Please provide a reciprocal lattice when initiating the Procar class")
         return None
 
 
-def sort_kpoints(kpoints: KPOINTS_DTYPE, order: str = "C"):
+def sort_kpoints(kpoints: npt.NDArray[np.float64], order: str = "C") -> npt.NDArray[np.float64]:
+    sorted_indices: npt.NDArray[np.intp]
     if order == "C":
         sorted_indices = np.lexsort((kpoints[:, 2], kpoints[:, 1], kpoints[:, 0]))
     elif order == "F":
         sorted_indices = np.lexsort((kpoints[:, 0], kpoints[:, 1], kpoints[:, 2]))
-    return kpoints[sorted_indices]
+    else:
+        raise ValueError(f"Invalid order: {order}")
+    result: npt.NDArray[np.float64] = kpoints[sorted_indices]
+    return result
 
 
 def cartesian_to_reduced(
-    cartesian: KPOINTS_DTYPE, reciprocal_lattice: RECIPROCAL_LATTICE_DTYPE
-) -> KPOINTS_DTYPE:
-    """Converts cartesian coordinates to fractional coordinates
+    cartesian: npt.NDArray[np.float64], reciprocal_lattice: npt.NDArray[np.float64] | None
+) -> npt.NDArray[np.float64] | None:
+    """Converts cartesian coordinates to fractional coordinates.
 
     Parameters
     ----------
@@ -128,22 +139,23 @@ def cartesian_to_reduced(
         The fractional coordinates. shape = [N,3]
     """
     if reciprocal_lattice is not None:
-        kpoints = np.dot(cartesian, np.linalg.inv(reciprocal_lattice))
+        kpoints: npt.NDArray[np.float64] = np.dot(cartesian, np.linalg.inv(reciprocal_lattice))
         return kpoints
     else:
         print("Please provide a reciprocal lattice when initiating the Procar class")
         return None
 
 
-def format_names(names: list[str], as_latex: bool = False):
-    new_names = []
+def format_names(names: Sequence[str], as_latex: bool = False) -> list[str]:
+    new_names: list[str] = []
     for x in names:
-        if x.lower() == "gamma":
-            x = r"\Gamma"
+        name = x
+        if name.lower() == "gamma":
+            name = r"\Gamma"
 
-        if "\\" in x and as_latex:
-            x = "$" + x + "$"
-        new_names.append(x)
+        if "\\" in name and as_latex:
+            name = "$" + name + "$"
+        new_names.append(name)
     return new_names
 
 
@@ -167,20 +179,33 @@ def normalize_kpoint_name(name: str) -> str:
 
 
 class KPath:
+    _kpoints: npt.NDArray[np.float64]
+    _n_grids: list[int] | None
+    _segment_names: list[tuple[str, str]] | None
+    _tick_name_map: dict[int, str] | None
+    _reciprocal_lattice: npt.NDArray[np.float64] | None
+    _segment_indices: list[npt.NDArray[np.intp]]
+    _continuous_start_indices: list[int]
+    _discontinuity_start_indices: list[int]
+    _special_kpoint_names: list[str]
+    discontinuity_threshold: float
+    zero_diff_threshold: float
+    special_kpoint_names: list[str]
+
     def __init__(
         self,
-        kpoints: np.ndarray = None,
-        n_grids: list[int] = None,
-        segment_names: list[tuple[str, str]] = None,
-        special_kpoint_map: dict[str, np.ndarray] = None,
-        tick_name_map: dict[int, str] = None,
-        reciprocal_lattice=None,
-        discontinuity_threshold=0.2,
-        zero_diff_threshold=1e-6,
-        as_latex=True,
-    ):
+        kpoints: npt.NDArray[np.float64] | None = None,
+        n_grids: list[int] | None = None,
+        segment_names: list[tuple[str, str]] | None = None,
+        special_kpoint_map: dict[str, npt.NDArray[np.float64]] | None = None,
+        tick_name_map: dict[int, str] | None = None,
+        reciprocal_lattice: npt.NDArray[np.float64] | None = None,
+        discontinuity_threshold: float = 0.2,
+        zero_diff_threshold: float = 1e-6,
+        as_latex: bool = True,
+    ) -> None:
         """
-        The Kpath object to handle labels and ticks for band structure
+        The Kpath object to handle labels and ticks for band structure.
 
         Parameters
         ----------
@@ -249,23 +274,26 @@ class KPath:
         logger.info(f"\n{self}\n")
         logger.info("KPath initialized")
 
-    def __eq__(self, other):
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, KPath):
+            return False
         segment_names_equal = self.segment_names == other.segment_names
-        special_kpoints_equal = np.allclose(self.special_kpoints, other.special_kpoints)
+        special_kpoints_equal = bool(np.allclose(self.special_kpoints, other.special_kpoints))
         n_grids_equal = self.n_grids == other.n_grids
         tick_names_equal = self.tick_names == other.tick_names
         return segment_names_equal and special_kpoints_equal and n_grids_equal and tick_names_equal
 
-    def __str__(self):
+    def __str__(self) -> str:
         ret = "K-Path\n"
         ret += "------\n"
 
-        for isegment, segment_indices in enumerate(self.segment_indices):
-            start_name, end_name = self.segment_names[isegment]
-            start_kpoint = self.special_kpoint_map[start_name]
-            end_kpoint = self.special_kpoint_map[end_name]
+        if self.segment_names is not None:
+            for isegment, _ in enumerate(self.segment_indices):
+                start_name, end_name = self.segment_names[isegment]
+                start_kpoint = self.special_kpoint_map[start_name]
+                end_kpoint = self.special_kpoint_map[end_name]
 
-            ret += f"{isegment + 1:>2}. {start_name:<8}: ({start_kpoint[0]:>6.2f} {start_kpoint[1]:>6.2f} {start_kpoint[2]:>6.2f}) -> {end_name:<8}: ({end_kpoint[0]:>6.2f} {end_kpoint[1]:>6.2f} {end_kpoint[2]:>6.2f})\n"
+                ret += f"{isegment + 1:>2}. {start_name:<8}: ({start_kpoint[0]:>6.2f} {start_kpoint[1]:>6.2f} {start_kpoint[2]:>6.2f}) -> {end_name:<8}: ({end_kpoint[0]:>6.2f} {end_kpoint[1]:>6.2f} {end_kpoint[2]:>6.2f})\n"
 
         ret += "\n"
         ret += "Tick names:    " + "    ".join(f"{name:^8}" for name in self.tick_names) + "\n"
@@ -279,16 +307,16 @@ class KPath:
         return ret
 
     @property
-    def n_kpoints(self):
+    def n_kpoints(self) -> int:
         return len(self._kpoints)
 
     @property
-    def n_grids(self):
+    def n_grids(self) -> list[int] | None:
         return self._n_grids
 
     @property
-    def n_segments(self):
-        """The number of band segments
+    def n_segments(self) -> int:
+        """The number of band segments.
 
         Returns
         -------
@@ -298,106 +326,115 @@ class KPath:
         return len(self.segment_indices)
 
     @property
-    def reciprocal_lattice(self):
+    def reciprocal_lattice(self) -> npt.NDArray[np.float64] | None:
         return self._reciprocal_lattice
 
     @property
-    def brillouin_zone(self):
+    def brillouin_zone(self) -> BrillouinZone:
         return BrillouinZone(self.reciprocal_lattice, transformation_matrix=[1, 1, 1])
 
     @property
-    def kpoints(self):
+    def kpoints(self) -> npt.NDArray[np.float64]:
         return self._kpoints
 
     @property
-    def k_distances(self):
+    def k_distances(self) -> npt.NDArray[np.float64]:
         return self.get_distances(as_segments=False)
 
     @property
-    def segment_indices(self):
+    def segment_indices(self) -> list[npt.NDArray[np.intp]]:
         return self._segment_indices
 
     @property
-    def knames(self):
+    def knames(self) -> list[tuple[str, str]] | None:
         return self.segment_names
 
     @property
-    def continuous_start_indices(self):
+    def continuous_start_indices(self) -> list[int]:
         return self._continuous_start_indices
 
     @property
-    def discontinuity_start_indices(self):
+    def discontinuity_start_indices(self) -> list[int]:
         return self._discontinuity_start_indices
 
     @property
-    def kpoints_cartesian(self):
+    def kpoints_cartesian(self) -> npt.NDArray[np.float64] | None:
         return reduced_to_cartesian(self.kpoints, self._reciprocal_lattice)
 
     @property
-    def segment_names(self):
+    def segment_names(self) -> list[tuple[str, str]] | None:
         return self._segment_names
 
     @segment_names.setter
-    def segment_names(self, segment_names):
+    def segment_names(self, segment_names: list[tuple[str, str]]) -> None:
         if len(segment_names) != self.n_segments:
             raise ValueError(
                 f"Number of segment names must match number of segments. Got {len(segment_names)} names for {self.n_segments} segments"
             )
         self._segment_names = segment_names
-        self._special_kpoints = self.get_special_kpoints()
+        # Note: _special_kpoints is a cached_property, this line won't work as expected
+        # self._special_kpoints = self.get_special_kpoints()
 
     @property
-    def special_kpoint_names(self):
+    def special_kpoint_names(self) -> list[str]:
         return self._special_kpoint_names
 
     @special_kpoint_names.setter
-    def special_kpoint_names(self, special_kpoint_names):
+    def special_kpoint_names(self, special_kpoint_names: list[str]) -> None:
         if len(special_kpoint_names) != len(self._special_kpoint_names):
             raise ValueError(
                 f"Setting special kpoint names must match the existing number of special kpoint names.\n"
                 f"Got {len(special_kpoint_names)} special kpoint names for {len(self._special_kpoint_names)} special kpoint names"
             )
-        new_segment_names = []
-        for i, segment_name_tuple in enumerate(self._segment_names):
-            start_name, end_name = segment_name_tuple
-            for j, special_kpoint in enumerate(self._special_kpoint_names):
-                if special_kpoint == start_name:
-                    start_name = special_kpoint_names[j]
-                if special_kpoint == end_name:
-                    end_name = special_kpoint_names[j]
+        new_segment_names: list[tuple[str, str]] = []
+        if self._segment_names is not None:
+            for segment_name_tuple in self._segment_names:
+                start_name, end_name = segment_name_tuple
+                for j, special_kpoint in enumerate(self._special_kpoint_names):
+                    if special_kpoint == start_name:
+                        start_name = special_kpoint_names[j]
+                    if special_kpoint == end_name:
+                        end_name = special_kpoint_names[j]
 
-            new_segment_names.append((start_name, end_name))
+                new_segment_names.append((start_name, end_name))
 
         self._segment_names = new_segment_names
         self._special_kpoint_names = special_kpoint_names
 
     @cached_property
-    def special_kpoints(self):
+    def special_kpoints(self) -> npt.NDArray[np.float64]:
         return self.get_special_kpoints(as_segments=True)
 
     @property
-    def special_kpoint_map(self):
-        special_kpoint_map = {}
+    def special_kpoint_map(self) -> dict[str, npt.NDArray[np.float64]]:
+        special_kpoint_map: dict[str, npt.NDArray[np.float64]] = {}
         special_kpoints = self.get_special_kpoints(as_segments=False)
         for name, kpoint in zip(self.special_kpoint_names, special_kpoints):
             special_kpoint_map[name] = kpoint
         return special_kpoint_map
 
-    def get_special_kpoint_names(self, segment_names: list[tuple[str, str]] = None):
+    def get_special_kpoint_names(
+        self, segment_names: list[tuple[str, str]] | None = None
+    ) -> list[str]:
         if segment_names is None:
             segment_names = self._segment_names
-        special_kpoint_names = []
-        for i, segment_name in enumerate(segment_names):
-            if segment_name[0] not in special_kpoint_names:
-                special_kpoint_names.append(segment_name[0])
-            if segment_name[1] not in special_kpoint_names:
-                special_kpoint_names.append(segment_name[1])
+        special_kpoint_names: list[str] = []
+        if segment_names is not None:
+            for segment_name in segment_names:
+                if segment_name[0] not in special_kpoint_names:
+                    special_kpoint_names.append(segment_name[0])
+                if segment_name[1] not in special_kpoint_names:
+                    special_kpoint_names.append(segment_name[1])
 
         return special_kpoint_names
 
-    def get_special_kpoints(self, as_segments: bool = False, cartesian: bool = False):
-        special_kpoints = []
+    def get_special_kpoints(
+        self, as_segments: bool = False, cartesian: bool = False
+    ) -> npt.NDArray[np.float64]:
+        special_kpoints: list[Any] = []
         kpoints = self.kpoints_cartesian if cartesian else self.kpoints
+        if kpoints is None:
+            return np.array([])
         for segment_indices in self.segment_indices:
             start_kpoint = kpoints[segment_indices[0]]
             end_kpoint = kpoints[segment_indices[-1]]
@@ -416,31 +453,36 @@ class KPath:
             if not end_exists:
                 special_kpoints.append(end_kpoint)
 
-        return np.array(special_kpoints)
+        result: npt.NDArray[np.float64] = np.array(special_kpoints)
+        return result
 
     @property
-    def tick_names_latex(self):
-        tick_names_latex = []
-        for tick_index, tick_name in enumerate(self.tick_names):
-            if "\\" in tick_name:
-                tick_name = f"${tick_name}$"
-            tick_names_latex.append(tick_name)
+    def tick_names_latex(self) -> list[str]:
+        tick_names_latex: list[str] = []
+        for tick_name in self.tick_names:
+            name = tick_name
+            if "\\" in name:
+                name = f"${name}$"
+            tick_names_latex.append(name)
         return tick_names_latex
 
     @property
-    def tick_name_map(self):
-        """The list of tick names
+    def tick_name_map(self) -> dict[int, str]:
+        """The list of tick names.
 
         Returns
         -------
-        List
-            The list of tick names
+        dict[int, str]
+            The mapping of tick indices to tick names
         """
         if self._tick_name_map is None:
-            tick_name_map = {}
+            tick_name_map: dict[int, str] = {}
+            if self._segment_names is None:
+                self._tick_name_map = tick_name_map
+                return self._tick_name_map
             for i, segment_indices in enumerate(self._segment_indices):
-                start_index = segment_indices[0]
-                end_index = segment_indices[-1]
+                start_index = int(segment_indices[0])
+                end_index = int(segment_indices[-1])
                 if i == 0:
                     tick_name_map[start_index] = self._segment_names[i][0]
                     continue
@@ -454,8 +496,8 @@ class KPath:
                     )
 
                     # Remove the previous segment end index. To avoid double tick
-                    previous_segment_end_index = self._segment_indices[i - 1][-1]
-                    tick_name_map.pop(previous_segment_end_index)
+                    previous_segment_end_index = int(self._segment_indices[i - 1][-1])
+                    tick_name_map.pop(previous_segment_end_index, None)
                 elif end_index in self.continuous_start_indices:
                     tick_name_map[end_index] = self._segment_names[i][1]
                 else:
@@ -468,20 +510,24 @@ class KPath:
         return self._tick_name_map
 
     @property
-    def tick_names(self):
+    def tick_names(self) -> list[str]:
         return list(self.tick_name_map.values())
 
     @property
-    def tick_positions(self):
+    def tick_positions(self) -> list[int]:
         return list(self.tick_name_map.keys())
 
-    def get_segments(self, isegments: list[int] = None, cartesian: bool = False):
+    def get_segments(
+        self, isegments: Sequence[int] | None = None, cartesian: bool = False
+    ) -> list[npt.NDArray[np.float64]]:
         if isegments is None:
             isegments = list(range(self.n_segments))
 
         kpoints = self.kpoints_cartesian if cartesian else self.kpoints
+        if kpoints is None:
+            return []
 
-        segments = []
+        segments: list[npt.NDArray[np.float64]] = []
         for segment_indices in self.segment_indices:
             segments.append(kpoints[segment_indices])
 
@@ -489,24 +535,24 @@ class KPath:
 
     def get_distances(
         self,
-        isegments: list[int] = None,
+        isegments: Sequence[int] | None = None,
         as_segments: bool = True,
         cumlative_across_segments: bool = True,
         cartesian: bool = False,
-    ):
+    ) -> list[npt.NDArray[np.float64]] | npt.NDArray[np.float64]:
         segments = self.get_segments(isegments=isegments, cartesian=cartesian)
 
-        k_segment_distances = []
-        previous_segment_max = 0
-        for isegment, segment in enumerate(segments):
-            k_diffs = np.diff(segment, axis=0)
-            k_diffs = np.linalg.norm(k_diffs, axis=1)
-            k_distances = np.cumsum(k_diffs)
+        k_segment_distances: list[npt.NDArray[np.float64]] = []
+        previous_segment_max: float = 0.0
+        for segment in segments:
+            k_diffs: npt.NDArray[np.float64] = np.diff(segment, axis=0)
+            k_diff_norms: npt.NDArray[np.float64] = np.linalg.norm(k_diffs, axis=1)
+            k_distances: npt.NDArray[np.float64] = np.cumsum(k_diff_norms)
 
             k_distances = np.insert(k_distances, 0, 0)
             if cumlative_across_segments:
                 k_distances = k_distances + previous_segment_max
-                previous_segment_max = k_distances[-1]
+                previous_segment_max = float(k_distances[-1])
 
             k_segment_distances.append(k_distances)
 
@@ -515,9 +561,11 @@ class KPath:
         else:
             return np.concatenate(k_segment_distances)
 
-    def get_segment_indices(self):
+    def get_segment_indices(
+        self,
+    ) -> tuple[list[npt.NDArray[np.intp]], list[int], list[int]]:
         if self._kpoints is None or len(self._kpoints) == 0:
-            return np.array([])
+            return [], [], []
 
         # Compute differences between consecutive kpoints
         k_diffs = np.diff(self._kpoints, axis=0)
