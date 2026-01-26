@@ -11,7 +11,7 @@
       "data/",
       "hack/"
     ],
-    "allowedUntypedLibraries": ["matplotlib", "numpy", "scipy", "pyvista"],
+    "allowedUntypedLibraries": ["matplotlib", "numpy", "scipy", "pyvista", "dill", "trimesh"],
     "pythonPlatform": "All",
     "pythonVersion": "3.13",
     "typeCheckingMode": "strict",

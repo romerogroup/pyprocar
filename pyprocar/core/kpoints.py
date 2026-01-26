@@ -858,7 +858,8 @@ class KPath:
 
         special_kpoints = self.get_special_kpoints(as_segments=False, cartesian=as_cartesian)
         special_kpoint_names = self.get_special_kpoint_names()
-        p.add_point_labels(special_kpoints, special_kpoint_names, **add_point_labels_args)
+        labels: list[str | int] = list(special_kpoint_names)
+        p.add_point_labels(special_kpoints, labels, **add_point_labels_args)
 
         bz_add_mesh_args["style"] = bz_add_mesh_args.get("style", "wireframe")
         bz_add_mesh_args["line_width"] = bz_add_mesh_args.get("line_width", 2.0)
