@@ -9,12 +9,13 @@
       ".github/",
       "**/_version.py",
       "data/",
-      "hack/"
+      "hack/",
+      "pyprocar/core/procarunfold/_bak.procarparser.py"
     ],
-    "allowedUntypedLibraries": ["matplotlib", "numpy", "scipy", "pyvista", "dill", "trimesh"],
+    "stubPath": "typings",
     "pythonPlatform": "All",
     "pythonVersion": "3.13",
-    "typeCheckingMode": "strict",
+    "typeCheckingMode": "all",
 
   }
   

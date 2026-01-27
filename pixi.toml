@@ -152,7 +152,8 @@ toml-lint = "taplo lint --verbose **/pixi.toml --config $PIXI_PROJECT_ROOT/.conf
 
 typos = "typos --force-exclude --config $PIXI_PROJECT_ROOT/.config/.typos.toml"
 
-typecheck = { cmd = "bash $PIXI_PROJECT_ROOT/.config/run_silent_typecheck.sh {{ file_path }} {{ verbose }}", args = [{ arg = "file_path", default = "" }, { arg = "verbose", default = "" }], description = "Run type checking (optional: file_path, --verbose|-v)" }
+typecheck-silent = { cmd = "bash $PIXI_PROJECT_ROOT/.config/run_silent_typecheck.sh {{ file_path }} {{ verbose }}", args = [{ arg = "file_path", default = "" }, { arg = "verbose", default = "" }], description = "Run type checking (optional: file_path, --verbose|-v)" }
+typecheck = { cmd = "basedpyright --project $PIXI_PROJECT_ROOT/pyrightconfig.json {{ file_path }}", args = [{ arg = "file_path", default = "" }], description = "Run type checking (optional: file_path)" }
 
 ruff-lint = { cmd = "bash $PIXI_PROJECT_ROOT/.config/run_silent_ruff_lint.sh {{ file_path }} {{ verbose }} {{ scope }}", args = [{ arg = "file_path", default = "" }, { arg = "verbose", default = "" }, { arg = "scope", default = "" }], description = "Run ruff linting (optional: file_path, --verbose|-v, --src|--tests)" }
 ruff-format = { cmd = "bash $PIXI_PROJECT_ROOT/.config/run_silent_ruff_format.sh {{ file_path }} {{ verbose }} {{ scope }}", args = [{ arg = "file_path", default = "" }, { arg = "verbose", default = "" }, { arg = "scope", default = "" }], description = "Run ruff formatting (optional: file_path, --verbose|-v, --src|--tests)" }
