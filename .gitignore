@@ -180,7 +180,7 @@ pypi_info.txt
 detailedCommitMessageTemporaryFile.txt
 
 .pixi/
-
+.ruff_cache/
 .claude/
 hack/
 skills/
