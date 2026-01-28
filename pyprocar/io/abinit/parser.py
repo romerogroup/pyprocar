@@ -1,10 +1,14 @@
 """Abinit parser orchestrator with file auto-detection."""
 
+from __future__ import annotations
+
 import logging
 import re
 from functools import cached_property
 from pathlib import Path
 from typing import Any
+
+from typing_extensions import override
 
 from pyprocar.core import DensityOfStates, ElectronicBandStructure, KPath, Structure
 from pyprocar.io.abinit.dos import AbinitDOS
@@ -29,14 +33,17 @@ class AbinitParser(BaseParser):
     structure = parser.structure
     """
 
+    _abinit_output: AbinitOutput
+    _abinit_kpoints: AbinitKpoints
+
     def __init__(
         self,
         dirpath: str | Path,
         abinit_output: str | Path | AbinitOutput | None = None,
         kpoints: str | Path | AbinitKpoints | None = None,
-        **kwargs,
+        **kwargs: Any,
     ) -> None:
-        super().__init__(dirpath=dirpath, **kwargs)
+        super().__init__(dirpath=dirpath)
         
         self._detected: dict[str, Path | list[Path] | None] = {
             "output": None,
@@ -109,7 +116,7 @@ class AbinitParser(BaseParser):
 
     def summary(self) -> dict[str, Any]:
         """Return summary of detected files and parsers."""
-        def _p(v):
+        def _p(v: Path | list[Path] | None) -> str | list[str] | None:
             if v is None:
                 return None
             if isinstance(v, list):
@@ -123,12 +130,12 @@ class AbinitParser(BaseParser):
                 "output": self._detected["output"] is not None,
                 "kpoints": self._detected["kpoints"] is not None,
                 "procar": (
-                    self._detected["procar"] is not None or 
-                    len(self._detected.get("procar_parallel", [])) > 0
+                    self._detected["procar"] is not None or
+                    bool(self._detected.get("procar_parallel"))
                 ),
                 "dos": (
                     self._detected["dos_total"] is not None or
-                    len(self._detected.get("dos_atoms", [])) > 0
+                    bool(self._detected.get("dos_atoms"))
                 ),
             },
         }
@@ -139,7 +146,7 @@ class AbinitParser(BaseParser):
         if hasattr(self, "_abinit_output"):
             return self._abinit_output
         fp = self._detected.get("output")
-        if not fp:
+        if not fp or isinstance(fp, list):
             return None
         try:
             return AbinitOutput(fp)
@@ -152,7 +159,7 @@ class AbinitParser(BaseParser):
         if hasattr(self, "_abinit_kpoints"):
             return self._abinit_kpoints
         fp = self._detected.get("kpoints")
-        if not fp:
+        if not fp or isinstance(fp, list):
             return None
         try:
             return AbinitKpoints(fp)
@@ -182,19 +189,22 @@ class AbinitParser(BaseParser):
             return None
 
     # -------- computed properties --------
-    @cached_property
+    @property
+    @override
     def version(self) -> str | None:
         if self.abinit_output:
             return self.abinit_output.version
         return None
 
-    @cached_property
+    @property
+    @override
     def version_tuple(self) -> tuple[int, ...] | None:
         if self.version:
             return tuple(int(x) for x in self.version.split("."))
         return None
 
     @property
+    @override
     def ebs(self) -> ElectronicBandStructure | None:
         if self.abinit_procar is None or self.abinit_procar.vasp_procar is None:
             user_logger.warning("Cannot create EBS: PROCAR not available")
@@ -204,22 +214,20 @@ class AbinitParser(BaseParser):
             return None
 
         procar = self.abinit_procar.vasp_procar
-        projected_phase = None
-        if hasattr(procar, 'spd_phase') and procar.spd_phase is not None:
-            projected_phase = procar._spd2projected(procar.spd_phase)
-        
+
         return ElectronicBandStructure(
             kpoints=procar.kpoints,
             bands=procar.bands,
-            projected=procar._spd2projected(procar.spd),
+            projected=procar.projected,
             fermi=self.abinit_output.fermi,
-            projected_phase=projected_phase,
+            projected_phase=procar.projected_phase,
             orbital_names=procar.orbital_names_old[:-1],
             reciprocal_lattice=self.abinit_output.reclat,
             structure=self.structure,
         )
 
     @property
+    @override
     def dos(self) -> DensityOfStates | None:
         if self.abinit_dos is None:
             return None
@@ -231,12 +239,14 @@ class AbinitParser(BaseParser):
         )
 
     @property
+    @override
     def structure(self) -> Structure | None:
         if self.abinit_output is None:
             return None
         return self.abinit_output.structure
 
     @property
+    @override
     def kpath(self) -> KPath | None:
         if self.abinit_kpoints is None:
             return None
@@ -247,9 +257,14 @@ class AbinitParser(BaseParser):
         if self.abinit_procar and self.abinit_procar.vasp_procar:
             kpoints = self.abinit_procar.vasp_procar.kpoints
 
+        # Convert ndarray to list of tuples for segment_names
+        # Note: knames is already checked for None above
+        knames = self.abinit_kpoints.knames
+        segment_names: list[tuple[str, str]] = [(str(row[0]), str(row[1])) for row in knames]
+
         return KPath(
             kpoints=kpoints,
-            segment_names=self.abinit_kpoints.knames,
+            segment_names=segment_names,
             n_grids=self.abinit_kpoints.ngrids,
             reciprocal_lattice=self.abinit_output.reclat if self.abinit_output else None,
         )
@@ -258,4 +273,7 @@ class AbinitParser(BaseParser):
     def kgrid(self) -> tuple[int, int, int] | None:
         if self.abinit_kpoints is None:
             return None
-        return self.abinit_kpoints.kgrid
+        kgrid_list = self.abinit_kpoints.kgrid
+        if kgrid_list is None or len(kgrid_list) < 3:
+            return None
+        return (kgrid_list[0], kgrid_list[1], kgrid_list[2])

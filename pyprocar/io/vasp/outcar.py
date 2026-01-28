@@ -348,11 +348,14 @@ class Outcar(Mapping[str, Any]):
     def __contains__(self, key: str) -> bool:  # pyright: ignore[reportIncompatibleMethodOverride]
         return key in self.__dict__
 
+    @override
     def __getitem__(self, key: str) -> Any:
         return self.__dict__[key]
 
+    @override
     def __iter__(self):
         return self.__dict__.__iter__()
 
+    @override
     def __len__(self):
         return len(self.__dict__)

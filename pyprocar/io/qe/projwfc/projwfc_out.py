@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 __author__ = "Logan Lang"
 __maintainer__ = "Logan Lang"
 __email__ = "lllang@mix.wvu.edu"
@@ -5,6 +7,7 @@ __date__ = "March 31, 2020"
 
 import logging
 import re
+from collections.abc import Mapping, Sequence
 from functools import cached_property
 from pathlib import Path
 from typing import Any
@@ -24,7 +27,7 @@ COORDS_PATTERN = rf"\s*({FLOAT_PATTERN})\s*({FLOAT_PATTERN})\s*({FLOAT_PATTERN})
 ORBITAL_ORDERING = OrbitalIndexer()
 
 
-def convert_lorbnum_to_letter(lorbnum):
+def convert_lorbnum_to_letter(lorbnum: int) -> str:
     """A helper method to convert the lorb number to the letter format
 
     Parameters
@@ -142,7 +145,7 @@ class ProjwfcOut:
         return len(self.atm_wfcs)
 
     @cached_property
-    def atm_wfcs(self):
+    def atm_wfcs(self) -> list[dict[str, int | str | float | None]]:
         state_pattern = re.compile(
             r"""^\s*state\s+\#\s*(?P<state_num>\d+):\s*
                 atom\s+(?P<atom_num>\d+)\s*\((?P<element>[A-Za-z]+)\s*\),\s*
@@ -157,7 +160,7 @@ class ProjwfcOut:
             re.VERBOSE | re.MULTILINE,
         )
 
-        results = []
+        results: list[dict[str, int | str | float | None]] = []
         for match in state_pattern.finditer(self.text):
             results.append(
                 {
@@ -231,19 +234,21 @@ class ProjwfcOut:
         """Number of atoms ``nat`` reported in ``projwfc.out``."""
         n_atoms = 0
         for atm_wfc in self.atm_wfcs:
-            n_atoms = max(n_atoms, atm_wfc["atom_num"])
+            atom_num = atm_wfc["atom_num"]
+            if isinstance(atom_num, int):
+                n_atoms = max(n_atoms, atom_num)
         return n_atoms
 
     @cached_property
-    def non_colinear_orbitals(self):
+    def non_colinear_orbitals(self) -> Sequence[Mapping[str, int | float]]:
         return ORBITAL_ORDERING.flat_soc_order
 
     @cached_property
-    def colinear_orbitals(self):
+    def colinear_orbitals(self) -> list[dict[str, int]]:
         return ORBITAL_ORDERING.az_to_lm_records
 
     @cached_property
-    def orbitals(self):
+    def orbitals(self) -> Sequence[Mapping[str, int | float]] | list[dict[str, int]]:
         if self.is_non_colinear:
             return self.non_colinear_orbitals
         else:
@@ -254,18 +259,20 @@ class ProjwfcOut:
         return len(self.orbitals)
 
     @cached_property
-    def wfc_mapping(self):
-        wfc_mapping = {}
+    def wfc_mapping(self) -> dict[int, dict[str, Any]]:
+        wfc_mapping: dict[int, dict[str, Any]] = {}
         for atm_wfc in self.atm_wfcs:
-            wfc_mapping[atm_wfc["state_num"]] = {
-                "element": atm_wfc["element"],
-                "wfc_num": atm_wfc["wfc_num"],
-                "atm_num": atm_wfc["atom_num"],
-                "l": atm_wfc["l"],
-                "j": atm_wfc["j"],
-                "m_j": atm_wfc["m_j"],
-                "m": atm_wfc["m"],
-            }
+            state_num = atm_wfc["state_num"]
+            if isinstance(state_num, int):
+                wfc_mapping[state_num] = {
+                    "element": atm_wfc["element"],
+                    "wfc_num": atm_wfc["wfc_num"],
+                    "atm_num": atm_wfc["atom_num"],
+                    "l": atm_wfc["l"],
+                    "j": atm_wfc["j"],
+                    "m_j": atm_wfc["m_j"],
+                    "m": atm_wfc["m"],
+                }
 
         return wfc_mapping
 

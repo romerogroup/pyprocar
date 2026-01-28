@@ -1,10 +1,14 @@
 """Elk DFT code parser orchestrator."""
 
+from __future__ import annotations
+
 import logging
 from functools import cached_property
 from pathlib import Path
 
 import numpy as np
+import numpy.typing as npt
+from typing_extensions import override
 
 from pyprocar.core import DensityOfStates, Structure
 from pyprocar.core.ebs import ElectronicBandStructure, get_ebs_from_data
@@ -173,14 +177,19 @@ class ElkParser(BaseParser):
             return self._elkin.natoms
         return 0
 
-    @cached_property
-    def reciprocal_lattice(self) -> np.ndarray:
+    @property
+    @override
+    def reciprocal_lattice(self) -> npt.NDArray[np.float64] | None:
         """Reciprocal lattice vectors."""
-        lattice = self._get_lattice()
-        return 2 * np.pi * np.linalg.inv(lattice).T
+        try:
+            lattice = self._get_lattice()
+            result: npt.NDArray[np.float64] = 2 * np.pi * np.linalg.inv(lattice).T
+            return result
+        except ValueError:
+            return None
 
     @property
-    def reclat(self) -> np.ndarray:
+    def reclat(self) -> np.ndarray | None:
         """Alias for reciprocal_lattice (for compatibility)."""
         return self.reciprocal_lattice
 
@@ -276,6 +285,7 @@ class ElkParser(BaseParser):
         return None
 
     @property
+    @override
     def structure(self) -> Structure | None:
         """Crystal structure."""
         return self._structure
@@ -302,6 +312,7 @@ class ElkParser(BaseParser):
         )
 
     @property
+    @override
     def kpath(self) -> KPath | None:
         """K-point path for band structure."""
         return self._kpath
@@ -329,8 +340,9 @@ class ElkParser(BaseParser):
 
         # Transform k-points to Cartesian if requested
         kpoints = self._bands_parser.kpoints
-        if not self._kdirect:
-            kpoints = np.dot(kpoints, self.reciprocal_lattice)
+        reclat = self.reciprocal_lattice
+        if not self._kdirect and reclat is not None:
+            kpoints = np.dot(kpoints, reclat)
 
         return get_ebs_from_data(
             kpoints=kpoints,
@@ -345,6 +357,7 @@ class ElkParser(BaseParser):
         )
 
     @property
+    @override
     def ebs(self) -> ElectronicBandStructure | None:
         """Electronic band structure."""
         return self._ebs
@@ -373,6 +386,7 @@ class ElkParser(BaseParser):
         )
 
     @property
+    @override
     def dos(self) -> DensityOfStates | None:
         """Density of states."""
         return self._dos

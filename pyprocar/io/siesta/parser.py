@@ -1,10 +1,15 @@
 """SIESTA parser adapter."""
 
+from __future__ import annotations
+
 import logging
 from functools import cached_property
 from pathlib import Path
+from typing import TypedDict, cast
 
 import numpy as np
+import numpy.typing as npt
+from typing_extensions import override
 
 from pyprocar.core import KPath, Structure
 from pyprocar.core.dos import DensityOfStates
@@ -13,6 +18,14 @@ from pyprocar.core.kpoints import normalize_kpoint_name
 from pyprocar.io.base import BaseParser
 from pyprocar.io.siesta.bands import Bands
 from pyprocar.io.siesta.fdf import FDF
+
+
+class _BandLineEntry(TypedDict):
+    """TypedDict for band line entries from FDF parser."""
+
+    npoints: int
+    kpoint: list[float]
+    label: str
 
 logger = logging.getLogger(__name__)
 user_logger = logging.getLogger("user")
@@ -107,19 +120,23 @@ class SiestaParser(BaseParser):
             return None
         return self._bands.fermi_energy
 
-    @cached_property
-    def reciprocal_lattice(self) -> np.ndarray | None:
+    @property
+    @override
+    def reciprocal_lattice(self) -> npt.NDArray[np.float64] | None:
         """Reciprocal lattice vectors."""
         if self._fdf is None:
             return None
         try:
             direct = self._fdf.lattice_vectors
-            return 2 * np.pi * np.linalg.inv(direct).T
+            # numpy cast: 2D float array inverse transposed returns 2D float array
+            result: npt.NDArray[np.float64] = 2 * np.pi * np.linalg.inv(direct).T
+            return result
         except Exception as e:
             logger.warning(f"Error computing reciprocal lattice: {e}")
             return None
 
     @property
+    @override
     def structure(self) -> Structure | None:
         """Crystal structure."""
         if self._fdf is None:
@@ -145,15 +162,19 @@ class SiestaParser(BaseParser):
             return None
 
     @property
+    @override
     def kpath(self) -> KPath | None:
         """K-point path for band structure."""
         if self._fdf is None or not self._fdf.has_band_lines:
             return None
 
         try:
-            band_lines = self._fdf.band_lines
-            if band_lines is None:
+            raw_band_lines = self._fdf.band_lines
+            if raw_band_lines is None:
                 return None
+
+            # Cast to typed structure (FDF returns list[dict] but structure is known)
+            band_lines = cast(list[_BandLineEntry], raw_band_lines)
 
             # Build segment names as list of tuples (start_name, end_name)
             segment_names: list[tuple[str, str]] = []
@@ -185,6 +206,7 @@ class SiestaParser(BaseParser):
             return None
 
     @property
+    @override
     def ebs(self) -> ElectronicBandStructure | None:
         """Electronic band structure."""
         if self._bands is None:
@@ -201,23 +223,22 @@ class SiestaParser(BaseParser):
             n_kpoints = self._bands.n_kpoints
             kpoints = np.zeros((n_kpoints, 3))  # Placeholder k-points
 
-            ebs_kwargs: dict = {
-                "kpoints": kpoints,
-                "bands": self._bands.bands,
-                "projected": None,  # Future work
-                "projected_phase": None,
-                "fermi": self.fermi,
-                "reciprocal_lattice": self.reciprocal_lattice,
-                "orbital_names": None,
-                "structure": self.structure,
-            }
-
-            return get_ebs_from_data(**ebs_kwargs)
+            return get_ebs_from_data(
+                kpoints=kpoints,
+                bands=self._bands.bands,
+                projected=None,  # Future work
+                projected_phase=None,
+                fermi=self.fermi,
+                reciprocal_lattice=self.reciprocal_lattice,
+                orbital_names=None,
+                structure=self.structure,
+            )
         except Exception as e:
             user_logger.warning(f"Error creating EBS: {e}")
             return None
 
     @property
+    @override
     def dos(self) -> DensityOfStates | None:
         """Density of states. Not yet implemented for SIESTA."""
         # Future work: Parse .PDOS.xml or .PDOS files

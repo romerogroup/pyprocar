@@ -1,15 +1,24 @@
 """FrmSrf parser adapter."""
 
+from __future__ import annotations
+
 import logging
 from functools import cached_property
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 import numpy as np
+from typing_extensions import override
 
 from pyprocar.core.ebs import ElectronicBandStructure, get_ebs_from_data
 from pyprocar.core.kpoints import KGRID_MODE, KGridInfo
 from pyprocar.io.base import BaseParser
 from pyprocar.io.frmsf.frmsf import Frmsf
+
+if TYPE_CHECKING:
+    from pyprocar.core.dos import DensityOfStates
+    from pyprocar.core.kpoints import KPath
+    from pyprocar.core.structure import Structure
 
 logger = logging.getLogger(__name__)
 user_logger = logging.getLogger("user")
@@ -29,10 +38,10 @@ class FrmsfParser(BaseParser):
     def __init__(
         self,
         dirpath: str | Path,
-        filepath: str | Path = Path("in.frmsf"),
-    ):
+        filepath: str | Path | None = None,
+    ) -> None:
         super().__init__(dirpath)
-        self._frmsf: Frmsf | None = self._initialize_extractor(filepath)
+        self._frmsf: Frmsf | None = self._initialize_extractor(filepath if filepath is not None else Path("in.frmsf"))
 
     def _initialize_extractor(self, param: str | Path | Frmsf | None) -> Frmsf | None:
         """Initialize Frmsf extractor."""
@@ -75,6 +84,7 @@ class FrmsfParser(BaseParser):
         )
 
     @property
+    @override
     def ebs(self) -> ElectronicBandStructure | None:
         """Electronic band structure (mesh-based)."""
         if self._frmsf is None:
@@ -100,13 +110,16 @@ class FrmsfParser(BaseParser):
             return None
 
     @property
-    def kpath(self):
+    @override
+    def kpath(self) -> KPath | None:
         return None
 
     @property
-    def structure(self):
+    @override
+    def structure(self) -> Structure | None:
         return None
 
     @property
-    def dos(self):
+    @override
+    def dos(self) -> DensityOfStates | None:
         return None

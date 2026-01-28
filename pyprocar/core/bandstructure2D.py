@@ -11,6 +11,8 @@ import sys
 from dataclasses import dataclass
 from typing import Any, Literal, cast
 
+from typing_extensions import override
+
 import numpy as np
 import numpy.typing as npt
 import pyvista as pv
@@ -69,8 +71,10 @@ def transform_points_to_uv(
     points: np.ndarray,
     u: np.ndarray,
     v: np.ndarray,
-    origin: np.ndarray = np.array([0, 0, 0]),
+    origin: np.ndarray | None = None,
 ):
+    if origin is None:
+        origin = np.array([0, 0, 0])
     points_shifted = points - origin
     return np.column_stack([np.dot(points_shifted, u), np.dot(points_shifted, v)])
 
@@ -103,7 +107,7 @@ def get_uv_grid_kpoints(
     uv_transformation_matrix: npt.NDArray[np.floating[Any]] | None = None,
     u: npt.NDArray[np.floating[Any]] | None = None,
     v: npt.NDArray[np.floating[Any]] | None = None,
-    normal: npt.NDArray[np.floating[Any]] | None = None,
+    _normal: npt.NDArray[np.floating[Any]] | None = None,
 ) -> npt.NDArray[np.floating[Any]]:
     if uv_transformation_matrix is None:
         if u is None or v is None:
@@ -273,13 +277,13 @@ def _merge_band_surfaces(
     # Merge surfaces
     merged: pv.PolyData = surfaces[0]
     for surface in surfaces[1:]:
-        merge_result = merged.merge(surface, merge_points=False)  # pyright: ignore[reportUnknownMemberType,reportUnknownVariableType]
+        merge_result = merged.merge(surface, merge_points=False)
         if not isinstance(merge_result, pv.PolyData):
-            raise TypeError(f"Expected PolyData from merge, got {type(merge_result)}")  # pyright: ignore[reportUnknownArgumentType]
+            raise TypeError(f"Expected PolyData from merge, got {type(merge_result)}")
         merged = merge_result
 
-    merged.point_data["spin_index"] = spin_index_array
-    merged.point_data["spin_band_index"] = spin_band_index_array
+    merged.point_data["spin_index"] = spin_index_array  # pyright: ignore[reportArgumentType]
+    merged.point_data["spin_band_index"] = spin_band_index_array  # pyright: ignore[reportArgumentType]
 
     return merged, spin_index_array, spin_band_index_array, band_spin_mask
 
@@ -444,15 +448,15 @@ def generate_band_2d_surfaces(
     k_plane_scale_transform: npt.NDArray[np.float64] = np.eye(4)
     k_plane_scale_transform[0, 0] = scale_factor
     k_plane_scale_transform[1, 1] = scale_factor
-    combined_surface.transform(k_plane_scale_transform, inplace=True)  # pyright: ignore[reportUnknownMemberType]
+    combined_surface.transform(k_plane_scale_transform, inplace=True)
 
     # Also scale individual surfaces
     for surface in band_surfaces_dict.values():
-        surface.transform(k_plane_scale_transform, inplace=True)  # pyright: ignore[reportUnknownMemberType]
+        surface.transform(k_plane_scale_transform, inplace=True)
 
     # Clean up PyVista internal arrays
-    combined_surface.point_data.pop("vtkOriginalPointIds", None)
-    combined_surface.cell_data.pop("vtkOriginalCellIds", None)
+    combined_surface.point_data.pop("vtkOriginalPointIds", None)  # pyright: ignore[reportUnknownMemberType, reportAttributeAccessIssue]
+    combined_surface.cell_data.pop("vtkOriginalCellIds", None)  # pyright: ignore[reportUnknownMemberType, reportAttributeAccessIssue]
 
     # Create PointSet with required properties
     point_set = PointSet(combined_surface.points)
@@ -464,8 +468,8 @@ def generate_band_2d_surfaces(
     )
 
     # Store band_spin_mask in field_data for later access
-    combined_surface.field_data["band_spin_surface_map"] = list(band_spin_surface_map.keys())
-    combined_surface.field_data["surface_band_spin_map"] = list(surface_band_spin_map.keys())
+    combined_surface.field_data["band_spin_surface_map"] = list(band_spin_surface_map.keys())  # pyright: ignore[reportArgumentType]
+    combined_surface.field_data["surface_band_spin_map"] = list(surface_band_spin_map.keys())  # pyright: ignore[reportArgumentType]
 
     combined_surface.set_active_scalars("spin_band_index")
 
@@ -481,6 +485,14 @@ class BandStructure2D(pv.PolyData):
 
     Use the factory methods `from_code()` or `from_ebs()` to create instances.
     """
+
+    points: npt.NDArray[np.float64]
+    faces: npt.NDArray[np.int_]
+    _band_surfaces: dict[tuple[int, int], pv.PolyData]
+    _point_set: PointSet
+    _original_ebs: ElectronicBandStructureMesh
+    _ebs: ElectronicBandStructureMesh
+    _plane_info: PlaneInfo
 
     def __init__(
         self,
@@ -500,7 +512,7 @@ class BandStructure2D(pv.PolyData):
 
         Use from_code() or from_ebs() factory methods to create instances.
         """
-        super().__init__()  # pyright: ignore[reportUnknownMemberType]
+        super().__init__()
 
         self.points = points
         self.faces = faces
@@ -525,9 +537,9 @@ class BandStructure2D(pv.PolyData):
         cell_data = cell_data if cell_data is not None else {}
         field_data = field_data if field_data is not None else {}
 
-        self.point_data.update(point_data)  # pyright: ignore[reportUnknownMemberType]
-        self.cell_data.update(cell_data)  # pyright: ignore[reportUnknownMemberType]
-        self.field_data.update(field_data)  # pyright: ignore[reportUnknownMemberType]
+        self.point_data.update(point_data)
+        self.cell_data.update(cell_data)
+        self.field_data.update(field_data)
 
         # Set default active scalars
         if "spin_band_index" in self.point_data:
@@ -571,7 +583,7 @@ class BandStructure2D(pv.PolyData):
         as_cartesian: bool = True,
         padding: int = 15,
         scale_factor: float = 2 * np.pi,
-        **kwargs: Any,
+        **_kwargs: Any,
     ) -> BandStructure2D:
         """
         Create BandStructure2D from an ElectronicBandStructureMesh.
@@ -624,7 +636,7 @@ class BandStructure2D(pv.PolyData):
 
         return cls(
             points=combined_surface.points,
-            faces=combined_surface.faces,  # pyright: ignore[reportUnknownArgumentType]
+            faces=combined_surface.faces,
             band_surfaces=band_surfaces,
             point_set=point_set,
             original_ebs=original_ebs,
@@ -836,7 +848,7 @@ class BandStructure2D(pv.PolyData):
         self,
         e_min: float,
         e_max: float,
-        supercell: list[int] | None = None,
+        _supercell: list[int] | None = None,
         scale_factor: float = 2 * np.pi,
     ) -> BrillouinZone2D:
         if self.ebs.reciprocal_lattice is None:
@@ -861,10 +873,10 @@ class BandStructure2D(pv.PolyData):
                 else:
                     point_data_array = np.insert(point_data_array, 0, values_band_values, axis=0)
             if point_data_array is not None:
-                self.point_data[name] = point_data_array
+                self.point_data[name] = point_data_array  # pyright: ignore[reportArgumentType]
         else:
             logger.debug(f"Adding scalar to surface point_data: {name}")
-            self.point_data[name] = values
+            self.point_data[name] = values  # pyright: ignore[reportArgumentType]
 
     def set_scalars(self, name: str, value: npt.NDArray[np.floating[Any]]) -> None:
         self.set_surface_point_data(name, value)
@@ -887,7 +899,7 @@ class BandStructure2D(pv.PolyData):
         else:
             self.set_scalars(name, value, **kwargs)
 
-    def compute_scalar_grid(self, scalars: npt.NDArray[np.floating[Any]], **kwargs: Any) -> npt.NDArray[np.float64]:
+    def compute_scalar_grid(self, scalars: npt.NDArray[np.floating[Any]], **_kwargs: Any) -> npt.NDArray[np.float64]:
         scalars_shape = scalars.shape
         # Convert to tuples for pyvista slice method
         normal_tuple: tuple[float, float, float] = (float(self.normal[0]), float(self.normal[1]), float(self.normal[2]))
@@ -991,7 +1003,8 @@ class BandStructure2D(pv.PolyData):
     # Serialization methods
     # -------------------------------------------------------------------------
 
-    def save(self, path: str) -> None:  # type: ignore[override] - different signature from pv.PolyData.save
+    @override
+    def save(self, path: str) -> None:  # pyright: ignore[reportIncompatibleMethodOverride] - different signature from pv.PolyData.save
         """
         Save BandStructure2D to file.
 
@@ -1031,8 +1044,8 @@ class BandStructure2D(pv.PolyData):
         band_surfaces_data: dict[tuple[int, int], dict[str, Any]] = {}
         for key, surface in self._band_surfaces.items():
             band_surfaces_data[key] = {
-                "points": np.asarray(surface.points),  # pyright: ignore[reportUnknownArgumentType]
-                "faces": np.asarray(surface.faces),  # pyright: ignore[reportUnknownArgumentType]
+                "points": np.asarray(surface.points),
+                "faces": np.asarray(surface.faces),
             }
 
         # Serialize plane_info
@@ -1051,8 +1064,8 @@ class BandStructure2D(pv.PolyData):
         }
 
         save_data: dict[str, Any] = {
-            "points": np.asarray(self.points).copy(),  # pyright: ignore[reportUnknownArgumentType]
-            "faces": np.asarray(self.faces).copy(),  # pyright: ignore[reportUnknownArgumentType]
+            "points": np.asarray(self.points).copy(),
+            "faces": np.asarray(self.faces).copy(),
             "point_data": {k: np.asarray(v) for k, v in self.point_data.items()},
             "cell_data": {k: np.asarray(v) for k, v in self.cell_data.items()},
             "field_data": dict(self.field_data),
@@ -1116,7 +1129,7 @@ class BandStructure2D(pv.PolyData):
         # Reconstruct band_surfaces
         band_surfaces: dict[tuple[int, int], pv.PolyData] = {}
         for key, surface_data in save_data["band_surfaces_data"].items():
-            surface = pv.PolyData(surface_data["points"], surface_data["faces"])  # pyright: ignore[reportUnknownArgumentType]
+            surface = pv.PolyData(surface_data["points"], surface_data["faces"])
             band_surfaces[key] = surface
 
         # Reconstruct plane_info
@@ -1136,15 +1149,15 @@ class BandStructure2D(pv.PolyData):
         )
 
         # Reconstruct via shallow copy pattern (like FermiSurface)
-        temp_polydata = pv.PolyData(save_data["points"], save_data["faces"])  # pyright: ignore[reportUnknownArgumentType]
+        temp_polydata = pv.PolyData(save_data["points"], save_data["faces"])
         for k, v in save_data["point_data"].items():
             temp_polydata.point_data[k] = v
         for k, v in save_data["cell_data"].items():
             temp_polydata.cell_data[k] = v
-        temp_polydata.field_data.update(save_data["field_data"])  # pyright: ignore[reportUnknownMemberType]
+        temp_polydata.field_data.update(save_data["field_data"])
 
         bs2d = pv.PolyData.__new__(cls)
-        bs2d.shallow_copy(temp_polydata)
+        bs2d.shallow_copy(temp_polydata)  # pyright: ignore[reportUnknownMemberType, reportAttributeAccessIssue]
 
         # Copy PyVista internal state
         for attr in ["_association_bitarray_names", "_association_complex_names"]:
@@ -1153,8 +1166,8 @@ class BandStructure2D(pv.PolyData):
 
         bs2d._band_surfaces = band_surfaces
         bs2d._point_set = point_set
-        bs2d._original_ebs = ebs
-        bs2d._ebs = ebs
+        bs2d._original_ebs = ebs  # pyright: ignore[reportAttributeAccessIssue]
+        bs2d._ebs = ebs  # pyright: ignore[reportAttributeAccessIssue]
         bs2d._plane_info = plane_info
         bs2d._ebs_cache_version = 0
         bs2d._cached_properties = {}

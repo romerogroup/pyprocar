@@ -21,7 +21,7 @@ COORDS_PATTERN = rf"\s*({FLOAT_PATTERN})\s*({FLOAT_PATTERN})\s*({FLOAT_PATTERN})
 ORBITAL_ORDERING = OrbitalIndexer()
 
 
-def convert_lorbnum_to_letter(lorbnum):
+def convert_lorbnum_to_letter(lorbnum: int) -> str:
     """A helper method to convert the lorb number to the letter format
 
     Parameters

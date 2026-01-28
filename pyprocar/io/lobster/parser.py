@@ -1,5 +1,7 @@
 """Lobster parser adapter."""
 
+from __future__ import annotations
+
 import logging
 import re
 from functools import cached_property
@@ -7,6 +9,7 @@ from pathlib import Path
 from typing import Any
 
 import numpy as np
+from typing_extensions import override
 
 from pyprocar.core import DensityOfStates, ElectronicBandStructure, KPath, Structure
 from pyprocar.io.base import BaseParser
@@ -191,6 +194,7 @@ class LobsterParser(BaseParser):
             return None
 
     @property
+    @override
     def structure(self) -> Structure | None:
         """Structure from external parser."""
         if self._structure_parser is not None:
@@ -198,6 +202,7 @@ class LobsterParser(BaseParser):
         return None
 
     @property
+    @override
     def kpath(self) -> KPath | None:
         """K-path information (QE mode only)."""
         result = self._kpath_from_qe
@@ -278,6 +283,7 @@ class LobsterParser(BaseParser):
         return None
 
     @property
+    @override
     def reciprocal_lattice(self) -> np.ndarray | None:
         """Reciprocal lattice from structure parser."""
         if self._structure_parser is not None:
@@ -287,6 +293,7 @@ class LobsterParser(BaseParser):
         return None
 
     @property
+    @override
     def ebs(self) -> ElectronicBandStructure | None:
         """Electronic band structure from FATBAND files."""
         if self._aggregated_bands is None:
@@ -309,18 +316,19 @@ class LobsterParser(BaseParser):
         )
 
     @property
+    @override
     def dos(self) -> DensityOfStates | None:
         """Density of states from DOSCAR.lobster."""
         if self._doscar is None:
             return None
 
         try:
-            total = []
+            total: list[np.ndarray] = []
             for ispin in range(self._doscar.n_spins):
                 total.append(self._doscar.total_dos[:, ispin])
 
             # Format projected DOS for DensityOfStates
-            projected = None
+            projected: list[list[list[list[np.ndarray]]]] | None = None
             if self._doscar.projected_dos is not None:
                 # Convert from (nedos, n_spins, n_atoms, n_orbitals) to expected format
                 pdos = self._doscar.projected_dos
@@ -329,9 +337,9 @@ class LobsterParser(BaseParser):
 
                 projected = []
                 for iatom in range(n_atoms):
-                    atom_data = []
+                    atom_data: list[list[np.ndarray]] = []
                     for iorb in range(n_orbitals):
-                        spin_data = []
+                        spin_data: list[np.ndarray] = []
                         for ispin in range(self._doscar.n_spins):
                             spin_data.append(pdos[:, ispin, iatom, iorb])
                         atom_data.append(spin_data)

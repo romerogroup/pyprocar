@@ -1,5 +1,7 @@
 """DOSCAR.lobster file extractor."""
 
+from __future__ import annotations
+
 import logging
 from collections.abc import Iterator, Mapping
 from functools import cached_property
@@ -7,6 +9,7 @@ from pathlib import Path
 from typing import Any
 
 import numpy as np
+from typing_extensions import override
 
 logger = logging.getLogger(__name__)
 
@@ -135,7 +138,7 @@ class DoscarLobster(Mapping[str, Any]):
         if start >= len(self._lines):
             return None
 
-        blocks = []
+        blocks: list[tuple[str, np.ndarray]] = []
         iline = start
         while iline < len(self._lines):
             # Header line contains ";" separators with orbital info
@@ -147,7 +150,7 @@ class DoscarLobster(Mapping[str, Any]):
             iline += 1
 
             # Parse data block
-            block_data = []
+            block_data: list[list[float]] = []
             for _ in range(self.nedos):
                 if iline >= len(self._lines):
                     break
@@ -199,11 +202,14 @@ class DoscarLobster(Mapping[str, Any]):
         return LOBSTER_ORBITALS.copy()
 
     # Mapping protocol
+    @override
     def __getitem__(self, key: str) -> Any:
         return getattr(self, key)
 
+    @override
     def __iter__(self) -> Iterator[str]:
         return iter(["energies", "total_dos", "projected_dos", "orbital_labels", "n_spins"])
 
+    @override
     def __len__(self) -> int:
         return 5

@@ -1,5 +1,7 @@
 """Abinit DOS file parser."""
 
+from __future__ import annotations
+
 import logging
 import re
 from functools import cached_property
@@ -13,9 +15,11 @@ logger = logging.getLogger(__name__)
 class AbinitDOS:
     """Parse Abinit DOS files (abinito_DOS_TOTAL* and abinito_DOS_AT*)."""
 
+    _dirpath: Path
+
     def __init__(self, dirpath: str | Path):
         """Initialize DOS parser from directory.
-        
+
         Parameters
         ----------
         dirpath : str | Path
@@ -164,7 +168,7 @@ class AbinitDOS:
             return None
 
         n_atoms = len(self.projected_dos_filepaths)
-        projected_list = [None] * n_atoms
+        projected_list: list[np.ndarray | None] = [None] * n_atoms
 
         for filepath in self.projected_dos_filepaths:
             dos_atom, atom_index = self._parse_projected_dos_file(filepath)

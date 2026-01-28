@@ -7,11 +7,14 @@ from pathlib import Path
 from typing import Any
 
 import numpy as np
+from typing_extensions import override
 
 logger = logging.getLogger(__name__)
 
 
 class Frmsf(Mapping[str, Any]):
+    _filepath: str | Path | None
+    _file_str: str
     """Extractor for FrmSrf (FermiSurfer) files.
 
     FrmSrf files contain band energies and projections on a uniform k-grid.
@@ -180,11 +183,14 @@ class Frmsf(Mapping[str, Any]):
         return self._parsed_data.get("projections")
 
     # Mapping protocol
+    @override
     def __getitem__(self, key: str) -> Any:
         return getattr(self, key)
 
+    @override
     def __iter__(self) -> Iterator[str]:
         return iter(["reciprocal_lattice", "bands", "kpoints", "nk_dim"])
 
+    @override
     def __len__(self) -> int:
         return 4

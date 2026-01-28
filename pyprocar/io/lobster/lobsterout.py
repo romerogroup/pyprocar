@@ -1,11 +1,15 @@
 """Lobster output file extractor."""
 
+from __future__ import annotations
+
 import logging
 import re
 from collections.abc import Iterator, Mapping
 from functools import cached_property
 from pathlib import Path
 from typing import Any
+
+from typing_extensions import override
 
 logger = logging.getLogger(__name__)
 
@@ -71,7 +75,7 @@ class LobsterOut(Mapping[str, Any]):
         """
         pattern = r"calculating FatBand for Element: (.*) Orbital\(s\):\s*(.*)"
         matches = re.findall(pattern, self.file_str)
-        result = []
+        result: list[tuple[str, list[str]]] = []
         for element, orbitals_str in matches:
             orbitals = orbitals_str.split()
             result.append((element, orbitals))
@@ -80,7 +84,7 @@ class LobsterOut(Mapping[str, Any]):
     @cached_property
     def fatband_filenames(self) -> list[str]:
         """List of expected FATBAND filenames based on lobsterout info."""
-        filenames = []
+        filenames: list[str] = []
         for element, orbitals in self.fatband_info:
             for orbital in orbitals:
                 filenames.append(f"FATBAND_{element}_{orbital}.lobster")
@@ -93,11 +97,14 @@ class LobsterOut(Mapping[str, Any]):
         return "ISPIN" in self.file_str or "spinPolarized" in self.file_str.lower()
 
     # Mapping protocol
+    @override
     def __getitem__(self, key: str) -> Any:
         return getattr(self, key)
 
+    @override
     def __iter__(self) -> Iterator[str]:
         return iter(["ions_list", "fatband_info", "fatband_filenames", "is_spin_polarized"])
 
+    @override
     def __len__(self) -> int:
         return 4

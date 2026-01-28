@@ -510,8 +510,8 @@ class KPointsCard(QECardBlock):
     def parse_crystal_b_mode(self) -> None:
         lines = self.block.splitlines()
         self.nhigh_sym = int(lines[0])
-        high_symmetry_points = []
-        line_points = []
+        high_symmetry_points: list[list[float]] = []
+        line_points: list[int] = []
         for line in lines[1:]:
             if line.strip():
                 cols = line.split()
@@ -551,7 +551,7 @@ class KPointsCard(QECardBlock):
         # Initial guess for knames
         self.knames = [str(x) for x in range(self.nhigh_sym)]
         if len(self.line_comments) == self.nhigh_sym:
-            tmp_knames = []
+            tmp_knames: list[str] = []
             for comment in self.line_comments:
                 tmp_knames.append(
                     comment.replace(",", "").replace("vlvp1d", "").replace(" ", "")

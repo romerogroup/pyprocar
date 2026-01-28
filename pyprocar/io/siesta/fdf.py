@@ -1,13 +1,16 @@
 """SIESTA FDF input file extractor."""
 
+from __future__ import annotations
+
 import logging
 import re
 from collections.abc import Iterator, Mapping
 from functools import cached_property
 from pathlib import Path
-from typing import Any, override
+from typing import Any
 
 import numpy as np
+from typing_extensions import override
 
 logger = logging.getLogger(__name__)
 
@@ -112,7 +115,7 @@ class FDF(Mapping[str, Any]):
         if raw_species is None:
             raise ValueError("No ChemicalSpeciesLabel block found in FDF file")
 
-        mapping = {}
+        mapping: dict[str, str] = {}
         for line in raw_species.split("\n"):
             parts = line.split()
             if len(parts) >= 3:
@@ -144,7 +147,7 @@ class FDF(Mapping[str, Any]):
         if raw_positions is None:
             return []
 
-        atoms = []
+        atoms: list[str] = []
         for line in raw_positions.split("\n"):
             parts = line.split()
             if len(parts) >= 4:
@@ -158,7 +161,7 @@ class FDF(Mapping[str, Any]):
         return _extract_block(self.file_str, "BandLines") is not None
 
     @cached_property
-    def band_lines(self) -> list[dict] | None:
+    def band_lines(self) -> list[dict[str, int | list[float] | str]] | None:
         """Parse BandLines block for k-path specification.
 
         Returns list of dicts with keys: npoints, kpoint, label
@@ -167,7 +170,7 @@ class FDF(Mapping[str, Any]):
         if raw_kpath is None:
             return None
 
-        result = []
+        result: list[dict[str, int | list[float] | str]] = []
         for line in raw_kpath.split("\n"):
             parts = line.split()
             if len(parts) >= 5:

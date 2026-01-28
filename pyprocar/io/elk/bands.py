@@ -1,5 +1,7 @@
 """BANDS.OUT and BANDLINES.OUT parser for Elk calculations."""
 
+from __future__ import annotations
+
 from functools import cached_property
 from pathlib import Path
 from typing import Self
@@ -117,7 +119,7 @@ class ElkBands:
     def _tick_positions(self) -> list[str]:
         """K-point positions at high-symmetry points (as strings for exact comparison)."""
         lines = self.bandlines_str.splitlines()
-        ticks = []
+        ticks: list[str] = []
         for i in range(0, len(lines), 3):
             ticks.append(lines[i].split()[0])
         return ticks
@@ -134,7 +136,7 @@ class ElkBands:
         x_points = np.array(self._x_points)
         tick_pos = np.array(self._tick_positions)
 
-        ticks = []
+        ticks: list[int] = []
         nhigh_sym = len(self._high_symmetry_points) if len(self._high_symmetry_points) > 0 else len(tick_pos)
 
         for ihs in range(1, nhigh_sym):

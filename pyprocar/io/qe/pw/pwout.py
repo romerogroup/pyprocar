@@ -504,7 +504,7 @@ class PwOut:
         """
         Returns a list of dicts with pseudopotential details.
         """
-        pseudos = []
+        pseudos: list[dict[str, Any]] = []
         pattern = re.compile(
             r"PseudoPot\.\s*#\s*(\d+)\s*for\s+(\S+)\s+read from file:\s*(\S+)\s*"
             + r"MD5 check sum:\s*([a-f0-9]+)\s*"
@@ -550,7 +550,7 @@ class PwOut:
                 {'symbol': 'O', 'valence': 6.0, 'mass': 15.9994, 'pseudo': 'O ( 1.00)'}
             ]
         """
-        species = []
+        species: list[dict[str, Any]] = []
         m = re.search(
             r"atomic species\s+valence\s+mass\s+pseudopotential\n(.*?)\n\s*\n",
             self.text,
@@ -622,9 +622,9 @@ class PwOut:
     def atomic_symbols(self) -> list[str] | None:
         if self.atomic_sites is None:
             return None
-        atomic_symbols = []
+        atomic_symbols: list[str] = []
         for atom in self.atomic_sites:
-            atomic_symbols.append(atom["symbol"])
+            atomic_symbols.append(str(atom["symbol"]))
         return atomic_symbols
 
     @cached_property
@@ -866,7 +866,7 @@ class PwOut:
             negative_rho_up, negative_rho_down,
             cpu_time_so_far_s, total_energy, estimated_scf_accuracy
         """
-        iterations = []
+        iterations: list[dict[str, Any]] = []
 
         # Regex to match each iteration block
         pattern = re.compile(

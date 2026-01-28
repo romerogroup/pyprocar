@@ -1,13 +1,16 @@
 """Abinit output file parser."""
 
+from __future__ import annotations
+
 import logging
 import re
-from collections.abc import Mapping
+from collections.abc import Iterator, Mapping
 from functools import cached_property
 from pathlib import Path
 from typing import Any
 
 import numpy as np
+from typing_extensions import override
 
 from pyprocar.core import Structure
 from pyprocar.utils import elements
@@ -16,9 +19,12 @@ logger = logging.getLogger(__name__)
 
 
 class AbinitOutput(Mapping[str, Any]):
-    """Parse the fermi energy, reciprocal lattice vectors and structure 
+    """Parse the fermi energy, reciprocal lattice vectors and structure
     from the Abinit output file.
     """
+
+    _filepath: Path | None
+    _file_str: str
 
     def __init__(self, filepath: str | Path | None = None, file_str: str = ""):
         self._filepath = Path(filepath) if filepath else None
@@ -152,14 +158,18 @@ class AbinitOutput(Mapping[str, Any]):
         return match[0] if match else None
 
     # Mapping protocol implementation
+    @override
     def __contains__(self, key: object) -> bool:
         return key in self.__dict__
 
+    @override
     def __getitem__(self, key: str) -> Any:
         return self.__dict__[key]
 
-    def __iter__(self):
+    @override
+    def __iter__(self) -> Iterator[str]:
         return self.__dict__.__iter__()
 
+    @override
     def __len__(self) -> int:
         return self.__dict__.__len__()

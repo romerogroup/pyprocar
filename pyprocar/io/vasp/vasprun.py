@@ -4,10 +4,19 @@ from collections.abc import Iterable, Iterator, Mapping
 from dataclasses import dataclass
 from functools import cached_property
 from pathlib import Path
-from typing import Any, override
+from typing import TYPE_CHECKING, Any, override
 
 import numpy as np
 from lxml import etree
+
+if TYPE_CHECKING:
+    from lxml.etree import _Element, _ElementTree  # pyright: ignore[reportPrivateUsage]
+
+    XmlElement = _Element
+    XmlElementTree = _ElementTree
+else:
+    XmlElement = etree._Element  # noqa: SLF001
+    XmlElementTree = etree._ElementTree  # noqa: SLF001
 
 logger = logging.getLogger(__name__)
 
@@ -89,7 +98,7 @@ class SCStepInfo:
     energy: EnergyInfo
 
 
-def parse_parameters_child(element: etree._Element, separator_name: str) -> dict[str, Any]:
+def parse_parameters_child(element: XmlElement, separator_name: str) -> dict[str, Any]:
     assert element is not None
 
     tag_list = element.xpath(f"//separator[@name='{separator_name}']")
@@ -98,7 +107,7 @@ def parse_parameters_child(element: etree._Element, separator_name: str) -> dict
         return {}
 
     sep_elem = tag_list[0]
-    if not isinstance(sep_elem, etree._Element):
+    if not isinstance(sep_elem, XmlElement):
         return {}
 
     params: dict[str, Any] = {}
@@ -160,7 +169,7 @@ class VaspXML(Mapping[str, Any]):
     def __init__(self, filepath: str | Path | None = "vasprun.xml", file_str: str = ""):
         self._filepath: str | Path | None = filepath
         self._file_str: str = file_str
-        self._etree: etree._ElementTree | None = None
+        self._etree: XmlElementTree | None = None
 
     @classmethod
     def from_str(cls, input: str):
@@ -188,7 +197,7 @@ class VaspXML(Mapping[str, Any]):
         return self._file_str
 
     @cached_property
-    def root(self) -> etree._Element:
+    def root(self) -> XmlElement:
         if self._file_str == "" and self.filepath is not None:
             with open(self.filepath) as f:
                 self._file_str = f.read()
@@ -207,14 +216,14 @@ class VaspXML(Mapping[str, Any]):
         return self.dos_element is not None
 
     @property
-    def dos_element(self) -> etree._Element | None:
+    def dos_element(self) -> XmlElement | None:
         # for chil in self.root
         path_list = self.root.xpath("//dos")
         assert isinstance(path_list, Iterable)
 
         element = path_list[0] if path_list else None
 
-        assert isinstance(element, etree._Element)
+        assert isinstance(element, XmlElement)
         return element[0] if element else None
 
     #     @property
@@ -227,14 +236,14 @@ class VaspXML(Mapping[str, Any]):
     #             return self.colinear_spins_dict
 
     @cached_property
-    def parameters_element(self) -> etree._Element | None:
+    def parameters_element(self) -> XmlElement | None:
         path_list = self.root.xpath("//parameters")
         assert isinstance(path_list, Iterable)
 
         element = path_list[0] if path_list else None
 
         if element is not None:
-            assert isinstance(element, etree._Element)
+            assert isinstance(element, XmlElement)
             return element[0] if len(element) > 0 else None
         return None
 
@@ -347,7 +356,7 @@ class VaspXML(Mapping[str, Any]):
         if not tag_list:
             return {}
         element = tag_list[0]
-        assert isinstance(element, etree._Element)
+        assert isinstance(element, XmlElement)
 
         for subelement in element:
             if subelement.tag == "separator":
@@ -401,7 +410,7 @@ class VaspXML(Mapping[str, Any]):
         if not tag_list:
             return {}
         element = tag_list[-1]
-        assert isinstance(element, etree._Element)
+        assert isinstance(element, XmlElement)
         params: dict[str, Any] = {}
         for subelement in element:
             name = subelement.attrib.get("name", None)
@@ -473,7 +482,7 @@ class VaspXML(Mapping[str, Any]):
             return None
 
         element = tag_list[0]
-        assert isinstance(element, etree._Element)
+        assert isinstance(element, XmlElement)
 
         params: dict[str, Any] = {}
         for subelement in element:
@@ -518,7 +527,7 @@ class VaspXML(Mapping[str, Any]):
             return None
 
         element = tag_list[0]
-        assert isinstance(element, etree._Element)
+        assert isinstance(element, XmlElement)
 
         info: dict[str, str] = {}
         for subelement in element:
@@ -546,7 +555,7 @@ class VaspXML(Mapping[str, Any]):
             return None
 
         element = tag_list[0]
-        assert isinstance(element, etree._Element)
+        assert isinstance(element, XmlElement)
 
         weights_list: list[float] = []
         kpointlist_data: list[list[float]] = []
@@ -599,7 +608,7 @@ class VaspXML(Mapping[str, Any]):
             return None
 
         element = tag_list[0]
-        assert isinstance(element, etree._Element)
+        assert isinstance(element, XmlElement)
 
         # Find the array element
         array_elem = None
@@ -654,7 +663,7 @@ class VaspXML(Mapping[str, Any]):
             return None
 
         element = tag_list[0]
-        assert isinstance(element, etree._Element)
+        assert isinstance(element, XmlElement)
 
         # Find the array element
         array_elem = None
@@ -705,7 +714,7 @@ class VaspXML(Mapping[str, Any]):
             return None
 
         element = tag_list[0]
-        assert isinstance(element, etree._Element)
+        assert isinstance(element, XmlElement)
 
         # Find the array element
         array_elem = None
@@ -751,7 +760,7 @@ class VaspXML(Mapping[str, Any]):
             return None
 
         element = tag_list[0]
-        assert isinstance(element, etree._Element)
+        assert isinstance(element, XmlElement)
 
         # Find the array element
         array_elem = None
@@ -809,7 +818,7 @@ class VaspXML(Mapping[str, Any]):
             return None
 
         element = tag_list[0]
-        assert isinstance(element, etree._Element)
+        assert isinstance(element, XmlElement)
 
         # Find the array elements - second one is the projection data
         array_elems = [child for child in element if child.tag == "array"]
@@ -872,7 +881,7 @@ class VaspXML(Mapping[str, Any]):
             return None
 
         element = tag_list[0]
-        assert isinstance(element, etree._Element)
+        assert isinstance(element, XmlElement)
 
         # Parse force vectors
         force_data: list[list[float]] = []
@@ -895,7 +904,7 @@ class VaspXML(Mapping[str, Any]):
             return None
 
         element = tag_list[0]
-        assert isinstance(element, etree._Element)
+        assert isinstance(element, XmlElement)
 
         # Parse stress tensor
         stress_data: list[list[float]] = []
@@ -915,7 +924,7 @@ class VaspXML(Mapping[str, Any]):
             return None
 
         element = tag_list[0]
-        assert isinstance(element, etree._Element)
+        assert isinstance(element, XmlElement)
 
         if element.text:
             return float(element.text.strip())
@@ -930,7 +939,7 @@ class VaspXML(Mapping[str, Any]):
             return None
 
         element = tag_list[0]
-        assert isinstance(element, etree._Element)
+        assert isinstance(element, XmlElement)
 
         if element.text:
             return float(element.text.strip())
@@ -945,7 +954,7 @@ class VaspXML(Mapping[str, Any]):
             return None
 
         element = tag_list[0]
-        assert isinstance(element, etree._Element)
+        assert isinstance(element, XmlElement)
 
         if element.text:
             return float(element.text.strip())
@@ -960,7 +969,7 @@ class VaspXML(Mapping[str, Any]):
             return None
 
         element = tag_list[0]
-        assert isinstance(element, etree._Element)
+        assert isinstance(element, XmlElement)
 
         # Parse crystal info
         basis_data: list[list[float]] = []
@@ -1004,7 +1013,7 @@ class VaspXML(Mapping[str, Any]):
             return None
 
         element = tag_list[0]
-        assert isinstance(element, etree._Element)
+        assert isinstance(element, XmlElement)
 
         name = element.attrib.get("name", "")
 
@@ -1049,7 +1058,7 @@ class VaspXML(Mapping[str, Any]):
 
         steps: list[SCStepInfo] = []
         for element in tag_list:
-            if not isinstance(element, etree._Element):
+            if not isinstance(element, XmlElement):
                 continue
 
             # Parse time info

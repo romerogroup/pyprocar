@@ -11,7 +11,8 @@ from re import Pattern
 from typing import Any, ClassVar
 
 import numpy as np
-import pandas as pd  # pyright: ignore[reportMissingTypeStubs]
+import numpy.typing as npt
+import pandas as pd
 
 from pyprocar.core.atomic_orbital_index import OrbitalIndexer
 
@@ -24,7 +25,7 @@ COORDS_PATTERN = rf"\s*({FLOAT_PATTERN})\s*({FLOAT_PATTERN})\s*({FLOAT_PATTERN})
 ORBITAL_ORDERING = OrbitalIndexer()
 
 
-def convert_lorbnum_to_letter(lorbnum):
+def convert_lorbnum_to_letter(lorbnum: int) -> str:
     """A helper method to convert the lorb number to the letter format
 
     Parameters
@@ -102,13 +103,13 @@ class ProjwfcPDOSFile:
     @property
     def data(self) -> pd.DataFrame:
         cols = self.columns
-        data_lines = []
+        data_lines: list[list[int | float]] = []
         for line in self.lines[1:]:
             if not line.strip() or line.strip().startswith("#"):
                 continue
             parts = line.split()
             try:
-                row = (
+                row: list[int | float] = (
                     [int(parts[0])] + [float(x.replace("E", "e")) for x in parts[1:]]
                     if cols and cols[0].lower() == "ik"
                     else [float(x.replace("E", "e")) for x in parts]
@@ -117,7 +118,7 @@ class ProjwfcPDOSFile:
             except ValueError:
                 continue
 
-        data_array = np.array(data_lines)
+        data_array: npt.NDArray[np.float64] = np.array(data_lines, dtype=np.float64)
         logger.debug(f"data_array: {data_array.shape}")
         # Adjust header length to match actual data length
         if data_lines:
@@ -180,7 +181,7 @@ class ProjwfcDOS:
 
     @cached_property
     def files_metadata(self) -> list[dict[str, Any]]:
-        files_metadata = []
+        files_metadata: list[dict[str, Any]] = []
         for fp in self.pdos_files:
             files_metadata.append(fp.filename_info)
         return files_metadata
@@ -200,7 +201,7 @@ class ProjwfcDOS:
         return ProjwfcPDOSFile(self.total_dos_path)
 
     @cached_property
-    def total_dos(self) -> np.ndarray | None:
+    def total_dos(self) -> npt.NDArray[np.float64] | None:
         """
         Parse the total DOS from the .pdos_tot file if available.
         Returns a numpy array or None if no file found.
@@ -209,18 +210,18 @@ class ProjwfcDOS:
         if total_dos_file is None:
             return None
 
-        dos_array = np.zeros((self.n_energies, self.n_spin_channels))
+        dos_array: npt.NDArray[np.float64] = np.zeros((self.n_energies, self.n_spin_channels))
 
         df = total_dos_file.data
         # Determine spin channels
         if self.is_spin_polarized:
             # Spin-polarized: use dosup(E) and dosdw(E) columns
-            dos_up = df["dosup(E)"].to_numpy()
-            dos_down = df["dosdw(E)"].to_numpy()
+            dos_up = np.asarray(df["dosup(E)"].values, dtype=np.float64)
+            dos_down = np.asarray(df["dosdw(E)"].values, dtype=np.float64)
             dos_array = np.hstack((dos_up, dos_down))  # shape (n_energies, 2)
         else:
             # Non-spin-polarized: only one DOS column
-            dos_total = df["dos(E)"].to_numpy()
+            dos_total = np.asarray(df["dos(E)"].values, dtype=np.float64)
             dos_array = dos_total[:, np.newaxis]  # shape (n_energies, 1)
 
         return dos_array
@@ -259,7 +260,7 @@ class ProjwfcDOS:
     # Public access: energies
     # -------------------------
     @cached_property
-    def bands(self) -> np.ndarray:
+    def bands(self) -> npt.NDArray[np.float64]:
         """
         Returns the energy grid in shape (n_kpoints, n_energies).
         - If k-resolved: n_kpoints > 1
@@ -272,45 +273,51 @@ class ProjwfcDOS:
             ik_values = df["ik"].unique()
 
             # Extract energies for each k-point
-            bands = []
+            bands_list: list[npt.NDArray[np.float64]] = []
             for ik in ik_values:
-                e_k = df.loc[df["ik"] == ik, "E"].to_numpy()
-                bands.append(e_k)
-            bands = np.array(bands)
+                e_k = np.asarray(
+                    df.loc[df["ik"] == ik, "E"].values,  # pyright: ignore[reportUnknownMemberType,reportAttributeAccessIssue]
+                    dtype=np.float64,
+                )
+                bands_list.append(e_k)
+            bands_arr: npt.NDArray[np.float64] = np.array(bands_list)
 
             # Validation check across all files
             for ifile, df_other in enumerate(self.data[1:], start=1):
                 for i, ik in enumerate(ik_values):
-                    e_k_other = df_other.loc[df_other["ik"] == ik, "E"].to_numpy()
-                    if not np.allclose(e_k_other, bands[i]):
+                    e_k_other = np.asarray(
+                        df_other.loc[df_other["ik"] == ik, "E"].values,  # pyright: ignore[reportUnknownMemberType,reportAttributeAccessIssue]
+                        dtype=np.float64,
+                    )
+                    if not np.allclose(e_k_other, bands_arr[i]):
                         filepath = self.files_metadata[ifile]["filepath"]
                         msg = f"Energies differ in file {filepath} for k-point {ik}"
                         raise ValueError(msg)
-            return bands
+            return bands_arr
 
         else:
-            ref_energies = df["E"].to_numpy()
+            ref_energies = np.asarray(df["E"].values, dtype=np.float64)
 
             # Validation check across all files
             for ifile, df_other in enumerate(self.data[1:], start=1):
-                e_other = df_other["E"].to_numpy()
+                e_other = np.asarray(df_other["E"].values, dtype=np.float64)
                 if e_other.shape != ref_energies.shape:
                     raise ValueError(f"Energies differ in file {self.pdos_files[ifile].filepath}")
 
             return ref_energies[np.newaxis, :]  # shape (1, n_energies)
 
     @cached_property
-    def energies(self) -> np.ndarray:
+    def energies(self) -> npt.NDArray[np.float64]:
         return self.bands
 
     @cached_property
     def n_energies(self) -> int:
         return self.bands.shape[1]
 
-    def _regularize_projections(self, dfs: list[pd.DataFrame]):
-        ref_energies = dfs[0]["E"].to_numpy()
+    def _regularize_projections(self, dfs: list[pd.DataFrame]) -> list[pd.DataFrame]:
+        ref_energies = np.asarray(dfs[0]["E"].values, dtype=np.float64)
         for ifile, df_other in enumerate(dfs[1:], start=1):
-            df_values = df_other.to_numpy()
+            df_values = np.asarray(df_other.values, dtype=np.float64)
             new_df_values = np.zeros((ref_energies.shape[0], df_values.shape[1]))
 
             energies = df_values[:, 0]
@@ -327,7 +334,7 @@ class ProjwfcDOS:
     # Cached property: projected_dos
     # -------------------------
     @cached_property
-    def projected_dos(self) -> np.ndarray:
+    def projected_dos(self) -> npt.NDArray[np.float64]:
         """
         Returns PDOS array with shape:
             (n_energies, n_spin_channels, n_atoms, n_orbitals)
@@ -338,10 +345,12 @@ class ProjwfcDOS:
         n_orbitals = self.n_orbitals
 
         # Initialize array
-        dos_array = np.zeros((self.n_energies, self.n_spin_channels, n_atoms, n_orbitals))
+        dos_array: npt.NDArray[np.float64] = np.zeros(
+            (self.n_energies, self.n_spin_channels, n_atoms, n_orbitals)
+        )
 
         # Group files by atom
-        atom_to_files: dict[int, list[dict]] = {a: [] for a in atom_indices}
+        atom_to_files: dict[int, list[dict[str, Any]]] = {a: [] for a in atom_indices}
         for f in self.files_metadata:
             atom_to_files[f["atom_index"]].append(f)
 
@@ -349,13 +358,14 @@ class ProjwfcDOS:
             for f in atom_to_files[atom]:
                 file_index = self.files_metadata.index(f)
                 df = self.data[file_index]
+                orbital_str: str = f["orbital"]
 
                 if self.is_non_colinear:
                     # SOC case: multiple m-components in one file
-                    orbital_l = ORBITAL_ORDERING.l_orbital_map[f["orbital"][0].lower()]
-                    j = f["j_value"]
+                    orbital_l = ORBITAL_ORDERING.l_orbital_map[orbital_str[0].lower()]
+                    j: float = f["j_value"]
                     n_m = df.shape[1] - 2  # E, LDOS, then PDOS_m...
-                    pdos_m = df.iloc[:, 2:].to_numpy()
+                    pdos_m = np.asarray(df.iloc[:, 2:].values, dtype=np.float64)
                     m_values = np.linspace(-j, j, int(2 * j + 1))
                     for mi, m in enumerate(m_values):
                         target_idx = ORBITAL_ORDERING.get_soc_index(orbital_l, j, m)
@@ -363,9 +373,9 @@ class ProjwfcDOS:
 
                 else:
                     # Collinear case
-                    orbital_l = ORBITAL_ORDERING.l_orbital_map[f["orbital"][0].lower()]
+                    orbital_l = ORBITAL_ORDERING.l_orbital_map[orbital_str[0].lower()]
 
-                    if f["orbital"] in ("s", "p", "d", "f"):
+                    if orbital_str in ("s", "p", "d", "f"):
                         # Multiple m-components in one file
                         n_pdos_cols = df.shape[1] - 2
                         if self.is_spin_polarized and self.n_spin_channels == 2:
@@ -373,7 +383,7 @@ class ProjwfcDOS:
                         else:
                             n_m = n_pdos_cols
 
-                        pdos_m = df.iloc[:, 2:].to_numpy()
+                        pdos_m = np.asarray(df.iloc[:, 2:].values, dtype=np.float64)
                         orb_names_for_l = ORBITAL_ORDERING.azimuthal_order[
                             list(ORBITAL_ORDERING.l_orbital_map.keys())[orbital_l]
                         ]
@@ -397,13 +407,13 @@ class ProjwfcDOS:
 
                     else:
                         # Single m-component per file
-                        m_idx = ORBITAL_ORDERING.az_to_flat_index[f["orbital"]]
+                        m_idx = ORBITAL_ORDERING.az_to_flat_index[orbital_str]
                         target_idx = m_idx
                         if self.is_spin_polarized and self.n_spin_channels == 2:
-                            dos_array[:, 0, ai, target_idx] = df.iloc[:, -2].to_numpy()
-                            dos_array[:, 1, ai, target_idx] = df.iloc[:, -1].to_numpy()
+                            dos_array[:, 0, ai, target_idx] = np.asarray(df.iloc[:, -2].values, dtype=np.float64)
+                            dos_array[:, 1, ai, target_idx] = np.asarray(df.iloc[:, -1].values, dtype=np.float64)
                         else:
-                            dos_array[:, 0, ai, target_idx] = df.iloc[:, -1].to_numpy()
+                            dos_array[:, 0, ai, target_idx] = np.asarray(df.iloc[:, -1].values, dtype=np.float64)
 
         return dos_array
 

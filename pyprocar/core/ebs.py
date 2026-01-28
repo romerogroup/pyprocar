@@ -24,7 +24,7 @@ import numpy.typing as npt
 import pyvista as pv
 from typing_extensions import override
 
-from pyprocar.core import kpoints
+import pyprocar.core.kpoints as kpoints
 from pyprocar.core.atomic_orbital_index import (
     PRIMARY_ORBITAL_GROUPS,
     AtomIndexer,
@@ -42,7 +42,7 @@ from pyprocar.utils import math, np_utils, physics
 from pyprocar.utils.math import np_round_to_half
 from pyprocar.utils.unfolder import Unfolder
 
-pv.global_theme.allow_empty_mesh = True  # pyright: ignore[reportUnknownMemberType, reportAttributeAccessIssue]
+pv.global_theme.allow_empty_mesh = True
 
 logger = logging.getLogger(__name__)
 user_logger = logging.getLogger("user")
@@ -148,7 +148,7 @@ def get_ebs_from_data(
     structure: Structure | None = None,
     kpath: kpoints.KPath | None = None,
     kgrid_info: kpoints.KGridInfo | None = None,
-    **kwargs: Any,
+    **_kwargs: Any,
 ) -> ElectronicBandStructure:
     if kpath is not None:
         logger.debug("Creating ElectronicBandStructurePath from EBS")
@@ -199,7 +199,7 @@ def get_ebs_from_code(
     dirpath: str,
     use_cache: bool = False,
     ebs_filename: str = "ebs.pkl",
-    **kwargs: Any,
+    **_kwargs: Any,
 ) -> ElectronicBandStructure:
     from pyprocar.io import Parser
 
@@ -209,16 +209,16 @@ def get_ebs_from_code(
     if not use_cache or not ebs_filepath.exists():
         logger.info(f"Parsing EBS calculation directory: {dirpath}")
         parser = Parser(code=code, dirpath=dirpath)
-        parser_ebs = parser.ebs  # pyright: ignore[reportUnknownMemberType, reportUnknownVariableType]
+        parser_ebs = parser.ebs
         if parser_ebs is None:
             raise ValueError("Parser returned no EBS data")
-        ebs = parser_ebs  # pyright: ignore[reportAssignmentType, reportUnknownVariableType]
-        ebs.save(ebs_filepath)  # pyright: ignore[reportUnknownMemberType]
+        ebs = parser_ebs
+        ebs.save(ebs_filepath)
     else:
         logger.info(f"Loading EBS  from picklefile: {ebs_filepath}")
         ebs = ElectronicBandStructure.load(ebs_filepath)
 
-    return ebs  # pyright: ignore[reportUnknownVariableType]
+    return ebs
 
 
 # Property key compatible with PointSet.get_property
@@ -235,10 +235,10 @@ class DifferentiablePropertyInterface(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def add_property(self, label: str, value: npt.NDArray[Any], **kwargs: Any) -> None:
+    def add_property(self, label: str, value: npt.NDArray[Any], **_kwargs: Any) -> None:
         raise NotImplementedError
 
-    def compute_band_velocity(self, **kwargs: Any) -> npt.NDArray[np.float64]:
+    def compute_band_velocity(self, **_kwargs: Any) -> npt.NDArray[np.float64]:
         logger.info("Computing band velocity")
         bands_gradient: npt.NDArray[np.float64] = self.get_property(("bands", "gradients", 1))
         return physics.calculate_band_velocity(bands_gradient)
@@ -248,7 +248,7 @@ class DifferentiablePropertyInterface(ABC):
         band_velocity = self.compute_band_velocity(**kwargs)
         return physics.calculate_band_speed(band_velocity)
 
-    def compute_avg_inv_effective_mass(self, **kwargs: Any) -> npt.NDArray[np.float64]:
+    def compute_avg_inv_effective_mass(self, **_kwargs: Any) -> npt.NDArray[np.float64]:
         logger.info("Computing average inverse effective mass")
         bands_hessian: npt.NDArray[np.float64] = self.get_property(("bands", "gradients", 2))
         return physics.calculate_avg_inv_effective_mass(bands_hessian)
@@ -276,11 +276,11 @@ class PyvistaInterface(ABC):
 
     def mesh_as_cart(self) -> None:
         if self._mesh is not None and self.kpoints_cartesian is not None:
-            self._mesh.points = self.kpoints_cartesian  # pyright: ignore[reportUnknownMemberType]
+            self._mesh.points = self.kpoints_cartesian
 
     def mesh_as_frac(self) -> None:
         if self._mesh is not None:
-            self._mesh.points = self.kpoints  # pyright: ignore[reportUnknownMemberType]
+            self._mesh.points = self.kpoints
 
     @abstractmethod
     def to_mesh(
@@ -293,13 +293,13 @@ class PyvistaInterface(ABC):
 
     def set_mesh_scalar(self, name: str, scalar: npt.NDArray[Any]) -> None:
         if self._mesh is not None:
-            self._mesh.point_data[name] = scalar  # pyright: ignore[reportUnknownMemberType]
-            self._mesh.set_active_scalars(name)  # pyright: ignore[reportUnknownMemberType]
+            self._mesh.point_data[name] = scalar
+            self._mesh.set_active_scalars(name)  # pyright: ignore[reportUnknownMemberType, reportAttributeAccessIssue]
 
     def set_mesh_vector(self, name: str, vector: npt.NDArray[Any]) -> None:
         if self._mesh is not None:
-            self._mesh.point_data[name] = vector  # pyright: ignore[reportUnknownMemberType]
-            self._mesh.set_active_vectors(name)  # pyright: ignore[reportUnknownMemberType]
+            self._mesh.point_data[name] = vector
+            self._mesh.set_active_vectors(name)  # pyright: ignore[reportUnknownMemberType, reportAttributeAccessIssue]
 
 
 class ElectronicBandStructure(PointSet, PyvistaInterface):
@@ -326,6 +326,13 @@ class ElectronicBandStructure(PointSet, PyvistaInterface):
     shifted_to_fermi : bool, optional
          Boolean to determine if the fermi energy is shifted, defaults to False
     """
+
+    _fermi: float
+    _orbital_names: list[str] | None
+    _reciprocal_lattice: kpoints.RECIPROCAL_LATTICE_DTYPE | None
+    _shifted_to_fermi: bool
+    _structure: Structure | None
+    _mesh: pv.PolyData | pv.StructuredGrid | Any | None
 
     def __init__(
         self,
@@ -366,7 +373,8 @@ class ElectronicBandStructure(PointSet, PyvistaInterface):
 
         logger.info("___ElectronicBandStructure initialization complete___")
 
-    def __str__(self):
+    @override
+    def __str__(self) -> str:
         ret = "\n Electronic Band Structure     \n"
         ret += "============================\n"
         ret += f"Total number of kpoints   = {self.n_kpoints}\n"
@@ -391,6 +399,7 @@ class ElectronicBandStructure(PointSet, PyvistaInterface):
 
         return ret
 
+    @override
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, ElectronicBandStructure):
             return False
@@ -426,8 +435,9 @@ class ElectronicBandStructure(PointSet, PyvistaInterface):
         return is_ebs_equal
 
     @property
+    @override
     def kpoints(self) -> npt.NDArray[np.float64]:
-        return self._points  # pyright: ignore[reportReturnType]
+        return self._points
 
     @property
     def bands(self) -> Property | None:
@@ -569,6 +579,7 @@ class ElectronicBandStructure(PointSet, PyvistaInterface):
             return spin_projection_names[:1]
 
     @property
+    @override
     def kpoints_cartesian(self) -> npt.NDArray[np.float64] | None:
         return kpoints.reduced_to_cartesian(self.kpoints, self.reciprocal_lattice)
 
@@ -729,7 +740,7 @@ class ElectronicBandStructure(PointSet, PyvistaInterface):
         return self.compute_projected_sum_spin_texture()
 
     @override
-    def get_property(  # pyright: ignore[reportIncompatibleMethodOverride]
+    def get_property(
         self, key: PropertyKey | None = None, **kwargs: Any
     ) -> Property | npt.NDArray[np.float64] | None:
         prop_name, _ = self._extract_key(key)  # pyright: ignore[reportArgumentType]
@@ -737,13 +748,14 @@ class ElectronicBandStructure(PointSet, PyvistaInterface):
             computed = self.compute_property(prop_name, **kwargs)
             if computed is not None:
                 # compute_property now returns Property objects
-                if isinstance(computed, Property):  # pyright: ignore[reportUnnecessaryIsInstance]
+                if isinstance(computed, Property):
                     self.property_store[prop_name] = computed
-                elif isinstance(computed, np.ndarray):  # pyright: ignore[reportUnnecessaryIsInstance]
+                elif isinstance(computed, np.ndarray):
                     # Fallback for any methods still returning arrays
                     self.add_property(name=prop_name, value=computed)
-        return super().get_property(key)  # pyright: ignore[reportArgumentType, reportUnknownParameterType]
+        return super().get_property(key)
 
+    @override
     def to_mesh(  # pyright: ignore[reportIncompatibleMethodOverride]
         self,
         scalars: tuple[str, npt.NDArray[Any]] | None = None,
@@ -754,13 +766,13 @@ class ElectronicBandStructure(PointSet, PyvistaInterface):
             mesh_points = self.kpoints_cartesian
         else:
             mesh_points = self.kpoints
-        mesh = pv.PointSet(mesh_points)  # pyright: ignore[reportUnknownMemberType, reportAttributeAccessIssue, reportUnknownVariableType]
+        mesh = pv.PointSet(mesh_points)
         if scalars is not None:
             self.set_mesh_scalar(*scalars)
         if vectors is not None:
             self.set_mesh_vector(*vectors)
-        self._mesh = mesh  # pyright: ignore[reportUnknownVariableType]
-        return mesh  # pyright: ignore[reportUnknownVariableType]
+        self._mesh = mesh
+        return mesh
 
     def compute_property(self, name: str, **kwargs: Any) -> Property | None:
         if name == "ebs_ipr":
@@ -779,7 +791,7 @@ class ElectronicBandStructure(PointSet, PyvistaInterface):
         norm_mode: str | EBSNormMode | None = "raw",
         label: str = "IPR",
         name: str = "ebs_ipr",
-        **kwargs: Any,
+        **_kwargs: Any,
     ) -> Property:
         """Compute Inverse Participation Ratio (IPR).
 
@@ -834,7 +846,7 @@ class ElectronicBandStructure(PointSet, PyvistaInterface):
         norm_mode: str | EBSNormMode | None = "raw",
         label: str = "Partial IPR",
         name: str = "ebs_ipr_atom",
-        **kwargs: Any,
+        **_kwargs: Any,
     ) -> Property:
         """Compute atom-resolved partial Inverse Participation Ratio.
 
@@ -975,7 +987,7 @@ class ElectronicBandStructure(PointSet, PyvistaInterface):
         self,
         label: str = "Spin Texture",
         name: str = "spin_texture",
-        **kwargs: Any,
+        **_kwargs: Any,
     ) -> Property:
         """Compute spin texture for non-collinear calculations.
 
@@ -1150,9 +1162,9 @@ class ElectronicBandStructure(PointSet, PyvistaInterface):
         # sum over orbitals
         ret: npt.NDArray[np.float64] = np.sum(
             projected_array[:, :, :, :, orbitals_arr], axis=-1
-        )  # pyright: ignore[reportAssignmentType]
+        )
         # sum over atoms
-        ret = np.sum(ret[:, :, :, atoms_arr], axis=-1)  # pyright: ignore[reportAssignmentType]
+        ret = np.sum(ret[:, :, :, atoms_arr], axis=-1)
         # sum over spins only in non collinear and reshaping for consistency (nkpoints, nbands, nspins)
         # in non-mag, non-colin nspin=1, in colin nspin=2
         if self.is_non_collinear and sum_noncolinear:
@@ -1198,23 +1210,23 @@ class ElectronicBandStructure(PointSet, PyvistaInterface):
         elif mode is EBSNormMode.TOTAL_PROJECTION:
             return self.normalize_total_projection(values_array, **kwargs)
         else:
-            raise ValueError(f"Unknown normalization mode: {mode}")
+            raise ValueError(f"Unknown normalization mode: {mode}")  # pyright: ignore[reportUnreachable]
 
     def normalize_max(
         self,
         values_array: npt.NDArray[np.float64],
-        **kwargs: Any,
+        **_kwargs: Any,
     ) -> npt.NDArray[np.float64]:
         """Normalize by maximum value across all k-points and bands."""
         max_val = np.max(np.abs(values_array))
         if max_val < NUMERICAL_STABILITY_FACTOR:
             return values_array
-        return values_array / max_val  # pyright: ignore[reportReturnType]
+        return values_array / max_val
 
     def normalize_total(
         self,
         values_array: npt.NDArray[np.float64],
-        **kwargs: Any,
+        **_kwargs: Any,
     ) -> npt.NDArray[np.float64]:
         """Normalize by total projection at each k-point/band."""
         total = self.ebs_sum()  # Sum over all atoms/orbitals
@@ -1223,7 +1235,7 @@ class ElectronicBandStructure(PointSet, PyvistaInterface):
             NUMERICAL_STABILITY_FACTOR,
             total,
         )
-        return values_array / total  # pyright: ignore[reportReturnType]
+        return values_array / total
 
     def normalize_total_projection(
         self,
@@ -1231,7 +1243,7 @@ class ElectronicBandStructure(PointSet, PyvistaInterface):
         atoms: list[int] | None = None,
         orbitals: list[int] | None = None,
         spins: list[int] | None = None,
-        **kwargs: Any,
+        **_kwargs: Any,
     ) -> npt.NDArray[np.float64]:
         """Normalize by total projection with same selection."""
         total = self.ebs_sum(atoms=atoms, orbitals=orbitals, spins=spins)
@@ -1240,7 +1252,7 @@ class ElectronicBandStructure(PointSet, PyvistaInterface):
             NUMERICAL_STABILITY_FACTOR,
             total,
         )
-        return values_array / total  # pyright: ignore[reportReturnType]
+        return values_array / total
 
     def _get_projection_label_builder(self) -> ProjectionLabelBuilder:
         """Lazily initialize and return the projection label builder."""
@@ -1708,7 +1720,7 @@ class ElectronicBandStructure(PointSet, PyvistaInterface):
             structure=struct,
         )
 
-        ebs.add_property(name="weights", value=uf.weights)  # pyright: ignore[reportUnknownMemberType]
+        ebs.add_property(name="weights", value=uf.weights)
         return ebs
 
     def save(self, path: Path) -> None:
@@ -1717,8 +1729,10 @@ class ElectronicBandStructure(PointSet, PyvistaInterface):
 
     @classmethod
     def load(cls, path: Path) -> ElectronicBandStructure:
+        from typing import cast
+
         serializer = get_serializer(path)
-        ebs: ElectronicBandStructure = serializer.load(path)
+        ebs = cast(ElectronicBandStructure, serializer.load(path))
         return ebs
 
     @classmethod
@@ -1801,6 +1815,9 @@ class ElectronicBandStructure(PointSet, PyvistaInterface):
 class ElectronicBandStructurePath(  # pyright: ignore[reportIncompatibleMethodOverride]
     ElectronicBandStructure, DifferentiablePropertyInterface, PyvistaInterface
 ):
+    _kpath: kpoints.KPath
+    _mesh: pv.PolyData | pv.StructuredGrid | Any | None
+
     def __init__(self, kpath: kpoints.KPath, **kwargs: Any) -> None:
         super().__init__(**kwargs)
         self._kpath = kpath
@@ -1809,11 +1826,13 @@ class ElectronicBandStructurePath(  # pyright: ignore[reportIncompatibleMethodOv
         logger.info("___ElectronicBandStructurePath initialization complete___")
 
     @classmethod
+    @override
     def from_code(
         cls, code: str, dirpath: str, use_cache: bool = False, ebs_filename: str = "ebs.pkl"
     ) -> ElectronicBandStructure:
         return get_ebs_from_code(code, dirpath, use_cache, ebs_filename)
 
+    @override
     def __str__(self) -> str:
         ret = super().__str__()
         ret += "\nKPath: \n"
@@ -1861,6 +1880,7 @@ class ElectronicBandStructurePath(  # pyright: ignore[reportIncompatibleMethodOv
         return self.kpath.special_kpoint_names
 
     @property
+    @override
     def bands(self) -> Property | None:
         """Return bands as a Property with kpath metadata.
 
@@ -1896,9 +1916,10 @@ class ElectronicBandStructurePath(  # pyright: ignore[reportIncompatibleMethodOv
             point_set=prop.point_set,
             units=prop.units,
             label=prop.label,
-            metadata=merged_metadata,
+            metadata=merged_metadata,  # pyright: ignore[reportArgumentType]
         )
 
+    @override
     def to_mesh(  # pyright: ignore[reportIncompatibleMethodOverride]
         self,
         scalars: tuple[str, npt.NDArray[Any]] | None = None,
@@ -1910,14 +1931,15 @@ class ElectronicBandStructurePath(  # pyright: ignore[reportIncompatibleMethodOv
             mesh_points = self.kpoints_cartesian
         else:
             mesh_points = self.kpoints
-        mesh = pv.PointSet(mesh_points)  # pyright: ignore[reportUnknownMemberType, reportAttributeAccessIssue, reportUnknownVariableType]
+        mesh = pv.PointSet(mesh_points)
         if scalars is not None:
             self.set_mesh_scalar(*scalars)
         if vectors is not None:
             self.set_mesh_vector(*vectors)
-        self._mesh = mesh  # pyright: ignore[reportUnknownVariableType]
-        return mesh  # pyright: ignore[reportUnknownVariableType]
+        self._mesh = mesh
+        return mesh
 
+    @override
     def gradient_func(  # pyright: ignore[reportIncompatibleMethodOverride]
         self, points: npt.NDArray[np.float64], values: npt.NDArray[np.float64]
     ) -> npt.NDArray[np.float64]:
@@ -1942,6 +1964,7 @@ class ElectronicBandStructurePath(  # pyright: ignore[reportIncompatibleMethodOv
         gradients = gradients * physics.METER_ANGSTROM
         return gradients
 
+    @override
     def compute_property(  # pyright: ignore[reportIncompatibleMethodOverride]
         self, name: str, **kwargs: Any
     ) -> Property | npt.NDArray[np.float64] | None:
@@ -2150,7 +2173,7 @@ class ElectronicBandStructurePath(  # pyright: ignore[reportIncompatibleMethodOv
         n_spins = bands_array.shape[2]
         n_kpoints = kdistances.shape[0]
         k_indices = self.kpath.segment_indices
-        blocks = pv.MultiBlock()  # pyright: ignore[reportUnknownMemberType, reportAttributeAccessIssue, reportUnknownVariableType]
+        blocks = pv.MultiBlock()
 
         if as_segments:
             for indices in k_indices:
@@ -2163,7 +2186,7 @@ class ElectronicBandStructurePath(  # pyright: ignore[reportIncompatibleMethodOv
                         band_kpoints = np.zeros(shape=(n_indices, 3))
                         band_kpoints[:, 0] = k_segment_distances
                         band_kpoints[:, 1] = band_values
-                        blocks.append(pv.PolyData(band_kpoints))  # pyright: ignore[reportUnknownMemberType]
+                        blocks.append(pv.PolyData(band_kpoints))
         else:
             for iband in range(n_bands):
                 for ispin in range(n_spins):
@@ -2173,8 +2196,8 @@ class ElectronicBandStructurePath(  # pyright: ignore[reportIncompatibleMethodOv
                     band_kpoints[:, 0] = k_distances
                     band_kpoints[:, 1] = band_values
                     band_kpoints[:, 2] = ispin
-                    blocks.append(pv.PolyData(band_kpoints))  # pyright: ignore[reportUnknownMemberType]
-        return blocks  # pyright: ignore[reportUnknownVariableType]
+                    blocks.append(pv.PolyData(band_kpoints))
+        return blocks
 
     def plot(
         self,
@@ -2194,7 +2217,7 @@ class ElectronicBandStructurePath(  # pyright: ignore[reportIncompatibleMethodOv
         special_kpoint_positions = self.kpath.get_special_kpoints(as_segments=False, cartesian=True)
 
         p = pv.Plotter()
-        p.add_mesh(self, **kwargs)  # pyright: ignore[reportArgumentType]
+        p.add_mesh(self, **kwargs)
         p.add_point_labels(special_kpoint_positions, special_kpoint_names, **add_point_labels_args)
 
         bz_add_mesh_args["style"] = bz_add_mesh_args.get("style", "wireframe")
@@ -2230,8 +2253,8 @@ def is_plane_aligned_with_reciprocal_lattice(
 def edge_diff_ramp(
     vector: npt.NDArray[np.float64],
     pad_width: tuple[int, int],
-    iaxis: int,
-    kwargs: dict[str, Any],
+    _iaxis: int,
+    _kwargs: dict[str, Any],
 ) -> npt.NDArray[np.float64] | None:
     if pad_width[0] == 0 or pad_width[1] == 0:
         return vector
@@ -2254,6 +2277,9 @@ def edge_diff_ramp(
 class ElectronicBandStructureMesh(  # pyright: ignore[reportIncompatibleMethodOverride]
     ElectronicBandStructure, DifferentiablePropertyInterface, PyvistaInterface
 ):
+    _kgrid_info: kpoints.KGridInfo
+    _mesh: pv.PolyData | pv.StructuredGrid | Any | None
+
     def __init__(self, kgrid_info: kpoints.KGridInfo, **kwargs: Any) -> None:
         super(ElectronicBandStructureMesh, self).__init__(**kwargs)
 
@@ -2276,12 +2302,14 @@ class ElectronicBandStructureMesh(  # pyright: ignore[reportIncompatibleMethodOv
             raise ValueError("n_kpoints must be equal to np.prod(kgrid) (number of kpoints)")
 
     @classmethod
+    @override
     def from_code(
         cls, code: str, dirpath: str, use_cache: bool = False, ebs_filename: str = "ebs.pkl"
     ) -> ElectronicBandStructure:
         ebs = get_ebs_from_code(code, dirpath, use_cache, ebs_filename)
         return ebs
 
+    @override
     def __str__(self) -> str:
         ret = super().__str__()
         ret += "\nKGrid: \n"
@@ -2361,12 +2389,13 @@ class ElectronicBandStructureMesh(  # pyright: ignore[reportIncompatibleMethodOv
 
         return is_2d
 
+    @override
     def to_mesh(  # pyright: ignore[reportIncompatibleMethodOverride]
         self,
         scalars: tuple[str, npt.NDArray[Any]] | None = None,
         vectors: tuple[str, npt.NDArray[Any]] | None = None,
         as_cartesian: bool = True,
-    ) -> pv.StructuredGrid:  # pyright: ignore[reportReturnType]
+    ) -> pv.StructuredGrid:
         """Explicitly returns a new PyVista StructuredGrid."""
         # This can be the same logic as the `grid` property,
         # but without caching if a fresh object is desired.
@@ -2425,6 +2454,7 @@ class ElectronicBandStructureMesh(  # pyright: ignore[reportIncompatibleMethodOv
         logger.debug(f"Property mesh shape: {property_mesh.shape}")
         return property_mesh
 
+    @override
     def compute_property(  # pyright: ignore[reportIncompatibleMethodOverride]
         self, name: str, **kwargs: Any
     ) -> Property | npt.NDArray[np.float64] | None:
@@ -2488,7 +2518,7 @@ class ElectronicBandStructureMesh(  # pyright: ignore[reportIncompatibleMethodOv
         return ebs
 
     def expand_kpoints_to_supercell_by_axes(
-        self, axes_to_expand: list[int] | None = None, inplace: bool = True, **kwargs: Any
+        self, axes_to_expand: list[int] | None = None, inplace: bool = True, **_kwargs: Any
     ) -> ElectronicBandStructureMesh:
         if axes_to_expand is None:
             axes_to_expand = [0, 1, 2]
@@ -2520,14 +2550,14 @@ class ElectronicBandStructureMesh(  # pyright: ignore[reportIncompatibleMethodOv
                 initial_array = value_array[:n_init_points]
                 new_values = np.concatenate([value_array, initial_array], axis=0)
 
-                ebs.add_property(name=prop_name, value=new_values, return_gradient_order=gradient_order)
+                ebs.add_property(name=prop_name, value=new_values, return_gradient_order=gradient_order)  # pyright: ignore[reportCallIssue] - TODO: fix parameter name
 
         ebs.update_points(new_kpoints)
         ebs._mesh = ebs.to_mesh()
         return ebs
 
     def interpolate(
-        self, interpolation_factor: int = 2, inplace: bool = True, order: str = "F"
+        self, interpolation_factor: int = 2, inplace: bool = True, _order: str = "F"
     ) -> ElectronicBandStructureMesh:
         """Interpolates the band structure meshes and properties using FFT interpolation.
         Creates and returns a new ElectronicBandStructure instance with interpolated data.
@@ -2677,28 +2707,29 @@ class ElectronicBandStructureMesh(  # pyright: ignore[reportIncompatibleMethodOv
         **kwargs: Any,
     ) -> Any:  # Returns pv.PolyData which is not fully typed
         mesh = self.to_mesh(scalars=scalars, vectors=vectors, as_cartesian=as_cartesian)
-        sliced = mesh.slice(normal=normal, origin=origin, **kwargs)  # pyright: ignore[reportUnknownMemberType, reportUnknownVariableType]
+        sliced = mesh.slice(normal=normal, origin=origin, **kwargs)
 
         if not as_cartesian:
             if self.reciprocal_lattice is None:
                 raise ValueError("reciprocal_lattice not set")
             transform_matrix: npt.NDArray[np.float64] = np.eye(4)
             transform_matrix[:3, :3] = self.reciprocal_lattice.T
-            sliced = sliced.transform(transform_matrix, inplace=False)  # pyright: ignore[reportUnknownMemberType, reportUnknownVariableType]
+            sliced = sliced.transform(transform_matrix, inplace=False)
 
-        n_slice_points: int = len(sliced.points)  # pyright: ignore[reportUnknownMemberType, reportUnknownArgumentType]
+        n_slice_points: int = len(sliced.points)
         if n_slice_points == 0:
             error_message = "No points found in the slice."
             error_message += "Look at the coordinates in cartesian or fractional space to see if origin is right."
             raise ValueError(error_message)
         if scalars is not None:
             scalar_name, _ = scalars
-            sliced.set_active_scalars(scalar_name)  # pyright: ignore[reportUnknownMemberType]
+            sliced.set_active_scalars(scalar_name)
         if vectors is not None:
             vector_name, _ = vectors
-            sliced.set_active_vectors(vector_name)  # pyright: ignore[reportUnknownMemberType]
-        return sliced  # pyright: ignore[reportUnknownVariableType]
+            sliced.set_active_vectors(vector_name)
+        return sliced
 
+    @override
     def gradient_func(  # pyright: ignore[reportIncompatibleMethodOverride]
         self, points: npt.NDArray[np.float64], values: npt.NDArray[np.float64], **kwargs: Any
     ) -> npt.NDArray[np.float64]:
@@ -2726,9 +2757,9 @@ def ibz2fbz(
     ebs: ElectronicBandStructure,
     rotations: npt.NDArray[np.float64] | None = None,
     kgrid_info: kpoints.KGridInfo | None = None,
-    decimals: int = 4,
+    _decimals: int = 4,
     inplace: bool = True,
-    **kwargs: Any,
+    **_kwargs: Any,
 ) -> ElectronicBandStructure:
     """Applys symmetry operations to the kpoints, bands, and projections
 
@@ -2790,7 +2821,7 @@ def ibz2fbz(
     if kgrid_info is not None:
         # Handle both KGRID_MODE enum and string for kgrid_mode
         kgrid_mode = kgrid_info.kgrid_mode
-        kgrid_mode_value = kgrid_mode.value if isinstance(kgrid_mode, kpoints.KGRID_MODE) else str(kgrid_mode)  # pyright: ignore[reportUnnecessaryIsInstance]
+        kgrid_mode_value = kgrid_mode.value if isinstance(kgrid_mode, kpoints.KGRID_MODE) else str(kgrid_mode)
         kpoints_grid_points = kpoints.get_kpoints_from_kgrid(
             kgrid=kgrid_info.kgrid, kshift=kgrid_info.kshift, mode=kgrid_mode_value
         )
@@ -2825,7 +2856,7 @@ def ibz2fbz(
             prop[calc_name, gradient_order] = value_array[unique_indices]
 
     ebs.update_points(new_kpoints)
-    return sort_by_kpoints(ebs, inplace=inplace, **kwargs)
+    return sort_by_kpoints(ebs, inplace=inplace)
 
 
 def sort_by_kpoints(

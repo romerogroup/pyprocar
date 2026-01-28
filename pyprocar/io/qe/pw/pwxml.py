@@ -9,7 +9,7 @@ import logging
 import xml.etree.ElementTree as ET
 from functools import cached_property
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 import numpy as np
 
@@ -95,7 +95,7 @@ class PwXML:
         """
 
     @cached_property
-    def spin_orbit_orbitals(self) -> list[dict]:
+    def spin_orbit_orbitals(self) -> list[dict[str, str | float]]:
         return [
             {"l": "s", "j": 0.5, "m": -0.5},
             {"l": "s", "j": 0.5, "m": 0.5},
@@ -118,8 +118,8 @@ class PwXML:
         ]
 
     @cached_property
-    def colinear_orbitals(self) -> list[dict]:
-        orbitals = [
+    def colinear_orbitals(self) -> list[dict[str, int]]:
+        orbitals: list[dict[str, int]] = [
             {"l": 0, "m": 1},
             {"l": 1, "m": 3},
             {"l": 1, "m": 1},
@@ -148,7 +148,7 @@ class PwXML:
         ]
 
     @cached_property
-    def orbitals(self) -> list[dict]:
+    def orbitals(self) -> list[dict[str, str | float]] | list[dict[str, int]]:
         if self.is_non_colinear:
             return self.spin_orbit_orbitals
         else:
@@ -156,10 +156,10 @@ class PwXML:
 
     @cached_property
     def orbital_names(self) -> list[str]:
-        orbital_names = []
+        orbital_names: list[str] = []
         if self.is_non_colinear:
             for orbital in self.spin_orbit_orbitals:
-                tmp_name = ""
+                tmp_name: str = ""
                 for key, value in orbital.items():
                     # print(key,value)
                     if key != "l":
@@ -234,7 +234,7 @@ class PwXML:
     def reciprocal_lattice(self) -> np.ndarray | None:
         match = self.root.findall(".//output/basis_set/reciprocal_lattice")
         if match:
-            lattice_vectors = []
+            lattice_vectors: list[np.ndarray] = []
             for acell in match[0]:
                 if acell.text is not None:
                     lattice_vectors.append(np.array(acell.text.split(), dtype=float))
@@ -245,7 +245,7 @@ class PwXML:
     def direct_lattice(self) -> np.ndarray | None:
         match = self.root.findall(".//output/atomic_structure/cell")
         if match:
-            lattice_vectors = []
+            lattice_vectors: list[np.ndarray] = []
             for acell in match[0]:
                 if acell.text is not None:
                     lattice_vectors.append(np.array(acell.text.split(), dtype=float))
@@ -355,7 +355,7 @@ class PwXML:
 
         raw_bands = np.zeros(shape=(self.n_kpoints, raw_n_bands))
         raw_occupations = np.zeros(shape=(self.n_kpoints, raw_n_bands))
-        kpoints = np.zeros(shape=(self.n_kpoints, 3))
+        kpoints: np.ndarray = np.zeros(shape=(self.n_kpoints, 3))
         weights = np.zeros(shape=(self.n_kpoints))
         bands = np.zeros(shape=(self.n_kpoints, self.n_bands, self.n_spin))
         occupations = np.zeros(shape=(self.n_kpoints, self.n_bands, self.n_spin))
@@ -395,8 +395,11 @@ class PwXML:
 
         if self.alat is not None and self.reciprocal_lattice is not None:
             kpoints = kpoints * (2 * np.pi / self.alat)
-            # Converting back to crystal basis
-            kpoints = np.around(kpoints.dot(np.linalg.inv(self.reciprocal_lattice)), decimals=8)
+            # Converting back to crystal basis - cast to ensure type is known
+            kpoints = cast(
+                np.ndarray,
+                np.around(kpoints.dot(np.linalg.inv(self.reciprocal_lattice)), decimals=8),
+            )
         # print(bands[:,:,0].shape)
         # print(bands[:,self.n_bands:,1].shape)
         # print(np.allclose(bands[...,0], bands[...,1]))

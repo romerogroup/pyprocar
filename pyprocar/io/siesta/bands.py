@@ -95,7 +95,7 @@ class Bands(Mapping[str, Any]):
         # Flatten all data after header (lines 0-3)
         raw_data = " ".join(self._lines[4:]).split()
 
-        k_distances = []
+        k_distances: list[float] = []
         bands = np.zeros((self.n_kpoints, self.n_bands, self.n_spins))
 
         idx = 0

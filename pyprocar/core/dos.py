@@ -10,6 +10,8 @@ from enum import Enum
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, cast
 
+from typing_extensions import override
+
 import numpy as np
 import numpy.typing as npt
 from scipy import integrate
@@ -64,17 +66,17 @@ def get_dos_from_code(
     if not use_cache or not dos_filepath.exists():
         logger.info("Parsing DOS calculation directory: %s", dirpath)
         parser = Parser(code=code, dirpath=dirpath)
-        parser_dos = parser.dos  # pyright: ignore[reportUnknownMemberType, reportUnknownVariableType]
+        parser_dos = parser.dos
         if parser_dos is None:
             raise ValueError("Parser returned no DOS data")
-        dos = parser_dos  # pyright: ignore[reportAssignmentType, reportUnknownVariableType]
+        dos = parser_dos
         if use_cache:
-            dos.save(dos_filepath)  # pyright: ignore[reportUnknownMemberType]
+            dos.save(dos_filepath)
     else:
         logger.info("Loading DOS from cache: %s", dos_filepath)
         dos = DensityOfStates.load(dos_filepath)
 
-    return dos  # pyright: ignore[reportUnknownVariableType]
+    return dos
 
 
 def _finite_difference_gradient(
@@ -336,7 +338,7 @@ class NormMode(Enum):
         elif mode == cls.MAGNETIZATION:
             return "magnetization"
         else:
-            raise ValueError(f"Invalid normalization mode: {mode}")
+            raise ValueError(f"Invalid normalization mode: {mode}")  # pyright: ignore[reportUnreachable]
 
     @classmethod
     def get_mode_units(cls, mode: str | NormMode, input_units: str) -> str:
@@ -354,7 +356,7 @@ class NormMode(Enum):
         elif mode == cls.INTEGRAL or mode == cls.ELECTRONS:
             return "states"
         else:
-            return ""
+            return ""  # pyright: ignore[reportUnreachable]
 
     @classmethod
     def get_mode_prefix(cls, mode: str | NormMode) -> str:
@@ -376,7 +378,7 @@ class NormMode(Enum):
         elif mode == cls.ELECTRONS:
             return "N_Electrons-Normed"
         else:
-            return ""
+            return ""  # pyright: ignore[reportUnreachable]
 
     @classmethod
     def get_mode_footnote(cls, mode: str | NormMode) -> str:
@@ -398,7 +400,7 @@ class NormMode(Enum):
         elif mode == cls.ELECTRONS:
             return "Normalization is by the N_Electrons DoS"
         else:
-            return ""
+            return ""  # pyright: ignore[reportUnreachable]
 
 
 GradientFunc = Callable[[npt.NDArray[np.float64], npt.NDArray[np.float64]], npt.NDArray[np.float64]]
@@ -406,6 +408,12 @@ GradientFunc = Callable[[npt.NDArray[np.float64], npt.NDArray[np.float64]], npt.
 
 class DensityOfStates(PointSet):
     """Data-centric representation of a density of states calculation."""
+
+    _fermi: float
+    _orbital_names: list[str] | None
+    _structure: Structure | None
+    _points: npt.NDArray[np.float64]
+    _points_label: str | None
 
     def __init__(
         self,
@@ -469,6 +477,7 @@ class DensityOfStates(PointSet):
     # ------------------------------------------------------------------
     # Basic representation & comparisons
     # ------------------------------------------------------------------
+    @override
     def __repr__(self) -> str:  # pragma: no cover - repr is for debugging only
         cls = self.__class__.__name__
         return (
@@ -477,6 +486,7 @@ class DensityOfStates(PointSet):
             f"fermi={self.fermi:.4f})"
         )
 
+    @override
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, DensityOfStates):
             return False
@@ -512,10 +522,12 @@ class DensityOfStates(PointSet):
     # ------------------------------------------------------------------
 
     @property
+    @override
     def points_label(self) -> str:
         return "Energy"
 
     @property
+    @override
     def points_units(self) -> str:
         return "eV"
 
@@ -918,12 +930,12 @@ class DensityOfStates(PointSet):
         elif mode is NormMode.ELECTRONS:
             return self.normalize_electrons(values_array=values_array, **kwargs)
         else:
-            raise ValueError(
+            raise ValueError(  # pyright: ignore[reportUnreachable]
                 f"Normalization mode {mode} not found. Likely forgot to add it to the normalize method."
             )
 
     def normalize_total(
-        self, values_array: npt.NDArray[np.float64], **kwargs: Any
+        self, values_array: npt.NDArray[np.float64], **_kwargs: Any
     ) -> npt.NDArray[np.float64]:
         """Normalize the values array by the total DOS.
 
@@ -956,7 +968,7 @@ class DensityOfStates(PointSet):
         return normalized_array
 
     def normalize_max(
-        self, values_array: npt.NDArray[np.float64], **kwargs: Any
+        self, values_array: npt.NDArray[np.float64], **_kwargs: Any
     ) -> npt.NDArray[np.float64]:
         """Normalize the values array by the max of the values.
 
@@ -985,7 +997,7 @@ class DensityOfStates(PointSet):
         return normalized_array
 
     def normalize_integral(
-        self, values_array: npt.NDArray[np.float64], **kwargs: Any
+        self, values_array: npt.NDArray[np.float64], **_kwargs: Any
     ) -> npt.NDArray[np.float64]:
         """Normalize the values array by the integral of the values.
 
@@ -1013,7 +1025,7 @@ class DensityOfStates(PointSet):
         return normalized_array
 
     def normalize_electrons(
-        self, values_array: npt.NDArray[np.float64], **kwargs: Any
+        self, values_array: npt.NDArray[np.float64], **_kwargs: Any
     ) -> npt.NDArray[np.float64]:
         """Normalize the values array by the number of electrons.
 
@@ -1032,7 +1044,7 @@ class DensityOfStates(PointSet):
         sigma: float = 1.25,
         fill_value: float = 0.0,
         eps: float = 0.001,
-        **kwargs: Any,
+        **_kwargs: Any,
     ) -> npt.NDArray[np.float64]:
         """Normalize the values array by the magnetization.
 
@@ -1074,7 +1086,7 @@ class DensityOfStates(PointSet):
         sigma: float = 1.25,
         fill_value: float = 0.0,
         eps: float = 0.001,
-        **kwargs: Any,
+        **_kwargs: Any,
     ) -> npt.NDArray[np.float64]:
         """Normalize the values array by the spin magnitude.
 
@@ -1112,7 +1124,7 @@ class DensityOfStates(PointSet):
         return normalized_array
 
     def normalize_total_projection(
-        self, values_array: npt.NDArray[np.float64], **kwargs: Any
+        self, values_array: npt.NDArray[np.float64], **_kwargs: Any
     ) -> npt.NDArray[np.float64]:
         """Normalize the values array by the projected total DOS.
 
@@ -1783,6 +1795,7 @@ class DensityOfStates(PointSet):
     # Property store bridge
     # ------------------------------------------------------------------
 
+    @override
     def get_property(
         self,
         key: str | tuple[str, int] | tuple[str, str] | tuple[str, str, int] | None = None,
@@ -1888,7 +1901,8 @@ class DensityOfStates(PointSet):
 
         return None
 
-    def add_property(
+    @override
+    def add_property(  # pyright: ignore[reportIncompatibleMethodOverride]
         self,
         property: Property | None = None,
         name: str | None = None,
@@ -2008,7 +2022,7 @@ class DensityOfStates(PointSet):
 
         path = Path(path)
         serializer = get_serializer(path)
-        return serializer.load(path)
+        return cast(DensityOfStates, serializer.load(path))
 
     # ------------------------------------------------------------------
     # Internal helpers

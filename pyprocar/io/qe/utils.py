@@ -13,7 +13,7 @@ def _strip_qe_comments(text: str) -> str:
     - In cards, lines with first non-space character "#" are comments
     - Trailing whitespace-only lines are dropped
     """
-    cleaned_lines = []
+    cleaned_lines: list[str] = []
     for line in text.splitlines():
         # Skip card-style comment lines beginning with '#'
         if line.lstrip().startswith("#"):

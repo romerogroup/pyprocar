@@ -8,11 +8,14 @@ from pathlib import Path
 from typing import Any
 
 import numpy as np
+from typing_extensions import override
 
 logger = logging.getLogger(__name__)
 
 
 class Bxsf(Mapping[str, Any]):
+    _filepath: str | Path | None
+    _file_str: str
     """Extractor for BXSF (XCrySDen Band Structure Format) files.
 
     BXSF files contain band energies on a uniform k-grid for Fermi surface visualization.
@@ -127,7 +130,7 @@ class Bxsf(Mapping[str, Any]):
         kpoints_full = np.zeros(shape=[nkfs_total, 3])
 
         # Track which k-point indices are boundary (to be removed)
-        boundary_indices = []
+        boundary_indices: list[int] = []
 
         # Parse each band block
         for band_label, band_block in zip(band_labels, band_blocks, strict=True):
@@ -177,11 +180,14 @@ class Bxsf(Mapping[str, Any]):
         return self._parsed_data["kpoints"]
 
     # Mapping protocol
+    @override
     def __getitem__(self, key: str) -> Any:
         return getattr(self, key)
 
+    @override
     def __iter__(self) -> Iterator[str]:
         return iter(["fermi_energy", "reciprocal_lattice", "bands", "kpoints", "nk_dim"])
 
+    @override
     def __len__(self) -> int:
         return 5

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 __author__ = "Logan Lang"
 __maintainer__ = "Logan Lang"
 __email__ = "lllangWV@gmail.com"
@@ -12,6 +14,8 @@ from pathlib import Path
 from typing import Any
 
 import numpy as np
+import numpy.typing as npt
+from typing_extensions import override
 
 from pyprocar.core import (
     DensityOfStates,
@@ -21,6 +25,7 @@ from pyprocar.core import (
     get_ebs_from_data,
 )
 from pyprocar.core import kpoints as k_utils
+from pyprocar.io.base import BaseParser
 from pyprocar.io.qe.projwfc import AtomicProjXML, ProjwfcDOS, ProjwfcIn, ProjwfcOut
 from pyprocar.io.qe.pw import PwIn, PwOut, PwXML
 from pyprocar.utils.units import AU_TO_ANG, HARTREE_TO_EV
@@ -29,7 +34,7 @@ logger = logging.getLogger(__name__)
 user_logger = logging.getLogger("user")
 
 
-class QEParser:
+class QEParser(BaseParser):
     """Auto-detects Quantum ESPRESSO files in a directory and exposes
     lazy parser properties and computed objects (EBS, DOS, Structure).
 
@@ -43,6 +48,7 @@ class QEParser:
     """
 
     def __init__(self, dirpath: str | Path) -> None:
+        super().__init__(dirpath)
         self._dirpath: Path = Path(dirpath)
         self._detected: dict[str, Path | list[Path] | None] = {
             "scf_in": None,
@@ -171,7 +177,7 @@ class QEParser:
             log_msg += f"{k}: "
             if isinstance(v, dict):
                 log_msg += f"{k}:\n"
-                for k2, v2 in v.items():
+                for k2, v2 in v.items():  # pyright: ignore[reportUnknownVariableType]
                     log_msg += f"  {k2}: {v2}\n"
             else:
                 log_msg += f"{v}\n"
@@ -182,7 +188,7 @@ class QEParser:
             log_msg += f"{k}: "
             if isinstance(v, dict):
                 log_msg += f"{k}:\n"
-                for k2, v2 in v.items():
+                for k2, v2 in v.items():  # pyright: ignore[reportUnknownVariableType]
                     log_msg += f"  {k2}: {v2}\n"
             else:
                 log_msg += f"{v}\n"
@@ -388,14 +394,15 @@ class QEParser:
 
         scaled_kpoints_cart = kpoints_cart * (2 * np.pi / self.alat)
 
-        kpoints = np.around(
+        kpoints: npt.NDArray[np.float64] = np.around(  # pyright: ignore[reportUnknownVariableType]
             scaled_kpoints_cart.dot(np.linalg.inv(self.reciprocal_lattice)), decimals=8
         )
 
-        return kpoints
+        return kpoints  # pyright: ignore[reportUnknownVariableType]
 
     @cached_property
-    def kpath(self) -> KPath | None:
+    @override
+    def kpath(self) -> KPath | None:  # pyright: ignore[reportIncompatibleMethodOverride]
         if self.is_dos_calculation:
             logger.info("No kpath found for DOS calculation")
             return None
@@ -414,7 +421,11 @@ class QEParser:
 
         high_sym_points = kpoints_card.high_symmetry_points
 
-        kticks = find_high_symmetry_ticks(self._raw_kpoints, high_sym_points)
+        if high_sym_points is None:
+            logger.info("No high symmetry points found")
+            return None
+
+        kticks: list[int] = find_high_symmetry_ticks(self._raw_kpoints, high_sym_points)
         self._kticks = kticks
         new_kpoints = insert_continuous_points(self._raw_kpoints, kticks)
         new_kpoints = np.array(new_kpoints)
@@ -527,7 +538,8 @@ class QEParser:
         return None
 
     @cached_property
-    def reciprocal_lattice(self) -> np.ndarray | None:
+    @override
+    def reciprocal_lattice(self) -> npt.NDArray[np.float64] | None:  # pyright: ignore[reportIncompatibleMethodOverride]
         reciprocal_lattice: np.ndarray | None = None
         if self.pw_xml is not None and self.pw_xml.reciprocal_lattice is not None:
             logger.info("Parsing reciprocal lattice from pw.xml")
@@ -606,7 +618,7 @@ class QEParser:
             return None
         logger.info("Parsing spd phase from atomic_proj.xml and projwfc.out")
 
-        wfc_mapping = self.projwfc_out.wfc_mapping
+        wfc_mapping: dict[int, dict[str, Any]] = self.projwfc_out.wfc_mapping
         projections = self.atomic_proj_xml.projections
         orbitals = self.projwfc_out.orbitals
 
@@ -628,19 +640,19 @@ class QEParser:
         )
 
         for state_num, wfc_info in wfc_mapping.items():
-            atm_num = wfc_info["atm_num"]
-            orbital_l = wfc_info["l"]
-            j = wfc_info["j"]
-            m_j = wfc_info["m_j"]
-            m = wfc_info["m"]
+            atm_num: int = wfc_info["atm_num"]
+            orbital_l: int = wfc_info["l"]
+            j: float | None = wfc_info["j"]
+            m_j: float | None = wfc_info["m_j"]
+            m: int | None = wfc_info["m"]
 
-            orbital_dict = (
+            orbital_dict: dict[str, int | float | None] = (
                 {"l": orbital_l, "j": j, "m_j": m_j}
                 if m_j is not None
                 else {"l": orbital_l, "m": m}
             )
 
-            i_orbital = orbitals.index(orbital_dict)
+            i_orbital = orbitals.index(orbital_dict)  # pyright: ignore[reportArgumentType]
             i_atom = atm_num - 1
             i_state = state_num - 1
             pyprocar_projections_phase[..., i_atom, i_orbital] += projections[..., i_state]
@@ -670,14 +682,18 @@ class QEParser:
     def orbitals(self) -> list[dict[str, int | float]] | None:
         if self.projwfc_out is not None:
             logger.info("Parsing orbitals from projwfc.out")
-            return [dict(orb) for orb in self.projwfc_out.orbitals]
+            result: list[dict[str, int | float]] = []
+            for orb in self.projwfc_out.orbitals:
+                result.append(dict(orb))
+            return result
         else:
             logger.info("No orbitals found in projwfc.out")
             return None
 
     # -------- computed properties --------
     @cached_property
-    def ebs(self) -> ElectronicBandStructure | None:
+    @override
+    def ebs(self) -> ElectronicBandStructure | None:  # pyright: ignore[reportIncompatibleMethodOverride]
         if self.fermi is None:
             user_logger.warning("Cannot create EBS without fermi energy")
             return None
@@ -695,7 +711,7 @@ class QEParser:
             reciprocal_lattice=self.reciprocal_lattice,
             orbital_names=orbital_names,
             structure=self.structure,
-            kpath=self.kpath,  # pyright: ignore[reportArgumentType]
+            kpath=self.kpath,
             kgrid_info=self.kgrid_info,
         )
 
@@ -754,7 +770,8 @@ class QEParser:
         return is_dos_calculation
 
     @cached_property
-    def dos(self) -> DensityOfStates | None:
+    @override
+    def dos(self) -> DensityOfStates | None:  # pyright: ignore[reportIncompatibleMethodOverride]
         if self.projwfc_dos is None:
             user_logger.warning("No PDOS files found for DOS construction")
             return None
@@ -830,7 +847,8 @@ class QEParser:
             return None
 
     @cached_property
-    def structure(self) -> Structure | None:
+    @override
+    def structure(self) -> Structure | None:  # pyright: ignore[reportIncompatibleMethodOverride]
         return Structure(
             atoms=self.species,
             lattice=self.direct_lattice,
@@ -839,7 +857,11 @@ class QEParser:
         )
 
 
-def find_high_symmetry_ticks(raw_kpoints, high_sym_points, atol=1e-4):
+def find_high_symmetry_ticks(
+    raw_kpoints: npt.NDArray[np.float64] | None,
+    high_sym_points: npt.NDArray[np.float64] | list[npt.NDArray[np.float64]],
+    atol: float = 1e-4,
+) -> list[int]:
     """
     Find indices of raw_kpoints that match high_sym_points within tolerance.
     Each high_sym_point is matched once, in order, to the first raw_kpoint
@@ -865,7 +887,7 @@ def find_high_symmetry_ticks(raw_kpoints, high_sym_points, atol=1e-4):
     # Compute pairwise distances (N, M)
     dists = np.linalg.norm(raw_kpoints[:, None, :] - high_sym_points[None, :, :], axis=-1)
 
-    kticks = []
+    kticks: list[int] = []
     last_idx = -1  # ensure we move forward along raw_kpoints
 
     for j in range(dists.shape[1]):

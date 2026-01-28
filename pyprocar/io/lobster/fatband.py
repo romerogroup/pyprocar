@@ -1,5 +1,7 @@
 """FATBAND file extractor."""
 
+from __future__ import annotations
+
 import logging
 import re
 from collections.abc import Iterator, Mapping
@@ -8,6 +10,7 @@ from pathlib import Path
 from typing import Any
 
 import numpy as np
+from typing_extensions import override
 
 logger = logging.getLogger(__name__)
 
@@ -163,11 +166,14 @@ class Fatband(Mapping[str, Any]):
         return self._parsed_data["projections"]
 
     # Mapping protocol
+    @override
     def __getitem__(self, key: str) -> Any:
         return getattr(self, key)
 
+    @override
     def __iter__(self) -> Iterator[str]:
         return iter(["element", "orbital", "kpoints", "bands", "projections", "n_spins"])
 
+    @override
     def __len__(self) -> int:
         return 6

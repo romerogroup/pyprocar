@@ -1,9 +1,12 @@
+from __future__ import annotations
+
 import logging
 from functools import cached_property
 from pathlib import Path
 from typing import overload
 
 import numpy as np
+from typing_extensions import override
 
 from pyprocar.core import DensityOfStates, ElectronicBandStructure, Structure, get_ebs_from_data
 from pyprocar.core import kpoints as kpoints_core
@@ -31,7 +34,7 @@ class VaspParser(BaseParser):
         poscar: str | Path | Poscar | None = "POSCAR",
         doscar: str | Path | Doscar | None = "DOSCAR",
         vasprun: str | Path | VaspXML | None = "vasprun.xml",
-    ):
+    ) -> None:
         super().__init__(dirpath)
 
         # Initialize parser objects by checking if they are already parser instances or paths
@@ -168,26 +171,30 @@ class VaspParser(BaseParser):
         )
 
     @cached_property
-    def version(self) -> str | None:
+    @override
+    def version(self) -> str | None:  # pyright: ignore[reportIncompatibleMethodOverride]
+        version: str | None = None
         if self.outcar:
             version = self.outcar.version
         elif self.vasprun:
-            version = self.vasprun.version
-        else:
-            version = None
-        return version
+            version = self.vasprun.version  # pyright: ignore[reportUnknownMemberType,reportUnknownVariableType,reportAttributeAccessIssue]
+        return version  # pyright: ignore[reportUnknownVariableType]
 
     @cached_property
-    def version_tuple(self) -> tuple[int, int, int]:
+    @override
+    def version_tuple(self) -> tuple[int, ...] | None:  # pyright: ignore[reportIncompatibleMethodOverride]
+        if self.version is None:
+            return None
         return tuple(int(x) for x in self.version.split("."))
 
     @cached_property
     def is_spin_polarized(self) -> bool:
         if self.vasprun:
-            return self.vasprun.is_spin_polarized
+            return self.vasprun.is_spin_polarized  # pyright: ignore[reportUnknownMemberType,reportUnknownVariableType,reportAttributeAccessIssue]
         return False
 
     @property
+    @override
     def kpath(self) -> kpoints_core.KPath | None:
         if self.kpoints is None:
             return None
@@ -199,9 +206,9 @@ class VaspParser(BaseParser):
 
         return kpoints_core.KPath(
             kpoints=kpoints,
-            segment_names=self.kpoints.knames,
+            segment_names=list(self.kpoints.knames),
             n_grids=self.kpoints.ngrids,
-            reciprocal_lattice=self.outcar.reciprocal_lattice,
+            reciprocal_lattice=self.outcar.reciprocal_lattice if self.outcar else None,
         )
 
     @property
@@ -220,16 +227,16 @@ class VaspParser(BaseParser):
 
     @cached_property
     def fermi(self) -> float | None:
+        fermi: float | None = None
         if self.outcar is not None:
             fermi = self.outcar.fermi
         elif self.vasprun is not None:
-            fermi = self.vasprun.fermi
-        else:
-            fermi = None
+            fermi = self.vasprun.fermi  # pyright: ignore[reportUnknownMemberType,reportUnknownVariableType,reportAttributeAccessIssue]
 
-        return fermi
+        return fermi  # pyright: ignore[reportUnknownVariableType]
 
     @property
+    @override
     def ebs(self) -> ElectronicBandStructure | None:
         if self.procar is None:
             logger.warning(
@@ -257,10 +264,11 @@ class VaspParser(BaseParser):
 
     @cached_property
     def energies(self) -> np.ndarray | None:
+        energies: np.ndarray | None = None
         if self.vasprun is not None and self.vasprun.has_dos:
             energies = self.vasprun.dos_energies
 
-        elif self.doscar is not None and self.doscar.has_dos:
+        elif self.doscar is not None and self.doscar.has_dos:  # pyright: ignore[reportUnknownMemberType,reportAttributeAccessIssue]
             energies = self.doscar.energies
         else:
             return None
@@ -271,29 +279,35 @@ class VaspParser(BaseParser):
 
     @cached_property
     def total_dos(self) -> np.ndarray | None:
+        total_dos: np.ndarray | None = None
         if self.vasprun is not None and self.vasprun.has_dos:
             total_dos = self.vasprun.total  # shape: (n_energies, n_spins)
-        elif self.doscar is not None and self.doscar.has_dos:
-            total_dos = self.doscar.total
+        elif self.doscar is not None and self.doscar.has_dos:  # pyright: ignore[reportUnknownMemberType,reportAttributeAccessIssue]
+            total_dos = self.doscar.total  # pyright: ignore[reportUnknownMemberType,reportUnknownVariableType,reportAttributeAccessIssue]
         else:
             return None
 
-        total_dos = total_dos[..., np.newaxis] if len(total_dos.shape) == 1 else total_dos
-        return total_dos
+        if total_dos is None:
+            return None
+        total_dos = total_dos[..., np.newaxis] if len(total_dos.shape) == 1 else total_dos  # pyright: ignore[reportUnknownArgumentType,reportUnknownMemberType,reportUnknownVariableType]
+        return total_dos  # pyright: ignore[reportUnknownVariableType]
 
     @cached_property
     def projected_dos(self) -> np.ndarray | None:
         if self.vasprun is not None and self.vasprun.has_dos:
             logger.info("Using vasprun projected dos")
             return self.vasprun.partial  # shape: (n_energies, n_spins, n_atoms, n_orbitals)
-        elif self.doscar is not None and self.doscar.has_dos:
+        elif self.doscar is not None and self.doscar.has_dos:  # pyright: ignore[reportUnknownMemberType,reportAttributeAccessIssue]
             logger.info("Using doscar projected dos")
             return self.doscar.projected_dos
         else:
             return None
 
     @property
+    @override
     def dos(self) -> DensityOfStates | None:
+        if self.energies is None or self.total_dos is None or self.fermi is None:
+            return None
         try:
             dos = DensityOfStates(
                 energies=self.energies,
@@ -313,6 +327,7 @@ class VaspParser(BaseParser):
         return dos
 
     @property
+    @override
     def structure(self) -> Structure | None:
         if self.poscar is not None:
             logger.info("Using poscar structure")
@@ -321,11 +336,17 @@ class VaspParser(BaseParser):
             lattice = self.poscar.lattice
         elif self.vasprun is not None:
             logger.info("Using vasprun structure")
-            atoms = self.vasprun.atoms
-            fractional_coordinates = self.vasprun.initial_structure.positions
-            lattice = self.vasprun.initial_structure.crystal.basis
-
-            return self.vasprun
+            atoms = self.vasprun.atoms  # pyright: ignore[reportUnknownMemberType,reportUnknownVariableType,reportAttributeAccessIssue]
+            initial_structure = self.vasprun.initial_structure
+            if initial_structure is None:
+                logger.warning("vasprun initial_structure is None")
+                return None
+            fractional_coordinates = initial_structure.positions
+            crystal = initial_structure.crystal
+            if crystal is None or crystal.basis is None:  # pyright: ignore[reportUnnecessaryComparison]
+                logger.warning("vasprun initial_structure.crystal is None")
+                return None
+            lattice = crystal.basis
         else:
             logger.warning(
                 "Issue with poscar file. Either it was not found or there is an issue with the parser"
@@ -335,7 +356,7 @@ class VaspParser(BaseParser):
         rotations = self.outcar.rotations if self.outcar else None
 
         return Structure(
-            atoms=atoms,
+            atoms=atoms,  # pyright: ignore[reportUnknownArgumentType]
             fractional_coordinates=fractional_coordinates,
             lattice=lattice,
             rotations=rotations,

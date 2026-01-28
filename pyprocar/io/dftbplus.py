@@ -1,44 +1,63 @@
 #!/usr/bin/env python
+"""DFTB+ parser for PyProcar."""
+
+from __future__ import annotations
 
 import os
 import re
+from collections import OrderedDict
+from pathlib import Path
+from typing import TYPE_CHECKING
 
 import numpy as np
+import numpy.typing as npt
+from typing_extensions import override
 
 from pyprocar.io.base import BaseParser
 from pyprocar.pyposcar.poscar import Poscar
 
+if TYPE_CHECKING:
+    from pyprocar.core.dos import DensityOfStates
+    from pyprocar.core.ebs import ElectronicBandStructure
+    from pyprocar.core.kpoints import KPath
+    from pyprocar.core.structure import Structure
+
 
 class DFTB_evec:
-    def __init__(self, filename, verbose):  # , normalize=False):
+    """Class to parse DFTB+ eigenvector files."""
+
+    verbose: bool
+    filename: str | Path
+    f: str | None
+    Nkpoints: int
+    Nbands: int
+    Natoms: int
+    Norbs: int
+    spd: npt.NDArray[np.float64] | npt.NDArray[np.complex128] | None
+    orbDict: OrderedDict[str, int] | None
+    is_complex: bool
+    bands: npt.NDArray[np.float64] | None
+    kpoints: npt.NDArray[np.float64] | None
+    occupancies: npt.NDArray[np.float64] | None
+
+    def __init__(self, filename: str | Path, verbose: bool = False) -> None:
         self.verbose = verbose
         self.filename = filename
-        # self.normalized = normalize # do I need to normalize the eigenvectors?
         self.f = None  # the whole file
-        self.Nkpoints = None  # How many k-points
-        self.Nbands = None  # How many bands
-        self.Natoms = None
-        self.Norbs = None  # How many orbitals (as a whole quantity, not by
-        # atom)
-        self.spd = None  # np.array[Nkpoints, Nbands, Natoms, Norbs], it
-        # can be complex or real. The Mulliken part is
-        # ignored.
-        self.orbDict = None  # An ordered dictionary assigning an index to
-        # each orbital
-        self.is_complex = None  # Is the data complex or real?
-        # Nkpoint=1->real, Nkpoints>1->complex
-        self.bands = None  # The eigenvalues (Nkpoints, Nbands) to be set
-        # externally, the file with eigenvectors doesn't
-        # have this information
-        self.kpoints = None  # The kpoints (Nkpoints, 4), the last entry
-        # are the weights. They are expected to be in
-        # direct coordinates. Needs to be set
-        # externally.
-        self.occupancies = None  # (Nkpoints, Nbands), to be set externally.
+        self.Nkpoints = 0  # How many k-points
+        self.Nbands = 0  # How many bands
+        self.Natoms = 0
+        self.Norbs = 0  # How many orbitals (as a whole quantity, not by atom)
+        self.spd = None  # np.array[Nkpoints, Nbands, Natoms, Norbs]
+        self.orbDict = None  # An ordered dictionary assigning an index to each orbital
+        self.is_complex = False  # Is the data complex or real?
+        self.bands = None  # The eigenvalues (Nkpoints, Nbands)
+        self.kpoints = None  # The kpoints (Nkpoints, 4)
+        self.occupancies = None  # (Nkpoints, Nbands)
 
-    def load(self):
-        self.f = open(self.filename)
-        self.f = self.f.read()
+    def load(self) -> None:
+        with open(self.filename) as file_handle:
+            self.f = file_handle.read()
         # The syntax is different whether there are more than one k-point
         # or just a single k-point.
         klist = re.findall(r"K-point\s*:\s*\d+", self.f)
@@ -68,7 +87,7 @@ class DFTB_evec:
             print("Number of bands: ", self.Nbands)
 
         # How many atoms?
-        atoms_list = re.findall("^\s*\d+\s+\w+", self.f, re.MULTILINE)
+        atoms_list = re.findall(r"^\s*\d+\s+\w+", self.f, re.MULTILINE)
         atoms_list = set(atoms_list)
         self.Natoms = len(atoms_list)
         if self.verbose:
@@ -85,13 +104,10 @@ class DFTB_evec:
         # also, we are going to create a Dict of the unique orbitals,
         # assigning them an index to store them into the arrays.
         # We are faking an orderedSet by using an orderedDict
-        from collections import OrderedDict
-
-        d = OrderedDict.fromkeys(orb_list)
-        i = 0
-        for key in d.keys():
-            d[key] = i
-            i = i + 1
+        d: OrderedDict[str, int] = OrderedDict()
+        for orb in orb_list:
+            if orb not in d:
+                d[orb] = len(d)
         self.orbDict = d
         if self.verbose:
             print("Set of orbitals and their indexes: ", self.orbDict)
@@ -126,8 +142,7 @@ class DFTB_evec:
                 ")",
             )
         # temporal storage of the evecs as an Nkpoint*Nbands array
-        evecs = np.array(evecs)
-        evecs.shape = (self.Nkpoints, self.Nbands)
+        evecs = np.array(evecs).reshape((self.Nkpoints, self.Nbands))
 
         # going to parse all the data, iterating over:
         # Kpoints->Bands->Atoms (and assignation at orbital level)
@@ -152,16 +167,17 @@ class DFTB_evec:
                     orbIndexes = [self.orbDict[x] for x in orbNames]
                     # print(orbNames, orbIndexes)
                     # getting all the floating numbers
-                    numbers = re.findall("[\-0-9]+\.\d+", atom)
-                    numbers = np.array(numbers, dtype=float)
+                    numbers_list = re.findall(r"[\-0-9]+\.\d+", atom)
+                    numbers_arr = np.array(numbers_list, dtype=float)
                     # if they are complex, we need to cast them. The last column
-                    # nneds to be ignored.
+                    # needs to be ignored.
+                    numbers: npt.NDArray[np.float64] | npt.NDArray[np.complex128]
                     if self.is_complex:
-                        numbers.shape = (len(orbIndexes), 3)  # Re, Im, Mulliken
-                        numbers = numbers[:, 0] + 1j * numbers[:, 1]
+                        numbers_arr = numbers_arr.reshape((len(orbIndexes), 3))  # Re, Im, Mulliken
+                        numbers = numbers_arr[:, 0] + 1j * numbers_arr[:, 1]
                     else:
-                        numbers.shape = (len(orbIndexes), 2)  # Re. Mulliken
-                        numbers = numbers[:, 0]
+                        numbers_arr = numbers_arr.reshape((len(orbIndexes), 2))  # Re. Mulliken
+                        numbers = numbers_arr[:, 0]
                     # print(numbers)
                     self.spd[cKpoint, cEvec, cAtom, orbIndexes] = numbers
                     cAtom = cAtom + 1
@@ -180,7 +196,9 @@ class DFTB_evec:
         #     #self.spd = self.spd/norms
         return
 
-    def set_bands(self, bands, occupancies):
+    def set_bands(
+        self, bands: npt.NDArray[np.float64], occupancies: npt.NDArray[np.float64]
+    ) -> None:
         if self.verbose:
             print("Setting the bands into the eigenvectors class")
         if bands.shape == (self.Nkpoints, self.Nbands):
@@ -197,9 +215,8 @@ class DFTB_evec:
                 "The number of the occupancies array doesn't"
                 "match: " + str(occupancies.shape) + " vs " + str((self.Nkpoints, self.Nbands))
             )
-        return
 
-    def set_kpoints(self, kpoints):
+    def set_kpoints(self, kpoints: npt.NDArray[np.float64]) -> None:
         if self.verbose:
             print("Setting the kpoints into the eigenvectors class")
         if kpoints.shape == (self.Nkpoints, 4):
@@ -209,15 +226,19 @@ class DFTB_evec:
                 "The shape of the kpoints array doesn't"
                 "match: " + str(kpoints.shape) + " vs " + str((self.Nkpoints, 4))
             )
-        return
 
-    def writeProcar(self):
+    def writeProcar(self) -> None:
+        if self.spd is None or self.bands is None or self.kpoints is None or self.occupancies is None:
+            raise RuntimeError("Data must be loaded before writing PROCAR")
+        if self.orbDict is None:
+            raise RuntimeError("Orbital dictionary must be loaded before writing PROCAR")
+
         # changing the coefficients to its module:
-        self.spd = np.array((self.spd * np.conjugate(self.spd)).real, dtype=float)
+        spd_data = np.array((self.spd * np.conjugate(self.spd)).real, dtype=float)
 
         # I need to sum over orbitals, and over atoms and over both
-        tot_orbs = np.sum(self.spd, axis=3)
-        tot_atoms = np.sum(self.spd, axis=2)
+        tot_orbs = np.sum(spd_data, axis=3)
+        tot_atoms = np.sum(spd_data, axis=2)
         tot_oa = np.sum(tot_orbs, axis=2)  # already summed over axis=3
         if self.verbose:
             print("sum over orbitals.shape: ", tot_orbs.shape)
@@ -227,30 +248,37 @@ class DFTB_evec:
         if self.verbose:
             print("going to transform all data to strings: ", end="")
 
-        self.spd = np.array(["%.5f" % x for x in self.spd.flatten()])
-        self.spd.shape = (self.Nkpoints, self.Nbands, self.Natoms, self.Norbs)
+        spd_str = np.array(["%.5f" % x for x in spd_data.flatten()]).reshape(
+            (self.Nkpoints, self.Nbands, self.Natoms, self.Norbs)
+        )
 
-        tot_orbs = np.array(["%.5f" % x for x in tot_orbs.flatten()])
-        tot_orbs.shape = (self.Nkpoints, self.Nbands, self.Natoms)
+        tot_orbs_str = np.array(["%.5f" % x for x in tot_orbs.flatten()]).reshape(
+            (self.Nkpoints, self.Nbands, self.Natoms)
+        )
 
-        tot_atoms = np.array(["%.5f" % x for x in tot_atoms.flatten()])
-        tot_atoms.shape = (self.Nkpoints, self.Nbands, self.Norbs)
+        tot_atoms_str = np.array(["%.5f" % x for x in tot_atoms.flatten()]).reshape(
+            (self.Nkpoints, self.Nbands, self.Norbs)
+        )
 
-        tot_oa = np.array(["%.5f" % x for x in tot_oa.flatten()])
-        tot_oa.shape = (self.Nkpoints, self.Nbands)
+        tot_oa_str = np.array(["%.5f" % x for x in tot_oa.flatten()]).reshape(
+            (self.Nkpoints, self.Nbands)
+        )
 
         # also the energies need to be casted to strings safely (i.e. no
         # scientific notation)
-        bands = np.array(["%.6f" % x for x in self.bands.flatten()])
-        bands.shape = (self.Nkpoints, self.Nbands)
+        bands_str = np.array(["%.6f" % x for x in self.bands.flatten()]).reshape(
+            (self.Nkpoints, self.Nbands)
+        )
 
-        # casting kpoints and weigths
-        kpoints = np.array(["%.6f" % x for x in self.kpoints.flatten()])
-        kpoints.shape = (self.Nkpoints, 4)
+        # casting kpoints and weights
+        kpoints_str = np.array(["%.6f" % x for x in self.kpoints.flatten()]).reshape(
+            (self.Nkpoints, 4)
+        )
 
         # and occupancies
-        occupancies = np.array(["%.5f" % x for x in self.occupancies.flatten()])
-        occupancies.shape = (self.Nkpoints, self.Nbands)
+        occupancies_str = np.array(["%.5f" % x for x in self.occupancies.flatten()]).reshape(
+            (self.Nkpoints, self.Nbands)
+        )
 
         if self.verbose:
             print("done")
@@ -273,115 +301,120 @@ class DFTB_evec:
 
         for ikpoint in range(self.Nkpoints):
             # preparing the K-point line
-            index = str(ikpoint + 1)
-            kpoint = kpoints[ikpoint][:3]
-            kpoint = " ".join([x for x in kpoint])
-            weight = kpoints[ikpoint][3]
-            kstr = "\n k-point " + index + " :   " + kpoint + " weight = " + weight + "\n"
+            index_k = str(ikpoint + 1)
+            kpoint_vals = kpoints_str[ikpoint][:3]
+            kpoint_line = " ".join([str(x) for x in kpoint_vals])
+            weight = str(kpoints_str[ikpoint][3])
+            kstr = "\n k-point " + index_k + " :   " + kpoint_line + " weight = " + weight + "\n"
             f.write(kstr)
 
             for iband in range(self.Nbands):
                 # preparing the band line
-                index = str(iband + 1)
-                energy = str(bands[ikpoint][iband])
-                occ = str(occupancies[ikpoint][iband])
-                bstr = "\nband " + index + " # energy " + energy + " # occ. " + occ + "\n"
+                index_b = str(iband + 1)
+                energy = str(bands_str[ikpoint][iband])
+                occ = str(occupancies_str[ikpoint][iband])
+                bstr = "\nband " + index_b + " # energy " + energy + " # occ. " + occ + "\n"
                 f.write(bstr)
 
                 # preparing atom string
                 # ion      s     py     pz     px    dxy    dyz    dz2    dxz  x2-y2    tot
                 astr = "\nion   " + "  ".join(self.orbDict.keys()) + " tot\n "
                 for iatom in range(self.Natoms):
-                    index = str(iatom + 1)
-                    astr += index + " " + " ".join(self.spd[ikpoint, iband, iatom])
-                    astr += " " + tot_orbs[ikpoint, iband, iatom] + "\n "
+                    index_a = str(iatom + 1)
+                    astr += index_a + " " + " ".join(spd_str[ikpoint, iband, iatom])
+                    astr += " " + str(tot_orbs_str[ikpoint, iband, iatom]) + "\n "
                 # special line `tot`
-                astr += "tot " + " ".join(tot_atoms[ikpoint, iband])
-                astr += " " + tot_oa[ikpoint, iband] + "\n"
+                astr += "tot " + " ".join(tot_atoms_str[ikpoint, iband])
+                astr += " " + str(tot_oa_str[ikpoint, iband]) + "\n"
                 f.write(astr)
         f.close()
 
 
 class DFTB_utils:
-    """Utilities that do not belong to other place"""
+    """Utilities that do not belong to other place."""
 
-    def __init__(self, verbose=True):
+    verbose: bool
+
+    def __init__(self, verbose: bool = True) -> None:
         self.verbose = verbose
-        return
 
-    def find_fermi(self, filename):
-        # checking if the file exists
-        import os
-
+    def find_fermi(self, filename: str | Path) -> float:
+        """Find the Fermi energy from output file."""
         if os.path.isfile(filename):
-            fermiFile = open(filename).read()
+            with open(filename) as f:
+                fermiFile = f.read()
         else:
-            raise RuntimeError("File " + filename + " not found")
+            raise RuntimeError("File " + str(filename) + " not found")
         # Fermi level:                        -0.1467617917 H           -3.9936 eV
-        fermi = re.findall(r"Fermi level:\s*[\-\d.]+\s*H\s*([\-\d.]+)", fermiFile)
-        fermi = float(fermi[0])
+        fermi_match = re.findall(r"Fermi level:\s*[\-\d.]+\s*H\s*([\-\d.]+)", fermiFile)
+        fermi = float(fermi_match[0])
         if self.verbose:
             print("Fermi energy found: ", fermi, "eV")
         return fermi
 
-    def get_kpoints(self, filename):
-        # in direct coordinates!
-
-        # checking if the file exists
+    def get_kpoints(self, filename: str | Path) -> npt.NDArray[np.float64]:
+        """Get k-points from XML file in direct coordinates."""
         from xml.dom import minidom
 
-        dom = minidom.parse(filename)
-        kpoints = dom.getElementsByTagName("kpointsandweights")[0].firstChild.data
-        kpoints = re.findall(r"-?\d+\.\d+", kpoints)
-        kpoints = np.array(kpoints, dtype=float)
-        Nkpoints = len(kpoints) / 4
-        if Nkpoints.is_integer:
-            Nkpoints = int(Nkpoints)
-        else:
-            raise RuntimeError("non-integer number of kpoints")
-        # the last enty is the weigth
-        kpoints.shape = (Nkpoints, 4)
+        dom = minidom.parse(str(filename))
+        kpoints_elem = dom.getElementsByTagName("kpointsandweights")[0]
+        if kpoints_elem.firstChild is None:
+            raise RuntimeError("No k-points found in XML")
+        # minidom Text node has .data attribute but typestubs don't properly type it
+        kpoints_str: str = getattr(kpoints_elem.firstChild, "data", "")
+        kpoints_list = re.findall(r"-?\d+\.\d+", kpoints_str)
+        kpoints = np.array(kpoints_list, dtype=float)
+        Nkpoints = len(kpoints) // 4
+        # the last entry is the weight
+        kpoints = kpoints.reshape((Nkpoints, 4))
         if self.verbose:
             print("Nkpoints: ", Nkpoints)
-        # print(kpoints)
         return kpoints
 
-    def find_lattice(self, filename):
-        # in direct coordinates!
-        # checking if the file exists
+    def find_lattice(self, filename: str | Path) -> npt.NDArray[np.float64]:
+        """Get lattice vectors from XML file."""
         from xml.dom import minidom
 
-        dom = minidom.parse(filename)
-        lat = dom.getElementsByTagName("latticevectors")[0].firstChild.data
-        lat = re.findall(r"-?\d+\.\d+", lat)
-        lat = np.array(lat, dtype=float)
-        lat.shape = (3, 3)
+        dom = minidom.parse(str(filename))
+        lat_elem = dom.getElementsByTagName("latticevectors")[0]
+        if lat_elem.firstChild is None:
+            raise RuntimeError("No lattice vectors found in XML")
+        # minidom Text node has .data attribute but typestubs don't properly type it
+        lat_str: str = getattr(lat_elem.firstChild, "data", "")
+        lat_list = re.findall(r"-?\d+\.\d+", lat_str)
+        lat = np.array(lat_list, dtype=float).reshape((3, 3))
         # Bohr to Angstroms
         lat = lat * 0.529177249
         return lat
 
-    def find_atoms(self, filename):
-        # The positions are in Cartesian coordiantes and in Bohr!
+    def find_atoms(
+        self, filename: str | Path
+    ) -> tuple[list[str], list[int], npt.NDArray[np.float64]]:
+        """Get atom types and positions from XML file. Positions are in Cartesian Angstroms."""
         from xml.dom import minidom
 
-        dom = minidom.parse(filename)
-        typenames = dom.getElementsByTagName("typenames")[0].firstChild.data
-        typesandcoordinates = dom.getElementsByTagName("typesandcoordinates")[0].firstChild.data
+        dom = minidom.parse(str(filename))
+        typenames_elem = dom.getElementsByTagName("typenames")[0]
+        coords_elem = dom.getElementsByTagName("typesandcoordinates")[0]
+        if typenames_elem.firstChild is None or coords_elem.firstChild is None:
+            raise RuntimeError("No atom info found in XML")
+        # minidom Text node has .data attribute but typestubs don't properly type it
+        typenames_str: str = getattr(typenames_elem.firstChild, "data", "")
+        coords_str: str = getattr(coords_elem.firstChild, "data", "")
 
-        typenames = re.findall(r'"([\w]+)"\s+', typenames)
-        ntypes = re.findall(r"\s(\d+)\s", typesandcoordinates)
+        typenames = re.findall(r'"([\w]+)"\s+', typenames_str)
+        ntypes = re.findall(r"\s(\d+)\s", coords_str)
         # I need the number of elements per type
         n = len(typenames)
         types_dict = dict(zip(typenames, range(1, n + 1)))
         occurences = [ntypes.count(str(types_dict[x])) for x in typenames]
-        positions = re.findall(r"([-\d]+\.[-\d]+)", typesandcoordinates)
-        positions = np.array(positions, dtype=float)
-        positions.shape = (sum(occurences), 3)
+        positions_list = re.findall(r"([-\d]+\.[-\d]+)", coords_str)
+        positions = np.array(positions_list, dtype=float).reshape((sum(occurences), 3))
         # Bohr to Angstrom
         positions = positions * 0.529177249
         return typenames, occurences, positions
 
-    def writePoscar(self, detailed_xml):
+    def writePoscar(self, detailed_xml: str | Path) -> None:
         # the positions are written in Bohrs and Cartesain coordinates
 
         poscarStr = "automatically created to speedup pyProcar\n"
@@ -408,43 +441,48 @@ class DFTB_utils:
         p.write("POSCAR", direct=True)
         return
 
-    def writeOutcar(self, detailed_out, detailed_xml):
-        f = open("OUTCAR", "w")
-        fermi = self.find_fermi(detailed_out)
-        f.write("E-fermi : " + str(fermi) + " \n")
+    def writeOutcar(self, detailed_out: str | Path, detailed_xml: str | Path) -> None:
+        """Write OUTCAR file with Fermi energy and reciprocal lattice."""
+        with open("OUTCAR", "w") as f:
+            fermi = self.find_fermi(detailed_out)
+            f.write("E-fermi : " + str(fermi) + " \n")
 
-        lat = self.find_lattice(detailed_xml)
-        # print('lat', lat)
-        vol = np.dot(lat[0], np.cross(lat[1], lat[2]))
-        b0 = np.cross(lat[1], lat[2]) / vol
-        b1 = np.cross(lat[2], lat[0]) / vol
-        b2 = np.cross(lat[0], lat[1]) / vol
+            lat = self.find_lattice(detailed_xml)
+            vol = float(np.dot(lat[0], np.cross(lat[1], lat[2])))
+            b0 = np.cross(lat[1], lat[2]) / vol
+            b1 = np.cross(lat[2], lat[0]) / vol
+            b2 = np.cross(lat[0], lat[1]) / vol
 
-        f.write("\nreciprocal lattice vectors \n")
-        # print('foo')
-        f.write(str(lat[0, 0]) + " " + str(lat[0, 1]) + " " + str(lat[0, 2]) + "  ")
-        f.write(str(b0[0]) + " " + str(b0[1]) + " " + str(b0[2]) + "\n")
-        f.write(str(lat[1, 0]) + " " + str(lat[1, 1]) + " " + str(lat[1, 2]) + "  ")
-        f.write(str(b1[0]) + " " + str(b1[1]) + " " + str(b1[2]) + "\n")
-        f.write(str(lat[2, 0]) + " " + str(lat[2, 1]) + " " + str(lat[2, 2]) + "  ")
-        f.write(str(b2[0]) + " " + str(b2[1]) + " " + str(b2[2]) + "\n")
-        f.close()
+            f.write("\nreciprocal lattice vectors \n")
+            f.write(str(lat[0, 0]) + " " + str(lat[0, 1]) + " " + str(lat[0, 2]) + "  ")
+            f.write(str(b0[0]) + " " + str(b0[1]) + " " + str(b0[2]) + "\n")
+            f.write(str(lat[1, 0]) + " " + str(lat[1, 1]) + " " + str(lat[1, 2]) + "  ")
+            f.write(str(b1[0]) + " " + str(b1[1]) + " " + str(b1[2]) + "\n")
+            f.write(str(lat[2, 0]) + " " + str(lat[2, 1]) + " " + str(lat[2, 2]) + "  ")
+            f.write(str(b2[0]) + " " + str(b2[1]) + " " + str(b2[2]) + "\n")
 
 
 class DFTB_bands:
-    def __init__(self, filename, verbose):
-        self.verbose = True
+    """Parse DFTB+ band output files."""
+
+    verbose: bool
+    filename: str | Path
+    Nkpoints: int
+    Nbands: int
+    Bands: npt.NDArray[np.float64] | None
+    Occupancies: npt.NDArray[np.float64] | None
+
+    def __init__(self, filename: str | Path, verbose: bool = False) -> None:
+        self.verbose = verbose
         self.filename = filename
-        self.Nkpoints = None
-        self.Nbands = None
+        self.Nkpoints = 0
+        self.Nbands = 0
         self.Bands = None
         self.Occupancies = None
 
-        return
-
-    def load(self):
-        data = open(self.filename)
-        data = data.read()
+    def load(self) -> None:
+        with open(self.filename) as f:
+            data = f.read()
 
         # Spin-polarized data is not supproted yet, if there exist, we
         # need to raise an exception
@@ -468,58 +506,58 @@ class DFTB_bands:
         # middleand end are needed :
         #
         #     1   -20.981  2.00000
-        evalues = []
-        occs = []  # occupancies
+        evalues_list: list[list[str]] = []
+        occs_list: list[list[str]] = []  # occupancies
         for kpoint in kpoints:
             occ = re.findall(r"\d+\s+[0-9.\-]+\s+([0-9.\-]+)\s*\n?", kpoint)
-            kpoint = re.findall(r"\d+\s+([0-9.\-]+)\s+[0-9.\-]+\s*\n?", kpoint)
-            # kpoint = np.array(kpoint, dtype=float)
-            evalues.append(kpoint)
-            occs.append(occ)
-        evalues = np.array(evalues, dtype=float)
-        occs = np.array(occs, dtype=float)
+            kpoint_bands = re.findall(r"\d+\s+([0-9.\-]+)\s+[0-9.\-]+\s*\n?", kpoint)
+            evalues_list.append(kpoint_bands)
+            occs_list.append(occ)
+        evalues = np.array(evalues_list, dtype=float)
+        occs = np.array(occs_list, dtype=float)
         if self.verbose:
             print("Bands found (Nkpoints. Nbands): ", evalues.shape)
 
-        # # removed
-        # evalues = evalues - self.fermi
-        # fermi = 0
         self.Bands = evalues
         self.Occupancies = occs
-        return
 
 
 class DFTB_input:
-    # it should parse the file dft_in.hsd
-    def __init__(self, filename, verbose=False):
+    """Parse DFTB+ input files (dft_in.hsd)."""
+
+    verbose: bool
+    filename: str | Path
+    finput: str
+
+    def __init__(self, filename: str | Path, verbose: bool = False) -> None:
         self.verbose = verbose
         self.filename = filename
-        self.finput = None  # the whole input file will be loaded here
+        self.finput = ""
         if self.verbose:
             print("DFTB_input.__init__(): going to open ", self.filename)
         with open(self.filename) as f:
             self.finput = f.read()
-        return
 
-    def _remove_comments(self):
+    def _remove_comments(self) -> str:
         # going to remove any text following a comment
         pattern = r"(\".*?\"|\'.*?\')|(#[^\r\n]*$)"
         # first group captures quoted strings (double or single)
         # second group captures comments
         regex = re.compile(pattern, re.MULTILINE | re.DOTALL)
 
-        def _replacer(match):
+        def _replacer(match: re.Match[str]) -> str:
             # if the 2nd group (capturing comments) is not None,
             # it means we have captured a non-quoted (real) comment string.
             if match.group(2) is not None:
                 return ""  # so we will return empty to remove the comment
             else:  # otherwise, we will return the 1st group
-                return match.group(1)  # captured quoted-string
+                result = match.group(1)
+                return result if result is not None else ""  # captured quoted-string
 
         new_file = regex.sub(_replacer, self.finput)
         return new_file
 
-    def _find_block(self, string):
+    def _find_block(self, string: str) -> str:
         """It finds a full block named `string` and return the full string of
         the block.
         It doesn't work of individual tags.
@@ -549,24 +587,26 @@ class DFTB_input:
         # counting {,}, to know where to close the block
         pattern = re.compile(r"(\{)|(\})")
         isopen = 0
+        end_pos = len(block)
         for m in pattern.finditer(block):
             # print(m.groups(1), m.groups(2))
             if m.group(1):
                 isopen += 1
-                # print('a \{ found, isopen = ', isopen)
+                # print('a { found, isopen = ', isopen)
             if m.group(2):
                 isopen -= 1
-                # print('a \} found, isopen = ', isopen)
+                # print('a } found, isopen = ', isopen)
             if isopen == 0:
+                end_pos = m.start(0) + 1
                 break
-        block = block[: m.start(0) + 1]
+        block = block[:end_pos]
         if self.verbose is True:
             print("block", string, "found:")
             print(block)
             print("------------")
         return block[:]
 
-    def _set_tag(self, tagName, blockName, value):
+    def _set_tag(self, tagName: str, blockName: str, value: str) -> None:
         """Searches for the tag `tagName` in the block `blockName`, and set
         its value to `value`"""
 
@@ -617,14 +657,16 @@ class DFTB_input:
                 # counting {,}, to know where to close the block
                 pattern = re.compile(r"(\{)|(\})")
                 isopen = 0
+                end_pos = len(tag)
                 for m in pattern.finditer(tag):
                     if m.group(1):
                         isopen += 1
                     if m.group(2):
                         isopen -= 1
                     if isopen == 0:
+                        end_pos = m.start(0) + 1
                         break
-                tag = tag[: m.start(0) + 1]
+                tag = tag[:end_pos]
                 if self.verbose:
                     print("tag (complex)")
                     print(tag)
@@ -641,7 +683,7 @@ class DFTB_input:
             print("-------\n")
         return
 
-    def add_pyprocar_tags(self, output=None):
+    def add_pyprocar_tags(self, output: str | Path | None = None) -> None:
         """This methods parses the dftb_input (already loaded) and add/changes
         the next tags to make DFTB+ output compatible with pyprocar:
 
@@ -693,16 +735,13 @@ class DFTB_input:
         print(self.finput)
 
         if output:
-            import os
+            import shutil
 
-            if os.path.isfile(output):
-                import shutil
-
-                shutil.copyfile(output, output + ".bkp")
-            f = open(output, "w")
-            f.write(self.finput)
-            f.close()
-        return
+            output_path = Path(output)
+            if output_path.is_file():
+                shutil.copyfile(output_path, str(output_path) + ".bkp")
+            with open(output_path, "w") as f:
+                f.write(self.finput)
 
 
 class DFTBParser(BaseParser):
@@ -723,14 +762,19 @@ class DFTBParser(BaseParser):
         The file with the list of kpoints, by default 'detailed.xml'
     """
 
+    eigenvec_filename: Path
+    bands_filename: Path
+    detailed_out: Path
+    detailed_xml: Path
+
     def __init__(
         self,
-        dirpath: str = "",
+        dirpath: str | Path = "",
         eigenvec_filename: str = "eigenvec.out",
         bands_filename: str = "band.out",
         detailed_out: str = "detailed.out",
         detailed_xml: str = "detailed.xml",
-    ):
+    ) -> None:
         super().__init__(dirpath)
         eigenvec_filepath = Path(eigenvec_filename)
         bands_filepath = Path(bands_filename)
@@ -746,18 +790,20 @@ class DFTBParser(BaseParser):
         utils = DFTB_utils(verbose=False)
 
         # Loading the bands
-        bands = DFTB_bands(filename=bands_filename, verbose=False)
-        bands.load()
+        bands_data = DFTB_bands(filename=self.bands_filename, verbose=False)
+        bands_data.load()
 
         # Loading the kpoints
-        if self.detailed_xml:
+        kpoints: npt.NDArray[np.float64]
+        if self.detailed_xml.exists():
             kpoints = utils.get_kpoints(self.detailed_xml)
-            # otherwise, a plain set of kpoints is spanned. Physically meaningless
         else:
-            Nkpoints = evec.Nkpoints
-            kpoints = np.linspace(0, 1, num=Nkpoints)
+            # Fallback: create dummy kpoints (physically meaningless)
+            Nkpoints = bands_data.Nkpoints
+            kpoints = np.linspace(0, 1, num=Nkpoints).reshape(-1, 1)
+            kpoints = np.hstack([kpoints, np.zeros((Nkpoints, 3))])  # Add weight column
             print(
-                "A list of k-points was not provided. Creating a fake and meaningless of K-points"
+                "A list of k-points was not provided. Creating a fake and meaningless set of K-points"
             )
 
         utils.writeOutcar(detailed_out=self.detailed_out, detailed_xml=self.detailed_xml)
@@ -778,21 +824,44 @@ class DFTBParser(BaseParser):
         except OSError:
             # Handle file not found or other errors
             create_procar = True
-        if create_procar == False:
+        if create_procar is False:
             return
 
         print(
-            "Going to create a PROCAR file from eigenvec.txt, it migth take a"
-            " while but will be done done just once"
+            "Going to create a PROCAR file from eigenvec.txt, it might take a"
+            " while but will be done just once"
         )
 
         evec = DFTB_evec(filename=str(self.eigenvec_filename), verbose=False)
         evec.load()
 
         # setting the bands and kpoints to the class with eigenvectors
-        evec.set_bands(bands.Bands, bands.Occupancies)
+        if bands_data.Bands is not None and bands_data.Occupancies is not None:
+            evec.set_bands(bands_data.Bands, bands_data.Occupancies)
         evec.set_kpoints(kpoints)
 
         evec.writeProcar()
 
-        return
+    @property
+    @override
+    def ebs(self) -> ElectronicBandStructure | None:
+        """Electronic band structure is not directly available from DFTB+ parser."""
+        return None
+
+    @property
+    @override
+    def dos(self) -> DensityOfStates | None:
+        """Density of states is not available from DFTB+ parser."""
+        return None
+
+    @property
+    @override
+    def structure(self) -> Structure | None:
+        """Crystal structure is not directly available from DFTB+ parser."""
+        return None
+
+    @property
+    @override
+    def kpath(self) -> KPath | None:
+        """K-path is not available from DFTB+ parser."""
+        return None

@@ -1,9 +1,13 @@
 """Abinit PROCAR file parser with parallel merge support."""
 
+from __future__ import annotations
+
 import logging
-from collections.abc import Mapping
+from collections.abc import Iterator, Mapping
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
+
+from typing_extensions import override
 
 from pyprocar.io.vasp import Procar
 
@@ -15,11 +19,15 @@ logger = logging.getLogger(__name__)
 
 class AbinitProcar(Mapping[str, Any]):
     """Parse PROCAR files from Abinit with parallel merge support.
-    
+
     Abinit generates separate PROCAR_* files in parallel runs that
     need to be merged before parsing. This class handles the merge
     process and then uses the VASP Procar parser.
     """
+
+    _dirpath: Path | None
+    _infilepaths: list[Path] | None
+    _nspin: int | None
 
     def __init__(
         self,
@@ -115,14 +123,18 @@ class AbinitProcar(Mapping[str, Any]):
                             outfile.write(line)
 
     # Mapping protocol implementation
+    @override
     def __contains__(self, key: object) -> bool:
         return key in self.__dict__
 
+    @override
     def __getitem__(self, key: str) -> Any:
         return self.__dict__[key]
 
-    def __iter__(self):
+    @override
+    def __iter__(self) -> Iterator[str]:
         return self.__dict__.__iter__()
 
+    @override
     def __len__(self) -> int:
         return self.__dict__.__len__()

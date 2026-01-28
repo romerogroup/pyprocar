@@ -75,10 +75,9 @@ class ProcarUnfolder:
         else:
             ispin_idx = ispin - 1
 
-        # ProcarParser attributes have int | None types (some may have Unknown due to incomplete typing)
+        # ProcarParser attributes have int | None types
         kpoints_count: int | None = self.procar.kpointsCount
-        # bandsCount has partially unknown type in ProcarParser, need explicit cast
-        bands_count: int | None = cast(int | None, self.procar.bandsCount)
+        bands_count: int | None = self.procar.bandsCount
         ions_count: int | None = self.procar.ionsCount
         orbital_count: int | None = self.procar.orbitalCount
 
@@ -165,8 +164,7 @@ class ProcarUnfolder:
             iispin = ispin - 1
 
         kpoints_count_opt: int | None = self.procar.kpointsCount
-        # bandsCount has partially unknown type in ProcarParser, need explicit cast
-        bands_count_opt: int | None = cast(int | None, self.procar.bandsCount)
+        bands_count_opt: int | None = self.procar.bandsCount
         if kpoints_count_opt is None or bands_count_opt is None:
             raise ValueError("Procar file not properly parsed - missing count values")
         kpoints_count: int = kpoints_count_opt
