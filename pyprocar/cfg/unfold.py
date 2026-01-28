@@ -1,6 +1,5 @@
 from dataclasses import asdict, dataclass, field
 from enum import Enum
-from typing import Any
 
 from pyprocar.cfg.band_structure import BandStructureConfig
 from pyprocar.cfg.base import PlotType
@@ -200,12 +199,12 @@ class UnfoldingConfig(BandStructureConfig):
     weighted_width: bool = False
 
     # label params
-    x_label_params: dict[str, any] = field(default_factory=lambda: {})
-    y_label_params: dict[str, any] = field(default_factory=lambda: {})
-    title_params: dict[str, any] = field(default_factory=lambda: {})
+    x_label_params: dict[str, object] = field(default_factory=lambda: {})
+    y_label_params: dict[str, object] = field(default_factory=lambda: {})
+    title_params: dict[str, object] = field(default_factory=lambda: {})
 
     # x tick parameters
-    major_x_tick_params: dict[str, Any] = field(
+    major_x_tick_params: dict[str, object] = field(
         default_factory=lambda: {
             "direction": "in",
             "length": 4,
@@ -215,7 +214,7 @@ class UnfoldingConfig(BandStructureConfig):
     )
 
     # y tick parameters
-    major_y_tick_params: dict[str, Any] = field(
+    major_y_tick_params: dict[str, object] = field(
         default_factory=lambda: {
             "direction": "in",
             "length": 4,
@@ -223,7 +222,7 @@ class UnfoldingConfig(BandStructureConfig):
             "colors": "black",
         }
     )
-    minor_y_tick_params: dict[str, Any] = field(
+    minor_y_tick_params: dict[str, object] = field(
         default_factory=lambda: {
             "direction": "in",
             "length": 2,

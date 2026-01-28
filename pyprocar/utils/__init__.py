@@ -1,5 +1,3 @@
-from typing import Union
-
 # Loading configuration settings
 from pyprocar.utils.config import (
     CONFIG,
@@ -18,6 +16,17 @@ from pyprocar.utils.splash import welcome
 
 
 # from pyprocar.utils.utilsprocar import UtilsProcar
+
+__all__ = [
+    "CONFIG",
+    "DATA_DIR",
+    "LOG_DIR",
+    "PKG_DIR",
+    "ROOT",
+    "ConfigManager",
+    "setup_logging",
+    "welcome",
+]
 
 # Initialize logger
 setup_logging()

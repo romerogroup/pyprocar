@@ -200,15 +200,15 @@ class BandStructureConfig(BaseConfig):
     figure_size: tuple[int] = field(default_factory=lambda: (9, 6))
     dpi: int = 300
 
-    colorbar_tick_params: dict[str, any] = field(default_factory=lambda: {})
-    colorbar_label_params: dict[str, any] = field(default_factory=lambda: {})
+    colorbar_tick_params: dict[str, object] = field(default_factory=lambda: {})
+    colorbar_label_params: dict[str, object] = field(default_factory=lambda: {})
 
     x_label: str = "K vector"
-    x_label_params: dict[str, any] = field(default_factory=lambda: {})
-    y_label_params: dict[str, any] = field(default_factory=lambda: {})
-    title_params: dict[str, any] = field(default_factory=lambda: {})
+    x_label_params: dict[str, object] = field(default_factory=lambda: {})
+    y_label_params: dict[str, object] = field(default_factory=lambda: {})
+    title_params: dict[str, object] = field(default_factory=lambda: {})
     # Tick Parameters
-    major_y_tick_params: dict[str, any] = field(
+    major_y_tick_params: dict[str, object] = field(
         default_factory=lambda: {
             "which": "major",
             "axis": "y",
@@ -220,7 +220,7 @@ class BandStructureConfig(BaseConfig):
             "left": True,
         }
     )
-    minor_y_tick_params: dict[str, any] = field(
+    minor_y_tick_params: dict[str, object] = field(
         default_factory=lambda: {
             "which": "minor",
             "axis": "y",
@@ -229,7 +229,7 @@ class BandStructureConfig(BaseConfig):
             "right": True,
         }
     )
-    major_x_tick_params: dict[str, any] = field(
+    major_x_tick_params: dict[str, object] = field(
         default_factory=lambda: {"which": "major", "axis": "x", "direction": "in"}
     )
     major_y_locator = None
