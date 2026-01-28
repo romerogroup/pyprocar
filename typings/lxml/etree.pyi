@@ -1,0 +1,149 @@
+"""Type stubs for lxml.etree module."""
+
+from _typeshed import Incomplete
+from collections.abc import Iterator
+from pathlib import Path
+from typing import overload
+
+class _Element:
+    """lxml Element class."""
+
+    tag: str
+    text: str | None
+    tail: str | None
+    attrib: dict[str, str]
+
+    def __iter__(self) -> Iterator[_Element]: ...
+    def __len__(self) -> int: ...
+    @overload
+    def __getitem__(self, index: int) -> _Element: ...
+    @overload
+    def __getitem__(self, index: slice) -> list[_Element]: ...
+    def get(self, key: str, default: str | None = ...) -> str | None: ...
+    def set(self, key: str, value: str) -> None: ...
+    def keys(self) -> list[str]: ...
+    def values(self) -> list[str]: ...
+    def items(self) -> list[tuple[str, str]]: ...
+    def find(
+        self, path: str, namespaces: dict[str, str] | None = ...
+    ) -> _Element | None: ...
+    def findall(
+        self, path: str, namespaces: dict[str, str] | None = ...
+    ) -> list[_Element]: ...
+    def findtext(
+        self,
+        path: str,
+        default: str | None = ...,
+        namespaces: dict[str, str] | None = ...,
+    ) -> str | None: ...
+    def iter(self, tag: str | None = ..., *tags: str) -> Iterator[_Element]: ...
+    def itertext(self) -> Iterator[str]: ...
+    def getchildren(self) -> list[_Element]: ...
+    def getparent(self) -> _Element | None: ...
+    def getnext(self) -> _Element | None: ...
+    def getprevious(self) -> _Element | None: ...
+    def getroottree(self) -> _ElementTree: ...
+    def append(self, subelement: _Element) -> None: ...
+    def insert(self, index: int, subelement: _Element) -> None: ...
+    def remove(self, subelement: _Element) -> None: ...
+    def clear(self) -> None: ...
+    def xpath(
+        self,
+        _path: str,
+        namespaces: dict[str, str] | None = ...,
+        extensions: Incomplete = ...,
+        smart_strings: bool = ...,
+        **kwargs: Incomplete,
+    ) -> list[_Element] | list[str] | list[Incomplete]: ...
+
+class _ElementTree:
+    """lxml ElementTree class."""
+
+    def getroot(self) -> _Element: ...
+    def find(
+        self, path: str, namespaces: dict[str, str] | None = ...
+    ) -> _Element | None: ...
+    def findall(
+        self, path: str, namespaces: dict[str, str] | None = ...
+    ) -> list[_Element]: ...
+    def findtext(
+        self,
+        path: str,
+        default: str | None = ...,
+        namespaces: dict[str, str] | None = ...,
+    ) -> str | None: ...
+    def iter(self, tag: str | None = ..., *tags: str) -> Iterator[_Element]: ...
+    def xpath(
+        self,
+        _path: str,
+        namespaces: dict[str, str] | None = ...,
+        extensions: Incomplete = ...,
+        smart_strings: bool = ...,
+        **kwargs: Incomplete,
+    ) -> list[_Element] | list[str] | list[Incomplete]: ...
+    def write(
+        self,
+        file: str | Path | Incomplete,
+        encoding: str | None = ...,
+        method: str = ...,
+        pretty_print: bool = ...,
+        xml_declaration: bool | None = ...,
+        with_tail: bool = ...,
+        standalone: bool | None = ...,
+        doctype: str | None = ...,
+        compression: int = ...,
+    ) -> None: ...
+
+class QName:
+    """lxml QName class for qualified names."""
+
+    localname: str
+    namespace: str | None
+    text: str
+
+    def __init__(
+        self,
+        text_or_uri: str | _Element | None,
+        tag: str | None = ...,
+    ) -> None: ...
+
+def parse(
+    source: str | Path | Incomplete,
+    parser: Incomplete = ...,
+    base_url: str | None = ...,
+) -> _ElementTree: ...
+def fromstring(
+    text: str | bytes,
+    parser: Incomplete = ...,
+    base_url: str | None = ...,
+) -> _Element: ...
+def tostring(
+    element_or_tree: _Element | _ElementTree,
+    encoding: str | type[str] | None = ...,
+    method: str = ...,
+    xml_declaration: bool | None = ...,
+    pretty_print: bool = ...,
+    with_tail: bool = ...,
+    standalone: bool | None = ...,
+    doctype: str | None = ...,
+    exclusive: bool = ...,
+    inclusive_ns_prefixes: list[str] | None = ...,
+) -> bytes | str: ...
+def Element(
+    _tag: str,
+    attrib: dict[str, str] | None = ...,
+    nsmap: dict[str | None, str] | None = ...,
+    **extra: str,
+) -> _Element: ...
+def SubElement(
+    _parent: _Element,
+    _tag: str,
+    attrib: dict[str, str] | None = ...,
+    nsmap: dict[str | None, str] | None = ...,
+    **extra: str,
+) -> _Element: ...
+def Comment(text: str | None = ...) -> _Element: ...
+def ProcessingInstruction(
+    target: str, text: str | None = ...
+) -> _Element: ...
+def __getattr__(name: str) -> Incomplete: ...
