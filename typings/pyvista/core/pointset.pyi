@@ -1,8 +1,8 @@
 """Type stubs for pyvista.core.pointset module."""
 
 from _typeshed import Incomplete
-from collections.abc import Sequence
-from typing import TypeVar
+from collections.abc import Iterator, Sequence
+from typing import TypeVar, overload
 
 import numpy as np
 import numpy.typing as npt
@@ -25,18 +25,68 @@ class _PointSet:
     def cell_data(self) -> DataSetAttributes: ...
     @property
     def field_data(self) -> DataSetAttributes: ...
+    @property
+    def cell(self) -> _CellArray: ...
+    def set_active_scalars(
+        self, name: str | None, preference: str = ...
+    ) -> tuple[npt.NDArray[np.float64], str] | tuple[None, str]: ...
+    def set_active_vectors(
+        self, name: str | None, preference: str = ...
+    ) -> tuple[npt.NDArray[np.float64], str] | tuple[None, str]: ...
+    def shallow_copy(self, to_copy: _PointSet | Incomplete) -> None: ...
+    def compute_cell_sizes(
+        self,
+        length: bool = ...,
+        area: bool = ...,
+        volume: bool = ...,
+        progress_bar: bool = ...,
+        vertex_count: bool = ...,
+    ) -> _PointSet: ...
+    @overload
+    def remove_points(
+        self: _Self,
+        remove_mask: npt.NDArray[np.bool_],
+        inplace: bool = ...,
+        mode: str = ...,
+    ) -> _Self: ...
+    @overload
+    def remove_points(
+        self: _Self,
+        remove_mask: npt.NDArray[np.bool_],
+        inplace: bool,
+        mode: str,
+        keep_scalars: bool = ...,
+        *,
+        adjacent_cells: bool = ...,
+    ) -> tuple[_Self, npt.NDArray[np.intp]]: ...
+    def remove_points(
+        self: _Self,
+        remove_mask: npt.NDArray[np.bool_],
+        inplace: bool = ...,
+        mode: str = ...,
+        keep_scalars: bool = ...,
+        adjacent_cells: bool = ...,
+    ) -> _Self | tuple[_Self, npt.NDArray[np.intp]]: ...
+
+class _CellArray:
+    """Cell connectivity array."""
+
+    def __len__(self) -> int: ...
+    def __iter__(self) -> Iterator[npt.NDArray[np.intp]]: ...
+    def __getitem__(self, index: int) -> npt.NDArray[np.intp]: ...
 
 class DataSetAttributes:
     """Attribute data for point/cell data."""
 
     def __getitem__(self, name: str) -> npt.NDArray[np.float64]: ...
-    def __setitem__(self, name: str, value: npt.NDArray[np.float64]) -> None: ...
+    def __setitem__(self, name: str, value: npt.NDArray[np.float64] | npt.NDArray[np.int32] | npt.NDArray[np.int64] | npt.NDArray[np.floating[Incomplete]]) -> None: ...
     def __contains__(self, name: str) -> bool: ...
     def __len__(self) -> int: ...
     def keys(self) -> list[str]: ...
     def values(self) -> list[npt.NDArray[np.float64]]: ...
     def items(self) -> list[tuple[str, npt.NDArray[np.float64]]]: ...
-    def update(self, other: dict[str, npt.NDArray[np.float64]]) -> None: ...
+    def update(self, other: dict[str, npt.NDArray[np.float64]] | DataSetAttributes) -> None: ...
+    def pop(self, name: str, default: npt.NDArray[np.float64] | None = ...) -> npt.NDArray[np.float64] | None: ...
     @property
     def active_scalars(self) -> npt.NDArray[np.float64] | None: ...
     @property
@@ -185,7 +235,7 @@ class PolyData(_PointSet):
     ) -> _Self: ...
     def interpolate(
         self,
-        target: PolyData | Incomplete,
+        target: PolyData | UnstructuredGrid | Incomplete,
         sharpness: float = ...,
         radius: float | None = ...,
         strategy: str = ...,
@@ -215,6 +265,14 @@ class PolyData(_PointSet):
         merge_points: bool = ...,
         crinkle: bool = ...,
     ) -> _Self: ...
+    def translate(
+        self: _Self,
+        xyz: npt.NDArray[np.float64] | Sequence[float],
+        inplace: bool = ...,
+        transform_all_input_vectors: bool = ...,
+    ) -> _Self: ...
+    def __add__(self, other: PolyData) -> PolyData: ...
+    def __iadd__(self: _Self, other: PolyData) -> _Self: ...
 
 class StructuredGrid(_PointSet):
     """PyVista StructuredGrid class."""
@@ -252,3 +310,7 @@ class StructuredGrid(_PointSet):
         contour: bool = ...,
         progress_bar: bool = ...,
     ) -> Incomplete: ...
+    def cast_to_unstructured_grid(self) -> UnstructuredGrid: ...
+
+# Forward reference for UnstructuredGrid
+from pyvista.core.grid import UnstructuredGrid as UnstructuredGrid

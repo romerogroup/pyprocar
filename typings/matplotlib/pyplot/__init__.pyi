@@ -76,6 +76,17 @@ def ylim(
 def gca(**kwargs: object) -> Axes: ...
 def gcf() -> Figure: ...
 
+class _ColormapRegistry:
+    """Registry of colormaps accessible via plt.colormaps."""
+
+    def __getitem__(self, name: str) -> Colormap: ...
+    def __contains__(self, name: str) -> bool: ...
+    def __iter__(self) -> object: ...
+
+colormaps: _ColormapRegistry
+
+from matplotlib.colors import Colormap
+
 __all__ = [
     "subplots",
     "figure",
@@ -92,4 +103,5 @@ __all__ = [
     "ylim",
     "gca",
     "gcf",
+    "colormaps",
 ]
