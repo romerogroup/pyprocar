@@ -1,6 +1,5 @@
 """Tests for LobsterOut extractor."""
 
-
 from pyprocar.io.lobster import LobsterOut
 
 LOBSTEROUT_CONTENT = """LOBSTER v4.1.0

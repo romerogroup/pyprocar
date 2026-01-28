@@ -162,9 +162,7 @@ class TestBandStructurePlotterToSeriesList:
     def test_to_series_list_basic(self, mock_property_single_spin):
         """Test basic series list creation."""
         plotter = BandStructurePlotter()
-        series_list = plotter._to_series_list(
-            mock_property_single_spin, None, None, "normal"
-        )
+        series_list = plotter._to_series_list(mock_property_single_spin, None, None, "normal")
 
         n_bands = mock_property_single_spin.to_array().shape[1]
         n_spins = mock_property_single_spin.to_array().shape[2]
@@ -182,9 +180,7 @@ class TestBandStructurePlotterToSeriesList:
 
         plt.close(plotter.fig)
 
-    def test_to_series_list_with_scalars(
-        self, mock_property_single_spin, mock_scalars_single_spin
-    ):
+    def test_to_series_list_with_scalars(self, mock_property_single_spin, mock_scalars_single_spin):
         """Test series list with scalar data."""
         plotter = BandStructurePlotter()
         series_list = plotter._to_series_list(
@@ -202,9 +198,7 @@ class TestBandStructurePlotterToSeriesList:
     def test_to_series_list_two_spins(self, mock_property_two_spins):
         """Test series list with two spin channels."""
         plotter = BandStructurePlotter()
-        series_list = plotter._to_series_list(
-            mock_property_two_spins, None, None, "normal"
-        )
+        series_list = plotter._to_series_list(mock_property_two_spins, None, None, "normal")
 
         n_bands = mock_property_two_spins.to_array().shape[1]
         n_spins = mock_property_two_spins.to_array().shape[2]
@@ -226,14 +220,10 @@ class TestBandStructurePlotterToSeriesList:
         plotter = BandStructurePlotter()
 
         # Get series with normal mode
-        series_normal = plotter._to_series_list(
-            mock_property_two_spins, None, None, "normal"
-        )
+        series_normal = plotter._to_series_list(mock_property_two_spins, None, None, "normal")
 
         # Get series with flip mode
-        series_flipped = plotter._to_series_list(
-            mock_property_two_spins, None, None, "flip"
-        )
+        series_flipped = plotter._to_series_list(mock_property_two_spins, None, None, "flip")
 
         # First spin should be identical
         for sn, sf in zip(series_normal, series_flipped):
@@ -393,9 +383,7 @@ class TestBandStructurePlotterPlot:
 class TestBandStructurePlotterScalarsModes:
     """Tests for scalar coloring modes."""
 
-    def test_scatter_uses_cmap(
-        self, mock_property_single_spin, mock_scalars_single_spin
-    ):
+    def test_scatter_uses_cmap(self, mock_property_single_spin, mock_scalars_single_spin):
         """Test that scatter mode uses specified colormap."""
         plotter = BandStructurePlotter()
         plotter.plot(
@@ -409,9 +397,7 @@ class TestBandStructurePlotterScalarsModes:
         assert scatter.get_cmap().name == "viridis"
         plt.close(plotter.fig)
 
-    def test_scatter_respects_clim(
-        self, mock_property_single_spin, mock_scalars_single_spin
-    ):
+    def test_scatter_respects_clim(self, mock_property_single_spin, mock_scalars_single_spin):
         """Test that scatter mode respects color limits."""
         plotter = BandStructurePlotter()
         plotter.plot(
@@ -425,9 +411,7 @@ class TestBandStructurePlotterScalarsModes:
         assert scatter.get_clim() == (0.2, 0.8)
         plt.close(plotter.fig)
 
-    def test_parametric_uses_cmap(
-        self, mock_property_single_spin, mock_scalars_single_spin
-    ):
+    def test_parametric_uses_cmap(self, mock_property_single_spin, mock_scalars_single_spin):
         """Test that parametric mode uses specified colormap."""
         plotter = BandStructurePlotter()
         plotter.plot(
@@ -444,17 +428,13 @@ class TestBandStructurePlotterScalarsModes:
     def test_resolve_clim_uses_user_value(self, mock_property_single_spin):
         """Test that _resolve_clim returns user-provided clim."""
         plotter = BandStructurePlotter()
-        series_list = plotter._to_series_list(
-            mock_property_single_spin, None, None, "normal"
-        )
+        series_list = plotter._to_series_list(mock_property_single_spin, None, None, "normal")
 
         clim = plotter._resolve_clim(series_list, (0.1, 0.9))
         assert clim == (0.1, 0.9)
         plt.close(plotter.fig)
 
-    def test_resolve_clim_auto_from_data(
-        self, mock_property_single_spin, mock_scalars_single_spin
-    ):
+    def test_resolve_clim_auto_from_data(self, mock_property_single_spin, mock_scalars_single_spin):
         """Test that _resolve_clim computes limits from data when not provided."""
         plotter = BandStructurePlotter()
         series_list = plotter._to_series_list(
@@ -491,9 +471,7 @@ class TestBandStructurePlotterColorbar:
         assert plotter.colorbar is not None
         plt.close(plotter.fig)
 
-    def test_colorbar_none_no_colorbar(
-        self, mock_property_single_spin, mock_scalars_single_spin
-    ):
+    def test_colorbar_none_no_colorbar(self, mock_property_single_spin, mock_scalars_single_spin):
         """Test that no colorbar is created with scalars_show_colorbar='none'."""
         plotter = BandStructurePlotter()
         plotter.plot(

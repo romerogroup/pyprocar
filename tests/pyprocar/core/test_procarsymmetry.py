@@ -13,12 +13,14 @@ def rng():
 @pytest.fixture
 def simple_kpoints():
     """Simple k-points for testing."""
-    return np.array([
-        [0.0, 0.0, 0.0],
-        [0.5, 0.0, 0.0],
-        [0.5, 0.5, 0.0],
-        [0.0, 0.5, 0.0],
-    ])
+    return np.array(
+        [
+            [0.0, 0.0, 0.0],
+            [0.5, 0.0, 0.0],
+            [0.5, 0.5, 0.0],
+            [0.0, 0.5, 0.0],
+        ]
+    )
 
 
 @pytest.fixture
@@ -214,9 +216,7 @@ class TestGeneralRotation:
         bands = np.array([[1.0]])
 
         ps = ProcarSymmetry(kpoints=kpoints, bands=bands)
-        new_kpoints, sx, sy, sz = ps.general_rotation(
-            angle=180, rotAxis=[1, 1, 0], store=False
-        )
+        new_kpoints, sx, sy, sz = ps.general_rotation(angle=180, rotAxis=[1, 1, 0], store=False)
 
         # 180 rotation around (1,1,0) axis: (1,0,0) -> (0,1,0)
         expected = np.array([[0.0, 1.0, 0.0]])
@@ -311,12 +311,14 @@ class TestRotSymmetryZ:
         assert ps.kpoints.shape[0] == 4
 
         # Check all rotated points
-        expected = np.array([
-            [1.0, 0.0, 0.0],   # 0 degrees
-            [0.0, 1.0, 0.0],   # 90 degrees
-            [-1.0, 0.0, 0.0],  # 180 degrees
-            [0.0, -1.0, 0.0],  # 270 degrees
-        ])
+        expected = np.array(
+            [
+                [1.0, 0.0, 0.0],  # 0 degrees
+                [0.0, 1.0, 0.0],  # 90 degrees
+                [-1.0, 0.0, 0.0],  # 180 degrees
+                [0.0, -1.0, 0.0],  # 270 degrees
+            ]
+        )
         assert np.allclose(ps.kpoints, expected, atol=1e-10)
 
     def test_rot_symmetry_z_order_6(self, simple_bands, simple_character):
@@ -344,10 +346,7 @@ class TestRotSymmetryZ:
         sy = np.array([[0.0]])
         sz = np.array([[0.0]])
 
-        ps = ProcarSymmetry(
-            kpoints=kpoints, bands=bands, character=character,
-            sx=sx, sy=sy, sz=sz
-        )
+        ps = ProcarSymmetry(kpoints=kpoints, bands=bands, character=character, sx=sx, sy=sy, sz=sz)
         ps.rot_symmetry_z(order=4)
 
         assert ps.sx.shape[0] == 4
@@ -373,10 +372,12 @@ class TestMirrorX:
         assert ps.kpoints.shape[0] == 2
 
         # Second point should have y negated
-        expected = np.array([
-            [1.0, 2.0, 3.0],
-            [1.0, -2.0, 3.0],
-        ])
+        expected = np.array(
+            [
+                [1.0, 2.0, 3.0],
+                [1.0, -2.0, 3.0],
+            ]
+        )
         assert np.allclose(ps.kpoints, expected)
 
     def test_mirror_x_spin_components(self):
@@ -390,10 +391,7 @@ class TestMirrorX:
         sy = np.array([[2.0]])
         sz = np.array([[3.0]])
 
-        ps = ProcarSymmetry(
-            kpoints=kpoints, bands=bands, character=character,
-            sx=sx, sy=sy, sz=sz
-        )
+        ps = ProcarSymmetry(kpoints=kpoints, bands=bands, character=character, sx=sx, sy=sy, sz=sz)
         ps.mirror_x()
 
         # sx should be negated for mirrored point
@@ -454,10 +452,12 @@ class TestTranslate:
         """Test translation to Gamma point."""
         from pyprocar.core.procarsymmetry import ProcarSymmetry
 
-        kpoints = np.array([
-            [0.1, 0.2, 0.3],
-            [0.5, 0.5, 0.5],
-        ])
+        kpoints = np.array(
+            [
+                [0.1, 0.2, 0.3],
+                [0.5, 0.5, 0.5],
+            ]
+        )
 
         ps = ProcarSymmetry(kpoints=kpoints.copy(), bands=simple_bands[:2])
 

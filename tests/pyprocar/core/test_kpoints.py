@@ -38,9 +38,7 @@ def simple_cubic_reciprocal_lattice():
         A 3x3 array representing a simple cubic reciprocal lattice
         with lattice parameter 2*pi.
     """
-    return np.array(
-        [[2 * np.pi, 0.0, 0.0], [0.0, 2 * np.pi, 0.0], [0.0, 0.0, 2 * np.pi]]
-    )
+    return np.array([[2 * np.pi, 0.0, 0.0], [0.0, 2 * np.pi, 0.0], [0.0, 0.0, 2 * np.pi]])
 
 
 @pytest.fixture
@@ -106,18 +104,14 @@ class TestKGridInfo:
 
     def test_kgrid_info_creation(self):
         """Test KGridInfo can be created with valid parameters."""
-        info = KGridInfo(
-            kgrid=(4, 4, 4), kgrid_mode=KGRID_MODE.MONKHORST, kshift=(0.0, 0.0, 0.0)
-        )
+        info = KGridInfo(kgrid=(4, 4, 4), kgrid_mode=KGRID_MODE.MONKHORST, kshift=(0.0, 0.0, 0.0))
         assert info.kgrid == (4, 4, 4)
         assert info.kgrid_mode == KGRID_MODE.MONKHORST
         assert info.kshift == (0.0, 0.0, 0.0)
 
     def test_kgrid_info_with_shift(self):
         """Test KGridInfo with non-zero k-shift."""
-        info = KGridInfo(
-            kgrid=(8, 8, 8), kgrid_mode=KGRID_MODE.GAMMA, kshift=(0.5, 0.5, 0.5)
-        )
+        info = KGridInfo(kgrid=(8, 8, 8), kgrid_mode=KGRID_MODE.GAMMA, kshift=(0.5, 0.5, 0.5))
         assert info.kshift == (0.5, 0.5, 0.5)
 
 
@@ -502,9 +496,7 @@ class TestKPathInitialization:
         assert kpath.segment_names[0][0] == "Γ"
         assert kpath.segment_names[2][1] == "Γ"
 
-    def test_init_with_discontinuity_threshold(
-        self, simple_kpath_kpoints, simple_segment_names
-    ):
+    def test_init_with_discontinuity_threshold(self, simple_kpath_kpoints, simple_segment_names):
         """Test KPath initialization with custom discontinuity threshold."""
         kpath = KPath(
             kpoints=simple_kpath_kpoints,
@@ -514,9 +506,7 @@ class TestKPathInitialization:
 
         assert kpath.discontinuity_threshold == 0.3
 
-    def test_init_with_zero_diff_threshold(
-        self, simple_kpath_kpoints, simple_segment_names
-    ):
+    def test_init_with_zero_diff_threshold(self, simple_kpath_kpoints, simple_segment_names):
         """Test KPath initialization with custom zero diff threshold."""
         kpath = KPath(
             kpoints=simple_kpath_kpoints,
@@ -605,9 +595,7 @@ class TestKPathProperties:
 
         assert len(distances) == kpath_with_segments.n_kpoints
         # Distances should be monotonically increasing
-        assert all(
-            distances[i] <= distances[i + 1] for i in range(len(distances) - 1)
-        )
+        assert all(distances[i] <= distances[i + 1] for i in range(len(distances) - 1))
 
     def test_kpoints_cartesian_property(
         self,
@@ -728,9 +716,7 @@ class TestKPathMethods:
 
     def test_get_segment_indices(self, kpath_with_segments):
         """Test get_segment_indices returns tuple of lists."""
-        segment_indices, continuous, discontinuous = (
-            kpath_with_segments.get_segment_indices()
-        )
+        segment_indices, continuous, discontinuous = kpath_with_segments.get_segment_indices()
 
         assert len(segment_indices) > 0
         assert isinstance(continuous, list)
@@ -859,13 +845,11 @@ class TestKPathDiscontinuities:
         # Verify we have the expected special point names
         tick_str = " ".join(tick_names)
         # Should contain gamma (or its normalized form) and some other points
-        assert any(
-            name in tick_str for name in ["Γ", "$\\Gamma$", "X", "M", "R"]
-        ), f"Tick names should include special k-points: {tick_names}"
+        assert any(name in tick_str for name in ["Γ", "$\\Gamma$", "X", "M", "R"]), (
+            f"Tick names should include special k-points: {tick_names}"
+        )
 
-    def test_continuous_segments_grouping(
-        self, simple_kpath_kpoints, simple_segment_names
-    ):
+    def test_continuous_segments_grouping(self, simple_kpath_kpoints, simple_segment_names):
         """Test get_continuous_segments groups continuous parts."""
         kpath = KPath(
             kpoints=simple_kpath_kpoints,

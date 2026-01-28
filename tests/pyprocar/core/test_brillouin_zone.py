@@ -22,11 +22,7 @@ def simple_cubic_reciprocal_lattice():
         A 3x3 array representing a simple cubic reciprocal lattice
         with lattice parameter 2*pi.
     """
-    return np.array([
-        [2 * np.pi, 0.0, 0.0],
-        [0.0, 2 * np.pi, 0.0],
-        [0.0, 0.0, 2 * np.pi]
-    ])
+    return np.array([[2 * np.pi, 0.0, 0.0], [0.0, 2 * np.pi, 0.0], [0.0, 0.0, 2 * np.pi]])
 
 
 @pytest.fixture
@@ -40,11 +36,7 @@ def fcc_reciprocal_lattice():
         A 3x3 array representing an FCC reciprocal lattice.
     """
     a = 2 * np.pi
-    return np.array([
-        [-a, a, a],
-        [a, -a, a],
-        [a, a, -a]
-    ])
+    return np.array([[-a, a, a], [a, -a, a], [a, a, -a]])
 
 
 @pytest.fixture
@@ -59,22 +51,13 @@ def hexagonal_reciprocal_lattice():
     """
     a = 2 * np.pi / 3.0
     c = 2 * np.pi / 5.0
-    return np.array([
-        [a, a / np.sqrt(3), 0.0],
-        [0.0, 2 * a / np.sqrt(3), 0.0],
-        [0.0, 0.0, c]
-    ])
+    return np.array([[a, a / np.sqrt(3), 0.0], [0.0, 2 * a / np.sqrt(3), 0.0], [0.0, 0.0, c]])
 
 
 @pytest.fixture
 def simple_verts():
     """Create simple vertices for Lines testing."""
-    return np.array([
-        [0.0, 0.0, 0.0],
-        [1.0, 0.0, 0.0],
-        [1.0, 1.0, 0.0],
-        [0.0, 1.0, 0.0]
-    ])
+    return np.array([[0.0, 0.0, 0.0], [1.0, 0.0, 0.0], [1.0, 1.0, 0.0], [0.0, 1.0, 0.0]])
 
 
 @pytest.fixture
@@ -249,9 +232,7 @@ class TestBrillouinZone2D:
         e_max = 5.0
 
         bz2d = BrillouinZone2D(
-            e_min=e_min,
-            e_max=e_max,
-            reciprocal_lattice=simple_cubic_reciprocal_lattice
+            e_min=e_min, e_max=e_max, reciprocal_lattice=simple_cubic_reciprocal_lattice
         )
 
         assert bz2d.reciprocal is not None
@@ -263,10 +244,7 @@ class TestBrillouinZone2D:
         e_max = 5.0
 
         bz2d = BrillouinZone2D(
-            e_min=e_min,
-            e_max=e_max,
-            axis=2,
-            reciprocal_lattice=simple_cubic_reciprocal_lattice
+            e_min=e_min, e_max=e_max, axis=2, reciprocal_lattice=simple_cubic_reciprocal_lattice
         )
 
         # Check that z-coordinates are transformed to e_min and e_max
@@ -280,10 +258,7 @@ class TestBrillouinZone2D:
         e_max = 3.0
 
         bz2d = BrillouinZone2D(
-            e_min=e_min,
-            e_max=e_max,
-            axis=0,
-            reciprocal_lattice=simple_cubic_reciprocal_lattice
+            e_min=e_min, e_max=e_max, axis=0, reciprocal_lattice=simple_cubic_reciprocal_lattice
         )
 
         # Check that x-coordinates are transformed
@@ -297,10 +272,7 @@ class TestBrillouinZone2D:
         e_max = 4.0
 
         bz2d = BrillouinZone2D(
-            e_min=e_min,
-            e_max=e_max,
-            axis=1,
-            reciprocal_lattice=simple_cubic_reciprocal_lattice
+            e_min=e_min, e_max=e_max, axis=1, reciprocal_lattice=simple_cubic_reciprocal_lattice
         )
 
         # Check that y-coordinates are transformed
@@ -311,9 +283,7 @@ class TestBrillouinZone2D:
     def test_brillouin_zone_2d_centers_property(self, simple_cubic_reciprocal_lattice):
         """Test centers property for BrillouinZone2D."""
         bz2d = BrillouinZone2D(
-            e_min=-5.0,
-            e_max=5.0,
-            reciprocal_lattice=simple_cubic_reciprocal_lattice
+            e_min=-5.0, e_max=5.0, reciprocal_lattice=simple_cubic_reciprocal_lattice
         )
 
         centers = bz2d.centers
@@ -324,9 +294,7 @@ class TestBrillouinZone2D:
     def test_brillouin_zone_2d_faces_array_property(self, simple_cubic_reciprocal_lattice):
         """Test faces_array property for BrillouinZone2D."""
         bz2d = BrillouinZone2D(
-            e_min=-5.0,
-            e_max=5.0,
-            reciprocal_lattice=simple_cubic_reciprocal_lattice
+            e_min=-5.0, e_max=5.0, reciprocal_lattice=simple_cubic_reciprocal_lattice
         )
 
         faces_array = bz2d.faces_array
@@ -336,9 +304,7 @@ class TestBrillouinZone2D:
     def test_brillouin_zone_2d_wigner_seitz_method(self, simple_cubic_reciprocal_lattice):
         """Test wigner_seitz method for BrillouinZone2D."""
         bz2d = BrillouinZone2D(
-            e_min=-5.0,
-            e_max=5.0,
-            reciprocal_lattice=simple_cubic_reciprocal_lattice
+            e_min=-5.0, e_max=5.0, reciprocal_lattice=simple_cubic_reciprocal_lattice
         )
 
         verts, faces = bz2d.wigner_seitz()
@@ -353,9 +319,7 @@ class TestBrillouinZone2D:
         import pyvista as pv
 
         bz2d = BrillouinZone2D(
-            e_min=-5.0,
-            e_max=5.0,
-            reciprocal_lattice=simple_cubic_reciprocal_lattice
+            e_min=-5.0, e_max=5.0, reciprocal_lattice=simple_cubic_reciprocal_lattice
         )
 
         assert isinstance(bz2d, pv.PolyData)
@@ -366,10 +330,7 @@ class TestBrillouinZone2D:
         e_max = 10.0
 
         bz2d = BrillouinZone2D(
-            e_min=e_min,
-            e_max=e_max,
-            axis=2,
-            reciprocal_lattice=simple_cubic_reciprocal_lattice
+            e_min=e_min, e_max=e_max, axis=2, reciprocal_lattice=simple_cubic_reciprocal_lattice
         )
 
         z_coords = bz2d.points[:, 2]
@@ -382,20 +343,17 @@ class TestBrillouinZone2D:
         assert np.isclose(z_max, e_max, atol=1e-2) or z_max <= e_max
 
     def test_brillouin_zone_2d_different_lattices(
-        self,
-        simple_cubic_reciprocal_lattice,
-        fcc_reciprocal_lattice,
-        hexagonal_reciprocal_lattice
+        self, simple_cubic_reciprocal_lattice, fcc_reciprocal_lattice, hexagonal_reciprocal_lattice
     ):
         """Test BrillouinZone2D works with different lattice types."""
         e_min = -5.0
         e_max = 5.0
 
-        for lattice in [simple_cubic_reciprocal_lattice, fcc_reciprocal_lattice, hexagonal_reciprocal_lattice]:
-            bz2d = BrillouinZone2D(
-                e_min=e_min,
-                e_max=e_max,
-                reciprocal_lattice=lattice
-            )
+        for lattice in [
+            simple_cubic_reciprocal_lattice,
+            fcc_reciprocal_lattice,
+            hexagonal_reciprocal_lattice,
+        ]:
+            bz2d = BrillouinZone2D(e_min=e_min, e_max=e_max, reciprocal_lattice=lattice)
             assert bz2d.n_cells > 0
             assert bz2d.n_points > 0

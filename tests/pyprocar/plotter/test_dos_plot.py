@@ -53,7 +53,8 @@ def _make_mock_property(
         metadata: Optional metadata dict with "label" key for per-channel labels
         data_lim: Optional (min, max) tuple for data limits
 
-    Returns:
+    Returns
+    -------
         Mock object with Property interface
     """
     mock = Mock()
@@ -100,7 +101,8 @@ def _make_mock_property_with_scalars(
 ) -> tuple[Mock, Mock]:
     """Create mock point_data and scalars_data Properties.
 
-    Returns:
+    Returns
+    -------
         Tuple of (point_data_mock, scalars_data_mock)
     """
     point_data = _make_mock_property(
@@ -134,7 +136,8 @@ def _make_mock_property_with_vectors(
 ) -> tuple[Mock, Mock]:
     """Create mock point_data and vectors_data Properties.
 
-    Returns:
+    Returns
+    -------
         Tuple of (point_data_mock, vectors_data_mock)
     """
     point_data = _make_mock_property(n_points=n_points, n_channels=n_channels)
@@ -201,7 +204,9 @@ def test_plot_line_uses_metadata_labels_per_channel():
 
     expected_labels = projected_sum.metadata["label"]
     # Filter out matplotlib internal lines (baseline, etc.) that have auto-generated labels starting with '_'
-    actual_labels = [line.get_label() for line in plotter.ax.lines if not line.get_label().startswith("_")]
+    actual_labels = [
+        line.get_label() for line in plotter.ax.lines if not line.get_label().startswith("_")
+    ]
 
     assert actual_labels == expected_labels
     plt.close(plotter.fig)
@@ -423,9 +428,7 @@ class TestDOSPlotterPlot:
             f"{mock_property_single_channel.points_label} "
             f"({mock_property_single_channel.points_units})"
         )
-        expected_y = (
-            f"{mock_property_single_channel.label} ({mock_property_single_channel.units})"
-        )
+        expected_y = f"{mock_property_single_channel.label} ({mock_property_single_channel.units})"
 
         assert plotter.ax.get_xlabel() == expected_x
         assert plotter.ax.get_ylabel() == expected_y
@@ -438,9 +441,7 @@ class TestDOSPlotterPlot:
         plotter.plot(mock_property_single_channel)
 
         # Vertical swaps x and y
-        expected_x = (
-            f"{mock_property_single_channel.label} ({mock_property_single_channel.units})"
-        )
+        expected_x = f"{mock_property_single_channel.label} ({mock_property_single_channel.units})"
         expected_y = (
             f"{mock_property_single_channel.points_label} "
             f"({mock_property_single_channel.points_units})"

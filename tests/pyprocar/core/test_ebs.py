@@ -202,7 +202,9 @@ def sample_ebs_mesh_spin_polarized(
 
 
 @pytest.fixture
-def sample_ebs_mesh_non_colinear(mesh_kpoints, mesh_bands, sample_reciprocal_lattice, sample_kgrid_info):
+def sample_ebs_mesh_non_colinear(
+    mesh_kpoints, mesh_bands, sample_reciprocal_lattice, sample_kgrid_info
+):
     """Create a sample ElectronicBandStructureMesh for testing"""
     n_kpoints = len(mesh_kpoints)
     n_bands = 3

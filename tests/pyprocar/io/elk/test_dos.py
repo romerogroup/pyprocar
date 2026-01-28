@@ -2,7 +2,6 @@
 
 import logging
 
-import numpy as np
 import pytest
 
 from pyprocar.io.elk.dos import HARTREE_TO_EV, ElkDOS

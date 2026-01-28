@@ -46,11 +46,13 @@ class TestFDF:
     def test_lattice_vectors(self) -> None:
         fdf = FDF.from_str(FDF_STR)
         assert fdf.lattice_vectors.shape == (3, 3)
-        expected = np.array([
-            [0.5, 0.5, 0.0],
-            [0.0, 0.5, 0.5],
-            [0.5, 0.0, 0.5],
-        ])
+        expected = np.array(
+            [
+                [0.5, 0.5, 0.0],
+                [0.0, 0.5, 0.5],
+                [0.5, 0.0, 0.5],
+            ]
+        )
         assert np.allclose(fdf.lattice_vectors, expected)
 
     def test_atomic_coords_format(self) -> None:

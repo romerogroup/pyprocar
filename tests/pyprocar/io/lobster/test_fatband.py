@@ -1,6 +1,5 @@
 """Tests for Fatband extractor."""
 
-
 from pyprocar.io.lobster import Fatband
 
 FATBAND_CONTENT = """# FATBAND for Fe (s)

@@ -255,11 +255,13 @@ class TestElkInStructure(BaseTest):
     def test_lattice_values(self):
         """Test lattice vectors with scale factor applied."""
         elkin = ElkIn.from_str(ELKIN_NON_SPIN_BANDS)
-        expected = np.array([
-            [7.2589, 0.0, 0.0],
-            [0.0, 7.2589, 0.0],
-            [0.0, 0.0, 7.2589],
-        ])
+        expected = np.array(
+            [
+                [7.2589, 0.0, 0.0],
+                [0.0, 7.2589, 0.0],
+                [0.0, 0.0, 7.2589],
+            ]
+        )
         np.testing.assert_allclose(elkin.lattice, expected)
 
     def test_fractional_coordinates_shape(self):
@@ -270,13 +272,15 @@ class TestElkInStructure(BaseTest):
     def test_fractional_coordinates_values(self):
         """Test fractional coordinates values."""
         elkin = ElkIn.from_str(ELKIN_NON_SPIN_BANDS)
-        expected = np.array([
-            [0.0, 0.0, 0.0],      # Sr
-            [0.5, 0.5, 0.5],      # V
-            [0.5, 0.5, 0.0],      # O
-            [0.5, 0.0, 0.5],      # O
-            [0.0, 0.5, 0.5],      # O
-        ])
+        expected = np.array(
+            [
+                [0.0, 0.0, 0.0],  # Sr
+                [0.5, 0.5, 0.5],  # V
+                [0.5, 0.5, 0.0],  # O
+                [0.5, 0.0, 0.5],  # O
+                [0.0, 0.5, 0.5],  # O
+            ]
+        )
         np.testing.assert_allclose(elkin.fractional_coordinates, expected)
 
 
@@ -319,14 +323,16 @@ class TestElkInKpath(BaseTest):
     def test_high_symmetry_points_values(self):
         """Test high-symmetry points values."""
         elkin = ElkIn.from_str(ELKIN_NON_SPIN_BANDS)
-        expected = np.array([
-            [0.0, 0.0, 0.0],  # Gamma
-            [0.5, 0.0, 0.0],  # X
-            [0.5, 0.5, 0.0],  # M
-            [0.0, 0.0, 0.0],  # Gamma
-            [0.5, 0.5, 0.5],  # R
-            [0.5, 0.0, 0.0],  # X
-        ])
+        expected = np.array(
+            [
+                [0.0, 0.0, 0.0],  # Gamma
+                [0.5, 0.0, 0.0],  # X
+                [0.5, 0.5, 0.0],  # M
+                [0.0, 0.0, 0.0],  # Gamma
+                [0.5, 0.5, 0.5],  # R
+                [0.5, 0.0, 0.0],  # X
+            ]
+        )
         np.testing.assert_allclose(elkin.high_symmetry_points, expected)
 
     def test_knames(self):

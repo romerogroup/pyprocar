@@ -17,7 +17,8 @@ class BaseTest:
     def _tmp_dir(self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
         """Make all tests run a in a temporary directory accessible via self.tmp_path.
 
-        References:
+        References
+        ----------
             https://docs.pytest.org/en/stable/how-to/tmp_path.html
         """
         monkeypatch.chdir(tmp_path)  # change to temporary directory

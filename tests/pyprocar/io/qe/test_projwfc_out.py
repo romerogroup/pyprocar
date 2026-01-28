@@ -1579,9 +1579,7 @@ def test_lowdin_non_colinear_spilling_parameter(
     lowdin_non_colinear_parser: ProjwfcOut,
 ) -> None:
     """Test spilling parameter for non-colinear."""
-    assert lowdin_non_colinear_parser.spilling_parameter == pytest.approx(
-        -0.0172, rel=1e-3
-    )
+    assert lowdin_non_colinear_parser.spilling_parameter == pytest.approx(-0.0172, rel=1e-3)
 
 
 def test_lowdin_non_colinear_total_charges_shape(

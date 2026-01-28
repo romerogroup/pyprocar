@@ -114,7 +114,7 @@ class TestFrmsfParserFromStr:
     def test_from_str_dirpath_is_empty(self) -> None:
         """Test from_str sets dirpath to empty Path."""
         parser = FrmsfParser.from_str(FRMSF_STR)
-        assert parser.dirpath == Path("")
+        assert parser.dirpath == Path()
 
 
 class TestFrmsfParserCustomFilepath:

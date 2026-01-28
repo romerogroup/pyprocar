@@ -39,7 +39,7 @@ class TestAbinitProcarMerge(BaseTest):
 
         output = AbinitOutput(bands_dirpath / "abinit.out")
         procar = AbinitProcar(dirpath=bands_dirpath, abinit_output=output)
-        
+
         merged_file = bands_dirpath / "PROCAR"
         assert merged_file.exists()
 
@@ -48,7 +48,7 @@ class TestAbinitProcarMerge(BaseTest):
 
         output = AbinitOutput(bands_dirpath / "abinit.out")
         procar = AbinitProcar(dirpath=bands_dirpath, abinit_output=output)
-        
+
         assert procar.vasp_procar is not None
 
 
@@ -58,7 +58,7 @@ class TestAbinitProcarData(BaseTest):
 
         output = AbinitOutput(bands_dirpath / "abinit.out")
         procar = AbinitProcar(dirpath=bands_dirpath, abinit_output=output)
-        
+
         assert isinstance(procar.vasp_procar.kpoints, np.ndarray)
 
     def test_bands_is_ndarray(self, bands_dirpath):
@@ -66,5 +66,5 @@ class TestAbinitProcarData(BaseTest):
 
         output = AbinitOutput(bands_dirpath / "abinit.out")
         procar = AbinitProcar(dirpath=bands_dirpath, abinit_output=output)
-        
+
         assert isinstance(procar.vasp_procar.bands, np.ndarray)

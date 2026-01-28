@@ -409,7 +409,9 @@ class TestFermiSurfaceSerialization:
         assert "test_scalar" in fs2.point_data
         np.testing.assert_array_almost_equal(fs2.point_data["test_scalar"], test_data)
 
-    def test_save_load_preserves_band_isosurfaces(self, fermisurface_3d_non_spin_polarized, tmp_path):
+    def test_save_load_preserves_band_isosurfaces(
+        self, fermisurface_3d_non_spin_polarized, tmp_path
+    ):
         """Test that band_isosurfaces are preserved through save/load."""
         fs = fermisurface_3d_non_spin_polarized
         original_keys = set(fs.band_isosurfaces.keys())

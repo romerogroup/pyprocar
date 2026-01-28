@@ -13,7 +13,8 @@ def generate_test_inputs(n_points=5):
     Args:
         n (int): number of elements (points) to generate for sequence-like inputs.
 
-    Returns:
+    Returns
+    -------
         dict of str -> data structure
     """
     return {
@@ -77,7 +78,6 @@ class TestProperty:
 
     def test_init_with_gradients(self):
         """Test initialization of Property class with dictionary."""
-
         test_data = generate_test_inputs(n_points=100)
         value = test_data["numpy_array"]
         gradients = {1: test_data["numpy_array"], 2: test_data["numpy_array"]}

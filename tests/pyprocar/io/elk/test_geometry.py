@@ -77,11 +77,13 @@ class TestElkGeometryLattice(BaseTest):
     def test_lattice_values(self):
         """Test lattice vectors values."""
         geometry = ElkGeometry.from_str(GEOMETRY_OUT)
-        expected = np.array([
-            [7.2589, 0.0, 0.0],
-            [0.0, 7.2589, 0.0],
-            [0.0, 0.0, 7.2589],
-        ])
+        expected = np.array(
+            [
+                [7.2589, 0.0, 0.0],
+                [0.0, 7.2589, 0.0],
+                [0.0, 0.0, 7.2589],
+            ]
+        )
         np.testing.assert_allclose(geometry.lattice, expected, rtol=1e-5)
 
     def test_lattice_dtype(self):
@@ -116,13 +118,15 @@ class TestElkGeometryCoordinates(BaseTest):
     def test_fractional_coordinates_values(self):
         """Test fractional coordinates values."""
         geometry = ElkGeometry.from_str(GEOMETRY_OUT)
-        expected = np.array([
-            [0.0, 0.0, 0.0],      # Sr
-            [0.5, 0.5, 0.5],      # V
-            [0.5, 0.5, 0.0],      # O
-            [0.5, 0.0, 0.5],      # O
-            [0.0, 0.5, 0.5],      # O
-        ])
+        expected = np.array(
+            [
+                [0.0, 0.0, 0.0],  # Sr
+                [0.5, 0.5, 0.5],  # V
+                [0.5, 0.5, 0.0],  # O
+                [0.5, 0.0, 0.5],  # O
+                [0.0, 0.5, 0.5],  # O
+            ]
+        )
         np.testing.assert_allclose(geometry.fractional_coordinates, expected)
 
     def test_fractional_coordinates_dtype(self):

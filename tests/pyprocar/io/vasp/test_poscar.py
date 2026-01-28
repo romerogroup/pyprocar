@@ -122,7 +122,6 @@ class TestPoscar:
         self, poscar_filepath: Path, poscar_filepath_selective_dynamics: Path
     ) -> None:
         """Test detection of Selective Dynamics line."""
-
         poscar = vasp.Poscar(poscar_filepath)
         print(poscar.file_str)
         assert poscar.has_selective_dynamics_line is False

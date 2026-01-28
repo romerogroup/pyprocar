@@ -19,10 +19,7 @@ def get_kpoints_files():
     return files
 
 
-@pytest.fixture(
-    params=get_kpoints_files(), 
-    ids=lambda p: f"{p.parent.parent.name}/{p.parent.name}"
-)
+@pytest.fixture(params=get_kpoints_files(), ids=lambda p: f"{p.parent.parent.name}/{p.parent.name}")
 def kpoints_filepath(request):
     return request.param
 

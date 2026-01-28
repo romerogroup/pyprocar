@@ -2,7 +2,6 @@
 
 import logging
 
-import numpy as np
 import pytest
 
 from pyprocar.core import DensityOfStates, Structure
@@ -281,7 +280,9 @@ class TestElkParserBands(BaseTest):
 
 
 class TestElkParserDOS(BaseTest):
-    @pytest.mark.skip(reason="ElkDOS.total shape (nspin, nenergies) doesn't match DensityOfStates expected (n_energies, n_spin)")
+    @pytest.mark.skip(
+        reason="ElkDOS.total shape (nspin, nenergies) doesn't match DensityOfStates expected (n_energies, n_spin)"
+    )
     def test_dos_type(self, dos_calc_dir):
         """Test that dos returns DensityOfStates."""
         parser = ElkParser(dos_calc_dir)

@@ -605,7 +605,7 @@ class TestPlotBandWeight:
 
     def test_plot_with_custom_cmap(self, band_plot_data):
         """Test plot with custom colormap."""
-        import matplotlib.cm as cm
+        from matplotlib import cm
 
         kslist, ekslist, wkslist = band_plot_data
 

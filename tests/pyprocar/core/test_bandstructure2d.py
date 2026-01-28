@@ -57,9 +57,7 @@ def mesh_2d_non_colinear_dir():
 @pytest.fixture
 def ebs_mesh(mesh_3d_non_spin_polarized_dir):
     """ElectronicBandStructureMesh from 3D non-spin-polarized data."""
-    ebs = ElectronicBandStructureMesh.from_code(
-        code="vasp", dirpath=mesh_3d_non_spin_polarized_dir
-    )
+    ebs = ElectronicBandStructureMesh.from_code(code="vasp", dirpath=mesh_3d_non_spin_polarized_dir)
     ebs.reduce_bands_near_fermi()
     return ebs
 
@@ -468,9 +466,7 @@ class TestBandStructure2DSerialization:
         bs2d_loaded = BandStructure2D.load(str(save_path))
 
         assert "test_scalar" in bs2d_loaded.point_data
-        np.testing.assert_array_almost_equal(
-            bs2d_loaded.point_data["test_scalar"], test_data
-        )
+        np.testing.assert_array_almost_equal(bs2d_loaded.point_data["test_scalar"], test_data)
 
     def test_save_load_preserves_band_surfaces(self, bandstructure2d_3d, tmp_path):
         """Test that band_surfaces are preserved through save/load."""
@@ -491,12 +487,8 @@ class TestBandStructure2DSerialization:
         bs2d.save(str(save_path))
         bs2d_loaded = BandStructure2D.load(str(save_path))
 
-        np.testing.assert_array_almost_equal(
-            bs2d_loaded.plane_info.normal, bs2d.plane_info.normal
-        )
-        np.testing.assert_array_almost_equal(
-            bs2d_loaded.plane_info.origin, bs2d.plane_info.origin
-        )
+        np.testing.assert_array_almost_equal(bs2d_loaded.plane_info.normal, bs2d.plane_info.normal)
+        np.testing.assert_array_almost_equal(bs2d_loaded.plane_info.origin, bs2d.plane_info.origin)
         assert bs2d_loaded.plane_info.grid_interpolation == bs2d.plane_info.grid_interpolation
 
     def test_save_load_preserves_point_set_properties(self, bandstructure2d_3d, tmp_path):

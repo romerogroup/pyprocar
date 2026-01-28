@@ -320,7 +320,6 @@ class TestStructure:
 
     def test_structure_with_empty_arrays(self):
         """Test Structure with empty arrays."""
-
         with pytest.raises(ValueError):
             struct = Structure(atoms=[], fractional_coordinates=[], lattice=np.eye(3))
 

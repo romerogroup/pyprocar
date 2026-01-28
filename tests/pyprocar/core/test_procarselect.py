@@ -132,7 +132,12 @@ class TestProcarSelectIspin:
 
         # Shape should reduce from 5D to 4D
         assert len(ps.spd.shape) == 4
-        assert ps.spd.shape == (original_shape[0], original_shape[1], original_shape[3], original_shape[4])
+        assert ps.spd.shape == (
+            original_shape[0],
+            original_shape[1],
+            original_shape[3],
+            original_shape[4],
+        )
 
     def test_select_ispin_magnetization(self, mock_procar_data):
         """Test selecting spin magnetization (value=[1])."""

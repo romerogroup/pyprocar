@@ -5,7 +5,7 @@ import logging
 import numpy as np
 import pytest
 
-from pyprocar.io.elk.bands import HARTREE_TO_EV, ElkBands
+from pyprocar.io.elk.bands import ElkBands
 from tests.utils import BaseTest
 
 logger = logging.getLogger(__name__)
@@ -70,11 +70,13 @@ BANDS_OUT_SPIN = """   0.000000000      -2.401220419        0.000002    0.000000
 """
 
 # High-symmetry points for k-path interpolation
-HIGH_SYM_POINTS = np.array([
-    [0.0, 0.0, 0.0],  # Gamma
-    [0.5, 0.0, 0.0],  # X
-    [0.5, 0.5, 0.0],  # M
-])
+HIGH_SYM_POINTS = np.array(
+    [
+        [0.0, 0.0, 0.0],  # Gamma
+        [0.5, 0.0, 0.0],  # X
+        [0.5, 0.5, 0.0],  # M
+    ]
+)
 
 
 @pytest.fixture

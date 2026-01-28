@@ -580,9 +580,7 @@ def test_spin_polarized_spin_up_eigenvalues_first_kpoint(spin_parser: PwXML) -> 
 
     bands = spin_parser.bands
     # First 3 eigenvalues in XML are spin-up: -1.959..., -0.997..., -0.997...
-    expected_spin_up = np.array(
-        [-1.959020700646865, -0.9970853727704887, -0.9970853727676383]
-    )
+    expected_spin_up = np.array([-1.959020700646865, -0.9970853727704887, -0.9970853727676383])
     np.testing.assert_array_almost_equal(bands[0, :, 0], expected_spin_up)
 
 
@@ -592,9 +590,7 @@ def test_spin_polarized_spin_down_eigenvalues_first_kpoint(spin_parser: PwXML) -
 
     bands = spin_parser.bands
     # Last 3 eigenvalues in XML are spin-down: -1.958..., -0.997..., -0.997...
-    expected_spin_down = np.array(
-        [-1.958955444221249, -0.9970213191092516, -0.9970213191044732]
-    )
+    expected_spin_down = np.array([-1.958955444221249, -0.9970213191092516, -0.9970213191044732])
     np.testing.assert_array_almost_equal(bands[0, :, 1], expected_spin_down)
 
 
@@ -603,9 +599,7 @@ def test_spin_polarized_spin_up_eigenvalues_second_kpoint(spin_parser: PwXML) ->
     import numpy as np
 
     bands = spin_parser.bands
-    expected_spin_up = np.array(
-        [-1.958978823584957, -0.9970492682579844, -0.9970492677830285]
-    )
+    expected_spin_up = np.array([-1.958978823584957, -0.9970492682579844, -0.9970492677830285])
     np.testing.assert_array_almost_equal(bands[1, :, 0], expected_spin_up)
 
 
@@ -614,9 +608,7 @@ def test_spin_polarized_spin_down_eigenvalues_second_kpoint(spin_parser: PwXML) 
     import numpy as np
 
     bands = spin_parser.bands
-    expected_spin_down = np.array(
-        [-1.958913568283779, -0.9969852167037133, -0.9969852162353813]
-    )
+    expected_spin_down = np.array([-1.958913568283779, -0.9969852167037133, -0.9969852162353813])
     np.testing.assert_array_almost_equal(bands[1, :, 1], expected_spin_down)
 
 
@@ -921,9 +913,7 @@ def test_identity_rotation_is_identity_matrix(symmetries_parser: PwXML) -> None:
     import numpy as np
 
     expected_identity = np.eye(3)
-    np.testing.assert_array_almost_equal(
-        symmetries_parser.rotations[0], expected_identity
-    )
+    np.testing.assert_array_almost_equal(symmetries_parser.rotations[0], expected_identity)
 
 
 def test_180_rotation_z_axis_has_correct_values(symmetries_parser: PwXML) -> None:
@@ -931,9 +921,7 @@ def test_180_rotation_z_axis_has_correct_values(symmetries_parser: PwXML) -> Non
     import numpy as np
 
     expected_rotation = np.array([[-1.0, 0.0, 0.0], [0.0, -1.0, 0.0], [0.0, 0.0, 1.0]])
-    np.testing.assert_array_almost_equal(
-        symmetries_parser.rotations[1], expected_rotation
-    )
+    np.testing.assert_array_almost_equal(symmetries_parser.rotations[1], expected_rotation)
 
 
 # =============================================================================
@@ -1085,9 +1073,7 @@ def test_reciprocal_lattice_b1_has_correct_values(basis_set_parser: PwXML) -> No
     import numpy as np
 
     expected_b1 = np.array([1.0, 0.0, 0.0])
-    np.testing.assert_array_almost_equal(
-        basis_set_parser.reciprocal_lattice[0], expected_b1
-    )
+    np.testing.assert_array_almost_equal(basis_set_parser.reciprocal_lattice[0], expected_b1)
 
 
 def test_reciprocal_lattice_b2_has_correct_values(basis_set_parser: PwXML) -> None:
@@ -1095,9 +1081,7 @@ def test_reciprocal_lattice_b2_has_correct_values(basis_set_parser: PwXML) -> No
     import numpy as np
 
     expected_b2 = np.array([0.0, 1.0, 0.0])
-    np.testing.assert_array_almost_equal(
-        basis_set_parser.reciprocal_lattice[1], expected_b2
-    )
+    np.testing.assert_array_almost_equal(basis_set_parser.reciprocal_lattice[1], expected_b2)
 
 
 def test_reciprocal_lattice_b3_has_correct_values(basis_set_parser: PwXML) -> None:
@@ -1105,9 +1089,7 @@ def test_reciprocal_lattice_b3_has_correct_values(basis_set_parser: PwXML) -> No
     import numpy as np
 
     expected_b3 = np.array([0.0, 0.0, 1.0])
-    np.testing.assert_array_almost_equal(
-        basis_set_parser.reciprocal_lattice[2], expected_b3
-    )
+    np.testing.assert_array_almost_equal(basis_set_parser.reciprocal_lattice[2], expected_b3)
 
 
 def test_reciprocal_lattice_is_identity_matrix(basis_set_parser: PwXML) -> None:
@@ -1115,9 +1097,7 @@ def test_reciprocal_lattice_is_identity_matrix(basis_set_parser: PwXML) -> None:
     import numpy as np
 
     expected_identity = np.eye(3)
-    np.testing.assert_array_almost_equal(
-        basis_set_parser.reciprocal_lattice, expected_identity
-    )
+    np.testing.assert_array_almost_equal(basis_set_parser.reciprocal_lattice, expected_identity)
 
 
 # =============================================================================
@@ -1686,9 +1666,7 @@ def test_timing_info_total_contains_wall(timing_info_parser: PwXML) -> None:
 
 def test_timing_info_total_wall_is_correct(timing_info_parser: PwXML) -> None:
     """Test that total timing wall time is correct."""
-    assert timing_info_parser.timing_info["total"]["wall"] == pytest.approx(
-        6.984742879867554
-    )
+    assert timing_info_parser.timing_info["total"]["wall"] == pytest.approx(6.984742879867554)
 
 
 # =============================================================================
@@ -1718,16 +1696,12 @@ def test_timing_info_partial_first_entry_calls(timing_info_parser: PwXML) -> Non
 
 def test_timing_info_partial_first_entry_cpu(timing_info_parser: PwXML) -> None:
     """Test that first partial timing has correct cpu time."""
-    assert timing_info_parser.timing_info["partial"][0]["cpu"] == pytest.approx(
-        0.4927510000000001
-    )
+    assert timing_info_parser.timing_info["partial"][0]["cpu"] == pytest.approx(0.4927510000000001)
 
 
 def test_timing_info_partial_first_entry_wall(timing_info_parser: PwXML) -> None:
     """Test that first partial timing has correct wall time."""
-    assert timing_info_parser.timing_info["partial"][0]["wall"] == pytest.approx(
-        0.8109369277954102
-    )
+    assert timing_info_parser.timing_info["partial"][0]["wall"] == pytest.approx(0.8109369277954102)
 
 
 def test_timing_info_partial_second_entry_label(timing_info_parser: PwXML) -> None:
@@ -1737,9 +1711,7 @@ def test_timing_info_partial_second_entry_label(timing_info_parser: PwXML) -> No
 
 def test_timing_info_partial_second_entry_cpu(timing_info_parser: PwXML) -> None:
     """Test that second partial timing has correct cpu time."""
-    assert timing_info_parser.timing_info["partial"][1]["cpu"] == pytest.approx(
-        5.369758
-    )
+    assert timing_info_parser.timing_info["partial"][1]["cpu"] == pytest.approx(5.369758)
 
 
 # =============================================================================
@@ -2118,10 +2090,7 @@ def test_creator_contains_text(general_info_parser: PwXML) -> None:
 
 def test_creator_text_is_correct(general_info_parser: PwXML) -> None:
     """Test that creator text is correct."""
-    assert (
-        general_info_parser.general_info["creator"]["text"]
-        == "XML file generated by PWSCF"
-    )
+    assert general_info_parser.general_info["creator"]["text"] == "XML file generated by PWSCF"
 
 
 # =============================================================================
@@ -2899,9 +2868,7 @@ def test_input_atomic_species_first_species_name(input_parser: PwXML) -> None:
 
 def test_input_atomic_species_first_species_mass(input_parser: PwXML) -> None:
     """Test that first species mass is correct."""
-    assert input_parser.input_atomic_species["species"][0]["mass"] == pytest.approx(
-        87.62
-    )
+    assert input_parser.input_atomic_species["species"][0]["mass"] == pytest.approx(87.62)
 
 
 def test_input_atomic_species_first_species_pseudo_file(input_parser: PwXML) -> None:
