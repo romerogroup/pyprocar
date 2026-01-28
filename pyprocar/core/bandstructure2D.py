@@ -468,8 +468,13 @@ def generate_band_2d_surfaces(
     )
 
     # Store band_spin_mask in field_data for later access
-    combined_surface.field_data["band_spin_surface_map"] = list(band_spin_surface_map.keys())  # pyright: ignore[reportArgumentType]
-    combined_surface.field_data["surface_band_spin_map"] = list(surface_band_spin_map.keys())  # pyright: ignore[reportArgumentType]
+    # Store as flattened int array that PyVista can serialize
+    combined_surface.field_data["band_spin_surface_map"] = np.array(
+        [item for key in band_spin_surface_map.keys() for item in key], dtype=np.int32
+    )
+    combined_surface.field_data["surface_band_spin_map"] = np.array(
+        list(surface_band_spin_map.keys()), dtype=np.int32
+    )
 
     combined_surface.set_active_scalars("spin_band_index")
 
@@ -490,8 +495,8 @@ class BandStructure2D(pv.PolyData):
     faces: npt.NDArray[np.int_]
     _band_surfaces: dict[tuple[int, int], pv.PolyData]
     _point_set: PointSet
-    _original_ebs: ElectronicBandStructureMesh
-    _ebs: ElectronicBandStructureMesh
+    _original_ebs: ElectronicBandStructureMesh | None
+    _ebs: ElectronicBandStructureMesh | None
     _plane_info: PlaneInfo
 
     def __init__(
@@ -654,11 +659,21 @@ class BandStructure2D(pv.PolyData):
     @property
     def ebs(self) -> ElectronicBandStructureMesh:
         """The padded electronic band structure mesh."""
+        if self._ebs is None:
+            raise ValueError(
+                "EBS not available. Pass ebs parameter to load() "
+                "or create BandStructure2D from calculation."
+            )
         return self._ebs
 
     @property
     def original_ebs(self) -> ElectronicBandStructureMesh:
         """The original (unpadded) electronic band structure mesh."""
+        if self._original_ebs is None:
+            raise ValueError(
+                "Original EBS not available. Pass ebs parameter to load() "
+                "or create BandStructure2D from calculation."
+            )
         return self._original_ebs
 
     @property
@@ -755,7 +770,7 @@ class BandStructure2D(pv.PolyData):
         # Convert to tuples for pyvista slice method
         normal_tuple: tuple[float, float, float] = (float(self.normal[0]), float(self.normal[1]), float(self.normal[2]))
         origin_tuple: tuple[float, float, float] = (float(self.origin[0]), float(self.origin[1]), float(self.origin[2]))
-        slice_mesh = self._ebs.slice(
+        slice_mesh = self.ebs.slice(
             normal=normal_tuple, origin=origin_tuple, as_cartesian=self.as_cartesian
         )
         return transform_points_to_uv(slice_mesh.points, self.u, self.v)
@@ -769,7 +784,7 @@ class BandStructure2D(pv.PolyData):
 
         Uses cache invalidation to track property staleness.
         """
-        prop_name, _ = self.ebs._extract_key(key)  # noqa: SLF001  # pyright: ignore[reportPrivateUsage]
+        prop_name, _ = self.ebs.extract_key(key)
 
         # Check if property exists and cache is valid
         property_value: npt.NDArray[np.float64]
@@ -1166,8 +1181,8 @@ class BandStructure2D(pv.PolyData):
 
         bs2d._band_surfaces = band_surfaces
         bs2d._point_set = point_set
-        bs2d._original_ebs = ebs  # pyright: ignore[reportAttributeAccessIssue]
-        bs2d._ebs = ebs  # pyright: ignore[reportAttributeAccessIssue]
+        bs2d._original_ebs = ebs
+        bs2d._ebs = ebs
         bs2d._plane_info = plane_info
         bs2d._ebs_cache_version = 0
         bs2d._cached_properties = {}

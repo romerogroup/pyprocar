@@ -17,7 +17,7 @@ from abc import ABC, abstractmethod
 from collections.abc import Iterable, Mapping, Sequence
 from enum import Enum
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 import numpy as np
 import numpy.typing as npt
@@ -227,7 +227,12 @@ PropertyKey = str | tuple[str, int] | tuple[str, str] | tuple[str, str, int]
 
 class DifferentiablePropertyInterface(ABC):
     @abstractmethod
-    def gradient_func(self, **kwargs: Any) -> Any:
+    def gradient_func(
+        self,
+        points: npt.NDArray[np.float64],
+        values: npt.NDArray[np.float64],
+        **kwargs: Any,
+    ) -> npt.NDArray[np.float64]:
         raise NotImplementedError
 
     @abstractmethod
@@ -285,10 +290,11 @@ class PyvistaInterface(ABC):
     @abstractmethod
     def to_mesh(
         self,
-        active_scalar: tuple[str, npt.NDArray[Any]] | None = None,
-        active_vector: tuple[str, npt.NDArray[Any]] | None = None,
+        scalars: tuple[str, npt.NDArray[Any]] | None = None,
+        vectors: tuple[str, npt.NDArray[Any]] | None = None,
+        as_cartesian: bool = True,
         **kwargs: Any,
-    ) -> Any:
+    ) -> pv.PolyData | pv.StructuredGrid | Any:
         raise NotImplementedError
 
     def set_mesh_scalar(self, name: str, scalar: npt.NDArray[Any]) -> None:
@@ -348,7 +354,7 @@ class ElectronicBandStructure(PointSet, PyvistaInterface):
         structure: Structure | None = None,
     ):
         # kpoints=None results in an empty array via np.array() in PointSet
-        super().__init__(kpoints)  # pyright: ignore[reportArgumentType]
+        super().__init__(kpoints)
 
         logger.info("Initializing ElectronicBandStructure")
 
@@ -469,8 +475,9 @@ class ElectronicBandStructure(PointSet, PyvistaInterface):
 
     @property
     def brillouin_zone(self) -> BrillouinZone:
-        # reciprocal_lattice may be None, but BrillouinZone handles it
-        return BrillouinZone(self.reciprocal_lattice, np.array([1, 1, 1]))  # pyright: ignore[reportArgumentType]
+        if self.reciprocal_lattice is None:
+            raise ValueError("reciprocal_lattice is required for brillouin_zone property")
+        return BrillouinZone(self.reciprocal_lattice, [1, 1, 1])
 
     @property
     def fermi(self) -> float:
@@ -743,7 +750,7 @@ class ElectronicBandStructure(PointSet, PyvistaInterface):
     def get_property(
         self, key: PropertyKey | None = None, **kwargs: Any
     ) -> Property | npt.NDArray[np.float64] | None:
-        prop_name, _ = self._extract_key(key)  # pyright: ignore[reportArgumentType]
+        prop_name, _ = self.extract_key(key)  # pyright: ignore[reportArgumentType]
         if prop_name not in self.property_store:
             computed = self.compute_property(prop_name, **kwargs)
             if computed is not None:
@@ -756,11 +763,13 @@ class ElectronicBandStructure(PointSet, PyvistaInterface):
         return super().get_property(key)
 
     @override
-    def to_mesh(  # pyright: ignore[reportIncompatibleMethodOverride]
+    @override
+    def to_mesh(
         self,
         scalars: tuple[str, npt.NDArray[Any]] | None = None,
         vectors: tuple[str, npt.NDArray[Any]] | None = None,
         as_cartesian: bool = True,
+        **_kwargs: Any,
     ) -> Any:  # Returns pv.PointSet which is not typed
         if as_cartesian:
             mesh_points = self.kpoints_cartesian
@@ -774,7 +783,7 @@ class ElectronicBandStructure(PointSet, PyvistaInterface):
         self._mesh = mesh
         return mesh
 
-    def compute_property(self, name: str, **kwargs: Any) -> Property | None:
+    def compute_property(self, name: str, **kwargs: Any) -> Property | npt.NDArray[np.float64] | None:
         if name == "ebs_ipr":
             return self.compute_ebs_ipr(**kwargs)
         elif name == "ebs_ipr_atom":
@@ -1093,11 +1102,14 @@ class ElectronicBandStructure(PointSet, PyvistaInterface):
         spin_texture_values = np.asarray(summed_projection[..., 1:], dtype=np.float64)
         temp_shape_list = list(spin_texture_values.shape)
         temp_shape_list.insert(2, 1)
-        reshape_order: str = kwargs.pop("order", "F")
+        order_raw = kwargs.pop("order", "F")
+        # Validate and narrow type for numpy reshape
+        if order_raw not in ("C", "F", "A"):
+            raise ValueError(f"Invalid order: {order_raw}. Must be 'C', 'F', or 'A'.")
+        # Type is now narrowed to Literal["C", "F", "A"] after the validation check
+        reshape_order = order_raw
         spin_texture_values = np.asarray(
-            spin_texture_values.reshape(
-                tuple(temp_shape_list), order=reshape_order  # pyright: ignore[reportArgumentType, reportCallIssue]
-            ),
+            spin_texture_values.reshape(tuple(temp_shape_list), order=reshape_order),
             dtype=np.float64,
         )
 
@@ -1210,6 +1222,8 @@ class ElectronicBandStructure(PointSet, PyvistaInterface):
         elif mode is EBSNormMode.TOTAL_PROJECTION:
             return self.normalize_total_projection(values_array, **kwargs)
         else:
+            # Defensive: unreachable with current enum values, but provides runtime
+            # safety if enum is extended without updating this function
             raise ValueError(f"Unknown normalization mode: {mode}")  # pyright: ignore[reportUnreachable]
 
     def normalize_max(
@@ -1812,6 +1826,10 @@ class ElectronicBandStructure(PointSet, PyvistaInterface):
         return f"{property_name}_hessian"
 
 
+# Intentional interface differences: add_property uses different parameter names
+# (PointSet's signature vs DifferentiablePropertyInterface), and gradient_func
+# overrides a property with a method. These are design choices that would require
+# major refactoring to Protocol-based design to properly fix.
 class ElectronicBandStructurePath(  # pyright: ignore[reportIncompatibleMethodOverride]
     ElectronicBandStructure, DifferentiablePropertyInterface, PyvistaInterface
 ):
@@ -1908,6 +1926,8 @@ class ElectronicBandStructurePath(  # pyright: ignore[reportIncompatibleMethodOv
         }
 
         # Create new Property with merged metadata
+        # Note: kpath_metadata is a nested dict which doesn't match MetadataValue type.
+        # Fixing this would require expanding MetadataValue to include nested dicts.
         merged_metadata = {**prop.metadata, "kpath": kpath_metadata}
 
         return Property(
@@ -1916,16 +1936,16 @@ class ElectronicBandStructurePath(  # pyright: ignore[reportIncompatibleMethodOv
             point_set=prop.point_set,
             units=prop.units,
             label=prop.label,
-            metadata=merged_metadata,  # pyright: ignore[reportArgumentType]
+            metadata=merged_metadata,  # pyright: ignore[reportArgumentType] - nested dict doesn't match MetadataValue
         )
 
     @override
-    def to_mesh(  # pyright: ignore[reportIncompatibleMethodOverride]
+    def to_mesh(
         self,
         scalars: tuple[str, npt.NDArray[Any]] | None = None,
         vectors: tuple[str, npt.NDArray[Any]] | None = None,
         as_cartesian: bool = True,
-        **kwargs: Any,
+        **_kwargs: Any,
     ) -> Any:  # Returns pv.PointSet which is not typed
         if as_cartesian:
             mesh_points = self.kpoints_cartesian
@@ -1939,9 +1959,14 @@ class ElectronicBandStructurePath(  # pyright: ignore[reportIncompatibleMethodOv
         self._mesh = mesh
         return mesh
 
+    # Intentionally overrides PointSet.gradient_func property with a method to implement
+    # DifferentiablePropertyInterface. This design choice requires Protocol refactoring to fix.
     @override
     def gradient_func(  # pyright: ignore[reportIncompatibleMethodOverride]
-        self, points: npt.NDArray[np.float64], values: npt.NDArray[np.float64]
+        self,
+        points: npt.NDArray[np.float64],
+        values: npt.NDArray[np.float64],
+        **_kwargs: Any,
     ) -> npt.NDArray[np.float64]:
         continuous_segments = self.kpath.get_continuous_segments()
 
@@ -1965,7 +1990,7 @@ class ElectronicBandStructurePath(  # pyright: ignore[reportIncompatibleMethodOv
         return gradients
 
     @override
-    def compute_property(  # pyright: ignore[reportIncompatibleMethodOverride]
+    def compute_property(
         self, name: str, **kwargs: Any
     ) -> Property | npt.NDArray[np.float64] | None:
         if name == "bands_velocity":
@@ -2274,6 +2299,10 @@ def edge_diff_ramp(
     return None
 
 
+# Intentional interface differences: add_property uses different parameter names
+# (PointSet's signature vs DifferentiablePropertyInterface), and gradient_func
+# overrides a property with a method. These are design choices that would require
+# major refactoring to Protocol-based design to properly fix.
 class ElectronicBandStructureMesh(  # pyright: ignore[reportIncompatibleMethodOverride]
     ElectronicBandStructure, DifferentiablePropertyInterface, PyvistaInterface
 ):
@@ -2390,11 +2419,12 @@ class ElectronicBandStructureMesh(  # pyright: ignore[reportIncompatibleMethodOv
         return is_2d
 
     @override
-    def to_mesh(  # pyright: ignore[reportIncompatibleMethodOverride]
+    def to_mesh(
         self,
         scalars: tuple[str, npt.NDArray[Any]] | None = None,
         vectors: tuple[str, npt.NDArray[Any]] | None = None,
         as_cartesian: bool = True,
+        **_kwargs: Any,
     ) -> pv.StructuredGrid:
         """Explicitly returns a new PyVista StructuredGrid."""
         # This can be the same logic as the `grid` property,
@@ -2455,7 +2485,7 @@ class ElectronicBandStructureMesh(  # pyright: ignore[reportIncompatibleMethodOv
         return property_mesh
 
     @override
-    def compute_property(  # pyright: ignore[reportIncompatibleMethodOverride]
+    def compute_property(
         self, name: str, **kwargs: Any
     ) -> Property | npt.NDArray[np.float64] | None:
         if name == "bands_velocity":
@@ -2486,11 +2516,14 @@ class ElectronicBandStructureMesh(  # pyright: ignore[reportIncompatibleMethodOv
         kpoints_padding_dims = copy.deepcopy(padding_dims)
         kpoints_padding_dims.append((0, 0))
         kpoints_mesh = ebs.get_kpoints_mesh()
-        # np.pad with custom function mode is not fully typed
-        padded_kpoints_mesh: npt.NDArray[np.float64] = np.pad(  # pyright: ignore[reportUnknownVariableType, reportCallIssue]
-            kpoints_mesh, kpoints_padding_dims, mode=edge_diff_ramp  # pyright: ignore[reportArgumentType]
+        # numpy cast: np.pad with custom edge_diff_ramp mode preserves float64 dtype
+        # and adds padding dimensions to input shape. The numpy stubs don't fully type
+        # custom mode functions, so we cast and suppress the argument type error.
+        padded_kpoints_mesh = cast(
+            npt.NDArray[np.float64],
+            np.pad(kpoints_mesh, kpoints_padding_dims, mode=edge_diff_ramp),  # pyright: ignore[reportCallIssue, reportArgumentType]
         )
-        logger.debug(f"Padded kpoints mesh shape: {padded_kpoints_mesh.shape}")  # pyright: ignore[reportUnknownMemberType]
+        logger.debug(f"Padded kpoints mesh shape: {padded_kpoints_mesh.shape}")
 
         for prop_name, calc_name, gradient_order, value_array in ebs.iter_properties():
             prop = ebs.get_property(prop_name)
@@ -2510,7 +2543,7 @@ class ElectronicBandStructureMesh(  # pyright: ignore[reportIncompatibleMethodOv
                 continue
             prop[calc_name, gradient_order] = padded_array
 
-        new_kpoints = math.mesh_to_array(padded_kpoints_mesh, order=order)  # pyright: ignore[reportUnknownArgumentType]
+        new_kpoints = math.mesh_to_array(padded_kpoints_mesh, order=order)
         if new_kpoints is None:
             raise ValueError("Failed to convert padded kpoints mesh to array")
         ebs.update_points(new_kpoints)
@@ -2612,8 +2645,11 @@ class ElectronicBandStructureMesh(  # pyright: ignore[reportIncompatibleMethodOv
             value_mesh = math.array_to_mesh(
                 array=value_array, nkx=ebs.n_kx, nky=ebs.n_ky, nkz=ebs.n_kz
             )
-            interpolated_mesh = math.fft_interpolate_nd_3dmesh(  # pyright: ignore[reportUnknownMemberType]
-                value_mesh, interpolation_factor
+            # numpy cast: fft_interpolate_nd_3dmesh returns interpolated array with same dtype.
+            # Function has partially unknown types due to internal numpy operations.
+            interpolated_mesh = cast(
+                npt.NDArray[np.float64],
+                math.fft_interpolate_nd_3dmesh(value_mesh, interpolation_factor),  # pyright: ignore[reportUnknownMemberType]
             )
             interpolated_value = math.mesh_to_array(interpolated_mesh)
             if interpolated_value is None:
@@ -2729,6 +2765,8 @@ class ElectronicBandStructureMesh(  # pyright: ignore[reportIncompatibleMethodOv
             sliced.set_active_vectors(vector_name)
         return sliced
 
+    # Intentionally overrides PointSet.gradient_func property with a method to implement
+    # DifferentiablePropertyInterface. This design choice requires Protocol refactoring to fix.
     @override
     def gradient_func(  # pyright: ignore[reportIncompatibleMethodOverride]
         self, points: npt.NDArray[np.float64], values: npt.NDArray[np.float64], **kwargs: Any

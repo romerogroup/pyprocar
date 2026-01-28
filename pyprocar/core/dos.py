@@ -338,6 +338,8 @@ class NormMode(Enum):
         elif mode == cls.MAGNETIZATION:
             return "magnetization"
         else:
+            # Defensive: unreachable with current enum values, but provides runtime
+            # safety if enum is extended without updating this function
             raise ValueError(f"Invalid normalization mode: {mode}")  # pyright: ignore[reportUnreachable]
 
     @classmethod
@@ -356,6 +358,8 @@ class NormMode(Enum):
         elif mode == cls.INTEGRAL or mode == cls.ELECTRONS:
             return "states"
         else:
+            # Defensive: unreachable with current enum values, but provides runtime
+            # safety if enum is extended without updating this function
             return ""  # pyright: ignore[reportUnreachable]
 
     @classmethod
@@ -378,6 +382,8 @@ class NormMode(Enum):
         elif mode == cls.ELECTRONS:
             return "N_Electrons-Normed"
         else:
+            # Defensive: unreachable with current enum values, but provides runtime
+            # safety if enum is extended without updating this function
             return ""  # pyright: ignore[reportUnreachable]
 
     @classmethod
@@ -400,6 +406,8 @@ class NormMode(Enum):
         elif mode == cls.ELECTRONS:
             return "Normalization is by the N_Electrons DoS"
         else:
+            # Defensive: unreachable with current enum values, but provides runtime
+            # safety if enum is extended without updating this function
             return ""  # pyright: ignore[reportUnreachable]
 
 
@@ -930,6 +938,8 @@ class DensityOfStates(PointSet):
         elif mode is NormMode.ELECTRONS:
             return self.normalize_electrons(values_array=values_array, **kwargs)
         else:
+            # Defensive: unreachable with current enum values, but provides runtime
+            # safety if enum is extended without updating this function
             raise ValueError(  # pyright: ignore[reportUnreachable]
                 f"Normalization mode {mode} not found. Likely forgot to add it to the normalize method."
             )
@@ -1815,7 +1825,7 @@ class DensityOfStates(PointSet):
         if key is None:
             return None
 
-        prop_name, (_calc_name, _gradient_order) = self._extract_key(key)
+        prop_name, (_calc_name, _gradient_order) = self.extract_key(key)
 
         params = self._params_for_property(prop_name, kwargs)
         requested_key = self._make_property_key(prop_name, params)

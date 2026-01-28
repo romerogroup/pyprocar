@@ -110,8 +110,8 @@ class FermiSurface(pv.PolyData):
     faces: npt.NDArray[Any]
     _band_isosurfaces: dict[tuple[int, int], pv.PolyData]
     _isovalue: float
-    _original_ebs: ElectronicBandStructureMesh
-    _ebs: ElectronicBandStructureMesh
+    _original_ebs: ElectronicBandStructureMesh | None
+    _ebs: ElectronicBandStructureMesh | None
     _point_set: PointSet
 
     def __init__(
@@ -224,10 +224,20 @@ class FermiSurface(pv.PolyData):
 
     @property
     def original_ebs(self) -> ElectronicBandStructureMesh:
+        if self._original_ebs is None:
+            raise ValueError(
+                "Original EBS not available. Pass ebs parameter to load() "
+                "or create FermiSurface from calculation."
+            )
         return self._original_ebs
 
     @property
     def ebs(self) -> ElectronicBandStructureMesh:
+        if self._ebs is None:
+            raise ValueError(
+                "EBS not available. Pass ebs parameter to load() "
+                "or create FermiSurface from calculation."
+            )
         return self._ebs
 
     @property
@@ -582,6 +592,8 @@ class FermiSurface(pv.PolyData):
         elif mode == FSNormMode.INTEGRAL:
             return self._normalize_integral(values_array, **kwargs)
         else:
+            # Defensive: unreachable with current enum values, but provides runtime
+            # safety if enum is extended without updating this function
             raise ValueError(f"Unknown normalization mode: {mode}")  # pyright: ignore[reportUnreachable]
 
     def _normalize_max(self, values_array: np.ndarray, **_kwargs: Any) -> np.ndarray:
@@ -839,7 +851,7 @@ class FermiSurface(pv.PolyData):
             prop_gradients = prop.gradients
             properties_dict[prop_name] = {
                 "value": prop.value.copy(),
-                "gradients": {k: v.copy() for k, v in prop_gradients.items() if v is not None and len(v) > 0},  # pyright: ignore[reportUnnecessaryComparison]
+                "gradients": {k: v.copy() for k, v in prop_gradients.items() if len(v) > 0},
                 "units": prop.units,
                 "label": prop.label,
                 "metadata": copy.deepcopy(prop.metadata) if prop.metadata else {},
@@ -953,8 +965,8 @@ class FermiSurface(pv.PolyData):
 
         fs._band_isosurfaces = band_isosurfaces
         fs._isovalue = save_data["isovalue"]
-        fs._original_ebs = ebs  # pyright: ignore[reportAttributeAccessIssue]
-        fs._ebs = ebs  # pyright: ignore[reportAttributeAccessIssue]
+        fs._original_ebs = ebs
+        fs._ebs = ebs
         fs._point_set = point_set
 
         # Projection selection infrastructure (lazy initialized)
@@ -968,7 +980,7 @@ class FermiSurface(pv.PolyData):
         logger.info(f"FermiSurface loaded from {path}")
         return fs
 
-    def get_brillouin_zone(self, supercell: list[int]):
+    def get_brillouin_zone(self, supercell: list[int]) -> BrillouinZone:
         """Returns the BrillouinZone of the material
 
         Parameters
@@ -981,11 +993,12 @@ class FermiSurface(pv.PolyData):
         pyprocar.core.BrillouinZone
             The BrillouinZone of the material
         """
-
-        return BrillouinZone(self.reciprocal_lattice, supercell)  # pyright: ignore[reportArgumentType]
+        if self.reciprocal_lattice is None:
+            raise ValueError("reciprocal_lattice is required for get_brillouin_zone")
+        return BrillouinZone(self.reciprocal_lattice, supercell)
 
     def get_property(self, key: Any, **kwargs: Any) -> npt.NDArray[np.float64]:
-        prop_name, (calc_name, gradient_order) = self.ebs._extract_key(key)  # pyright: ignore[reportPrivateUsage]
+        prop_name, (calc_name, gradient_order) = self.ebs.extract_key(key)
 
         property_value: npt.NDArray[np.float64]
         if prop_name not in self.point_set.property_store:
@@ -1271,7 +1284,7 @@ class FermiSurface(pv.PolyData):
         elif isinstance(point_data, np.ndarray):
             self.point_data[name] = point_data
         elif surface is not None:
-            self.point_data.update(surface.point_data)  # pyright: ignore[reportArgumentType]
+            self.point_data.update(dict(surface.point_data))
         else:
             raise ValueError(
                 "Either point_data or a surface with point_data attribute must be provided"
@@ -1406,21 +1419,23 @@ class FermiSurface(pv.PolyData):
         logger.info("___Interpolating to surface___")
 
         if grid is None and meshgrids is None:
-            raise ValueError("image_data, meshgrids, or unstructured_grid must be provided")
+            raise ValueError("grid or meshgrids must be provided")
 
         unstructured_grid: pv.UnstructuredGrid
         if meshgrids is not None:
             logger.info("___Interpolating to surface from meshgrids___")
-            grid = copy.deepcopy(self.grid)
+            local_grid = copy.deepcopy(self.grid)
             for name, meshgrid in meshgrids.items():
-                grid.point_data[name] = meshgrid.reshape(-1, order="F")
-            unstructured_grid = grid.cast_to_unstructured_grid()
-
-        if grid is not None:
+                local_grid.point_data[name] = meshgrid.reshape(-1, order="F")
+            unstructured_grid = local_grid.cast_to_unstructured_grid()
+        elif grid is not None:
             logger.info("___Interpolating to surface from grid___")
             unstructured_grid = grid.cast_to_unstructured_grid()
+        else:
+            # Unreachable due to check above, but satisfies type checker
+            raise AssertionError("grid or meshgrids must be provided")
 
-        unstructured_grid_cart: pv.UnstructuredGrid = unstructured_grid.transform(  # pyright: ignore[reportPossiblyUnboundVariable] - grid is None-checked above
+        unstructured_grid_cart: pv.UnstructuredGrid = unstructured_grid.transform(
             self.transform_matrix_to_cart, transform_all_input_vectors=False, inplace=False
         )
 

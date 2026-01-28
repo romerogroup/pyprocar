@@ -587,14 +587,14 @@ class PointSet:
 
     def __init__(
         self,
-        points: npt.ArrayLike,
+        points: npt.ArrayLike | None = None,
         point_data: Mapping[str, Property] | Sequence[Property] | None = None,
         gradient_func: GradientFuncType | None = None,
         transform_matrix: npt.NDArray[np.float64] | None = None,
         points_label: str | None = None,
         points_units: str | None = None,
     ) -> None:
-        self._points = np.array(points)
+        self._points = np.array([], dtype=np.float64) if points is None else np.array(points)
         self._points_label = points_label
         self._points_units = points_units
         self._point_data = {}
@@ -687,7 +687,7 @@ class PointSet:
     ) -> Property | npt.NDArray[np.float64] | None:
         if key is None:
             return None
-        prop_name, (calc_name, gradient_order) = self._extract_key(key)
+        prop_name, (calc_name, gradient_order) = self.extract_key(key)
         prop = self._point_data.get(prop_name, None)
         if prop is None:
             return None
@@ -834,9 +834,25 @@ class PointSet:
             points=points, point_data=new_point_data, gradient_func=self.gradient_func
         )
 
-    def _extract_key(
+    def extract_key(
         self, key: str | tuple[str, int] | tuple[str, str] | tuple[str, str, int]
     ) -> tuple[str, tuple[str | None, int]]:
+        """Extract property name and calculation info from a property key.
+
+        Parameters
+        ----------
+        key : str | tuple
+            Property key in various formats:
+            - str: property name (gradient_order=0)
+            - tuple[str, int]: (property_name, gradient_order)
+            - tuple[str, str]: (property_name, calc_name)
+            - tuple[str, str, int]: (property_name, calc_name, gradient_order)
+
+        Returns
+        -------
+        tuple[str, tuple[str | None, int]]
+            (property_name, (calc_name, gradient_order))
+        """
         if isinstance(key, str):
             prop_name = key
             calc_name = None
