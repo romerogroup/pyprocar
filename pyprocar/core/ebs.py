@@ -294,12 +294,12 @@ class PyvistaInterface(ABC):
     def set_mesh_scalar(self, name: str, scalar: npt.NDArray[Any]) -> None:
         if self._mesh is not None:
             self._mesh.point_data[name] = scalar
-            self._mesh.set_active_scalars(name)  # pyright: ignore[reportUnknownMemberType, reportAttributeAccessIssue]
+            self._mesh.set_active_scalars(name)
 
     def set_mesh_vector(self, name: str, vector: npt.NDArray[Any]) -> None:
         if self._mesh is not None:
             self._mesh.point_data[name] = vector
-            self._mesh.set_active_vectors(name)  # pyright: ignore[reportUnknownMemberType, reportAttributeAccessIssue]
+            self._mesh.set_active_vectors(name)
 
 
 class ElectronicBandStructure(PointSet, PyvistaInterface):

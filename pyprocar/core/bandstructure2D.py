@@ -282,8 +282,8 @@ def _merge_band_surfaces(
             raise TypeError(f"Expected PolyData from merge, got {type(merge_result)}")
         merged = merge_result
 
-    merged.point_data["spin_index"] = spin_index_array  # pyright: ignore[reportArgumentType]
-    merged.point_data["spin_band_index"] = spin_band_index_array  # pyright: ignore[reportArgumentType]
+    merged.point_data["spin_index"] = spin_index_array
+    merged.point_data["spin_band_index"] = spin_band_index_array
 
     return merged, spin_index_array, spin_band_index_array, band_spin_mask
 
@@ -455,8 +455,8 @@ def generate_band_2d_surfaces(
         surface.transform(k_plane_scale_transform, inplace=True)
 
     # Clean up PyVista internal arrays
-    combined_surface.point_data.pop("vtkOriginalPointIds", None)  # pyright: ignore[reportUnknownMemberType, reportAttributeAccessIssue]
-    combined_surface.cell_data.pop("vtkOriginalCellIds", None)  # pyright: ignore[reportUnknownMemberType, reportAttributeAccessIssue]
+    combined_surface.point_data.pop("vtkOriginalPointIds", None)
+    combined_surface.cell_data.pop("vtkOriginalCellIds", None)
 
     # Create PointSet with required properties
     point_set = PointSet(combined_surface.points)
@@ -873,10 +873,10 @@ class BandStructure2D(pv.PolyData):
                 else:
                     point_data_array = np.insert(point_data_array, 0, values_band_values, axis=0)
             if point_data_array is not None:
-                self.point_data[name] = point_data_array  # pyright: ignore[reportArgumentType]
+                self.point_data[name] = point_data_array
         else:
             logger.debug(f"Adding scalar to surface point_data: {name}")
-            self.point_data[name] = values  # pyright: ignore[reportArgumentType]
+            self.point_data[name] = values
 
     def set_scalars(self, name: str, value: npt.NDArray[np.floating[Any]]) -> None:
         self.set_surface_point_data(name, value)
@@ -1157,7 +1157,7 @@ class BandStructure2D(pv.PolyData):
         temp_polydata.field_data.update(save_data["field_data"])
 
         bs2d = pv.PolyData.__new__(cls)
-        bs2d.shallow_copy(temp_polydata)  # pyright: ignore[reportUnknownMemberType, reportAttributeAccessIssue]
+        bs2d.shallow_copy(temp_polydata)
 
         # Copy PyVista internal state
         for attr in ["_association_bitarray_names", "_association_complex_names"]:

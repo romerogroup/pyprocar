@@ -5,7 +5,7 @@ import logging
 from collections.abc import Iterable, Mapping, Sequence
 from enum import Enum
 from functools import cached_property
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Any, Literal, cast
 
 from typing_extensions import override
 
@@ -616,7 +616,7 @@ class FermiSurface(pv.PolyData):
         values_array = np.asarray(values_array, dtype=np.float64)
 
         # Compute cell areas for weighting
-        cell_sizes_result: npt.NDArray[np.float64] = np.asarray(self.compute_cell_sizes(), dtype=np.float64)  # pyright: ignore[reportUnknownMemberType, reportAttributeAccessIssue]
+        cell_sizes_result: npt.NDArray[np.float64] = np.asarray(self.compute_cell_sizes(), dtype=np.float64)
         if len(cell_sizes_result) == 0:
             # Fallback to simple sum if cell sizes unavailable
             return self._normalize_total(values_array, **kwargs)
@@ -625,8 +625,8 @@ class FermiSurface(pv.PolyData):
         point_weights: npt.NDArray[np.float64] = np.zeros(self.n_points, dtype=np.float64)
         cell_count: npt.NDArray[np.float64] = np.zeros(self.n_points, dtype=np.float64)
 
-        for i, cell in enumerate(self.cell):  # pyright: ignore[reportUnknownMemberType, reportUnknownVariableType, reportUnknownArgumentType, reportAttributeAccessIssue]
-            for point_idx in cell:  # pyright: ignore[reportUnknownVariableType]
+        for i, cell in enumerate(self.cell):
+            for point_idx in cell:
                 point_weights[point_idx] += cell_sizes_result[i]
                 cell_count[point_idx] += 1
 
@@ -943,7 +943,7 @@ class FermiSurface(pv.PolyData):
         # Create the FermiSurface by calling the parent class constructor
         # and then manually setting our attributes
         fs: FermiSurface = pv.PolyData.__new__(cls)
-        fs.shallow_copy(temp_polydata)  # pyright: ignore[reportUnknownMemberType, reportAttributeAccessIssue]
+        fs.shallow_copy(temp_polydata)
 
         # Copy PyVista-specific internal state that isn't handled by VTK's shallow_copy
         # This is required for point_data/cell_data access to work properly
@@ -1065,13 +1065,20 @@ class FermiSurface(pv.PolyData):
             new_point_set = self.point_set
 
         else:
-            new_surface, fs_indices = self.remove_points(combined_mask, inplace=False)  # pyright: ignore[reportUnknownMemberType, reportUnknownVariableType, reportAttributeAccessIssue]
-            points = np.asarray(new_surface.points, dtype=np.float64)  # pyright: ignore[reportUnknownMemberType]
-            faces = np.asarray(new_surface.faces, dtype=np.int64)  # pyright: ignore[reportUnknownMemberType]
-            point_data_dict = dict(new_surface.point_data)  # pyright: ignore[reportUnknownMemberType, reportUnknownArgumentType]
-            cell_data_dict = dict(new_surface.cell_data)  # pyright: ignore[reportUnknownMemberType, reportUnknownArgumentType]
-            field_data_dict = dict(new_surface.field_data)  # pyright: ignore[reportUnknownMemberType, reportUnknownArgumentType]
-            new_point_set = self.point_set.select_points(fs_indices)  # pyright: ignore[reportUnknownArgumentType]
+            # PyVista's remove_points returns (surface, indices) tuple when inplace=False
+            # Cast via object: PyVista stubs don't fully express this return type variant
+            remove_result = cast(
+                tuple[FermiSurface, npt.NDArray[np.intp]],
+                cast(object, self.remove_points(combined_mask, inplace=False)),
+            )
+            new_surface = remove_result[0]
+            fs_indices = remove_result[1]
+            points = np.asarray(new_surface.points, dtype=np.float64)
+            faces = np.asarray(new_surface.faces, dtype=np.int64)
+            point_data_dict = dict(new_surface.point_data)
+            cell_data_dict = dict(new_surface.cell_data)
+            field_data_dict = dict(new_surface.field_data)
+            new_point_set = self.point_set.select_points(fs_indices)
             for iband, ispin in bands_spin_indices:
                 if (iband, ispin) in self.band_isosurfaces:
                     selected_band_surfaces[(iband, ispin)] = self.band_isosurfaces[(iband, ispin)]
@@ -1090,7 +1097,7 @@ class FermiSurface(pv.PolyData):
         )
 
         if return_relative_indices:
-            return fs, fs_indices  # pyright: ignore[reportUnknownVariableType]
+            return fs, fs_indices
         else:
             return fs
 
@@ -1147,7 +1154,7 @@ class FermiSurface(pv.PolyData):
             for (iband, ispin), color in surface_color_map.items():
                 color_rgba: tuple[float, float, float, float]
                 if isinstance(color, str):
-                    color_rgba = tuple(mcolors.to_rgba(color))  # pyright: ignore[reportAssignmentType]
+                    color_rgba = mcolors.to_rgba(color)
                 else:
                     color_rgba = (float(color[0]), float(color[1]), float(color[2]), 1.0)
                 if (iband, ispin) not in self.band_spin_mask:
@@ -1167,14 +1174,14 @@ class FermiSurface(pv.PolyData):
                 color = colors[i_surface]
                 color_rgba_val: tuple[float, float, float, float]
                 if isinstance(color, str):
-                    color_rgba_val = tuple(mcolors.to_rgba(color))  # pyright: ignore[reportAssignmentType]
+                    color_rgba_val = mcolors.to_rgba(color)
                 else:
                     color_rgba_val = (float(color[0]), float(color[1]), float(color[2]), 1.0)
                 bands_colors[bands_spin_mask] = color_rgba_val
                 i_surface += 1
         else:
             for (iband, ispin), _isurface in self.band_spin_surface_map.items():
-                cmapper: Colormap = plt.colormaps[cmap[ispin]]  # pyright: ignore[reportUnknownMemberType, reportUnknownVariableType, reportAttributeAccessIssue]
+                cmapper: Colormap = plt.colormaps[cmap[ispin]]
 
                 bands_spin_mask = self.band_spin_mask[(iband, ispin)]
                 color_arr: npt.NDArray[np.float64] = np.asarray([cmapper(iband)] * int(bands_spin_mask.sum()), dtype=np.float64)
@@ -1187,7 +1194,8 @@ class FermiSurface(pv.PolyData):
         bands_colors: npt.NDArray[np.float64] = np.zeros((self.n_points, 4))
 
         for spin_channel, mask in self.spin_channel_mask.items():
-            color_rgba: tuple[float, float, float, float] = tuple(mcolors.to_rgba(colors[spin_channel]))  # pyright: ignore[reportAssignmentType, reportUnknownArgumentType]
+            color_str: str = colors[int(spin_channel)]
+            color_rgba = mcolors.to_rgba(color_str)
             bands_colors[mask] = color_rgba
 
         self.point_data["spin"] = bands_colors
@@ -1309,14 +1317,14 @@ class FermiSurface(pv.PolyData):
         for direction in zone_directions:
             surface_copy: FermiSurface = copy.deepcopy(initial_surface)
             translation_vec: npt.NDArray[np.float64] = np.dot(direction, recip_lattice)
-            translated_surface: FermiSurface = surface_copy.translate(translation_vec, inplace=True)  # pyright: ignore[reportUnknownMemberType, reportUnknownVariableType, reportAttributeAccessIssue]
-            new_surface = new_surface.merge(translated_surface, merge_points=False)  # pyright: ignore[reportUnknownArgumentType]
+            translated_surface: FermiSurface = surface_copy.translate(translation_vec, inplace=True)
+            new_surface = new_surface.merge(translated_surface, merge_points=False)
 
             # Copying exisiting band_isosurfaces
             for (iband, ispin), initial_band_surface in initial_band_surfaces.items():
                 new_band_surface_cp: pv.PolyData = copy.deepcopy(initial_band_surface)
-                new_band_surface_cp += initial_band_surface.translate(translation_vec, inplace=True)  # pyright: ignore[reportUnknownMemberType, reportUnknownVariableType, reportAttributeAccessIssue]
-                new_band_surfaces[(iband, ispin)] += new_band_surface_cp  # pyright: ignore[reportOperatorIssue]
+                new_band_surface_cp += initial_band_surface.translate(translation_vec, inplace=True)
+                new_band_surfaces[(iband, ispin)] += new_band_surface_cp
 
             # Copying exisiting properties
             for (
@@ -1361,7 +1369,7 @@ class FermiSurface(pv.PolyData):
         n_points: int = 40,
         sharpness: int = 20,
         strategy: Literal["null_value", "mask_points", "closest_point"] = "null_value",
-    ) -> pv.UnstructuredGrid:
+    ) -> pv.PolyData:
         """
         Interpolate data from a grid or meshgrids onto the Fermi surface.
 
@@ -1387,8 +1395,8 @@ class FermiSurface(pv.PolyData):
 
         Returns
         -------
-        pyvista.UnstructuredGrid
-            The interpolated grid containing the data as point attributes.
+        pyvista.PolyData
+            The interpolated surface containing the data as point attributes.
 
         Notes
         -----
@@ -1406,21 +1414,21 @@ class FermiSurface(pv.PolyData):
             grid = copy.deepcopy(self.grid)
             for name, meshgrid in meshgrids.items():
                 grid.point_data[name] = meshgrid.reshape(-1, order="F")
-            unstructured_grid = grid.cast_to_unstructured_grid()  # pyright: ignore[reportUnknownMemberType, reportUnknownVariableType, reportAttributeAccessIssue]
+            unstructured_grid = grid.cast_to_unstructured_grid()
 
         if grid is not None:
             logger.info("___Interpolating to surface from grid___")
-            unstructured_grid = grid.cast_to_unstructured_grid()  # pyright: ignore[reportUnknownMemberType, reportUnknownVariableType, reportAttributeAccessIssue]
+            unstructured_grid = grid.cast_to_unstructured_grid()
 
-        unstructured_grid_cart: pv.UnstructuredGrid = unstructured_grid.transform(  # pyright: ignore[reportUnknownMemberType, reportPossiblyUnboundVariable, reportUnknownVariableType]
+        unstructured_grid_cart: pv.UnstructuredGrid = unstructured_grid.transform(  # pyright: ignore[reportPossiblyUnboundVariable] - grid is None-checked above
             self.transform_matrix_to_cart, transform_all_input_vectors=False, inplace=False
         )
 
-        keys_to_interpolate = unstructured_grid_cart.point_data.keys()  # pyright: ignore[reportUnknownMemberType, reportUnknownVariableType]
+        keys_to_interpolate = unstructured_grid_cart.point_data.keys()
         logger.debug(f"point_data to be interpolated: {keys_to_interpolate}")
 
-        interpolated_surface: pv.UnstructuredGrid = self.interpolate(  # pyright: ignore[reportAssignmentType]
-            unstructured_grid_cart,  # pyright: ignore[reportUnknownArgumentType]
+        interpolated_surface: pv.PolyData = self.interpolate(
+            unstructured_grid_cart,
             n_points=n_points,
             sharpness=sharpness,
             strategy=strategy,
