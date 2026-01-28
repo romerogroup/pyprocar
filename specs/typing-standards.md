@@ -8,7 +8,7 @@ This document is the source of truth for Python typing standards in this reposit
 
 1. **Types are documentation that the compiler verifies.** Every function signature is a contract. Violations are bugs.
 
-2. **No escape hatches.** Never use `Any`, `# type: ignore`, or `cast()` to silence errors. Fix the underlying type issue or write a proper stub.
+2. **Pragmatic typing.** Use `Any` sparingly when full typing is impractical (e.g., complex numpy operations, interop with untyped libraries). Avoid `# type: ignore` and `cast()` to silence errors—fix the underlying type issue or write a proper stub when possible.
 
 3. **Explicit over implicit.** Annotate all function parameters and return types. Never rely on type inference for public APIs.
 
@@ -384,31 +384,73 @@ These patterns are **never acceptable** in this codebase:
 
 | Pattern | Why It's Banned | What To Do Instead |
 |---------|-----------------|-------------------|
-| `Any` type | Defeats type safety entirely | Use proper types, generics, or `object` |
 | `# type: ignore` | Unsafe, no rule specification | Fix the type error properly |
 | `# pyright: ignore` (without rule) | Hides multiple potential errors | Never use; fix the underlying issue |
 | `cast()` for narrowing | Lies to the type checker | Use `isinstance()`, `TypeGuard`, or assertions |
-| `dict[str, Any]` | Untyped structure | Use `TypedDict` or proper value types |
-| `*args: Any, **kwargs: Any` | Untyped variadic | Use `ParamSpec` or concrete types |
 | Unparameterized generics | `list`, `dict`, `set` without type args | Always specify: `list[str]`, `dict[str, int]` |
 
-### Conditional Prohibitions
+### Discouraged Patterns
 
-These require explicit justification in rare cases:
+These patterns should be avoided but are allowed when necessary:
+
+| Pattern | When Acceptable | Preferred Alternative |
+|---------|-----------------|----------------------|
+| `Any` type | Complex numpy operations, untyped library interop | Use proper types, generics, or `object` when possible |
+| `dict[str, Any]` | JSON data, dynamic config structures | Use `TypedDict` when structure is known |
+| `*args: Any, **kwargs: Any` | Wrapper functions for untyped APIs | Use `ParamSpec` or concrete types when possible |
+
+### Conditional Patterns
+
+These require explicit justification:
 
 | Pattern | When Acceptable | Required Action |
 |---------|-----------------|-----------------|
 | `cast()` | Widening types or post-narrowing in comprehensions | Add comment explaining why narrowing won't work |
+| `cast()` | Numpy array operations where semantic type is known but numpy's type stubs return `Any` | Add comment with: (1) expected dtype/shape, (2) why stubs can't express it |
 | `object` type | Truly accepting any type | Confirm you don't need type info from the value |
 | `@no_type_check` | Never | Remove and fix types |
+
+### Numpy Array Typing
+
+Numpy's type stubs are incomplete for complex operations like boolean indexing, multi-axis reductions, and advanced slicing. When numpy returns `Any` but the semantic type is known:
+
+**Preferred solutions (in order):**
+1. **Targeted stubs** - Add overloads in `typings/numpy/` for the specific operation
+2. **Intermediate variables** - Break complex expressions into typed steps
+3. **`cast()` with justification** - When stubs are impractical (e.g., dynamic axis parameters)
+
+**When using `cast()` for numpy:**
+```python
+# GOOD: cast() with required justification comment
+# numpy cast: boolean indexing on float64 array returns float64 array
+selected_energies = cast(npt.NDArray[np.float64], energies[mask])
+
+# GOOD: cast() for reduction with dynamic axis
+# numpy cast: sum over axis 0 of (n_kpoints, n_bands) float64 array -> (n_bands,) float64
+band_totals = cast(npt.NDArray[np.float64], projections.sum(axis=0))
+
+# BAD: cast() without explanation
+result = cast(npt.NDArray[np.float64], some_operation)  # Why? What's the source type?
+```
+
+**Pattern: Use a helper for repeated casts:**
+```python
+# In a module where many similar casts are needed, define a typed helper:
+def _float_array(arr: npt.ArrayLike) -> npt.NDArray[np.float64]:
+    """Convert array-like to float64 ndarray. Used to type numpy operations returning Any."""
+    return np.asarray(arr, dtype=np.float64)
+
+# Usage - cleaner than scattered casts:
+selected = _float_array(energies[mask])
+```
 
 ### Examples of Fixes
 
 ```python
-# BANNED: Any in signature
+# DISCOURAGED: Any in signature (prefer proper types)
 def process(data: Any) -> Any: ...
 
-# FIXED: Proper generic
+# BETTER: Proper generic when type relationship matters
 _T = TypeVar("_T")
 def process(data: _T) -> _T: ...
 
@@ -426,8 +468,6 @@ strings = [x for x in items if isinstance(x, str)]  # Inferred as list[str]
 ```
 
 ### Relevant Diagnostics
-- `reportAny`
-- `reportExplicitAny`
 - `reportIgnoreCommentWithoutRule`
 - `reportInvalidCast`
 - `reportUnnecessaryCast`
@@ -444,8 +484,6 @@ strings = [x for x in items if isinstance(x, str)]  # Inferred as list[str]
 | `reportArgumentType` | Wrong argument type passed to function |
 | `reportReturnType` | Return value doesn't match declared type |
 | `reportAttributeAccessIssue` | Accessing attribute that doesn't exist on type |
-| `reportAny` | Expression has type `Any` |
-| `reportExplicitAny` | Direct usage of `Any` in annotations |
 | `reportUnknownParameterType` | Parameter type cannot be determined |
 | `reportUnknownMemberType` | Attribute/method type is unknown |
 | `reportMissingTypeStubs` | Third-party library needs stubs |
@@ -470,6 +508,18 @@ strings = [x for x in items if isinstance(x, str)]  # Inferred as list[str]
 | `reportIgnoreCommentWithoutRule` | Ignore comment missing rule code |
 | `reportImplicitOverride` | Override method missing `@override` decorator |
 | `reportPrivateLocalImportUsage` | Using non-exported symbol from module |
+
+### Disabled Diagnostics
+
+These diagnostics are disabled in `pyrightconfig.json` for pragmatic reasons:
+
+| Diagnostic | Reason Disabled |
+|------------|-----------------|
+| `reportAny` | Allows `Any` for complex numpy operations and untyped library interop |
+| `reportExplicitAny` | Allows explicit `Any` annotations when full typing is impractical |
+| `reportUnnecessaryIsInstance` | Allows defensive isinstance checks for clarity |
+| `reportUnusedCallResult` | Allows calling functions for side effects without capturing return |
+| `reportImplicitStringConcatenation` | Allows implicit string concatenation in code |
 
 ### Running Diagnostics
 
