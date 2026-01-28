@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import logging
-from typing import Any, cast
+from typing import cast
 
 import numpy as np
 import numpy.typing as npt
@@ -20,7 +20,7 @@ class Lines:
     verts: npt.NDArray[np.float64] | None
     faces: npt.NDArray[np.intp] | None
     pyvista_line: pv.PolyData
-    trimesh_line: Any
+    trimesh_line: object
     connectivity: list[list[int]]
 
     def __init__(
@@ -46,13 +46,19 @@ class Lines:
     def _get_connectivity(self) -> None:
         if self.faces is None:
             return
-        for iface in range(len(self.faces)):
+        faces_arr = self.faces
+        n_faces = int(cast(int, faces_arr.shape[0]))
+        for iface in range(n_faces):
+            # Get row as 1D array by slicing
+            first_val = int(cast(np.intp, faces_arr[iface, 0]))
+            last_val = int(cast(np.intp, faces_arr[iface, -1]))
             self.connectivity.append(
-                [int(self.faces[iface][0]), int(self.faces[iface][-1])]
+                [first_val, last_val]
             )  # to connect the 1st and last point
-            for ipoint in range(len(self.faces[iface]) - 1):
-                point_1 = int(self.faces[iface][ipoint])
-                point_2 = int(self.faces[iface][ipoint + 1])
+            face_len = int(cast(int, faces_arr.shape[1]))
+            for ipoint in range(face_len - 1):
+                point_1 = int(cast(np.intp, faces_arr[iface, ipoint]))
+                point_2 = int(cast(np.intp, faces_arr[iface, ipoint + 1]))
                 self.connectivity.append([point_1, point_2])
 
     # def _create_pyvista(self):
@@ -62,14 +68,14 @@ class Lines:
     #     self.pyvista_line.lines = cell
 
     def _create_trimesh(self) -> None:
-        entities: list[Any] = []
-        for iline in self.connectivity:
-            # trimesh is untyped, access entities module via path
-            path_module: Any = trimesh.path
-            line_entity: Any = path_module.entities.Line(iline)
-            entities.append(line_entity)
+        from trimesh.path.entities import Line
 
-        self.trimesh_line = trimesh.path.Path3D(entities=entities, vertices=self.verts)
+        entity_list: list[Line] = []
+        for iline in self.connectivity:
+            line_entity = Line(iline)
+            entity_list.append(line_entity)
+
+        self.trimesh_line = trimesh.path.Path3D(entities=entity_list, vertices=self.verts)
 
 
 class BrillouinZone(pv.PolyData):
@@ -96,7 +102,7 @@ class BrillouinZone(pv.PolyData):
         logger.info("___Initializing BrillouinZone object___")
 
         self.reciprocal = reciprocal_lattice
-        verts, faces = self.wigner_seitz()
+        verts, faces = self.compute_wigner_seitz_static(reciprocal_lattice)
 
         # Format faces for pv.PolyData
         new_faces: list[int] = []
@@ -105,9 +111,8 @@ class BrillouinZone(pv.PolyData):
             for ivert in iface:
                 new_faces.append(ivert)
 
-        # Initialize with the properly formatted faces array
-        # pyvista has incomplete type stubs, use cast to suppress warning
-        cast(Any, pv.PolyData.__init__)(self, verts, new_faces)
+        # Initialize parent class
+        super().__init__(verts, new_faces)
 
         logger.debug(f"BrillouinZone faces: {len(faces)}")
         logger.debug(f"BrillouinZone verts: {verts.shape}")
@@ -118,10 +123,7 @@ class BrillouinZone(pv.PolyData):
 
     @property
     def centers(self) -> npt.NDArray[np.float64]:
-        result: npt.NDArray[np.float64] = cast(
-            npt.NDArray[np.float64], self.cell_centers().points
-        )
-        return result
+        return self.cell_centers().points
 
     @property
     def faces_array(self) -> list[list[int]]:
@@ -141,45 +143,43 @@ class BrillouinZone(pv.PolyData):
         count = 0
         num_verts = 0
 
-        pv_faces: npt.NDArray[np.intp] = cast(npt.NDArray[np.intp], self.faces)
-        for iverts_in_face, verts_in_face in enumerate(pv_faces):
+        pv_faces: npt.NDArray[np.intp] = self.faces
+        for iverts_in_face in range(len(pv_faces)):
+            verts_in_face_val = int(cast(np.intp, pv_faces[iverts_in_face]))
             if iverts_in_face == 0:
-                num_verts = int(verts_in_face)
+                num_verts = verts_in_face_val
                 face = [num_verts]
             else:
                 if count == num_verts:
                     count = 0
                     new_faces.append(face)
-                    num_verts = int(verts_in_face)
+                    num_verts = verts_in_face_val
                     face = [num_verts]
                 elif iverts_in_face == len(pv_faces) - 1:
-                    face.append(int(verts_in_face))
+                    face.append(verts_in_face_val)
                     new_faces.append(face)
                 else:
                     count += 1
-                    face.append(int(verts_in_face))
+                    face.append(verts_in_face_val)
 
         return new_faces
 
-    def wigner_seitz(self) -> tuple[npt.NDArray[np.float64], list[list[int]]]:
-        """Calculates the wigner Seitz cell in the form of a tuple containing the verts and faces of the cell
-
-        Returns
-        -------
-        Tuple(n_verts,n_faces)
-            Returns the wigner Seitz cell in the form of a tuple containing the verts and faces of the cell
-        """
+    @staticmethod
+    def compute_wigner_seitz_static(
+        reciprocal: npt.NDArray[np.float64],
+    ) -> tuple[npt.NDArray[np.float64], list[list[int]]]:
+        """Computes the Wigner Seitz cell for a given reciprocal lattice."""
         logger.info("___Calculating Wigner Seitz cell___")
 
         kpoints: list[npt.NDArray[np.float64]] = []
+        r0: npt.NDArray[np.float64] = cast(npt.NDArray[np.float64], reciprocal[0])
+        r1: npt.NDArray[np.float64] = cast(npt.NDArray[np.float64], reciprocal[1])
+        r2: npt.NDArray[np.float64] = cast(npt.NDArray[np.float64], reciprocal[2])
         for i in range(-1, 2):
             for j in range(-1, 2):
                 for k in range(-1, 2):
-                    vec: npt.NDArray[np.float64] = (
-                        i * self.reciprocal[0] + j * self.reciprocal[1] + k * self.reciprocal[2]
-                    )
+                    vec: npt.NDArray[np.float64] = i * r0 + j * r1 + k * r2
                     kpoints.append(vec)
-        # print(kpoints, self.reciprocal)
         brill = Voronoi(np.array(kpoints))
         faces: list[list[int]] = []
         for idict in brill.ridge_dict:
@@ -190,27 +190,35 @@ class BrillouinZone(pv.PolyData):
 
         return verts, faces
 
+    def wigner_seitz(self) -> tuple[npt.NDArray[np.float64], list[list[int]]]:
+        """Calculates the wigner Seitz cell in the form of a tuple containing the verts and faces of the cell
+
+        Returns
+        -------
+        Tuple(n_verts,n_faces)
+            Returns the wigner Seitz cell in the form of a tuple containing the verts and faces of the cell
+        """
+        return self.compute_wigner_seitz_static(self.reciprocal)
+
     def _fix_normals_direction(self) -> None:
         """
         Helper method that calculates the normals of the Wigner seits cell
         """
         logger.info("___Fixing normals direction___")
-        cell_centers: npt.NDArray[np.float64] = cast(
-            npt.NDArray[np.float64], self.cell_centers().points
-        )
-        if len(cell_centers) == 0:
+        cell_centers_points: npt.NDArray[np.float64] = self.cell_centers().points
+        if len(cell_centers_points) == 0:
             logger.warning("___No centers found___")
             return None
 
-        center: npt.NDArray[np.float64] = cell_centers[0]
+        center: npt.NDArray[np.float64] = cast(npt.NDArray[np.float64], cell_centers_points[0])
         n1: npt.NDArray[np.float64] = center / np.linalg.norm(center)
-        face_normals: npt.NDArray[np.float64] = cast(
-            npt.NDArray[np.float64], self.face_normals
-        )
-        n2: npt.NDArray[np.float64] = face_normals[0]
-        correction: np.floating[Any] = np.sign(np.dot(n1, n2))
+        face_normals_arr: npt.NDArray[np.float64] = self.face_normals
+        n2: npt.NDArray[np.float64] = cast(npt.NDArray[np.float64], face_normals_arr[0])
+        dot_result: np.float64 = cast(np.float64, np.dot(n1, n2))
+        sign_result: np.float64 = cast(np.float64, np.sign(dot_result))
+        correction = float(sign_result)
         if correction == -1:
-            self.compute_normals(flip_normals=True, inplace=True)
+            _ = self.compute_normals(flip_normals=True, inplace=True)
         return None
 
 
@@ -242,19 +250,22 @@ class BrillouinZone2D(pv.PolyData):
         reciprocal_lattice: npt.NDArray[np.float64] | None = None,
         transformation_matrix: list[int] | None = None,
     ) -> None:
+        if reciprocal_lattice is None:
+            raise ValueError("reciprocal_lattice must be provided")
+
         self.reciprocal = reciprocal_lattice
 
-        verts, faces = self.wigner_seitz()
+        verts, faces = BrillouinZone.compute_wigner_seitz_static(reciprocal_lattice)
 
-        min_val: np.floating[Any] = verts[:, axis].min()
-        max_val: np.floating[Any] = verts[:, axis].max()
+        min_val = float(cast(np.float64, verts[:, axis].min()))
+        max_val = float(cast(np.float64, verts[:, axis].max()))
 
-        for vert in verts:
-            vert_z = vert[axis]
+        for i_vert in range(len(verts)):
+            vert_z = float(cast(np.float64, verts[i_vert, axis]))
             if np.isclose(vert_z, min_val, atol=1e-2):
-                vert[axis] = e_min
+                verts[i_vert, axis] = e_min
             if np.isclose(vert_z, max_val, atol=1e-2):
-                vert[axis] = e_max
+                verts[i_vert, axis] = e_max
 
         new_faces: list[int] = []
         for iface in faces:
@@ -262,19 +273,15 @@ class BrillouinZone2D(pv.PolyData):
             for ivert in iface:
                 new_faces.append(ivert)
 
-        # Initialize with the properly formatted faces array
-        # pyvista has incomplete type stubs, use cast to suppress warning
-        cast(Any, pv.PolyData.__init__)(self, verts, new_faces)
+        # Initialize parent class
+        super().__init__(verts, new_faces)
 
         self._fix_normals_direction()
         return None
 
     @property
     def centers(self) -> npt.NDArray[np.float64]:
-        result: npt.NDArray[np.float64] = cast(
-            npt.NDArray[np.float64], self.cell_centers().points
-        )
-        return result
+        return self.cell_centers().points
 
     @property
     def faces_array(self) -> list[list[int]]:
@@ -294,23 +301,24 @@ class BrillouinZone2D(pv.PolyData):
         count = 0
         num_verts = 0
 
-        pv_faces: npt.NDArray[np.intp] = cast(npt.NDArray[np.intp], self.faces)
-        for iverts_in_face, verts_in_face in enumerate(pv_faces):
+        pv_faces: npt.NDArray[np.intp] = self.faces
+        for iverts_in_face in range(len(pv_faces)):
+            verts_in_face_val = int(cast(np.intp, pv_faces[iverts_in_face]))
             if iverts_in_face == 0:
-                num_verts = int(verts_in_face)
+                num_verts = verts_in_face_val
                 face = [num_verts]
             else:
                 if count == num_verts:
                     count = 0
                     new_faces.append(face)
-                    num_verts = int(verts_in_face)
+                    num_verts = verts_in_face_val
                     face = [num_verts]
                 elif iverts_in_face == len(pv_faces) - 1:
-                    face.append(int(verts_in_face))
+                    face.append(verts_in_face_val)
                     new_faces.append(face)
                 else:
                     count += 1
-                    face.append(int(verts_in_face))
+                    face.append(verts_in_face_val)
 
         return new_faces
 
@@ -325,36 +333,19 @@ class BrillouinZone2D(pv.PolyData):
         if self.reciprocal is None:
             raise ValueError("reciprocal_lattice must be provided")
 
-        kpoints: list[npt.NDArray[np.float64]] = []
-        for i in range(-1, 2):
-            for j in range(-1, 2):
-                for k in range(-1, 2):
-                    vec: npt.NDArray[np.float64] = (
-                        i * self.reciprocal[0] + j * self.reciprocal[1] + k * self.reciprocal[2]
-                    )
-                    kpoints.append(vec)
-        # print(kpoints, self.reciprocal)
-        brill = Voronoi(np.array(kpoints))
-        faces: list[list[int]] = []
-        for idict in brill.ridge_dict:
-            if idict[0] == 13 or idict[1] == 13:
-                faces.append(brill.ridge_dict[idict])
-
-        verts: npt.NDArray[np.float64] = np.array(brill.vertices, dtype=np.float64)
-
-        return verts, faces
+        return BrillouinZone.compute_wigner_seitz_static(self.reciprocal)
 
     def _fix_normals_direction(self) -> None:
         """
         Helper method that calculates the normals of the Wigner seits cell
         """
-        center: npt.NDArray[np.float64] = self.centers[0]
+        center: npt.NDArray[np.float64] = cast(npt.NDArray[np.float64], self.centers[0])
         n1: npt.NDArray[np.float64] = center / np.linalg.norm(center)
-        face_normals: npt.NDArray[np.float64] = cast(
-            npt.NDArray[np.float64], self.face_normals
-        )
-        n2: npt.NDArray[np.float64] = face_normals[0]
-        correction: np.floating[Any] = np.sign(np.dot(n1, n2))
+        face_normals_arr: npt.NDArray[np.float64] = self.face_normals
+        n2: npt.NDArray[np.float64] = cast(npt.NDArray[np.float64], face_normals_arr[0])
+        dot_result: np.float64 = cast(np.float64, np.dot(n1, n2))
+        sign_result: np.float64 = cast(np.float64, np.sign(dot_result))
+        correction = float(sign_result)
         if correction == -1:
-            self.compute_normals(flip_normals=True, inplace=True)
+            _ = self.compute_normals(flip_normals=True, inplace=True)
         return None

@@ -26,6 +26,7 @@ from typing_extensions import override
 
 from pyprocar.core import kpoints
 from pyprocar.core.atomic_orbital_index import (
+    PRIMARY_ORBITAL_GROUPS,
     AtomIndexer,
     OrbitalIndexer,
     ProjectionLabelBuilder,
@@ -38,11 +39,10 @@ from pyprocar.core.property_store import PointSet, Property
 from pyprocar.core.serializer import get_serializer
 from pyprocar.core.structure import Structure
 from pyprocar.utils import math, np_utils, physics
-from pyprocar.utils.info import orbital_names
 from pyprocar.utils.math import np_round_to_half
 from pyprocar.utils.unfolder import Unfolder
 
-pv.global_theme.allow_empty_mesh = True
+pv.global_theme.allow_empty_mesh = True  # pyright: ignore[reportUnknownMemberType, reportAttributeAccessIssue]
 
 logger = logging.getLogger(__name__)
 user_logger = logging.getLogger("user")
@@ -212,7 +212,7 @@ def get_ebs_from_code(
         parser_ebs = parser.ebs  # pyright: ignore[reportUnknownMemberType, reportUnknownVariableType]
         if parser_ebs is None:
             raise ValueError("Parser returned no EBS data")
-        ebs = parser_ebs  # pyright: ignore[reportAssignmentType]
+        ebs = parser_ebs  # pyright: ignore[reportAssignmentType, reportUnknownVariableType]
         ebs.save(ebs_filepath)  # pyright: ignore[reportUnknownMemberType]
     else:
         logger.info(f"Loading EBS  from picklefile: {ebs_filepath}")
@@ -255,7 +255,7 @@ class DifferentiablePropertyInterface(ABC):
 
 
 class PyvistaInterface(ABC):
-    _mesh: pv.PolyData | pv.StructuredGrid | pv.PointSet | None
+    _mesh: pv.PolyData | pv.StructuredGrid | Any | None  # pv.PointSet not typed
 
     @property
     @abstractmethod
@@ -269,18 +269,18 @@ class PyvistaInterface(ABC):
         """Return kpoints."""
         ...
 
-    def mesh(self) -> pv.PolyData | pv.StructuredGrid | pv.PointSet | None:
+    def mesh(self) -> pv.PolyData | pv.StructuredGrid | Any | None:  # pv.PointSet not typed
         if self._mesh is None:
             self.to_mesh()
         return self._mesh
 
     def mesh_as_cart(self) -> None:
         if self._mesh is not None and self.kpoints_cartesian is not None:
-            self._mesh.points = self.kpoints_cartesian
+            self._mesh.points = self.kpoints_cartesian  # pyright: ignore[reportUnknownMemberType]
 
     def mesh_as_frac(self) -> None:
         if self._mesh is not None:
-            self._mesh.points = self.kpoints
+            self._mesh.points = self.kpoints  # pyright: ignore[reportUnknownMemberType]
 
     @abstractmethod
     def to_mesh(
@@ -293,13 +293,13 @@ class PyvistaInterface(ABC):
 
     def set_mesh_scalar(self, name: str, scalar: npt.NDArray[Any]) -> None:
         if self._mesh is not None:
-            self._mesh.point_data[name] = scalar
-            self._mesh.set_active_scalars(name)
+            self._mesh.point_data[name] = scalar  # pyright: ignore[reportUnknownMemberType]
+            self._mesh.set_active_scalars(name)  # pyright: ignore[reportUnknownMemberType]
 
     def set_mesh_vector(self, name: str, vector: npt.NDArray[Any]) -> None:
         if self._mesh is not None:
-            self._mesh.point_data[name] = vector
-            self._mesh.set_active_vectors(name)
+            self._mesh.point_data[name] = vector  # pyright: ignore[reportUnknownMemberType]
+            self._mesh.set_active_vectors(name)  # pyright: ignore[reportUnknownMemberType]
 
 
 class ElectronicBandStructure(PointSet, PyvistaInterface):
@@ -576,8 +576,8 @@ class ElectronicBandStructure(PointSet, PyvistaInterface):
     def inv_reciprocal_lattice(self) -> npt.NDArray[np.float64] | None:
         """Returns the inverse of the reciprocal lattice"""
         if self.reciprocal_lattice is not None:
-            result: npt.NDArray[np.float64] = np.linalg.inv(self.reciprocal_lattice)
-            return result
+            result = np.linalg.inv(self.reciprocal_lattice)
+            return np.asarray(result, dtype=np.float64)
         else:
             print("Please provide a reciprocal lattice when initiating the Procar class")
             return None
@@ -737,30 +737,30 @@ class ElectronicBandStructure(PointSet, PyvistaInterface):
             computed = self.compute_property(prop_name, **kwargs)
             if computed is not None:
                 # compute_property now returns Property objects
-                if isinstance(computed, Property):
+                if isinstance(computed, Property):  # pyright: ignore[reportUnnecessaryIsInstance]
                     self.property_store[prop_name] = computed
-                elif isinstance(computed, np.ndarray):
+                elif isinstance(computed, np.ndarray):  # pyright: ignore[reportUnnecessaryIsInstance]
                     # Fallback for any methods still returning arrays
                     self.add_property(name=prop_name, value=computed)
-        return super().get_property(key)  # pyright: ignore[reportArgumentType]
+        return super().get_property(key)  # pyright: ignore[reportArgumentType, reportUnknownParameterType]
 
     def to_mesh(  # pyright: ignore[reportIncompatibleMethodOverride]
         self,
         scalars: tuple[str, npt.NDArray[Any]] | None = None,
         vectors: tuple[str, npt.NDArray[Any]] | None = None,
         as_cartesian: bool = True,
-    ) -> pv.PointSet:
+    ) -> Any:  # Returns pv.PointSet which is not typed
         if as_cartesian:
             mesh_points = self.kpoints_cartesian
         else:
             mesh_points = self.kpoints
-        mesh = pv.PointSet(mesh_points)
+        mesh = pv.PointSet(mesh_points)  # pyright: ignore[reportUnknownMemberType, reportAttributeAccessIssue, reportUnknownVariableType]
         if scalars is not None:
             self.set_mesh_scalar(*scalars)
         if vectors is not None:
             self.set_mesh_vector(*vectors)
-        self._mesh = mesh
-        return mesh
+        self._mesh = mesh  # pyright: ignore[reportUnknownVariableType]
+        return mesh  # pyright: ignore[reportUnknownVariableType]
 
     def compute_property(self, name: str, **kwargs: Any) -> Property | None:
         if name == "ebs_ipr":
@@ -992,14 +992,13 @@ class ElectronicBandStructure(PointSet, PyvistaInterface):
         if not self.is_non_collinear:
             raise ValueError("Spin texture is only available for non-collinear calculations")
 
-        # Extract spin components (indices 1,2,3 = Sx,Sy,Sz)
-        values = self.projected[:, :, 1:, :, :]
-        values = np.moveaxis(values, 2, -1)
+        if self.projected is None:
+            raise ValueError("projected not set")
 
-        metadata = {
-            "description": "Spin texture components (Sx, Sy, Sz)",
-            "is_non_collinear": True,
-        }
+        # Extract spin components (indices 1,2,3 = Sx,Sy,Sz)
+        projected_array = self.projected.to_array()
+        values: npt.NDArray[np.float64] = projected_array[:, :, 1:, :, :]
+        values = np.moveaxis(values, 2, -1)
 
         prop = self._build_property(
             values=values,
@@ -1007,7 +1006,8 @@ class ElectronicBandStructure(PointSet, PyvistaInterface):
             name=name,
             norm_mode="raw",  # Spin texture should not be normalized
             selection=None,
-            **metadata,
+            description="Spin texture components (Sx, Sy, Sz)",
+            is_non_collinear=True,
         )
 
         return prop
@@ -1078,23 +1078,25 @@ class ElectronicBandStructure(PointSet, PyvistaInterface):
         )
 
         # Extract spin texture components (exclude total at index 0)
-        values = summed_projection[..., 1:]
-        temp_shape = list(values.shape)
-        temp_shape.insert(2, 1)
-        values = values.reshape(temp_shape, order=kwargs.pop("order", "F"))
-
-        metadata = {
-            "description": "Projected spin texture components (Sx, Sy, Sz)",
-            "is_non_collinear": True,
-        }
+        spin_texture_values = np.asarray(summed_projection[..., 1:], dtype=np.float64)
+        temp_shape_list = list(spin_texture_values.shape)
+        temp_shape_list.insert(2, 1)
+        reshape_order: str = kwargs.pop("order", "F")
+        spin_texture_values = np.asarray(
+            spin_texture_values.reshape(
+                tuple(temp_shape_list), order=reshape_order  # pyright: ignore[reportArgumentType, reportCallIssue]
+            ),
+            dtype=np.float64,
+        )
 
         prop = self._build_property(
-            values=values,
+            values=spin_texture_values,
             label=label,
             name=name,
             norm_mode="raw",
             selection=selection,
-            **metadata,
+            description="Projected spin texture components (Sx, Sy, Sz)",
+            is_non_collinear=True,
         )
 
         return prop
@@ -1127,6 +1129,8 @@ class ElectronicBandStructure(PointSet, PyvistaInterface):
         if self.projected is None:
             raise ValueError("projected not set")
 
+        projected_array = self.projected.to_array()
+
         atoms_arr: npt.NDArray[np.intp]
         spins_arr: npt.NDArray[np.intp]
         orbitals_arr: npt.NDArray[np.intp]
@@ -1145,7 +1149,7 @@ class ElectronicBandStructure(PointSet, PyvistaInterface):
             orbitals_arr = np.asarray(orbitals, dtype=np.intp)
         # sum over orbitals
         ret: npt.NDArray[np.float64] = np.sum(
-            self.projected[:, :, :, :, orbitals_arr], axis=-1
+            projected_array[:, :, :, :, orbitals_arr], axis=-1
         )  # pyright: ignore[reportAssignmentType]
         # sum over atoms
         ret = np.sum(ret[:, :, :, atoms_arr], axis=-1)  # pyright: ignore[reportAssignmentType]
@@ -1537,14 +1541,15 @@ class ElectronicBandStructure(PointSet, PyvistaInterface):
         if ebs.bands is None:
             raise ValueError("bands not set")
 
+        bands_array = ebs.bands.to_array()
         for ispin in ebs.spin_channels:
             bands_spin_index[int(ispin)] = []
             for iband in range(ebs.n_bands):
                 fermi_surface_test = len(
                     np.where(
                         np.logical_and(
-                            ebs.bands[:, iband, ispin] >= energy - tolerance,
-                            ebs.bands[:, iband, ispin] <= energy + tolerance,
+                            bands_array[:, iband, ispin] >= energy - tolerance,
+                            bands_array[:, iband, ispin] <= energy + tolerance,
                         )
                     )[0]
                 )
@@ -1558,7 +1563,7 @@ class ElectronicBandStructure(PointSet, PyvistaInterface):
         band_property_names = ebs.band_property_names
         for prop_name, calc_name, gradient_order, value_array in ebs.iter_properties():
             prop = ebs.get_property(prop_name)
-            if prop_name in band_property_names and prop is not None:
+            if prop_name in band_property_names and prop is not None and isinstance(prop, Property):
                 prop[calc_name, gradient_order] = value_array[:, full_band_index, ...]
 
         debug_message = f"Bands near energy {energy}. "
@@ -1590,7 +1595,7 @@ class ElectronicBandStructure(PointSet, PyvistaInterface):
         band_property_names = ebs.band_property_names
         for prop_name, calc_name, gradient_order, value_array in ebs.iter_properties():
             prop = ebs.get_property(prop_name)
-            if prop_name in band_property_names and prop is not None:
+            if prop_name in band_property_names and prop is not None and isinstance(prop, Property):
                 prop[calc_name, gradient_order] = value_array[:, bands, ...]
 
         return ebs
@@ -1693,13 +1698,17 @@ class ElectronicBandStructure(PointSet, PyvistaInterface):
         else:
             ebs = copy.deepcopy(self)
 
+        # Provide default transformation matrix if None
+        trans_matrix = transformation_matrix if transformation_matrix is not None else np.diag([1, 1, 1]).astype(np.float64)
+        struct = structure if structure is not None else self.structure
+
         uf = Unfolder(
             ebs=ebs,
-            transformation_matrix=transformation_matrix,
-            structure=structure,
+            transformation_matrix=trans_matrix,
+            structure=struct,
         )
 
-        ebs.add_property(name="weights", value=uf.weights)
+        ebs.add_property(name="weights", value=uf.weights)  # pyright: ignore[reportUnknownMemberType]
         return ebs
 
     def save(self, path: Path) -> None:
@@ -1789,7 +1798,7 @@ class ElectronicBandStructure(PointSet, PyvistaInterface):
         return f"{property_name}_hessian"
 
 
-class ElectronicBandStructurePath(
+class ElectronicBandStructurePath(  # pyright: ignore[reportIncompatibleMethodOverride]
     ElectronicBandStructure, DifferentiablePropertyInterface, PyvistaInterface
 ):
     def __init__(self, kpath: kpoints.KPath, **kwargs: Any) -> None:
@@ -1813,20 +1822,22 @@ class ElectronicBandStructurePath(
         return ret
 
     def as_cart(self) -> None:
+        if self.reciprocal_lattice is None:
+            raise ValueError("reciprocal_lattice not set")
         self.transform_points(self.reciprocal_lattice)
 
     def as_frac(self) -> None:
         if self.reciprocal_lattice is None:
             raise ValueError("reciprocal_lattice not set")
-        inv_lattice: npt.NDArray[np.float64] = np.linalg.inv(self.reciprocal_lattice)
-        self.transform_points(inv_lattice)
+        inv_lattice = np.linalg.inv(self.reciprocal_lattice)
+        self.transform_points(np.asarray(inv_lattice, dtype=np.float64))
 
     @property
     def kpath(self) -> kpoints.KPath:
         return self._kpath
 
     @property
-    def knames(self) -> list[str]:
+    def knames(self) -> list[tuple[str, str]] | None:
         return self.kpath.knames
 
     @property
@@ -1888,26 +1899,26 @@ class ElectronicBandStructurePath(
             metadata=merged_metadata,
         )
 
-    def to_mesh(
+    def to_mesh(  # pyright: ignore[reportIncompatibleMethodOverride]
         self,
         scalars: tuple[str, npt.NDArray[Any]] | None = None,
         vectors: tuple[str, npt.NDArray[Any]] | None = None,
         as_cartesian: bool = True,
         **kwargs: Any,
-    ) -> pv.PointSet:  # pyright: ignore[reportReturnType]
+    ) -> Any:  # Returns pv.PointSet which is not typed
         if as_cartesian:
             mesh_points = self.kpoints_cartesian
         else:
             mesh_points = self.kpoints
-        mesh = pv.PointSet(mesh_points)
+        mesh = pv.PointSet(mesh_points)  # pyright: ignore[reportUnknownMemberType, reportAttributeAccessIssue, reportUnknownVariableType]
         if scalars is not None:
             self.set_mesh_scalar(*scalars)
         if vectors is not None:
             self.set_mesh_vector(*vectors)
-        self._mesh = mesh
-        return mesh
+        self._mesh = mesh  # pyright: ignore[reportUnknownVariableType]
+        return mesh  # pyright: ignore[reportUnknownVariableType]
 
-    def gradient_func(
+    def gradient_func(  # pyright: ignore[reportIncompatibleMethodOverride]
         self, points: npt.NDArray[np.float64], values: npt.NDArray[np.float64]
     ) -> npt.NDArray[np.float64]:
         continuous_segments = self.kpath.get_continuous_segments()
@@ -1931,7 +1942,9 @@ class ElectronicBandStructurePath(
         gradients = gradients * physics.METER_ANGSTROM
         return gradients
 
-    def compute_property(self, name: str, **kwargs: Any) -> Property | npt.NDArray[np.float64] | None:
+    def compute_property(  # pyright: ignore[reportIncompatibleMethodOverride]
+        self, name: str, **kwargs: Any
+    ) -> Property | npt.NDArray[np.float64] | None:
         if name == "bands_velocity":
             return self.compute_band_velocity(**kwargs)
         elif name == "bands_speed":
@@ -1979,12 +1992,19 @@ class ElectronicBandStructurePath(
 
         properties: list[Property] = []
 
-        # Get species list
-        species_iterable = getattr(self._structure, "species", None)
-        if species_iterable is None:
-            species_iterable = np.unique(self._structure.atoms)
+        # Get species list - structure.species is a list of strings or we use atoms
+        species_attr: Any = getattr(self._structure, "species", None)
+        species_list: list[str]
+        if species_attr is not None:
+            species_list = list(species_attr)
+        else:
+            atoms_array = self._structure.atoms
+            if atoms_array is not None:
+                species_list = [str(s) for s in np.unique(atoms_array)]
+            else:
+                species_list = []
 
-        for species_name in species_iterable:
+        for species_name in species_list:
             prop = self.compute_projected_sum(
                 species=species_name,
                 orbitals=orbitals,
@@ -2024,20 +2044,20 @@ class ElectronicBandStructurePath(
         """
         properties: list[Property] = []
 
-        # orbital_names dict maps "s" -> [0], "p" -> [1,2,3], etc.
-        orbital_groups = ["s", "p", "d", "f"]
+        # PRIMARY_ORBITAL_GROUPS maps "s" -> (0,), "p" -> (1,2,3), etc.
+        orbital_group_map: dict[str, tuple[int, ...]] = dict(PRIMARY_ORBITAL_GROUPS)
 
-        for orb_name in orbital_groups:
+        for orb_name in ["s", "p", "d", "f"]:
             if orb_name == "f" and self.n_orbitals <= 9:
                 continue
 
-            orb_indices = orbital_names.get(orb_name)
+            orb_indices = orbital_group_map.get(orb_name)
             if orb_indices is None:
                 continue
 
             prop = self.compute_projected_sum(
                 atoms=atoms,
-                orbitals=orb_indices,
+                orbitals=list(orb_indices),
                 spins=spins,
                 norm_mode=norm_mode,
                 label=orb_name,
@@ -2049,7 +2069,7 @@ class ElectronicBandStructurePath(
 
     def build_overlay_weights(
         self,
-        items: dict | list[dict],
+        items: dict[str, Sequence[str | int]] | list[dict[str, Sequence[str | int]]],
         spins: Sequence[int] | int | None = None,
         norm_mode: str | EBSNormMode | None = "raw",
     ) -> list[Property]:
@@ -2078,6 +2098,7 @@ class ElectronicBandStructurePath(
         if self._structure is None:
             raise ValueError("Structure is required to build overlay weights from items")
 
+        items_iter: list[dict[str, Sequence[str | int]]]
         if isinstance(items, dict):
             items_iter = [items]
         else:
@@ -2085,20 +2106,25 @@ class ElectronicBandStructurePath(
 
         properties: list[Property] = []
 
+        # Create orbital group map for resolving names to indices
+        orbital_group_map: dict[str, tuple[int, ...]] = dict(PRIMARY_ORBITAL_GROUPS)
+
         for mapping in items_iter:
             for species_name, orbital_spec in mapping.items():
                 # Resolve orbital names to indices if needed
+                orbitals: list[int]
                 if len(orbital_spec) > 0 and isinstance(orbital_spec[0], str):
                     resolved_orbitals: list[int] = []
                     for orb_token in orbital_spec:
-                        orb_indices = orbital_names.get(orb_token, [])
-                        resolved_orbitals.extend(orb_indices)
+                        if isinstance(orb_token, str):
+                            orb_indices = orbital_group_map.get(orb_token, ())
+                            resolved_orbitals.extend(orb_indices)
                     orbitals = resolved_orbitals
                 else:
                     orbitals = [int(x) for x in orbital_spec]
 
                 # Use species_orbital_map for proper label generation
-                species_orbital_map = {species_name: orbitals}
+                species_orbital_map: dict[str, Iterable[int]] = {species_name: orbitals}
 
                 prop = self.compute_projected_sum(
                     species_orbital_map=species_orbital_map,
@@ -2113,15 +2139,18 @@ class ElectronicBandStructurePath(
 
     def as_kdist(
         self, as_segments: bool = True
-    ) -> pv.MultiBlock:  # pyright: ignore[reportReturnType]
-        kdistances = self.kpath.get_distances(as_segments=False, cumlative_across_segments=True)
+    ) -> Any:  # Returns pv.MultiBlock which is not typed
+        kdistances_result = self.kpath.get_distances(as_segments=False, cumlative_across_segments=True)
+        # When as_segments=False, returns NDArray not list
+        kdistances = np.asarray(kdistances_result, dtype=np.float64)
         if self.bands is None:
             raise ValueError("bands not set")
-        n_bands = self.bands.shape[1]
-        n_spins = self.bands.shape[2]
+        bands_array = self.bands.to_array()
+        n_bands = bands_array.shape[1]
+        n_spins = bands_array.shape[2]
         n_kpoints = kdistances.shape[0]
         k_indices = self.kpath.segment_indices
-        blocks = pv.MultiBlock()
+        blocks = pv.MultiBlock()  # pyright: ignore[reportUnknownMemberType, reportAttributeAccessIssue, reportUnknownVariableType]
 
         if as_segments:
             for indices in k_indices:
@@ -2129,23 +2158,23 @@ class ElectronicBandStructurePath(
                 for iband in range(n_bands):
                     for ispin in range(n_spins):
                         k_segment_distances = kdistances[indices]
-                        bands = self.bands[indices, iband, ispin]
+                        band_values = bands_array[indices, iband, ispin]
 
                         band_kpoints = np.zeros(shape=(n_indices, 3))
                         band_kpoints[:, 0] = k_segment_distances
-                        band_kpoints[:, 1] = bands
-                        blocks.append(pv.PolyData(band_kpoints))
+                        band_kpoints[:, 1] = band_values
+                        blocks.append(pv.PolyData(band_kpoints))  # pyright: ignore[reportUnknownMemberType]
         else:
             for iband in range(n_bands):
                 for ispin in range(n_spins):
-                    bands = self.bands[:, iband, ispin]
+                    band_values = bands_array[:, iband, ispin]
                     k_distances = kdistances.copy()
                     band_kpoints = np.zeros(shape=(n_kpoints, 3))
                     band_kpoints[:, 0] = k_distances
-                    band_kpoints[:, 1] = bands
+                    band_kpoints[:, 1] = band_values
                     band_kpoints[:, 2] = ispin
-                    blocks.append(pv.PolyData(band_kpoints))
-        return blocks
+                    blocks.append(pv.PolyData(band_kpoints))  # pyright: ignore[reportUnknownMemberType]
+        return blocks  # pyright: ignore[reportUnknownVariableType]
 
     def plot(
         self,
@@ -2161,7 +2190,7 @@ class ElectronicBandStructurePath(
         add_point_labels_args = add_point_labels_args or {}
         bz_add_mesh_args = bz_add_mesh_args or {}
 
-        special_kpoint_names = self.kpath.special_kpoint_names
+        special_kpoint_names: list[str | int] = list(self.kpath.special_kpoint_names)
         special_kpoint_positions = self.kpath.get_special_kpoints(as_segments=False, cartesian=True)
 
         p = pv.Plotter()
@@ -2190,7 +2219,7 @@ def is_plane_aligned_with_reciprocal_lattice(
     normal_unit: npt.NDArray[np.float64] = normal / np.linalg.norm(normal)
 
     # Check alignment with each reciprocal lattice vector
-    for i, recip_vec in enumerate(reciprocal_lattice):
+    for recip_vec in reciprocal_lattice:
         recip_unit = recip_vec / np.linalg.norm(recip_vec)
         dot_product = abs(np.dot(normal_unit, recip_unit))
         if dot_product > 0.99:  # Nearly parallel (within 1 degree)
@@ -2222,7 +2251,7 @@ def edge_diff_ramp(
     return None
 
 
-class ElectronicBandStructureMesh(
+class ElectronicBandStructureMesh(  # pyright: ignore[reportIncompatibleMethodOverride]
     ElectronicBandStructure, DifferentiablePropertyInterface, PyvistaInterface
 ):
     def __init__(self, kgrid_info: kpoints.KGridInfo, **kwargs: Any) -> None:
@@ -2231,6 +2260,8 @@ class ElectronicBandStructureMesh(
         self._kgrid_info = kgrid_info
 
         if self.n_kpoints != np.prod(self.kgrid_info.kgrid):
+            if self.structure is None:
+                raise ValueError("structure is required when expanding IBZ to FBZ")
             ibz2fbz(
                 self,
                 rotations=self.structure.rotations,
@@ -2264,21 +2295,22 @@ class ElectronicBandStructureMesh(
 
     @property
     def kgrid(self) -> tuple[int, int, int]:
-        return self.get_kgrid()
+        dims = self.get_kgrid()
+        return (int(dims[0]), int(dims[1]), int(dims[2]))
 
     def get_kgrid(
-        self, num_bins: int = 1000, height: float = 1, coord_tol: float = 0.01
-    ) -> tuple[int, int, int]:
+        self, num_bins: int = 1000, height: int = 1, coord_tol: float = 0.01
+    ) -> npt.NDArray[np.int_]:
         return math.get_grid_dims(
             self.kpoints, num_bins=num_bins, height=height, coord_tol=coord_tol
         )
 
     @property
-    def kshift(self) -> npt.NDArray[np.float64]:
+    def kshift(self) -> tuple[float, float, float]:
         return self.kgrid_info.kshift
 
     @property
-    def kgrid_mode(self) -> str:
+    def kgrid_mode(self) -> kpoints.KGRID_MODE:
         return self.kgrid_info.kgrid_mode
 
     @property
@@ -2287,15 +2319,15 @@ class ElectronicBandStructureMesh(
 
     @property
     def ukx(self) -> npt.NDArray[np.float64]:
-        return np.linspace(self.kbounds[0, 0], self.kbounds[0, 1], self.n_kx)
+        return np.asarray(np.linspace(self.kbounds[0, 0], self.kbounds[0, 1], self.n_kx), dtype=np.float64)
 
     @property
     def uky(self) -> npt.NDArray[np.float64]:
-        return np.linspace(self.kbounds[1, 0], self.kbounds[1, 1], self.n_ky)
+        return np.asarray(np.linspace(self.kbounds[1, 0], self.kbounds[1, 1], self.n_ky), dtype=np.float64)
 
     @property
     def ukz(self) -> npt.NDArray[np.float64]:
-        return np.linspace(self.kbounds[2, 0], self.kbounds[2, 1], self.n_kz)
+        return np.asarray(np.linspace(self.kbounds[2, 0], self.kbounds[2, 1], self.n_kz), dtype=np.float64)
 
     @property
     def n_kx(self) -> int:
@@ -2329,7 +2361,7 @@ class ElectronicBandStructureMesh(
 
         return is_2d
 
-    def to_mesh(
+    def to_mesh(  # pyright: ignore[reportIncompatibleMethodOverride]
         self,
         scalars: tuple[str, npt.NDArray[Any]] | None = None,
         vectors: tuple[str, npt.NDArray[Any]] | None = None,
@@ -2340,6 +2372,8 @@ class ElectronicBandStructureMesh(
         # but without caching if a fresh object is desired.
         grid = pv.StructuredGrid()
         if as_cartesian:
+            if self.kpoints_cartesian is None:
+                raise ValueError("kpoints_cartesian not set")
             grid.points = self.kpoints_cartesian
         else:
             grid.points = self.kpoints
@@ -2370,23 +2404,30 @@ class ElectronicBandStructureMesh(
         )
 
     def get_property_mesh(self, key: PropertyKey, **kwargs: Any) -> npt.NDArray[np.float64] | None:
-        property = self.get_property(key, **kwargs)
-        if property is None:
+        prop = self.get_property(key, **kwargs)
+        if prop is None:
             return None
+        # Get the value array from Property or use directly if already an array
+        if isinstance(prop, Property):
+            prop_value = prop.value
+        else:
+            prop_value = prop
         property_mesh: npt.NDArray[np.float64] = math.array_to_mesh(
-            array=property.value,
+            array=prop_value,
             nkx=self.n_kx,
             nky=self.n_ky,
             nkz=self.n_kz,
             **kwargs,
         )
 
-        logger.debug(f"Property mesh shape: {property.value.shape}")
+        logger.debug(f"Property mesh shape: {prop_value.shape}")
         logger.debug(f"Nkx: {self.n_kx}, Nky: {self.n_ky}, Nkz: {self.n_kz}")
         logger.debug(f"Property mesh shape: {property_mesh.shape}")
         return property_mesh
 
-    def compute_property(self, name: str, **kwargs: Any) -> Property | npt.NDArray[np.float64] | None:
+    def compute_property(  # pyright: ignore[reportIncompatibleMethodOverride]
+        self, name: str, **kwargs: Any
+    ) -> Property | npt.NDArray[np.float64] | None:
         if name == "bands_velocity":
             return self.compute_band_velocity(**kwargs)
         elif name == "bands_speed":
@@ -2406,7 +2447,7 @@ class ElectronicBandStructureMesh(
             ebs = copy.deepcopy(self)
 
         padding_dims: list[tuple[int, int]] = []
-        for i, n in enumerate(ebs.kgrid):
+        for _, n in enumerate(ebs.kgrid):
             if n == 1:
                 padding_dims.append((0, 0))
             else:
@@ -2415,10 +2456,11 @@ class ElectronicBandStructureMesh(
         kpoints_padding_dims = copy.deepcopy(padding_dims)
         kpoints_padding_dims.append((0, 0))
         kpoints_mesh = ebs.get_kpoints_mesh()
-        padded_kpoints_mesh = np.pad(
+        # np.pad with custom function mode is not fully typed
+        padded_kpoints_mesh: npt.NDArray[np.float64] = np.pad(  # pyright: ignore[reportUnknownVariableType, reportCallIssue]
             kpoints_mesh, kpoints_padding_dims, mode=edge_diff_ramp  # pyright: ignore[reportArgumentType]
         )
-        logger.debug(f"Padded kpoints mesh shape: {padded_kpoints_mesh.shape}")
+        logger.debug(f"Padded kpoints mesh shape: {padded_kpoints_mesh.shape}")  # pyright: ignore[reportUnknownMemberType]
 
         for prop_name, calc_name, gradient_order, value_array in ebs.iter_properties():
             prop = ebs.get_property(prop_name)
@@ -2429,15 +2471,18 @@ class ElectronicBandStructureMesh(
             )
             n_scalar_dims = len(value_mesh.shape[3:])
             scalar_padding_dims = copy.deepcopy(padding_dims)
-            for i in range(n_scalar_dims):
+            for _ in range(n_scalar_dims):
                 scalar_padding_dims.append((0, 0))
             padded_mesh = np.pad(value_mesh, scalar_padding_dims, mode="wrap")
             logger.debug(f"Padded {prop_name} mesh shape: {padded_mesh.shape}")
             padded_array = math.mesh_to_array(padded_mesh, order=order)
-
+            if padded_array is None:
+                continue
             prop[calc_name, gradient_order] = padded_array
 
-        new_kpoints = math.mesh_to_array(padded_kpoints_mesh, order=order)
+        new_kpoints = math.mesh_to_array(padded_kpoints_mesh, order=order)  # pyright: ignore[reportUnknownArgumentType]
+        if new_kpoints is None:
+            raise ValueError("Failed to convert padded kpoints mesh to array")
         ebs.update_points(new_kpoints)
         ebs._mesh = ebs.to_mesh()
         return ebs
@@ -2471,12 +2516,11 @@ class ElectronicBandStructureMesh(
                 shifted_kpoints[:, axis] += supercell_direction[i]
 
             new_kpoints = np.concatenate([new_kpoints, shifted_kpoints], axis=0)
-            for prop_name, calc_name, gradient_order, value_array in ebs.iter_properties():
-                property = ebs.get_property(prop_name)
+            for prop_name, _, gradient_order, value_array in ebs.iter_properties():
                 initial_array = value_array[:n_init_points]
-                new_points = np.concatenate([value_array, initial_array], axis=0)
+                new_values = np.concatenate([value_array, initial_array], axis=0)
 
-                ebs.add_property(prop_name, new_points, return_gradient_order=gradient_order)
+                ebs.add_property(name=prop_name, value=new_values, return_gradient_order=gradient_order)
 
         ebs.update_points(new_kpoints)
         ebs._mesh = ebs.to_mesh()
@@ -2538,8 +2582,12 @@ class ElectronicBandStructureMesh(
             value_mesh = math.array_to_mesh(
                 array=value_array, nkx=ebs.n_kx, nky=ebs.n_ky, nkz=ebs.n_kz
             )
-            interpolated_mesh = math.fft_interpolate_nd_3dmesh(value_mesh, interpolation_factor)
+            interpolated_mesh = math.fft_interpolate_nd_3dmesh(  # pyright: ignore[reportUnknownMemberType]
+                value_mesh, interpolation_factor
+            )
             interpolated_value = math.mesh_to_array(interpolated_mesh)
+            if interpolated_value is None:
+                continue
             prop[calc_name, gradient_order] = interpolated_value
 
         ebs.update_points(new_kpoints)
@@ -2627,33 +2675,35 @@ class ElectronicBandStructureMesh(
         vectors: tuple[str, npt.NDArray[Any]] | None = None,
         as_cartesian: bool = True,
         **kwargs: Any,
-    ) -> pv.PolyData:  # pyright: ignore[reportReturnType]
+    ) -> Any:  # Returns pv.PolyData which is not fully typed
         mesh = self.to_mesh(scalars=scalars, vectors=vectors, as_cartesian=as_cartesian)
-        sliced = mesh.slice(normal=normal, origin=origin, **kwargs)
+        sliced = mesh.slice(normal=normal, origin=origin, **kwargs)  # pyright: ignore[reportUnknownMemberType, reportUnknownVariableType]
 
         if not as_cartesian:
             if self.reciprocal_lattice is None:
                 raise ValueError("reciprocal_lattice not set")
             transform_matrix: npt.NDArray[np.float64] = np.eye(4)
             transform_matrix[:3, :3] = self.reciprocal_lattice.T
-            sliced = sliced.transform(transform_matrix, inplace=False)
+            sliced = sliced.transform(transform_matrix, inplace=False)  # pyright: ignore[reportUnknownMemberType, reportUnknownVariableType]
 
-        n_slice_points = len(sliced.points)
+        n_slice_points: int = len(sliced.points)  # pyright: ignore[reportUnknownMemberType, reportUnknownArgumentType]
         if n_slice_points == 0:
             error_message = "No points found in the slice."
             error_message += "Look at the coordinates in cartesian or fractional space to see if origin is right."
             raise ValueError(error_message)
         if scalars is not None:
-            scalar_name, scalar_values = scalars
-            sliced.set_active_scalars(scalar_name)
+            scalar_name, _ = scalars
+            sliced.set_active_scalars(scalar_name)  # pyright: ignore[reportUnknownMemberType]
         if vectors is not None:
-            vector_name, vector_values = vectors
-            sliced.set_active_vectors(vector_name)
-        return sliced
+            vector_name, _ = vectors
+            sliced.set_active_vectors(vector_name)  # pyright: ignore[reportUnknownMemberType]
+        return sliced  # pyright: ignore[reportUnknownVariableType]
 
-    def gradient_func(
+    def gradient_func(  # pyright: ignore[reportIncompatibleMethodOverride]
         self, points: npt.NDArray[np.float64], values: npt.NDArray[np.float64], **kwargs: Any
     ) -> npt.NDArray[np.float64]:
+        if self.reciprocal_lattice is None:
+            raise ValueError("reciprocal_lattice not set")
         val_mesh = math.array_to_mesh(
             array=values,
             nkx=self.n_kx,
@@ -2664,7 +2714,10 @@ class ElectronicBandStructureMesh(
         gradients_mesh = math.calculate_3d_mesh_scalar_gradients(val_mesh, self.reciprocal_lattice)
         gradients_mesh *= physics.METER_ANGSTROM
 
-        gradients: npt.NDArray[np.float64] = math.mesh_to_array(mesh=gradients_mesh, **kwargs)
+        gradients_result = math.mesh_to_array(mesh=gradients_mesh, **kwargs)
+        if gradients_result is None:
+            raise ValueError("Failed to convert gradients mesh to array")
+        gradients: npt.NDArray[np.float64] = gradients_result
 
         return gradients
 
@@ -2716,7 +2769,7 @@ def ibz2fbz(
 
     # Apply rotations and copy properties
     new_kpoints: npt.NDArray[np.float64] = ebs.kpoints.copy()
-    for i, rotation in enumerate(rotations_list):
+    for _, rotation in enumerate(rotations_list):
         # Rotate kpoints
         new_values = ebs.kpoints.dot(rotation.T)
 
@@ -2735,8 +2788,11 @@ def ibz2fbz(
 
     new_in_original_grid_indices: npt.NDArray[np.intp] | None = None
     if kgrid_info is not None:
+        # Handle both KGRID_MODE enum and string for kgrid_mode
+        kgrid_mode = kgrid_info.kgrid_mode
+        kgrid_mode_value = kgrid_mode.value if isinstance(kgrid_mode, kpoints.KGRID_MODE) else str(kgrid_mode)  # pyright: ignore[reportUnnecessaryIsInstance]
         kpoints_grid_points = kpoints.get_kpoints_from_kgrid(
-            kgrid=kgrid_info.kgrid, kshift=kgrid_info.kshift, mode=kgrid_info.kgrid_mode
+            kgrid=kgrid_info.kgrid, kshift=kgrid_info.kshift, mode=kgrid_mode_value
         )
 
         diff = new_kpoints[:, np.newaxis, :] - kpoints_grid_points[np.newaxis, :, :]

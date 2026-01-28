@@ -222,8 +222,8 @@ class poscar_modify:
 
     def change_elements(
         self,
-        indexes: np.ndarray | List[int] | int,
-        newElements: np.ndarray | List[str] | str,
+        indexes: np.ndarray | list[int] | int,
+        newElements: np.ndarray | list[str] | str,
         human: bool = False,
     ):
         """It changes the Element of one or more atoms in this poscar object.
@@ -231,9 +231,9 @@ class poscar_modify:
         Parameters
         ----------
 
-        indexes : np.ndarray | List[int] | int
+        indexes : np.ndarray | list[int] | int
             the 0-based index(es) of the atom to be replaced.
-        newElements : np.ndarray | List[str] | str
+        newElements : np.ndarray | list[str] | str
             the element(s) to replace. Same size of `indexes`
         human : bool
             if True, the index(es) will be one-based, as humans like to count. Default is False
@@ -262,7 +262,7 @@ class poscar_modify:
         if self.verbose:
             print("Added element ", newElement, "at direct coord:", dpos)
 
-    def remove(self, atoms: List[int] | np.ndarray, human: bool = False):
+    def remove(self, atoms: list[int] | np.ndarray, human: bool = False):
         """Removes a list of atoms from the Poscar object. The order of
         removal is not trivial, and it is equivalent to removing all the
         desired atoms at once.
@@ -270,7 +270,7 @@ class poscar_modify:
         Parameters
         ----------
 
-        atoms : List[int] | np.ndarray
+        atoms : list[int] | np.ndarray
             a list with the indexes of the atoms to remove
         human : bool
             does `atoms` start from 1 (True) or 0 (False)? Default is False
@@ -285,7 +285,7 @@ class poscar_modify:
             print("removing the following atoms (0-based indexes):", atoms)
             print(self.p.numberSp, self.p.typeSp)
 
-    def add(self, element: str, position: List[float] | np.nadarray, cartesian: bool = False):
+    def add(self, element: str, position: list[float] | np.ndarray, cartesian: bool = False):
         """Adds a single atom to the Poscar object.
 
         Parameters
@@ -293,7 +293,7 @@ class poscar_modify:
 
         element : str
             a string with the atomic specie, e.g. 'Cu'
-        position : List[float] | np.nadarray
+        position : list[float] | np.ndarray
             [X, Y, Z]
         cartesian : bool
             are the positions in Cartesian (True) or direct coordiantes (False)? Default is False
@@ -307,7 +307,7 @@ class poscar_modify:
             direct = False
         self.p.add(position=position, element=element, direct=direct)
 
-    def shift(self, amount: List[float] | np.ndarray, cartesian: bool = False):
+    def shift(self, amount: list[float] | np.ndarray, cartesian: bool = False):
         """Shift all the positions by `amount`, given in Cartesian or direct
         coordinates. The PBCs are always enforced (i.e. [0,1] in direct
         coords). If amount = [0,0,0] it just applies the perodic boundary
@@ -316,7 +316,7 @@ class poscar_modify:
         Parameters
         ----------
 
-        amount : List[float] | np.ndarray
+        amount : list[float] | np.ndarray
             [X,Y,Z] the shift along each basis vector or along Cartesian axis.
         cartesian : bool
             is the `amount` given in Cartesian (True) or direct (False) coords? Default False

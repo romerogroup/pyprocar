@@ -72,10 +72,10 @@ class Poscar:
         self.cpos: np.ndarray = None  # cartesian coordinates
         self.dpos: np.ndarray = None  # direct coordinates
         self.lat: np.ndarray = None  # lattice
-        self.typeSp: List[str] = None  # Name of atomic species
-        self.numberSp: nd.array = None  # Number of atoms per specie
+        self.typeSp: list[str] = None  # Name of atomic species
+        self.numberSp: np.ndarray = None  # Number of atoms per specie
         self.Ntotal: int = None  # Total atoms in system
-        self.elm: List[str] = None  # Element of each atoms one-by-one.
+        self.elm: list[str] = None  # Element of each atoms one-by-one.
         self.selective: bool = None  # Selective dynamics
         self.selectFlags: np.ndarray = None  # all the T,F from selective dynamics
         self.flags: dict = {}  # list of flags, not used here just for convenience
@@ -186,7 +186,7 @@ class Poscar:
         return
 
     def load_from_data(
-        self, direct_positions: np.ndarray, lattice: np.ndarray, elements: List[str]
+        self, direct_positions: np.ndarray, lattice: np.ndarray, elements: list[str]
     ):
         """
         It loades the Poscar class with essencial data.
@@ -197,7 +197,7 @@ class Poscar:
           atomic positions in direct (fractional) coordiantes. Size [Natoms:3]
         lattice : np.ndarray
           Lattice vectors [3:3], in *Angstroms*
-        elements : List[str]
+        elements : list[str]
           A list of atomic symbols, with the same order as the `direct_positions`
 
         """

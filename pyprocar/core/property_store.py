@@ -5,7 +5,7 @@ import re
 import weakref
 from collections.abc import Callable, Generator, Mapping, Sequence
 from enum import Enum
-from typing import Any, cast, overload
+from typing import cast, overload
 
 import numpy as np
 import numpy.typing as npt
@@ -13,6 +13,9 @@ import pandas as pd
 from typing_extensions import override
 
 from pyprocar.utils.math import np_round_to_half
+
+# Type alias for metadata values that can be stored
+MetadataValue = str | int | float | bool | list[str] | list[int] | list[float] | None
 
 VALUE_ARRAY_TYPE = npt.NDArray[np.float64]
 GRADIENT_TYPE = dict[int, VALUE_ARRAY_TYPE]
@@ -31,13 +34,13 @@ def to_numpy_array(
 
 @overload
 def to_numpy_array(
-    data: pd.Series[Any], dtype: npt.DTypeLike | None = None
+    data: pd.Series[float], dtype: npt.DTypeLike | None = None
 ) -> npt.NDArray[np.float64]: ...
 
 
 @overload
 def to_numpy_array(
-    data: Mapping[str, Any], dtype: npt.DTypeLike | None = None
+    data: Mapping[str, npt.ArrayLike], dtype: npt.DTypeLike | None = None
 ) -> dict[str, npt.NDArray[np.float64]]: ...
 
 
@@ -48,7 +51,7 @@ def to_numpy_array(
 
 
 def to_numpy_array(
-    data: npt.ArrayLike | pd.Series[Any] | Mapping[str, Any] | None,
+    data: npt.ArrayLike | pd.Series[float] | Mapping[str, npt.ArrayLike] | None,
     dtype: npt.DTypeLike | None = None,
 ) -> npt.NDArray[np.float64] | dict[str, npt.NDArray[np.float64]]:
     """
@@ -115,7 +118,7 @@ class Property:
     gradients: dict[int, npt.NDArray[np.float64]]
     units: str | None
     label: str | None
-    metadata: dict[str, Any]
+    metadata: dict[str, MetadataValue]
     _data_lim: tuple[float | None, float | None] | None
     _point_set: weakref.ReferenceType[PointSet] | PointSet | None
 
@@ -129,7 +132,7 @@ class Property:
         units: str | None = None,
         label: str | None = None,
         point_set: PointSet | None = None,
-        metadata: dict[str, Any] | None = None,
+        metadata: dict[str, MetadataValue] | None = None,
         data_lim: tuple[float | None, float | None] | None = None,
     ) -> None:
         self.name = name
@@ -219,7 +222,8 @@ class Property:
 
     @property
     def n_points(self) -> int:
-        return self.value.shape[0]
+        shape: tuple[int, ...] = self.value.shape
+        return shape[0]
 
     @property
     def shape(self) -> tuple[int, ...]:
@@ -233,12 +237,16 @@ class Property:
 
     @property
     def is_vector(self) -> bool:
-        return self.value.shape[-1] == 3
+        shape: tuple[int, ...] = self.value.shape
+        return shape[-1] == 3
 
     @property
     def magnitude(self) -> npt.NDArray[np.float64]:
         if self.is_vector:
-            magnitude = np.linalg.norm(self.value, axis=-1)
+            # np.linalg.norm returns a floating point array; cast for type checker
+            magnitude: npt.NDArray[np.float64] = np.asarray(
+                np.linalg.norm(self.value, axis=-1), dtype=np.float64
+            )
         else:
             magnitude = self.value
         return magnitude
@@ -247,9 +255,12 @@ class Property:
     def divergence(self) -> npt.NDArray[np.float64]:
         if self.is_vector:
             gradient_1 = self.gradients[1]
-            divergence = np.trace(gradient_1, axis1=-2, axis2=-1)
+            # np.trace returns an ndarray; cast for type checker
+            divergence: npt.NDArray[np.float64] = np.asarray(
+                np.trace(gradient_1, axis1=-2, axis2=-1), dtype=np.float64
+            )
         else:
-            divergence = np.array([])
+            divergence = np.array([], dtype=np.float64)
         return divergence
 
     @property
@@ -306,7 +317,10 @@ class Property:
     @property
     def laplacian(self) -> npt.NDArray[np.float64]:
         gradient_2 = self.gradients[2]
-        laplacian = np.trace(gradient_2, axis1=-2, axis2=-1)
+        # np.trace returns an ndarray; cast for type checker
+        laplacian: npt.NDArray[np.float64] = np.asarray(
+            np.trace(gradient_2, axis1=-2, axis2=-1), dtype=np.float64
+        )
         return laplacian
 
     def bind_owner(self, point_set: "PointSet") -> None:
@@ -327,13 +341,22 @@ class Property:
     @override
     def __eq__(self, other: object) -> bool:
         if isinstance(other, dict):
-            other_dict = cast(dict[str, Any], other)
+            # Type narrowing: other is a dict, use get() for safe access
+            other_dict = cast(dict[str, object], other)
+            name_val = other_dict.get("name")
+            value_val = other_dict.get("value")
+            gradients_val = other_dict.get("gradients")
+            if not isinstance(name_val, str):
+                return False
+            if not isinstance(value_val, np.ndarray):
+                return False
+            gradients: dict[int, npt.NDArray[np.float64]] | None = None
+            if gradients_val is not None and isinstance(gradients_val, dict):
+                gradients = cast(dict[int, npt.NDArray[np.float64]], gradients_val)
             other = Property(
-                name=cast(str, other_dict["name"]),
-                value=cast(npt.NDArray[np.float64], other_dict["value"]),
-                gradients=cast(
-                    dict[int, npt.NDArray[np.float64]] | None, other_dict.get("gradients")
-                ),
+                name=name_val,
+                value=value_val,
+                gradients=gradients,
             )
         if not isinstance(other, Property):
             return False
@@ -405,6 +428,7 @@ class Property:
     def __delitem__(self, key: PROPERTY_KEY_TYPE) -> None:
         self[key] = np.array([])
 
+    @override
     def __str__(self) -> str:
         ret = f"{self.name} \n"
         ret += f" - Value: {self.value.shape}\n"
@@ -415,6 +439,7 @@ class Property:
                     ret += f"  - Gradients {gradient_order}: {gradient.shape}\n"
         return ret
 
+    @override
     def __repr__(self) -> str:
         tmp = self.__class__.__name__
         tmp += "("
@@ -444,13 +469,19 @@ class Property:
         if self.value.ndim == 1:
             return 1
         else:
-            return self.value.shape[1]
+            shape: tuple[int, ...] = self.value.shape
+            return shape[1]
 
     @property
     def data_lim(self) -> npt.NDArray[np.float64] | tuple[float | None, float | None]:
         if self._data_lim is None:
-            data_mins: npt.NDArray[np.float64] = np.min(self.value, axis=0)
-            data_maxs: npt.NDArray[np.float64] = np.max(self.value, axis=0)
+            # np.min/max return ndarrays; cast for type checker
+            data_mins: npt.NDArray[np.float64] = np.asarray(
+                np.min(self.value, axis=0), dtype=np.float64
+            )
+            data_maxs: npt.NDArray[np.float64] = np.asarray(
+                np.max(self.value, axis=0), dtype=np.float64
+            )
             data_lims: npt.NDArray[np.float64] = np.vstack([data_mins, data_maxs]).T
             return data_lims
         return self._data_lim
@@ -459,7 +490,10 @@ class Property:
     def rounded_data_lim(self) -> npt.NDArray[np.float64] | tuple[float | None, float | None]:
         if self._data_lim is None:
             data_lims = self.data_lim
-            rounded_lims: npt.NDArray[np.float64] = np.vectorize(np_round_to_half)(data_lims)
+            # np.vectorize result needs explicit type annotation
+            rounded_lims: npt.NDArray[np.float64] = np.asarray(
+                np.vectorize(np_round_to_half)(data_lims), dtype=np.float64
+            )
             return rounded_lims
         return self._data_lim
 
@@ -487,7 +521,7 @@ class Property:
                 calc_name = "value"
             return calc_name, gradient_order
 
-    def to_series(self) -> pd.Series[Any]:
+    def to_series(self) -> pd.Series[float]:
         return pd.Series(self.value, name=self.name)
 
     def to_array(self) -> npt.NDArray[np.float64]:
@@ -577,12 +611,14 @@ class PointSet:
             gradient_func if gradient_func is not None else lambda x, y: np.zeros_like(x)
         )
 
+    @override
     def __str__(self) -> str:
         ret = "\n Point Set     \n"
         ret += "============================\n"
         ret += "Points: \n"
         ret += "------------------------     \n"
-        ret += f"Number of points = {self._points.shape[0]}\n"
+        points_shape: tuple[int, ...] = self._points.shape
+        ret += f"Number of points = {points_shape[0]}\n"
         ret += f"Number of properties = {len(self._point_data)}\n\n"
 
         ret += "Properties: \n"
@@ -605,7 +641,8 @@ class PointSet:
 
     @property
     def n_points(self) -> int:
-        return self._points.shape[0]
+        shape: tuple[int, ...] = self._points.shape
+        return shape[0]
 
     @property
     def point_data(self) -> dict[str, Property]:
@@ -656,16 +693,28 @@ class PointSet:
             return None
         if calc_name is None:
             return prop
-        value: Any = getattr(prop, calc_name)
-        if isinstance(value, dict) and gradient_order > 0:
-            gradients_dict = cast(dict[int, npt.NDArray[np.float64]], value)
-            gradient = gradients_dict.get(gradient_order, None)
-            if gradient is None or gradient.shape[0] == 0:
-                self.compute_gradients(gradient_order, names=[prop_name])
-                gradient = gradients_dict[gradient_order]
-            return gradient
-        if isinstance(value, np.ndarray):
-            return cast(npt.NDArray[np.float64], value)
+        # calc_name can be: value, gradients, divergence, curl, laplacian, magnitude, etc.
+        # Use hasattr and type narrowing rather than getattr
+        if calc_name == "gradients":
+            gradients_dict = prop.gradients
+            if gradient_order > 0:
+                gradient = gradients_dict.get(gradient_order, None)
+                if gradient is None or gradient.shape[0] == 0:
+                    _ = self.compute_gradients(gradient_order, names=[prop_name])
+                    gradient = gradients_dict[gradient_order]
+                return gradient
+            return None
+        # For other properties (value, divergence, curl, laplacian, magnitude)
+        if calc_name == "value":
+            return prop.value
+        if calc_name == "divergence":
+            return prop.divergence
+        if calc_name == "curl":
+            return prop.curl
+        if calc_name == "laplacian":
+            return prop.laplacian
+        if calc_name == "magnitude":
+            return prop.magnitude
         return None
 
     def add_property(
@@ -673,7 +722,13 @@ class PointSet:
         property: Property | None = None,
         name: str | None = None,
         value: npt.ArrayLike | None = None,
-        **kwargs: Any,
+        gradients: dict[int, npt.NDArray[np.float64]] | None = None,
+        points: npt.NDArray[np.float64] | None = None,
+        gradient_func: GradientFuncType | None = None,
+        units: str | None = None,
+        label: str | None = None,
+        metadata: dict[str, MetadataValue] | None = None,
+        data_lim: tuple[float | None, float | None] | None = None,
     ) -> None:
         if property is not None:
             logger.info("Adding property %s", property.name)
@@ -688,7 +743,16 @@ class PointSet:
 
         prop = self.point_data.get(name, None)
         if prop is None:
-            prop = Property(name=name, **kwargs)
+            prop = Property(
+                name=name,
+                gradients=gradients,
+                points=points,
+                gradient_func=gradient_func,
+                units=units,
+                label=label,
+                metadata=metadata,
+                data_lim=data_lim,
+            )
 
         prop.value = np.array(value)
 
@@ -728,7 +792,7 @@ class PointSet:
             if gradient_order == 1:
                 scalars = prop.value
             else:
-                self.compute_gradients(gradient_order - 1, names=[name])
+                _ = self.compute_gradients(gradient_order - 1, names=[name])
                 scalars = prop.gradients[gradient_order - 1]
 
             prop.gradients[gradient_order] = self.gradient_func(self._points, scalars)

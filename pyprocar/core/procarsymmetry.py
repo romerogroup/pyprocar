@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import logging
-from typing import Any
+from typing import TextIO
 
 import numpy as np
 import numpy.typing as npt
@@ -19,7 +19,7 @@ class ProcarSymmetry:
     sy: npt.NDArray[np.float64]
     sz: npt.NDArray[np.float64]
     log: logging.Logger
-    ch: logging.StreamHandler[Any]
+    ch: logging.StreamHandler[TextIO]
 
     def __init__(
         self,
@@ -68,14 +68,22 @@ class ProcarSymmetry:
 
     def _q_mult(
         self,
-        q1: npt.NDArray[np.float64] | tuple[Any, ...],
-        q2: npt.NDArray[np.float64] | tuple[Any, ...],
+        q1: npt.NDArray[np.float64]
+        | tuple[npt.NDArray[np.float64], npt.NDArray[np.float64], npt.NDArray[np.float64], npt.NDArray[np.float64]],
+        q2: npt.NDArray[np.float64]
+        | tuple[npt.NDArray[np.float64], npt.NDArray[np.float64], npt.NDArray[np.float64], npt.NDArray[np.float64]],
     ) -> npt.NDArray[np.float64]:
         """
         Multiplication of quaternions, it doesn't fit in any other place
         """
-        w1, x1, y1, z1 = q1
-        w2, x2, y2, z2 = q2
+        w1: npt.NDArray[np.float64] = np.asarray(q1[0], dtype=np.float64)
+        x1: npt.NDArray[np.float64] = np.asarray(q1[1], dtype=np.float64)
+        y1: npt.NDArray[np.float64] = np.asarray(q1[2], dtype=np.float64)
+        z1: npt.NDArray[np.float64] = np.asarray(q1[3], dtype=np.float64)
+        w2: npt.NDArray[np.float64] = np.asarray(q2[0], dtype=np.float64)
+        x2: npt.NDArray[np.float64] = np.asarray(q2[1], dtype=np.float64)
+        y2: npt.NDArray[np.float64] = np.asarray(q2[2], dtype=np.float64)
+        z2: npt.NDArray[np.float64] = np.asarray(q2[3], dtype=np.float64)
         w = w1 * w2 - x1 * x2 - y1 * y2 - z1 * z2
         x = w1 * x2 + x1 * w2 + y1 * z2 - z1 * y2
         y = w1 * y2 + y1 * w2 + z1 * x2 - x1 * z2
@@ -86,7 +94,7 @@ class ProcarSymmetry:
     def general_rotation(
         self,
         angle: float,
-        rotAxis: list[float] | str = [0, 0, 1],
+        rotAxis: list[float] | str | None = None,
         store: bool = True,
     ) -> tuple[
         npt.NDArray[np.float64],
@@ -113,7 +121,9 @@ class ProcarSymmetry:
 
         """
         rotAxis_arr: npt.NDArray[np.float64]
-        if rotAxis == "x" or rotAxis == "X":
+        if rotAxis is None:
+            rotAxis_arr = np.array([0.0, 0.0, 1.0])
+        elif rotAxis == "x" or rotAxis == "X":
             rotAxis_arr = np.array([1.0, 0.0, 0.0])
         elif rotAxis == "y" or rotAxis == "Y":
             rotAxis_arr = np.array([0.0, 1.0, 0.0])
@@ -128,7 +138,7 @@ class ProcarSymmetry:
         angle_rad = angle * np.pi / 180
         # defining a quaternion for rotatoin
         angle_half = angle_rad / 2
-        rotAxis_arr = rotAxis_arr * np.sin(angle_half)
+        rotAxis_arr = np.asarray(rotAxis_arr * np.sin(angle_half), dtype=np.float64)
         qRot: npt.NDArray[np.float64] = np.array(
             (np.cos(angle_half), rotAxis_arr[0], rotAxis_arr[1], rotAxis_arr[2])
         )
@@ -166,9 +176,12 @@ class ProcarSymmetry:
         qvectors_rotated = self._q_mult(qRot, qvectors_spin)
         qvectors_rotated = self._q_mult(qvectors_rotated, qRotI)
         self.log.debug("Spin quaternions after rotation:\n" + str(qvectors_rotated))
-        sx: npt.NDArray[np.float64] = qvectors_rotated[1].reshape(sxShape)
-        sy: npt.NDArray[np.float64] = qvectors_rotated[2].reshape(syShape)
-        sz: npt.NDArray[np.float64] = qvectors_rotated[3].reshape(szShape)
+        qr1: npt.NDArray[np.float64] = np.asarray(qvectors_rotated[1], dtype=np.float64)
+        qr2: npt.NDArray[np.float64] = np.asarray(qvectors_rotated[2], dtype=np.float64)
+        qr3: npt.NDArray[np.float64] = np.asarray(qvectors_rotated[3], dtype=np.float64)
+        sx: npt.NDArray[np.float64] = qr1.reshape(sxShape)
+        sy: npt.NDArray[np.float64] = qr2.reshape(syShape)
+        sz: npt.NDArray[np.float64] = qr3.reshape(szShape)
 
         if store is True:
             self.kpoints, self.sx, self.sy, self.sz = kpoints, sx, sy, sz
@@ -243,7 +256,7 @@ class ProcarSymmetry:
         newOrigin_arr: npt.NDArray[np.float64]
         if len(newOrigin) == 1:
             newOrigin_idx = int(newOrigin[0])
-            newOrigin_arr = self.kpoints[newOrigin_idx]
+            newOrigin_arr = np.asarray(self.kpoints[newOrigin_idx], dtype=np.float64)
         else:
             # Make sure newOrigin is a numpy array
             newOrigin_arr = np.array(newOrigin, dtype=np.float64)

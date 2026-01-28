@@ -3,10 +3,16 @@
 from __future__ import annotations
 
 import logging
-from typing import Any, Protocol
+from typing import Protocol, TextIO
 
 import numpy as np
 import numpy.typing as npt
+
+
+def _get_shape_dim(arr: npt.NDArray[np.float64], dim: int) -> int:
+    """Get array shape dimension with proper type narrowing."""
+    shape: tuple[int, ...] = arr.shape
+    return shape[dim]
 
 
 class ProcarDataProtocol(Protocol):
@@ -57,7 +63,7 @@ class ProcarSelect:
     mode: str | None
     numspin: int
     log: logging.Logger
-    ch: logging.StreamHandler[Any]
+    ch: logging.StreamHandler[TextIO]
 
     def __init__(
         self,
@@ -153,12 +159,14 @@ class ProcarSelect:
             raise RuntimeError("Wrong dimensionality of the array")
         self.log.debug("ispin value = " + str(value))
 
-        numofbands = int(self.spd.shape[1] / 2)
+        numofbands = _get_shape_dim(self.spd, 1) // 2
 
         if separate == False:
             # spin density or magnetization
             spd_selected: npt.NDArray[np.float64] = self.spd[:, :, value]
-            spd_summed: npt.NDArray[np.float64] = spd_selected.sum(axis=2)
+            spd_summed: npt.NDArray[np.float64] = np.asarray(
+                spd_selected.sum(axis=2), dtype=np.float64
+            )
             self.spd = spd_summed
             self.log.info("new spd shape =" + str(spd_summed.shape))
             self.log.debug("selectIspin: ...Done")
@@ -220,7 +228,9 @@ class ProcarSelect:
             self.log.error("You should call selectIspin->selecAtom->selectOrbitals, in this order.")
             raise RuntimeError("Wrong dimensionality of the array")
         spd_selected: npt.NDArray[np.float64] = self.spd[:, :, value]
-        spd_summed: npt.NDArray[np.float64] = spd_selected.sum(axis=2)
+        spd_summed: npt.NDArray[np.float64] = np.asarray(
+            spd_selected.sum(axis=2), dtype=np.float64
+        )
         self.spd = spd_summed
         # self.cspd = self.cspd[:,:,value]
         # self.cspd = self.cspd.sum(axis=2)
@@ -275,7 +285,9 @@ class ProcarSelect:
             self.log.error("You should call selectIspin->selecAtom->selectOrbitals, in this order.")
             raise RuntimeError("Wrong dimensionality of the array")
 
-        spd_summed: npt.NDArray[np.float64] = spd_selected.sum(axis=2)
+        spd_summed: npt.NDArray[np.float64] = np.asarray(
+            spd_selected.sum(axis=2), dtype=np.float64
+        )
         self.spd = spd_summed
         # self.cspd=self.cspd.sum(axis=2)
         self.log.info("new shape =" + str(spd_summed.shape))

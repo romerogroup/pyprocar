@@ -8,7 +8,7 @@ from collections import Counter
 from collections.abc import Callable, Iterable, Mapping, Sequence
 from enum import Enum
 from pathlib import Path
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, cast
 
 import numpy as np
 import numpy.typing as npt
@@ -67,14 +67,14 @@ def get_dos_from_code(
         parser_dos = parser.dos  # pyright: ignore[reportUnknownMemberType, reportUnknownVariableType]
         if parser_dos is None:
             raise ValueError("Parser returned no DOS data")
-        dos = parser_dos  # pyright: ignore[reportAssignmentType]
+        dos = parser_dos  # pyright: ignore[reportAssignmentType, reportUnknownVariableType]
         if use_cache:
-            dos.save(dos_filepath)
+            dos.save(dos_filepath)  # pyright: ignore[reportUnknownMemberType]
     else:
         logger.info("Loading DOS from cache: %s", dos_filepath)
         dos = DensityOfStates.load(dos_filepath)
 
-    return dos
+    return dos  # pyright: ignore[reportUnknownVariableType]
 
 
 def _finite_difference_gradient(
@@ -736,7 +736,8 @@ class DensityOfStates(PointSet):
             values_to_integrate = values_array[energy_indices]
             energies_to_integrate = self.energies[energy_indices]
 
-        return np.trapezoid(values_to_integrate, x=energies_to_integrate, axis=0)
+        result = np.trapezoid(values_to_integrate, x=energies_to_integrate, axis=0)
+        return np.atleast_1d(result)
 
     def cumsum(self, values: npt.NDArray[np.float64] | Property) -> npt.NDArray[np.float64]:
         """Compute the cumulative sum of the values.
@@ -784,11 +785,11 @@ class DensityOfStates(PointSet):
         if factor in (0, 1):
             return self
 
-        energies, total = interpolate(self.energies, self.total, factor=factor)
-        projected = None
-        projected_raw = self.projected_unnormalized
-        if projected_raw is not None:
-            _, projected = interpolate(self.energies, projected_raw, factor=factor)
+        energies, total = interpolate(self.energies, self.total.to_array(), factor=factor)
+        projected: npt.NDArray[np.float64] | None = None
+        projected_prop = self.projected
+        if projected_prop is not None:
+            _, projected = interpolate(self.energies, projected_prop.to_array(), factor=factor)
 
         return DensityOfStates(
             energies=energies,
@@ -897,7 +898,7 @@ class DensityOfStates(PointSet):
         return tmp_array
 
     def normalize(
-        self, mode: str | NormMode | None, values_array: npt.NDArray[np.float64], **kwargs
+        self, mode: str | NormMode | None, values_array: npt.NDArray[np.float64], **kwargs: Any
     ) -> npt.NDArray[np.float64]:
         mode = NormMode.from_input(mode)
         if mode is NormMode.RAW:
@@ -922,7 +923,7 @@ class DensityOfStates(PointSet):
             )
 
     def normalize_total(
-        self, values_array: npt.NDArray[np.float64], **kwargs
+        self, values_array: npt.NDArray[np.float64], **kwargs: Any
     ) -> npt.NDArray[np.float64]:
         """Normalize the values array by the total DOS.
 
@@ -955,7 +956,7 @@ class DensityOfStates(PointSet):
         return normalized_array
 
     def normalize_max(
-        self, values_array: npt.NDArray[np.float64], **kwargs
+        self, values_array: npt.NDArray[np.float64], **kwargs: Any
     ) -> npt.NDArray[np.float64]:
         """Normalize the values array by the max of the values.
 
@@ -984,7 +985,7 @@ class DensityOfStates(PointSet):
         return normalized_array
 
     def normalize_integral(
-        self, values_array: npt.NDArray[np.float64], **kwargs
+        self, values_array: npt.NDArray[np.float64], **kwargs: Any
     ) -> npt.NDArray[np.float64]:
         """Normalize the values array by the integral of the values.
 
@@ -1002,9 +1003,8 @@ class DensityOfStates(PointSet):
         """
         values_array = np.asarray(values_array, dtype=np.float64)
         integrals = integrate.trapezoid(values_array, x=self.energies, axis=0)
-        factors = integrals[np.newaxis, :]
-
-        factors = np.asarray(factors, dtype=np.float64)
+        integrals_array = np.atleast_1d(np.asarray(integrals, dtype=np.float64))
+        factors = np.asarray(integrals_array[np.newaxis, :], dtype=np.float64)
         factors = np.where(factors == 0, 1.0, factors)
         with np.errstate(divide="ignore", invalid="ignore"):
             normalized_array = np.divide(
@@ -1013,7 +1013,7 @@ class DensityOfStates(PointSet):
         return normalized_array
 
     def normalize_electrons(
-        self, values_array: npt.NDArray[np.float64], **kwargs
+        self, values_array: npt.NDArray[np.float64], **kwargs: Any
     ) -> npt.NDArray[np.float64]:
         """Normalize the values array by the number of electrons.
 
@@ -1032,7 +1032,7 @@ class DensityOfStates(PointSet):
         sigma: float = 1.25,
         fill_value: float = 0.0,
         eps: float = 0.001,
-        **kwargs,
+        **kwargs: Any,
     ) -> npt.NDArray[np.float64]:
         """Normalize the values array by the magnetization.
 
@@ -1074,7 +1074,7 @@ class DensityOfStates(PointSet):
         sigma: float = 1.25,
         fill_value: float = 0.0,
         eps: float = 0.001,
-        **kwargs,
+        **kwargs: Any,
     ) -> npt.NDArray[np.float64]:
         """Normalize the values array by the spin magnitude.
 
@@ -1112,7 +1112,7 @@ class DensityOfStates(PointSet):
         return normalized_array
 
     def normalize_total_projection(
-        self, values_array: npt.NDArray[np.float64], **kwargs
+        self, values_array: npt.NDArray[np.float64], **kwargs: Any
     ) -> npt.NDArray[np.float64]:
         """Normalize the values array by the projected total DOS.
 
@@ -1129,7 +1129,10 @@ class DensityOfStates(PointSet):
             The normalized values.
         """
         normalized_array = np.zeros_like(values_array)
-        projected_total_array = self.projected_total.to_array()
+        projected_total = self.projected_total
+        if projected_total is None:
+            raise ValueError("Projected total is not available")
+        projected_total_array = projected_total.to_array()
 
         logger.debug(f"projected_total: {projected_total_array.shape}")
         logger.debug(f"values_array: {values_array.shape}")
@@ -1162,8 +1165,8 @@ class DensityOfStates(PointSet):
         norm_mode: str | NormMode | None = "raw",
         label: str = "Projected DoS",
         name: str = "projected_sum",
-        units="$\\frac{states}{eV}$",
-        **kwargs,
+        units: str = "$\\frac{states}{eV}$",
+        **kwargs: Any,
     ) -> Property | list[Property]:
         """Compute projected DOS sums over selected atoms, orbitals, and spins.
 
@@ -1216,7 +1219,7 @@ class DensityOfStates(PointSet):
             )
         )
 
-        results = []
+        results: list[Property] = []
         for params in param_dicts:
             # Resolve Projection Selection
             selection = self._resolve_projection_selection(
@@ -1229,6 +1232,7 @@ class DensityOfStates(PointSet):
             )
 
             # Sum Atomic Projection Components
+            # Note: self.projected guaranteed not None by check at start of function
             values = self.sum_projection_components(
                 values_array=self.projected.to_array(),
                 atoms=selection.atoms,
@@ -1265,7 +1269,7 @@ class DensityOfStates(PointSet):
         label: str = "Spin Texture",
         name: str = "spin_texture",
         units: str = "$\\frac{states}{eV}$",
-        **kwargs,
+        **kwargs: Any,
     ) -> Property | list[Property]:
         """Compute spin texture (S_x, S_y, S_z components) for non-collinear calculations.
 
@@ -1314,11 +1318,13 @@ class DensityOfStates(PointSet):
             raise ValueError("Spin texture is only available for non-collinear calculations")
 
         # Resolve default values
-        dos_array = (
-            self.total.to_array()
-            if (self.projected is None and hasattr(self, "total"))
-            else self.projected.to_array()
-        )
+        projected_prop = self.projected
+        if projected_prop is None and hasattr(self, "total"):
+            dos_array = self.total.to_array()
+        elif projected_prop is not None:
+            dos_array = projected_prop.to_array()
+        else:
+            raise ValueError("No DOS data available")
         spins = (1, 2, 3) if spins is None else spins
 
         for spin in spins:
@@ -1340,7 +1346,7 @@ class DensityOfStates(PointSet):
             )
         )
 
-        results = []
+        results: list[Property] = []
         for params in param_dicts:
             # Resolve Projection Selection
             selection = self._resolve_projection_selection(
@@ -1396,7 +1402,7 @@ class DensityOfStates(PointSet):
         label: str = "Magnetization",
         name: str = "magnetization",
         units: str = "$\\frac{states}{eV}$",
-        **kwargs,
+        **kwargs: Any,
     ) -> Property | list[Property]:
         """Compute magnetization density of states.
 
@@ -1452,11 +1458,13 @@ class DensityOfStates(PointSet):
             raise ValueError("Total or projected DOS is not available for this calculation")
 
         # Resolve default values
-        dos_array = (
-            self.total.to_array()
-            if (self.projected is None and hasattr(self, "total")) or from_total
-            else self.projected.to_array()
-        )
+        projected_prop = self.projected
+        if (projected_prop is None and hasattr(self, "total")) or from_total:
+            dos_array = self.total.to_array()
+        elif projected_prop is not None:
+            dos_array = projected_prop.to_array()
+        else:
+            raise ValueError("No DOS data available")
         spins = (0,) if self.is_non_collinear else (0, 1)
 
         # Resolve selection parameters groups.
@@ -1471,7 +1479,7 @@ class DensityOfStates(PointSet):
             )
         )
 
-        results = []
+        results: list[Property] = []
         for params in param_dicts:
             # Resolve Projection Selection
             selection = self._resolve_projection_selection(
@@ -1540,7 +1548,7 @@ class DensityOfStates(PointSet):
         name: str = "spin_texture_magnitude",
         units: str = "$\\frac{states}{eV}$",
         from_total: bool = False,
-        **kwargs,
+        **kwargs: Any,
     ) -> Property | list[Property]:
         """Compute spin texture magnitude ||S|| for non-collinear calculations.
 
@@ -1595,11 +1603,13 @@ class DensityOfStates(PointSet):
             raise ValueError("DOS is not non-collinear")
 
         # Resolve default values
-        dos_array = (
-            self.total.to_array()
-            if (self.projected is None and hasattr(self, "total")) or from_total
-            else self.projected.to_array()
-        )
+        projected_prop = self.projected
+        if (projected_prop is None and hasattr(self, "total")) or from_total:
+            dos_array = self.total.to_array()
+        elif projected_prop is not None:
+            dos_array = projected_prop.to_array()
+        else:
+            raise ValueError("No DOS data available")
         spins = (1, 2, 3) if spins is None else spins
 
         # Validate Spin Selection
@@ -1623,7 +1633,7 @@ class DensityOfStates(PointSet):
             )
         )
 
-        results = []
+        results: list[Property] = []
         for params in param_dicts:
             # Resolve Projection Selection
             selection = self._resolve_projection_selection(
@@ -1673,7 +1683,7 @@ class DensityOfStates(PointSet):
         label: str = "Normalized Total",
         name: str = "normalized_total",
         units: str = "$\\frac{states}{eV}$",
-        **kwargs,
+        **kwargs: Any,
     ) -> Property:
         """Compute normalized total DOS.
 
@@ -1700,13 +1710,8 @@ class DensityOfStates(PointSet):
         Property
             Normalized total DOS as a Property.
         """
-        if not (hasattr(self, "total") and self.total is not None):
+        if not hasattr(self, "total"):
             raise ValueError("Total DOS is not provided")
-
-        # Resolve Default Values
-        name = self.total.name if name is None else name
-        label = self.total.label if label is None else label
-        units = self.total.units if units is None else units
 
         prop = self._build_property(
             values=self.total.to_array(),
@@ -1722,11 +1727,11 @@ class DensityOfStates(PointSet):
 
     def compute_cumulative_total(
         self,
-        norm_mode: str | NormMode = None,
+        norm_mode: str | NormMode | None = None,
         label: str = "Cumulative Total",
         name: str = "cumulative_total",
         units: str = "$\\frac{states}{eV}$",
-        **kwargs,
+        **kwargs: Any,
     ) -> Property:
         """Compute cumulative total DOS.
 
@@ -1755,7 +1760,7 @@ class DensityOfStates(PointSet):
             Cumulative total DOS as a Property.
         """
         # Validate Input
-        if not (hasattr(self, "total") and self.total is not None):
+        if not hasattr(self, "total"):
             raise ValueError("Total DOS is not provided")
 
         # Compute Cumulative Total
@@ -1778,19 +1783,26 @@ class DensityOfStates(PointSet):
     # Property store bridge
     # ------------------------------------------------------------------
 
-    def get_property(self, key: str | tuple[str, int], **kwargs):
+    def get_property(
+        self,
+        key: str | tuple[str, int] | tuple[str, str] | tuple[str, str, int] | None = None,
+        **kwargs: Any,
+    ) -> Property | npt.NDArray[np.float64] | None:
         """Get a property from the property store.
 
         Parameters
         ----------
-        key: str | tuple[str, int]
+        key: str | tuple[str, int] | tuple[str, str] | tuple[str, str, int] | None
             The key of the property to get. Can be a string or a tuple of two strings.
             The first string is the property name, the second string is the calculation name.
             The second string can be an integer for the gradient order.
         **kwargs: dict[str, Any]
             Additional kwargs passed to compute_property method.
         """
-        prop_name, (calc_name, gradient_order) = self._extract_key(key)
+        if key is None:
+            return None
+
+        prop_name, (_calc_name, _gradient_order) = self._extract_key(key)
 
         params = self._params_for_property(prop_name, kwargs)
         requested_key = self._make_property_key(prop_name, params)
@@ -1800,6 +1812,11 @@ class DensityOfStates(PointSet):
             computed = self.compute_property(prop_name, **kwargs)
             if computed is None:
                 return None
+            # Handle list of properties by taking the first one
+            if isinstance(computed, list):
+                computed = computed[0] if computed else None
+                if computed is None:
+                    return None
             property_obj = self._coerce_to_property(computed, stored_key)
             self.add_property(property=property_obj)
             stored_key = property_obj.name
@@ -1834,7 +1851,9 @@ class DensityOfStates(PointSet):
             point_set=self,
         )
 
-    def compute_property(self, name: str, **kwargs):
+    def compute_property(
+        self, name: str, **kwargs: Any
+    ) -> Property | list[Property] | None:
         """Compute a property.
 
         Parameters
@@ -1846,7 +1865,7 @@ class DensityOfStates(PointSet):
 
         Returns
         -------
-        Property | None
+        Property | list[Property] | None
             The computed property.
         """
         if name in {"projected_sum", "projected_sum_total", "projected_total"}:
@@ -1874,8 +1893,8 @@ class DensityOfStates(PointSet):
         property: Property | None = None,
         name: str | None = None,
         value: npt.ArrayLike | None = None,
-        **kwargs,
-    ) -> Property:
+        **kwargs: Any,
+    ) -> None:
         """Attach a custom property to the DOS object.
 
         Users may supply an existing :class:`Property` instance or provide a
@@ -1906,7 +1925,7 @@ class DensityOfStates(PointSet):
         if property is not None:
             self.validate_property_points(property)
             super().add_property(property=property, **kwargs)
-            return self.property_store[property.name]
+            return
 
         # Validate Name and Value
         assert name is not None and value is not None, (
@@ -1924,7 +1943,6 @@ class DensityOfStates(PointSet):
         )
 
         super().add_property(name=name, value=value_array, **kwargs)
-        return self.property_store[name]
 
     # ------------------------------------------------------------------
     # Basis helpers
@@ -1938,10 +1956,7 @@ class DensityOfStates(PointSet):
         str
             The current basis of the DOS.
         """
-        assert hasattr(self, "projected") and self.projected is not None, (
-            "Projected DOS is not provided"
-        )
-        if self.projected is None:
+        if not hasattr(self, "projected") or self.projected is None:
             return "Unknown"
         n_orbitals = self.projected.shape[-1]
         if n_orbitals == 18:
@@ -1952,7 +1967,7 @@ class DensityOfStates(PointSet):
             return "spdf basis"
         return "Unknown"
 
-    def coupled_to_uncoupled_basis(self):  # pragma: no cover - legacy feature
+    def coupled_to_uncoupled_basis(self) -> None:  # pragma: no cover - legacy feature
         raise NotImplementedError(
             "Coupled-to-uncoupled basis conversion is not implemented for the "
             "new DOS representation."
@@ -2009,9 +2024,9 @@ class DensityOfStates(PointSet):
         selection: ProjectionSelectionResult | None = None,
         include_normal_label: bool = False,
         allowed_norm_modes: set[NormMode] | None = None,
-        **kwargs,
-    ) -> dict[str, Any]:
-        """Build metadata dictionary for a computed property.
+        **kwargs: Any,
+    ) -> Property:
+        """Build a computed property.
 
         Parameters
         ----------
@@ -2063,7 +2078,7 @@ class DensityOfStates(PointSet):
         data_lim = (data_min, data_max)
         rounded_data_lim = (np_round_to_half(data_min), np_round_to_half(data_max))
 
-        metadata = {
+        metadata: dict[str, Any] = {
             "norm_mode": norm_mode,
             "units": normed_units,
             "data_lim": data_lim,
@@ -2289,7 +2304,7 @@ class DensityOfStates(PointSet):
             raise IndexError("Index out of bounds")
         return np.unique(arr)
 
-    def _params_for_property(self, name: str, kwargs: dict) -> dict:
+    def _params_for_property(self, name: str, kwargs: dict[str, Any]) -> dict[str, Any]:
         """Get the parameters for the property.
 
         Parameters
@@ -2313,7 +2328,7 @@ class DensityOfStates(PointSet):
             return {}
         return {key: value for key, value in kwargs.items() if value is not None}
 
-    def _projected_sum_cache_params(self, **kwargs) -> dict[str, tuple[int, ...] | bool]:
+    def _projected_sum_cache_params(self, **kwargs: Any) -> dict[str, tuple[int, ...] | bool]:
         """Get the parameters for the projected sum cache.
 
         Parameters
@@ -2354,7 +2369,7 @@ class DensityOfStates(PointSet):
     def _make_property_key(
         self,
         base_name: str,
-        params: dict | None,
+        params: dict[str, Any] | None,
     ) -> str:
         """Make the property key.
 
@@ -2372,42 +2387,47 @@ class DensityOfStates(PointSet):
         """
         if not params:
             return base_name
-        tokens = [base_name]
+        tokens: list[str] = [base_name]
         for key in sorted(params):
-            value = params[key]
+            value: Any = params[key]
             if value is None:
                 continue
             if isinstance(value, tuple):
-                string = ",".join(str(v) for v in value) if value else "[]"
+                tuple_val = cast("tuple[Any, ...]", value)
+                string = ",".join(str(v) for v in tuple_val) if tuple_val else "[]"
             else:
                 string = str(value)
             tokens.append(f"{key}={string}")
         return "|".join(tokens)
 
-    def _normalize_super_key(self, original_key, resolved_name: str) -> str:
+    def _normalize_super_key(
+        self,
+        original_key: str | tuple[str, int] | tuple[str, str] | tuple[str, str, int] | None,
+        resolved_name: str,
+    ) -> str | tuple[str, int] | tuple[str, str] | tuple[str, str, int]:
         """Normalize the super key.
 
         Parameters
         ----------
-        original_key: str | tuple[str, int] | tuple[str, str] | tuple[str, int, str]
+        original_key: str | tuple[str, int] | tuple[str, str] | tuple[str, int, str] | None
             The original key to normalize.
         resolved_name: str
             The resolved name to normalize.
 
         Returns
         -------
-        str
+        str | tuple[str, int] | tuple[str, str] | tuple[str, str, int]
             The normalized super key.
         """
         if original_key is None or isinstance(original_key, str):
             return resolved_name
-        if isinstance(original_key, tuple):
-            if len(original_key) == 2 and isinstance(original_key[1], int):
-                return (resolved_name, original_key[1])
-            if len(original_key) == 2 and isinstance(original_key[1], str):
-                return (resolved_name, original_key[1])
-            if len(original_key) == 3:
-                return (resolved_name, original_key[1], original_key[2])
+        # At this point original_key is one of the tuple types
+        if len(original_key) == 2 and isinstance(original_key[1], int):
+            return (resolved_name, original_key[1])
+        if len(original_key) == 2 and isinstance(original_key[1], str):
+            return (resolved_name, original_key[1])
+        if len(original_key) == 3:
+            return (resolved_name, original_key[1], original_key[2])
         return resolved_name
 
     def _validate_projection_selection_params(
@@ -2418,7 +2438,7 @@ class DensityOfStates(PointSet):
         species: Sequence[str] | None = None,
         species_orbital_map: dict[str, Iterable[int]] | None = None,
         atoms_orbital_map: dict[int, Iterable[int]] | None = None,
-    ) -> tuple[set[int], set[int], set[int], set[str]]:
+    ) -> tuple[set[int], set[int] | None, set[int] | None, set[str]]:
         """Validate the projection selection parameters.
 
         Parameters
@@ -2438,18 +2458,23 @@ class DensityOfStates(PointSet):
 
         Returns
         -------
-        tuple[set[int], set[int], set[int], set[str]]
+        tuple[set[int], set[int] | None, set[int] | None, set[str]]
             The validated atoms, orbitals, spins, and species.
         """
         if species is not None and atoms is not None:
             raise ValueError("atoms and species cannot be specified together")
+        # Cast to satisfy the type checker - dict[int, ...] is compatible at runtime
+        atoms_orbital_map_casted = cast(
+            "Mapping[Iterable[int] | int, Iterable[int]] | None",
+            atoms_orbital_map,
+        )
         selection = self._resolve_projection_selection(
             atoms=atoms,
             orbitals=orbitals,
             spins=spins,
             species=species,
             species_orbital_map=species_orbital_map,
-            atoms_orbital_map=atoms_orbital_map,
+            atoms_orbital_map=atoms_orbital_map_casted,
         )
 
         atoms_set = set(selection.atoms)

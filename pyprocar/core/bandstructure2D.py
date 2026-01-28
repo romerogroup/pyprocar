@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 __author__ = "Pedram Tavadze and Logan Lang"
 __maintainer__ = "Pedram Tavadze and Logan Lang"
 __email__ = "petavazohi@mail.wvu.edu, lllang@mix.wvu.edu"
@@ -7,15 +9,16 @@ import copy
 import logging
 import sys
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, Literal, cast
 
 import numpy as np
+import numpy.typing as npt
 import pyvista as pv
 from scipy.interpolate import LinearNDInterpolator
 
 from pyprocar.core.brillouin_zone import BrillouinZone2D
 from pyprocar.core.ebs import ElectronicBandStructureMesh
-from pyprocar.core.property_store import PointSet, Property
+from pyprocar.core.property_store import PointSet, Property  # noqa: TC002 - used for isinstance checks
 
 np.set_printoptions(threshold=sys.maxsize)
 
@@ -46,15 +49,17 @@ class PlaneInfo:
     as_cartesian: bool
 
 
-def get_orthonormal_basis(normal):
+def get_orthonormal_basis(
+    normal: npt.NDArray[np.floating[Any]],
+) -> tuple[npt.NDArray[np.float32], npt.NDArray[np.float32]]:
     if np.abs(np.dot(normal, [0, 0, 1])) < 0.99:
         v_temp = np.array([0, 0, 1])  # Not parallel to normal
     else:
         v_temp = np.array([0, 1, 0])  # Not parallel to normal
 
-    u = np.cross(v_temp, normal).astype(np.float32)
+    u: npt.NDArray[np.float32] = np.cross(v_temp, normal).astype(np.float32)
     u /= np.linalg.norm(u)
-    v = np.cross(normal, u).astype(np.float32)
+    v: npt.NDArray[np.float32] = np.cross(normal, u).astype(np.float32)
     v /= np.linalg.norm(v)  # Ensure normalization
 
     return u, v
@@ -93,14 +98,16 @@ def get_uv_grid_points(grid_u: np.ndarray, grid_v: np.ndarray):
 
 
 def get_uv_grid_kpoints(
-    origin: np.ndarray,
-    uv_points: np.ndarray,
-    uv_transformation_matrix: np.ndarray = None,
-    u: np.ndarray = None,
-    v: np.ndarray = None,
-    normal: np.ndarray = None,
-):
+    origin: npt.NDArray[np.floating[Any]],
+    uv_points: npt.NDArray[np.floating[Any]],
+    uv_transformation_matrix: npt.NDArray[np.floating[Any]] | None = None,
+    u: npt.NDArray[np.floating[Any]] | None = None,
+    v: npt.NDArray[np.floating[Any]] | None = None,
+    normal: npt.NDArray[np.floating[Any]] | None = None,
+) -> npt.NDArray[np.floating[Any]]:
     if uv_transformation_matrix is None:
+        if u is None or v is None:
+            raise ValueError("Either uv_transformation_matrix or both u and v must be provided")
         uv_transformation_matrix = get_uv_transformation_matrix(u, v)
     return origin + uv_points @ uv_transformation_matrix
 
@@ -145,7 +152,10 @@ def compute_plane_info(
     normal_arr = np.array(normal)
     origin_arr = np.array(origin)
 
-    slice_mesh = ebs.slice(normal=normal_arr, origin=origin_arr, as_cartesian=as_cartesian)
+    # Convert to tuples for pyvista slice method
+    normal_tuple: tuple[float, float, float] = (float(normal_arr[0]), float(normal_arr[1]), float(normal_arr[2]))
+    origin_tuple: tuple[float, float, float] = (float(origin_arr[0]), float(origin_arr[1]), float(origin_arr[2]))
+    slice_mesh = ebs.slice(normal=normal_tuple, origin=origin_tuple, as_cartesian=as_cartesian)
     u, v = get_orthonormal_basis(normal=normal_arr)
     plane_points = transform_points_to_uv(slice_mesh.points, u, v)
     u_limits, v_limits = find_plane_limits(plane_points)
@@ -159,8 +169,8 @@ def compute_plane_info(
     return PlaneInfo(
         normal=normal_arr,
         origin=origin_arr,
-        u=u,
-        v=v,
+        u=np.asarray(u),
+        v=np.asarray(v),
         u_limits=u_limits,
         v_limits=v_limits,
         grid_interpolation=grid_interpolation,
@@ -172,9 +182,9 @@ def compute_plane_info(
 
 
 def _generate_single_band_surface(
-    scalars: np.ndarray,
-    u_grid: np.ndarray,
-    v_grid: np.ndarray,
+    scalars: npt.NDArray[np.floating[Any]],
+    u_grid: npt.NDArray[np.floating[Any]],
+    v_grid: npt.NDArray[np.floating[Any]],
 ) -> pv.PolyData:
     """Generate surface mesh for a single band's scalar values.
 
@@ -198,11 +208,11 @@ def _generate_single_band_surface(
     surface_points[:, 1] = v_grid.ravel()
     surface_points[:, 2] = scalars
 
-    grid = pv.StructuredGrid()
+    grid: Any = pv.StructuredGrid()
     grid.points = surface_points
     grid.dimensions = (u_grid.shape[0], v_grid.shape[0], 1)
-    unstructured = grid.cast_to_unstructured_grid()
-    surface = unstructured.extract_surface()
+    unstructured: Any = grid.cast_to_unstructured_grid()
+    surface: Any = unstructured.extract_surface()
     if not isinstance(surface, pv.PolyData):
         raise TypeError(f"Expected PolyData, got {type(surface)}")
     return surface
@@ -211,7 +221,7 @@ def _generate_single_band_surface(
 def _merge_band_surfaces(
     surfaces: list[pv.PolyData],
     surface_band_spin_map: dict[int, tuple[int, int]],
-) -> tuple[pv.PolyData, np.ndarray, np.ndarray, dict[tuple[int, int], np.ndarray]]:
+) -> tuple[pv.PolyData, npt.NDArray[np.int32], npt.NDArray[np.int32], dict[tuple[int, int], npt.NDArray[np.bool_]]]:
     """Merge individual band surfaces with tracking arrays.
 
     Parameters
@@ -233,7 +243,7 @@ def _merge_band_surfaces(
         Mask arrays for each (band, spin) pair
     """
     if not surfaces:
-        return pv.PolyData(), np.empty(0), np.empty(0), {}
+        return pv.PolyData(), np.empty(0, dtype=np.int32), np.empty(0, dtype=np.int32), {}
 
     # Build tracking arrays
     spin_band_index_array = np.empty(0, dtype=np.int32)
@@ -254,16 +264,19 @@ def _merge_band_surfaces(
         )
 
     # Build band_spin_mask
-    band_spin_mask = {}
-    band_spin_surface_map = {v: k for k, v in surface_band_spin_map.items()}
+    band_spin_mask: dict[tuple[int, int], npt.NDArray[np.bool_]] = {}
+    band_spin_surface_map: dict[tuple[int, int], int] = {v: k for k, v in surface_band_spin_map.items()}
     for (iband, ispin), surface_idx in band_spin_surface_map.items():
-        mask = spin_band_index_array == surface_idx
+        mask: npt.NDArray[np.bool_] = spin_band_index_array == surface_idx
         band_spin_mask[(iband, ispin)] = mask
 
     # Merge surfaces
-    merged = surfaces[0]
+    merged: pv.PolyData = surfaces[0]
     for surface in surfaces[1:]:
-        merged = merged.merge(surface, merge_points=False)
+        merge_result = merged.merge(surface, merge_points=False)  # pyright: ignore[reportUnknownMemberType,reportUnknownVariableType]
+        if not isinstance(merge_result, pv.PolyData):
+            raise TypeError(f"Expected PolyData from merge, got {type(merge_result)}")  # pyright: ignore[reportUnknownArgumentType]
+        merged = merge_result
 
     merged.point_data["spin_index"] = spin_index_array
     merged.point_data["spin_band_index"] = spin_band_index_array
@@ -273,9 +286,9 @@ def _merge_band_surfaces(
 
 def _compute_scalar_grid(
     ebs: ElectronicBandStructureMesh,
-    scalars: np.ndarray,
+    scalars: npt.NDArray[np.floating[Any]],
     plane_info: PlaneInfo,
-) -> np.ndarray:
+) -> npt.NDArray[np.floating[Any]]:
     """Interpolate scalar values onto the 2D grid.
 
     Parameters
@@ -293,9 +306,20 @@ def _compute_scalar_grid(
         Interpolated scalar values on the grid
     """
     scalars_shape = scalars.shape
+    # Convert to tuples for pyvista slice method
+    normal_tuple: tuple[float, float, float] = (
+        float(plane_info.normal[0]),
+        float(plane_info.normal[1]),
+        float(plane_info.normal[2]),
+    )
+    origin_tuple: tuple[float, float, float] = (
+        float(plane_info.origin[0]),
+        float(plane_info.origin[1]),
+        float(plane_info.origin[2]),
+    )
     slice_mesh = ebs.slice(
-        normal=plane_info.normal,
-        origin=plane_info.origin,
+        normal=normal_tuple,
+        origin=origin_tuple,
         scalars=("scalars", scalars.reshape(scalars_shape[0], -1)),
         as_cartesian=plane_info.as_cartesian,
     )
@@ -304,6 +328,8 @@ def _compute_scalar_grid(
     plane_points = transform_points_to_uv(slice_mesh.points, plane_info.u, plane_info.v)
 
     scalar_grid_points_flat = slice_mesh.active_scalars
+    if scalar_grid_points_flat is None:
+        raise ValueError("slice_mesh.active_scalars is None")
     n_grid_points = plane_info.uv_grid_points.shape[0]
     new_scalars_grid_points_flat = np.zeros(
         shape=(n_grid_points, scalar_grid_points_flat.shape[-1])
@@ -350,19 +376,21 @@ def generate_band_2d_surfaces(
         PointSet with spin_index and spin_band_index properties
     """
     bands = ebs.get_property("bands")
-    if bands is None:
+    if bands is None or not isinstance(bands, Property):
         raise ValueError("bands property not found in EBS")
-    new_bands = _compute_scalar_grid(ebs, bands.value, plane_info)
+    bands_value: npt.NDArray[np.float64] = bands.value
+    new_bands = _compute_scalar_grid(ebs, bands_value, plane_info)
 
     # Clip to original range if provided
     if original_ebs is not None:
         original_bands = original_ebs.get_property("bands")
-        if original_bands is not None:
+        if original_bands is not None and isinstance(original_bands, Property):
+            original_bands_value: npt.NDArray[np.float64] = original_bands.value
             new_bands = np.clip(
-                new_bands, original_bands.value.min(), original_bands.value.max()
+                new_bands, float(original_bands_value.min()), float(original_bands_value.max())
             )
 
-    band_surfaces_list = []
+    band_surfaces_list: list[pv.PolyData] = []
     band_surfaces_dict: dict[tuple[int, int], pv.PolyData] = {}
     band_spin_surface_map: dict[tuple[int, int], int] = {}
     surface_band_spin_map: dict[int, tuple[int, int]] = {}
@@ -413,14 +441,14 @@ def generate_band_2d_surfaces(
     )
 
     # Apply k-plane scaling
-    k_plane_scale_transform = np.eye(4)
+    k_plane_scale_transform: npt.NDArray[np.float64] = np.eye(4)
     k_plane_scale_transform[0, 0] = scale_factor
     k_plane_scale_transform[1, 1] = scale_factor
-    combined_surface.transform(k_plane_scale_transform, inplace=True)
+    combined_surface.transform(k_plane_scale_transform, inplace=True)  # pyright: ignore[reportUnknownMemberType]
 
     # Also scale individual surfaces
     for surface in band_surfaces_dict.values():
-        surface.transform(k_plane_scale_transform, inplace=True)
+        surface.transform(k_plane_scale_transform, inplace=True)  # pyright: ignore[reportUnknownMemberType]
 
     # Clean up PyVista internal arrays
     combined_surface.point_data.pop("vtkOriginalPointIds", None)
@@ -472,7 +500,7 @@ class BandStructure2D(pv.PolyData):
 
         Use from_code() or from_ebs() factory methods to create instances.
         """
-        super().__init__()
+        super().__init__()  # pyright: ignore[reportUnknownMemberType]
 
         self.points = points
         self.faces = faces
@@ -497,19 +525,20 @@ class BandStructure2D(pv.PolyData):
         cell_data = cell_data if cell_data is not None else {}
         field_data = field_data if field_data is not None else {}
 
-        self.point_data.update(point_data)
-        self.cell_data.update(cell_data)
-        self.field_data.update(field_data)
+        self.point_data.update(point_data)  # pyright: ignore[reportUnknownMemberType]
+        self.cell_data.update(cell_data)  # pyright: ignore[reportUnknownMemberType]
+        self.field_data.update(field_data)  # pyright: ignore[reportUnknownMemberType]
 
         # Set default active scalars
         if "spin_band_index" in self.point_data:
             self.set_active_scalars("spin_band_index", preference="point")
 
         # Compute transformation matrices (for reciprocal space conversions)
-        self.transform_to_cart = np.eye(4)
-        self.transform_to_frac = np.eye(4)
-        self.transform_to_cart[:3, :3] = self._ebs.reciprocal_lattice.T
-        self.transform_to_frac[:3, :3] = np.linalg.inv(self._ebs.reciprocal_lattice.T)
+        self.transform_to_cart: npt.NDArray[np.float64] = np.eye(4)
+        self.transform_to_frac: npt.NDArray[np.float64] = np.eye(4)
+        if self._ebs.reciprocal_lattice is not None:
+            self.transform_to_cart[:3, :3] = self._ebs.reciprocal_lattice.T
+            self.transform_to_frac[:3, :3] = np.linalg.inv(self._ebs.reciprocal_lattice.T)
 
         logger.info("___BandStructure2D initialization complete___")
 
@@ -542,8 +571,8 @@ class BandStructure2D(pv.PolyData):
         as_cartesian: bool = True,
         padding: int = 15,
         scale_factor: float = 2 * np.pi,
-        **kwargs,
-    ) -> "BandStructure2D":
+        **kwargs: Any,
+    ) -> BandStructure2D:
         """
         Create BandStructure2D from an ElectronicBandStructureMesh.
 
@@ -595,7 +624,7 @@ class BandStructure2D(pv.PolyData):
 
         return cls(
             points=combined_surface.points,
-            faces=combined_surface.faces,
+            faces=combined_surface.faces,  # pyright: ignore[reportUnknownArgumentType]
             band_surfaces=band_surfaces,
             point_set=point_set,
             original_ebs=original_ebs,
@@ -671,9 +700,12 @@ class BandStructure2D(pv.PolyData):
         return {idx: key for idx, key in enumerate(self._band_surfaces.keys())}
 
     @property
-    def band_spin_mask(self) -> dict[tuple[int, int], np.ndarray]:
+    def band_spin_mask(self) -> dict[tuple[int, int], npt.NDArray[np.bool_]]:
         """Boolean masks for each (band, spin) pair."""
-        spin_band_index = self._point_set.get_property("spin_band_index").value
+        spin_band_index_prop = self._point_set.get_property("spin_band_index")
+        if spin_band_index_prop is None or not isinstance(spin_band_index_prop, Property):
+            raise ValueError("spin_band_index property not found")
+        spin_band_index: npt.NDArray[np.float64] = spin_band_index_prop.value
         return {key: spin_band_index == idx for key, idx in self.band_spin_surface_map.items()}
 
     # -------------------------------------------------------------------------
@@ -706,10 +738,13 @@ class BandStructure2D(pv.PolyData):
         return self._plane_info.grid_interpolation
 
     @property
-    def plane_points(self) -> np.ndarray:
+    def plane_points(self) -> npt.NDArray[np.floating[Any]]:
         """Points on the slice plane in UV coordinates."""
+        # Convert to tuples for pyvista slice method
+        normal_tuple: tuple[float, float, float] = (float(self.normal[0]), float(self.normal[1]), float(self.normal[2]))
+        origin_tuple: tuple[float, float, float] = (float(self.origin[0]), float(self.origin[1]), float(self.origin[2]))
         slice_mesh = self._ebs.slice(
-            normal=self.normal, origin=self.origin, as_cartesian=self.as_cartesian
+            normal=normal_tuple, origin=origin_tuple, as_cartesian=self.as_cartesian
         )
         return transform_points_to_uv(slice_mesh.points, self.u, self.v)
 
@@ -717,17 +752,21 @@ class BandStructure2D(pv.PolyData):
     # Core methods
     # -------------------------------------------------------------------------
 
-    def get_property(self, key: str, **kwargs) -> np.ndarray:
+    def get_property(self, key: str, **kwargs: Any) -> npt.NDArray[np.float64]:
         """Get property values, computing if necessary.
 
         Uses cache invalidation to track property staleness.
         """
-        prop_name, _ = self.ebs._extract_key(key)
+        prop_name, _ = self.ebs._extract_key(key)  # noqa: SLF001  # pyright: ignore[reportPrivateUsage]
 
         # Check if property exists and cache is valid
+        property_value: npt.NDArray[np.float64]
         if prop_name in self.point_set.property_store and self._is_cache_valid(prop_name):
             prop = self.point_set.get_property(prop_name)
-            property_value = prop.value if prop is not None else self.compute_property(prop_name, **kwargs)
+            if prop is not None and isinstance(prop, Property):
+                property_value = prop.value
+            else:
+                property_value = self.compute_property(prop_name, **kwargs)
         else:
             # Compute and cache the property
             property_value = self.compute_property(prop_name, **kwargs)
@@ -750,21 +789,29 @@ class BandStructure2D(pv.PolyData):
 
         for prop_name, calc_name, grad_order, value_array in self.ebs.iter_properties():
             prop = self.point_set.get_property(prop_name)
-            if prop is not None:
+            if prop is not None and isinstance(prop, Property):
                 surface_points = self.interpolate_values(value_array)
-                prop[calc_name, grad_order] = surface_points
+                # Cast from floating[Any] to float64 for Property setter
+                surface_points_f64: npt.NDArray[np.float64] = surface_points.astype(np.float64)
+                prop[calc_name, grad_order] = surface_points_f64
 
-    def compute_property(self, name: str, **kwargs):
-        property = self.ebs.get_property(name, **kwargs)
-        grid_scalars = self.compute_scalar_grid(property.value)
+    def compute_property(self, name: str, **kwargs: Any) -> npt.NDArray[np.float64]:
+        ebs_property = self.ebs.get_property(name, **kwargs)
+        if ebs_property is None or not isinstance(ebs_property, Property):
+            raise ValueError(f"Property '{name}' not found in EBS")
+        grid_scalars: npt.NDArray[np.float64] = self.compute_scalar_grid(ebs_property.value)
 
         original_property = self.original_ebs.get_property(name, **kwargs)
-        grid_scalars = np.clip(
-            grid_scalars, original_property.value.min(), original_property.value.max()
+        if original_property is None or not isinstance(original_property, Property):
+            raise ValueError(f"Property '{name}' not found in original EBS")
+        original_value: npt.NDArray[np.float64] = original_property.value
+        clipped_scalars: npt.NDArray[np.float64] = np.clip(
+            grid_scalars, float(original_value.min()), float(original_value.max())
         )
-        return grid_scalars
+        return clipped_scalars
 
-    def interpolate_values(self, values: np.ndarray):
+    def interpolate_values(self, values: npt.NDArray[np.floating[Any]]) -> npt.NDArray[np.floating[Any]]:
+        new_values: npt.NDArray[np.floating[Any]]
         if values.shape[-1] != 3:
             new_values = np.zeros(self.n_grid_points)
             interpolator = LinearNDInterpolator(self.plane_points, values)
@@ -777,33 +824,36 @@ class BandStructure2D(pv.PolyData):
 
         return new_values
 
-    def points_to_grid(self, points: np.ndarray, order: str = "C"):
+    def points_to_grid(self, points: npt.NDArray[np.floating[Any]], order: Literal["C", "F", "A"] = "C") -> npt.NDArray[np.floating[Any]]:
         return points.reshape(self.u_grid.shape, order=order)
 
-    def project_vector_to_plane(self, vectors: np.ndarray):
-        velocity_u = np.dot(vectors, self.u)
-        velocity_v = np.dot(vectors, self.v)
+    def project_vector_to_plane(self, vectors: npt.NDArray[np.floating[Any]]) -> tuple[npt.NDArray[np.floating[Any]], npt.NDArray[np.floating[Any]]]:
+        velocity_u: npt.NDArray[np.floating[Any]] = np.dot(vectors, self.u)
+        velocity_v: npt.NDArray[np.floating[Any]] = np.dot(vectors, self.v)
         return velocity_u, velocity_v
 
     def get_2d_brillouin_zone(
         self,
         e_min: float,
         e_max: float,
-        supercell: list[int] = None,
+        supercell: list[int] | None = None,
         scale_factor: float = 2 * np.pi,
-    ):
+    ) -> BrillouinZone2D:
+        if self.ebs.reciprocal_lattice is None:
+            raise ValueError("reciprocal_lattice is None")
+        reciprocal_lattice: npt.NDArray[np.float64] = self.ebs.reciprocal_lattice * scale_factor
         return BrillouinZone2D(
             e_min=e_min,
             e_max=e_max,
             axis=2,
-            reciprocal_lattice=self.ebs.reciprocal_lattice * scale_factor,
+            reciprocal_lattice=reciprocal_lattice,
         )
 
-    def set_surface_point_data(self, name: str, values: np.ndarray) -> None:
+    def set_surface_point_data(self, name: str, values: npt.NDArray[np.floating[Any]]) -> None:
         """Set point data on the surface, handling band-resolved data."""
         if self.ebs.is_band_property(values):
             logger.debug(f"Adding band resolved to surface point_data: {name}")
-            point_data_array: np.ndarray | None = None
+            point_data_array: npt.NDArray[np.floating[Any]] | None = None
             for (iband, ispin), _ in self.band_spin_surface_map.items():
                 values_band_values = values[:, iband, ispin, ...]
                 if point_data_array is None:
@@ -816,37 +866,42 @@ class BandStructure2D(pv.PolyData):
             logger.debug(f"Adding scalar to surface point_data: {name}")
             self.point_data[name] = values
 
-    def set_scalars(self, name: str, value: np.ndarray):
+    def set_scalars(self, name: str, value: npt.NDArray[np.floating[Any]]) -> None:
         self.set_surface_point_data(name, value)
         self.set_active_scalars(name, preference="point")
 
-    def set_vectors(self, name: str, value: np.ndarray, set_scalar: bool = True):
+    def set_vectors(self, name: str, value: npt.NDArray[np.floating[Any]], set_scalar: bool = True) -> None:
         if value.shape[-1] != 3:
             raise ValueError(f"Vector data must have 3 dimensions. Got {value.shape[-1]}.")
 
-        vector_magnitude = np.linalg.norm(value, axis=-1)
+        vector_magnitude: npt.NDArray[np.floating[Any]] = np.linalg.norm(value, axis=-1)
         if set_scalar:
             self.set_surface_point_data(f"{name}-norm", vector_magnitude)
             self.set_active_scalars(f"{name}-norm", preference="point")
         self.set_surface_point_data(name, value)
         self.set_active_vectors(name, preference="point")
 
-    def set_values(self, name: str, value: np.ndarray, **kwargs):
+    def set_values(self, name: str, value: npt.NDArray[np.floating[Any]], **kwargs: Any) -> None:
         if value.shape[-1] == 3:
             self.set_vectors(name, value, **kwargs)
         else:
             self.set_scalars(name, value, **kwargs)
 
-    def compute_scalar_grid(self, scalars: np.ndarray, **kwargs):
+    def compute_scalar_grid(self, scalars: npt.NDArray[np.floating[Any]], **kwargs: Any) -> npt.NDArray[np.float64]:
         scalars_shape = scalars.shape
-        slice = self.ebs.slice(
-            normal=self.normal,
-            origin=self.origin,
+        # Convert to tuples for pyvista slice method
+        normal_tuple: tuple[float, float, float] = (float(self.normal[0]), float(self.normal[1]), float(self.normal[2]))
+        origin_tuple: tuple[float, float, float] = (float(self.origin[0]), float(self.origin[1]), float(self.origin[2]))
+        slice_mesh = self.ebs.slice(
+            normal=normal_tuple,
+            origin=origin_tuple,
             scalars=("scalars", scalars.reshape(scalars_shape[0], -1)),
             as_cartesian=self.as_cartesian,
         )
 
-        scalar_grid_points_flat = slice.active_scalars
+        scalar_grid_points_flat = slice_mesh.active_scalars
+        if scalar_grid_points_flat is None:
+            raise ValueError("slice_mesh.active_scalars is None")
         new_scalars_grid_points_flat = np.zeros(
             shape=(self.n_grid_points, scalar_grid_points_flat.shape[-1])
         )
@@ -875,8 +930,8 @@ class BandStructure2D(pv.PolyData):
         padding: int = 15,
         as_cartesian: bool = False,
         scale_factor: float = 2 * np.pi,
-        **kwargs,
-    ) -> "BandStructure2D":
+        **kwargs: Any,
+    ) -> BandStructure2D:
         """
         Create BandStructure2D from DFT output files.
 
@@ -910,7 +965,9 @@ class BandStructure2D(pv.PolyData):
         BandStructure2D
             The constructed 2D band structure surface
         """
-        ebs = ElectronicBandStructureMesh.from_code(code=code, dirpath=dirpath)
+        ebs_result = ElectronicBandStructureMesh.from_code(code=code, dirpath=dirpath)
+        # from_code returns ElectronicBandStructure, cast to Mesh type
+        ebs = cast(ElectronicBandStructureMesh, ebs_result)
 
         if reduce_bands_near_energy is not None:
             ebs.reduce_bands_near_energy(reduce_bands_near_energy)
@@ -934,7 +991,7 @@ class BandStructure2D(pv.PolyData):
     # Serialization methods
     # -------------------------------------------------------------------------
 
-    def save(self, path: str) -> None:
+    def save(self, path: str) -> None:  # type: ignore[override] - different signature from pv.PolyData.save
         """
         Save BandStructure2D to file.
 
@@ -954,7 +1011,7 @@ class BandStructure2D(pv.PolyData):
         path_obj = Path(path)
 
         # Serialize point_set properties
-        point_set_data = {
+        point_set_data: dict[str, Any] = {
             "points": self._point_set.points.copy(),
             "properties": {},
         }
@@ -962,7 +1019,7 @@ class BandStructure2D(pv.PolyData):
             point_set_data["properties"][prop_name] = {
                 "value": prop.value.copy(),
                 "gradients": {
-                    k: v.copy() for k, v in prop.gradients.items() if v is not None and len(v) > 0
+                    k: v.copy() for k, v in prop.gradients.items() if len(v) > 0
                 },
                 "units": prop.units,
                 "label": prop.label,
@@ -971,11 +1028,11 @@ class BandStructure2D(pv.PolyData):
             }
 
         # Serialize band surfaces (geometry only)
-        band_surfaces_data = {}
+        band_surfaces_data: dict[tuple[int, int], dict[str, Any]] = {}
         for key, surface in self._band_surfaces.items():
             band_surfaces_data[key] = {
-                "points": np.array(surface.points),
-                "faces": np.array(surface.faces),
+                "points": np.asarray(surface.points),  # pyright: ignore[reportUnknownArgumentType]
+                "faces": np.asarray(surface.faces),  # pyright: ignore[reportUnknownArgumentType]
             }
 
         # Serialize plane_info
@@ -993,11 +1050,11 @@ class BandStructure2D(pv.PolyData):
             "as_cartesian": self._plane_info.as_cartesian,
         }
 
-        save_data = {
-            "points": self.points.copy(),
-            "faces": self.faces.copy(),
-            "point_data": {k: np.array(v) for k, v in self.point_data.items()},
-            "cell_data": {k: np.array(v) for k, v in self.cell_data.items()},
+        save_data: dict[str, Any] = {
+            "points": np.asarray(self.points).copy(),  # pyright: ignore[reportUnknownArgumentType]
+            "faces": np.asarray(self.faces).copy(),  # pyright: ignore[reportUnknownArgumentType]
+            "point_data": {k: np.asarray(v) for k, v in self.point_data.items()},
+            "cell_data": {k: np.asarray(v) for k, v in self.cell_data.items()},
             "field_data": dict(self.field_data),
             "point_set_data": point_set_data,
             "band_surfaces_data": band_surfaces_data,
@@ -1059,7 +1116,7 @@ class BandStructure2D(pv.PolyData):
         # Reconstruct band_surfaces
         band_surfaces: dict[tuple[int, int], pv.PolyData] = {}
         for key, surface_data in save_data["band_surfaces_data"].items():
-            surface = pv.PolyData(surface_data["points"], surface_data["faces"])
+            surface = pv.PolyData(surface_data["points"], surface_data["faces"])  # pyright: ignore[reportUnknownArgumentType]
             band_surfaces[key] = surface
 
         # Reconstruct plane_info
@@ -1079,12 +1136,12 @@ class BandStructure2D(pv.PolyData):
         )
 
         # Reconstruct via shallow copy pattern (like FermiSurface)
-        temp_polydata = pv.PolyData(save_data["points"], save_data["faces"])
+        temp_polydata = pv.PolyData(save_data["points"], save_data["faces"])  # pyright: ignore[reportUnknownArgumentType]
         for k, v in save_data["point_data"].items():
             temp_polydata.point_data[k] = v
         for k, v in save_data["cell_data"].items():
             temp_polydata.cell_data[k] = v
-        temp_polydata.field_data.update(save_data["field_data"])
+        temp_polydata.field_data.update(save_data["field_data"])  # pyright: ignore[reportUnknownMemberType]
 
         bs2d = pv.PolyData.__new__(cls)
         bs2d.shallow_copy(temp_polydata)

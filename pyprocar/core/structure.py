@@ -8,16 +8,27 @@ __date__ = "March 31, 2020"
 import logging
 from collections.abc import Sequence
 from pathlib import Path
-from typing import Any
 
 import numpy as np
 import numpy.typing as npt
 import pyvista as pv
 import spglib
 from scipy.spatial import ConvexHull
+from typing_extensions import override
 
 from pyprocar.core.serializer import get_serializer
 from pyprocar.utils import elements
+from pyprocar.utils.typing_helpers import (
+    arccos_deg,
+    array_str_to_list,
+    arrays_equal,
+    det_to_float,
+    dot_matrix,
+    dot_scalar,
+    inv_matrix,
+    norm_to_float,
+    sum_to_float,
+)
 
 # TODO add __str__ method
 
@@ -143,6 +154,20 @@ class Structure:
             and len(self.atoms) > 0
         )
 
+    @property
+    def atoms_list(self) -> list[str] | None:
+        """Return the atoms as a typed list of strings.
+
+        Returns
+        -------
+        list[str] | None
+            List of atomic symbols, or None if atoms is not set.
+        """
+        if self.atoms is None:
+            return None
+        return array_str_to_list(self.atoms)
+
+    @override
     def __repr__(self) -> str:
         """Unambiguous representation with essential details for debugging."""
         return (
@@ -153,6 +178,7 @@ class Structure:
             f"spacegroup='{self.get_space_group_international() if self.has_complete_data else 'N/A'}')"
         )
 
+    @override
     def __str__(self) -> str:
         """Human-readable summary of the structure."""
         header = f"Structure with {self.natoms} atoms and {self.nspecies} species"
@@ -162,10 +188,12 @@ class Structure:
 
         # Only show first few fractional coords for readability
         if self.atoms is not None and self.fractional_coordinates is not None:
-            frac_preview = "\n".join(
-                f"  {atom}: {coord}"
-                for atom, coord in zip(self.atoms, self.fractional_coordinates)
-            )
+            lines: list[str] = []
+            atoms_list = array_str_to_list(self.atoms)
+            for i, atom_str in enumerate(atoms_list):
+                coord = self.fractional_coordinates[i, :]
+                lines.append(f"  {atom_str}: {coord}")
+            frac_preview = "\n".join(lines)
         else:
             frac_preview = "  N/A"
 
@@ -173,14 +201,13 @@ class Structure:
             [header, species_line, volume_line, angle_line, "Fractional coordinates:", frac_preview]
         )
 
+    @override
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, Structure):
             return False
-        atoms_equal = (
-            self.atoms is not None
-            and other.atoms is not None
-            and all(self.atoms == other.atoms)
-        )
+        atoms_equal = False
+        if self.atoms is not None and other.atoms is not None:
+            atoms_equal = arrays_equal(self.atoms, other.atoms)
 
         fractional_coordinates_equal = True
         if self.fractional_coordinates is not None and other.fractional_coordinates is not None:
@@ -202,13 +229,13 @@ class Structure:
     @property
     def wyckoff_positions(self) -> npt.NDArray[np.str_] | None:
         if self._wyckoff_positions is None:
-            self.get_wyckoff_positions()
+            _ = self.get_wyckoff_positions()
         return self._wyckoff_positions
 
     @property
     def group(self) -> npt.NDArray[np.intp] | None:
         if self._group is None:
-            self.get_wyckoff_positions()
+            _ = self.get_wyckoff_positions()
         return self._group
 
     @property
@@ -222,7 +249,8 @@ class Structure:
         """
         if self.lattice is None:
             raise ValueError("lattice must be set to calculate volume")
-        return float(abs(np.linalg.det(self.lattice))) * 1e-30
+        det_val = det_to_float(self.lattice)
+        return abs(det_val) * 1e-30
 
     @property
     def masses(self) -> list[float]:
@@ -236,10 +264,11 @@ class Structure:
         if self.atoms is None:
             raise ValueError("atoms must be set to calculate masses")
         result: list[float] = []
-        for x in self.atoms:
-            mass = elements.atomic_mass(str(x))
+        atoms_list = array_str_to_list(self.atoms)
+        for atom_str in atoms_list:
+            mass = elements.atomic_mass(atom_str)
             if mass is None:
-                raise ValueError(f"Unknown atomic mass for element: {x}")
+                raise ValueError(f"Unknown atomic mass for element: {atom_str}")
             result.append(float(mass) * 1.0e-3)
         return result
 
@@ -252,7 +281,8 @@ class Structure:
         float
             Density of the cell (kg/m^3).
         """
-        return float(np.sum(self.masses)) / (self.volume * N_AVOGADRO)
+        total_mass = sum_to_float(self.masses)
+        return total_mass / (self.volume * N_AVOGADRO)
 
     @property
     def a(self) -> float:
@@ -265,7 +295,7 @@ class Structure:
         """
         if self.lattice is None:
             raise ValueError("lattice must be set to calculate lattice parameter a")
-        return float(np.linalg.norm(self.lattice[0, :]))
+        return norm_to_float(self.lattice[0, :])
 
     @property
     def b(self) -> float:
@@ -278,7 +308,7 @@ class Structure:
         """
         if self.lattice is None:
             raise ValueError("lattice must be set to calculate lattice parameter b")
-        return float(np.linalg.norm(self.lattice[1, :]))
+        return norm_to_float(self.lattice[1, :])
 
     @property
     def c(self) -> float:
@@ -291,7 +321,7 @@ class Structure:
         """
         if self.lattice is None:
             raise ValueError("lattice must be set to calculate lattice parameter c")
-        return float(np.linalg.norm(self.lattice[2, :]))
+        return norm_to_float(self.lattice[2, :])
 
     @property
     def alpha(self) -> float:
@@ -304,9 +334,8 @@ class Structure:
         """
         if self.lattice is None:
             raise ValueError("lattice must be set to calculate angle alpha")
-        return float(
-            np.rad2deg(np.arccos(np.dot(self.lattice[1, :], self.lattice[2, :]) / (self.b * self.c)))
-        )
+        dot_val = dot_scalar(self.lattice[1, :], self.lattice[2, :])
+        return arccos_deg(dot_val / (self.b * self.c))
 
     @property
     def beta(self) -> float:
@@ -319,9 +348,8 @@ class Structure:
         """
         if self.lattice is None:
             raise ValueError("lattice must be set to calculate angle beta")
-        return float(
-            np.rad2deg(np.arccos(np.dot(self.lattice[0, :], self.lattice[2, :]) / (self.a * self.c)))
-        )
+        dot_val = dot_scalar(self.lattice[0, :], self.lattice[2, :])
+        return arccos_deg(dot_val / (self.a * self.c))
 
     @property
     def gamma(self) -> float:
@@ -334,9 +362,8 @@ class Structure:
         """
         if self.lattice is None:
             raise ValueError("lattice must be set to calculate angle gamma")
-        return float(
-            np.rad2deg(np.arccos(np.dot(self.lattice[0, :], self.lattice[1, :]) / (self.a * self.b)))
-        )
+        dot_val = dot_scalar(self.lattice[0, :], self.lattice[1, :])
+        return arccos_deg(dot_val / (self.a * self.b))
 
     @property
     def species(self) -> npt.NDArray[np.str_]:
@@ -386,7 +413,12 @@ class Structure:
         """
         if self.atoms is None:
             raise ValueError("atoms must be set to get atomic numbers")
-        return [int(elements.atomic_number(str(x))) for x in self.atoms]
+        result: list[int] = []
+        atoms_list = array_str_to_list(self.atoms)
+        for atom_str in atoms_list:
+            atomic_num = elements.atomic_number(atom_str)
+            result.append(int(atomic_num))
+        return result
 
     @property
     def reciprocal_lattice(self) -> npt.NDArray[np.float64]:
@@ -499,24 +531,31 @@ class Structure:
         if spglib_dataset is None:
             return None
 
-        if hasattr(spglib_dataset, "wyckoffs"):
-            wyckoffs_temp: npt.NDArray[np.str_] = np.array(spglib_dataset.wyckoffs)
-        elif isinstance(spglib_dataset, dict):
-            wyckoffs_temp = np.array(spglib_dataset["wyckoffs"])
-        else:
-            return None
+        # spglib.SymmetryDataset has wyckoffs: list[str]
+        wyckoffs_list: list[str] = spglib_dataset.wyckoffs
 
         group: npt.NDArray[np.intp] = np.zeros(shape=(self.natoms,), dtype=np.intp)
         counter = 0
-        for iwyckoff in np.unique(wyckoffs_temp):
-            idx = np.where(wyckoffs_temp == iwyckoff)[0]
-            for ispc in np.unique(self.atoms[idx]):
-                idx2 = np.where(self.atoms[idx] == ispc)[0]
-                multiplicity = len(idx2)
-                for i in idx[idx2]:
-                    wyckoff_positions[i] = str(multiplicity) + str(iwyckoff)
-                    group[i] = counter
+        unique_wyckoffs_list: list[str] = list(dict.fromkeys(wyckoffs_list))  # Preserve order
+        atoms_list = array_str_to_list(self.atoms)
+
+        for iwyckoff in unique_wyckoffs_list:
+            # Find indices where wyckoff matches
+            idx_list: list[int] = [i for i, w in enumerate(wyckoffs_list) if w == iwyckoff]
+            atoms_at_wyckoff: list[str] = [atoms_list[i] for i in idx_list]
+            unique_species_list: list[str] = list(dict.fromkeys(atoms_at_wyckoff))
+
+            for ispc in unique_species_list:
+                # Find indices within idx_list where species matches
+                idx2_list: list[int] = [
+                    idx_list[j] for j, a in enumerate(atoms_at_wyckoff) if a == ispc
+                ]
+                multiplicity = len(idx2_list)
+                for i_idx in idx2_list:
+                    wyckoff_positions[i_idx] = str(multiplicity) + iwyckoff
+                    group[i_idx] = counter
                 counter += 1
+
         self._wyckoff_positions = wyckoff_positions
         self._group = group
         return wyckoff_positions
@@ -579,7 +618,9 @@ class Structure:
         surface = pv.PolyData(hull.points, faces)
         surface.plot()
 
-    def get_spglib_symmetry_dataset(self, symprec: float = 1e-5) -> Any:
+    def get_spglib_symmetry_dataset(
+        self, symprec: float = 1e-5
+    ) -> spglib.SymmetryDataset | None:
         """Return the spglib symmetry dataset.
 
         Parameters
@@ -589,8 +630,8 @@ class Structure:
 
         Returns
         -------
-        Any
-            spglib symmetry dataset
+        spglib.SymmetryDataset | None
+            spglib symmetry dataset, or None if symmetry could not be determined
         """
         return spglib.get_symmetry_dataset(self._spglib_cell, symprec)
 
@@ -625,17 +666,20 @@ class Structure:
         if self.atoms is None:
             raise ValueError("atoms must be set to transform structure")
 
-        scale = np.linalg.det(transformation_matrix).round(2)
-        if not float(scale).is_integer() or float(1 / scale).is_integer():
+        det_val = det_to_float(transformation_matrix)
+        scale: float = round(det_val, 2)
+        if not scale.is_integer() or (1 / scale).is_integer():
             raise ValueError("This transform is not proper.")
         scale_int = int(scale)
-        new_lattice: npt.NDArray[np.float64] = np.dot(self.lattice, transformation_matrix)
+        new_lattice = dot_matrix(self.lattice, transformation_matrix)
         temp_structure = Structure(
             atoms=["X"], fractional_coordinates=[[0, 0, 0]], lattice=new_lattice
         )
         new_atoms_list: list[list[str]] = []
         new_fractional_list: list[npt.NDArray[np.float64]] = []
-        for iatom, atom_coord in enumerate(self.cartesian_coordinates):
+        atoms_list = array_str_to_list(self.atoms)
+        for iatom in range(len(atoms_list)):
+            cart_coord: npt.NDArray[np.float64] = self.cartesian_coordinates[iatom, :]
             new_atoms_cartesian: list[npt.NDArray[np.float64]] = []
             for x in range(-1 * scale_int, scale_int):
                 for y in range(-1 * scale_int, scale_int):
@@ -644,18 +688,17 @@ class Structure:
                             x * self.lattice[0, :]
                             + y * self.lattice[1, :]
                             + z * self.lattice[2, :]
-                            + atom_coord
+                            + cart_coord
                         )
                         if temp_structure.is_point_inside(p):
                             new_atoms_cartesian.append(p)
             new_atoms_cart_arr: npt.NDArray[np.float64] = np.array(new_atoms_cartesian)
-            new_atoms_fractional: npt.NDArray[np.float64] = np.dot(
-                new_atoms_cart_arr, np.linalg.inv(new_lattice)
-            )
+            inv_lattice = inv_matrix(new_lattice)
+            new_atoms_fractional = dot_matrix(new_atoms_cart_arr, inv_lattice)
             new_atoms_fractional[new_atoms_fractional >= 1] -= 1
             new_atoms_fractional = np.unique(new_atoms_fractional, axis=0)
             new_fractional_list.append(new_atoms_fractional)
-            new_atoms_list.append([str(self.atoms[iatom])] * len(new_atoms_fractional))
+            new_atoms_list.append([atoms_list[iatom]] * len(new_atoms_fractional))
         new_atoms_flat = np.reshape(new_atoms_list, (-1,))
         new_fractional_flat: npt.NDArray[np.float64] = np.reshape(
             np.array(new_fractional_list, dtype=object), (-1, 3)
@@ -687,9 +730,12 @@ class Structure:
             if self.lattice is None:
                 raise ValueError("lattice must be set to check if point is inside")
             lattice = self.lattice
-        edges: list[Any] = self._get_lattice_corners(lattice).tolist()
-        edges.append(point)
-        new_convex_hull = ConvexHull(edges)
+        corners: npt.NDArray[np.float64] = self._get_lattice_corners(lattice)
+        # Build list of points including the test point
+        edges_list: list[npt.NDArray[np.float64]] = list(corners)
+        edges_list.append(point)
+        edges_arr: npt.NDArray[np.float64] = np.array(edges_list)
+        new_convex_hull = ConvexHull(edges_arr)
         return bool(new_convex_hull.area == self.cell_convex_hull.area)
 
     def supercell(self, matrix: npt.NDArray[np.float64]) -> Structure:
@@ -716,4 +762,7 @@ class Structure:
     def load(cls, path: Path) -> Structure:
         """Load a structure from a file."""
         serializer = get_serializer(path)
-        return serializer.load(path)
+        result = serializer.load(path)
+        if not isinstance(result, Structure):
+            raise TypeError(f"Expected Structure, got {type(result)}")
+        return result

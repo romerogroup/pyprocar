@@ -7,10 +7,13 @@ from collections.abc import Iterable, Mapping, Sequence
 from collections.abc import Iterable as ABCIterable
 from collections.abc import Mapping as ABCMapping
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, TypeVar
 
 if TYPE_CHECKING:
     from pyprocar.core.structure import Structure
+
+_KT = TypeVar("_KT")
+_VT = TypeVar("_VT")
 
 AZIMUTHAL_ORBITAL_ORDER = {
     "s": ["s"],
@@ -90,7 +93,7 @@ ORBITAL_INDEX_LABEL_MAP: dict[int | tuple[int, ...], str] = {
     (9, 10, 11, 12, 13, 14, 15): "f",
     (4, 5, 7): "t_{2g}",
     (5, 6, 8): "e_g",
-    tuple(range(0, 16)): "all",
+    tuple(range(16)): "all",
 }
 
 ORBITAL_INDEX_TO_LABEL: dict[int, str] = {
@@ -151,14 +154,12 @@ LEGACY_ORBITAL_NAMES: dict[str, int | list[int]] = {
 }
 
 
-def _normalize_indices(indices: Iterable[int] | None) -> list[int]:
+def _normalize_indices(indices: Iterable[int] | int | None) -> list[int]:
     if indices is None:
         return []
-    try:
-        normalized = {int(idx) for idx in indices}
-    except TypeError:
-        normalized = {int(indices)}
-    return sorted(normalized)
+    if isinstance(indices, int):
+        return [indices]
+    return sorted({int(idx) for idx in indices})
 
 
 def format_index_ranges(indices: Sequence[int] | None) -> str:
@@ -330,7 +331,7 @@ class OrbitalIndexer:
             return token
         if token.startswith("l") and "_j" in token and "_m" in token:
             segments = token.split("_")
-            latex_segments = []
+            latex_segments: list[str] = []
             for segment in segments:
                 if not segment:
                     continue
@@ -445,8 +446,11 @@ class AtomIndexer:
     ) -> AtomIndexer:
         if structure is None:
             return cls(species_per_atom=None, max_indices_for_ranges=max_indices_for_ranges)
+        atoms_list = structure.atoms_list
+        if atoms_list is None:
+            return cls(species_per_atom=None, max_indices_for_ranges=max_indices_for_ranges)
         return cls(
-            species_per_atom=tuple(str(atom) for atom in structure.atoms),
+            species_per_atom=tuple(atoms_list),
             max_indices_for_ranges=max_indices_for_ranges,
         )
 
@@ -468,7 +472,7 @@ class AtomIndexer:
             return ""
 
         limit = self.max_indices_for_ranges if max_tokens is None else max_tokens
-        if limit is not None and len(resolved) > limit:
+        if len(resolved) > limit:
             species_tokens = self._species_names_from_indices(resolved, normalized_species)
             if species_tokens:
                 return ",".join(species_tokens)
@@ -511,7 +515,7 @@ class AtomIndexer:
             return [("", list(indices))]
 
         if species_order:
-            ordered_species = list(dict.fromkeys(species_order))
+            ordered_species: list[str] = list(dict.fromkeys(species_order))
         else:
             ordered_species = []
             for idx in indices:
@@ -834,6 +838,11 @@ class ProjectionSelectionResult:
 class ProjectionSelectionResolver:
     """Resolve selection inputs into canonical index tuples and labels."""
 
+    label_builder: ProjectionLabelBuilder
+    atom_indexer: AtomIndexer | None
+    orbital_names: Sequence[str] | None
+    is_non_colinear: bool
+
     def __init__(
         self,
         *,
@@ -873,43 +882,48 @@ class ProjectionSelectionResolver:
         spins_set = self._normalize_indices_set(spins)
 
         species_list = self._normalize_species_sequence(species)
-        species_set = set(species_list) if species_list is not None else None
 
         normalized_species_maps = self._normalize_species_orbital_map(species_orbital_map)
         if normalized_species_maps is not None:
-            species_list = []
-            species_set = set()
-            orbitals_set = set()
+            species_list_resolved: list[str] = []
+            species_seen: set[str] = set()
+            orbitals_set_resolved: set[int] = set()
             for mapping in normalized_species_maps:
                 for specie, orbital_indices in mapping.items():
                     specie_str = str(specie)
-                    if specie_str not in species_set:
-                        species_list.append(specie_str)
-                        species_set.add(specie_str)
-                    orbitals_set.update(self._normalize_indices_set(orbital_indices) or set())
-            atoms_set = set()
-            for specie in species_list:
-                atoms_set.update(self._atoms_for_species(specie))
+                    if specie_str not in species_seen:
+                        species_list_resolved.append(specie_str)
+                        species_seen.add(specie_str)
+                    orbitals_set_resolved.update(
+                        self._normalize_indices_set(orbital_indices) or set()
+                    )
+            atoms_set_resolved: set[int] = set()
+            for specie in species_list_resolved:
+                atoms_set_resolved.update(self._atoms_for_species(specie))
+            species_list = species_list_resolved
+            orbitals_set = orbitals_set_resolved
+            atoms_set = atoms_set_resolved
 
         normalized_atoms_maps = self._normalize_atoms_orbital_map(atoms_orbital_map)
         if normalized_atoms_maps is not None:
-            atoms_set = set()
-            orbitals_set = set()
+            atoms_set_map: set[int] = set()
+            orbitals_set_map: set[int] = set()
             for mapping in normalized_atoms_maps:
                 for atom_indices, orbital_indices in mapping.items():
-                    atoms_set.update(self._normalize_indices_set(atom_indices) or set())
-                    orbitals_set.update(self._normalize_indices_set(orbital_indices) or set())
-            if atoms_set:
-                species_list = self._species_from_atoms(sorted(atoms_set))
-                species_set = set(species_list)
+                    atoms_set_map.update(self._normalize_indices_set(atom_indices) or set())
+                    orbitals_set_map.update(self._normalize_indices_set(orbital_indices) or set())
+            if atoms_set_map:
+                species_list = self._species_from_atoms(sorted(atoms_set_map))
             else:
                 species_list = []
-                species_set = set()
+            atoms_set = atoms_set_map
+            orbitals_set = orbitals_set_map
 
         if species_list is not None:
-            atoms_set = set()
+            atoms_set_species: set[int] = set()
             for specie in species_list:
-                atoms_set.update(self._atoms_for_species(specie))
+                atoms_set_species.update(self._atoms_for_species(specie))
+            atoms_set = atoms_set_species
         elif atoms_set is None:
             if self.atom_indexer is None:
                 raise ValueError(
@@ -921,14 +935,12 @@ class ProjectionSelectionResolver:
         else:
             species_list = self._species_from_atoms(sorted(atoms_set))
 
-        atoms_tuple = tuple(sorted(atoms_set)) if atoms_set is not None else tuple()
+        atoms_tuple = tuple(sorted(atoms_set))
         orbitals_tuple = (
-            tuple(sorted(orbitals_set))
-            if orbitals_set is not None and len(orbitals_set) > 0
-            else None
+            tuple(sorted(orbitals_set)) if orbitals_set is not None and len(orbitals_set) > 0 else None
         )
         spins_tuple = tuple(sorted(spins_set)) if spins_set is not None else None
-        species_tuple = tuple(species_list) if species_list is not None else tuple()
+        species_tuple = tuple(species_list) if species_list else tuple()
 
         labels = self.label_builder.build_components(
             atoms=atoms_tuple if atoms_tuple else None,
@@ -983,9 +995,8 @@ class ProjectionSelectionResolver:
         return [self._ensure_mapping(item) for item in mapping]
 
     @staticmethod
-    def _ensure_mapping(mapping: Mapping) -> Mapping:
-        if not isinstance(mapping, ABCMapping):
-            raise TypeError("Expected a mapping of indices to orbital selections")
+    def _ensure_mapping(mapping: Mapping[_KT, _VT]) -> Mapping[_KT, _VT]:
+        # Type signature already ensures mapping is a Mapping
         return mapping
 
     def _atoms_for_species(self, specie: str) -> tuple[int, ...]:
@@ -1041,18 +1052,18 @@ class ProjectionSelectionResolver:
 __all__ = [
     "AZIMUTHAL_ORBITAL_ORDER",
     "CONVENTIONAL_CUBIC_ORBITAL_ORDER",
+    "LEGACY_ORBITAL_NAMES",
     "NONCOLINEAR_AZIMUTHAL_ORBITAL_ORDER",
-    "PRIMARY_ORBITAL_GROUPS",
+    "ORBITAL_GROUP_LABELS",
     "ORBITAL_INDEX_LABEL_MAP",
     "ORBITAL_INDEX_TO_LABEL",
-    "ORBITAL_GROUP_LABELS",
-    "LEGACY_ORBITAL_NAMES",
-    "format_index_ranges",
-    "OrbitalIndexer",
+    "PRIMARY_ORBITAL_GROUPS",
     "AtomIndexer",
-    "SpinIndexer",
-    "ProjectionLabels",
+    "OrbitalIndexer",
     "ProjectionLabelBuilder",
-    "ProjectionSelectionResult",
+    "ProjectionLabels",
     "ProjectionSelectionResolver",
+    "ProjectionSelectionResult",
+    "SpinIndexer",
+    "format_index_ranges",
 ]
