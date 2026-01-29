@@ -1,6 +1,7 @@
 """Tests for ElkIn extractor."""
 
 import logging
+from pathlib import Path
 
 import numpy as np
 import pytest
@@ -153,7 +154,7 @@ atoms
 
 
 @pytest.fixture
-def elkin_non_spin_bands(tmp_path):
+def elkin_non_spin_bands(tmp_path: Path) -> Path:
     """Create a temporary elk.in file for non-spin-polarized bands."""
     elkin_file = tmp_path / "elk.in"
     elkin_file.write_text(ELKIN_NON_SPIN_BANDS)
@@ -161,7 +162,7 @@ def elkin_non_spin_bands(tmp_path):
 
 
 @pytest.fixture
-def elkin_spin_polarized_bands(tmp_path):
+def elkin_spin_polarized_bands(tmp_path: Path) -> Path:
     """Create a temporary elk.in file for spin-polarized bands."""
     elkin_file = tmp_path / "elk.in"
     elkin_file.write_text(ELKIN_SPIN_POLARIZED_BANDS)
@@ -169,13 +170,13 @@ def elkin_spin_polarized_bands(tmp_path):
 
 
 class TestElkInInit(BaseTest):
-    def test_elkin_from_filepath(self, elkin_non_spin_bands):
+    def test_elkin_from_filepath(self, elkin_non_spin_bands: Path) -> None:
         """Test loading ElkIn from elk.in file."""
         elkin = ElkIn(elkin_non_spin_bands)
         assert elkin is not None
         assert elkin.filepath == elkin_non_spin_bands
 
-    def test_elkin_from_str(self):
+    def test_elkin_from_str(self) -> None:
         """Test loading ElkIn from string content."""
         elkin = ElkIn.from_str(ELKIN_NON_SPIN_BANDS)
         assert elkin is not None
@@ -183,76 +184,76 @@ class TestElkInInit(BaseTest):
 
 
 class TestElkInTasks(BaseTest):
-    def test_tasks_parsing_bands(self):
+    def test_tasks_parsing_bands(self) -> None:
         """Test that task numbers are extracted correctly."""
         elkin = ElkIn.from_str(ELKIN_NON_SPIN_BANDS)
         assert elkin.tasks == [0, 22]
 
-    def test_tasks_parsing_dos(self):
+    def test_tasks_parsing_dos(self) -> None:
         """Test that task numbers are extracted correctly for DOS."""
         elkin = ElkIn.from_str(ELKIN_DOS)
         assert elkin.tasks == [0, 10]
 
-    def test_is_bands_calculation_true(self):
+    def test_is_bands_calculation_true(self) -> None:
         """Test is_bands_calculation returns True for task 22."""
         elkin = ElkIn.from_str(ELKIN_NON_SPIN_BANDS)
         assert elkin.is_bands_calculation is True
 
-    def test_is_bands_calculation_false(self):
+    def test_is_bands_calculation_false(self) -> None:
         """Test is_bands_calculation returns False for DOS task."""
         elkin = ElkIn.from_str(ELKIN_DOS)
         assert elkin.is_bands_calculation is False
 
 
 class TestElkInSpin(BaseTest):
-    def test_spinpol_false(self):
+    def test_spinpol_false(self) -> None:
         """Test spinpol detection when not spin-polarized."""
         elkin = ElkIn.from_str(ELKIN_NON_SPIN_BANDS)
         assert elkin.spinpol is False
 
-    def test_spinpol_true(self):
+    def test_spinpol_true(self) -> None:
         """Test spinpol detection when spin-polarized."""
         elkin = ElkIn.from_str(ELKIN_SPIN_POLARIZED_BANDS)
         assert elkin.spinpol is True
 
-    def test_nspin_non_polarized(self):
+    def test_nspin_non_polarized(self) -> None:
         """Test nspin is 1 for non-spin-polarized."""
         elkin = ElkIn.from_str(ELKIN_NON_SPIN_BANDS)
         assert elkin.nspin == 1
 
-    def test_nspin_polarized(self):
+    def test_nspin_polarized(self) -> None:
         """Test nspin is 2 for spin-polarized."""
         elkin = ElkIn.from_str(ELKIN_SPIN_POLARIZED_BANDS)
         assert elkin.nspin == 2
 
 
 class TestElkInStructure(BaseTest):
-    def test_nspecies(self):
+    def test_nspecies(self) -> None:
         """Test number of species."""
         elkin = ElkIn.from_str(ELKIN_NON_SPIN_BANDS)
         assert elkin.nspecies == 3
 
-    def test_composition(self):
+    def test_composition(self) -> None:
         """Test species composition dictionary."""
         elkin = ElkIn.from_str(ELKIN_NON_SPIN_BANDS)
         assert elkin.composition == {"Sr": 1, "V": 1, "O": 3}
 
-    def test_atoms(self):
+    def test_atoms(self) -> None:
         """Test atoms list."""
         elkin = ElkIn.from_str(ELKIN_NON_SPIN_BANDS)
         assert elkin.atoms == ["Sr", "V", "O", "O", "O"]
 
-    def test_natoms(self):
+    def test_natoms(self) -> None:
         """Test number of atoms."""
         elkin = ElkIn.from_str(ELKIN_NON_SPIN_BANDS)
         assert elkin.natoms == 5
 
-    def test_lattice_shape(self):
+    def test_lattice_shape(self) -> None:
         """Test lattice vectors shape."""
         elkin = ElkIn.from_str(ELKIN_NON_SPIN_BANDS)
         assert elkin.lattice.shape == (3, 3)
 
-    def test_lattice_values(self):
+    def test_lattice_values(self) -> None:
         """Test lattice vectors with scale factor applied."""
         elkin = ElkIn.from_str(ELKIN_NON_SPIN_BANDS)
         expected = np.array(
@@ -264,12 +265,12 @@ class TestElkInStructure(BaseTest):
         )
         np.testing.assert_allclose(elkin.lattice, expected)
 
-    def test_fractional_coordinates_shape(self):
+    def test_fractional_coordinates_shape(self) -> None:
         """Test fractional coordinates shape."""
         elkin = ElkIn.from_str(ELKIN_NON_SPIN_BANDS)
         assert elkin.fractional_coordinates.shape == (5, 3)
 
-    def test_fractional_coordinates_values(self):
+    def test_fractional_coordinates_values(self) -> None:
         """Test fractional coordinates values."""
         elkin = ElkIn.from_str(ELKIN_NON_SPIN_BANDS)
         expected = np.array(
@@ -285,42 +286,42 @@ class TestElkInStructure(BaseTest):
 
 
 class TestElkInKpath(BaseTest):
-    def test_has_kpath_true(self):
+    def test_has_kpath_true(self) -> None:
         """Test has_kpath is True for bands calculation."""
         elkin = ElkIn.from_str(ELKIN_NON_SPIN_BANDS)
         assert elkin.has_kpath is True
 
-    def test_has_kpath_false(self):
+    def test_has_kpath_false(self) -> None:
         """Test has_kpath is False for DOS calculation."""
         elkin = ElkIn.from_str(ELKIN_DOS)
         assert elkin.has_kpath is False
 
-    def test_n_high_sym(self):
+    def test_n_high_sym(self) -> None:
         """Test number of high-symmetry points."""
         elkin = ElkIn.from_str(ELKIN_NON_SPIN_BANDS)
         assert elkin.n_high_sym == 6
 
-    def test_nkpoints_non_spin(self):
+    def test_nkpoints_non_spin(self) -> None:
         """Test total number of k-points."""
         elkin = ElkIn.from_str(ELKIN_NON_SPIN_BANDS)
         assert elkin.nkpoints == 50
 
-    def test_nkpoints_spin_polarized(self):
+    def test_nkpoints_spin_polarized(self) -> None:
         """Test total number of k-points for spin-polarized."""
         elkin = ElkIn.from_str(ELKIN_SPIN_POLARIZED_BANDS)
         assert elkin.nkpoints == 40
 
-    def test_n_segments(self):
+    def test_n_segments(self) -> None:
         """Test number of path segments."""
         elkin = ElkIn.from_str(ELKIN_NON_SPIN_BANDS)
         assert elkin.n_segments == 5
 
-    def test_high_symmetry_points_shape(self):
+    def test_high_symmetry_points_shape(self) -> None:
         """Test high-symmetry points array shape."""
         elkin = ElkIn.from_str(ELKIN_NON_SPIN_BANDS)
         assert elkin.high_symmetry_points.shape == (6, 3)
 
-    def test_high_symmetry_points_values(self):
+    def test_high_symmetry_points_values(self) -> None:
         """Test high-symmetry points values."""
         elkin = ElkIn.from_str(ELKIN_NON_SPIN_BANDS)
         expected = np.array(
@@ -335,7 +336,7 @@ class TestElkInKpath(BaseTest):
         )
         np.testing.assert_allclose(elkin.high_symmetry_points, expected)
 
-    def test_knames(self):
+    def test_knames(self) -> None:
         """Test k-point labels."""
         elkin = ElkIn.from_str(ELKIN_NON_SPIN_BANDS)
         assert len(elkin.knames) == 5  # 5 segments

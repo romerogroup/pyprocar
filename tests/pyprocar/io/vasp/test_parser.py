@@ -9,7 +9,7 @@ from pyprocar.io.vasp.procar import Procar
 class TestVaspParserInitialization:
     """Test VaspParser initialization with different input types."""
 
-    def test_init_with_dirpath_only(self, tmp_path):
+    def test_init_with_dirpath_only(self, tmp_path: Path) -> None:
         """Test initialization with only dirpath."""
         parser = VaspParser(dirpath=tmp_path)
 

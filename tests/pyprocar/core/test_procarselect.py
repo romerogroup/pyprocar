@@ -1,11 +1,18 @@
 """Tests for ProcarSelect class."""
 
 import numpy as np
+import numpy.typing as npt
 import pytest
+
+from pyprocar.core.procarselect import ProcarSelect
 
 
 class MockProcarData:
     """Mock ProcarParser-like object for testing."""
+
+    spd: npt.NDArray[np.float64]
+    bands: npt.NDArray[np.float64]
+    kpoints: npt.NDArray[np.float64]
 
     def __init__(
         self,
@@ -27,19 +34,19 @@ class MockProcarData:
 
 
 @pytest.fixture
-def rng():
+def rng() -> np.random.Generator:
     """Seeded random number generator for reproducibility."""
     return np.random.default_rng(42)
 
 
 @pytest.fixture
-def mock_procar_data(rng):
+def mock_procar_data(rng: np.random.Generator) -> MockProcarData:
     """Create mock ProcarData with default dimensions."""
     return MockProcarData(rng=rng)
 
 
 @pytest.fixture
-def mock_procar_data_single_spin(rng):
+def mock_procar_data_single_spin(rng: np.random.Generator) -> MockProcarData:
     """Create mock ProcarData with single spin channel."""
     return MockProcarData(n_spins=1, rng=rng)
 
@@ -47,38 +54,30 @@ def mock_procar_data_single_spin(rng):
 class TestProcarSelectInit:
     """Test ProcarSelect initialization."""
 
-    def test_init_without_data(self):
+    def test_init_without_data(self) -> None:
         """Test initialization without ProcarData."""
-        from pyprocar.core.procarselect import ProcarSelect
-
         ps = ProcarSelect()
 
         assert ps.spd is None
         assert ps.bands is None
         assert ps.kpoints is None
 
-    def test_init_with_data_deep_copy(self, mock_procar_data):
+    def test_init_with_data_deep_copy(self, mock_procar_data: MockProcarData) -> None:
         """Test initialization with ProcarData using deep copy."""
-        from pyprocar.core.procarselect import ProcarSelect
-
         ps = ProcarSelect(ProcarData=mock_procar_data, deepCopy=True)
 
         assert ps.spd is not None
         assert ps.spd is not mock_procar_data.spd
         assert np.allclose(ps.spd, mock_procar_data.spd)
 
-    def test_init_with_data_shallow_copy(self, mock_procar_data):
+    def test_init_with_data_shallow_copy(self, mock_procar_data: MockProcarData) -> None:
         """Test initialization with ProcarData using shallow copy."""
-        from pyprocar.core.procarselect import ProcarSelect
-
         ps = ProcarSelect(ProcarData=mock_procar_data, deepCopy=False)
 
         assert ps.spd is mock_procar_data.spd
 
-    def test_init_with_mode(self, mock_procar_data):
+    def test_init_with_mode(self, mock_procar_data: MockProcarData) -> None:
         """Test initialization with mode parameter."""
-        from pyprocar.core.procarselect import ProcarSelect
-
         ps = ProcarSelect(ProcarData=mock_procar_data, mode="parametric")
 
         assert ps.mode == "parametric"
@@ -87,31 +86,28 @@ class TestProcarSelectInit:
 class TestProcarSelectSetData:
     """Test ProcarSelect.setData method."""
 
-    def test_set_data_deep_copy(self, mock_procar_data):
+    def test_set_data_deep_copy(self, mock_procar_data: MockProcarData) -> None:
         """Test setData with deep copy."""
-        from pyprocar.core.procarselect import ProcarSelect
-
         ps = ProcarSelect()
         ps.setData(mock_procar_data, deepCopy=True)
 
+        assert ps.spd is not None
+        assert ps.bands is not None
+        assert ps.kpoints is not None
         assert ps.spd is not mock_procar_data.spd
         assert np.allclose(ps.spd, mock_procar_data.spd)
         assert np.allclose(ps.bands, mock_procar_data.bands)
         assert np.allclose(ps.kpoints, mock_procar_data.kpoints)
 
-    def test_set_data_shallow_copy(self, mock_procar_data):
+    def test_set_data_shallow_copy(self, mock_procar_data: MockProcarData) -> None:
         """Test setData with shallow copy."""
-        from pyprocar.core.procarselect import ProcarSelect
-
         ps = ProcarSelect()
         ps.setData(mock_procar_data, deepCopy=False)
 
         assert ps.spd is mock_procar_data.spd
 
-    def test_set_data_records_numspin(self, mock_procar_data):
+    def test_set_data_records_numspin(self, mock_procar_data: MockProcarData) -> None:
         """Test that setData correctly records number of spins."""
-        from pyprocar.core.procarselect import ProcarSelect
-
         ps = ProcarSelect()
         ps.setData(mock_procar_data)
 
@@ -121,15 +117,15 @@ class TestProcarSelectSetData:
 class TestProcarSelectIspin:
     """Test ProcarSelect.selectIspin method."""
 
-    def test_select_ispin_density(self, mock_procar_data):
+    def test_select_ispin_density(self, mock_procar_data: MockProcarData) -> None:
         """Test selecting spin density (value=[0])."""
-        from pyprocar.core.procarselect import ProcarSelect
-
         ps = ProcarSelect(ProcarData=mock_procar_data)
+        assert ps.spd is not None
         original_shape = ps.spd.shape
 
         ps.selectIspin(value=[0], separate=False)
 
+        assert ps.spd is not None
         # Shape should reduce from 5D to 4D
         assert len(ps.spd.shape) == 4
         assert ps.spd.shape == (
@@ -139,55 +135,53 @@ class TestProcarSelectIspin:
             original_shape[4],
         )
 
-    def test_select_ispin_magnetization(self, mock_procar_data):
+    def test_select_ispin_magnetization(self, mock_procar_data: MockProcarData) -> None:
         """Test selecting spin magnetization (value=[1])."""
-        from pyprocar.core.procarselect import ProcarSelect
-
         ps = ProcarSelect(ProcarData=mock_procar_data)
 
         ps.selectIspin(value=[1], separate=False)
 
+        assert ps.spd is not None
         assert len(ps.spd.shape) == 4
 
-    def test_select_ispin_both_channels(self, mock_procar_data):
+    def test_select_ispin_both_channels(self, mock_procar_data: MockProcarData) -> None:
         """Test selecting both spin channels."""
-        from pyprocar.core.procarselect import ProcarSelect
-
         ps = ProcarSelect(ProcarData=mock_procar_data)
 
         ps.selectIspin(value=[0, 1], separate=False)
 
+        assert ps.spd is not None
         assert len(ps.spd.shape) == 4
 
-    def test_select_ispin_spin_up_separate(self, mock_procar_data):
+    def test_select_ispin_spin_up_separate(self, mock_procar_data: MockProcarData) -> None:
         """Test selecting spin up separately."""
-        from pyprocar.core.procarselect import ProcarSelect
-
+        _ = mock_procar_data  # fixture required by pytest but not used directly
         # Need even number of bands for separate spin selection
         mock_data = MockProcarData(n_bands=10)
         ps = ProcarSelect(ProcarData=mock_data)
 
         ps.selectIspin(value=[0], separate=True)
 
+        assert ps.spd is not None
         # Should select first half of bands
         assert ps.spd.shape[1] == 5
 
-    def test_select_ispin_spin_down_separate(self, mock_procar_data):
+    def test_select_ispin_spin_down_separate(self, mock_procar_data: MockProcarData) -> None:
         """Test selecting spin down separately."""
-        from pyprocar.core.procarselect import ProcarSelect
-
+        _ = mock_procar_data  # fixture required by pytest but not used directly
         mock_data = MockProcarData(n_bands=10)
         ps = ProcarSelect(ProcarData=mock_data)
 
         ps.selectIspin(value=[1], separate=True)
 
+        assert ps.spd is not None
         # Should select second half of bands
         assert ps.spd.shape[1] == 5
 
-    def test_select_ispin_wrong_dimensionality_raises_error(self, mock_procar_data):
+    def test_select_ispin_wrong_dimensionality_raises_error(
+        self, mock_procar_data: MockProcarData
+    ) -> None:
         """Test that selectIspin raises error if array is not 5D."""
-        from pyprocar.core.procarselect import ProcarSelect
-
         ps = ProcarSelect(ProcarData=mock_procar_data)
         # First call reduces to 4D
         ps.selectIspin(value=[0])
@@ -200,35 +194,32 @@ class TestProcarSelectIspin:
 class TestProcarSelectAtoms:
     """Test ProcarSelect.selectAtoms method."""
 
-    def test_select_single_atom(self, mock_procar_data):
+    def test_select_single_atom(self, mock_procar_data: MockProcarData) -> None:
         """Test selecting a single atom."""
-        from pyprocar.core.procarselect import ProcarSelect
-
         ps = ProcarSelect(ProcarData=mock_procar_data)
         ps.selectIspin(value=[0])
+        assert ps.spd is not None
         original_shape = ps.spd.shape
 
         ps.selectAtoms(value=[0])
 
+        assert ps.spd is not None
         # Shape should reduce from 4D to 3D
         assert len(ps.spd.shape) == 3
         assert ps.spd.shape == (original_shape[0], original_shape[1], original_shape[3])
 
-    def test_select_multiple_atoms(self, mock_procar_data):
+    def test_select_multiple_atoms(self, mock_procar_data: MockProcarData) -> None:
         """Test selecting multiple atoms (summed)."""
-        from pyprocar.core.procarselect import ProcarSelect
-
         ps = ProcarSelect(ProcarData=mock_procar_data)
         ps.selectIspin(value=[0])
 
         ps.selectAtoms(value=[0, 1, 2])
 
+        assert ps.spd is not None
         assert len(ps.spd.shape) == 3
 
-    def test_select_atoms_fortran_indexing(self, mock_procar_data):
+    def test_select_atoms_fortran_indexing(self, mock_procar_data: MockProcarData) -> None:
         """Test selecting atoms with 1-based indexing."""
-        from pyprocar.core.procarselect import ProcarSelect
-
         ps1 = ProcarSelect(ProcarData=mock_procar_data)
         ps1.selectIspin(value=[0])
         ps1.selectAtoms(value=[0], fortran=False)
@@ -238,12 +229,14 @@ class TestProcarSelectAtoms:
         ps2.selectAtoms(value=[1], fortran=True)
 
         # Both should select the same atom
+        assert ps1.spd is not None
+        assert ps2.spd is not None
         assert np.allclose(ps1.spd, ps2.spd)
 
-    def test_select_atoms_wrong_dimensionality_raises_error(self, mock_procar_data):
+    def test_select_atoms_wrong_dimensionality_raises_error(
+        self, mock_procar_data: MockProcarData
+    ) -> None:
         """Test that selectAtoms raises error if array is not 4D."""
-        from pyprocar.core.procarselect import ProcarSelect
-
         ps = ProcarSelect(ProcarData=mock_procar_data)
         # Skip selectIspin, so array is still 5D
 
@@ -254,49 +247,47 @@ class TestProcarSelectAtoms:
 class TestProcarSelectOrbital:
     """Test ProcarSelect.selectOrbital method."""
 
-    def test_select_single_orbital(self, mock_procar_data):
+    def test_select_single_orbital(self, mock_procar_data: MockProcarData) -> None:
         """Test selecting a single orbital."""
-        from pyprocar.core.procarselect import ProcarSelect
-
         ps = ProcarSelect(ProcarData=mock_procar_data)
         ps.selectIspin(value=[0])
         ps.selectAtoms(value=[0])
+        assert ps.spd is not None
         original_shape = ps.spd.shape
 
         ps.selectOrbital(value=[0])
 
+        assert ps.spd is not None
         # Shape should reduce from 3D to 2D
         assert len(ps.spd.shape) == 2
         assert ps.spd.shape == (original_shape[0], original_shape[1])
 
-    def test_select_multiple_orbitals(self, mock_procar_data):
+    def test_select_multiple_orbitals(self, mock_procar_data: MockProcarData) -> None:
         """Test selecting multiple orbitals (summed)."""
-        from pyprocar.core.procarselect import ProcarSelect
-
         ps = ProcarSelect(ProcarData=mock_procar_data)
         ps.selectIspin(value=[0])
         ps.selectAtoms(value=[0])
 
         ps.selectOrbital(value=[0, 1, 2])
 
+        assert ps.spd is not None
         assert len(ps.spd.shape) == 2
 
-    def test_select_total_orbital(self, mock_procar_data):
+    def test_select_total_orbital(self, mock_procar_data: MockProcarData) -> None:
         """Test selecting total orbital using negative index."""
-        from pyprocar.core.procarselect import ProcarSelect
-
         ps = ProcarSelect(ProcarData=mock_procar_data)
         ps.selectIspin(value=[0])
         ps.selectAtoms(value=[0])
 
         ps.selectOrbital(value=[-1])
 
+        assert ps.spd is not None
         assert len(ps.spd.shape) == 2
 
-    def test_select_orbital_wrong_dimensionality_raises_error(self, mock_procar_data):
+    def test_select_orbital_wrong_dimensionality_raises_error(
+        self, mock_procar_data: MockProcarData
+    ) -> None:
         """Test that selectOrbital raises error if array is not 3D."""
-        from pyprocar.core.procarselect import ProcarSelect
-
         ps = ProcarSelect(ProcarData=mock_procar_data)
         ps.selectIspin(value=[0])
         # Skip selectAtoms, so array is still 4D
@@ -308,22 +299,24 @@ class TestProcarSelectOrbital:
 class TestProcarSelectFullPipeline:
     """Test complete selection pipeline."""
 
-    def test_full_selection_pipeline(self, mock_procar_data):
+    def test_full_selection_pipeline(self, mock_procar_data: MockProcarData) -> None:
         """Test complete pipeline: ispin -> atoms -> orbital."""
-        from pyprocar.core.procarselect import ProcarSelect
-
         ps = ProcarSelect(ProcarData=mock_procar_data)
 
         # Verify initial 5D shape
+        assert ps.spd is not None
         assert len(ps.spd.shape) == 5
 
         ps.selectIspin(value=[0])
+        assert ps.spd is not None
         assert len(ps.spd.shape) == 4
 
         ps.selectAtoms(value=[0, 1])
+        assert ps.spd is not None
         assert len(ps.spd.shape) == 3
 
         ps.selectOrbital(value=[0])
+        assert ps.spd is not None
         assert len(ps.spd.shape) == 2
 
         # Final shape should be [kpoints, bands]

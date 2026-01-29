@@ -10,7 +10,7 @@ import numpy as np
 from lxml import etree
 
 if TYPE_CHECKING:
-    from lxml.etree import _Element, _ElementTree  # pyright: ignore[reportPrivateUsage]
+    from lxml.etree import _Element, _ElementTree
 
     XmlElement = _Element
     XmlElementTree = _ElementTree
@@ -224,7 +224,7 @@ class VaspXML(Mapping[str, Any]):
         element = path_list[0] if path_list else None
 
         assert isinstance(element, XmlElement)
-        return element[0] if element else None
+        return element[0] if len(element) > 0 else None
 
     #     @property
     #     def spins_dict(self) -> dict[str, str]:

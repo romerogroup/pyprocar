@@ -2,6 +2,7 @@
 
 import importlib.util
 import sys
+import types
 from pathlib import Path
 
 import numpy as np
@@ -9,12 +10,14 @@ import pytest
 import pyvista as pv
 
 
-def _load_fs_plot_module():
+def _load_fs_plot_module() -> types.ModuleType:
     """Load fs_plot module directly to avoid pyprocar/__init__.py import issues."""
     fs_plot_path = Path(__file__).parents[3] / "pyprocar" / "plotter" / "fs_plot.py"
     spec = importlib.util.spec_from_file_location("fs_plot", fs_plot_path)
+    assert spec is not None
     fs_plot = importlib.util.module_from_spec(spec)
     sys.modules["fs_plot"] = fs_plot
+    assert spec.loader is not None
     spec.loader.exec_module(fs_plot)
     return fs_plot
 
@@ -28,7 +31,7 @@ FermiSeries = _fs_plot.FermiSeries
 class TestFermiSeries:
     """Tests for FermiSeries dataclass."""
 
-    def test_fermi_series_creation_minimal(self):
+    def test_fermi_series_creation_minimal(self) -> None:
         """Test FermiSeries can be instantiated with minimal required fields."""
         mesh = pv.Sphere()
         series = FermiSeries(
@@ -51,7 +54,7 @@ class TestFermiSeries:
         assert series.scalars is None
         assert series.vectors is None
 
-    def test_fermi_series_creation_with_scalars(self):
+    def test_fermi_series_creation_with_scalars(self) -> None:
         """Test FermiSeries with scalar data."""
         mesh = pv.Sphere()
         scalars = np.random.rand(mesh.n_points)
@@ -75,7 +78,7 @@ class TestFermiSeries:
         assert series.scalars_lim == (0.0, 1.0)
         assert series.label == "Band 0 ↑"
 
-    def test_fermi_series_creation_with_vectors(self):
+    def test_fermi_series_creation_with_vectors(self) -> None:
         """Test FermiSeries with vector data."""
         mesh = pv.Sphere()
         vectors = np.random.rand(mesh.n_points, 3)
@@ -98,7 +101,7 @@ class TestFermiSeries:
         assert series.vectors_unit == "hbar"
         assert series.vectors_lim == (0.0, 1.0)
 
-    def test_fermi_series_additional_kwargs_default(self):
+    def test_fermi_series_additional_kwargs_default(self) -> None:
         """Test FermiSeries additional_kwargs defaults to empty dict."""
         mesh = pv.Sphere()
         series = FermiSeries(
@@ -117,7 +120,7 @@ class TestFermiSeries:
         )
         assert series.additional_kwargs == {}
 
-    def test_fermi_series_additional_kwargs_custom(self):
+    def test_fermi_series_additional_kwargs_custom(self) -> None:
         """Test FermiSeries with custom additional_kwargs."""
         mesh = pv.Sphere()
         kwargs = {"opacity": 0.5, "style": "wireframe"}
@@ -142,20 +145,22 @@ class TestFermiSeries:
 class TestFermiPlotterInit:
     """Tests for FermiPlotter initialization."""
 
-    def test_plotter_init_default(self):
+    def test_plotter_init_default(self) -> None:
         """Test FermiPlotter initializes with expected attributes."""
         plotter = FermiPlotter(off_screen=True)
         try:
             assert hasattr(plotter, "_meshes")
             assert hasattr(plotter, "values_dict")
-            assert isinstance(plotter._meshes, list)
-            assert isinstance(plotter.values_dict, dict)
-            assert len(plotter._meshes) == 0
-            assert len(plotter.values_dict) == 0
+            meshes: list[object] = plotter._meshes
+            values: dict[str, object] = plotter.values_dict
+            assert isinstance(meshes, list)
+            assert isinstance(values, dict)
+            assert len(meshes) == 0
+            assert len(values) == 0
         finally:
             plotter.close()
 
-    def test_plotter_has_plot_method(self):
+    def test_plotter_has_plot_method(self) -> None:
         """Test FermiPlotter has plot method."""
         plotter = FermiPlotter(off_screen=True)
         try:
@@ -164,7 +169,7 @@ class TestFermiPlotterInit:
         finally:
             plotter.close()
 
-    def test_plotter_has_to_series_list_method(self):
+    def test_plotter_has_to_series_list_method(self) -> None:
         """Test FermiPlotter has _to_series_list method."""
         plotter = FermiPlotter(off_screen=True)
         try:
@@ -177,7 +182,7 @@ class TestFermiPlotterInit:
 class TestFermiPlotterBuildSeriesLabel:
     """Tests for _build_series_label method."""
 
-    def test_build_series_label_single_surface(self):
+    def test_build_series_label_single_surface(self) -> None:
         """Test label generation for single surface returns None."""
         plotter = FermiPlotter(off_screen=True)
         try:
@@ -186,7 +191,7 @@ class TestFermiPlotterBuildSeriesLabel:
         finally:
             plotter.close()
 
-    def test_build_series_label_multiple_surfaces_spin_up(self):
+    def test_build_series_label_multiple_surfaces_spin_up(self) -> None:
         """Test label generation for spin up in multi-surface plot."""
         plotter = FermiPlotter(off_screen=True)
         try:
@@ -195,7 +200,7 @@ class TestFermiPlotterBuildSeriesLabel:
         finally:
             plotter.close()
 
-    def test_build_series_label_multiple_surfaces_spin_down(self):
+    def test_build_series_label_multiple_surfaces_spin_down(self) -> None:
         """Test label generation for spin down in multi-surface plot."""
         plotter = FermiPlotter(off_screen=True)
         try:
@@ -208,7 +213,7 @@ class TestFermiPlotterBuildSeriesLabel:
 class TestFermiPlotterResolveClim:
     """Tests for _resolve_clim method."""
 
-    def test_resolve_clim_empty_series(self):
+    def test_resolve_clim_empty_series(self) -> None:
         """Test clim resolution with no series."""
         plotter = FermiPlotter(off_screen=True)
         try:
@@ -217,7 +222,7 @@ class TestFermiPlotterResolveClim:
         finally:
             plotter.close()
 
-    def test_resolve_clim_no_scalars(self):
+    def test_resolve_clim_no_scalars(self) -> None:
         """Test clim resolution when series have no scalars."""
         plotter = FermiPlotter(off_screen=True)
         mesh = pv.Sphere()
@@ -241,7 +246,7 @@ class TestFermiPlotterResolveClim:
         finally:
             plotter.close()
 
-    def test_resolve_clim_with_scalars(self):
+    def test_resolve_clim_with_scalars(self) -> None:
         """Test clim resolution with scalar data."""
         plotter = FermiPlotter(off_screen=True)
         mesh = pv.Sphere()
@@ -266,7 +271,7 @@ class TestFermiPlotterResolveClim:
         finally:
             plotter.close()
 
-    def test_resolve_clim_multiple_series(self):
+    def test_resolve_clim_multiple_series(self) -> None:
         """Test clim resolution with multiple series."""
         plotter = FermiPlotter(off_screen=True)
         mesh = pv.Sphere()
@@ -308,7 +313,7 @@ class TestFermiPlotterResolveClim:
 class TestFermiPlotterRecordSeriesData:
     """Tests for _record_series_data method."""
 
-    def test_record_series_data_basic(self):
+    def test_record_series_data_basic(self) -> None:
         """Test recording series data for export."""
         plotter = FermiPlotter(off_screen=True)
         mesh = pv.Sphere()
@@ -333,7 +338,7 @@ class TestFermiPlotterRecordSeriesData:
         finally:
             plotter.close()
 
-    def test_record_series_data_with_scalars(self):
+    def test_record_series_data_with_scalars(self) -> None:
         """Test recording series data with scalars."""
         plotter = FermiPlotter(off_screen=True)
         mesh = pv.Sphere()
@@ -359,7 +364,7 @@ class TestFermiPlotterRecordSeriesData:
         finally:
             plotter.close()
 
-    def test_record_series_data_with_vectors(self):
+    def test_record_series_data_with_vectors(self) -> None:
         """Test recording series data with vectors."""
         plotter = FermiPlotter(off_screen=True)
         mesh = pv.Sphere()
@@ -389,7 +394,7 @@ class TestFermiPlotterRecordSeriesData:
 class TestFermiPlotterExport:
     """Tests for export functionality."""
 
-    def test_export_npz(self, tmp_path):
+    def test_export_npz(self, tmp_path: Path) -> None:
         """Test export to NPZ format."""
         plotter = FermiPlotter(off_screen=True)
         plotter.values_dict = {"test": np.array([1, 2, 3])}
@@ -404,7 +409,7 @@ class TestFermiPlotterExport:
         finally:
             plotter.close()
 
-    def test_export_vtk(self, tmp_path):
+    def test_export_vtk(self, tmp_path: Path) -> None:
         """Test export to VTK format."""
         plotter = FermiPlotter(off_screen=True)
         mesh = pv.Sphere()
@@ -416,11 +421,12 @@ class TestFermiPlotterExport:
             assert output_path.exists()
             # Verify the file can be loaded back
             loaded_mesh = pv.read(str(output_path))
+            assert isinstance(loaded_mesh, pv.PolyData)
             assert loaded_mesh.n_points == mesh.n_points
         finally:
             plotter.close()
 
-    def test_export_vtp(self, tmp_path):
+    def test_export_vtp(self, tmp_path: Path) -> None:
         """Test export to VTP format."""
         plotter = FermiPlotter(off_screen=True)
         mesh = pv.Sphere()
@@ -431,11 +437,12 @@ class TestFermiPlotterExport:
             plotter.export_data(str(output_path))
             assert output_path.exists()
             loaded_mesh = pv.read(str(output_path))
+            assert isinstance(loaded_mesh, pv.PolyData)
             assert loaded_mesh.n_points == mesh.n_points
         finally:
             plotter.close()
 
-    def test_export_ply(self, tmp_path):
+    def test_export_ply(self, tmp_path: Path) -> None:
         """Test export to PLY format."""
         plotter = FermiPlotter(off_screen=True)
         mesh = pv.Sphere()
@@ -446,11 +453,12 @@ class TestFermiPlotterExport:
             plotter.export_data(str(output_path))
             assert output_path.exists()
             loaded_mesh = pv.read(str(output_path))
+            assert isinstance(loaded_mesh, pv.PolyData)
             assert loaded_mesh.n_points == mesh.n_points
         finally:
             plotter.close()
 
-    def test_export_stl(self, tmp_path):
+    def test_export_stl(self, tmp_path: Path) -> None:
         """Test export to STL format."""
         plotter = FermiPlotter(off_screen=True)
         mesh = pv.Sphere()
@@ -461,11 +469,12 @@ class TestFermiPlotterExport:
             plotter.export_data(str(output_path))
             assert output_path.exists()
             loaded_mesh = pv.read(str(output_path))
+            assert isinstance(loaded_mesh, pv.PolyData)
             assert loaded_mesh.n_points == mesh.n_points
         finally:
             plotter.close()
 
-    def test_export_unsupported_format_raises(self, tmp_path):
+    def test_export_unsupported_format_raises(self, tmp_path: Path) -> None:
         """Test export raises ValueError for unsupported formats."""
         plotter = FermiPlotter(off_screen=True)
         output_path = tmp_path / "test.xyz"
@@ -475,7 +484,7 @@ class TestFermiPlotterExport:
         finally:
             plotter.close()
 
-    def test_export_multiple_meshes_merged(self, tmp_path):
+    def test_export_multiple_meshes_merged(self, tmp_path: Path) -> None:
         """Test export merges multiple meshes."""
         plotter = FermiPlotter(off_screen=True)
         mesh1 = pv.Sphere(center=(0, 0, 0))
@@ -487,12 +496,13 @@ class TestFermiPlotterExport:
             plotter.export_data(str(output_path))
             assert output_path.exists()
             loaded_mesh = pv.read(str(output_path))
+            assert isinstance(loaded_mesh, pv.PolyData)
             # Merged mesh should have points from both spheres
             assert loaded_mesh.n_points == mesh1.n_points + mesh2.n_points
         finally:
             plotter.close()
 
-    def test_export_empty_meshes_no_error(self, tmp_path):
+    def test_export_empty_meshes_no_error(self, tmp_path: Path) -> None:
         """Test export with empty meshes doesn't raise."""
         plotter = FermiPlotter(off_screen=True)
         plotter._meshes = []
@@ -509,7 +519,7 @@ class TestFermiPlotterExport:
 class TestFermiPlotterScalarBarMethods:
     """Tests for scalar bar configuration methods."""
 
-    def test_set_scalar_bar_title_no_bar(self):
+    def test_set_scalar_bar_title_no_bar(self) -> None:
         """Test set_scalar_bar_title when no scalar bar exists."""
         plotter = FermiPlotter(off_screen=True)
         try:
@@ -518,7 +528,7 @@ class TestFermiPlotterScalarBarMethods:
         finally:
             plotter.close()
 
-    def test_set_scalar_bar_label_font_size_no_bar(self):
+    def test_set_scalar_bar_label_font_size_no_bar(self) -> None:
         """Test set_scalar_bar_label_font_size when no scalar bar exists."""
         plotter = FermiPlotter(off_screen=True)
         try:
@@ -527,7 +537,7 @@ class TestFermiPlotterScalarBarMethods:
         finally:
             plotter.close()
 
-    def test_set_scalar_bar_position_no_bar(self):
+    def test_set_scalar_bar_position_no_bar(self) -> None:
         """Test set_scalar_bar_position when no scalar bar exists."""
         plotter = FermiPlotter(off_screen=True)
         try:
@@ -536,7 +546,7 @@ class TestFermiPlotterScalarBarMethods:
         finally:
             plotter.close()
 
-    def test_scalar_bar_methods_exist(self):
+    def test_scalar_bar_methods_exist(self) -> None:
         """Test all scalar bar methods exist."""
         plotter = FermiPlotter(off_screen=True)
         try:

@@ -126,7 +126,8 @@ types-pyyaml = "*"
 
 [feature.pytest.tasks]
 
-test = { cmd = "bash $PIXI_PROJECT_ROOT/.config/run_silent_pytest.sh {{ test_pattern }} {{ verbose }}", args = [{ arg = "test_pattern", default = "" }, { arg = "verbose", default = "" }], description = "Run tests (optional: test_pattern, --verbose|-v)" }
+test-silent = { cmd = "bash $PIXI_PROJECT_ROOT/.config/run_silent_pytest.sh {{ test_pattern }} {{ verbose }}", args = [{ arg = "test_pattern", default = "" }, { arg = "verbose", default = "" }], description = "Run tests (optional: test_pattern, --verbose|-v)" }
+test = { cmd = "pytest -s tests --config-file $PIXI_PROJECT_ROOT/.config/.pytest.toml {{ test_pattern }}", args = [{ arg = "test_pattern", default = "" }], description = "Run tests (optional: test_pattern)" }
 
 
 ###############################################################

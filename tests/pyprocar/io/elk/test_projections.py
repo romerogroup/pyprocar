@@ -1,6 +1,7 @@
 """Tests for ElkProjections extractor."""
 
 import logging
+from pathlib import Path
 
 import numpy as np
 import pytest
@@ -37,7 +38,7 @@ BAND_S02_A0001 = """   0.000000000      -2.401220419        0.000001    0.000000
 
 
 @pytest.fixture
-def projection_files(tmp_path):
+def projection_files(tmp_path: Path) -> list[Path]:
     """Create temporary projection files."""
     file1 = tmp_path / "BAND_S01_A0001.OUT"
     file1.write_text(BAND_S01_A0001)
@@ -47,7 +48,7 @@ def projection_files(tmp_path):
 
 
 class TestElkProjectionsInit(BaseTest):
-    def test_projections_from_filepaths(self, projection_files):
+    def test_projections_from_filepaths(self, projection_files: list[Path]) -> None:
         """Test loading ElkProjections from file paths."""
         proj = ElkProjections(
             filepaths=projection_files,
@@ -58,7 +59,7 @@ class TestElkProjectionsInit(BaseTest):
         )
         assert proj is not None
 
-    def test_projections_from_str(self):
+    def test_projections_from_str(self) -> None:
         """Test loading ElkProjections from string content."""
         proj = ElkProjections.from_str(
             file_contents=[BAND_S01_A0001, BAND_S02_A0001],
@@ -70,7 +71,7 @@ class TestElkProjectionsInit(BaseTest):
 
 
 class TestElkProjectionsDimensions(BaseTest):
-    def test_nkpoints(self):
+    def test_nkpoints(self) -> None:
         """Test nkpoints property."""
         proj = ElkProjections.from_str(
             file_contents=[BAND_S01_A0001, BAND_S02_A0001],
@@ -80,7 +81,7 @@ class TestElkProjectionsDimensions(BaseTest):
         )
         assert proj.nkpoints == 3
 
-    def test_nbands(self):
+    def test_nbands(self) -> None:
         """Test nbands property."""
         proj = ElkProjections.from_str(
             file_contents=[BAND_S01_A0001, BAND_S02_A0001],
@@ -90,7 +91,7 @@ class TestElkProjectionsDimensions(BaseTest):
         )
         assert proj.nbands == 2
 
-    def test_nspin(self):
+    def test_nspin(self) -> None:
         """Test nspin property."""
         proj = ElkProjections.from_str(
             file_contents=[BAND_S01_A0001, BAND_S02_A0001],
@@ -100,7 +101,7 @@ class TestElkProjectionsDimensions(BaseTest):
         )
         assert proj.nspin == 1
 
-    def test_natoms(self):
+    def test_natoms(self) -> None:
         """Test natoms property."""
         proj = ElkProjections.from_str(
             file_contents=[BAND_S01_A0001, BAND_S02_A0001],
@@ -112,7 +113,7 @@ class TestElkProjectionsDimensions(BaseTest):
 
 
 class TestElkProjectionsSPD(BaseTest):
-    def test_spd_shape(self):
+    def test_spd_shape(self) -> None:
         """Test SPD array shape."""
         proj = ElkProjections.from_str(
             file_contents=[BAND_S01_A0001, BAND_S02_A0001],
@@ -123,7 +124,7 @@ class TestElkProjectionsSPD(BaseTest):
         # Shape: (nkpoints, nbands, nspin, natoms+1, norbitals+2)
         assert proj.spd.shape == (3, 2, 1, 3, 18)
 
-    def test_spd_not_empty(self):
+    def test_spd_not_empty(self) -> None:
         """Test SPD array has data."""
         proj = ElkProjections.from_str(
             file_contents=[BAND_S01_A0001, BAND_S02_A0001],
@@ -137,7 +138,7 @@ class TestElkProjectionsSPD(BaseTest):
 
 
 class TestElkProjectionsProjected(BaseTest):
-    def test_projected_shape(self):
+    def test_projected_shape(self) -> None:
         """Test projected array shape in canonical format."""
         proj = ElkProjections.from_str(
             file_contents=[BAND_S01_A0001, BAND_S02_A0001],
@@ -149,7 +150,7 @@ class TestElkProjectionsProjected(BaseTest):
         assert proj.projected is not None
         assert proj.projected.shape == (3, 2, 2, 1, 16, 1)
 
-    def test_projected_not_none(self):
+    def test_projected_not_none(self) -> None:
         """Test projected is not None when data exists."""
         proj = ElkProjections.from_str(
             file_contents=[BAND_S01_A0001, BAND_S02_A0001],
@@ -159,7 +160,7 @@ class TestElkProjectionsProjected(BaseTest):
         )
         assert proj.projected is not None
 
-    def test_projected_values(self):
+    def test_projected_values(self) -> None:
         """Test specific projected values are parsed correctly."""
         proj = ElkProjections.from_str(
             file_contents=[BAND_S01_A0001, BAND_S02_A0001],
@@ -168,9 +169,11 @@ class TestElkProjectionsProjected(BaseTest):
             nspin=1,
         )
         # First k-point, first band, first atom, first orbital should be ~0.000002
-        assert proj.projected[0, 0, 0, 0, 0, 0] == pytest.approx(0.000002, abs=1e-7)
+        projected = proj.projected
+        assert projected is not None
+        assert projected[0, 0, 0, 0, 0, 0] == pytest.approx(0.000002, abs=1e-7)
 
-    def test_projected_empty_when_no_files(self):
+    def test_projected_empty_when_no_files(self) -> None:
         """Test projected is None when no file contents."""
         proj = ElkProjections(
             nkpoints=3,

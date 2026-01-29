@@ -59,7 +59,7 @@ class TestProjcar(BaseTest):
         """Test that Projcar doesn't parse on initialization."""
         projcar = vasp.Projcar(projcar_file)
         # File shouldn't be read yet
-        assert projcar._file_str == ""  # pyright: ignore[reportPrivateUsage]
+        assert projcar._file_str == ""
 
     def test_projcar_dimensions(self, projcar_file: Path) -> None:
         """Test that Projcar correctly parses dimensions."""

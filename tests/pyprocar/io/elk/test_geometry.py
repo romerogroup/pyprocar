@@ -1,6 +1,7 @@
 """Tests for ElkGeometry extractor."""
 
 import logging
+from pathlib import Path
 
 import numpy as np
 import pytest
@@ -47,7 +48,7 @@ atoms
 
 
 @pytest.fixture
-def geometry_file(tmp_path):
+def geometry_file(tmp_path: Path) -> Path:
     """Create a temporary GEOMETRY.OUT file."""
     geom_file = tmp_path / "GEOMETRY.OUT"
     geom_file.write_text(GEOMETRY_OUT)
@@ -55,13 +56,13 @@ def geometry_file(tmp_path):
 
 
 class TestElkGeometryInit(BaseTest):
-    def test_geometry_from_filepath(self, geometry_file):
+    def test_geometry_from_filepath(self, geometry_file: Path) -> None:
         """Test loading ElkGeometry from GEOMETRY.OUT file."""
         geometry = ElkGeometry(geometry_file)
         assert geometry is not None
         assert geometry.filepath == geometry_file
 
-    def test_geometry_from_str(self):
+    def test_geometry_from_str(self) -> None:
         """Test loading ElkGeometry from string content."""
         geometry = ElkGeometry.from_str(GEOMETRY_OUT)
         assert geometry is not None
@@ -69,12 +70,12 @@ class TestElkGeometryInit(BaseTest):
 
 
 class TestElkGeometryLattice(BaseTest):
-    def test_lattice_shape(self):
+    def test_lattice_shape(self) -> None:
         """Test lattice vectors shape is 3x3."""
         geometry = ElkGeometry.from_str(GEOMETRY_OUT)
         assert geometry.lattice.shape == (3, 3)
 
-    def test_lattice_values(self):
+    def test_lattice_values(self) -> None:
         """Test lattice vectors values."""
         geometry = ElkGeometry.from_str(GEOMETRY_OUT)
         expected = np.array(
@@ -86,36 +87,36 @@ class TestElkGeometryLattice(BaseTest):
         )
         np.testing.assert_allclose(geometry.lattice, expected, rtol=1e-5)
 
-    def test_lattice_dtype(self):
+    def test_lattice_dtype(self) -> None:
         """Test lattice vectors are float."""
         geometry = ElkGeometry.from_str(GEOMETRY_OUT)
         assert geometry.lattice.dtype == np.float64
 
 
 class TestElkGeometryAtoms(BaseTest):
-    def test_nspecies(self):
+    def test_nspecies(self) -> None:
         """Test number of species."""
         geometry = ElkGeometry.from_str(GEOMETRY_OUT)
         assert geometry.nspecies == 3
 
-    def test_atoms_list(self):
+    def test_atoms_list(self) -> None:
         """Test atoms list."""
         geometry = ElkGeometry.from_str(GEOMETRY_OUT)
         assert geometry.atoms == ["Sr", "V", "O", "O", "O"]
 
-    def test_natoms(self):
+    def test_natoms(self) -> None:
         """Test number of atoms."""
         geometry = ElkGeometry.from_str(GEOMETRY_OUT)
         assert geometry.natoms == 5
 
 
 class TestElkGeometryCoordinates(BaseTest):
-    def test_fractional_coordinates_shape(self):
+    def test_fractional_coordinates_shape(self) -> None:
         """Test fractional coordinates shape."""
         geometry = ElkGeometry.from_str(GEOMETRY_OUT)
         assert geometry.fractional_coordinates.shape == (5, 3)
 
-    def test_fractional_coordinates_values(self):
+    def test_fractional_coordinates_values(self) -> None:
         """Test fractional coordinates values."""
         geometry = ElkGeometry.from_str(GEOMETRY_OUT)
         expected = np.array(
@@ -129,7 +130,7 @@ class TestElkGeometryCoordinates(BaseTest):
         )
         np.testing.assert_allclose(geometry.fractional_coordinates, expected)
 
-    def test_fractional_coordinates_dtype(self):
+    def test_fractional_coordinates_dtype(self) -> None:
         """Test fractional coordinates are float."""
         geometry = ElkGeometry.from_str(GEOMETRY_OUT)
         assert geometry.fractional_coordinates.dtype == np.float64

@@ -53,7 +53,7 @@ def find_test_cases(data_root: Path) -> list[CalcInfo]:
     Scans the data directory to find all valid test calculation paths
     and returns a list of structured CalcInfo objects.
     """
-    test_cases = []
+    test_cases: list[CalcInfo] = []
     # The glob pattern matches the 5 levels of your directory structure
     # {mat_system}/{code}/{version}/{mag_type}/{calc_type}
     for path in data_root.glob("*/*/*/*/*"):

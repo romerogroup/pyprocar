@@ -99,27 +99,27 @@ def _make_mock_kpath(n_kpoints: int = 50) -> Mock:
 
 
 @pytest.fixture
-def mock_property_single_spin():
+def mock_property_single_spin() -> Mock:
     return _make_mock_property(n_spins=1)
 
 
 @pytest.fixture
-def mock_property_two_spins():
+def mock_property_two_spins() -> Mock:
     return _make_mock_property(n_spins=2)
 
 
 @pytest.fixture
-def mock_scalars_single_spin():
+def mock_scalars_single_spin() -> Mock:
     return _make_mock_scalars_property(n_spins=1)
 
 
 @pytest.fixture
-def mock_scalars_two_spins():
+def mock_scalars_two_spins() -> Mock:
     return _make_mock_scalars_property(n_spins=2)
 
 
 @pytest.fixture
-def mock_kpath():
+def mock_kpath() -> Mock:
     return _make_mock_kpath()
 
 
@@ -131,7 +131,7 @@ def mock_kpath():
 class TestBandStructurePlotterInitialization:
     """Tests for BandStructurePlotter initialization."""
 
-    def test_default_initialization(self):
+    def test_default_initialization(self) -> None:
         plotter = BandStructurePlotter()
         assert plotter.figsize == (8, 6)
         assert plotter.dpi == 100
@@ -139,12 +139,12 @@ class TestBandStructurePlotterInitialization:
         assert plotter.fig is not None
         plt.close(plotter.fig)
 
-    def test_custom_figsize(self):
+    def test_custom_figsize(self) -> None:
         plotter = BandStructurePlotter(figsize=(10, 8))
         assert plotter.figsize == (10, 8)
         plt.close(plotter.fig)
 
-    def test_external_axes(self):
+    def test_external_axes(self) -> None:
         fig, ax = plt.subplots()
         plotter = BandStructurePlotter(ax=ax)
         assert plotter.ax is ax
@@ -159,13 +159,13 @@ class TestBandStructurePlotterInitialization:
 class TestBandStructurePlotterToSeriesList:
     """Tests for the _to_series_list method."""
 
-    def test_to_series_list_basic(self, mock_property_single_spin):
+    def test_to_series_list_basic(self, mock_property_single_spin: Mock) -> None:
         """Test basic series list creation."""
         plotter = BandStructurePlotter()
         series_list = plotter._to_series_list(mock_property_single_spin, None, None, "normal")
 
-        n_bands = mock_property_single_spin.to_array().shape[1]
-        n_spins = mock_property_single_spin.to_array().shape[2]
+        n_bands: int = mock_property_single_spin.to_array().shape[1]
+        n_spins: int = mock_property_single_spin.to_array().shape[2]
 
         # Should have n_bands * n_spins series
         assert len(series_list) == n_bands * n_spins
@@ -180,7 +180,9 @@ class TestBandStructurePlotterToSeriesList:
 
         plt.close(plotter.fig)
 
-    def test_to_series_list_with_scalars(self, mock_property_single_spin, mock_scalars_single_spin):
+    def test_to_series_list_with_scalars(
+        self, mock_property_single_spin: Mock, mock_scalars_single_spin: Mock
+    ) -> None:
         """Test series list with scalar data."""
         plotter = BandStructurePlotter()
         series_list = plotter._to_series_list(
@@ -195,27 +197,28 @@ class TestBandStructurePlotterToSeriesList:
 
         plt.close(plotter.fig)
 
-    def test_to_series_list_two_spins(self, mock_property_two_spins):
+    def test_to_series_list_two_spins(self, mock_property_two_spins: Mock) -> None:
         """Test series list with two spin channels."""
         plotter = BandStructurePlotter()
         series_list = plotter._to_series_list(mock_property_two_spins, None, None, "normal")
 
-        n_bands = mock_property_two_spins.to_array().shape[1]
-        n_spins = mock_property_two_spins.to_array().shape[2]
+        n_bands: int = mock_property_two_spins.to_array().shape[1]
+        n_spins: int = mock_property_two_spins.to_array().shape[2]
 
         # Should have n_bands * n_spins series
         assert len(series_list) == n_bands * n_spins
 
         # Check spin labels are assigned (uses arrow symbols)
         for series in series_list:
+            assert series.label is not None
             if series.spin_index == 0:
-                assert "↑" in series.label or "Band" in series.label
+                assert "\u2191" in series.label or "Band" in series.label
             else:
-                assert "↓" in series.label or "Band" in series.label
+                assert "\u2193" in series.label or "Band" in series.label
 
         plt.close(plotter.fig)
 
-    def test_to_series_list_flip_channel_mode(self, mock_property_two_spins):
+    def test_to_series_list_flip_channel_mode(self, mock_property_two_spins: Mock) -> None:
         """Test that flip channel mode negates second spin channel."""
         plotter = BandStructurePlotter()
 
@@ -235,7 +238,7 @@ class TestBandStructurePlotterToSeriesList:
 
         plt.close(plotter.fig)
 
-    def test_to_series_list_missing_kpath_raises(self):
+    def test_to_series_list_missing_kpath_raises(self) -> None:
         """Test that missing kpath metadata raises error."""
         mock = Mock()
         mock.to_array.return_value = np.random.rand(50, 5, 1)
@@ -247,7 +250,7 @@ class TestBandStructurePlotterToSeriesList:
 
         plt.close(plotter.fig)
 
-    def test_distribute_kwargs(self):
+    def test_distribute_kwargs(self) -> None:
         """Test kwargs distribution to channels."""
         plotter = BandStructurePlotter()
 
@@ -263,7 +266,7 @@ class TestBandStructurePlotterToSeriesList:
 
         plt.close(plotter.fig)
 
-    def test_build_series_label_single_spin(self, mock_property_single_spin):
+    def test_build_series_label_single_spin(self, mock_property_single_spin: Mock) -> None:
         """Test label building for single spin."""
         plotter = BandStructurePlotter()
         label = plotter._build_series_label(mock_property_single_spin, 0, 0, 5, 1)
@@ -273,7 +276,7 @@ class TestBandStructurePlotterToSeriesList:
 
         plt.close(plotter.fig)
 
-    def test_build_series_label_two_spins(self, mock_property_two_spins):
+    def test_build_series_label_two_spins(self, mock_property_two_spins: Mock) -> None:
         """Test label building for two spins."""
         plotter = BandStructurePlotter()
         label_up = plotter._build_series_label(mock_property_two_spins, 0, 0, 5, 2)
@@ -294,19 +297,19 @@ class TestBandStructurePlotterToSeriesList:
 class TestBandStructurePlotterPlot:
     """Tests for the unified plot() method."""
 
-    def test_plot_none_mode_creates_lines(self, mock_property_single_spin):
+    def test_plot_none_mode_creates_lines(self, mock_property_single_spin: Mock) -> None:
         """Test that scalars_mode='none' creates line plots."""
         plotter = BandStructurePlotter()
         artists = plotter.plot(mock_property_single_spin, scalars_mode="none")
 
-        n_bands = mock_property_single_spin.to_array().shape[1]
+        n_bands: int = mock_property_single_spin.to_array().shape[1]
         assert len(artists) == n_bands
         assert all(isinstance(a, Line2D) for a in artists.values())
         plt.close(plotter.fig)
 
     def test_plot_scatter_mode_creates_scatter(
-        self, mock_property_single_spin, mock_scalars_single_spin
-    ):
+        self, mock_property_single_spin: Mock, mock_scalars_single_spin: Mock
+    ) -> None:
         """Test that scalars_mode='scatter' creates scatter plots."""
         plotter = BandStructurePlotter()
         artists = plotter.plot(
@@ -315,14 +318,14 @@ class TestBandStructurePlotterPlot:
             scalars_mode="scatter",
         )
 
-        n_bands = mock_property_single_spin.to_array().shape[1]
+        n_bands: int = mock_property_single_spin.to_array().shape[1]
         assert len(artists) == n_bands
         assert all(isinstance(a, PathCollection) for a in artists.values())
         plt.close(plotter.fig)
 
     def test_plot_parametric_mode_creates_collections(
-        self, mock_property_single_spin, mock_scalars_single_spin
-    ):
+        self, mock_property_single_spin: Mock, mock_scalars_single_spin: Mock
+    ) -> None:
         """Test that scalars_mode='parametric' creates LineCollections."""
         plotter = BandStructurePlotter()
         artists = plotter.plot(
@@ -331,33 +334,33 @@ class TestBandStructurePlotterPlot:
             scalars_mode="parametric",
         )
 
-        n_bands = mock_property_single_spin.to_array().shape[1]
+        n_bands: int = mock_property_single_spin.to_array().shape[1]
         assert len(artists) == n_bands
         assert all(isinstance(a, LineCollection) for a in artists.values())
         plt.close(plotter.fig)
 
-    def test_plot_two_spins_doubles_artists(self, mock_property_two_spins):
+    def test_plot_two_spins_doubles_artists(self, mock_property_two_spins: Mock) -> None:
         """Test that two spin channels produce n_bands * n_spins artists."""
         plotter = BandStructurePlotter()
         artists = plotter.plot(mock_property_two_spins, scalars_mode="none")
 
-        n_bands = mock_property_two_spins.to_array().shape[1]
-        n_spins = mock_property_two_spins.to_array().shape[2]
+        n_bands: int = mock_property_two_spins.to_array().shape[1]
+        n_spins: int = mock_property_two_spins.to_array().shape[2]
         assert len(artists) == n_bands * n_spins
         plt.close(plotter.fig)
 
-    def test_plot_returns_dict_with_correct_keys(self, mock_property_single_spin):
+    def test_plot_returns_dict_with_correct_keys(self, mock_property_single_spin: Mock) -> None:
         """Test that returned dict has (band_index, spin_index) keys."""
         plotter = BandStructurePlotter()
         artists = plotter.plot(mock_property_single_spin, scalars_mode="none")
 
-        n_bands = mock_property_single_spin.to_array().shape[1]
+        n_bands: int = mock_property_single_spin.to_array().shape[1]
         for iband in range(n_bands):
             assert (iband, 0) in artists
 
         plt.close(plotter.fig)
 
-    def test_plot_stores_x_data(self, mock_property_single_spin):
+    def test_plot_stores_x_data(self, mock_property_single_spin: Mock) -> None:
         """Test that plot() stores x data for axis methods."""
         plotter = BandStructurePlotter()
         plotter.plot(mock_property_single_spin, scalars_mode="none")
@@ -367,7 +370,7 @@ class TestBandStructurePlotterPlot:
         assert np.allclose(plotter.x, k_distances)
         plt.close(plotter.fig)
 
-    def test_plot_unknown_scalars_mode_raises(self, mock_property_single_spin):
+    def test_plot_unknown_scalars_mode_raises(self, mock_property_single_spin: Mock) -> None:
         """Test that unknown scalars_mode raises ValueError."""
         plotter = BandStructurePlotter()
         with pytest.raises(ValueError, match="Unknown scalars_mode"):
@@ -383,7 +386,9 @@ class TestBandStructurePlotterPlot:
 class TestBandStructurePlotterScalarsModes:
     """Tests for scalar coloring modes."""
 
-    def test_scatter_uses_cmap(self, mock_property_single_spin, mock_scalars_single_spin):
+    def test_scatter_uses_cmap(
+        self, mock_property_single_spin: Mock, mock_scalars_single_spin: Mock
+    ) -> None:
         """Test that scatter mode uses specified colormap."""
         plotter = BandStructurePlotter()
         plotter.plot(
@@ -397,7 +402,9 @@ class TestBandStructurePlotterScalarsModes:
         assert scatter.get_cmap().name == "viridis"
         plt.close(plotter.fig)
 
-    def test_scatter_respects_clim(self, mock_property_single_spin, mock_scalars_single_spin):
+    def test_scatter_respects_clim(
+        self, mock_property_single_spin: Mock, mock_scalars_single_spin: Mock
+    ) -> None:
         """Test that scatter mode respects color limits."""
         plotter = BandStructurePlotter()
         plotter.plot(
@@ -411,7 +418,9 @@ class TestBandStructurePlotterScalarsModes:
         assert scatter.get_clim() == (0.2, 0.8)
         plt.close(plotter.fig)
 
-    def test_parametric_uses_cmap(self, mock_property_single_spin, mock_scalars_single_spin):
+    def test_parametric_uses_cmap(
+        self, mock_property_single_spin: Mock, mock_scalars_single_spin: Mock
+    ) -> None:
         """Test that parametric mode uses specified colormap."""
         plotter = BandStructurePlotter()
         plotter.plot(
@@ -425,7 +434,7 @@ class TestBandStructurePlotterScalarsModes:
         assert lc.get_cmap().name == "coolwarm"
         plt.close(plotter.fig)
 
-    def test_resolve_clim_uses_user_value(self, mock_property_single_spin):
+    def test_resolve_clim_uses_user_value(self, mock_property_single_spin: Mock) -> None:
         """Test that _resolve_clim returns user-provided clim."""
         plotter = BandStructurePlotter()
         series_list = plotter._to_series_list(mock_property_single_spin, None, None, "normal")
@@ -434,7 +443,9 @@ class TestBandStructurePlotterScalarsModes:
         assert clim == (0.1, 0.9)
         plt.close(plotter.fig)
 
-    def test_resolve_clim_auto_from_data(self, mock_property_single_spin, mock_scalars_single_spin):
+    def test_resolve_clim_auto_from_data(
+        self, mock_property_single_spin: Mock, mock_scalars_single_spin: Mock
+    ) -> None:
         """Test that _resolve_clim computes limits from data when not provided."""
         plotter = BandStructurePlotter()
         series_list = plotter._to_series_list(
@@ -457,8 +468,8 @@ class TestBandStructurePlotterColorbar:
     """Tests for colorbar functionality."""
 
     def test_colorbar_single_creates_colorbar(
-        self, mock_property_single_spin, mock_scalars_single_spin
-    ):
+        self, mock_property_single_spin: Mock, mock_scalars_single_spin: Mock
+    ) -> None:
         """Test that colorbar is created with scalars_show_colorbar='single'."""
         plotter = BandStructurePlotter()
         plotter.plot(
@@ -471,7 +482,9 @@ class TestBandStructurePlotterColorbar:
         assert plotter.colorbar is not None
         plt.close(plotter.fig)
 
-    def test_colorbar_none_no_colorbar(self, mock_property_single_spin, mock_scalars_single_spin):
+    def test_colorbar_none_no_colorbar(
+        self, mock_property_single_spin: Mock, mock_scalars_single_spin: Mock
+    ) -> None:
         """Test that no colorbar is created with scalars_show_colorbar='none'."""
         plotter = BandStructurePlotter()
         plotter.plot(
@@ -484,7 +497,7 @@ class TestBandStructurePlotterColorbar:
         assert plotter.colorbar is None
         plt.close(plotter.fig)
 
-    def test_no_colorbar_for_none_mode(self, mock_property_single_spin):
+    def test_no_colorbar_for_none_mode(self, mock_property_single_spin: Mock) -> None:
         """Test that no colorbar is created for scalars_mode='none'."""
         plotter = BandStructurePlotter()
         plotter.plot(
@@ -505,7 +518,7 @@ class TestBandStructurePlotterColorbar:
 class TestBandStructurePlotterHighSymmetry:
     """Tests for high-symmetry point handling."""
 
-    def test_high_symmetry_lines_drawn(self, mock_property_single_spin):
+    def test_high_symmetry_lines_drawn(self, mock_property_single_spin: Mock) -> None:
         """Test that vertical lines are drawn at high-symmetry points."""
         plotter = BandStructurePlotter()
         plotter.plot(mock_property_single_spin, scalars_mode="none")
@@ -517,7 +530,7 @@ class TestBandStructurePlotterHighSymmetry:
         assert len(plotter._tick_positions) == n_expected_hsym
         plt.close(plotter.fig)
 
-    def test_tick_positions_stored(self, mock_property_single_spin):
+    def test_tick_positions_stored(self, mock_property_single_spin: Mock) -> None:
         """Test that tick positions are stored from metadata."""
         plotter = BandStructurePlotter()
         plotter.plot(mock_property_single_spin, scalars_mode="none")
@@ -526,7 +539,7 @@ class TestBandStructurePlotterHighSymmetry:
         assert plotter._tick_positions == expected_positions
         plt.close(plotter.fig)
 
-    def test_tick_names_stored(self, mock_property_single_spin):
+    def test_tick_names_stored(self, mock_property_single_spin: Mock) -> None:
         """Test that tick names are stored from metadata."""
         plotter = BandStructurePlotter()
         plotter.plot(mock_property_single_spin, scalars_mode="none")
@@ -544,7 +557,7 @@ class TestBandStructurePlotterHighSymmetry:
 class TestBandStructurePlotterEdgeCases:
     """Tests for edge cases and error handling."""
 
-    def test_single_band(self):
+    def test_single_band(self) -> None:
         """Test plotting with a single band."""
         mock = _make_mock_property(n_bands=1)
         plotter = BandStructurePlotter()
@@ -553,7 +566,7 @@ class TestBandStructurePlotterEdgeCases:
         assert len(artists) == 1
         plt.close(plotter.fig)
 
-    def test_missing_kpath_metadata_raises(self):
+    def test_missing_kpath_metadata_raises(self) -> None:
         """Test that missing kpath metadata raises ValueError."""
         mock = Mock()
         mock.to_array.return_value = np.random.rand(50, 5, 1)
@@ -564,7 +577,7 @@ class TestBandStructurePlotterEdgeCases:
             plotter.plot(mock, scalars_mode="none")
         plt.close(plotter.fig)
 
-    def test_2d_bands_array(self):
+    def test_2d_bands_array(self) -> None:
         """Test that 2D bands array is handled correctly."""
         mock = Mock()
         mock.to_array.return_value = np.random.rand(50, 5)  # 2D, no spin dim
@@ -583,7 +596,7 @@ class TestBandStructurePlotterEdgeCases:
         assert len(artists) == 5  # 5 bands
         plt.close(plotter.fig)
 
-    def test_export_data_recorded(self, mock_property_single_spin):
+    def test_export_data_recorded(self, mock_property_single_spin: Mock) -> None:
         """Test that band data is recorded for export."""
         plotter = BandStructurePlotter()
         plotter.plot(mock_property_single_spin, scalars_mode="none")
@@ -602,7 +615,7 @@ class TestBandStructurePlotterEdgeCases:
 class TestBandStructurePlotterWrapperHelpers:
     """Tests for Property wrapper helper methods."""
 
-    def test_wrap_as_property_creates_property(self, mock_kpath):
+    def test_wrap_as_property_creates_property(self, mock_kpath: Mock) -> None:
         """Test _wrap_as_property creates a valid Property."""
         from pyprocar.core.property_store import Property
 
@@ -617,7 +630,7 @@ class TestBandStructurePlotterWrapperHelpers:
         assert prop.label == "Energy"
         plt.close(plotter.fig)
 
-    def test_wrap_as_property_includes_kpath_metadata(self, mock_kpath):
+    def test_wrap_as_property_includes_kpath_metadata(self, mock_kpath: Mock) -> None:
         """Test _wrap_as_property includes kpath metadata."""
         plotter = BandStructurePlotter()
         bands = np.random.rand(50, 5, 1)
@@ -632,7 +645,7 @@ class TestBandStructurePlotterWrapperHelpers:
         assert len(kpath_meta["k_distances"]) == 50
         plt.close(plotter.fig)
 
-    def test_wrap_as_property_handles_2d_bands(self, mock_kpath):
+    def test_wrap_as_property_handles_2d_bands(self, mock_kpath: Mock) -> None:
         """Test _wrap_as_property adds spin dimension for 2D bands."""
         plotter = BandStructurePlotter()
         bands = np.random.rand(50, 5)  # 2D, no spin dimension
@@ -644,7 +657,7 @@ class TestBandStructurePlotterWrapperHelpers:
         assert prop.value.shape == (50, 5, 1)
         plt.close(plotter.fig)
 
-    def test_wrap_scalars_as_property_creates_property(self):
+    def test_wrap_scalars_as_property_creates_property(self) -> None:
         """Test _wrap_scalars_as_property creates a valid Property."""
         from pyprocar.core.property_store import Property
 
@@ -658,7 +671,7 @@ class TestBandStructurePlotterWrapperHelpers:
         assert prop.label == "Projection"
         plt.close(plotter.fig)
 
-    def test_wrap_scalars_as_property_custom_label(self):
+    def test_wrap_scalars_as_property_custom_label(self) -> None:
         """Test _wrap_scalars_as_property accepts custom label."""
         plotter = BandStructurePlotter()
         scalars = np.random.rand(50, 5, 1)
@@ -677,7 +690,7 @@ class TestBandStructurePlotterWrapperHelpers:
 class TestBandStructurePlotterLegacyAPI:
     """Tests for backwards-compatible array-based API methods."""
 
-    def test_plot_plain_creates_lines(self, mock_kpath):
+    def test_plot_plain_creates_lines(self, mock_kpath: Mock) -> None:
         """Test plot_plain creates Line2D artists."""
         plotter = BandStructurePlotter()
         bands = np.random.rand(50, 5, 1)
@@ -688,7 +701,7 @@ class TestBandStructurePlotterLegacyAPI:
         assert all(isinstance(a, Line2D) for a in artists.values())
         plt.close(plotter.fig)
 
-    def test_plot_plain_sets_axis_properties(self, mock_kpath):
+    def test_plot_plain_sets_axis_properties(self, mock_kpath: Mock) -> None:
         """Test plot_plain sets axis limits and ticks."""
         plotter = BandStructurePlotter()
         bands = np.random.rand(50, 5, 1)
@@ -702,7 +715,7 @@ class TestBandStructurePlotterLegacyAPI:
         assert ylim[0] < ylim[1]
         plt.close(plotter.fig)
 
-    def test_plot_scatter_creates_scatter(self, mock_kpath):
+    def test_plot_scatter_creates_scatter(self, mock_kpath: Mock) -> None:
         """Test plot_scatter creates PathCollection artists."""
         plotter = BandStructurePlotter()
         bands = np.random.rand(50, 5, 1)
@@ -714,7 +727,7 @@ class TestBandStructurePlotterLegacyAPI:
         assert all(isinstance(a, PathCollection) for a in artists.values())
         plt.close(plotter.fig)
 
-    def test_plot_scatter_without_scalars(self, mock_kpath):
+    def test_plot_scatter_without_scalars(self, mock_kpath: Mock) -> None:
         """Test plot_scatter works without scalars."""
         plotter = BandStructurePlotter()
         bands = np.random.rand(50, 5, 1)
@@ -724,7 +737,7 @@ class TestBandStructurePlotterLegacyAPI:
         assert len(artists) == 5  # n_bands
         plt.close(plotter.fig)
 
-    def test_plot_parametric_creates_collections(self, mock_kpath):
+    def test_plot_parametric_creates_collections(self, mock_kpath: Mock) -> None:
         """Test plot_parametric creates LineCollection artists."""
         plotter = BandStructurePlotter()
         bands = np.random.rand(50, 5, 1)
@@ -736,7 +749,7 @@ class TestBandStructurePlotterLegacyAPI:
         assert all(isinstance(a, LineCollection) for a in artists.values())
         plt.close(plotter.fig)
 
-    def test_plot_parametric_without_scalars(self, mock_kpath):
+    def test_plot_parametric_without_scalars(self, mock_kpath: Mock) -> None:
         """Test plot_parametric works without scalars."""
         plotter = BandStructurePlotter()
         bands = np.random.rand(50, 5, 1)
@@ -746,7 +759,7 @@ class TestBandStructurePlotterLegacyAPI:
         assert len(artists) == 5  # n_bands
         plt.close(plotter.fig)
 
-    def test_legacy_methods_record_export_data(self, mock_kpath):
+    def test_legacy_methods_record_export_data(self, mock_kpath: Mock) -> None:
         """Test legacy methods record data for export."""
         plotter = BandStructurePlotter()
         bands = np.random.rand(50, 5, 1)

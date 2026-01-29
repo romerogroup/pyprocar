@@ -1,4 +1,8 @@
+from collections.abc import Iterable
+from pathlib import Path
+
 import numpy as np
+import numpy.typing as npt
 import pytest
 
 from pyprocar.core.dos import DensityOfStates
@@ -8,12 +12,12 @@ from tests.utils import DATA_DIR
 
 
 @pytest.fixture
-def rng():
+def rng() -> np.random.Generator:
     return np.random.default_rng(42)
 
 
 @pytest.fixture
-def fractional_coordinates():
+def fractional_coordinates() -> npt.NDArray[np.float64]:
     return np.array(
         [
             [0.00, 0.00, 0.00],
@@ -26,17 +30,21 @@ def fractional_coordinates():
 
 
 @pytest.fixture
-def lattice():
+def lattice() -> npt.NDArray[np.float64]:
     return np.eye(3)
 
 
 @pytest.fixture
-def atoms():
+def atoms() -> list[str]:
     return ["Sr", "V", "O", "O", "O"]
 
 
 @pytest.fixture
-def structure(fractional_coordinates, lattice, atoms):
+def structure(
+    fractional_coordinates: npt.NDArray[np.float64],
+    lattice: npt.NDArray[np.float64],
+    atoms: list[str],
+) -> Structure:
     return Structure(
         atoms=atoms,
         fractional_coordinates=fractional_coordinates,
@@ -53,7 +61,9 @@ def _make_random_dos(
     structure: Structure | None = None,
 ) -> DensityOfStates:
     if structure is not None:
-        n_atoms = len(structure.atoms)
+        structure_atoms = structure.atoms
+        assert structure_atoms is not None
+        n_atoms = len(structure_atoms)
     energies = np.linspace(-5.0, 5.0, n_energies, dtype=float)
     total = rng.random((n_energies, n_spins)) + 0.5
     projected = rng.random((n_energies, n_spins, n_atoms, n_orbitals))
@@ -67,9 +77,11 @@ def _make_random_dos(
 
 
 @pytest.fixture
-def dos(rng, structure):
+def dos(rng: np.random.Generator, structure: Structure) -> DensityOfStates:
     n_energies = 32
-    n_atoms = len(structure.atoms)
+    structure_atoms = structure.atoms
+    assert structure_atoms is not None
+    n_atoms = len(structure_atoms)
     n_orbitals = 9
     n_spins = 4
 
@@ -85,22 +97,22 @@ def dos(rng, structure):
 
 
 @pytest.fixture
-def dos_non_spin_polarized(rng, structure):
+def dos_non_spin_polarized(rng: np.random.Generator, structure: Structure) -> DensityOfStates:
     return _make_random_dos(rng, n_spins=1, structure=structure)
 
 
 @pytest.fixture
-def dos_spin_polarized(rng, structure):
+def dos_spin_polarized(rng: np.random.Generator, structure: Structure) -> DensityOfStates:
     return _make_random_dos(rng, n_spins=2, structure=structure)
 
 
 @pytest.fixture
-def dos_non_collinear(rng, structure):
+def dos_non_collinear(rng: np.random.Generator, structure: Structure) -> DensityOfStates:
     return _make_random_dos(rng, n_spins=4, structure=structure)
 
 
 @pytest.fixture
-def non_spin_polarized_dir():
+def non_spin_polarized_dir() -> Path:
     return DATA_DIR / "examples" / "dos" / "non-spin-polarized"
 
 
@@ -109,7 +121,7 @@ def non_spin_polarized_dir():
 # ------------------------------------------------------------------
 
 
-def test_from_code(non_spin_polarized_dir):
+def test_from_code(non_spin_polarized_dir: Path) -> None:
     dos = DensityOfStates.from_code(code="vasp", dirpath=non_spin_polarized_dir)
     assert dos.energies.shape[0] > 0, f"Energies empty ({dos.energies.shape})"
     assert dos.total.to_array().shape[0] == dos.energies.shape[0], (
@@ -118,7 +130,11 @@ def test_from_code(non_spin_polarized_dir):
     assert dos.projected is not None, "Projected DOS is None"
 
 
-def test_spin_metadata(dos_non_spin_polarized, dos_spin_polarized, dos_non_collinear):
+def test_spin_metadata(
+    dos_non_spin_polarized: DensityOfStates,
+    dos_spin_polarized: DensityOfStates,
+    dos_non_collinear: DensityOfStates,
+) -> None:
     assert not dos_non_spin_polarized.is_spin_polarized, (
         f"Non-spin-polarized DOS is spin-polarized ({dos_non_spin_polarized.is_spin_polarized})"
     )
@@ -138,7 +154,7 @@ def test_spin_metadata(dos_non_spin_polarized, dos_spin_polarized, dos_non_colli
 # ------------------------------------------------------------------
 
 
-def test_compute_projected_sum_spin_polarized(dos_spin_polarized):
+def test_compute_projected_sum_spin_polarized(dos_spin_polarized: DensityOfStates) -> None:
     atoms = [0, 2]
     orbitals = [1, 3]
 
@@ -148,9 +164,12 @@ def test_compute_projected_sum_spin_polarized(dos_spin_polarized):
         spins=[0],
         keepdims=False,
     )
+    assert isinstance(projected_sum, Property)
     result = projected_sum.to_array()
 
-    projected = dos_spin_polarized.projected.to_array()
+    projected_prop = dos_spin_polarized.projected
+    assert projected_prop is not None
+    projected = projected_prop.to_array()
     expected = np.sum(projected[..., orbitals], axis=-1)
     expected = np.sum(expected[..., atoms], axis=-1)
     manual = expected[..., [0]]
@@ -164,7 +183,7 @@ def test_compute_projected_sum_spin_polarized(dos_spin_polarized):
     assert projected_sum.metadata["atoms"] == atoms
 
 
-def test_compute_projected_sum_non_collinear(dos_non_collinear):
+def test_compute_projected_sum_non_collinear(dos_non_collinear: DensityOfStates) -> None:
     atoms = [0, 1]
     orbitals = [0, 2]
     spins = [1, 2, 3]
@@ -175,6 +194,7 @@ def test_compute_projected_sum_non_collinear(dos_non_collinear):
         spins=spins,
         keepdims=False,
     )
+    assert isinstance(summed_property, Property)
     summed = summed_property.to_array()
     assert summed.shape == (dos_non_collinear.n_energies, 3)
 
@@ -184,14 +204,17 @@ def test_compute_projected_sum_non_collinear(dos_non_collinear):
         spins=spins,
         keepdims=True,
     )
+    assert isinstance(expanded_property, Property)
     expanded = expanded_property.to_array()
 
     assert expanded.shape == (dos_non_collinear.n_energies, len(spins), 1, 1)
-    assert len(expanded_property.metadata["label"]) == len(spins)
+    label_list = expanded_property.metadata["label"]
+    assert isinstance(label_list, list)
+    assert len(label_list) == len(spins)
     assert expanded_property.metadata["spin_component_labels_latex"] == ["S_x", "S_y", "S_z"]
 
 
-def test_compute_projected_sum_species_list(dos):
+def test_compute_projected_sum_species_list(dos: DensityOfStates) -> None:
     atoms = None
     orbitals = [0]
     spins = [0]
@@ -206,7 +229,7 @@ def test_compute_projected_sum_species_list(dos):
     )
 
 
-def test_compute_projected_sum_species_str(dos):
+def test_compute_projected_sum_species_str(dos: DensityOfStates) -> None:
     atoms = None
     orbitals = [0]
     spins = [0]
@@ -221,7 +244,7 @@ def test_compute_projected_sum_species_str(dos):
     )
 
 
-def test_compute_projected_sum_orbitals_int(dos):
+def test_compute_projected_sum_orbitals_int(dos: DensityOfStates) -> None:
     atoms = None
     orbitals = 0
     spins = [0]
@@ -236,7 +259,7 @@ def test_compute_projected_sum_orbitals_int(dos):
     )
 
 
-def test_compute_projected_sum_species_orbital_map(dos):
+def test_compute_projected_sum_species_orbital_map(dos: DensityOfStates) -> None:
     spins = [0]
     species_orbital_map = {"Sr": [0], "V": [1, 2, 3]}
 
@@ -247,7 +270,7 @@ def test_compute_projected_sum_species_orbital_map(dos):
     )
 
 
-def test_compute_projected_sum_species_orbital_map_list(dos):
+def test_compute_projected_sum_species_orbital_map_list(dos: DensityOfStates) -> None:
     spins = [0]
     species_orbital_map = [{"Sr": [0], "V": [4, 5, 6, 7, 8]}, {"O": [0, 1, 2]}]
 
@@ -256,16 +279,20 @@ def test_compute_projected_sum_species_orbital_map_list(dos):
     assert isinstance(projected_sum, list), (
         f"The result should be a list given a list of species_orbital_map, ({projected_sum})"
     )
-    for projected_sum in projected_sum:
-        print(projected_sum.metadata)
-        assert isinstance(projected_sum, Property), (
-            f"The result should be a Property instance, ({projected_sum})"
+    for _projected_sum_item in projected_sum:
+        print(_projected_sum_item.metadata)
+        assert isinstance(_projected_sum_item, Property), (
+            f"The result should be a Property instance, ({_projected_sum_item})"
         )
 
 
-def test_compute_projected_sum_atoms_orbital_map(dos):
+def test_compute_projected_sum_atoms_orbital_map(dos: DensityOfStates) -> None:
     spins = [0]
-    atoms_orbital_map = {(0): [0], (1): [4, 5, 6, 7, 8], (2, 3, 4): [0, 1, 2]}
+    atoms_orbital_map: dict[Iterable[int] | int, Iterable[int]] = {
+        0: [0],
+        1: [4, 5, 6, 7, 8],
+        (2, 3, 4): [0, 1, 2],
+    }
 
     projected_sum = dos.compute_projected_sum(spins=spins, atoms_orbital_map=atoms_orbital_map)
 
@@ -274,28 +301,32 @@ def test_compute_projected_sum_atoms_orbital_map(dos):
     )
 
 
-def test_compute_projected_sum_atoms_orbital_map_list(dos):
+def test_compute_projected_sum_atoms_orbital_map_list(dos: DensityOfStates) -> None:
     spins = [0]
-    atoms_orbital_map = [{(0): [0], (1): [4, 5, 6, 7, 8], (2): [0, 1, 2]}, {(0): [0]}]
+    atoms_orbital_map: list[dict[Iterable[int] | int, Iterable[int]]] = [
+        {0: [0], 1: [4, 5, 6, 7, 8], 2: [0, 1, 2]},
+        {0: [0]},
+    ]
 
     projected_sum = dos.compute_projected_sum(spins=spins, atoms_orbital_map=atoms_orbital_map)
 
     assert isinstance(projected_sum, list), (
         f"The result should be a list given a list of atoms_orbital_map, ({projected_sum})"
     )
-    for projected_sum in projected_sum:
-        assert isinstance(projected_sum, Property), (
-            f"The result should be a Property instance, ({projected_sum})"
+    for _projected_sum_item in projected_sum:
+        assert isinstance(_projected_sum_item, Property), (
+            f"The result should be a Property instance, ({_projected_sum_item})"
         )
 
 
-def test_compute_projected_sum_metadata_contains_latex(dos_spin_polarized):
+def test_compute_projected_sum_metadata_contains_latex(dos_spin_polarized: DensityOfStates) -> None:
     prop = dos_spin_polarized.compute_projected_sum(
         atoms=[1],
         orbitals=[0],
         spins=[0],
         norm_mode="raw",
     )
+    assert isinstance(prop, Property)
 
     metadata = prop.metadata
 
@@ -308,7 +339,9 @@ def test_compute_projected_sum_metadata_contains_latex(dos_spin_polarized):
     assert metadata["include_normal_label"] is False
 
 
-def test_compute_projected_sum_metadata_without_normal_label(dos_spin_polarized):
+def test_compute_projected_sum_metadata_without_normal_label(
+    dos_spin_polarized: DensityOfStates,
+) -> None:
     prop = dos_spin_polarized.compute_projected_sum(
         atoms=[1],
         orbitals=[0],
@@ -316,6 +349,7 @@ def test_compute_projected_sum_metadata_without_normal_label(dos_spin_polarized)
         norm_mode="raw",
         include_normal_label=False,
     )
+    assert isinstance(prop, Property)
 
     metadata = prop.metadata
 
@@ -324,15 +358,22 @@ def test_compute_projected_sum_metadata_without_normal_label(dos_spin_polarized)
     assert metadata["include_normal_label"] is False
 
 
-def test_get_property_projected_sum_matches_dos_sum(dos_spin_polarized):
+def test_get_property_projected_sum_matches_dos_sum(
+    dos_spin_polarized: DensityOfStates,
+) -> None:
     atoms = [0, 1]
     orbitals = [0, 2]
     spins = [0]
 
-    property_value = dos_spin_polarized.get_property(
+    property_result = dos_spin_polarized.get_property(
         "projected_sum", atoms=atoms, orbitals=orbitals, spins=spins, keepdims=False
-    ).to_array()
-    projected = dos_spin_polarized.projected.to_array()
+    )
+    assert isinstance(property_result, Property)
+    property_value = property_result.to_array()
+
+    projected_prop = dos_spin_polarized.projected
+    assert projected_prop is not None
+    projected = projected_prop.to_array()
     manual = np.sum(projected[..., orbitals], axis=-1)
     manual = np.sum(manual[..., atoms], axis=-1)
     manual = manual[..., spins]
@@ -343,7 +384,9 @@ def test_get_property_projected_sum_matches_dos_sum(dos_spin_polarized):
     assert "projected_sum|atoms=0,1|orbitals=0,2|spins=0" in dos_spin_polarized.property_store
 
 
-def test_get_property_projected_sum_caches_variants(dos_spin_polarized):
+def test_get_property_projected_sum_caches_variants(
+    dos_spin_polarized: DensityOfStates,
+) -> None:
     initial_keys = set(dos_spin_polarized.property_store.keys())
     dos_spin_polarized.get_property("projected_sum", atoms=[0], orbitals=[0], spins=[0])
     after_first = set(dos_spin_polarized.property_store.keys())
@@ -355,33 +398,26 @@ def test_get_property_projected_sum_caches_variants(dos_spin_polarized):
     assert len(after_second - initial_keys) == 2
 
 
-def _make_simple_structure() -> Structure:
-    fractional_coordinates = np.array(
-        [
-            [0.0, 0.0, 0.0],
-            [0.5, 0.5, 0.0],
-            [0.25, 0.75, 0.5],
-        ]
-    )
-    lattice = np.eye(3)
-    atoms = ["Sr", "Sr", "O"]
-    return Structure(atoms=atoms, fractional_coordinates=fractional_coordinates, lattice=lattice)
-
-
-def test_compute_gradients_total(dos_spin_polarized):
+def test_compute_gradients_total(dos_spin_polarized: DensityOfStates) -> None:
     dos_spin_polarized.compute_gradients(gradient_order=2, names=["total"])
     grad = dos_spin_polarized.get_property(("total", "gradients", 1))
     hess = dos_spin_polarized.get_property(("total", "gradients", 2))
+    assert isinstance(grad, np.ndarray)
+    assert isinstance(hess, np.ndarray)
     assert grad.shape == dos_spin_polarized.total.to_array().shape
     assert hess.shape == dos_spin_polarized.total.to_array().shape
 
 
-def test_compute_gradients_projected(dos_spin_polarized):
+def test_compute_gradients_projected(dos_spin_polarized: DensityOfStates) -> None:
     dos_spin_polarized.compute_gradients(gradient_order=2, names=["projected"])
     grad = dos_spin_polarized.get_property(("projected", "gradients", 1))
     hess = dos_spin_polarized.get_property(("projected", "gradients", 2))
-    assert grad.shape == dos_spin_polarized.projected.to_array().shape
-    assert hess.shape == dos_spin_polarized.projected.to_array().shape
+    assert isinstance(grad, np.ndarray)
+    assert isinstance(hess, np.ndarray)
+    projected_prop = dos_spin_polarized.projected
+    assert projected_prop is not None
+    assert grad.shape == projected_prop.to_array().shape
+    assert hess.shape == projected_prop.to_array().shape
 
 
 # ------------------------------------------------------------------
@@ -389,20 +425,27 @@ def test_compute_gradients_projected(dos_spin_polarized):
 # ------------------------------------------------------------------
 
 
-def test_get_property_projected_sum_total(dos_spin_polarized):
-    total_property = dos_spin_polarized.get_property(
-        "projected_sum_total", spins=[0], keepdims=False
-    ).to_array()
+def test_get_property_projected_sum_total(dos_spin_polarized: DensityOfStates) -> None:
+    total_result = dos_spin_polarized.get_property("projected_sum_total", spins=[0], keepdims=False)
+    assert isinstance(total_result, Property)
+    total_property = total_result.to_array()
+
+    projected_prop = dos_spin_polarized.projected
+    assert projected_prop is not None
     manual_total = dos_spin_polarized.sum_projection_components(
-        values_array=dos_spin_polarized.projected.to_array(),
+        values_array=projected_prop.to_array(),
         spins=[0],
         keepdims=False,
     )
     assert np.allclose(total_property, manual_total)
 
 
-def test_get_property_normalized_total_max_normalization(dos_spin_polarized):
-    normalized_array = dos_spin_polarized.get_property("normalized_total").to_array()
+def test_get_property_normalized_total_max_normalization(
+    dos_spin_polarized: DensityOfStates,
+) -> None:
+    normalized_result = dos_spin_polarized.get_property("normalized_total")
+    assert isinstance(normalized_result, Property)
+    normalized_array = normalized_result.to_array()
     total_array = dos_spin_polarized.total.to_array()
     assert normalized_array.shape == total_array.shape, (
         f"Normalized total does not match total ({normalized_array.shape} != {total_array.shape})"
@@ -412,18 +455,22 @@ def test_get_property_normalized_total_max_normalization(dos_spin_polarized):
     )
 
 
-def test_get_property_normalized_total_integral_normalization(dos_spin_polarized):
-    normalized_integral = dos_spin_polarized.get_property(
-        "normalized_total", norm_mode="integral"
-    ).to_array()
+def test_get_property_normalized_total_integral_normalization(
+    dos_spin_polarized: DensityOfStates,
+) -> None:
+    normalized_result = dos_spin_polarized.get_property("normalized_total", norm_mode="integral")
+    assert isinstance(normalized_result, Property)
+    normalized_integral = normalized_result.to_array()
     integrals = np.trapezoid(normalized_integral, x=dos_spin_polarized.energies, axis=0)
     assert np.allclose(integrals, np.ones(dos_spin_polarized.n_spin_channels)), (
         f"Integrals do not match ones ({integrals} != {np.ones(dos_spin_polarized.n_spin_channels)})"
     )
 
 
-def test_get_property_cumulative_total(dos_spin_polarized):
-    cumulative = dos_spin_polarized.get_property("cumulative_total").to_array()
+def test_get_property_cumulative_total(dos_spin_polarized: DensityOfStates) -> None:
+    cumulative_result = dos_spin_polarized.get_property("cumulative_total")
+    assert isinstance(cumulative_result, Property)
+    cumulative = cumulative_result.to_array()
     assert cumulative.shape == dos_spin_polarized.total.to_array().shape, (
         f"Cumulative total does not match total ({cumulative.shape} != {dos_spin_polarized.total.to_array().shape})"
     )
@@ -436,15 +483,16 @@ def test_get_property_cumulative_total(dos_spin_polarized):
 # ------------------------------------------------------------------
 
 
-def test_add_property_from_array(dos_spin_polarized):
+def test_add_property_from_array(dos_spin_polarized: DensityOfStates) -> None:
     custom = np.linspace(0, 1, dos_spin_polarized.n_energies)
     dos_spin_polarized.add_property(name="custom", value=custom)
     stored = dos_spin_polarized.get_property("custom")
+    assert isinstance(stored, Property)
     assert stored.name == "custom"
     assert np.allclose(stored.value, custom)
 
 
-def test_add_property_from_property_instance(dos_spin_polarized):
+def test_add_property_from_property_instance(dos_spin_polarized: DensityOfStates) -> None:
     value = np.vstack(
         [
             np.linspace(0, 1, dos_spin_polarized.n_energies),
@@ -454,16 +502,17 @@ def test_add_property_from_property_instance(dos_spin_polarized):
     prop = Property(name="custom_vector", value=value)
     dos_spin_polarized.add_property(property=prop)
     stored = dos_spin_polarized.get_property("custom_vector")
+    assert isinstance(stored, Property)
     assert stored.name == "custom_vector"
     assert np.allclose(stored.value, value)
 
 
-def test_add_property_invalid_shape_raises(dos_spin_polarized):
+def test_add_property_invalid_shape_raises(dos_spin_polarized: DensityOfStates) -> None:
     with pytest.raises(AssertionError):
         dos_spin_polarized.add_property(name="bad", value=np.ones((2,)))
 
 
-def test_get_species_atom_map_str(dos):
+def test_get_species_atom_map_str(dos: DensityOfStates) -> None:
     specie_atom_groups = dos.get_species_atom_map(species="Sr")
 
     assert len(specie_atom_groups) == 1
@@ -472,10 +521,12 @@ def test_get_species_atom_map_str(dos):
     )
 
 
-def test_get_species_atom_map_none(dos):
+def test_get_species_atom_map_none(dos: DensityOfStates) -> None:
     specie_atom_groups = dos.get_species_atom_map(species=None)
 
-    assert len(specie_atom_groups) == len(dos.species), (
+    species = dos.species
+    assert species is not None
+    assert len(specie_atom_groups) == len(species), (
         f"Specie atom groups do not match ({specie_atom_groups})"
     )
     assert set(specie_atom_groups.items()) == set(
@@ -483,7 +534,7 @@ def test_get_species_atom_map_none(dos):
     ), f"Specie atom groups do not match ({specie_atom_groups})"
 
 
-def test_get_species_atom_map_list(dos):
+def test_get_species_atom_map_list(dos: DensityOfStates) -> None:
     specie_atom_groups = dos.get_species_atom_map(species=["Sr", "O"])
 
     assert len(specie_atom_groups) == 2
@@ -492,14 +543,15 @@ def test_get_species_atom_map_list(dos):
     )
 
 
-def test_compute_projected_sum_atom_groups(dos):
+def test_compute_projected_sum_atom_groups(dos: DensityOfStates) -> None:
     atoms = [[0, 1], [2, 0, 1]]
     orbitals = [0]
     spins = [0]
 
     projected_sum_groups = dos.compute_projected_sum(atoms=atoms, orbitals=orbitals, spins=spins)
 
+    assert isinstance(projected_sum_groups, list)
     assert len(projected_sum_groups) == 2
 
-    for projected_sum in projected_sum_groups:
-        print(repr(projected_sum))
+    for _projected_sum in projected_sum_groups:
+        print(repr(_projected_sum))

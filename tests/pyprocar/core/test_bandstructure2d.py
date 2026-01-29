@@ -6,6 +6,7 @@ serialization support.
 """
 
 import logging
+from pathlib import Path
 
 import numpy as np
 import pytest
@@ -31,54 +32,57 @@ logger.setLevel(logging.DEBUG)
 
 
 @pytest.fixture
-def mesh_3d_non_spin_polarized_dir():
+def mesh_3d_non_spin_polarized_dir() -> Path:
     """Directory for non-spin-polarized 3D mesh data."""
     return DATA_DIR / "examples" / "fermi3d" / "non-spin-polarized"
 
 
 @pytest.fixture
-def mesh_2d_non_spin_polarized_dir():
+def mesh_2d_non_spin_polarized_dir() -> Path:
     """Directory for non-spin-polarized 2D mesh data."""
     return DATA_DIR / "examples" / "fermi2d" / "non-spin-polarized"
 
 
 @pytest.fixture
-def mesh_2d_spin_polarized_dir():
+def mesh_2d_spin_polarized_dir() -> Path:
     """Directory for spin-polarized 2D mesh data."""
     return DATA_DIR / "examples" / "fermi2d" / "spin-polarized"
 
 
 @pytest.fixture
-def mesh_2d_non_colinear_dir():
+def mesh_2d_non_colinear_dir() -> Path:
     """Directory for non-colinear 2D mesh data."""
     return DATA_DIR / "examples" / "fermi2d" / "non-colinear"
 
 
 @pytest.fixture
-def ebs_mesh(mesh_3d_non_spin_polarized_dir):
+def ebs_mesh(mesh_3d_non_spin_polarized_dir: Path) -> ElectronicBandStructureMesh:
     """ElectronicBandStructureMesh from 3D non-spin-polarized data."""
-    ebs = ElectronicBandStructureMesh.from_code(code="vasp", dirpath=mesh_3d_non_spin_polarized_dir)
+    ebs = ElectronicBandStructureMesh.from_code(
+        code="vasp", dirpath=str(mesh_3d_non_spin_polarized_dir)
+    )
+    assert isinstance(ebs, ElectronicBandStructureMesh)
     ebs.reduce_bands_near_fermi()
     return ebs
 
 
 @pytest.fixture
-def bandstructure2d_3d(mesh_3d_non_spin_polarized_dir):
+def bandstructure2d_3d(mesh_3d_non_spin_polarized_dir: Path) -> BandStructure2D:
     """BandStructure2D from 3D non-spin-polarized data."""
     return BandStructure2D.from_code(
         code="vasp",
-        dirpath=mesh_3d_non_spin_polarized_dir,
+        dirpath=str(mesh_3d_non_spin_polarized_dir),
         grid_interpolation=(20, 20),
         padding=5,
     )
 
 
 @pytest.fixture
-def bandstructure2d_2d(mesh_2d_non_spin_polarized_dir):
+def bandstructure2d_2d(mesh_2d_non_spin_polarized_dir: Path) -> BandStructure2D:
     """BandStructure2D from 2D non-spin-polarized data."""
     return BandStructure2D.from_code(
         code="vasp",
-        dirpath=mesh_2d_non_spin_polarized_dir,
+        dirpath=str(mesh_2d_non_spin_polarized_dir),
         grid_interpolation=(20, 20),
         padding=5,
     )
@@ -92,7 +96,7 @@ def bandstructure2d_2d(mesh_2d_non_spin_polarized_dir):
 class TestPlaneInfo:
     """Tests for PlaneInfo dataclass."""
 
-    def test_plane_info_fields(self):
+    def test_plane_info_fields(self) -> None:
         """Verify PlaneInfo has all required fields."""
         plane_info = PlaneInfo(
             normal=np.array([0, 0, 1]),
@@ -120,7 +124,7 @@ class TestPlaneInfo:
         assert isinstance(plane_info.uv_grid_points, np.ndarray)
         assert isinstance(plane_info.as_cartesian, bool)
 
-    def test_compute_plane_info(self, ebs_mesh):
+    def test_compute_plane_info(self, ebs_mesh: ElectronicBandStructureMesh) -> None:
         """Test compute_plane_info function."""
         padded_ebs = ebs_mesh.pad(padding=5, inplace=False)
         padded_ebs = padded_ebs.expand_single_dimension(inplace=False)
@@ -155,7 +159,7 @@ class TestPlaneInfo:
 class TestBandStructure2DFactory:
     """Tests for BandStructure2D factory methods."""
 
-    def test_from_ebs_creates_valid_surface(self, ebs_mesh):
+    def test_from_ebs_creates_valid_surface(self, ebs_mesh: ElectronicBandStructureMesh) -> None:
         """Test from_ebs factory creates valid BandStructure2D."""
         bs2d = BandStructure2D.from_ebs(
             ebs=ebs_mesh,
@@ -170,11 +174,11 @@ class TestBandStructure2DFactory:
         assert bs2d.points.shape[0] > 0
         assert bs2d.n_points > 0
 
-    def test_from_code_creates_valid_surface(self, mesh_3d_non_spin_polarized_dir):
+    def test_from_code_creates_valid_surface(self, mesh_3d_non_spin_polarized_dir: Path) -> None:
         """Test from_code factory creates valid BandStructure2D."""
         bs2d = BandStructure2D.from_code(
             code="vasp",
-            dirpath=mesh_3d_non_spin_polarized_dir,
+            dirpath=str(mesh_3d_non_spin_polarized_dir),
             normal=(0, 0, 1),
             origin=(0, 0, 0),
             grid_interpolation=(20, 20),
@@ -184,11 +188,11 @@ class TestBandStructure2DFactory:
         assert isinstance(bs2d, BandStructure2D)
         assert bs2d.points.shape[0] > 0
 
-    def test_from_code_delegates_to_from_ebs(self, mesh_3d_non_spin_polarized_dir):
+    def test_from_code_delegates_to_from_ebs(self, mesh_3d_non_spin_polarized_dir: Path) -> None:
         """Test from_code internally uses from_ebs (same results)."""
         bs2d_from_code = BandStructure2D.from_code(
             code="vasp",
-            dirpath=mesh_3d_non_spin_polarized_dir,
+            dirpath=str(mesh_3d_non_spin_polarized_dir),
             normal=(0, 0, 1),
             origin=(0, 0, 0),
             grid_interpolation=(20, 20),
@@ -198,8 +202,9 @@ class TestBandStructure2DFactory:
 
         # Load EBS manually and create via from_ebs
         ebs = ElectronicBandStructureMesh.from_code(
-            code="vasp", dirpath=mesh_3d_non_spin_polarized_dir
+            code="vasp", dirpath=str(mesh_3d_non_spin_polarized_dir)
         )
+        assert isinstance(ebs, ElectronicBandStructureMesh)
         ebs.reduce_bands_near_fermi()
         bs2d_from_ebs = BandStructure2D.from_ebs(
             ebs=ebs,
@@ -221,7 +226,9 @@ class TestBandStructure2DFactory:
 class TestBandStructure2DConstructor:
     """Tests for BandStructure2D constructor validation."""
 
-    def test_constructor_validates_spin_band_index(self, ebs_mesh):
+    def test_constructor_validates_spin_band_index(
+        self, ebs_mesh: ElectronicBandStructureMesh
+    ) -> None:
         """Test constructor raises error if spin_band_index missing."""
         # Create minimal valid inputs
         padded_ebs = ebs_mesh.pad(padding=5, inplace=False)
@@ -251,7 +258,7 @@ class TestBandStructure2DConstructor:
                 plane_info=plane_info,
             )
 
-    def test_constructor_validates_spin_index(self, ebs_mesh):
+    def test_constructor_validates_spin_index(self, ebs_mesh: ElectronicBandStructureMesh) -> None:
         """Test constructor raises error if spin_index missing."""
         padded_ebs = ebs_mesh.pad(padding=5, inplace=False)
         padded_ebs = padded_ebs.expand_single_dimension(inplace=False)
@@ -289,33 +296,33 @@ class TestBandStructure2DConstructor:
 class TestBandStructure2DProperties:
     """Tests for BandStructure2D property accessors."""
 
-    def test_ebs_property(self, bandstructure2d_3d):
+    def test_ebs_property(self, bandstructure2d_3d: BandStructure2D) -> None:
         """Test ebs property returns ElectronicBandStructureMesh."""
         assert isinstance(bandstructure2d_3d.ebs, ElectronicBandStructureMesh)
 
-    def test_original_ebs_property(self, bandstructure2d_3d):
+    def test_original_ebs_property(self, bandstructure2d_3d: BandStructure2D) -> None:
         """Test original_ebs property returns ElectronicBandStructureMesh."""
         assert isinstance(bandstructure2d_3d.original_ebs, ElectronicBandStructureMesh)
 
-    def test_point_set_property(self, bandstructure2d_3d):
+    def test_point_set_property(self, bandstructure2d_3d: BandStructure2D) -> None:
         """Test point_set property returns PointSet."""
         assert isinstance(bandstructure2d_3d.point_set, PointSet)
 
-    def test_plane_info_property(self, bandstructure2d_3d):
+    def test_plane_info_property(self, bandstructure2d_3d: BandStructure2D) -> None:
         """Test plane_info property returns PlaneInfo."""
         assert isinstance(bandstructure2d_3d.plane_info, PlaneInfo)
 
-    def test_normal_property(self, bandstructure2d_3d):
+    def test_normal_property(self, bandstructure2d_3d: BandStructure2D) -> None:
         """Test normal property returns array."""
         assert isinstance(bandstructure2d_3d.normal, np.ndarray)
         assert bandstructure2d_3d.normal.shape == (3,)
 
-    def test_origin_property(self, bandstructure2d_3d):
+    def test_origin_property(self, bandstructure2d_3d: BandStructure2D) -> None:
         """Test origin property returns array."""
         assert isinstance(bandstructure2d_3d.origin, np.ndarray)
         assert bandstructure2d_3d.origin.shape == (3,)
 
-    def test_u_v_properties(self, bandstructure2d_3d):
+    def test_u_v_properties(self, bandstructure2d_3d: BandStructure2D) -> None:
         """Test u and v properties return orthonormal basis vectors."""
         u = bandstructure2d_3d.u
         v = bandstructure2d_3d.v
@@ -332,12 +339,12 @@ class TestBandStructure2DProperties:
         assert np.abs(np.dot(u, normal)) < 1e-5
         assert np.abs(np.dot(v, normal)) < 1e-5
 
-    def test_n_grid_points_property(self, bandstructure2d_3d):
+    def test_n_grid_points_property(self, bandstructure2d_3d: BandStructure2D) -> None:
         """Test n_grid_points property returns integer."""
         assert isinstance(bandstructure2d_3d.n_grid_points, int)
         assert bandstructure2d_3d.n_grid_points > 0
 
-    def test_band_surfaces_property(self, bandstructure2d_3d):
+    def test_band_surfaces_property(self, bandstructure2d_3d: BandStructure2D) -> None:
         """Test band_surfaces property returns dict."""
         assert isinstance(bandstructure2d_3d.band_surfaces, dict)
         for key, surface in bandstructure2d_3d.band_surfaces.items():
@@ -345,7 +352,7 @@ class TestBandStructure2DProperties:
             assert len(key) == 2  # (band_index, spin_index)
             assert isinstance(surface, pv.PolyData)
 
-    def test_band_spin_surface_map_property(self, bandstructure2d_3d):
+    def test_band_spin_surface_map_property(self, bandstructure2d_3d: BandStructure2D) -> None:
         """Test band_spin_surface_map property."""
         mapping = bandstructure2d_3d.band_spin_surface_map
         assert isinstance(mapping, dict)
@@ -353,7 +360,7 @@ class TestBandStructure2DProperties:
             assert isinstance(key, tuple)
             assert isinstance(idx, int)
 
-    def test_surface_band_spin_map_property(self, bandstructure2d_3d):
+    def test_surface_band_spin_map_property(self, bandstructure2d_3d: BandStructure2D) -> None:
         """Test surface_band_spin_map property."""
         mapping = bandstructure2d_3d.surface_band_spin_map
         assert isinstance(mapping, dict)
@@ -361,7 +368,7 @@ class TestBandStructure2DProperties:
             assert isinstance(idx, int)
             assert isinstance(key, tuple)
 
-    def test_band_spin_mask_property(self, bandstructure2d_3d):
+    def test_band_spin_mask_property(self, bandstructure2d_3d: BandStructure2D) -> None:
         """Test band_spin_mask property."""
         masks = bandstructure2d_3d.band_spin_mask
         assert isinstance(masks, dict)
@@ -370,7 +377,7 @@ class TestBandStructure2DProperties:
             assert isinstance(mask, np.ndarray)
             assert mask.dtype == bool
 
-    def test_backwards_compatible_properties(self, bandstructure2d_3d):
+    def test_backwards_compatible_properties(self, bandstructure2d_3d: BandStructure2D) -> None:
         """Test backwards-compatible property accessors."""
         # u_grid, v_grid
         assert isinstance(bandstructure2d_3d.u_grid, np.ndarray)
@@ -394,7 +401,9 @@ class TestBandStructure2DProperties:
 class TestBandStructure2DCache:
     """Tests for BandStructure2D caching system."""
 
-    def test_cache_invalidation_marks_properties_stale(self, bandstructure2d_3d):
+    def test_cache_invalidation_marks_properties_stale(
+        self, bandstructure2d_3d: BandStructure2D
+    ) -> None:
         """Test that cache invalidation works."""
         bs2d = bandstructure2d_3d
 
@@ -406,7 +415,7 @@ class TestBandStructure2DCache:
         bs2d._invalidate_cache()
         assert not bs2d._is_cache_valid("test_prop")
 
-    def test_cache_version_increments(self, bandstructure2d_3d):
+    def test_cache_version_increments(self, bandstructure2d_3d: BandStructure2D) -> None:
         """Test that cache version increments on invalidation."""
         bs2d = bandstructure2d_3d
 
@@ -415,7 +424,7 @@ class TestBandStructure2DCache:
 
         assert bs2d._ebs_cache_version == initial_version + 1
 
-    def test_uncached_property_invalid(self, bandstructure2d_3d):
+    def test_uncached_property_invalid(self, bandstructure2d_3d: BandStructure2D) -> None:
         """Test that uncached properties are detected as invalid."""
         bs2d = bandstructure2d_3d
 
@@ -430,7 +439,7 @@ class TestBandStructure2DCache:
 class TestBandStructure2DSerialization:
     """Tests for BandStructure2D save/load functionality."""
 
-    def test_save_creates_file(self, bandstructure2d_3d, tmp_path):
+    def test_save_creates_file(self, bandstructure2d_3d: BandStructure2D, tmp_path: Path) -> None:
         """Test that save creates a file."""
         save_path = tmp_path / "test_bs2d.pkl"
 
@@ -438,7 +447,7 @@ class TestBandStructure2DSerialization:
 
         assert save_path.exists()
 
-    def test_save_load_roundtrip(self, bandstructure2d_3d, tmp_path):
+    def test_save_load_roundtrip(self, bandstructure2d_3d: BandStructure2D, tmp_path: Path) -> None:
         """Test that save/load preserves surface geometry."""
         bs2d = bandstructure2d_3d
         save_path = tmp_path / "test_bs2d.pkl"
@@ -453,7 +462,9 @@ class TestBandStructure2DSerialization:
         assert bs2d_loaded.n_points == bs2d.n_points
         np.testing.assert_array_almost_equal(bs2d_loaded.points, bs2d.points)
 
-    def test_save_load_preserves_point_data(self, bandstructure2d_3d, tmp_path):
+    def test_save_load_preserves_point_data(
+        self, bandstructure2d_3d: BandStructure2D, tmp_path: Path
+    ) -> None:
         """Test that point_data is preserved through save/load."""
         bs2d = bandstructure2d_3d
         save_path = tmp_path / "test_bs2d_data.pkl"
@@ -468,7 +479,9 @@ class TestBandStructure2DSerialization:
         assert "test_scalar" in bs2d_loaded.point_data
         np.testing.assert_array_almost_equal(bs2d_loaded.point_data["test_scalar"], test_data)
 
-    def test_save_load_preserves_band_surfaces(self, bandstructure2d_3d, tmp_path):
+    def test_save_load_preserves_band_surfaces(
+        self, bandstructure2d_3d: BandStructure2D, tmp_path: Path
+    ) -> None:
         """Test that band_surfaces are preserved through save/load."""
         bs2d = bandstructure2d_3d
         original_keys = set(bs2d.band_surfaces.keys())
@@ -479,7 +492,9 @@ class TestBandStructure2DSerialization:
 
         assert set(bs2d_loaded.band_surfaces.keys()) == original_keys
 
-    def test_save_load_preserves_plane_info(self, bandstructure2d_3d, tmp_path):
+    def test_save_load_preserves_plane_info(
+        self, bandstructure2d_3d: BandStructure2D, tmp_path: Path
+    ) -> None:
         """Test that plane_info is preserved through save/load."""
         bs2d = bandstructure2d_3d
         save_path = tmp_path / "test_bs2d_plane.pkl"
@@ -491,7 +506,9 @@ class TestBandStructure2DSerialization:
         np.testing.assert_array_almost_equal(bs2d_loaded.plane_info.origin, bs2d.plane_info.origin)
         assert bs2d_loaded.plane_info.grid_interpolation == bs2d.plane_info.grid_interpolation
 
-    def test_save_load_preserves_point_set_properties(self, bandstructure2d_3d, tmp_path):
+    def test_save_load_preserves_point_set_properties(
+        self, bandstructure2d_3d: BandStructure2D, tmp_path: Path
+    ) -> None:
         """Test that PointSet properties are preserved through save/load."""
         bs2d = bandstructure2d_3d
         save_path = tmp_path / "test_bs2d_pointset.pkl"
@@ -504,8 +521,14 @@ class TestBandStructure2DSerialization:
         assert "spin_band_index" in bs2d_loaded.point_set.property_store
 
         # Check values match
-        orig_spin_index = bs2d.point_set.get_property("spin_index").value
-        loaded_spin_index = bs2d_loaded.point_set.get_property("spin_index").value
+        orig_prop = bs2d.point_set.get_property("spin_index")
+        assert isinstance(orig_prop, Property)
+        orig_spin_index = orig_prop.value
+
+        loaded_prop = bs2d_loaded.point_set.get_property("spin_index")
+        assert isinstance(loaded_prop, Property)
+        loaded_spin_index = loaded_prop.value
+
         np.testing.assert_array_almost_equal(loaded_spin_index, orig_spin_index)
 
 
@@ -517,7 +540,7 @@ class TestBandStructure2DSerialization:
 class TestBandStructure2DSurfaceGeneration:
     """Tests for surface generation functionality."""
 
-    def test_generate_band_2d_surfaces(self, ebs_mesh):
+    def test_generate_band_2d_surfaces(self, ebs_mesh: ElectronicBandStructureMesh) -> None:
         """Test generate_band_2d_surfaces function."""
         padded_ebs = ebs_mesh.pad(padding=5, inplace=False)
         padded_ebs = padded_ebs.expand_single_dimension(inplace=False)
@@ -544,7 +567,7 @@ class TestBandStructure2DSurfaceGeneration:
         assert "spin_index" in point_set.property_store
         assert "spin_band_index" in point_set.property_store
 
-    def test_required_properties_in_point_set(self, bandstructure2d_3d):
+    def test_required_properties_in_point_set(self, bandstructure2d_3d: BandStructure2D) -> None:
         """Test that spin_band_index and spin_index are in point_set."""
         bs2d = bandstructure2d_3d
 
@@ -560,14 +583,14 @@ class TestBandStructure2DSurfaceGeneration:
 class TestBandStructure2DFunctionality:
     """Tests for BandStructure2D methods."""
 
-    def test_get_2d_brillouin_zone(self, bandstructure2d_3d):
+    def test_get_2d_brillouin_zone(self, bandstructure2d_3d: BandStructure2D) -> None:
         """Test get_2d_brillouin_zone method."""
         from pyprocar.core.brillouin_zone import BrillouinZone2D
 
         bz = bandstructure2d_3d.get_2d_brillouin_zone(e_min=-2, e_max=2)
         assert isinstance(bz, BrillouinZone2D)
 
-    def test_set_scalars(self, bandstructure2d_3d):
+    def test_set_scalars(self, bandstructure2d_3d: BandStructure2D) -> None:
         """Test set_scalars method."""
         bs2d = bandstructure2d_3d
         # Use n_points (surface point count) not n_grid_points
@@ -577,7 +600,7 @@ class TestBandStructure2DFunctionality:
 
         assert "test_scalar" in bs2d.point_data
 
-    def test_transform_matrices_initialized(self, bandstructure2d_3d):
+    def test_transform_matrices_initialized(self, bandstructure2d_3d: BandStructure2D) -> None:
         """Test that transformation matrices are initialized."""
         bs2d = bandstructure2d_3d
 

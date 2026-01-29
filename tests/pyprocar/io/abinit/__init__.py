@@ -1,5 +1,3 @@
-from pathlib import Path
-
 from tests.utils import ROOT_DIR
 
 ABINIT_DATA_DIR = ROOT_DIR / "data" / "codes" / "abinit" / "9.6" / "Fe"

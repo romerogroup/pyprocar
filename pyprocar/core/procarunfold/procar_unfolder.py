@@ -19,7 +19,7 @@ class _ProcarParserWithPhase(Protocol):
     """Protocol for ProcarParser methods used in unfolding."""
 
     def readFile2(
-        self, fname: str, phase: bool = ..., ispin: int | None = ...
+        self, fname: str, _phase: bool = ..., ispin: int | None = ...
     ) -> None: ...
 
     @property
@@ -61,7 +61,7 @@ class ProcarUnfolder:
         self.procar = ProcarParser()
         # ProcarParser.readFile2 has partially unknown types - cast to protocol via object
         procar_with_phase = cast(_ProcarParserWithPhase, cast(object, self.procar))
-        procar_with_phase.readFile2(self.fname, phase=True, ispin=ispin)
+        procar_with_phase.readFile2(self.fname, _phase=True, ispin=ispin)
 
     def _prepare_unfold_basis(self, ispin: int | None = None) -> None:
         # basis, which are the name of the bands e.g. 'Ti|dxy|0'

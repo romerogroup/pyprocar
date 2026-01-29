@@ -56,6 +56,26 @@ def Plane(
     j_resolution: int = ...,
 ) -> PolyData: ...
 
+def Sphere(
+    radius: float = ...,
+    center: tuple[float, float, float] = ...,
+    direction: tuple[float, float, float] = ...,
+    theta_resolution: int = ...,
+    phi_resolution: int = ...,
+    start_theta: float = ...,
+    end_theta: float = ...,
+    start_phi: float = ...,
+    end_phi: float = ...,
+) -> PolyData: ...
+
+def read(
+    filename: str,
+    attrs: Incomplete = ...,
+    force_ext: str | None = ...,
+    file_format: str | None = ...,
+    progress_bar: bool = ...,
+) -> PolyData | UnstructuredGrid | ImageData | StructuredGrid | MultiBlock | Incomplete: ...
+
 __all__ = [
     "ImageData",
     "MultiBlock",
@@ -65,5 +85,7 @@ __all__ = [
     "PolyData",
     "StructuredGrid",
     "UnstructuredGrid",
+    "Sphere",
     "global_theme",
+    "read",
 ]

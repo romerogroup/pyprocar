@@ -1,6 +1,7 @@
 """Tests for ElkParser integration."""
 
 import logging
+from pathlib import Path
 
 import pytest
 
@@ -183,7 +184,7 @@ TDOS_OUT = """ -0.5000000000       0.000000000
 
 
 @pytest.fixture
-def bands_calc_dir(tmp_path):
+def bands_calc_dir(tmp_path: Path) -> Path:
     """Create a temporary directory with all files for bands calculation."""
     (tmp_path / "elk.in").write_text(ELKIN_BANDS)
     (tmp_path / "FERMI.OUT").write_text(EFERMI_OUT)  # Parser expects FERMI.OUT
@@ -196,7 +197,7 @@ def bands_calc_dir(tmp_path):
 
 
 @pytest.fixture
-def dos_calc_dir(tmp_path):
+def dos_calc_dir(tmp_path: Path) -> Path:
     """Create a temporary directory with all files for DOS calculation."""
     (tmp_path / "elk.in").write_text(ELKIN_DOS)
     (tmp_path / "FERMI.OUT").write_text(EFERMI_OUT)  # Parser expects FERMI.OUT
@@ -206,74 +207,80 @@ def dos_calc_dir(tmp_path):
 
 
 class TestElkParserInit(BaseTest):
-    def test_parser_init_bands(self, bands_calc_dir):
+    def test_parser_init_bands(self, bands_calc_dir: Path) -> None:
         """Test ElkParser initialization for bands calculation."""
         parser = ElkParser(bands_calc_dir)
         assert parser is not None
 
-    def test_parser_init_dos(self, dos_calc_dir):
+    def test_parser_init_dos(self, dos_calc_dir: Path) -> None:
         """Test ElkParser initialization for DOS calculation."""
         parser = ElkParser(dos_calc_dir)
         assert parser is not None
 
 
 class TestElkParserStructure(BaseTest):
-    def test_structure_type(self, bands_calc_dir):
+    def test_structure_type(self, bands_calc_dir: Path) -> None:
         """Test that structure returns a Structure object."""
         parser = ElkParser(bands_calc_dir)
         assert isinstance(parser.structure, Structure)
 
-    def test_structure_natoms(self, bands_calc_dir):
+    def test_structure_natoms(self, bands_calc_dir: Path) -> None:
         """Test structure has correct number of atoms."""
         parser = ElkParser(bands_calc_dir)
-        assert parser.structure.natoms == 2
+        structure = parser.structure
+        assert structure is not None
+        assert structure.natoms == 2
 
-    def test_structure_atoms(self, bands_calc_dir):
+    def test_structure_atoms(self, bands_calc_dir: Path) -> None:
         """Test structure has correct atom list."""
         parser = ElkParser(bands_calc_dir)
-        assert list(parser.structure.atoms) == ["Sr", "V"]
+        structure = parser.structure
+        assert structure is not None
+        atoms = structure.atoms
+        assert atoms is not None
+        assert list(atoms) == ["Sr", "V"]
 
 
 class TestElkParserFermi(BaseTest):
-    def test_fermi_value(self, bands_calc_dir):
+    def test_fermi_value(self, bands_calc_dir: Path) -> None:
         """Test Fermi energy value."""
         parser = ElkParser(bands_calc_dir)
         # 0.3218543102 Hartree * 27.211386 = 8.757 eV
         assert parser.fermi == pytest.approx(8.757, rel=0.01)
 
-    def test_nspin(self, bands_calc_dir):
+    def test_nspin(self, bands_calc_dir: Path) -> None:
         """Test nspin value."""
         parser = ElkParser(bands_calc_dir)
         assert parser.nspin == 1
 
 
 class TestElkParserBands(BaseTest):
-    def test_is_bands_calculation(self, bands_calc_dir):
+    def test_is_bands_calculation(self, bands_calc_dir: Path) -> None:
         """Test is_bands_calculation is True."""
         parser = ElkParser(bands_calc_dir)
         assert parser.is_bands_calculation is True
 
-    def test_is_bands_calculation_false_for_dos(self, dos_calc_dir):
+    def test_is_bands_calculation_false_for_dos(self, dos_calc_dir: Path) -> None:
         """Test is_bands_calculation is False for DOS calc."""
         parser = ElkParser(dos_calc_dir)
         assert parser.is_bands_calculation is False
 
-    def test_ebs_type(self, bands_calc_dir):
+    def test_ebs_type(self, bands_calc_dir: Path) -> None:
         """Test that ebs returns ElectronicBandStructure."""
         parser = ElkParser(bands_calc_dir)
         assert isinstance(parser.ebs, ElectronicBandStructure)
 
-    def test_ebs_none_for_dos(self, dos_calc_dir):
+    def test_ebs_none_for_dos(self, dos_calc_dir: Path) -> None:
         """Test that ebs is None for DOS calculation."""
         parser = ElkParser(dos_calc_dir)
         assert parser.ebs is None
 
-    def test_kpath_type(self, bands_calc_dir):
+    def test_kpath_type(self, bands_calc_dir: Path) -> None:
         """Test that kpath returns KPath."""
         parser = ElkParser(bands_calc_dir)
         assert isinstance(parser.kpath, KPath)
 
-    def test_kpath_none_for_dos(self, dos_calc_dir):
+    def test_kpath_none_for_dos(self, dos_calc_dir: Path) -> None:
         """Test that kpath is None for DOS calculation."""
         parser = ElkParser(dos_calc_dir)
         assert parser.kpath is None
@@ -283,12 +290,12 @@ class TestElkParserDOS(BaseTest):
     @pytest.mark.skip(
         reason="ElkDOS.total shape (nspin, nenergies) doesn't match DensityOfStates expected (n_energies, n_spin)"
     )
-    def test_dos_type(self, dos_calc_dir):
+    def test_dos_type(self, dos_calc_dir: Path) -> None:
         """Test that dos returns DensityOfStates."""
         parser = ElkParser(dos_calc_dir)
         assert isinstance(parser.dos, DensityOfStates)
 
-    def test_dos_none_for_bands(self, bands_calc_dir):
+    def test_dos_none_for_bands(self, bands_calc_dir: Path) -> None:
         """Test that dos is None for bands calculation (no TDOS.OUT)."""
         parser = ElkParser(bands_calc_dir)
         assert parser.dos is None

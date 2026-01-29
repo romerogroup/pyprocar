@@ -117,6 +117,9 @@ class PolyData(_PointSet):
     n_faces: int
     n_lines: int
 
+    def __getitem__(self, name: str) -> npt.NDArray[np.float64]: ...
+    def __setitem__(self, name: str, value: npt.NDArray[np.float64] | npt.NDArray[np.floating[Incomplete]]) -> None: ...
+
     @property
     def active_scalars(self) -> npt.NDArray[np.float64] | None: ...
     @property

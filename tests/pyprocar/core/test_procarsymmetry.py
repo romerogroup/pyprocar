@@ -1,17 +1,20 @@
 """Tests for ProcarSymmetry class."""
 
 import numpy as np
+import numpy.typing as npt
 import pytest
+
+from pyprocar.core.procarsymmetry import ProcarSymmetry
 
 
 @pytest.fixture
-def rng():
+def rng() -> np.random.Generator:
     """Seeded random number generator for reproducibility."""
     return np.random.default_rng(42)
 
 
 @pytest.fixture
-def simple_kpoints():
+def simple_kpoints() -> npt.NDArray[np.float64]:
     """Simple k-points for testing."""
     return np.array(
         [
@@ -24,7 +27,7 @@ def simple_kpoints():
 
 
 @pytest.fixture
-def simple_bands(simple_kpoints):
+def simple_bands(simple_kpoints: npt.NDArray[np.float64]) -> npt.NDArray[np.float64]:
     """Simple bands data matching k-points."""
     n_kpoints = len(simple_kpoints)
     n_bands = 4
@@ -32,13 +35,17 @@ def simple_bands(simple_kpoints):
 
 
 @pytest.fixture
-def simple_character(simple_kpoints, simple_bands):
+def simple_character(
+    simple_kpoints: npt.NDArray[np.float64], simple_bands: npt.NDArray[np.float64]
+) -> npt.NDArray[np.float64]:
     """Simple character data matching k-points and bands."""
     return np.ones((len(simple_kpoints), simple_bands.shape[1]))
 
 
 @pytest.fixture
-def spin_components(simple_kpoints, simple_bands):
+def spin_components(
+    simple_kpoints: npt.NDArray[np.float64], simple_bands: npt.NDArray[np.float64]
+) -> dict[str, npt.NDArray[np.float64]]:
     """Spin vector components for testing."""
     shape = (len(simple_kpoints), simple_bands.shape[1])
     return {
@@ -51,10 +58,12 @@ def spin_components(simple_kpoints, simple_bands):
 class TestProcarSymmetryInit:
     """Test ProcarSymmetry initialization."""
 
-    def test_init_minimal(self, simple_kpoints, simple_bands):
+    def test_init_minimal(
+        self,
+        simple_kpoints: npt.NDArray[np.float64],
+        simple_bands: npt.NDArray[np.float64],
+    ) -> None:
         """Test initialization with only required parameters."""
-        from pyprocar.core.procarsymmetry import ProcarSymmetry
-
         ps = ProcarSymmetry(kpoints=simple_kpoints, bands=simple_bands)
 
         assert np.allclose(ps.kpoints, simple_kpoints)
@@ -64,10 +73,13 @@ class TestProcarSymmetryInit:
         assert ps.sy.shape == (0,)
         assert ps.sz.shape == (0,)
 
-    def test_init_with_character(self, simple_kpoints, simple_bands, simple_character):
+    def test_init_with_character(
+        self,
+        simple_kpoints: npt.NDArray[np.float64],
+        simple_bands: npt.NDArray[np.float64],
+        simple_character: npt.NDArray[np.float64],
+    ) -> None:
         """Test initialization with character data."""
-        from pyprocar.core.procarsymmetry import ProcarSymmetry
-
         ps = ProcarSymmetry(
             kpoints=simple_kpoints,
             bands=simple_bands,
@@ -76,10 +88,13 @@ class TestProcarSymmetryInit:
 
         assert np.allclose(ps.character, simple_character)
 
-    def test_init_with_spin_components(self, simple_kpoints, simple_bands, spin_components):
+    def test_init_with_spin_components(
+        self,
+        simple_kpoints: npt.NDArray[np.float64],
+        simple_bands: npt.NDArray[np.float64],
+        spin_components: dict[str, npt.NDArray[np.float64]],
+    ) -> None:
         """Test initialization with spin components."""
-        from pyprocar.core.procarsymmetry import ProcarSymmetry
-
         ps = ProcarSymmetry(
             kpoints=simple_kpoints,
             bands=simple_bands,
@@ -96,10 +111,12 @@ class TestProcarSymmetryInit:
 class TestQuaternionMultiplication:
     """Test quaternion multiplication helper."""
 
-    def test_q_mult_identity(self, simple_kpoints, simple_bands):
+    def test_q_mult_identity(
+        self,
+        simple_kpoints: npt.NDArray[np.float64],
+        simple_bands: npt.NDArray[np.float64],
+    ) -> None:
         """Test multiplication with identity quaternion."""
-        from pyprocar.core.procarsymmetry import ProcarSymmetry
-
         ps = ProcarSymmetry(kpoints=simple_kpoints, bands=simple_bands)
 
         # Identity quaternion: (1, 0, 0, 0)
@@ -110,10 +127,12 @@ class TestQuaternionMultiplication:
 
         assert np.allclose(result, q)
 
-    def test_q_mult_inverse(self, simple_kpoints, simple_bands):
+    def test_q_mult_inverse(
+        self,
+        simple_kpoints: npt.NDArray[np.float64],
+        simple_bands: npt.NDArray[np.float64],
+    ) -> None:
         """Test multiplication with inverse quaternion."""
-        from pyprocar.core.procarsymmetry import ProcarSymmetry
-
         ps = ProcarSymmetry(kpoints=simple_kpoints, bands=simple_bands)
 
         # Unit quaternion
@@ -126,10 +145,12 @@ class TestQuaternionMultiplication:
         expected = np.array([1.0, 0.0, 0.0, 0.0])
         assert np.allclose(result, expected, atol=1e-10)
 
-    def test_q_mult_associative(self, simple_kpoints, simple_bands):
+    def test_q_mult_associative(
+        self,
+        simple_kpoints: npt.NDArray[np.float64],
+        simple_bands: npt.NDArray[np.float64],
+    ) -> None:
         """Test quaternion multiplication is associative."""
-        from pyprocar.core.procarsymmetry import ProcarSymmetry
-
         ps = ProcarSymmetry(kpoints=simple_kpoints, bands=simple_bands)
 
         q1 = np.array([0.5, 0.1, 0.2, 0.3])
@@ -146,86 +167,93 @@ class TestQuaternionMultiplication:
 class TestGeneralRotation:
     """Test general_rotation method."""
 
-    def test_rotation_zero_angle(self, simple_kpoints, simple_bands):
+    def test_rotation_zero_angle(
+        self,
+        simple_kpoints: npt.NDArray[np.float64],
+        simple_bands: npt.NDArray[np.float64],
+    ) -> None:
         """Test rotation by zero angle returns original kpoints."""
-        from pyprocar.core.procarsymmetry import ProcarSymmetry
-
         ps = ProcarSymmetry(kpoints=simple_kpoints.copy(), bands=simple_bands)
 
-        kpoints, sx, sy, sz = ps.general_rotation(angle=0, rotAxis="z", store=False)
+        _kpoints, _sx, _sy, _sz = ps.general_rotation(angle=0, rotAxis="z", store=False)
 
-        assert np.allclose(kpoints, simple_kpoints, atol=1e-10)
+        assert np.allclose(_kpoints, simple_kpoints, atol=1e-10)
 
-    def test_rotation_360_degrees(self, simple_kpoints, simple_bands):
+    def test_rotation_360_degrees(
+        self,
+        simple_kpoints: npt.NDArray[np.float64],
+        simple_bands: npt.NDArray[np.float64],
+    ) -> None:
         """Test rotation by 360 degrees returns original kpoints."""
-        from pyprocar.core.procarsymmetry import ProcarSymmetry
-
         ps = ProcarSymmetry(kpoints=simple_kpoints.copy(), bands=simple_bands)
 
-        kpoints, sx, sy, sz = ps.general_rotation(angle=360, rotAxis="z", store=False)
+        _kpoints, _sx, _sy, _sz = ps.general_rotation(angle=360, rotAxis="z", store=False)
 
-        assert np.allclose(kpoints, simple_kpoints, atol=1e-10)
+        assert np.allclose(_kpoints, simple_kpoints, atol=1e-10)
 
-    def test_rotation_90_degrees_z_axis(self, simple_kpoints, simple_bands):
+    def test_rotation_90_degrees_z_axis(
+        self,
+    ) -> None:
         """Test 90 degree rotation around z-axis."""
-        from pyprocar.core.procarsymmetry import ProcarSymmetry
-
         # Point at (1, 0, 0) should rotate to (0, 1, 0)
         kpoints = np.array([[1.0, 0.0, 0.0]])
         bands = np.array([[1.0]])
 
         ps = ProcarSymmetry(kpoints=kpoints, bands=bands)
-        new_kpoints, sx, sy, sz = ps.general_rotation(angle=90, rotAxis="z", store=False)
+        new_kpoints, _sx, _sy, _sz = ps.general_rotation(angle=90, rotAxis="z", store=False)
 
         expected = np.array([[0.0, 1.0, 0.0]])
         assert np.allclose(new_kpoints, expected, atol=1e-10)
 
-    def test_rotation_90_degrees_x_axis(self, simple_kpoints, simple_bands):
+    def test_rotation_90_degrees_x_axis(
+        self,
+    ) -> None:
         """Test 90 degree rotation around x-axis."""
-        from pyprocar.core.procarsymmetry import ProcarSymmetry
-
         # Point at (0, 1, 0) should rotate to (0, 0, 1)
         kpoints = np.array([[0.0, 1.0, 0.0]])
         bands = np.array([[1.0]])
 
         ps = ProcarSymmetry(kpoints=kpoints, bands=bands)
-        new_kpoints, sx, sy, sz = ps.general_rotation(angle=90, rotAxis="x", store=False)
+        new_kpoints, _sx, _sy, _sz = ps.general_rotation(angle=90, rotAxis="x", store=False)
 
         expected = np.array([[0.0, 0.0, 1.0]])
         assert np.allclose(new_kpoints, expected, atol=1e-10)
 
-    def test_rotation_90_degrees_y_axis(self, simple_kpoints, simple_bands):
+    def test_rotation_90_degrees_y_axis(
+        self,
+    ) -> None:
         """Test 90 degree rotation around y-axis."""
-        from pyprocar.core.procarsymmetry import ProcarSymmetry
-
         # Point at (0, 0, 1) should rotate to (1, 0, 0)
         kpoints = np.array([[0.0, 0.0, 1.0]])
         bands = np.array([[1.0]])
 
         ps = ProcarSymmetry(kpoints=kpoints, bands=bands)
-        new_kpoints, sx, sy, sz = ps.general_rotation(angle=90, rotAxis="y", store=False)
+        new_kpoints, _sx, _sy, _sz = ps.general_rotation(angle=90, rotAxis="y", store=False)
 
         expected = np.array([[1.0, 0.0, 0.0]])
         assert np.allclose(new_kpoints, expected, atol=1e-10)
 
-    def test_rotation_custom_axis(self, simple_kpoints, simple_bands):
+    def test_rotation_custom_axis(
+        self,
+    ) -> None:
         """Test rotation around custom axis."""
-        from pyprocar.core.procarsymmetry import ProcarSymmetry
-
         kpoints = np.array([[1.0, 0.0, 0.0]])
         bands = np.array([[1.0]])
 
         ps = ProcarSymmetry(kpoints=kpoints, bands=bands)
-        new_kpoints, sx, sy, sz = ps.general_rotation(angle=180, rotAxis=[1, 1, 0], store=False)
+        new_kpoints, _sx, _sy, _sz = ps.general_rotation(angle=180, rotAxis=[1, 1, 0], store=False)
 
         # 180 rotation around (1,1,0) axis: (1,0,0) -> (0,1,0)
         expected = np.array([[0.0, 1.0, 0.0]])
         assert np.allclose(new_kpoints, expected, atol=1e-10)
 
-    def test_rotation_store_true(self, simple_kpoints, simple_bands, spin_components):
+    def test_rotation_store_true(
+        self,
+        simple_kpoints: npt.NDArray[np.float64],
+        simple_bands: npt.NDArray[np.float64],
+        spin_components: dict[str, npt.NDArray[np.float64]],
+    ) -> None:
         """Test that store=True updates internal state."""
-        from pyprocar.core.procarsymmetry import ProcarSymmetry
-
         ps = ProcarSymmetry(
             kpoints=simple_kpoints.copy(),
             bands=simple_bands,
@@ -239,10 +267,12 @@ class TestGeneralRotation:
 
         assert not np.allclose(ps.kpoints, original_kpoints)
 
-    def test_rotation_store_false(self, simple_kpoints, simple_bands):
+    def test_rotation_store_false(
+        self,
+        simple_kpoints: npt.NDArray[np.float64],
+        simple_bands: npt.NDArray[np.float64],
+    ) -> None:
         """Test that store=False does not modify internal state."""
-        from pyprocar.core.procarsymmetry import ProcarSymmetry
-
         ps = ProcarSymmetry(kpoints=simple_kpoints.copy(), bands=simple_bands)
         original_kpoints = ps.kpoints.copy()
 
@@ -250,10 +280,10 @@ class TestGeneralRotation:
 
         assert np.allclose(ps.kpoints, original_kpoints)
 
-    def test_rotation_with_spin_vectors(self, spin_components):
+    def test_rotation_with_spin_vectors(
+        self,
+    ) -> None:
         """Test that spin vectors are also rotated."""
-        from pyprocar.core.procarsymmetry import ProcarSymmetry
-
         # Spin pointing in x direction
         kpoints = np.array([[0.0, 0.0, 0.0]])
         bands = np.array([[1.0]])
@@ -264,7 +294,7 @@ class TestGeneralRotation:
         ps = ProcarSymmetry(kpoints=kpoints, bands=bands, sx=sx, sy=sy, sz=sz)
 
         # 90 degree rotation around z: sx -> sy
-        new_kpoints, new_sx, new_sy, new_sz = ps.general_rotation(
+        _new_kpoints, new_sx, new_sy, new_sz = ps.general_rotation(
             angle=90, rotAxis="z", store=False
         )
 
@@ -276,10 +306,10 @@ class TestGeneralRotation:
 class TestRotSymmetryZ:
     """Test rot_symmetry_z method."""
 
-    def test_rot_symmetry_z_order_2(self, simple_bands, simple_character):
+    def test_rot_symmetry_z_order_2(
+        self,
+    ) -> None:
         """Test 2-fold rotational symmetry."""
-        from pyprocar.core.procarsymmetry import ProcarSymmetry
-
         kpoints = np.array([[1.0, 0.0, 0.0]])
         bands = np.array([[1.0]])
         character = np.array([[1.0]])
@@ -296,10 +326,10 @@ class TestRotSymmetryZ:
         expected_second = np.array([-1.0, 0.0, 0.0])
         assert np.allclose(ps.kpoints[1], expected_second, atol=1e-10)
 
-    def test_rot_symmetry_z_order_4(self, simple_bands, simple_character):
+    def test_rot_symmetry_z_order_4(
+        self,
+    ) -> None:
         """Test 4-fold rotational symmetry."""
-        from pyprocar.core.procarsymmetry import ProcarSymmetry
-
         kpoints = np.array([[1.0, 0.0, 0.0]])
         bands = np.array([[1.0]])
         character = np.array([[1.0]])
@@ -321,10 +351,10 @@ class TestRotSymmetryZ:
         )
         assert np.allclose(ps.kpoints, expected, atol=1e-10)
 
-    def test_rot_symmetry_z_order_6(self, simple_bands, simple_character):
+    def test_rot_symmetry_z_order_6(
+        self,
+    ) -> None:
         """Test 6-fold rotational symmetry."""
-        from pyprocar.core.procarsymmetry import ProcarSymmetry
-
         kpoints = np.array([[1.0, 0.0, 0.0]])
         bands = np.array([[1.0]])
         character = np.array([[1.0]])
@@ -335,10 +365,10 @@ class TestRotSymmetryZ:
         # Should have 6 k-points
         assert ps.kpoints.shape[0] == 6
 
-    def test_rot_symmetry_z_with_spin(self, simple_bands, simple_character):
+    def test_rot_symmetry_z_with_spin(
+        self,
+    ) -> None:
         """Test rotational symmetry also rotates spin components."""
-        from pyprocar.core.procarsymmetry import ProcarSymmetry
-
         kpoints = np.array([[1.0, 0.0, 0.0]])
         bands = np.array([[1.0]])
         character = np.array([[1.0]])
@@ -357,10 +387,10 @@ class TestRotSymmetryZ:
 class TestMirrorX:
     """Test mirror_x method."""
 
-    def test_mirror_x_kpoints(self, simple_bands, simple_character):
+    def test_mirror_x_kpoints(
+        self,
+    ) -> None:
         """Test mirror operation on k-points."""
-        from pyprocar.core.procarsymmetry import ProcarSymmetry
-
         kpoints = np.array([[1.0, 2.0, 3.0]])
         bands = np.array([[1.0]])
         character = np.array([[1.0]])
@@ -380,10 +410,8 @@ class TestMirrorX:
         )
         assert np.allclose(ps.kpoints, expected)
 
-    def test_mirror_x_spin_components(self):
+    def test_mirror_x_spin_components(self) -> None:
         """Test mirror operation on spin components."""
-        from pyprocar.core.procarsymmetry import ProcarSymmetry
-
         kpoints = np.array([[0.0, 0.0, 0.0]])
         bands = np.array([[1.0]])
         character = np.array([[1.0]])
@@ -404,10 +432,10 @@ class TestMirrorX:
         assert np.allclose(ps.sz[0], 3.0)
         assert np.allclose(ps.sz[1], 3.0)
 
-    def test_mirror_x_bands_duplicated(self, simple_bands, simple_character):
+    def test_mirror_x_bands_duplicated(
+        self,
+    ) -> None:
         """Test that bands and character are duplicated."""
-        from pyprocar.core.procarsymmetry import ProcarSymmetry
-
         kpoints = np.array([[0.0, 0.0, 0.0]])
         bands = np.array([[1.0, 2.0]])
         character = np.array([[0.5, 0.5]])
@@ -424,10 +452,12 @@ class TestMirrorX:
 class TestTranslate:
     """Test translate method."""
 
-    def test_translate_by_coordinates(self, simple_kpoints, simple_bands):
+    def test_translate_by_coordinates(
+        self,
+        simple_kpoints: npt.NDArray[np.float64],
+        simple_bands: npt.NDArray[np.float64],
+    ) -> None:
         """Test translation by coordinate vector."""
-        from pyprocar.core.procarsymmetry import ProcarSymmetry
-
         ps = ProcarSymmetry(kpoints=simple_kpoints.copy(), bands=simple_bands)
 
         ps.translate(newOrigin=[0.5, 0.0, 0.0])
@@ -436,10 +466,12 @@ class TestTranslate:
         expected = simple_kpoints - np.array([0.5, 0.0, 0.0])
         assert np.allclose(ps.kpoints, expected)
 
-    def test_translate_by_index(self, simple_kpoints, simple_bands):
+    def test_translate_by_index(
+        self,
+        simple_kpoints: npt.NDArray[np.float64],
+        simple_bands: npt.NDArray[np.float64],
+    ) -> None:
         """Test translation using k-point index."""
-        from pyprocar.core.procarsymmetry import ProcarSymmetry
-
         ps = ProcarSymmetry(kpoints=simple_kpoints.copy(), bands=simple_bands)
 
         # Translate to origin at k-point index 1
@@ -448,10 +480,11 @@ class TestTranslate:
         # K-point at index 1 should now be at origin
         assert np.allclose(ps.kpoints[1], [0.0, 0.0, 0.0])
 
-    def test_translate_to_gamma(self, simple_bands):
+    def test_translate_to_gamma(
+        self,
+        simple_bands: npt.NDArray[np.float64],
+    ) -> None:
         """Test translation to Gamma point."""
-        from pyprocar.core.procarsymmetry import ProcarSymmetry
-
         kpoints = np.array(
             [
                 [0.1, 0.2, 0.3],
@@ -471,10 +504,8 @@ class TestTranslate:
 class TestProcarSymmetryIntegration:
     """Integration tests combining multiple operations."""
 
-    def test_rotation_then_mirror(self):
+    def test_rotation_then_mirror(self) -> None:
         """Test combining rotation and mirror operations."""
-        from pyprocar.core.procarsymmetry import ProcarSymmetry
-
         kpoints = np.array([[1.0, 0.0, 0.0]])
         bands = np.array([[1.0]])
         character = np.array([[1.0]])
@@ -489,10 +520,8 @@ class TestProcarSymmetryIntegration:
         ps.mirror_x()
         assert ps.kpoints.shape[0] == 8
 
-    def test_translate_then_rotate(self):
+    def test_translate_then_rotate(self) -> None:
         """Test translation followed by rotation."""
-        from pyprocar.core.procarsymmetry import ProcarSymmetry
-
         kpoints = np.array([[1.0, 0.0, 0.0], [2.0, 0.0, 0.0]])
         bands = np.array([[1.0], [2.0]])
         character = np.array([[1.0], [1.0]])

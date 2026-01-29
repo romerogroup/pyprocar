@@ -44,7 +44,7 @@ class globalConectivity:
         # Re-obtaining neighbors allowing for pbc neighbors
         self.Neighbors.set_neighbors(allow_self=True)
         if filter_Neighbors:
-            self.Neighbors._filter_exclusiveSpNeighbors()  # pyright: ignore[reportPrivateUsage]
+            self.Neighbors._filter_exclusiveSpNeighbors()
 
         assert self.Neighbors.nn_list is not None
         self.nn_list = self.Neighbors.nn_list

@@ -2,6 +2,7 @@
 
 import importlib.util
 import sys
+import types
 from pathlib import Path
 
 import numpy as np
@@ -9,12 +10,14 @@ import pytest
 import pyvista as pv
 
 
-def _load_bs_2d_plot_module():
+def _load_bs_2d_plot_module() -> types.ModuleType:
     """Load bs_2d_plot module directly to avoid pyprocar/__init__.py import issues."""
     bs_2d_plot_path = Path(__file__).parents[3] / "pyprocar" / "plotter" / "bs_2d_plot.py"
     spec = importlib.util.spec_from_file_location("bs_2d_plot", bs_2d_plot_path)
+    assert spec is not None, f"Could not load spec from {bs_2d_plot_path}"
     bs_2d_plot = importlib.util.module_from_spec(spec)
     sys.modules["bs_2d_plot"] = bs_2d_plot
+    assert spec.loader is not None, "spec.loader is None"
     spec.loader.exec_module(bs_2d_plot)
     return bs_2d_plot
 
@@ -28,7 +31,7 @@ BS2DSeries = _bs_2d_plot.BS2DSeries
 class TestBS2DSeries:
     """Tests for BS2DSeries dataclass."""
 
-    def test_bs2d_series_creation_minimal(self):
+    def test_bs2d_series_creation_minimal(self) -> None:
         """Test BS2DSeries can be instantiated with minimal required fields."""
         mesh = pv.Plane()
         series = BS2DSeries(
@@ -51,7 +54,7 @@ class TestBS2DSeries:
         assert series.scalars is None
         assert series.vectors is None
 
-    def test_bs2d_series_creation_with_scalars(self):
+    def test_bs2d_series_creation_with_scalars(self) -> None:
         """Test BS2DSeries with scalar data."""
         mesh = pv.Plane()
         scalars = np.random.rand(mesh.n_points)
@@ -75,7 +78,7 @@ class TestBS2DSeries:
         assert series.scalars_lim == (0.0, 1.0)
         assert series.label == "Band 0 up"
 
-    def test_bs2d_series_creation_with_vectors(self):
+    def test_bs2d_series_creation_with_vectors(self) -> None:
         """Test BS2DSeries with vector data."""
         mesh = pv.Plane()
         vectors = np.random.rand(mesh.n_points, 3)
@@ -98,7 +101,7 @@ class TestBS2DSeries:
         assert series.vectors_unit == "hbar"
         assert series.vectors_lim == (0.0, 1.0)
 
-    def test_bs2d_series_additional_kwargs_default(self):
+    def test_bs2d_series_additional_kwargs_default(self) -> None:
         """Test BS2DSeries additional_kwargs defaults to empty dict."""
         mesh = pv.Plane()
         series = BS2DSeries(
@@ -121,30 +124,32 @@ class TestBS2DSeries:
 class TestBS2DPlotterInit:
     """Tests for BS2DPlotter initialization."""
 
-    def test_plotter_init_has_meshes_list(self):
+    def test_plotter_init_has_meshes_list(self) -> None:
         """Test BS2DPlotter initializes with _meshes list."""
         # Create a minimal mock bandstructure2d
         mock_bs2d = type("MockBS2D", (), {})()
         plotter = BS2DPlotter(mock_bs2d, off_screen=True)
         try:
             assert hasattr(plotter, "_meshes")
-            assert isinstance(plotter._meshes, list)
-            assert len(plotter._meshes) == 0
+            meshes_attr: object = plotter._meshes
+            assert isinstance(meshes_attr, list)
+            assert meshes_attr.__len__() == 0
         finally:
             plotter.close()
 
-    def test_plotter_init_has_values_dict(self):
+    def test_plotter_init_has_values_dict(self) -> None:
         """Test BS2DPlotter initializes with values_dict."""
         mock_bs2d = type("MockBS2D", (), {})()
         plotter = BS2DPlotter(mock_bs2d, off_screen=True)
         try:
             assert hasattr(plotter, "values_dict")
-            assert isinstance(plotter.values_dict, dict)
-            assert len(plotter.values_dict) == 0
+            values_attr: object = plotter.values_dict
+            assert isinstance(values_attr, dict)
+            assert values_attr.__len__() == 0
         finally:
             plotter.close()
 
-    def test_plotter_has_plot_method(self):
+    def test_plotter_has_plot_method(self) -> None:
         """Test BS2DPlotter has plot method."""
         mock_bs2d = type("MockBS2D", (), {})()
         plotter = BS2DPlotter(mock_bs2d, off_screen=True)
@@ -154,7 +159,7 @@ class TestBS2DPlotterInit:
         finally:
             plotter.close()
 
-    def test_plotter_has_to_series_list_method(self):
+    def test_plotter_has_to_series_list_method(self) -> None:
         """Test BS2DPlotter has _to_series_list method."""
         mock_bs2d = type("MockBS2D", (), {})()
         plotter = BS2DPlotter(mock_bs2d, off_screen=True)
@@ -168,7 +173,7 @@ class TestBS2DPlotterInit:
 class TestBS2DPlotterBuildSeriesLabel:
     """Tests for _build_series_label method."""
 
-    def test_build_series_label_single_surface(self):
+    def test_build_series_label_single_surface(self) -> None:
         """Test label generation for single surface returns None."""
         mock_bs2d = type("MockBS2D", (), {})()
         plotter = BS2DPlotter(mock_bs2d, off_screen=True)
@@ -178,7 +183,7 @@ class TestBS2DPlotterBuildSeriesLabel:
         finally:
             plotter.close()
 
-    def test_build_series_label_multiple_surfaces_spin_up(self):
+    def test_build_series_label_multiple_surfaces_spin_up(self) -> None:
         """Test label generation for spin up in multi-surface plot."""
         mock_bs2d = type("MockBS2D", (), {})()
         plotter = BS2DPlotter(mock_bs2d, off_screen=True)
@@ -188,7 +193,7 @@ class TestBS2DPlotterBuildSeriesLabel:
         finally:
             plotter.close()
 
-    def test_build_series_label_multiple_surfaces_spin_down(self):
+    def test_build_series_label_multiple_surfaces_spin_down(self) -> None:
         """Test label generation for spin down in multi-surface plot."""
         mock_bs2d = type("MockBS2D", (), {})()
         plotter = BS2DPlotter(mock_bs2d, off_screen=True)
@@ -202,7 +207,7 @@ class TestBS2DPlotterBuildSeriesLabel:
 class TestBS2DPlotterResolveClim:
     """Tests for _resolve_clim method."""
 
-    def test_resolve_clim_empty_series(self):
+    def test_resolve_clim_empty_series(self) -> None:
         """Test clim resolution with no series."""
         mock_bs2d = type("MockBS2D", (), {})()
         plotter = BS2DPlotter(mock_bs2d, off_screen=True)
@@ -212,7 +217,7 @@ class TestBS2DPlotterResolveClim:
         finally:
             plotter.close()
 
-    def test_resolve_clim_no_scalars(self):
+    def test_resolve_clim_no_scalars(self) -> None:
         """Test clim resolution when series have no scalars."""
         mock_bs2d = type("MockBS2D", (), {})()
         plotter = BS2DPlotter(mock_bs2d, off_screen=True)
@@ -237,7 +242,7 @@ class TestBS2DPlotterResolveClim:
         finally:
             plotter.close()
 
-    def test_resolve_clim_with_scalars(self):
+    def test_resolve_clim_with_scalars(self) -> None:
         """Test clim resolution with scalar data."""
         mock_bs2d = type("MockBS2D", (), {})()
         plotter = BS2DPlotter(mock_bs2d, off_screen=True)
@@ -263,7 +268,7 @@ class TestBS2DPlotterResolveClim:
         finally:
             plotter.close()
 
-    def test_resolve_clim_multiple_series(self):
+    def test_resolve_clim_multiple_series(self) -> None:
         """Test clim resolution with multiple series."""
         mock_bs2d = type("MockBS2D", (), {})()
         plotter = BS2DPlotter(mock_bs2d, off_screen=True)
@@ -306,7 +311,7 @@ class TestBS2DPlotterResolveClim:
 class TestBS2DPlotterRecordSeriesData:
     """Tests for _record_series_data method."""
 
-    def test_record_series_data_basic(self):
+    def test_record_series_data_basic(self) -> None:
         """Test recording series data for export."""
         mock_bs2d = type("MockBS2D", (), {})()
         plotter = BS2DPlotter(mock_bs2d, off_screen=True)
@@ -332,7 +337,7 @@ class TestBS2DPlotterRecordSeriesData:
         finally:
             plotter.close()
 
-    def test_record_series_data_with_scalars(self):
+    def test_record_series_data_with_scalars(self) -> None:
         """Test recording series data with scalars."""
         mock_bs2d = type("MockBS2D", (), {})()
         plotter = BS2DPlotter(mock_bs2d, off_screen=True)
@@ -359,7 +364,7 @@ class TestBS2DPlotterRecordSeriesData:
         finally:
             plotter.close()
 
-    def test_record_series_data_with_vectors(self):
+    def test_record_series_data_with_vectors(self) -> None:
         """Test recording series data with vectors."""
         mock_bs2d = type("MockBS2D", (), {})()
         plotter = BS2DPlotter(mock_bs2d, off_screen=True)
@@ -390,7 +395,7 @@ class TestBS2DPlotterRecordSeriesData:
 class TestBS2DPlotterExport:
     """Tests for export functionality."""
 
-    def test_export_npz(self, tmp_path):
+    def test_export_npz(self, tmp_path: Path) -> None:
         """Test export to NPZ format."""
         mock_bs2d = type("MockBS2D", (), {})()
         plotter = BS2DPlotter(mock_bs2d, off_screen=True)
@@ -406,7 +411,7 @@ class TestBS2DPlotterExport:
         finally:
             plotter.close()
 
-    def test_export_vtk(self, tmp_path):
+    def test_export_vtk(self, tmp_path: Path) -> None:
         """Test export to VTK format."""
         mock_bs2d = type("MockBS2D", (), {})()
         plotter = BS2DPlotter(mock_bs2d, off_screen=True)
@@ -418,11 +423,12 @@ class TestBS2DPlotterExport:
             plotter.export_data(str(output_path))
             assert output_path.exists()
             loaded_mesh = pv.read(str(output_path))
+            assert isinstance(loaded_mesh, pv.PolyData)
             assert loaded_mesh.n_points == mesh.n_points
         finally:
             plotter.close()
 
-    def test_export_unsupported_format_raises(self, tmp_path):
+    def test_export_unsupported_format_raises(self, tmp_path: Path) -> None:
         """Test export raises ValueError for unsupported formats."""
         mock_bs2d = type("MockBS2D", (), {})()
         plotter = BS2DPlotter(mock_bs2d, off_screen=True)
@@ -433,7 +439,7 @@ class TestBS2DPlotterExport:
         finally:
             plotter.close()
 
-    def test_export_multiple_meshes_merged(self, tmp_path):
+    def test_export_multiple_meshes_merged(self, tmp_path: Path) -> None:
         """Test export merges multiple meshes."""
         mock_bs2d = type("MockBS2D", (), {})()
         plotter = BS2DPlotter(mock_bs2d, off_screen=True)
@@ -446,6 +452,7 @@ class TestBS2DPlotterExport:
             plotter.export_data(str(output_path))
             assert output_path.exists()
             loaded_mesh = pv.read(str(output_path))
+            assert isinstance(loaded_mesh, pv.PolyData)
             # Merged mesh should have points from both planes
             assert loaded_mesh.n_points == mesh1.n_points + mesh2.n_points
         finally:

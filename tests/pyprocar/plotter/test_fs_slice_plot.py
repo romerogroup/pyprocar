@@ -6,6 +6,12 @@ these tests can use normal imports:
     from pyprocar.plotter.fs_slice_plot import FermiSlicePlotter, FermiSliceSeries
 """
 
+from __future__ import annotations
+
+from dataclasses import dataclass, field
+from pathlib import Path
+from typing import Any
+
 import matplotlib
 
 matplotlib.use("Agg")
@@ -13,6 +19,7 @@ matplotlib.use("Agg")
 
 import matplotlib.pyplot as plt
 import numpy as np
+import numpy.typing as npt
 import pyvista as pv
 
 # ------------------------------------------------------------------
@@ -20,37 +27,37 @@ import pyvista as pv
 # ------------------------------------------------------------------
 
 
+@dataclass
+class FermiSliceSeries:
+    """Local dataclass mirroring the real FermiSliceSeries for testing."""
+
+    points_2d: npt.NDArray[np.float64]
+    lines: npt.NDArray[np.int_]
+    scalars: npt.NDArray[np.float64] | None
+    scalars_label: str | None
+    scalars_unit: str | None
+    scalars_lim: tuple[float, float] | None
+    vectors: npt.NDArray[np.float64] | None
+    vectors_label: str | None
+    vectors_unit: str | None
+    vectors_lim: tuple[float, float] | None
+    label: str | None
+    additional_kwargs: dict[str, Any] = field(default_factory=dict)
+
+
 def _make_series(
     n_points: int = 10,
     has_scalars: bool = True,
     has_vectors: bool = False,
-):
+) -> FermiSliceSeries:
     """Create a FermiSliceSeries for testing."""
-    from dataclasses import dataclass, field
-    from typing import Any
-
-    @dataclass
-    class FermiSliceSeries:
-        points_2d: np.ndarray
-        lines: np.ndarray
-        scalars: np.ndarray | None
-        scalars_label: str | None
-        scalars_unit: str | None
-        scalars_lim: tuple[float, float] | None
-        vectors: np.ndarray | None
-        vectors_label: str | None
-        vectors_unit: str | None
-        vectors_lim: tuple[float, float] | None
-        label: str | None
-        additional_kwargs: dict[str, Any] = field(default_factory=dict)
-
-    points_2d = np.random.rand(n_points, 2)
+    points_2d: npt.NDArray[np.float64] = np.random.rand(n_points, 2)
     # Create line connectivity: pairs of points
     # PyVista format: [n_pts, p0, p1, n_pts, p2, p3, ...]
-    lines_list = []
+    lines_list: list[int] = []
     for i in range(n_points - 1):
         lines_list.extend([2, i, i + 1])  # 2 points per segment
-    lines = np.array(lines_list, dtype=int)
+    lines: npt.NDArray[np.int_] = np.array(lines_list, dtype=int)
 
     return FermiSliceSeries(
         points_2d=points_2d,
@@ -70,7 +77,7 @@ def _make_series(
 class TestFermiSliceSeriesDataclass:
     """Tests for FermiSliceSeries dataclass structure."""
 
-    def test_create_minimal_series(self):
+    def test_create_minimal_series(self) -> None:
         """Can create series with minimal required fields."""
         series = _make_series(has_scalars=False, has_vectors=False)
         assert series.points_2d is not None
@@ -78,7 +85,7 @@ class TestFermiSliceSeriesDataclass:
         assert series.scalars is None
         assert series.vectors is None
 
-    def test_create_full_series(self):
+    def test_create_full_series(self) -> None:
         """Can create series with all fields populated."""
         series = _make_series(has_scalars=True, has_vectors=True)
         assert series.scalars is not None
@@ -86,7 +93,7 @@ class TestFermiSliceSeriesDataclass:
         assert series.scalars_label == "Test Scalars"
         assert series.vectors_label == "Test Vectors"
 
-    def test_series_additional_kwargs_default(self):
+    def test_series_additional_kwargs_default(self) -> None:
         """Additional kwargs defaults to empty dict."""
         series = _make_series()
         assert series.additional_kwargs == {}
@@ -98,18 +105,22 @@ class TestFermiSliceSeriesDataclass:
 
 
 def _make_mock_fermi_surface(
-    n_points: int = 100, has_scalars: bool = True, has_vectors: bool = False
+    _n_points: int = 100, has_scalars: bool = True, has_vectors: bool = False
 ) -> pv.PolyData:
     """Create a mock Fermi surface (sphere) for testing."""
-    sphere = pv.Sphere(radius=1.0, center=(0, 0, 0), theta_resolution=10, phi_resolution=10)
+    sphere: pv.PolyData = pv.Sphere(
+        radius=1.0, center=(0, 0, 0), theta_resolution=10, phi_resolution=10
+    )
 
     if has_scalars:
-        scalars = np.linalg.norm(sphere.points, axis=1)
+        scalars: npt.NDArray[np.floating[Any]] = np.linalg.norm(sphere.points, axis=1)
         sphere["scalars"] = scalars
         sphere.set_active_scalars("scalars")
 
     if has_vectors:
-        vectors = sphere.points / np.linalg.norm(sphere.points, axis=1, keepdims=True)
+        vectors: npt.NDArray[np.floating[Any]] = sphere.points / np.linalg.norm(
+            sphere.points, axis=1, keepdims=True
+        )
         sphere["vectors"] = vectors
         sphere.set_active_vectors("vectors")
 
@@ -123,7 +134,7 @@ def _make_mock_fermi_surface(
 class TestFermiSlicePlotterPatterns:
     """Tests for patterns used in FermiSlicePlotter."""
 
-    def test_orthonormal_basis_z_normal(self):
+    def test_orthonormal_basis_z_normal(self) -> None:
         """Orthonormal basis computation for z-normal plane."""
         normal = np.array([0, 0, 1])
 
@@ -145,7 +156,7 @@ class TestFermiSlicePlotterPatterns:
         assert abs(np.linalg.norm(u) - 1.0) < 1e-6
         assert abs(np.linalg.norm(v) - 1.0) < 1e-6
 
-    def test_orthonormal_basis_x_normal(self):
+    def test_orthonormal_basis_x_normal(self) -> None:
         """Orthonormal basis computation for x-normal plane."""
         normal = np.array([1, 0, 0])
 
@@ -163,43 +174,43 @@ class TestFermiSlicePlotterPatterns:
         assert abs(np.dot(u, normal)) < 1e-6
         assert abs(np.dot(v, normal)) < 1e-6
 
-    def test_iter_segments_pattern(self):
+    def test_iter_segments_pattern(self) -> None:
         """Line segment iteration pattern works correctly."""
         # PyVista line format: [n_pts, p1, p2, n_pts, p3, p4, ...]
         lines = np.array([2, 0, 1, 2, 2, 3])
 
-        segments = []
+        segments: list[tuple[int, int]] = []
         i = 0
         while i < len(lines):
-            num_points_in_line = lines[i]
+            num_points_in_line = int(lines[i])
             line_connectivity_start = i + 1
             for j in range(num_points_in_line - 1):
-                start_idx = lines[line_connectivity_start + j]
-                end_idx = lines[line_connectivity_start + j + 1]
+                start_idx = int(lines[line_connectivity_start + j])
+                end_idx = int(lines[line_connectivity_start + j + 1])
                 segments.append((start_idx, end_idx))
             i += num_points_in_line + 1
 
         assert segments == [(0, 1), (2, 3)]
 
-    def test_slice_returns_polydata(self):
+    def test_slice_returns_polydata(self) -> None:
         """Slicing a surface returns PolyData."""
         sphere = _make_mock_fermi_surface(has_scalars=True)
-        slice_data = sphere.slice(normal=[0, 0, 1], origin=[0, 0, 0])
+        slice_data = sphere.slice(normal=(0.0, 0.0, 1.0), origin=(0.0, 0.0, 0.0))
 
         assert isinstance(slice_data, pv.PolyData)
         assert slice_data.n_points > 0
 
-    def test_slice_preserves_scalars(self):
+    def test_slice_preserves_scalars(self) -> None:
         """Sliced data preserves scalar field."""
         sphere = _make_mock_fermi_surface(has_scalars=True)
-        slice_data = sphere.slice(normal=[0, 0, 1], origin=[0, 0, 0])
+        slice_data = sphere.slice(normal=(0.0, 0.0, 1.0), origin=(0.0, 0.0, 0.0))
 
         assert slice_data.active_scalars is not None
 
-    def test_slice_preserves_vectors(self):
+    def test_slice_preserves_vectors(self) -> None:
         """Sliced data preserves vector field."""
         sphere = _make_mock_fermi_surface(has_scalars=True, has_vectors=True)
-        slice_data = sphere.slice(normal=[0, 0, 1], origin=[0, 0, 0])
+        slice_data = sphere.slice(normal=(0.0, 0.0, 1.0), origin=(0.0, 0.0, 0.0))
 
         assert slice_data.active_vectors is not None
 
@@ -207,7 +218,7 @@ class TestFermiSlicePlotterPatterns:
 class TestMatplotlibIntegration:
     """Tests for matplotlib integration patterns."""
 
-    def test_line_collection_creation(self):
+    def test_line_collection_creation(self) -> None:
         """LineCollection can be created from segments."""
         from matplotlib.collections import LineCollection
 
@@ -218,7 +229,7 @@ class TestMatplotlibIntegration:
 
         assert lc is not None
 
-    def test_colorbar_creation(self):
+    def test_colorbar_creation(self) -> None:
         """Colorbar can be attached to mappable."""
         from matplotlib.collections import LineCollection
 
@@ -233,7 +244,7 @@ class TestMatplotlibIntegration:
 
         plt.close(fig)
 
-    def test_quiver_creation(self):
+    def test_quiver_creation(self) -> None:
         """Quiver plot can be created."""
         fig, ax = plt.subplots()
 
@@ -252,7 +263,7 @@ class TestMatplotlibIntegration:
 class TestAxisConfiguration:
     """Tests for axis configuration patterns."""
 
-    def test_set_axis_labels(self):
+    def test_set_axis_labels(self) -> None:
         """Axis labels can be set."""
         fig, ax = plt.subplots()
 
@@ -264,7 +275,7 @@ class TestAxisConfiguration:
 
         plt.close(fig)
 
-    def test_set_axis_limits(self):
+    def test_set_axis_limits(self) -> None:
         """Axis limits can be set."""
         fig, ax = plt.subplots()
 
@@ -276,7 +287,7 @@ class TestAxisConfiguration:
 
         plt.close(fig)
 
-    def test_set_aspect_equal(self):
+    def test_set_aspect_equal(self) -> None:
         """Aspect ratio can be set to equal."""
         fig, ax = plt.subplots()
 
@@ -289,7 +300,7 @@ class TestAxisConfiguration:
 class TestExportPatterns:
     """Tests for export functionality patterns."""
 
-    def test_csv_export(self, tmp_path):
+    def test_csv_export(self, tmp_path: Path) -> None:
         """Data can be exported to CSV."""
         import pandas as pd
 
@@ -306,10 +317,10 @@ class TestExportPatterns:
         assert filepath.exists()
 
         # Verify content
-        df_read = pd.read_csv(filepath)
+        df_read = pd.read_csv(filepath)  # pyright: ignore[reportUnknownMemberType]
         np.testing.assert_array_almost_equal(df_read["points_u"], values["points_u"])
 
-    def test_json_export(self, tmp_path):
+    def test_json_export(self, tmp_path: Path) -> None:
         """Data can be exported to JSON."""
         import json
 
@@ -330,13 +341,13 @@ class TestExportPatterns:
             data = json.load(f)
         assert data["points_u"] == values["points_u"]
 
-    def test_savefig(self, tmp_path):
+    def test_savefig(self, tmp_path: Path) -> None:
         """Figure can be saved to file."""
         fig, ax = plt.subplots()
         ax.plot([0, 1, 2], [0, 1, 0])
 
         filepath = tmp_path / "test.png"
-        fig.savefig(filepath)
+        fig.savefig(str(filepath))
 
         assert filepath.exists()
 
@@ -351,7 +362,7 @@ class TestExportPatterns:
 class TestShowColorbarEnum:
     """Tests for ShowColorbar enum pattern."""
 
-    def test_from_string_single(self):
+    def test_from_string_single(self) -> None:
         """'single' converts to SINGLE enum."""
         from enum import Enum
 
@@ -361,9 +372,10 @@ class TestShowColorbarEnum:
             PER_CHANNEL = "per_channel"
 
             @classmethod
-            def from_string(cls, value):
+            def from_string(cls, value: str | ShowColorbar) -> ShowColorbar:
                 if isinstance(value, cls):
                     return value
+                assert isinstance(value, str)
                 mapping = {
                     "none": cls.NONE,
                     "single": cls.SINGLE,
@@ -376,7 +388,7 @@ class TestShowColorbarEnum:
         result = ShowColorbar.from_string("single")
         assert result == ShowColorbar.SINGLE
 
-    def test_from_string_none(self):
+    def test_from_string_none(self) -> None:
         """'none' converts to NONE enum."""
         from enum import Enum
 
@@ -385,15 +397,16 @@ class TestShowColorbarEnum:
             SINGLE = "single"
 
             @classmethod
-            def from_string(cls, value):
+            def from_string(cls, value: str | ShowColorbar) -> ShowColorbar:
                 if isinstance(value, cls):
                     return value
+                assert isinstance(value, str)
                 return cls.NONE if value.lower() == "none" else cls.SINGLE
 
         result = ShowColorbar.from_string("none")
         assert result == ShowColorbar.NONE
 
-    def test_from_string_passthrough(self):
+    def test_from_string_passthrough(self) -> None:
         """Enum passthrough works."""
         from enum import Enum
 
@@ -401,9 +414,10 @@ class TestShowColorbarEnum:
             SINGLE = "single"
 
             @classmethod
-            def from_string(cls, value):
+            def from_string(cls, value: str | ShowColorbar) -> ShowColorbar:
                 if isinstance(value, cls):
                     return value
+                assert isinstance(value, str)
                 return cls.SINGLE
 
         result = ShowColorbar.from_string(ShowColorbar.SINGLE)

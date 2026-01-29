@@ -1117,7 +1117,7 @@ class PwOut:
         return self.timing_info["output_data_dir"]
 
     @cached_property
-    def timings(self) -> dict[str, Any] | None:
+    def timings(self) -> list[dict[str, Any]] | None:
         if self.timing_info is None:
             return None
         return self.timing_info["timings"]

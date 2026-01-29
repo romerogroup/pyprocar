@@ -13,6 +13,8 @@ class BaseTest:
     - assert_msonable: Test if obj is MSONable and return its serialized string.
     """
 
+    tmp_path: Path  # pyright: ignore[reportUninitializedInstanceVariable] - set by autouse fixture
+
     @pytest.fixture(autouse=True)
     def _tmp_dir(self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
         """Make all tests run a in a temporary directory accessible via self.tmp_path.

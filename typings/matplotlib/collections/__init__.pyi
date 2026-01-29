@@ -5,6 +5,8 @@ from collections.abc import Sequence
 import numpy as np
 import numpy.typing as npt
 
+from matplotlib.colors import Colormap
+
 class LineCollection:
     """Collection of lines."""
 
@@ -52,11 +54,15 @@ class LineCollection:
             | str
         ),
     ) -> None: ...
+    def get_cmap(self) -> Colormap: ...
+    def get_clim(self) -> tuple[float, float]: ...
 
 class PathCollection:
     """Collection of paths (returned by scatter)."""
 
     def set_array(self, A: npt.NDArray[np.float64] | None) -> None: ...
     def get_array(self) -> npt.NDArray[np.float64] | None: ...
+    def get_cmap(self) -> Colormap: ...
+    def get_clim(self) -> tuple[float, float]: ...
 
 __all__ = ["LineCollection", "PathCollection"]

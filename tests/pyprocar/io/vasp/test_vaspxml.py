@@ -818,8 +818,8 @@ ATOM_INFO = """<atominfo>
 """
 
 
-def parse_atom_info_element():
-    parser = VaspXML.from_str(ATOM_INFO)
+def parse_atom_info_element() -> None:
+    _parser = VaspXML.from_str(ATOM_INFO)
     assert False
 
 
@@ -874,21 +874,23 @@ KPOINTS_ELEMENT = """ <kpoints>
 """
 
 
-def parse_kpoints_element():
+def parse_kpoints_element() -> None:
     parser = VaspXML.from_str(KPOINTS_ELEMENT)
 
-    assert np.allclose(parser.kpoints.weights, np.array([0.00500000, 0.00500000]))
+    kpoints = parser.kpoints
+    assert kpoints is not None
+    assert np.allclose(kpoints.weights, np.array([0.00500000, 0.00500000]))
     assert np.allclose(
-        parser.kpoints.kpointlist,
+        kpoints.kpointlist,
         np.array([[0.00000000, 0.00000000, 0.00000000], [0.00000000, 0.01282051, 0.00000000]]),
     )
 
-    assert parser.kpoints.comment == "listgenerated"
-    assert parser.kpoints.mode == "listgenerated"
-    assert parser.kpoints.ngrids == 2
-    assert parser.kpoints.automatic == False
-    assert parser.kpoints.kgrid == [2, 2, 2]
-    assert parser.kpoints.kshift == [0, 0, 0]
+    assert kpoints.comment == "listgenerated"
+    assert kpoints.mode == "listgenerated"
+    assert kpoints.ngrids == 2
+    assert kpoints.automatic == False
+    assert kpoints.kgrid == [2, 2, 2]
+    assert kpoints.kshift == [0, 0, 0]
 
 
 INCAR_ELEMENT = """<incar>
@@ -1211,14 +1213,16 @@ INITIAL_STRUCTURE_ELEMENT = """ <calculation> <structure>
 """
 
 
-def parse_initial_structure_element():
+def parse_initial_structure_element() -> None:
     parser = VaspXML.from_str(INITIAL_STRUCTURE_ELEMENT)
-    assert parser.initial_structure.crystal.basis.shape == (3, 3)
-    assert parser.initial_structure.crystal.volume == 56.91201793
-    assert parser.initial_structure.crystal.rec_basis.shape == (3, 3)
-    assert parser.initial_structure.positions.shape == (2, 3)
+    initial_structure = parser.initial_structure
+    assert initial_structure is not None
+    assert initial_structure.crystal.basis.shape == (3, 3)
+    assert initial_structure.crystal.volume == 56.91201793
+    assert initial_structure.crystal.rec_basis.shape == (3, 3)
+    assert initial_structure.positions.shape == (2, 3)
     assert np.allclose(
-        parser.initial_structure.positions,
+        initial_structure.positions,
         np.array([[0.00000000, 0.00000000, 0.00000000], [0.50000000, 0.50000000, 0.50000000]]),
     )
 
@@ -1233,11 +1237,13 @@ FORCES_ELEMENT = """ <calculation> <forces>
 """
 
 
-def parse_forces_element():
+def parse_forces_element() -> None:
     parser = VaspXML.from_str(FORCES_ELEMENT)
-    assert parser.forces.shape == (2, 3)
+    forces = parser.forces
+    assert forces is not None
+    assert forces.shape == (2, 3)
     assert np.allclose(
-        parser.forces,
+        forces,
         np.array(
             [[-0.00000000, -5.00000000, -0.00000000], [-0.00000000, -5.00000000, -5.00000000]]
         ),
@@ -1255,10 +1261,12 @@ STRESS_ELEMENT = """ <calculation> <stress>
 """
 
 
-def parse_stress_element():
+def parse_stress_element() -> None:
     parser = VaspXML.from_str(STRESS_ELEMENT)
+    stress = parser.stress
+    assert stress is not None
     assert np.allclose(
-        parser.stress,
+        stress,
         np.array(
             [
                 [229.62291361, 0.00000000, -0.00000000],
@@ -1349,7 +1357,7 @@ class VaspXMLEigenvaluesTestCase(NamedTuple):
     n_spins: int
 
 
-TEST_CASES = [
+eigenvalues_test_cases = [
     VaspXMLEigenvaluesTestCase(
         data=NON_SPIN_POLARIZED_EIGENVALUES_ELEMENT, id="non_spin_polarized_eigenvalues", n_spins=1
     ),
@@ -1362,13 +1370,15 @@ TEST_CASES = [
 
 
 class TestVasprunEigenvalues:
-    @pytest.fixture(params=TEST_CASES, ids=lambda c: c.id)
+    @pytest.fixture(params=eigenvalues_test_cases, ids=lambda c: c.id)  # pyright: ignore[reportUnknownLambdaType, reportUnknownMemberType]
     def case(self, request: pytest.FixtureRequest) -> VaspXMLEigenvaluesTestCase:
         return request.param
 
     def test_eigenvalues_shape(self, case: VaspXMLEigenvaluesTestCase) -> None:
         vaspxml = VaspXML.from_str(case.data)
-        assert vaspxml.eigenvalues.shape == (2, 2, case.n_spins)
+        eigenvalues = vaspxml.eigenvalues
+        assert eigenvalues is not None
+        assert eigenvalues.shape == (2, 2, case.n_spins)
 
 
 NON_SPIN_POLARIZED_TOTAL_DOS_ELEMENT = """ <total>
@@ -1446,7 +1456,7 @@ class VaspXMLTotalTestCase(NamedTuple):
     n_spins: int
 
 
-TEST_CASES = [
+total_test_cases = [
     VaspXMLTotalTestCase(
         data=NON_SPIN_POLARIZED_TOTAL_DOS_ELEMENT, id="non_spin_polarized_total", n_spins=1
     ),
@@ -1458,13 +1468,15 @@ TEST_CASES = [
 
 
 class TestVasprunTotal:
-    @pytest.fixture(params=TEST_CASES, ids=lambda c: c.id)
+    @pytest.fixture(params=total_test_cases, ids=lambda c: c.id)  # pyright: ignore[reportUnknownLambdaType, reportUnknownMemberType]
     def case(self, request: pytest.FixtureRequest) -> VaspXMLTotalTestCase:
         return request.param
 
     def test_total_shape(self, case: VaspXMLTotalTestCase) -> None:
         vaspxml = VaspXML.from_str(case.data)
-        assert vaspxml.total.shape == (2, case.n_spins)
+        total = vaspxml.total
+        assert total is not None
+        assert total.shape == (2, case.n_spins)
 
 
 NON_SPIN_POLARIZED_PARTIAL_DOS_ELEMENT = """  <partial>
@@ -1606,7 +1618,7 @@ class VaspXMLPartialTestCase(NamedTuple):
     n_spins: int
 
 
-TEST_CASES = [
+partial_test_cases = [
     VaspXMLPartialTestCase(
         data=NON_SPIN_POLARIZED_PARTIAL_DOS_ELEMENT, id="non_spin_polarized_partial", n_spins=1
     ),
@@ -1620,13 +1632,15 @@ TEST_CASES = [
 
 
 class TestVasprunPartial:
-    @pytest.fixture(params=TEST_CASES, ids=lambda c: c.id)
+    @pytest.fixture(params=partial_test_cases, ids=lambda c: c.id)  # pyright: ignore[reportUnknownLambdaType, reportUnknownMemberType]
     def case(self, request: pytest.FixtureRequest) -> VaspXMLPartialTestCase:
         return request.param
 
     def test_partial_shape(self, case: VaspXMLPartialTestCase) -> None:
         vaspxml = VaspXML.from_str(case.data)
-        assert vaspxml.partial.shape == (2, case.n_spins, 2, 9)
+        partial = vaspxml.partial
+        assert partial is not None
+        assert partial.shape == (2, case.n_spins, 2, 9)
 
 
 NON_SPIN_POLARIZED_PROJ_ELEMENT = """ <projected>
@@ -1958,7 +1972,7 @@ class VaspXMLProjTestCase(NamedTuple):
     n_spins: int
 
 
-TEST_CASES = [
+proj_test_cases = [
     VaspXMLProjTestCase(
         data=NON_SPIN_POLARIZED_PROJ_ELEMENT, id="non_spin_polarized_proj", n_spins=1
     ),
@@ -1968,13 +1982,15 @@ TEST_CASES = [
 
 
 class TestVasprunProj:
-    @pytest.fixture(params=TEST_CASES, ids=lambda c: c.id)
+    @pytest.fixture(params=proj_test_cases, ids=lambda c: c.id)  # pyright: ignore[reportUnknownLambdaType, reportUnknownMemberType]
     def case(self, request: pytest.FixtureRequest) -> VaspXMLProjTestCase:
         return request.param
 
     def test_proj_shape(self, case: VaspXMLProjTestCase) -> None:
         vaspxml = VaspXML.from_str(case.data)
-        assert vaspxml.projected.shape == (2, 2, case.n_spins, 2, 9)
+        projected = vaspxml.projected
+        assert projected is not None
+        assert projected.shape == (2, 2, case.n_spins, 2, 9)
 
 
 FINAL_STRUCTURE_ELEMENT = """ <structure name="finalpos" >
@@ -2002,6 +2018,6 @@ FINAL_STRUCTURE_ELEMENT = """ <structure name="finalpos" >
 """
 
 
-def parse_final_structure_element():
-    parser = VaspXML.from_str(FINAL_STRUCTURE_ELEMENT)
+def parse_final_structure_element() -> None:
+    _parser = VaspXML.from_str(FINAL_STRUCTURE_ELEMENT)
     assert False

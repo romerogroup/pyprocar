@@ -35,7 +35,7 @@ from pyprocar.core.atomic_orbital_index import (
     SpinIndexer,
 )
 from pyprocar.core.brillouin_zone import BrillouinZone
-from pyprocar.core.property_store import PointSet, Property
+from pyprocar.core.property_store import MetadataValue, PointSet, Property
 from pyprocar.core.serializer import get_serializer
 from pyprocar.core.structure import Structure
 from pyprocar.utils import math, np_utils, physics
@@ -1918,17 +1918,17 @@ class ElectronicBandStructurePath(  # pyright: ignore[reportIncompatibleMethodOv
             return None
 
         # Add kpath metadata to a copy of the property
-        kpath_metadata = {
-            "k_distances": self.kpath.get_distances(as_segments=False),
+        k_distances = self.kpath.get_distances(as_segments=False)
+        assert isinstance(k_distances, np.ndarray)
+        kpath_metadata: dict[str, MetadataValue] = {
+            "k_distances": k_distances,
             "tick_positions": list(self.kpath.tick_positions),
             "tick_names": list(self.kpath.tick_names),
             "tick_names_latex": list(self.kpath.tick_names_latex),
         }
 
         # Create new Property with merged metadata
-        # Note: kpath_metadata is a nested dict which doesn't match MetadataValue type.
-        # Fixing this would require expanding MetadataValue to include nested dicts.
-        merged_metadata = {**prop.metadata, "kpath": kpath_metadata}
+        merged_metadata: dict[str, MetadataValue] = {**prop.metadata, "kpath": kpath_metadata}
 
         return Property(
             name=prop.name,
@@ -1936,7 +1936,7 @@ class ElectronicBandStructurePath(  # pyright: ignore[reportIncompatibleMethodOv
             point_set=prop.point_set,
             units=prop.units,
             label=prop.label,
-            metadata=merged_metadata,  # pyright: ignore[reportArgumentType] - nested dict doesn't match MetadataValue
+            metadata=merged_metadata,
         )
 
     @override

@@ -20,29 +20,29 @@ DOSCAR_CONTENT = """   2   2   0   1
 
 
 class TestDoscarLobster:
-    def test_from_str(self):
+    def test_from_str(self) -> None:
         extractor = DoscarLobster.from_str(DOSCAR_CONTENT)
         assert extractor is not None
 
-    def test_nedos(self):
+    def test_nedos(self) -> None:
         extractor = DoscarLobster.from_str(DOSCAR_CONTENT)
         assert extractor.nedos == 5
 
-    def test_energies(self):
+    def test_energies(self) -> None:
         extractor = DoscarLobster.from_str(DOSCAR_CONTENT)
         assert len(extractor.energies) == 5
         assert extractor.energies[0] == pytest.approx(-10.0)
         assert extractor.energies[-1] == pytest.approx(10.0)
 
-    def test_total_dos_shape(self):
+    def test_total_dos_shape(self) -> None:
         extractor = DoscarLobster.from_str(DOSCAR_CONTENT)
         assert extractor.total_dos.shape == (5, 1)  # (nedos, n_spins)
 
-    def test_is_spin_polarized(self):
+    def test_is_spin_polarized(self) -> None:
         extractor = DoscarLobster.from_str(DOSCAR_CONTENT)
         assert not extractor.is_spin_polarized
 
-    def test_mapping_protocol(self):
+    def test_mapping_protocol(self) -> None:
         extractor = DoscarLobster.from_str(DOSCAR_CONTENT)
         assert "energies" in extractor
         assert len(extractor) == 5

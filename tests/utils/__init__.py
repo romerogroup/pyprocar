@@ -1,7 +1,7 @@
 import logging
 from pathlib import Path
 
-from tests.utils.base_test import BaseTest
+from tests.utils.base_test import BaseTest as BaseTest
 
 logger = logging.getLogger("pyprocar")
 logger.setLevel(logging.DEBUG)

@@ -1,4 +1,5 @@
 import logging
+from pathlib import Path
 
 import pytest
 
@@ -8,9 +9,9 @@ from tests.utils import BaseTest
 logger = logging.getLogger(__name__)
 
 
-def get_all_dirs():
+def get_all_dirs() -> list[Path]:
     """Get all calculation directories for testing."""
-    dirs = []
+    dirs: list[Path] = []
     for calc_type in CALC_TYPES:
         for mode in ["bands", "dos", "fermi"]:
             dirpath = ABINIT_DATA_DIR / calc_type / mode
@@ -19,19 +20,19 @@ def get_all_dirs():
     return dirs
 
 
-@pytest.fixture(params=get_all_dirs(), ids=lambda p: f"{p.parent.name}/{p.name}")
-def calc_dirpath(request):
-    return request.param
+@pytest.fixture(params=get_all_dirs(), ids=lambda p: f"{p.parent.name}/{p.name}")  # pyright: ignore[reportUnknownLambdaType, reportUnknownMemberType]
+def calc_dirpath(request: pytest.FixtureRequest) -> Path:
+    return request.param  # type: ignore[no-any-return]
 
 
 class TestAbinitParserInit(BaseTest):
-    def test_init_from_dirpath(self, calc_dirpath):
+    def test_init_from_dirpath(self, calc_dirpath: Path) -> None:
         from pyprocar.io.abinit import AbinitParser
 
         parser = AbinitParser(calc_dirpath)
         assert parser is not None
 
-    def test_detect_files_runs(self, calc_dirpath):
+    def test_detect_files_runs(self, calc_dirpath: Path) -> None:
         from pyprocar.io.abinit import AbinitParser
 
         parser = AbinitParser(calc_dirpath)
@@ -40,7 +41,7 @@ class TestAbinitParserInit(BaseTest):
 
 
 class TestAbinitParserOutput(BaseTest):
-    def test_abinit_output_detected(self, calc_dirpath):
+    def test_abinit_output_detected(self, calc_dirpath: Path) -> None:
         from pyprocar.io.abinit import AbinitParser
 
         parser = AbinitParser(calc_dirpath)
@@ -48,7 +49,7 @@ class TestAbinitParserOutput(BaseTest):
 
 
 class TestAbinitParserStructure(BaseTest):
-    def test_structure_returns_structure_object(self, calc_dirpath):
+    def test_structure_returns_structure_object(self, calc_dirpath: Path) -> None:
         from pyprocar.core import Structure
         from pyprocar.io.abinit import AbinitParser
 
@@ -58,7 +59,7 @@ class TestAbinitParserStructure(BaseTest):
 
 
 class TestAbinitParserEBS(BaseTest):
-    def test_ebs_for_bands_calculation(self):
+    def test_ebs_for_bands_calculation(self) -> None:
         from pyprocar.io.abinit import AbinitParser
 
         dirpath = ABINIT_DATA_DIR / "non-spin-polarized" / "bands"
@@ -69,7 +70,7 @@ class TestAbinitParserEBS(BaseTest):
 
 
 class TestAbinitParserDOS(BaseTest):
-    def test_dos_for_dos_calculation(self):
+    def test_dos_for_dos_calculation(self) -> None:
         from pyprocar.io.abinit import AbinitParser
 
         dirpath = ABINIT_DATA_DIR / "non-spin-polarized" / "dos"

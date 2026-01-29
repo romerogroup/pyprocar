@@ -511,7 +511,7 @@ class DOSPlotter:
                     vectors_unit=v_unit,
                     vectors_lim=v_lim,
                     label=(
-                        str(point_data.metadata.get("label")[c])  # pyright: ignore[reportIndexIssue, reportOptionalSubscript, reportUnknownArgumentType]
+                        str(point_data.metadata.get("label")[c])  # pyright: ignore[reportIndexIssue, reportOptionalSubscript, reportUnknownArgumentType, reportArgumentType]
                         if point_data.metadata.get("label")
                         else point_data.label
                     ),
@@ -650,8 +650,8 @@ class DOSPlotter:
         if cb_axes is None:
             return []
         if self.colorbar_orientation is AxesOrientation.VERTICAL:
-            return cb_axes.get_yticklabels()
-        return cb_axes.get_xticklabels()
+            return list(cb_axes.get_yticklabels())
+        return list(cb_axes.get_xticklabels())
 
     def _validate_ticks(
         self, ticks: Sequence[float] | ticker.Locator, labels: Sequence[str]

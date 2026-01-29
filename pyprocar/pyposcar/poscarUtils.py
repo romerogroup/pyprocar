@@ -177,10 +177,10 @@ class poscar_modify:
 
         if cartesian is True:
             self.p.cpos = self.p.cpos * factor
-            self.p._set_direct()  # pyright: ignore[reportPrivateUsage]
+            self.p._set_direct()
         else:
             self.p.dpos = self.p.dpos * factor
-            self.p._set_cartesian()  # pyright: ignore[reportPrivateUsage]
+            self.p._set_cartesian()
 
         if self.verbose:
             print("\nnew positions:")
@@ -213,10 +213,10 @@ class poscar_modify:
 
         if cartesian is True:
             self.p.cpos = self.p.cpos + factor
-            self.p._set_direct()  # pyright: ignore[reportPrivateUsage]
+            self.p._set_direct()
         else:
             self.p.dpos = self.p.dpos + factor
-            self.p._set_cartesian()  # pyright: ignore[reportPrivateUsage]
+            self.p._set_cartesian()
 
         if self.verbose:
             print("\nnew positions:")
@@ -332,7 +332,7 @@ class poscar_modify:
                 print("\nOriginal Cartesian coords:")
                 print(self.p.cpos)
             self.p.cpos = self.p.cpos + amount
-            self.p._set_direct()  # pyright: ignore[reportPrivateUsage]
+            self.p._set_direct()
             if self.verbose:
                 print("\nShifted Cartesian coords:")
                 print(self.p.cpos)
@@ -341,7 +341,7 @@ class poscar_modify:
                 print("\nOriginal Direct coords:")
                 print(self.p.dpos)
             self.p.dpos = self.p.dpos + amount
-            self.p._set_cartesian()  # pyright: ignore[reportPrivateUsage]
+            self.p._set_cartesian()
             if self.verbose:
                 print("\nShifted Cartesian coords:")
                 print(self.p.cpos)
@@ -349,7 +349,7 @@ class poscar_modify:
         # enforcing the PBCs
         assert self.p.dpos is not None
         self.p.dpos = np.mod(self.p.dpos, 1.0)
-        self.p._set_cartesian()  # pyright: ignore[reportPrivateUsage]
+        self.p._set_cartesian()
 
     def scale_lattice(self, factor: np.ndarray, keep_cartesian: bool = False) -> None:
         """Scale the lattice vectors by factor [a,b,c]
@@ -377,9 +377,9 @@ class poscar_modify:
         if keep_cartesian:
             # if cartesian positions are to remain constant, the direct ones
             # needs to be updated
-            self.p._set_direct()  # pyright: ignore[reportPrivateUsage]
+            self.p._set_direct()
         else:
-            self.p._set_cartesian()  # pyright: ignore[reportPrivateUsage]
+            self.p._set_cartesian()
 
 
 class poscar_supercell:
@@ -518,7 +518,7 @@ class poscar_supercell:
         self.poscar.elm = new_elem
         self.poscar.lat = np.dot(scell, lat)
         self.poscar.dpos = npos
-        self.poscar._set_cartesian()  # pyright: ignore[reportPrivateUsage]
+        self.poscar._set_cartesian()
 
         self.poscar.sort()
 

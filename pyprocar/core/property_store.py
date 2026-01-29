@@ -5,7 +5,7 @@ import re
 import weakref
 from collections.abc import Callable, Generator, Mapping, Sequence
 from enum import Enum
-from typing import cast, overload
+from typing import TypeAlias, cast, overload
 
 import numpy as np
 import numpy.typing as npt
@@ -14,8 +14,20 @@ from typing_extensions import override
 
 from pyprocar.utils.math import np_round_to_half
 
-# Type alias for metadata values that can be stored
-MetadataValue = str | int | float | bool | list[str] | list[int] | list[float] | None
+# Type alias for metadata values that can be stored.
+# Includes nested dicts and ndarrays which are used in e.g. kpath metadata.
+MetadataValue: TypeAlias = (
+    str
+    | int
+    | float
+    | bool
+    | list[str]
+    | list[int]
+    | list[float]
+    | npt.NDArray[np.float64]
+    | dict[str, "MetadataValue"]
+    | None
+)
 
 VALUE_ARRAY_TYPE = npt.NDArray[np.float64]
 GRADIENT_TYPE = dict[int, VALUE_ARRAY_TYPE]

@@ -1,8 +1,14 @@
 """Tests for EBSPlanePlotter class."""
 
+from __future__ import annotations
+
+from collections.abc import Generator
+from pathlib import Path
+
 import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
+import numpy.typing as npt
 import pytest
 
 matplotlib.use("Agg")  # Use non-interactive backend for testing
@@ -18,27 +24,27 @@ from pyprocar.plotter.ebs_plane_plot import (
 class TestPlaneScalarsMode:
     """Tests for PlaneScalarsMode enum."""
 
-    def test_from_string_pcolormesh(self):
+    def test_from_string_pcolormesh(self) -> None:
         mode = PlaneScalarsMode.from_string("pcolormesh")
         assert mode is PlaneScalarsMode.PCOLORMESH
 
-    def test_from_string_contour(self):
+    def test_from_string_contour(self) -> None:
         mode = PlaneScalarsMode.from_string("contour")
         assert mode is PlaneScalarsMode.CONTOUR
 
-    def test_from_string_contourf(self):
+    def test_from_string_contourf(self) -> None:
         mode = PlaneScalarsMode.from_string("contourf")
         assert mode is PlaneScalarsMode.CONTOURF
 
-    def test_from_string_case_insensitive(self):
+    def test_from_string_case_insensitive(self) -> None:
         mode = PlaneScalarsMode.from_string("PCOLORMESH")
         assert mode is PlaneScalarsMode.PCOLORMESH
 
-    def test_from_string_invalid(self):
+    def test_from_string_invalid(self) -> None:
         with pytest.raises(ValueError, match="Invalid scalars mode"):
             PlaneScalarsMode.from_string("invalid")
 
-    def test_from_string_passthrough(self):
+    def test_from_string_passthrough(self) -> None:
         mode = PlaneScalarsMode.from_string(PlaneScalarsMode.CONTOUR)
         assert mode is PlaneScalarsMode.CONTOUR
 
@@ -46,7 +52,7 @@ class TestPlaneScalarsMode:
 class TestPlaneSeries:
     """Tests for PlaneSeries dataclass."""
 
-    def test_creation_scalars_only(self):
+    def test_creation_scalars_only(self) -> None:
         u_grid = np.zeros((5, 5))
         v_grid = np.zeros((5, 5))
 
@@ -71,7 +77,7 @@ class TestPlaneSeries:
         assert series.vectors_u is None
         assert series.vectors_v is None
 
-    def test_creation_vectors_only(self):
+    def test_creation_vectors_only(self) -> None:
         u_grid = np.zeros((5, 5))
         v_grid = np.zeros((5, 5))
 
@@ -95,7 +101,7 @@ class TestPlaneSeries:
         assert series.vectors_lim == (0.0, 2.0)
         assert series.scalars is None
 
-    def test_creation_with_additional_kwargs(self):
+    def test_creation_with_additional_kwargs(self) -> None:
         u_grid = np.zeros((5, 5))
         v_grid = np.zeros((5, 5))
 
@@ -117,7 +123,7 @@ class TestPlaneSeries:
 
         assert series.additional_kwargs == {"custom_key": "custom_value"}
 
-    def test_default_additional_kwargs(self):
+    def test_default_additional_kwargs(self) -> None:
         u_grid = np.zeros((5, 5))
         v_grid = np.zeros((5, 5))
 
@@ -142,7 +148,10 @@ class TestPlaneSeries:
 class MockEBSMesh:
     """Mock ElectronicBandStructureMesh for testing."""
 
-    def __init__(self, n_points: int = 100):
+    slice_points: npt.NDArray[np.float64]
+    n_points: int
+
+    def __init__(self, n_points: int = 100) -> None:
         # Create mock slice points on a plane
         u = np.linspace(-0.5, 0.5, 10)
         v = np.linspace(-0.5, 0.5, 10)
@@ -150,35 +159,53 @@ class MockEBSMesh:
         self.slice_points = np.column_stack([uu.ravel(), vv.ravel(), np.zeros(100)])
         self.n_points = 100
 
-    def slice(self, normal=None, origin=None, scalars=None, vectors=None):
+    def slice(
+        self,
+        normal: tuple[int, int, int] | None = None,
+        origin: tuple[int, int, int] | None = None,
+        scalars: str | None = None,
+        vectors: str | None = None,
+    ) -> MockSlice:
         """Return mock slice with points."""
-
-        class MockSlice:
-            def __init__(self, points, scalars_val=None, vectors_val=None):
-                self.points = points
-                self._scalars = scalars_val
-                self._vectors = vectors_val
-
-            @property
-            def active_scalars(self):
-                return self._scalars
-
-            @property
-            def active_vectors(self):
-                return self._vectors
-
+        _ = normal, origin  # interface-matching parameters
         s_val = np.random.rand(100) if scalars is not None else None
         v_val = np.random.rand(100, 3) if vectors is not None else None
         return MockSlice(self.slice_points, s_val, v_val)
 
 
+class MockSlice:
+    """Mock slice returned by MockEBSMesh.slice()."""
+
+    points: npt.NDArray[np.float64]
+    _scalars: npt.NDArray[np.float64] | None
+    _vectors: npt.NDArray[np.float64] | None
+
+    def __init__(
+        self,
+        points: npt.NDArray[np.float64],
+        scalars_val: npt.NDArray[np.float64] | None = None,
+        vectors_val: npt.NDArray[np.float64] | None = None,
+    ) -> None:
+        self.points = points
+        self._scalars = scalars_val
+        self._vectors = vectors_val
+
+    @property
+    def active_scalars(self) -> npt.NDArray[np.float64] | None:
+        return self._scalars
+
+    @property
+    def active_vectors(self) -> npt.NDArray[np.float64] | None:
+        return self._vectors
+
+
 class TestEBSPlanePlotterInit:
     """Tests for EBSPlanePlotter initialization."""
 
-    def test_init_with_defaults(self):
+    def test_init_with_defaults(self) -> None:
         """Test initialization with default parameters."""
         mock_mesh = MockEBSMesh()
-        plotter = EBSPlanePlotter(mock_mesh)
+        plotter = EBSPlanePlotter(mock_mesh)  # pyright: ignore[reportArgumentType]
 
         assert plotter.ebs_mesh is mock_mesh
         assert plotter.normal == (0, 0, 1)
@@ -189,19 +216,19 @@ class TestEBSPlanePlotterInit:
         assert isinstance(plotter.values_dict, dict)
         plt.close(plotter.fig)
 
-    def test_init_with_custom_normal(self):
+    def test_init_with_custom_normal(self) -> None:
         """Test initialization with custom normal."""
         mock_mesh = MockEBSMesh()
-        plotter = EBSPlanePlotter(mock_mesh, normal=(1, 0, 0))
+        plotter = EBSPlanePlotter(mock_mesh, normal=(1, 0, 0))  # pyright: ignore[reportArgumentType]
 
         assert plotter.normal == (1, 0, 0)
         plt.close(plotter.fig)
 
-    def test_init_with_existing_ax(self):
+    def test_init_with_existing_ax(self) -> None:
         """Test initialization with provided axes."""
         mock_mesh = MockEBSMesh()
         fig, ax = plt.subplots()
-        plotter = EBSPlanePlotter(mock_mesh, ax=ax)
+        plotter = EBSPlanePlotter(mock_mesh, ax=ax)  # pyright: ignore[reportArgumentType]
 
         assert plotter.ax is ax
         assert plotter.fig is fig
@@ -212,14 +239,14 @@ class TestEBSPlanePlotterToSeries:
     """Tests for _to_series method."""
 
     @pytest.fixture
-    def plotter(self):
+    def plotter(self) -> Generator[EBSPlanePlotter]:
         """Create a plotter with mock mesh."""
         mock_mesh = MockEBSMesh()
-        plotter = EBSPlanePlotter(mock_mesh)
+        plotter = EBSPlanePlotter(mock_mesh)  # pyright: ignore[reportArgumentType]
         yield plotter
         plt.close(plotter.fig)
 
-    def test_to_series_with_property_scalars(self, plotter):
+    def test_to_series_with_property_scalars(self, plotter: EBSPlanePlotter) -> None:
         """Test _to_series with Property input for scalars."""
         scalars_prop = Property(
             name="bands",
@@ -235,7 +262,7 @@ class TestEBSPlanePlotterToSeries:
         assert series.scalars is not None
         assert series.scalars.shape == plotter.u_grid.shape
 
-    def test_to_series_with_tuple_scalars(self, plotter):
+    def test_to_series_with_tuple_scalars(self, plotter: EBSPlanePlotter) -> None:
         """Test _to_series with legacy tuple input."""
         scalars_tuple = ("bands", np.random.rand(100))
 
@@ -245,7 +272,7 @@ class TestEBSPlanePlotterToSeries:
         assert series.scalars_unit is None
         assert series.scalars is not None
 
-    def test_to_series_with_vectors(self, plotter):
+    def test_to_series_with_vectors(self, plotter: EBSPlanePlotter) -> None:
         """Test _to_series with vector data."""
         vectors_prop = Property(
             name="velocity",
@@ -262,7 +289,7 @@ class TestEBSPlanePlotterToSeries:
         assert series.vectors_v is not None
         assert series.vectors_magnitude is not None
 
-    def test_to_series_with_both(self, plotter):
+    def test_to_series_with_both(self, plotter: EBSPlanePlotter) -> None:
         """Test _to_series with both scalars and vectors."""
         scalars_tuple = ("energy", np.random.rand(100))
         vectors_tuple = ("velocity", np.random.rand(100, 3))
@@ -272,7 +299,7 @@ class TestEBSPlanePlotterToSeries:
         assert series.scalars is not None
         assert series.vectors_u is not None
 
-    def test_to_series_with_none(self, plotter):
+    def test_to_series_with_none(self, plotter: EBSPlanePlotter) -> None:
         """Test _to_series with no data."""
         series = plotter._to_series()
 
@@ -284,14 +311,14 @@ class TestEBSPlanePlotterRenderMethods:
     """Tests for internal render methods."""
 
     @pytest.fixture
-    def plotter(self):
+    def plotter(self) -> Generator[EBSPlanePlotter]:
         """Create a plotter with mock mesh."""
         mock_mesh = MockEBSMesh()
-        plotter = EBSPlanePlotter(mock_mesh)
+        plotter = EBSPlanePlotter(mock_mesh)  # pyright: ignore[reportArgumentType]
         yield plotter
         plt.close(plotter.fig)
 
-    def test_add_pcolormesh(self, plotter):
+    def test_add_pcolormesh(self, plotter: EBSPlanePlotter) -> None:
         """Test _add_pcolormesh creates a QuadMesh."""
         series = PlaneSeries(
             u_grid=plotter.u_grid,
@@ -313,7 +340,7 @@ class TestEBSPlanePlotterRenderMethods:
         # Check that it returns a QuadMesh
         assert result is not None
 
-    def test_add_contour(self, plotter):
+    def test_add_contour(self, plotter: EBSPlanePlotter) -> None:
         """Test _add_contour creates a contour plot."""
         series = PlaneSeries(
             u_grid=plotter.u_grid,
@@ -334,7 +361,7 @@ class TestEBSPlanePlotterRenderMethods:
 
         assert result is not None
 
-    def test_add_contourf(self, plotter):
+    def test_add_contourf(self, plotter: EBSPlanePlotter) -> None:
         """Test _add_contourf creates a filled contour plot."""
         series = PlaneSeries(
             u_grid=plotter.u_grid,
@@ -355,7 +382,7 @@ class TestEBSPlanePlotterRenderMethods:
 
         assert result is not None
 
-    def test_add_quiver(self, plotter):
+    def test_add_quiver(self, plotter: EBSPlanePlotter) -> None:
         """Test _add_quiver creates a quiver plot."""
         series = PlaneSeries(
             u_grid=plotter.u_grid,
@@ -381,14 +408,14 @@ class TestEBSPlanePlotterPlot:
     """Integration tests for plot() method."""
 
     @pytest.fixture
-    def plotter(self):
+    def plotter(self) -> Generator[EBSPlanePlotter]:
         """Create a plotter with mock mesh."""
         mock_mesh = MockEBSMesh()
-        plotter = EBSPlanePlotter(mock_mesh)
+        plotter = EBSPlanePlotter(mock_mesh)  # pyright: ignore[reportArgumentType]
         yield plotter
         plt.close(plotter.fig)
 
-    def test_plot_scalars_pcolormesh(self, plotter):
+    def test_plot_scalars_pcolormesh(self, plotter: EBSPlanePlotter) -> None:
         """Test pcolormesh rendering mode."""
         scalars_tuple = ("bands", np.random.rand(100))
 
@@ -398,7 +425,7 @@ class TestEBSPlanePlotterPlot:
         assert plotter.scalar_name == "bands"
         assert plotter.scalar_plot is not None
 
-    def test_plot_scalars_contour(self, plotter):
+    def test_plot_scalars_contour(self, plotter: EBSPlanePlotter) -> None:
         """Test contour rendering mode."""
         scalars_tuple = ("bands", np.random.rand(100))
 
@@ -406,7 +433,7 @@ class TestEBSPlanePlotterPlot:
 
         assert "scalars" in artists
 
-    def test_plot_scalars_contourf(self, plotter):
+    def test_plot_scalars_contourf(self, plotter: EBSPlanePlotter) -> None:
         """Test contourf rendering mode."""
         scalars_tuple = ("bands", np.random.rand(100))
 
@@ -416,7 +443,7 @@ class TestEBSPlanePlotterPlot:
 
         assert "scalars" in artists
 
-    def test_plot_vectors(self, plotter):
+    def test_plot_vectors(self, plotter: EBSPlanePlotter) -> None:
         """Test vector plotting."""
         vectors_tuple = ("velocity", np.random.rand(100, 3))
 
@@ -426,7 +453,7 @@ class TestEBSPlanePlotterPlot:
         assert plotter.vector_name == "velocity"
         assert plotter.vector_plot is not None
 
-    def test_plot_with_property(self, plotter):
+    def test_plot_with_property(self, plotter: EBSPlanePlotter) -> None:
         """Test plot with Property input."""
         scalars_prop = Property(
             name="bands",
@@ -440,7 +467,7 @@ class TestEBSPlanePlotterPlot:
         assert "scalars" in artists
         assert plotter.scalar_name == "Energy"
 
-    def test_plot_returns_dict(self, plotter):
+    def test_plot_returns_dict(self, plotter: EBSPlanePlotter) -> None:
         """Test that plot returns a dict of artists."""
         scalars_tuple = ("bands", np.random.rand(100))
 
@@ -453,16 +480,16 @@ class TestEBSPlanePlotterExport:
     """Tests for export functionality."""
 
     @pytest.fixture
-    def plotter_with_data(self, tmp_path):
+    def plotter_with_data(self, tmp_path: Path) -> Generator[tuple[EBSPlanePlotter, Path]]:
         """Create plotter with plotted data."""
         mock_mesh = MockEBSMesh()
-        plotter = EBSPlanePlotter(mock_mesh)
+        plotter = EBSPlanePlotter(mock_mesh)  # pyright: ignore[reportArgumentType]
         scalars_tuple = ("bands", np.random.rand(100))
         plotter.plot(scalars_data=scalars_tuple)
         yield plotter, tmp_path
         plt.close(plotter.fig)
 
-    def test_export_data_csv(self, plotter_with_data):
+    def test_export_data_csv(self, plotter_with_data: tuple[EBSPlanePlotter, Path]) -> None:
         """Test CSV export."""
         plotter, tmp_path = plotter_with_data
         filepath = tmp_path / "output.csv"
@@ -474,7 +501,7 @@ class TestEBSPlanePlotterExport:
         assert "u_grid" in content
         assert "v_grid" in content
 
-    def test_export_data_json(self, plotter_with_data):
+    def test_export_data_json(self, plotter_with_data: tuple[EBSPlanePlotter, Path]) -> None:
         """Test JSON export."""
         import json
 
@@ -488,7 +515,7 @@ class TestEBSPlanePlotterExport:
         assert "u_grid" in data
         assert "v_grid" in data
 
-    def test_export_data_txt(self, plotter_with_data):
+    def test_export_data_txt(self, plotter_with_data: tuple[EBSPlanePlotter, Path]) -> None:
         """Test TXT export."""
         plotter, tmp_path = plotter_with_data
         filepath = tmp_path / "output.txt"
@@ -497,7 +524,7 @@ class TestEBSPlanePlotterExport:
 
         assert filepath.exists()
 
-    def test_export_data_dat(self, plotter_with_data):
+    def test_export_data_dat(self, plotter_with_data: tuple[EBSPlanePlotter, Path]) -> None:
         """Test DAT export."""
         plotter, tmp_path = plotter_with_data
         filepath = tmp_path / "output.dat"
@@ -506,7 +533,9 @@ class TestEBSPlanePlotterExport:
 
         assert filepath.exists()
 
-    def test_export_data_invalid_type(self, plotter_with_data):
+    def test_export_data_invalid_type(
+        self, plotter_with_data: tuple[EBSPlanePlotter, Path]
+    ) -> None:
         """Test export with invalid file type."""
         plotter, tmp_path = plotter_with_data
         filepath = tmp_path / "output.xyz"
@@ -514,10 +543,10 @@ class TestEBSPlanePlotterExport:
         with pytest.raises(ValueError, match="File type must be one of"):
             plotter.export_data(str(filepath))
 
-    def test_export_data_no_values(self):
+    def test_export_data_no_values(self) -> None:
         """Test export raises error when no values recorded."""
         mock_mesh = MockEBSMesh()
-        plotter = EBSPlanePlotter(mock_mesh)
+        plotter = EBSPlanePlotter(mock_mesh)  # pyright: ignore[reportArgumentType]
 
         with pytest.raises(ValueError, match="No values recorded"):
             plotter.export_data("output.csv")
@@ -528,53 +557,53 @@ class TestEBSPlanePlotterAxisMethods:
     """Tests for axis configuration methods."""
 
     @pytest.fixture
-    def plotter(self):
+    def plotter(self) -> Generator[EBSPlanePlotter]:
         """Create a plotter with mock mesh."""
         mock_mesh = MockEBSMesh()
-        plotter = EBSPlanePlotter(mock_mesh)
+        plotter = EBSPlanePlotter(mock_mesh)  # pyright: ignore[reportArgumentType]
         yield plotter
         plt.close(plotter.fig)
 
-    def test_set_xlim_with_values(self, plotter):
+    def test_set_xlim_with_values(self, plotter: EBSPlanePlotter) -> None:
         """Test set_xlim with explicit values."""
         plotter.set_xlim((-1.0, 1.0))
         xlim = plotter.ax.get_xlim()
         assert xlim == (-1.0, 1.0)
 
-    def test_set_xlim_auto(self, plotter):
+    def test_set_xlim_auto(self, plotter: EBSPlanePlotter) -> None:
         """Test set_xlim with auto values."""
         plotter.set_xlim(None)
         xlim = plotter.ax.get_xlim()
         assert xlim is not None
 
-    def test_set_ylim_with_values(self, plotter):
+    def test_set_ylim_with_values(self, plotter: EBSPlanePlotter) -> None:
         """Test set_ylim with explicit values."""
         plotter.set_ylim((-1.0, 1.0))
         ylim = plotter.ax.get_ylim()
         assert ylim == (-1.0, 1.0)
 
-    def test_set_xlabel(self, plotter):
+    def test_set_xlabel(self, plotter: EBSPlanePlotter) -> None:
         """Test set_xlabel."""
         plotter.set_xlabel("Custom X Label")
         assert plotter.ax.get_xlabel() == "Custom X Label"
 
-    def test_set_ylabel(self, plotter):
+    def test_set_ylabel(self, plotter: EBSPlanePlotter) -> None:
         """Test set_ylabel."""
         plotter.set_ylabel("Custom Y Label")
         assert plotter.ax.get_ylabel() == "Custom Y Label"
 
-    def test_set_aspect(self, plotter):
+    def test_set_aspect(self, plotter: EBSPlanePlotter) -> None:
         """Test set_aspect."""
         plotter.set_aspect("equal")
         # Just ensure it doesn't raise
 
-    def test_draw_origin(self, plotter):
+    def test_draw_origin(self, plotter: EBSPlanePlotter) -> None:
         """Test draw_origin adds a marker."""
         plotter.draw_origin()
         # Check that a line was added
         assert len(plotter.ax.lines) > 0
 
-    def test_grid(self, plotter):
+    def test_grid(self, plotter: EBSPlanePlotter) -> None:
         """Test grid configuration."""
         plotter.grid(True)
         # Just ensure it doesn't raise
@@ -584,14 +613,14 @@ class TestEBSPlanePlotterLegacyAPI:
     """Tests for legacy API methods."""
 
     @pytest.fixture
-    def plotter(self):
+    def plotter(self) -> Generator[EBSPlanePlotter]:
         """Create a plotter with mock mesh."""
         mock_mesh = MockEBSMesh()
-        plotter = EBSPlanePlotter(mock_mesh)
+        plotter = EBSPlanePlotter(mock_mesh)  # pyright: ignore[reportArgumentType]
         yield plotter
         plt.close(plotter.fig)
 
-    def test_plot_scalars_with_tuple(self, plotter):
+    def test_plot_scalars_with_tuple(self, plotter: EBSPlanePlotter) -> None:
         """Test legacy plot_scalars with tuple."""
         scalars_tuple = ("bands", np.random.rand(100))
 
@@ -600,7 +629,7 @@ class TestEBSPlanePlotterLegacyAPI:
         assert plotter.scalar_name == "bands"
         assert plotter.scalar_plot is not None
 
-    def test_plot_scalars_with_property(self, plotter):
+    def test_plot_scalars_with_property(self, plotter: EBSPlanePlotter) -> None:
         """Test legacy plot_scalars with Property."""
         scalars_prop = Property(
             name="bands",
@@ -613,7 +642,7 @@ class TestEBSPlanePlotterLegacyAPI:
 
         assert plotter.scalar_name == "Energy"
 
-    def test_plot_scalars_with_grid_points(self, plotter):
+    def test_plot_scalars_with_grid_points(self, plotter: EBSPlanePlotter) -> None:
         """Test legacy plot_scalars with pre-computed grid points."""
         grid_points = np.random.rand(plotter.n_points)
 
@@ -621,7 +650,7 @@ class TestEBSPlanePlotterLegacyAPI:
 
         assert plotter.scalar_name == "test_field"
 
-    def test_plot_vectors_quiver_with_tuple(self, plotter):
+    def test_plot_vectors_quiver_with_tuple(self, plotter: EBSPlanePlotter) -> None:
         """Test legacy plot_vectors_quiver with tuple."""
         vectors_tuple = ("velocity", np.random.rand(100, 3))
 
@@ -630,7 +659,7 @@ class TestEBSPlanePlotterLegacyAPI:
         assert plotter.vector_name == "velocity"
         assert plotter.vector_plot is not None
 
-    def test_plot_vectors_quiver_with_property(self, plotter):
+    def test_plot_vectors_quiver_with_property(self, plotter: EBSPlanePlotter) -> None:
         """Test legacy plot_vectors_quiver with Property."""
         vectors_prop = Property(
             name="velocity",

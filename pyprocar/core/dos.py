@@ -39,7 +39,7 @@ if TYPE_CHECKING:
 
 def get_dos_from_code(
     code: str,
-    dirpath: str,
+    dirpath: str | Path,
     use_cache: bool = False,
     filename: str = "dos.pkl",
 ) -> DensityOfStates:
@@ -519,7 +519,7 @@ class DensityOfStates(PointSet):
     def from_code(
         cls,
         code: str,
-        dirpath: str,
+        dirpath: str | Path,
         use_cache: bool = False,
         filename: str = "dos.pkl",
     ) -> DensityOfStates:
@@ -1178,12 +1178,16 @@ class DensityOfStates(PointSet):
     # ------------------------------------------------------------------
     def compute_projected_sum(
         self,
-        atoms: Iterable[int] | None = None,
-        orbitals: Iterable[int] | None = None,
+        atoms: Sequence[int] | int | Sequence[Sequence[int]] | None = None,
+        orbitals: Sequence[int] | int | None = None,
         spins: Iterable[int] | None = None,
         species: Iterable[str] | None = None,
-        species_orbital_map: dict[str, Iterable[int]] | None = None,
-        atoms_orbital_map: dict[int, Iterable[int]] | None = None,
+        species_orbital_map: Mapping[str, Iterable[int]]
+        | Sequence[Mapping[str, Iterable[int]]]
+        | None = None,
+        atoms_orbital_map: Mapping[Iterable[int] | int, Iterable[int]]
+        | Sequence[Mapping[Iterable[int] | int, Iterable[int]]]
+        | None = None,
         norm_mode: str | NormMode | None = "raw",
         label: str = "Projected DoS",
         name: str = "projected_sum",

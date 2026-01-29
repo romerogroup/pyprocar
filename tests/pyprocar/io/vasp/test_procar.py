@@ -564,7 +564,7 @@ TEST_CASES = [
 
 
 class TestProcar:
-    @pytest.fixture(params=TEST_CASES, ids=lambda c: c.id)
+    @pytest.fixture(params=TEST_CASES, ids=lambda c: c.id)  # pyright: ignore[reportUnknownLambdaType, reportUnknownMemberType]
     def case(self, request: pytest.FixtureRequest) -> ProcarTestCase:
         return request.param
 

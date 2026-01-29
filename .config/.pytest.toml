@@ -43,6 +43,7 @@ addopts = [
 
 filterwarnings = [
   "ignore::DeprecationWarning",
+  "ignore::FutureWarning",
 ]
 testpaths = ["../tests"]
 verbosity_test_cases = "0"

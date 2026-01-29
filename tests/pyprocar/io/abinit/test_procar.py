@@ -1,4 +1,5 @@
 import logging
+from pathlib import Path
 
 import numpy as np
 import pytest
@@ -9,9 +10,9 @@ from tests.utils import BaseTest
 logger = logging.getLogger(__name__)
 
 
-def get_bands_dirs():
+def get_bands_dirs() -> list[Path]:
     """Get all bands directories for testing (contain PROCAR files)."""
-    dirs = []
+    dirs: list[Path] = []
     for calc_type in CALC_TYPES:
         dirpath = ABINIT_DATA_DIR / calc_type / "bands"
         if dirpath.exists():
@@ -19,13 +20,13 @@ def get_bands_dirs():
     return dirs
 
 
-@pytest.fixture(params=get_bands_dirs(), ids=lambda p: p.parent.name)
-def bands_dirpath(request):
-    return request.param
+@pytest.fixture(params=get_bands_dirs(), ids=lambda p: p.parent.name)  # pyright: ignore[reportUnknownLambdaType, reportUnknownMemberType]
+def bands_dirpath(request: pytest.FixtureRequest) -> Path:
+    return request.param  # type: ignore[no-any-return]
 
 
 class TestAbinitProcarInit(BaseTest):
-    def test_init_from_dirpath(self, bands_dirpath):
+    def test_init_from_dirpath(self, bands_dirpath: Path) -> None:
         from pyprocar.io.abinit import AbinitOutput, AbinitProcar
 
         output = AbinitOutput(bands_dirpath / "abinit.out")
@@ -34,16 +35,16 @@ class TestAbinitProcarInit(BaseTest):
 
 
 class TestAbinitProcarMerge(BaseTest):
-    def test_merge_creates_procar_file(self, bands_dirpath):
+    def test_merge_creates_procar_file(self, bands_dirpath: Path) -> None:
         from pyprocar.io.abinit import AbinitOutput, AbinitProcar
 
         output = AbinitOutput(bands_dirpath / "abinit.out")
-        procar = AbinitProcar(dirpath=bands_dirpath, abinit_output=output)
+        _procar = AbinitProcar(dirpath=bands_dirpath, abinit_output=output)
 
         merged_file = bands_dirpath / "PROCAR"
         assert merged_file.exists()
 
-    def test_vasp_procar_is_parsed(self, bands_dirpath):
+    def test_vasp_procar_is_parsed(self, bands_dirpath: Path) -> None:
         from pyprocar.io.abinit import AbinitOutput, AbinitProcar
 
         output = AbinitOutput(bands_dirpath / "abinit.out")
@@ -53,18 +54,22 @@ class TestAbinitProcarMerge(BaseTest):
 
 
 class TestAbinitProcarData(BaseTest):
-    def test_kpoints_is_ndarray(self, bands_dirpath):
+    def test_kpoints_is_ndarray(self, bands_dirpath: Path) -> None:
         from pyprocar.io.abinit import AbinitOutput, AbinitProcar
 
         output = AbinitOutput(bands_dirpath / "abinit.out")
         procar = AbinitProcar(dirpath=bands_dirpath, abinit_output=output)
 
-        assert isinstance(procar.vasp_procar.kpoints, np.ndarray)
+        vasp_procar = procar.vasp_procar
+        assert vasp_procar is not None
+        assert isinstance(vasp_procar.kpoints, np.ndarray)
 
-    def test_bands_is_ndarray(self, bands_dirpath):
+    def test_bands_is_ndarray(self, bands_dirpath: Path) -> None:
         from pyprocar.io.abinit import AbinitOutput, AbinitProcar
 
         output = AbinitOutput(bands_dirpath / "abinit.out")
         procar = AbinitProcar(dirpath=bands_dirpath, abinit_output=output)
 
-        assert isinstance(procar.vasp_procar.bands, np.ndarray)
+        vasp_procar = procar.vasp_procar
+        assert vasp_procar is not None
+        assert isinstance(vasp_procar.bands, np.ndarray)

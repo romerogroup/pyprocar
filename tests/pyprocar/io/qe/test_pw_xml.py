@@ -512,22 +512,30 @@ def test_spin_polarized_ks_energies_returns_dict(spin_parser: PwXML) -> None:
 
 def test_spin_polarized_ks_energies_contains_bands_key(spin_parser: PwXML) -> None:
     """Test that ks_energies dictionary contains bands key."""
-    assert "bands" in spin_parser.ks_energies
+    ks = spin_parser.ks_energies
+    assert ks is not None
+    assert "bands" in ks
 
 
 def test_spin_polarized_ks_energies_contains_occupations_key(spin_parser: PwXML) -> None:
     """Test that ks_energies dictionary contains occupations key."""
-    assert "occupations" in spin_parser.ks_energies
+    ks = spin_parser.ks_energies
+    assert ks is not None
+    assert "occupations" in ks
 
 
 def test_spin_polarized_ks_energies_contains_kpoints_key(spin_parser: PwXML) -> None:
     """Test that ks_energies dictionary contains kpoints key."""
-    assert "kpoints" in spin_parser.ks_energies
+    ks = spin_parser.ks_energies
+    assert ks is not None
+    assert "kpoints" in ks
 
 
 def test_spin_polarized_ks_energies_contains_weights_key(spin_parser: PwXML) -> None:
     """Test that ks_energies dictionary contains weights key."""
-    assert "weights" in spin_parser.ks_energies
+    ks = spin_parser.ks_energies
+    assert ks is not None
+    assert "weights" in ks
 
 
 def test_spin_polarized_bands_shape(spin_parser: PwXML) -> None:
@@ -579,6 +587,7 @@ def test_spin_polarized_spin_up_eigenvalues_first_kpoint(spin_parser: PwXML) -> 
     import numpy as np
 
     bands = spin_parser.bands
+    assert bands is not None
     # First 3 eigenvalues in XML are spin-up: -1.959..., -0.997..., -0.997...
     expected_spin_up = np.array([-1.959020700646865, -0.9970853727704887, -0.9970853727676383])
     np.testing.assert_array_almost_equal(bands[0, :, 0], expected_spin_up)
@@ -589,6 +598,7 @@ def test_spin_polarized_spin_down_eigenvalues_first_kpoint(spin_parser: PwXML) -
     import numpy as np
 
     bands = spin_parser.bands
+    assert bands is not None
     # Last 3 eigenvalues in XML are spin-down: -1.958..., -0.997..., -0.997...
     expected_spin_down = np.array([-1.958955444221249, -0.9970213191092516, -0.9970213191044732])
     np.testing.assert_array_almost_equal(bands[0, :, 1], expected_spin_down)
@@ -599,6 +609,7 @@ def test_spin_polarized_spin_up_eigenvalues_second_kpoint(spin_parser: PwXML) ->
     import numpy as np
 
     bands = spin_parser.bands
+    assert bands is not None
     expected_spin_up = np.array([-1.958978823584957, -0.9970492682579844, -0.9970492677830285])
     np.testing.assert_array_almost_equal(bands[1, :, 0], expected_spin_up)
 
@@ -608,6 +619,7 @@ def test_spin_polarized_spin_down_eigenvalues_second_kpoint(spin_parser: PwXML) 
     import numpy as np
 
     bands = spin_parser.bands
+    assert bands is not None
     expected_spin_down = np.array([-1.958913568283779, -0.9969852167037133, -0.9969852162353813])
     np.testing.assert_array_almost_equal(bands[1, :, 1], expected_spin_down)
 
@@ -617,6 +629,7 @@ def test_spin_polarized_occupations_spin_up_first_kpoint(spin_parser: PwXML) -> 
     import numpy as np
 
     occupations = spin_parser.occupations
+    assert occupations is not None
     expected_spin_up = np.array([1.0, 1.0, 1.0])
     np.testing.assert_array_almost_equal(occupations[0, :, 0], expected_spin_up)
 
@@ -626,6 +639,7 @@ def test_spin_polarized_occupations_spin_down_first_kpoint(spin_parser: PwXML) -
     import numpy as np
 
     occupations = spin_parser.occupations
+    assert occupations is not None
     expected_spin_down = np.array([1.0, 1.0, 1.0])
     np.testing.assert_array_almost_equal(occupations[0, :, 1], expected_spin_down)
 
@@ -635,6 +649,7 @@ def test_spin_polarized_first_kpoint_coordinates(spin_parser: PwXML) -> None:
     import numpy as np
 
     kpoints = spin_parser.kpoints
+    assert kpoints is not None
     # First kpoint is at origin (0, 0, 0)
     expected_kpoint = np.array([0.0, 0.0, 0.0])
     np.testing.assert_array_almost_equal(kpoints[0], expected_kpoint)
@@ -645,6 +660,7 @@ def test_spin_polarized_weights_values(spin_parser: PwXML) -> None:
     import pytest
 
     weights = spin_parser.weights
+    assert weights is not None
     # Both kpoints have weight 6.622516556291391E-003
     assert weights[0] == pytest.approx(6.622516556291391e-003)
     assert weights[1] == pytest.approx(6.622516556291391e-003)
@@ -872,17 +888,23 @@ def test_sym_ops_returns_none_when_absent(no_symmetries_parser: PwXML) -> None:
 
 def test_sym_ops_contains_rotations_key(symmetries_parser: PwXML) -> None:
     """Test that sym_ops dictionary contains rotations key."""
-    assert "rotations" in symmetries_parser.sym_ops
+    sym_ops = symmetries_parser.sym_ops
+    assert sym_ops is not None
+    assert "rotations" in sym_ops
 
 
 def test_sym_ops_contains_translations_key(symmetries_parser: PwXML) -> None:
     """Test that sym_ops dictionary contains translations key."""
-    assert "translations" in symmetries_parser.sym_ops
+    sym_ops = symmetries_parser.sym_ops
+    assert sym_ops is not None
+    assert "translations" in sym_ops
 
 
 def test_sym_ops_contains_equivalent_atoms_key(symmetries_parser: PwXML) -> None:
     """Test that sym_ops dictionary contains equivalent_atoms key."""
-    assert "equivalent_atoms" in symmetries_parser.sym_ops
+    sym_ops = symmetries_parser.sym_ops
+    assert sym_ops is not None
+    assert "equivalent_atoms" in sym_ops
 
 
 # =============================================================================
@@ -905,23 +927,29 @@ def test_rotations_returns_none_when_absent(no_symmetries_parser: PwXML) -> None
 
 def test_rotations_shape_is_correct(symmetries_parser: PwXML) -> None:
     """Test that rotations array has shape (n_sym_ops, 3, 3)."""
-    assert symmetries_parser.rotations.shape == (2, 3, 3)
+    rotations = symmetries_parser.rotations
+    assert rotations is not None
+    assert rotations.shape == (2, 3, 3)
 
 
 def test_identity_rotation_is_identity_matrix(symmetries_parser: PwXML) -> None:
     """Test that the first rotation (identity) is the identity matrix."""
     import numpy as np
 
+    rotations = symmetries_parser.rotations
+    assert rotations is not None
     expected_identity = np.eye(3)
-    np.testing.assert_array_almost_equal(symmetries_parser.rotations[0], expected_identity)
+    np.testing.assert_array_almost_equal(rotations[0], expected_identity)
 
 
 def test_180_rotation_z_axis_has_correct_values(symmetries_parser: PwXML) -> None:
     """Test that the second rotation (180 deg around z) has correct values."""
     import numpy as np
 
+    rotations = symmetries_parser.rotations
+    assert rotations is not None
     expected_rotation = np.array([[-1.0, 0.0, 0.0], [0.0, -1.0, 0.0], [0.0, 0.0, 1.0]])
-    np.testing.assert_array_almost_equal(symmetries_parser.rotations[1], expected_rotation)
+    np.testing.assert_array_almost_equal(rotations[1], expected_rotation)
 
 
 # =============================================================================
@@ -931,17 +959,19 @@ def test_180_rotation_z_axis_has_correct_values(symmetries_parser: PwXML) -> Non
 
 def test_translations_shape_is_correct(symmetries_parser: PwXML) -> None:
     """Test that translations array has shape (n_sym_ops, 3)."""
-    assert symmetries_parser.sym_ops["translations"].shape == (2, 3)
+    sym_ops = symmetries_parser.sym_ops
+    assert sym_ops is not None
+    assert sym_ops["translations"].shape == (2, 3)
 
 
 def test_translations_are_zero_vectors(symmetries_parser: PwXML) -> None:
     """Test that both translations are zero vectors."""
     import numpy as np
 
+    sym_ops = symmetries_parser.sym_ops
+    assert sym_ops is not None
     expected_translations = np.zeros((2, 3))
-    np.testing.assert_array_almost_equal(
-        symmetries_parser.sym_ops["translations"], expected_translations
-    )
+    np.testing.assert_array_almost_equal(sym_ops["translations"], expected_translations)
 
 
 # =============================================================================
@@ -951,7 +981,9 @@ def test_translations_are_zero_vectors(symmetries_parser: PwXML) -> None:
 
 def test_equivalent_atoms_has_correct_length(symmetries_parser: PwXML) -> None:
     """Test that equivalent_atoms list has correct number of entries."""
-    assert len(symmetries_parser.sym_ops["equivalent_atoms"]) == 2
+    sym_ops = symmetries_parser.sym_ops
+    assert sym_ops is not None
+    assert len(sym_ops["equivalent_atoms"]) == 2
 
 
 def test_equivalent_atoms_identity_maps_atoms_correctly(
@@ -960,10 +992,10 @@ def test_equivalent_atoms_identity_maps_atoms_correctly(
     """Test that identity symmetry maps atoms to themselves."""
     import numpy as np
 
+    sym_ops = symmetries_parser.sym_ops
+    assert sym_ops is not None
     expected_equivalent = np.array([1, 2, 3, 4, 5])
-    np.testing.assert_array_equal(
-        symmetries_parser.sym_ops["equivalent_atoms"][0], expected_equivalent
-    )
+    np.testing.assert_array_equal(sym_ops["equivalent_atoms"][0], expected_equivalent)
 
 
 # =============================================================================
@@ -1065,39 +1097,49 @@ def test_reciprocal_lattice_returns_none_when_absent(
 
 def test_reciprocal_lattice_shape_is_3x3(basis_set_parser: PwXML) -> None:
     """Test that reciprocal_lattice array has shape (3, 3)."""
-    assert basis_set_parser.reciprocal_lattice.shape == (3, 3)
+    rl = basis_set_parser.reciprocal_lattice
+    assert rl is not None
+    assert rl.shape == (3, 3)
 
 
 def test_reciprocal_lattice_b1_has_correct_values(basis_set_parser: PwXML) -> None:
     """Test that b1 vector has correct values [1, 0, 0]."""
     import numpy as np
 
+    rl = basis_set_parser.reciprocal_lattice
+    assert rl is not None
     expected_b1 = np.array([1.0, 0.0, 0.0])
-    np.testing.assert_array_almost_equal(basis_set_parser.reciprocal_lattice[0], expected_b1)
+    np.testing.assert_array_almost_equal(rl[0], expected_b1)
 
 
 def test_reciprocal_lattice_b2_has_correct_values(basis_set_parser: PwXML) -> None:
     """Test that b2 vector has correct values [0, 1, 0]."""
     import numpy as np
 
+    rl = basis_set_parser.reciprocal_lattice
+    assert rl is not None
     expected_b2 = np.array([0.0, 1.0, 0.0])
-    np.testing.assert_array_almost_equal(basis_set_parser.reciprocal_lattice[1], expected_b2)
+    np.testing.assert_array_almost_equal(rl[1], expected_b2)
 
 
 def test_reciprocal_lattice_b3_has_correct_values(basis_set_parser: PwXML) -> None:
     """Test that b3 vector has correct values [0, 0, 1]."""
     import numpy as np
 
+    rl = basis_set_parser.reciprocal_lattice
+    assert rl is not None
     expected_b3 = np.array([0.0, 0.0, 1.0])
-    np.testing.assert_array_almost_equal(basis_set_parser.reciprocal_lattice[2], expected_b3)
+    np.testing.assert_array_almost_equal(rl[2], expected_b3)
 
 
 def test_reciprocal_lattice_is_identity_matrix(basis_set_parser: PwXML) -> None:
     """Test that the reciprocal lattice is the identity matrix for cubic cell."""
     import numpy as np
 
+    rl = basis_set_parser.reciprocal_lattice
+    assert rl is not None
     expected_identity = np.eye(3)
-    np.testing.assert_array_almost_equal(basis_set_parser.reciprocal_lattice, expected_identity)
+    np.testing.assert_array_almost_equal(rl, expected_identity)
 
 
 # =============================================================================
@@ -1298,37 +1340,51 @@ def test_total_energy_returns_none_when_absent(
 
 def test_total_energy_contains_etot_key(total_energy_parser: PwXML) -> None:
     """Test that total_energy dictionary contains etot key."""
-    assert "etot" in total_energy_parser.total_energy
+    te = total_energy_parser.total_energy
+    assert te is not None
+    assert "etot" in te
 
 
 def test_total_energy_contains_eband_key(total_energy_parser: PwXML) -> None:
     """Test that total_energy dictionary contains eband key."""
-    assert "eband" in total_energy_parser.total_energy
+    te = total_energy_parser.total_energy
+    assert te is not None
+    assert "eband" in te
 
 
 def test_total_energy_contains_ehart_key(total_energy_parser: PwXML) -> None:
     """Test that total_energy dictionary contains ehart key."""
-    assert "ehart" in total_energy_parser.total_energy
+    te = total_energy_parser.total_energy
+    assert te is not None
+    assert "ehart" in te
 
 
 def test_total_energy_contains_vtxc_key(total_energy_parser: PwXML) -> None:
     """Test that total_energy dictionary contains vtxc key."""
-    assert "vtxc" in total_energy_parser.total_energy
+    te = total_energy_parser.total_energy
+    assert te is not None
+    assert "vtxc" in te
 
 
 def test_total_energy_contains_etxc_key(total_energy_parser: PwXML) -> None:
     """Test that total_energy dictionary contains etxc key."""
-    assert "etxc" in total_energy_parser.total_energy
+    te = total_energy_parser.total_energy
+    assert te is not None
+    assert "etxc" in te
 
 
 def test_total_energy_contains_ewald_key(total_energy_parser: PwXML) -> None:
     """Test that total_energy dictionary contains ewald key."""
-    assert "ewald" in total_energy_parser.total_energy
+    te = total_energy_parser.total_energy
+    assert te is not None
+    assert "ewald" in te
 
 
 def test_total_energy_contains_demet_key(total_energy_parser: PwXML) -> None:
     """Test that total_energy dictionary contains demet key."""
-    assert "demet" in total_energy_parser.total_energy
+    te = total_energy_parser.total_energy
+    assert te is not None
+    assert "demet" in te
 
 
 # =============================================================================
@@ -1626,12 +1682,16 @@ def test_timing_info_returns_none_when_absent(no_timing_info_parser: PwXML) -> N
 
 def test_timing_info_contains_total_key(timing_info_parser: PwXML) -> None:
     """Test that timing_info dictionary contains total key."""
-    assert "total" in timing_info_parser.timing_info
+    ti = timing_info_parser.timing_info
+    assert ti is not None
+    assert "total" in ti
 
 
 def test_timing_info_contains_partial_key(timing_info_parser: PwXML) -> None:
     """Test that timing_info dictionary contains partial key."""
-    assert "partial" in timing_info_parser.timing_info
+    ti = timing_info_parser.timing_info
+    assert ti is not None
+    assert "partial" in ti
 
 
 # =============================================================================
@@ -1641,32 +1701,44 @@ def test_timing_info_contains_partial_key(timing_info_parser: PwXML) -> None:
 
 def test_timing_info_total_contains_label(timing_info_parser: PwXML) -> None:
     """Test that total timing contains label."""
-    assert "label" in timing_info_parser.timing_info["total"]
+    ti = timing_info_parser.timing_info
+    assert ti is not None
+    assert "label" in ti["total"]
 
 
 def test_timing_info_total_label_is_pwscf(timing_info_parser: PwXML) -> None:
     """Test that total timing label is PWSCF."""
-    assert timing_info_parser.timing_info["total"]["label"] == "PWSCF"
+    ti = timing_info_parser.timing_info
+    assert ti is not None
+    assert ti["total"]["label"] == "PWSCF"
 
 
 def test_timing_info_total_contains_cpu(timing_info_parser: PwXML) -> None:
     """Test that total timing contains cpu time."""
-    assert "cpu" in timing_info_parser.timing_info["total"]
+    ti = timing_info_parser.timing_info
+    assert ti is not None
+    assert "cpu" in ti["total"]
 
 
 def test_timing_info_total_cpu_is_correct(timing_info_parser: PwXML) -> None:
     """Test that total timing cpu time is correct."""
-    assert timing_info_parser.timing_info["total"]["cpu"] == pytest.approx(6.286296)
+    ti = timing_info_parser.timing_info
+    assert ti is not None
+    assert ti["total"]["cpu"] == pytest.approx(6.286296)
 
 
 def test_timing_info_total_contains_wall(timing_info_parser: PwXML) -> None:
     """Test that total timing contains wall time."""
-    assert "wall" in timing_info_parser.timing_info["total"]
+    ti = timing_info_parser.timing_info
+    assert ti is not None
+    assert "wall" in ti["total"]
 
 
 def test_timing_info_total_wall_is_correct(timing_info_parser: PwXML) -> None:
     """Test that total timing wall time is correct."""
-    assert timing_info_parser.timing_info["total"]["wall"] == pytest.approx(6.984742879867554)
+    ti = timing_info_parser.timing_info
+    assert ti is not None
+    assert ti["total"]["wall"] == pytest.approx(6.984742879867554)
 
 
 # =============================================================================
@@ -1676,42 +1748,58 @@ def test_timing_info_total_wall_is_correct(timing_info_parser: PwXML) -> None:
 
 def test_timing_info_partial_is_list(timing_info_parser: PwXML) -> None:
     """Test that partial timings is a list."""
-    assert isinstance(timing_info_parser.timing_info["partial"], list)
+    ti = timing_info_parser.timing_info
+    assert ti is not None
+    assert isinstance(ti["partial"], list)
 
 
 def test_timing_info_partial_has_correct_length(timing_info_parser: PwXML) -> None:
     """Test that partial timings list has correct number of entries."""
-    assert len(timing_info_parser.timing_info["partial"]) == 2
+    ti = timing_info_parser.timing_info
+    assert ti is not None
+    assert len(ti["partial"]) == 2
 
 
 def test_timing_info_partial_first_entry_label(timing_info_parser: PwXML) -> None:
     """Test that first partial timing has correct label."""
-    assert timing_info_parser.timing_info["partial"][0]["label"] == "init_run"
+    ti = timing_info_parser.timing_info
+    assert ti is not None
+    assert ti["partial"][0]["label"] == "init_run"
 
 
 def test_timing_info_partial_first_entry_calls(timing_info_parser: PwXML) -> None:
     """Test that first partial timing has correct calls count."""
-    assert timing_info_parser.timing_info["partial"][0]["calls"] == 1
+    ti = timing_info_parser.timing_info
+    assert ti is not None
+    assert ti["partial"][0]["calls"] == 1
 
 
 def test_timing_info_partial_first_entry_cpu(timing_info_parser: PwXML) -> None:
     """Test that first partial timing has correct cpu time."""
-    assert timing_info_parser.timing_info["partial"][0]["cpu"] == pytest.approx(0.4927510000000001)
+    ti = timing_info_parser.timing_info
+    assert ti is not None
+    assert ti["partial"][0]["cpu"] == pytest.approx(0.4927510000000001)
 
 
 def test_timing_info_partial_first_entry_wall(timing_info_parser: PwXML) -> None:
     """Test that first partial timing has correct wall time."""
-    assert timing_info_parser.timing_info["partial"][0]["wall"] == pytest.approx(0.8109369277954102)
+    ti = timing_info_parser.timing_info
+    assert ti is not None
+    assert ti["partial"][0]["wall"] == pytest.approx(0.8109369277954102)
 
 
 def test_timing_info_partial_second_entry_label(timing_info_parser: PwXML) -> None:
     """Test that second partial timing has correct label."""
-    assert timing_info_parser.timing_info["partial"][1]["label"] == "electrons"
+    ti = timing_info_parser.timing_info
+    assert ti is not None
+    assert ti["partial"][1]["label"] == "electrons"
 
 
 def test_timing_info_partial_second_entry_cpu(timing_info_parser: PwXML) -> None:
     """Test that second partial timing has correct cpu time."""
-    assert timing_info_parser.timing_info["partial"][1]["cpu"] == pytest.approx(5.369758)
+    ti = timing_info_parser.timing_info
+    assert ti is not None
+    assert ti["partial"][1]["cpu"] == pytest.approx(5.369758)
 
 
 # =============================================================================
@@ -1832,22 +1920,30 @@ def test_closed_info_returns_none_when_absent(no_closed_parser: PwXML) -> None:
 
 def test_closed_info_contains_date_key(closed_parser: PwXML) -> None:
     """Test that closed_info dictionary contains date key."""
-    assert "date" in closed_parser.closed_info
+    closed_info = closed_parser.closed_info
+    assert closed_info is not None
+    assert "date" in closed_info
 
 
 def test_closed_info_contains_time_key(closed_parser: PwXML) -> None:
     """Test that closed_info dictionary contains time key."""
-    assert "time" in closed_parser.closed_info
+    closed_info = closed_parser.closed_info
+    assert closed_info is not None
+    assert "time" in closed_info
 
 
 def test_closed_info_date_is_correct(closed_parser: PwXML) -> None:
     """Test that closed_info date is correct."""
-    assert closed_parser.closed_info["date"] == "19 Jul 2024"
+    closed_info = closed_parser.closed_info
+    assert closed_info is not None
+    assert closed_info["date"] == "19 Jul 2024"
 
 
 def test_closed_info_time_is_correct(closed_parser: PwXML) -> None:
     """Test that closed_info time is correct."""
-    assert closed_parser.closed_info["time"] == "11:28:33"
+    closed_info = closed_parser.closed_info
+    assert closed_info is not None
+    assert closed_info["time"] == "11:28:33"
 
 
 # =============================================================================
@@ -2005,22 +2101,30 @@ def test_general_info_returns_none_when_absent(no_general_info_parser: PwXML) ->
 
 def test_general_info_contains_xml_format_key(general_info_parser: PwXML) -> None:
     """Test that general_info dictionary contains xml_format key."""
-    assert "xml_format" in general_info_parser.general_info
+    general_info = general_info_parser.general_info
+    assert general_info is not None
+    assert "xml_format" in general_info
 
 
 def test_general_info_contains_creator_key(general_info_parser: PwXML) -> None:
     """Test that general_info dictionary contains creator key."""
-    assert "creator" in general_info_parser.general_info
+    general_info = general_info_parser.general_info
+    assert general_info is not None
+    assert "creator" in general_info
 
 
 def test_general_info_contains_created_key(general_info_parser: PwXML) -> None:
     """Test that general_info dictionary contains created key."""
-    assert "created" in general_info_parser.general_info
+    general_info = general_info_parser.general_info
+    assert general_info is not None
+    assert "created" in general_info
 
 
 def test_general_info_contains_job_key(general_info_parser: PwXML) -> None:
     """Test that general_info dictionary contains job key."""
-    assert "job" in general_info_parser.general_info
+    general_info = general_info_parser.general_info
+    assert general_info is not None
+    assert "job" in general_info
 
 
 # =============================================================================
@@ -2030,32 +2134,44 @@ def test_general_info_contains_job_key(general_info_parser: PwXML) -> None:
 
 def test_xml_format_contains_name(general_info_parser: PwXML) -> None:
     """Test that xml_format contains name attribute."""
-    assert "name" in general_info_parser.general_info["xml_format"]
+    general_info = general_info_parser.general_info
+    assert general_info is not None
+    assert "name" in general_info["xml_format"]
 
 
 def test_xml_format_name_is_correct(general_info_parser: PwXML) -> None:
     """Test that xml_format name is correct."""
-    assert general_info_parser.general_info["xml_format"]["name"] == "QEXSD"
+    general_info = general_info_parser.general_info
+    assert general_info is not None
+    assert general_info["xml_format"]["name"] == "QEXSD"
 
 
 def test_xml_format_contains_version(general_info_parser: PwXML) -> None:
     """Test that xml_format contains version attribute."""
-    assert "version" in general_info_parser.general_info["xml_format"]
+    general_info = general_info_parser.general_info
+    assert general_info is not None
+    assert "version" in general_info["xml_format"]
 
 
 def test_xml_format_version_is_correct(general_info_parser: PwXML) -> None:
     """Test that xml_format version is correct."""
-    assert general_info_parser.general_info["xml_format"]["version"] == "23.03.10"
+    general_info = general_info_parser.general_info
+    assert general_info is not None
+    assert general_info["xml_format"]["version"] == "23.03.10"
 
 
 def test_xml_format_contains_text(general_info_parser: PwXML) -> None:
     """Test that xml_format contains text content."""
-    assert "text" in general_info_parser.general_info["xml_format"]
+    general_info = general_info_parser.general_info
+    assert general_info is not None
+    assert "text" in general_info["xml_format"]
 
 
 def test_xml_format_text_is_correct(general_info_parser: PwXML) -> None:
     """Test that xml_format text is correct."""
-    assert general_info_parser.general_info["xml_format"]["text"] == "QEXSD_23.03.10"
+    general_info = general_info_parser.general_info
+    assert general_info is not None
+    assert general_info["xml_format"]["text"] == "QEXSD_23.03.10"
 
 
 # =============================================================================
@@ -2065,32 +2181,44 @@ def test_xml_format_text_is_correct(general_info_parser: PwXML) -> None:
 
 def test_creator_contains_name(general_info_parser: PwXML) -> None:
     """Test that creator contains name attribute."""
-    assert "name" in general_info_parser.general_info["creator"]
+    general_info = general_info_parser.general_info
+    assert general_info is not None
+    assert "name" in general_info["creator"]
 
 
 def test_creator_name_is_correct(general_info_parser: PwXML) -> None:
     """Test that creator name is correct."""
-    assert general_info_parser.general_info["creator"]["name"] == "PWSCF"
+    general_info = general_info_parser.general_info
+    assert general_info is not None
+    assert general_info["creator"]["name"] == "PWSCF"
 
 
 def test_creator_contains_version(general_info_parser: PwXML) -> None:
     """Test that creator contains version attribute."""
-    assert "version" in general_info_parser.general_info["creator"]
+    general_info = general_info_parser.general_info
+    assert general_info is not None
+    assert "version" in general_info["creator"]
 
 
 def test_creator_version_is_correct(general_info_parser: PwXML) -> None:
     """Test that creator version is correct."""
-    assert general_info_parser.general_info["creator"]["version"] == "7.2"
+    general_info = general_info_parser.general_info
+    assert general_info is not None
+    assert general_info["creator"]["version"] == "7.2"
 
 
 def test_creator_contains_text(general_info_parser: PwXML) -> None:
     """Test that creator contains text content."""
-    assert "text" in general_info_parser.general_info["creator"]
+    general_info = general_info_parser.general_info
+    assert general_info is not None
+    assert "text" in general_info["creator"]
 
 
 def test_creator_text_is_correct(general_info_parser: PwXML) -> None:
     """Test that creator text is correct."""
-    assert general_info_parser.general_info["creator"]["text"] == "XML file generated by PWSCF"
+    general_info = general_info_parser.general_info
+    assert general_info is not None
+    assert general_info["creator"]["text"] == "XML file generated by PWSCF"
 
 
 # =============================================================================
@@ -2100,35 +2228,44 @@ def test_creator_text_is_correct(general_info_parser: PwXML) -> None:
 
 def test_created_contains_date(general_info_parser: PwXML) -> None:
     """Test that created contains date attribute."""
-    assert "date" in general_info_parser.general_info["created"]
+    general_info = general_info_parser.general_info
+    assert general_info is not None
+    assert "date" in general_info["created"]
 
 
 def test_created_date_is_correct(general_info_parser: PwXML) -> None:
     """Test that created date is correct."""
-    assert general_info_parser.general_info["created"]["date"] == "19Jul2024"
+    general_info = general_info_parser.general_info
+    assert general_info is not None
+    assert general_info["created"]["date"] == "19Jul2024"
 
 
 def test_created_contains_time(general_info_parser: PwXML) -> None:
     """Test that created contains time attribute."""
-    assert "time" in general_info_parser.general_info["created"]
+    general_info = general_info_parser.general_info
+    assert general_info is not None
+    assert "time" in general_info["created"]
 
 
 def test_created_time_is_correct(general_info_parser: PwXML) -> None:
     """Test that created time is correct."""
-    assert general_info_parser.general_info["created"]["time"] == "11:28:51"
+    general_info = general_info_parser.general_info
+    assert general_info is not None
+    assert general_info["created"]["time"] == "11:28:51"
 
 
 def test_created_contains_text(general_info_parser: PwXML) -> None:
     """Test that created contains text content."""
-    assert "text" in general_info_parser.general_info["created"]
+    general_info = general_info_parser.general_info
+    assert general_info is not None
+    assert "text" in general_info["created"]
 
 
 def test_created_text_is_correct(general_info_parser: PwXML) -> None:
     """Test that created text is correct."""
-    assert (
-        general_info_parser.general_info["created"]["text"]
-        == "This run was terminated on:  11:28:51  19 Jul 2024"
-    )
+    general_info = general_info_parser.general_info
+    assert general_info is not None
+    assert general_info["created"]["text"] == "This run was terminated on:  11:28:51  19 Jul 2024"
 
 
 # =============================================================================
@@ -2138,12 +2275,16 @@ def test_created_text_is_correct(general_info_parser: PwXML) -> None:
 
 def test_job_is_correct(general_info_parser: PwXML) -> None:
     """Test that job is correct."""
-    assert general_info_parser.general_info["job"] == "test_job"
+    general_info = general_info_parser.general_info
+    assert general_info is not None
+    assert general_info["job"] == "test_job"
 
 
 def test_job_empty_returns_empty_string(general_info_empty_job_parser: PwXML) -> None:
     """Test that empty job tag returns empty string."""
-    assert general_info_empty_job_parser.general_info["job"] == ""
+    general_info = general_info_empty_job_parser.general_info
+    assert general_info is not None
+    assert general_info["job"] == ""
 
 
 # =============================================================================
@@ -2363,32 +2504,44 @@ def test_parallel_info_returns_none_when_absent(no_parallel_info_parser: PwXML) 
 
 def test_parallel_info_contains_nprocs_key(parallel_info_parser: PwXML) -> None:
     """Test that parallel_info dictionary contains nprocs key."""
-    assert "nprocs" in parallel_info_parser.parallel_info
+    parallel_info = parallel_info_parser.parallel_info
+    assert parallel_info is not None
+    assert "nprocs" in parallel_info
 
 
 def test_parallel_info_contains_nthreads_key(parallel_info_parser: PwXML) -> None:
     """Test that parallel_info dictionary contains nthreads key."""
-    assert "nthreads" in parallel_info_parser.parallel_info
+    parallel_info = parallel_info_parser.parallel_info
+    assert parallel_info is not None
+    assert "nthreads" in parallel_info
 
 
 def test_parallel_info_contains_ntasks_key(parallel_info_parser: PwXML) -> None:
     """Test that parallel_info dictionary contains ntasks key."""
-    assert "ntasks" in parallel_info_parser.parallel_info
+    parallel_info = parallel_info_parser.parallel_info
+    assert parallel_info is not None
+    assert "ntasks" in parallel_info
 
 
 def test_parallel_info_contains_nbgrp_key(parallel_info_parser: PwXML) -> None:
     """Test that parallel_info dictionary contains nbgrp key."""
-    assert "nbgrp" in parallel_info_parser.parallel_info
+    parallel_info = parallel_info_parser.parallel_info
+    assert parallel_info is not None
+    assert "nbgrp" in parallel_info
 
 
 def test_parallel_info_contains_npool_key(parallel_info_parser: PwXML) -> None:
     """Test that parallel_info dictionary contains npool key."""
-    assert "npool" in parallel_info_parser.parallel_info
+    parallel_info = parallel_info_parser.parallel_info
+    assert parallel_info is not None
+    assert "npool" in parallel_info
 
 
 def test_parallel_info_contains_ndiag_key(parallel_info_parser: PwXML) -> None:
     """Test that parallel_info dictionary contains ndiag key."""
-    assert "ndiag" in parallel_info_parser.parallel_info
+    parallel_info = parallel_info_parser.parallel_info
+    assert parallel_info is not None
+    assert "ndiag" in parallel_info
 
 
 # =============================================================================
@@ -2398,32 +2551,44 @@ def test_parallel_info_contains_ndiag_key(parallel_info_parser: PwXML) -> None:
 
 def test_parallel_info_nprocs_is_correct(parallel_info_parser: PwXML) -> None:
     """Test that nprocs value is correct."""
-    assert parallel_info_parser.parallel_info["nprocs"] == 40
+    parallel_info = parallel_info_parser.parallel_info
+    assert parallel_info is not None
+    assert parallel_info["nprocs"] == 40
 
 
 def test_parallel_info_nthreads_is_correct(parallel_info_parser: PwXML) -> None:
     """Test that nthreads value is correct."""
-    assert parallel_info_parser.parallel_info["nthreads"] == 1
+    parallel_info = parallel_info_parser.parallel_info
+    assert parallel_info is not None
+    assert parallel_info["nthreads"] == 1
 
 
 def test_parallel_info_ntasks_is_correct(parallel_info_parser: PwXML) -> None:
     """Test that ntasks value is correct."""
-    assert parallel_info_parser.parallel_info["ntasks"] == 1
+    parallel_info = parallel_info_parser.parallel_info
+    assert parallel_info is not None
+    assert parallel_info["ntasks"] == 1
 
 
 def test_parallel_info_nbgrp_is_correct(parallel_info_parser: PwXML) -> None:
     """Test that nbgrp value is correct."""
-    assert parallel_info_parser.parallel_info["nbgrp"] == 1
+    parallel_info = parallel_info_parser.parallel_info
+    assert parallel_info is not None
+    assert parallel_info["nbgrp"] == 1
 
 
 def test_parallel_info_npool_is_correct(parallel_info_parser: PwXML) -> None:
     """Test that npool value is correct."""
-    assert parallel_info_parser.parallel_info["npool"] == 4
+    parallel_info = parallel_info_parser.parallel_info
+    assert parallel_info is not None
+    assert parallel_info["npool"] == 4
 
 
 def test_parallel_info_ndiag_is_correct(parallel_info_parser: PwXML) -> None:
     """Test that ndiag value is correct."""
-    assert parallel_info_parser.parallel_info["ndiag"] == 10
+    parallel_info = parallel_info_parser.parallel_info
+    assert parallel_info is not None
+    assert parallel_info["ndiag"] == 10
 
 
 # =============================================================================
@@ -2720,72 +2885,100 @@ def test_control_variables_returns_none_when_absent(no_input_parser: PwXML) -> N
 
 def test_control_variables_contains_calculation(input_parser: PwXML) -> None:
     """Test that control_variables contains calculation key."""
-    assert "calculation" in input_parser.control_variables
+    control_variables = input_parser.control_variables
+    assert control_variables is not None
+    assert "calculation" in control_variables
 
 
 def test_control_variables_calculation_is_correct(input_parser: PwXML) -> None:
     """Test that calculation value is correct."""
-    assert input_parser.control_variables["calculation"] == "bands"
+    control_variables = input_parser.control_variables
+    assert control_variables is not None
+    assert control_variables["calculation"] == "bands"
 
 
 def test_control_variables_contains_prefix(input_parser: PwXML) -> None:
     """Test that control_variables contains prefix key."""
-    assert "prefix" in input_parser.control_variables
+    control_variables = input_parser.control_variables
+    assert control_variables is not None
+    assert "prefix" in control_variables
 
 
 def test_control_variables_prefix_is_correct(input_parser: PwXML) -> None:
     """Test that prefix value is correct."""
-    assert input_parser.control_variables["prefix"] == "SrVO3"
+    control_variables = input_parser.control_variables
+    assert control_variables is not None
+    assert control_variables["prefix"] == "SrVO3"
 
 
 def test_control_variables_contains_pseudo_dir(input_parser: PwXML) -> None:
     """Test that control_variables contains pseudo_dir key."""
-    assert "pseudo_dir" in input_parser.control_variables
+    control_variables = input_parser.control_variables
+    assert control_variables is not None
+    assert "pseudo_dir" in control_variables
 
 
 def test_control_variables_contains_outdir(input_parser: PwXML) -> None:
     """Test that control_variables contains outdir key."""
-    assert "outdir" in input_parser.control_variables
+    control_variables = input_parser.control_variables
+    assert control_variables is not None
+    assert "outdir" in control_variables
 
 
 def test_control_variables_contains_restart_mode(input_parser: PwXML) -> None:
     """Test that control_variables contains restart_mode key."""
-    assert "restart_mode" in input_parser.control_variables
+    control_variables = input_parser.control_variables
+    assert control_variables is not None
+    assert "restart_mode" in control_variables
 
 
 def test_control_variables_restart_mode_is_correct(input_parser: PwXML) -> None:
     """Test that restart_mode value is correct."""
-    assert input_parser.control_variables["restart_mode"] == "from_scratch"
+    control_variables = input_parser.control_variables
+    assert control_variables is not None
+    assert control_variables["restart_mode"] == "from_scratch"
 
 
 def test_control_variables_contains_verbosity(input_parser: PwXML) -> None:
     """Test that control_variables contains verbosity key."""
-    assert "verbosity" in input_parser.control_variables
+    control_variables = input_parser.control_variables
+    assert control_variables is not None
+    assert "verbosity" in control_variables
 
 
 def test_control_variables_verbosity_is_correct(input_parser: PwXML) -> None:
     """Test that verbosity value is correct."""
-    assert input_parser.control_variables["verbosity"] == "low"
+    control_variables = input_parser.control_variables
+    assert control_variables is not None
+    assert control_variables["verbosity"] == "low"
 
 
 def test_control_variables_contains_etot_conv_thr(input_parser: PwXML) -> None:
     """Test that control_variables contains etot_conv_thr key."""
-    assert "etot_conv_thr" in input_parser.control_variables
+    control_variables = input_parser.control_variables
+    assert control_variables is not None
+    assert "etot_conv_thr" in control_variables
 
 
 def test_control_variables_etot_conv_thr_is_correct(input_parser: PwXML) -> None:
     """Test that etot_conv_thr value is correct."""
-    assert input_parser.control_variables["etot_conv_thr"] == pytest.approx(5e-05)
+    control_variables = input_parser.control_variables
+    assert control_variables is not None
+    assert control_variables["etot_conv_thr"] == pytest.approx(5e-05)
 
 
 def test_control_variables_contains_max_seconds(input_parser: PwXML) -> None:
     """Test that control_variables contains max_seconds key."""
-    assert "max_seconds" in input_parser.control_variables
+    control_variables = input_parser.control_variables
+    assert control_variables is not None
+    assert "max_seconds" in control_variables
 
 
 def test_control_variables_max_seconds_is_correct(input_parser: PwXML) -> None:
     """Test that max_seconds value is correct."""
-    assert input_parser.control_variables["max_seconds"] == 10000000
+    control_variables = input_parser.control_variables
+    assert control_variables is not None
+    assert control_variables["max_seconds"] == 10000000
 
 
 # =============================================================================
@@ -2843,57 +3036,72 @@ def test_input_atomic_species_returns_none_when_absent(no_input_parser: PwXML) -
 
 def test_input_atomic_species_contains_ntyp(input_parser: PwXML) -> None:
     """Test that input_atomic_species contains ntyp key."""
-    assert "ntyp" in input_parser.input_atomic_species
+    input_atomic_species = input_parser.input_atomic_species
+    assert input_atomic_species is not None
+    assert "ntyp" in input_atomic_species
 
 
 def test_input_atomic_species_ntyp_is_correct(input_parser: PwXML) -> None:
     """Test that ntyp value is correct."""
-    assert input_parser.input_atomic_species["ntyp"] == 3
+    input_atomic_species = input_parser.input_atomic_species
+    assert input_atomic_species is not None
+    assert input_atomic_species["ntyp"] == 3
 
 
 def test_input_atomic_species_contains_species(input_parser: PwXML) -> None:
     """Test that input_atomic_species contains species key."""
-    assert "species" in input_parser.input_atomic_species
+    input_atomic_species = input_parser.input_atomic_species
+    assert input_atomic_species is not None
+    assert "species" in input_atomic_species
 
 
 def test_input_atomic_species_has_three_species(input_parser: PwXML) -> None:
     """Test that there are three species."""
-    assert len(input_parser.input_atomic_species["species"]) == 3
+    input_atomic_species = input_parser.input_atomic_species
+    assert input_atomic_species is not None
+    assert len(input_atomic_species["species"]) == 3
 
 
 def test_input_atomic_species_first_species_name(input_parser: PwXML) -> None:
     """Test that first species name is correct."""
-    assert input_parser.input_atomic_species["species"][0]["name"] == "Sr"
+    input_atomic_species = input_parser.input_atomic_species
+    assert input_atomic_species is not None
+    assert input_atomic_species["species"][0]["name"] == "Sr"
 
 
 def test_input_atomic_species_first_species_mass(input_parser: PwXML) -> None:
     """Test that first species mass is correct."""
-    assert input_parser.input_atomic_species["species"][0]["mass"] == pytest.approx(87.62)
+    input_atomic_species = input_parser.input_atomic_species
+    assert input_atomic_species is not None
+    assert input_atomic_species["species"][0]["mass"] == pytest.approx(87.62)
 
 
 def test_input_atomic_species_first_species_pseudo_file(input_parser: PwXML) -> None:
     """Test that first species pseudo_file is correct."""
-    assert (
-        input_parser.input_atomic_species["species"][0]["pseudo_file"]
-        == "Sr.pbe-spn-kjpaw_psl.1.0.0.UPF"
-    )
+    input_atomic_species = input_parser.input_atomic_species
+    assert input_atomic_species is not None
+    assert input_atomic_species["species"][0]["pseudo_file"] == "Sr.pbe-spn-kjpaw_psl.1.0.0.UPF"
 
 
 def test_input_atomic_species_first_species_magnetization(input_parser: PwXML) -> None:
     """Test that first species starting_magnetization is correct."""
-    assert input_parser.input_atomic_species["species"][0][
-        "starting_magnetization"
-    ] == pytest.approx(0.7)
+    input_atomic_species = input_parser.input_atomic_species
+    assert input_atomic_species is not None
+    assert input_atomic_species["species"][0]["starting_magnetization"] == pytest.approx(0.7)
 
 
 def test_input_atomic_species_second_species_name(input_parser: PwXML) -> None:
     """Test that second species name is correct."""
-    assert input_parser.input_atomic_species["species"][1]["name"] == "V"
+    input_atomic_species = input_parser.input_atomic_species
+    assert input_atomic_species is not None
+    assert input_atomic_species["species"][1]["name"] == "V"
 
 
 def test_input_atomic_species_third_species_name(input_parser: PwXML) -> None:
     """Test that third species name is correct."""
-    assert input_parser.input_atomic_species["species"][2]["name"] == "O"
+    input_atomic_species = input_parser.input_atomic_species
+    assert input_atomic_species is not None
+    assert input_atomic_species["species"][2]["name"] == "O"
 
 
 # =============================================================================
@@ -2914,32 +3122,44 @@ def test_input_spin_returns_none_when_absent(no_input_parser: PwXML) -> None:
 
 def test_input_spin_contains_lsda(input_parser: PwXML) -> None:
     """Test that input_spin contains lsda key."""
-    assert "lsda" in input_parser.input_spin
+    input_spin = input_parser.input_spin
+    assert input_spin is not None
+    assert "lsda" in input_spin
 
 
 def test_input_spin_lsda_is_correct(input_parser: PwXML) -> None:
     """Test that input lsda value is correct."""
-    assert input_parser.input_spin["lsda"] is True
+    input_spin = input_parser.input_spin
+    assert input_spin is not None
+    assert input_spin["lsda"] is True
 
 
 def test_input_spin_contains_noncolin(input_parser: PwXML) -> None:
     """Test that input_spin contains noncolin key."""
-    assert "noncolin" in input_parser.input_spin
+    input_spin = input_parser.input_spin
+    assert input_spin is not None
+    assert "noncolin" in input_spin
 
 
 def test_input_spin_noncolin_is_correct(input_parser: PwXML) -> None:
     """Test that input noncolin value is correct."""
-    assert input_parser.input_spin["noncolin"] is False
+    input_spin = input_parser.input_spin
+    assert input_spin is not None
+    assert input_spin["noncolin"] is False
 
 
 def test_input_spin_contains_spinorbit(input_parser: PwXML) -> None:
     """Test that input_spin contains spinorbit key."""
-    assert "spinorbit" in input_parser.input_spin
+    input_spin = input_parser.input_spin
+    assert input_spin is not None
+    assert "spinorbit" in input_spin
 
 
 def test_input_spin_spinorbit_is_correct(input_parser: PwXML) -> None:
     """Test that input spinorbit value is correct."""
-    assert input_parser.input_spin["spinorbit"] is False
+    input_spin = input_parser.input_spin
+    assert input_spin is not None
+    assert input_spin["spinorbit"] is False
 
 
 # =============================================================================
@@ -2960,37 +3180,51 @@ def test_input_bands_returns_none_when_absent(no_input_parser: PwXML) -> None:
 
 def test_input_bands_contains_occupations(input_parser: PwXML) -> None:
     """Test that input_bands contains occupations key."""
-    assert "occupations" in input_parser.input_bands
+    input_bands = input_parser.input_bands
+    assert input_bands is not None
+    assert "occupations" in input_bands
 
 
 def test_input_bands_occupations_is_correct(input_parser: PwXML) -> None:
     """Test that occupations value is correct."""
-    assert input_parser.input_bands["occupations"] == "smearing"
+    input_bands = input_parser.input_bands
+    assert input_bands is not None
+    assert input_bands["occupations"] == "smearing"
 
 
 def test_input_bands_contains_smearing(input_parser: PwXML) -> None:
     """Test that input_bands contains smearing key."""
-    assert "smearing" in input_parser.input_bands
+    input_bands = input_parser.input_bands
+    assert input_bands is not None
+    assert "smearing" in input_bands
 
 
 def test_input_bands_smearing_type_is_correct(input_parser: PwXML) -> None:
     """Test that smearing type is correct."""
-    assert input_parser.input_bands["smearing"]["type"] == "gaussian"
+    input_bands = input_parser.input_bands
+    assert input_bands is not None
+    assert input_bands["smearing"]["type"] == "gaussian"
 
 
 def test_input_bands_smearing_degauss_is_correct(input_parser: PwXML) -> None:
     """Test that smearing degauss is correct."""
-    assert input_parser.input_bands["smearing"]["degauss"] == pytest.approx(0.007)
+    input_bands = input_parser.input_bands
+    assert input_bands is not None
+    assert input_bands["smearing"]["degauss"] == pytest.approx(0.007)
 
 
 def test_input_bands_contains_tot_charge(input_parser: PwXML) -> None:
     """Test that input_bands contains tot_charge key."""
-    assert "tot_charge" in input_parser.input_bands
+    input_bands = input_parser.input_bands
+    assert input_bands is not None
+    assert "tot_charge" in input_bands
 
 
 def test_input_bands_tot_charge_is_correct(input_parser: PwXML) -> None:
     """Test that tot_charge value is correct."""
-    assert input_parser.input_bands["tot_charge"] == pytest.approx(0.0)
+    input_bands = input_parser.input_bands
+    assert input_bands is not None
+    assert input_bands["tot_charge"] == pytest.approx(0.0)
 
 
 # =============================================================================
@@ -3011,32 +3245,44 @@ def test_input_basis_returns_none_when_absent(no_input_parser: PwXML) -> None:
 
 def test_input_basis_contains_gamma_only(input_parser: PwXML) -> None:
     """Test that input_basis contains gamma_only key."""
-    assert "gamma_only" in input_parser.input_basis
+    input_basis = input_parser.input_basis
+    assert input_basis is not None
+    assert "gamma_only" in input_basis
 
 
 def test_input_basis_gamma_only_is_correct(input_parser: PwXML) -> None:
     """Test that gamma_only value is correct."""
-    assert input_parser.input_basis["gamma_only"] is False
+    input_basis = input_parser.input_basis
+    assert input_basis is not None
+    assert input_basis["gamma_only"] is False
 
 
 def test_input_basis_contains_ecutwfc(input_parser: PwXML) -> None:
     """Test that input_basis contains ecutwfc key."""
-    assert "ecutwfc" in input_parser.input_basis
+    input_basis = input_parser.input_basis
+    assert input_basis is not None
+    assert "ecutwfc" in input_basis
 
 
 def test_input_basis_ecutwfc_is_correct(input_parser: PwXML) -> None:
     """Test that ecutwfc value is correct."""
-    assert input_parser.input_basis["ecutwfc"] == pytest.approx(25.0)
+    input_basis = input_parser.input_basis
+    assert input_basis is not None
+    assert input_basis["ecutwfc"] == pytest.approx(25.0)
 
 
 def test_input_basis_contains_ecutrho(input_parser: PwXML) -> None:
     """Test that input_basis contains ecutrho key."""
-    assert "ecutrho" in input_parser.input_basis
+    input_basis = input_parser.input_basis
+    assert input_basis is not None
+    assert "ecutrho" in input_basis
 
 
 def test_input_basis_ecutrho_is_correct(input_parser: PwXML) -> None:
     """Test that ecutrho value is correct."""
-    assert input_parser.input_basis["ecutrho"] == pytest.approx(300.0)
+    input_basis = input_parser.input_basis
+    assert input_basis is not None
+    assert input_basis["ecutrho"] == pytest.approx(300.0)
 
 
 # =============================================================================
@@ -3094,52 +3340,72 @@ def test_electron_control_returns_none_when_absent(no_input_parser: PwXML) -> No
 
 def test_electron_control_contains_diagonalization(input_parser: PwXML) -> None:
     """Test that electron_control contains diagonalization key."""
-    assert "diagonalization" in input_parser.electron_control
+    electron_control = input_parser.electron_control
+    assert electron_control is not None
+    assert "diagonalization" in electron_control
 
 
 def test_electron_control_diagonalization_is_correct(input_parser: PwXML) -> None:
     """Test that diagonalization value is correct."""
-    assert input_parser.electron_control["diagonalization"] == "davidson"
+    electron_control = input_parser.electron_control
+    assert electron_control is not None
+    assert electron_control["diagonalization"] == "davidson"
 
 
 def test_electron_control_contains_mixing_mode(input_parser: PwXML) -> None:
     """Test that electron_control contains mixing_mode key."""
-    assert "mixing_mode" in input_parser.electron_control
+    electron_control = input_parser.electron_control
+    assert electron_control is not None
+    assert "mixing_mode" in electron_control
 
 
 def test_electron_control_mixing_mode_is_correct(input_parser: PwXML) -> None:
     """Test that mixing_mode value is correct."""
-    assert input_parser.electron_control["mixing_mode"] == "plain"
+    electron_control = input_parser.electron_control
+    assert electron_control is not None
+    assert electron_control["mixing_mode"] == "plain"
 
 
 def test_electron_control_contains_mixing_beta(input_parser: PwXML) -> None:
     """Test that electron_control contains mixing_beta key."""
-    assert "mixing_beta" in input_parser.electron_control
+    electron_control = input_parser.electron_control
+    assert electron_control is not None
+    assert "mixing_beta" in electron_control
 
 
 def test_electron_control_mixing_beta_is_correct(input_parser: PwXML) -> None:
     """Test that mixing_beta value is correct."""
-    assert input_parser.electron_control["mixing_beta"] == pytest.approx(0.7)
+    electron_control = input_parser.electron_control
+    assert electron_control is not None
+    assert electron_control["mixing_beta"] == pytest.approx(0.7)
 
 
 def test_electron_control_contains_conv_thr(input_parser: PwXML) -> None:
     """Test that electron_control contains conv_thr key."""
-    assert "conv_thr" in input_parser.electron_control
+    electron_control = input_parser.electron_control
+    assert electron_control is not None
+    assert "conv_thr" in electron_control
 
 
 def test_electron_control_conv_thr_is_correct(input_parser: PwXML) -> None:
     """Test that conv_thr value is correct."""
-    assert input_parser.electron_control["conv_thr"] == pytest.approx(5e-07)
+    electron_control = input_parser.electron_control
+    assert electron_control is not None
+    assert electron_control["conv_thr"] == pytest.approx(5e-07)
 
 
 def test_electron_control_contains_max_nstep(input_parser: PwXML) -> None:
     """Test that electron_control contains max_nstep key."""
-    assert "max_nstep" in input_parser.electron_control
+    electron_control = input_parser.electron_control
+    assert electron_control is not None
+    assert "max_nstep" in electron_control
 
 
 def test_electron_control_max_nstep_is_correct(input_parser: PwXML) -> None:
     """Test that max_nstep value is correct."""
-    assert input_parser.electron_control["max_nstep"] == 100
+    electron_control = input_parser.electron_control
+    assert electron_control is not None
+    assert electron_control["max_nstep"] == 100
 
 
 # =============================================================================
@@ -3160,37 +3426,47 @@ def test_k_points_ibz_returns_none_when_absent(no_input_parser: PwXML) -> None:
 
 def test_k_points_ibz_contains_nk(input_parser: PwXML) -> None:
     """Test that k_points_ibz contains nk key."""
-    assert "nk" in input_parser.k_points_ibz
+    k_points_ibz = input_parser.k_points_ibz
+    assert k_points_ibz is not None
+    assert "nk" in k_points_ibz
 
 
 def test_k_points_ibz_nk_is_correct(input_parser: PwXML) -> None:
     """Test that nk value is correct."""
-    assert input_parser.k_points_ibz["nk"] == 151
+    k_points_ibz = input_parser.k_points_ibz
+    assert k_points_ibz is not None
+    assert k_points_ibz["nk"] == 151
 
 
 def test_k_points_ibz_contains_k_points(input_parser: PwXML) -> None:
     """Test that k_points_ibz contains k_points key."""
-    assert "k_points" in input_parser.k_points_ibz
+    k_points_ibz = input_parser.k_points_ibz
+    assert k_points_ibz is not None
+    assert "k_points" in k_points_ibz
 
 
 def test_k_points_ibz_has_two_k_points(input_parser: PwXML) -> None:
     """Test that there are two k_points in the list."""
-    assert len(input_parser.k_points_ibz["k_points"]) == 2
+    k_points_ibz = input_parser.k_points_ibz
+    assert k_points_ibz is not None
+    assert len(k_points_ibz["k_points"]) == 2
 
 
 def test_k_points_ibz_first_k_point_weight(input_parser: PwXML) -> None:
     """Test that first k_point weight is correct."""
-    assert input_parser.k_points_ibz["k_points"][0]["weight"] == pytest.approx(1.0)
+    k_points_ibz = input_parser.k_points_ibz
+    assert k_points_ibz is not None
+    assert k_points_ibz["k_points"][0]["weight"] == pytest.approx(1.0)
 
 
 def test_k_points_ibz_first_k_point_coordinates(input_parser: PwXML) -> None:
     """Test that first k_point coordinates are correct."""
     import numpy as np
 
+    k_points_ibz = input_parser.k_points_ibz
+    assert k_points_ibz is not None
     expected = np.array([0.0, 0.0, 0.0])
-    np.testing.assert_array_almost_equal(
-        input_parser.k_points_ibz["k_points"][0]["coordinates"], expected
-    )
+    np.testing.assert_array_almost_equal(k_points_ibz["k_points"][0]["coordinates"], expected)
 
 
 # =============================================================================
@@ -3211,22 +3487,30 @@ def test_ion_control_returns_none_when_absent(no_input_parser: PwXML) -> None:
 
 def test_ion_control_contains_ion_dynamics(input_parser: PwXML) -> None:
     """Test that ion_control contains ion_dynamics key."""
-    assert "ion_dynamics" in input_parser.ion_control
+    ion_control = input_parser.ion_control
+    assert ion_control is not None
+    assert "ion_dynamics" in ion_control
 
 
 def test_ion_control_ion_dynamics_is_correct(input_parser: PwXML) -> None:
     """Test that ion_dynamics value is correct."""
-    assert input_parser.ion_control["ion_dynamics"] == "none"
+    ion_control = input_parser.ion_control
+    assert ion_control is not None
+    assert ion_control["ion_dynamics"] == "none"
 
 
 def test_ion_control_contains_upscale(input_parser: PwXML) -> None:
     """Test that ion_control contains upscale key."""
-    assert "upscale" in input_parser.ion_control
+    ion_control = input_parser.ion_control
+    assert ion_control is not None
+    assert "upscale" in ion_control
 
 
 def test_ion_control_upscale_is_correct(input_parser: PwXML) -> None:
     """Test that upscale value is correct."""
-    assert input_parser.ion_control["upscale"] == pytest.approx(100.0)
+    ion_control = input_parser.ion_control
+    assert ion_control is not None
+    assert ion_control["upscale"] == pytest.approx(100.0)
 
 
 # =============================================================================
@@ -3247,32 +3531,44 @@ def test_cell_control_returns_none_when_absent(no_input_parser: PwXML) -> None:
 
 def test_cell_control_contains_cell_dynamics(input_parser: PwXML) -> None:
     """Test that cell_control contains cell_dynamics key."""
-    assert "cell_dynamics" in input_parser.cell_control
+    cell_control = input_parser.cell_control
+    assert cell_control is not None
+    assert "cell_dynamics" in cell_control
 
 
 def test_cell_control_cell_dynamics_is_correct(input_parser: PwXML) -> None:
     """Test that cell_dynamics value is correct."""
-    assert input_parser.cell_control["cell_dynamics"] == "none"
+    cell_control = input_parser.cell_control
+    assert cell_control is not None
+    assert cell_control["cell_dynamics"] == "none"
 
 
 def test_cell_control_contains_pressure(input_parser: PwXML) -> None:
     """Test that cell_control contains pressure key."""
-    assert "pressure" in input_parser.cell_control
+    cell_control = input_parser.cell_control
+    assert cell_control is not None
+    assert "pressure" in cell_control
 
 
 def test_cell_control_pressure_is_correct(input_parser: PwXML) -> None:
     """Test that pressure value is correct."""
-    assert input_parser.cell_control["pressure"] == pytest.approx(0.0)
+    cell_control = input_parser.cell_control
+    assert cell_control is not None
+    assert cell_control["pressure"] == pytest.approx(0.0)
 
 
 def test_cell_control_contains_cell_do_free(input_parser: PwXML) -> None:
     """Test that cell_control contains cell_do_free key."""
-    assert "cell_do_free" in input_parser.cell_control
+    cell_control = input_parser.cell_control
+    assert cell_control is not None
+    assert "cell_do_free" in cell_control
 
 
 def test_cell_control_cell_do_free_is_correct(input_parser: PwXML) -> None:
     """Test that cell_do_free value is correct."""
-    assert input_parser.cell_control["cell_do_free"] == "all"
+    cell_control = input_parser.cell_control
+    assert cell_control is not None
+    assert cell_control["cell_do_free"] == "all"
 
 
 # =============================================================================
@@ -3293,29 +3589,41 @@ def test_symmetry_flags_returns_none_when_absent(no_input_parser: PwXML) -> None
 
 def test_symmetry_flags_contains_nosym(input_parser: PwXML) -> None:
     """Test that symmetry_flags contains nosym key."""
-    assert "nosym" in input_parser.symmetry_flags
+    symmetry_flags = input_parser.symmetry_flags
+    assert symmetry_flags is not None
+    assert "nosym" in symmetry_flags
 
 
 def test_symmetry_flags_nosym_is_correct(input_parser: PwXML) -> None:
     """Test that nosym value is correct."""
-    assert input_parser.symmetry_flags["nosym"] is False
+    symmetry_flags = input_parser.symmetry_flags
+    assert symmetry_flags is not None
+    assert symmetry_flags["nosym"] is False
 
 
 def test_symmetry_flags_contains_noinv(input_parser: PwXML) -> None:
     """Test that symmetry_flags contains noinv key."""
-    assert "noinv" in input_parser.symmetry_flags
+    symmetry_flags = input_parser.symmetry_flags
+    assert symmetry_flags is not None
+    assert "noinv" in symmetry_flags
 
 
 def test_symmetry_flags_noinv_is_correct(input_parser: PwXML) -> None:
     """Test that noinv value is correct."""
-    assert input_parser.symmetry_flags["noinv"] is False
+    symmetry_flags = input_parser.symmetry_flags
+    assert symmetry_flags is not None
+    assert symmetry_flags["noinv"] is False
 
 
 def test_symmetry_flags_contains_no_t_rev(input_parser: PwXML) -> None:
     """Test that symmetry_flags contains no_t_rev key."""
-    assert "no_t_rev" in input_parser.symmetry_flags
+    symmetry_flags = input_parser.symmetry_flags
+    assert symmetry_flags is not None
+    assert "no_t_rev" in symmetry_flags
 
 
 def test_symmetry_flags_no_t_rev_is_correct(input_parser: PwXML) -> None:
     """Test that no_t_rev value is correct."""
-    assert input_parser.symmetry_flags["no_t_rev"] is False
+    symmetry_flags = input_parser.symmetry_flags
+    assert symmetry_flags is not None
+    assert symmetry_flags["no_t_rev"] is False

@@ -704,6 +704,7 @@ def test_kpdos_non_spin_bands_first_kpoint_first_band(
 ) -> None:
     """Test band energy for first k-point, first band in non-spin-polarized."""
     bands = kpdos_non_spin_parser.bands
+    assert bands is not None
     assert bands[0, 0, 0] == pytest.approx(-53.32013, rel=1e-5)
 
 
@@ -712,6 +713,7 @@ def test_kpdos_non_spin_bands_first_kpoint_second_band(
 ) -> None:
     """Test band energy for first k-point, second band in non-spin-polarized."""
     bands = kpdos_non_spin_parser.bands
+    assert bands is not None
     assert bands[0, 1, 0] == pytest.approx(-27.14377, rel=1e-5)
 
 
@@ -720,6 +722,7 @@ def test_kpdos_non_spin_bands_second_kpoint_first_band(
 ) -> None:
     """Test band energy for second k-point, first band in non-spin-polarized."""
     bands = kpdos_non_spin_parser.bands
+    assert bands is not None
     assert bands[1, 0, 0] == pytest.approx(-53.32014, rel=1e-5)
 
 
@@ -728,6 +731,7 @@ def test_kpdos_non_spin_bands_second_kpoint_second_band(
 ) -> None:
     """Test band energy for second k-point, second band in non-spin-polarized."""
     bands = kpdos_non_spin_parser.bands
+    assert bands is not None
     assert bands[1, 1, 0] == pytest.approx(-27.14388, rel=1e-5)
 
 
@@ -749,6 +753,7 @@ def test_kpdos_non_spin_psi2_first_kpoint_first_band(
 ) -> None:
     """Test psi2 value for first k-point, first band in non-spin-polarized."""
     psi2 = kpdos_non_spin_parser.psi2
+    assert psi2 is not None
     assert psi2[0, 0, 0] == pytest.approx(0.998, rel=1e-3)
 
 
@@ -757,6 +762,7 @@ def test_kpdos_non_spin_psi2_first_kpoint_second_band(
 ) -> None:
     """Test psi2 value for first k-point, second band in non-spin-polarized."""
     psi2 = kpdos_non_spin_parser.psi2
+    assert psi2 is not None
     assert psi2[0, 1, 0] == pytest.approx(0.987, rel=1e-3)
 
 
@@ -778,6 +784,7 @@ def test_kpdos_non_spin_psi_coeffs_first_kpoint_first_band_state_9(
 ) -> None:
     """Test psi coefficient for state #9 at first k-point, first band."""
     psi_coeffs = kpdos_non_spin_parser.psi_coeffs
+    assert psi_coeffs is not None
     # State #9 is index 8 (0-based), coefficient should be 0.942
     assert psi_coeffs[0, 0, 0, 8] == pytest.approx(0.942, rel=1e-3)
 
@@ -787,6 +794,7 @@ def test_kpdos_non_spin_psi_coeffs_first_kpoint_first_band_state_2(
 ) -> None:
     """Test psi coefficient for state #2 at first k-point, first band."""
     psi_coeffs = kpdos_non_spin_parser.psi_coeffs
+    assert psi_coeffs is not None
     # State #2 is index 1 (0-based), coefficient should be 0.054
     assert psi_coeffs[0, 0, 0, 1] == pytest.approx(0.054, rel=1e-3)
 
@@ -796,6 +804,7 @@ def test_kpdos_non_spin_psi_coeffs_first_kpoint_second_band_state_3(
 ) -> None:
     """Test psi coefficient for state #3 at first k-point, second band."""
     psi_coeffs = kpdos_non_spin_parser.psi_coeffs
+    assert psi_coeffs is not None
     # State #3 is index 2 (0-based), coefficient should be 0.327
     assert psi_coeffs[0, 1, 0, 2] == pytest.approx(0.327, rel=1e-3)
 
@@ -805,6 +814,7 @@ def test_kpdos_non_spin_psi_coeffs_zero_for_missing_state(
 ) -> None:
     """Test that missing psi coefficients are zero."""
     psi_coeffs = kpdos_non_spin_parser.psi_coeffs
+    assert psi_coeffs is not None
     # State #1 is index 0, not present in first band psi, should be 0.0
     assert psi_coeffs[0, 0, 0, 0] == pytest.approx(0.0, abs=1e-6)
 
@@ -828,6 +838,7 @@ def test_kpdos_spin_bands_first_kpoint_first_band_spin_up(
 ) -> None:
     """Test band energy for first k-point, first band, spin up."""
     bands = kpdos_spin_polarized_parser.bands
+    assert bands is not None
     # Indexing: [spin, kpoint, band]
     assert bands[0, 0, 0] == pytest.approx(-53.30767, rel=1e-5)
 
@@ -837,6 +848,7 @@ def test_kpdos_spin_bands_first_kpoint_second_band_spin_up(
 ) -> None:
     """Test band energy for first k-point, second band, spin up."""
     bands = kpdos_spin_polarized_parser.bands
+    assert bands is not None
     # Indexing: [spin, kpoint, band]
     assert bands[0, 0, 1] == pytest.approx(-27.13208, rel=1e-5)
 
@@ -846,6 +858,7 @@ def test_kpdos_spin_bands_first_kpoint_first_band_spin_down(
 ) -> None:
     """Test band energy for first k-point, first band, spin down."""
     bands = kpdos_spin_polarized_parser.bands
+    assert bands is not None
     # Indexing: [spin, kpoint, band]
     assert bands[1, 0, 0] == pytest.approx(-53.30589, rel=1e-5)
 
@@ -855,6 +868,7 @@ def test_kpdos_spin_bands_first_kpoint_second_band_spin_down(
 ) -> None:
     """Test band energy for first k-point, second band, spin down."""
     bands = kpdos_spin_polarized_parser.bands
+    assert bands is not None
     # Indexing: [spin, kpoint, band]
     assert bands[1, 0, 1] == pytest.approx(-27.13033, rel=1e-5)
 
@@ -864,6 +878,7 @@ def test_kpdos_spin_bands_second_kpoint_second_band_spin_down(
 ) -> None:
     """Test band energy for second k-point, second band, spin down."""
     bands = kpdos_spin_polarized_parser.bands
+    assert bands is not None
     # Indexing: [spin, kpoint, band]
     assert bands[1, 1, 1] == pytest.approx(-27.13044, rel=1e-5)
 
@@ -887,6 +902,7 @@ def test_kpdos_spin_psi2_first_kpoint_first_band_spin_up(
 ) -> None:
     """Test psi2 value for first k-point, first band, spin up."""
     psi2 = kpdos_spin_polarized_parser.psi2
+    assert psi2 is not None
     # Indexing: [spin, kpoint, band]
     assert psi2[0, 0, 0] == pytest.approx(0.998, rel=1e-3)
 
@@ -896,6 +912,7 @@ def test_kpdos_spin_psi2_first_kpoint_second_band_spin_down(
 ) -> None:
     """Test psi2 value for first k-point, second band, spin down."""
     psi2 = kpdos_spin_polarized_parser.psi2
+    assert psi2 is not None
     # Indexing: [spin, kpoint, band]
     assert psi2[1, 0, 1] == pytest.approx(0.983, rel=1e-3)
 
@@ -919,6 +936,7 @@ def test_kpdos_spin_psi_coeffs_first_kpoint_first_band_spin_up_state_9(
 ) -> None:
     """Test psi coefficient for state #9 at first k-point, first band, spin up."""
     psi_coeffs = kpdos_spin_polarized_parser.psi_coeffs
+    assert psi_coeffs is not None
     # Indexing: [spin, kpoint, band, atomwfc]
     # State #9 is index 8 (0-based), coefficient should be 0.942 for spin up
     assert psi_coeffs[0, 0, 0, 8] == pytest.approx(0.942, rel=1e-3)
@@ -929,6 +947,7 @@ def test_kpdos_spin_psi_coeffs_first_kpoint_first_band_spin_down_state_9(
 ) -> None:
     """Test psi coefficient for state #9 at first k-point, first band, spin down."""
     psi_coeffs = kpdos_spin_polarized_parser.psi_coeffs
+    assert psi_coeffs is not None
     # Indexing: [spin, kpoint, band, atomwfc]
     # State #9 is index 8 (0-based), coefficient should be 0.940 for spin down
     assert psi_coeffs[1, 0, 0, 8] == pytest.approx(0.940, rel=1e-3)
@@ -939,6 +958,7 @@ def test_kpdos_spin_psi_coeffs_first_kpoint_second_band_spin_up_state_3(
 ) -> None:
     """Test psi coefficient for state #3 at first k-point, second band, spin up."""
     psi_coeffs = kpdos_spin_polarized_parser.psi_coeffs
+    assert psi_coeffs is not None
     # Indexing: [spin, kpoint, band, atomwfc]
     # State #3 is index 2 (0-based), coefficient should be 0.327 for spin up
     assert psi_coeffs[0, 0, 1, 2] == pytest.approx(0.327, rel=1e-3)
@@ -949,6 +969,7 @@ def test_kpdos_spin_psi_coeffs_first_kpoint_second_band_spin_down_state_3(
 ) -> None:
     """Test psi coefficient for state #3 at first k-point, second band, spin down."""
     psi_coeffs = kpdos_spin_polarized_parser.psi_coeffs
+    assert psi_coeffs is not None
     # Indexing: [spin, kpoint, band, atomwfc]
     # State #3 is index 2 (0-based), coefficient should be 0.325 for spin down
     assert psi_coeffs[1, 0, 1, 2] == pytest.approx(0.325, rel=1e-3)
@@ -959,6 +980,7 @@ def test_kpdos_spin_psi_coeffs_different_between_spin_channels(
 ) -> None:
     """Test that psi coefficients differ between spin channels."""
     psi_coeffs = kpdos_spin_polarized_parser.psi_coeffs
+    assert psi_coeffs is not None
     # Indexing: [spin, kpoint, band, atomwfc]
     # State #6 (index 5) has different values for spin up (0.006) vs spin down (0.008)
     assert psi_coeffs[0, 0, 1, 5] == pytest.approx(0.006, rel=1e-2)
@@ -981,6 +1003,7 @@ def test_kpdos_non_spin_kpoints_shape(kpdos_non_spin_parser: ProjwfcOut) -> None
 def test_kpdos_non_spin_kpoints_first(kpdos_non_spin_parser: ProjwfcOut) -> None:
     """Test first k-point coordinates for non-spin-polarized."""
     kpoints = kpdos_non_spin_parser.kpoints
+    assert kpoints is not None
     assert kpoints[0, 0] == pytest.approx(0.0, abs=1e-9)
     assert kpoints[0, 1] == pytest.approx(0.0, abs=1e-9)
     assert kpoints[0, 2] == pytest.approx(0.0, abs=1e-9)
@@ -989,6 +1012,7 @@ def test_kpdos_non_spin_kpoints_first(kpdos_non_spin_parser: ProjwfcOut) -> None
 def test_kpdos_non_spin_kpoints_second(kpdos_non_spin_parser: ProjwfcOut) -> None:
     """Test second k-point coordinates for non-spin-polarized."""
     kpoints = kpdos_non_spin_parser.kpoints
+    assert kpoints is not None
     assert kpoints[1, 0] == pytest.approx(0.0166666667, rel=1e-6)
     assert kpoints[1, 1] == pytest.approx(0.0, abs=1e-9)
     assert kpoints[1, 2] == pytest.approx(0.0, abs=1e-9)

@@ -2,6 +2,9 @@
 
 from collections.abc import Sequence
 
+import numpy as np
+import numpy.typing as npt
+
 from matplotlib.axes import Axes
 from matplotlib.colorbar import Colorbar
 
@@ -9,6 +12,7 @@ class Figure:
     """Matplotlib Figure class."""
 
     axes: list[Axes]
+    dpi: float
 
     def __init__(
         self,
@@ -66,6 +70,7 @@ class Figure:
         t: str,
         **kwargs: object,
     ) -> object: ...
+    def get_size_inches(self) -> npt.NDArray[np.float64]: ...
     def colorbar(
         self,
         mappable: object,

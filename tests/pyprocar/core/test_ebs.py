@@ -3,6 +3,7 @@ import tempfile
 from pathlib import Path
 
 import numpy as np
+import numpy.typing as npt
 import pytest
 import pyvista as pv
 
@@ -12,7 +13,7 @@ from pyprocar.core.ebs import (
     ElectronicBandStructureMesh,
     ElectronicBandStructurePath,
 )
-from pyprocar.core.kpoints import KGRID_MODE, KGridInfo
+from pyprocar.core.kpoints import KGRID_MODE, KGridInfo, KPath
 from pyprocar.core.property_store import Property
 from tests.utils import DATA_DIR
 
@@ -22,7 +23,7 @@ user_logger = logging.getLogger("user")
 
 
 @pytest.fixture
-def mesh_calc_dir():
+def mesh_calc_dir() -> Path:
     """
     This is the parameterized fixture. Pytest will run any test that
     uses this fixture once for each item in ALL_TEST_CASES.
@@ -33,7 +34,7 @@ def mesh_calc_dir():
 
 
 @pytest.fixture
-def path_calc_dir():
+def path_calc_dir() -> Path:
     """
     This is the parameterized fixture. Pytest will run any test that
     uses this fixture once for each item in ALL_TEST_CASES.
@@ -44,12 +45,12 @@ def path_calc_dir():
 
 
 @pytest.fixture
-def ebs(mesh_calc_dir):
-    return ElectronicBandStructureMesh.from_code(code="vasp", dirpath=mesh_calc_dir)
+def ebs(mesh_calc_dir: Path) -> ElectronicBandStructure:
+    return ElectronicBandStructure.from_code(code="vasp", dirpath=str(mesh_calc_dir))
 
 
 @pytest.fixture
-def sample_kpoints():
+def sample_kpoints() -> npt.NDArray[np.float64]:
     """Generate sample kpoints for testing"""
     return np.array(
         [
@@ -66,7 +67,7 @@ def sample_kpoints():
 
 
 @pytest.fixture
-def sample_bands():
+def sample_bands() -> npt.NDArray[np.float64]:
     """Generate sample bands for testing"""
     n_kpoints = 8
     n_bands = 4
@@ -75,7 +76,7 @@ def sample_bands():
 
 
 @pytest.fixture
-def sample_projected():
+def sample_projected() -> npt.NDArray[np.float64]:
     """Generate sample projected data for testing"""
     n_kpoints = 8
     n_bands = 4
@@ -86,7 +87,7 @@ def sample_projected():
 
 
 @pytest.fixture
-def sample_reciprocal_lattice():
+def sample_reciprocal_lattice() -> npt.NDArray[np.float64]:
     """Generate sample reciprocal lattice for testing"""
     return np.array(
         [
@@ -98,7 +99,7 @@ def sample_reciprocal_lattice():
 
 
 @pytest.fixture
-def sample_kgrid_info():
+def sample_kgrid_info() -> KGridInfo:
     """Create a sample KGridInfo for testing"""
     return KGridInfo(
         kgrid=(4, 4, 4),
@@ -108,7 +109,12 @@ def sample_kgrid_info():
 
 
 @pytest.fixture
-def sample_ebs(sample_kpoints, sample_bands, sample_projected, sample_reciprocal_lattice):
+def sample_ebs(
+    sample_kpoints: npt.NDArray[np.float64],
+    sample_bands: npt.NDArray[np.float64],
+    sample_projected: npt.NDArray[np.float64],
+    sample_reciprocal_lattice: npt.NDArray[np.float64],
+) -> ElectronicBandStructure:
     """Create a sample ElectronicBandStructure for testing"""
     return ElectronicBandStructure(
         kpoints=sample_kpoints,
@@ -121,24 +127,24 @@ def sample_ebs(sample_kpoints, sample_bands, sample_projected, sample_reciprocal
 
 
 @pytest.fixture
-def mesh_kpoints():
+def mesh_kpoints() -> npt.NDArray[np.float64]:
     """Generate mesh kpoints for testing"""
     nkx, nky, nkz = 4, 4, 4
     kx = np.linspace(0, 1, nkx, endpoint=False)
     ky = np.linspace(0, 1, nky, endpoint=False)
     kz = np.linspace(0, 1, nkz, endpoint=False)
 
-    kpoints = []
+    kpoints_list: list[list[float]] = []
     for ix in range(nkx):
         for iy in range(nky):
             for iz in range(nkz):
-                kpoints.append([kx[ix], ky[iy], kz[iz]])
+                kpoints_list.append([float(kx[ix]), float(ky[iy]), float(kz[iz])])
 
-    return np.array(kpoints)
+    return np.array(kpoints_list)
 
 
 @pytest.fixture
-def mesh_bands(mesh_kpoints):
+def mesh_bands(mesh_kpoints: npt.NDArray[np.float64]) -> npt.NDArray[np.float64]:
     """Generate mesh bands for testing"""
     n_kpoints = len(mesh_kpoints)
     n_bands = 3
@@ -147,7 +153,7 @@ def mesh_bands(mesh_kpoints):
 
 
 @pytest.fixture
-def mesh_bands_spin_polarized(mesh_kpoints):
+def mesh_bands_spin_polarized(mesh_kpoints: npt.NDArray[np.float64]) -> npt.NDArray[np.float64]:
     """Generate mesh bands for testing"""
     n_kpoints = len(mesh_kpoints)
     n_bands = 3
@@ -156,7 +162,12 @@ def mesh_bands_spin_polarized(mesh_kpoints):
 
 
 @pytest.fixture
-def sample_ebs_mesh(mesh_kpoints, mesh_bands, sample_reciprocal_lattice, sample_kgrid_info):
+def sample_ebs_mesh(
+    mesh_kpoints: npt.NDArray[np.float64],
+    mesh_bands: npt.NDArray[np.float64],
+    sample_reciprocal_lattice: npt.NDArray[np.float64],
+    sample_kgrid_info: KGridInfo,
+) -> ElectronicBandStructureMesh:
     """Create a sample ElectronicBandStructureMesh for testing"""
     n_kpoints = len(mesh_kpoints)
     n_bands = 3
@@ -179,8 +190,11 @@ def sample_ebs_mesh(mesh_kpoints, mesh_bands, sample_reciprocal_lattice, sample_
 
 @pytest.fixture
 def sample_ebs_mesh_spin_polarized(
-    mesh_kpoints, mesh_bands_spin_polarized, sample_reciprocal_lattice, sample_kgrid_info
-):
+    mesh_kpoints: npt.NDArray[np.float64],
+    mesh_bands_spin_polarized: npt.NDArray[np.float64],
+    sample_reciprocal_lattice: npt.NDArray[np.float64],
+    sample_kgrid_info: KGridInfo,
+) -> ElectronicBandStructureMesh:
     """Create a sample ElectronicBandStructureMesh for testing"""
     n_kpoints = len(mesh_kpoints)
     n_bands = 3
@@ -203,8 +217,11 @@ def sample_ebs_mesh_spin_polarized(
 
 @pytest.fixture
 def sample_ebs_mesh_non_colinear(
-    mesh_kpoints, mesh_bands, sample_reciprocal_lattice, sample_kgrid_info
-):
+    mesh_kpoints: npt.NDArray[np.float64],
+    mesh_bands: npt.NDArray[np.float64],
+    sample_reciprocal_lattice: npt.NDArray[np.float64],
+    sample_kgrid_info: KGridInfo,
+) -> ElectronicBandStructureMesh:
     """Create a sample ElectronicBandStructureMesh for testing"""
     n_kpoints = len(mesh_kpoints)
     n_bands = 3
@@ -228,7 +245,7 @@ def sample_ebs_mesh_non_colinear(
 class TestElectronicBandStructure:
     """Test class for ElectronicBandStructure functionality."""
 
-    def test_initialization(self, sample_ebs):
+    def test_initialization(self, sample_ebs: ElectronicBandStructure) -> None:
         """Test basic initialization of ElectronicBandStructure."""
         assert sample_ebs.n_kpoints == 8
         assert sample_ebs.n_bands == 4
@@ -236,9 +253,11 @@ class TestElectronicBandStructure:
         assert sample_ebs.n_atoms == 2
         assert sample_ebs.n_orbitals == 3
         assert sample_ebs.fermi == 0.0
-        assert len(sample_ebs.orbital_names) == 3
+        orbital_names = sample_ebs.orbital_names
+        assert orbital_names is not None
+        assert len(orbital_names) == 3
 
-    def test_properties_access(self, sample_ebs):
+    def test_properties_access(self, sample_ebs: ElectronicBandStructure) -> None:
         """Test property access methods."""
         assert sample_ebs.kpoints is not None
         assert sample_ebs.bands is not None
@@ -250,7 +269,7 @@ class TestElectronicBandStructure:
         assert sample_ebs.bands.shape == (8, 4, 2)  # Property delegates .shape
         assert sample_ebs.projected.shape == (8, 4, 2, 2, 3)
 
-    def test_spin_properties(self, sample_ebs):
+    def test_spin_properties(self, sample_ebs: ElectronicBandStructure) -> None:
         """Test spin-related properties."""
         assert sample_ebs.n_spin_channels == 2
         assert sample_ebs.is_spin_polarized is True
@@ -258,16 +277,18 @@ class TestElectronicBandStructure:
         assert "Spin-up" in sample_ebs.spin_projection_names
         assert "Spin-down" in sample_ebs.spin_projection_names
 
-    def test_cartesian_conversion(self, sample_ebs):
+    def test_cartesian_conversion(self, sample_ebs: ElectronicBandStructure) -> None:
         """Test cartesian coordinate conversion."""
         kpoints_cart = sample_ebs.kpoints_cartesian
+        assert kpoints_cart is not None
         assert kpoints_cart.shape == sample_ebs.kpoints.shape
 
         # Test conversion functions
         kpoints_reduced = kpoints.cartesian_to_reduced(kpoints_cart, sample_ebs.reciprocal_lattice)
+        assert kpoints_reduced is not None
         assert np.allclose(kpoints_reduced, sample_ebs.kpoints)
 
-    def test_ebs_sum(self, sample_ebs):
+    def test_ebs_sum(self, sample_ebs: ElectronicBandStructure) -> None:
         """Test ebs_sum method."""
         result = sample_ebs.ebs_sum()
         assert result.shape == (8, 4, 2)
@@ -279,7 +300,7 @@ class TestElectronicBandStructure:
         result_orbitals = sample_ebs.ebs_sum(orbitals=[0, 1])
         assert result_orbitals.shape == (8, 4, 2)
 
-    def test_compute_ebs_ipr(self, sample_ebs):
+    def test_compute_ebs_ipr(self, sample_ebs: ElectronicBandStructure) -> None:
         """Test IPR computation."""
         ipr_prop = sample_ebs.compute_ebs_ipr()
 
@@ -290,7 +311,7 @@ class TestElectronicBandStructure:
         assert np.all(ipr_prop.value <= 1)  # IPR should be <= 1
         assert ipr_prop.metadata.get("description") == "Inverse Participation Ratio"
 
-    def test_compute_projected_sum(self, sample_ebs):
+    def test_compute_projected_sum(self, sample_ebs: ElectronicBandStructure) -> None:
         """Test projected sum computation."""
         proj_sum_prop = sample_ebs.compute_projected_sum()
 
@@ -309,7 +330,7 @@ class TestElectronicBandStructure:
         assert isinstance(proj_sum_normalized, Property)
         assert np.max(proj_sum_normalized.value) <= 1.0 + 1e-6
 
-    def test_reduce_bands_near_fermi(self, sample_ebs):
+    def test_reduce_bands_near_fermi(self, sample_ebs: ElectronicBandStructure) -> None:
         """Test reducing bands near Fermi energy."""
         # Set some bands closer to Fermi - access underlying array through property_store
         sample_ebs.property_store["bands"].value[:, 0, :] = 0.1  # Close to Fermi
@@ -320,9 +341,9 @@ class TestElectronicBandStructure:
         assert reduced_ebs.n_bands <= sample_ebs.n_bands
         assert reduced_ebs.n_kpoints == sample_ebs.n_kpoints
 
-    def test_reduce_bands_by_index(self, sample_ebs):
+    def test_reduce_bands_by_index(self, sample_ebs: ElectronicBandStructure) -> None:
         """Test reducing bands by specific indices."""
-        original_n_bands = sample_ebs.n_bands
+        _original_n_bands = sample_ebs.n_bands
         bands_to_keep = [0, 2]  # Keep bands 0 and 2
 
         reduced_ebs = sample_ebs.reduce_bands_by_index(bands_to_keep, inplace=False)
@@ -332,15 +353,22 @@ class TestElectronicBandStructure:
         assert reduced_ebs.n_kpoints == sample_ebs.n_kpoints
 
         # Check that the bands data is correctly sliced
-        expected_bands = sample_ebs.bands[:, bands_to_keep, :]
-        assert np.allclose(reduced_ebs.bands.to_array(), expected_bands)
+        original_bands = sample_ebs.bands
+        assert original_bands is not None
+        expected_bands = original_bands.to_array()[:, bands_to_keep, :]
+        reduced_bands = reduced_ebs.bands
+        assert reduced_bands is not None
+        assert np.allclose(reduced_bands.to_array(), expected_bands)
 
         # Check projected data is also sliced if it exists
-        if sample_ebs.projected is not None:
-            expected_projected = sample_ebs.projected[:, bands_to_keep, :, :, :]
-            assert np.allclose(reduced_ebs.projected.to_array(), expected_projected)
+        projected = sample_ebs.projected
+        assert projected is not None
+        expected_projected = projected.to_array()[:, bands_to_keep, :, :, :]
+        reduced_projected = reduced_ebs.projected
+        assert reduced_projected is not None
+        assert np.allclose(reduced_projected.to_array(), expected_projected)
 
-    def test_shift_kpoints_to_fbz(self, sample_ebs):
+    def test_shift_kpoints_to_fbz(self, sample_ebs: ElectronicBandStructure) -> None:  # pyright: ignore[reportUnusedParameter]
         """Test shifting kpoints to first Brillouin zone."""
         # Create kpoints outside the [-0.5, 0.5] range
         kpoints_outside_fbz = np.array(
@@ -413,24 +441,29 @@ class TestElectronicBandStructure:
     #     for param in expected_params:
     #         assert param in actual_params
 
-    def test_fix_collinear_spin(self, sample_ebs):
+    def test_fix_collinear_spin(self, sample_ebs: ElectronicBandStructure) -> None:
         """Test fixing collinear spin."""
         fixed_ebs = sample_ebs.fix_collinear_spin(inplace=False)
 
+        assert fixed_ebs.bands is not None
         assert fixed_ebs.bands.shape == (8, 8, 1)  # 2*n_bands, 1 spin channel
         assert fixed_ebs.n_spin_channels == 1
 
-    def test_shift_bands(self, sample_ebs):
+    def test_shift_bands(self, sample_ebs: ElectronicBandStructure) -> None:
         """Test shifting bands."""
         shift_value = 1.0
+        assert sample_ebs.bands is not None
         original_bands = sample_ebs.bands.to_array().copy()
 
         shifted_ebs = sample_ebs.shift_bands(shift_value, inplace=False)
 
+        assert shifted_ebs.bands is not None
         assert np.allclose(shifted_ebs.bands.to_array(), original_bands + shift_value)
 
-    def test_equality(self, sample_ebs):
+    def test_equality(self, sample_ebs: ElectronicBandStructure) -> None:
         """Test equality comparison."""
+        assert sample_ebs.bands is not None
+        assert sample_ebs.projected is not None
         ebs_copy = ElectronicBandStructure(
             kpoints=sample_ebs.kpoints,
             bands=sample_ebs.bands.to_array(),
@@ -442,7 +475,7 @@ class TestElectronicBandStructure:
 
         assert sample_ebs == ebs_copy
 
-    def test_save_load(self, sample_ebs):
+    def test_save_load(self, sample_ebs: ElectronicBandStructure) -> None:
         """Test saving and loading EBS."""
         with tempfile.TemporaryDirectory() as temp_dir:
             filepath = Path(temp_dir) / "test_ebs.pkl"
@@ -457,7 +490,7 @@ class TestElectronicBandStructure:
 
 
 @pytest.fixture
-def sample_kpath():
+def sample_kpath() -> KPath:
     """Create a sample kpoints.KPath for testing"""
     # Create a simple high-symmetry path: Gamma -> X -> L -> Gamma
     n_grids = [50, 50, 50, 50, 50, 50]
@@ -486,13 +519,13 @@ def sample_kpath():
 
 
 @pytest.fixture
-def path_kpoints(sample_kpath):
+def path_kpoints(sample_kpath: KPath) -> npt.NDArray[np.float64]:
     """Generate path kpoints for testing"""
     return sample_kpath.kpoints
 
 
 @pytest.fixture
-def path_bands(path_kpoints):
+def path_bands(path_kpoints: npt.NDArray[np.float64]) -> npt.NDArray[np.float64]:
     """Generate path bands for testing"""
     n_kpoints = len(path_kpoints)
     n_bands = 4
@@ -512,7 +545,12 @@ def path_bands(path_kpoints):
 
 
 @pytest.fixture
-def sample_ebs_path(path_kpoints, path_bands, sample_reciprocal_lattice, sample_kpath):
+def sample_ebs_path(
+    path_kpoints: npt.NDArray[np.float64],
+    path_bands: npt.NDArray[np.float64],
+    sample_reciprocal_lattice: npt.NDArray[np.float64],
+    sample_kpath: KPath,
+) -> ElectronicBandStructurePath:
     """Create a sample ElectronicBandStructurePath for testing"""
     n_kpoints = len(path_kpoints)
     n_bands = 4
@@ -536,7 +574,7 @@ def sample_ebs_path(path_kpoints, path_bands, sample_reciprocal_lattice, sample_
 class TestElectronicBandStructurePath:
     """Test class for ElectronicBandStructurePath functionality."""
 
-    def test_initialization(self, sample_ebs_path):
+    def test_initialization(self, sample_ebs_path: ElectronicBandStructurePath) -> None:
         """Test basic initialization of ElectronicBandStructurePath."""
         assert sample_ebs_path.n_kpoints == 300  # 3 segments * 10 points + 1 final
         assert sample_ebs_path.n_bands == 4
@@ -544,13 +582,17 @@ class TestElectronicBandStructurePath:
         assert sample_ebs_path.n_atoms == 2
         assert sample_ebs_path.n_orbitals == 3
         assert sample_ebs_path.fermi == 0.0
-        assert len(sample_ebs_path.orbital_names) == 3
+        orbital_names = sample_ebs_path.orbital_names
+        assert orbital_names is not None
+        assert len(orbital_names) == 3
 
-    def test_kpath_properties(self, sample_ebs_path):
+    def test_kpath_properties(self, sample_ebs_path: ElectronicBandStructurePath) -> None:
         """Test kpoints.KPath-related properties."""
         kpath = sample_ebs_path.kpath
         assert kpath is not None
-        assert len(kpath.segment_names) == 6  # Γ, X, L, Γ
+        segment_names = kpath.segment_names
+        assert segment_names is not None
+        assert len(segment_names) == 6  # Gamma, X, L, Gamma
         assert kpath.n_segments == 6
         assert len(kpath.tick_positions) == 5
         assert len(kpath.tick_names) == 5
@@ -563,7 +605,7 @@ class TestElectronicBandStructurePath:
         assert tick_names == kpath.tick_names
         assert tick_names_latex == kpath.tick_names_latex
 
-    def test_coordinate_transformation(self, sample_ebs_path):
+    def test_coordinate_transformation(self, sample_ebs_path: ElectronicBandStructurePath) -> None:
         """Test as_cart and as_frac methods."""
         # Store original kpoints
         original_kpoints = sample_ebs_path.kpoints.copy()
@@ -580,10 +622,12 @@ class TestElectronicBandStructurePath:
         assert np.allclose(fractional_kpoints, original_kpoints, atol=1e-10)
 
         # Cartesian and fractional should be different (unless reciprocal lattice is identity)
-        if not np.allclose(sample_ebs_path.reciprocal_lattice, np.eye(3)):
+        reciprocal_lattice = sample_ebs_path.reciprocal_lattice
+        assert reciprocal_lattice is not None
+        if not np.allclose(reciprocal_lattice, np.eye(3)):
             assert not np.allclose(cartesian_kpoints, fractional_kpoints)
 
-    def test_gradient_func_interface(self, sample_ebs_path):
+    def test_gradient_func_interface(self, sample_ebs_path: ElectronicBandStructurePath) -> None:
         """Test gradient_func method from DifferentiablePropertyInterface."""
         # Test that gradient_func exists and is callable
         assert hasattr(sample_ebs_path, "gradient_func")
@@ -603,12 +647,14 @@ class TestElectronicBandStructurePath:
         for param in expected_params:
             assert param in actual_params
 
-    def test_property_interface_methods(self, sample_ebs_path):
+    def test_property_interface_methods(self, sample_ebs_path: ElectronicBandStructurePath) -> None:
         """Test DifferentiablePropertyInterface methods."""
         # Test get_property
         bands_prop = sample_ebs_path.get_property("bands")
-        assert bands_prop is not None
-        assert np.array_equal(bands_prop.value, sample_ebs_path.bands.to_array())
+        assert isinstance(bands_prop, Property)
+        bands_data = sample_ebs_path.bands
+        assert bands_data is not None
+        assert np.array_equal(bands_prop.value, bands_data.to_array())
 
         # Test add_property
         test_property = np.random.rand(
@@ -617,10 +663,12 @@ class TestElectronicBandStructurePath:
         sample_ebs_path.add_property(name="test_prop", value=test_property)
 
         retrieved_prop = sample_ebs_path.get_property("test_prop")
-        assert retrieved_prop is not None
+        assert isinstance(retrieved_prop, Property)
         assert np.array_equal(retrieved_prop.value, test_property)
 
-    def test_differentiable_property_interface(self, sample_ebs_path):
+    def test_differentiable_property_interface(
+        self, sample_ebs_path: ElectronicBandStructurePath
+    ) -> None:
         """Test compute_band_velocity method."""
         # First add gradients manually for testing
 
@@ -628,39 +676,39 @@ class TestElectronicBandStructurePath:
         velocity_property = sample_ebs_path.get_property("bands_velocity")
 
         # Check output
-        assert velocity_property is not None
+        assert isinstance(velocity_property, Property)
         assert "bands_velocity" in sample_ebs_path.property_store
 
         # Check that it's stored as property
         stored_velocity_property = sample_ebs_path.get_property("bands_velocity")
-        assert stored_velocity_property is not None
+        assert isinstance(stored_velocity_property, Property)
         assert np.array_equal(stored_velocity_property.value, velocity_property.value)
 
         # Compute band speed
         speed_property = sample_ebs_path.get_property("bands_speed")
 
         # Check output
-        assert speed_property is not None
+        assert isinstance(speed_property, Property)
         assert "bands_speed" in sample_ebs_path.property_store
 
         # Check that it's stored as property
         stored_speed_property = sample_ebs_path.get_property("bands_speed")
-        assert stored_speed_property is not None
+        assert isinstance(stored_speed_property, Property)
         assert np.array_equal(stored_speed_property.value, speed_property.value)
 
         # Compute average inverse effective mass
         avg_inv_mass_property = sample_ebs_path.get_property("avg_inv_effective_mass")
 
         # Check output
-        assert avg_inv_mass_property is not None
+        assert isinstance(avg_inv_mass_property, Property)
         assert "avg_inv_effective_mass" in sample_ebs_path.property_store
 
         # Check that it's stored as property
         stored_avg_inv_mass_property = sample_ebs_path.get_property("avg_inv_effective_mass")
-        assert stored_avg_inv_mass_property is not None
+        assert isinstance(stored_avg_inv_mass_property, Property)
         assert np.array_equal(stored_avg_inv_mass_property.value, avg_inv_mass_property.value)
 
-    def test_as_kdist_method(self, sample_ebs_path):
+    def test_as_kdist_method(self, sample_ebs_path: ElectronicBandStructurePath) -> None:
         """Test as_kdist method for plotting."""
         # Test as segments
         blocks_segments = sample_ebs_path.as_kdist(as_segments=True)
@@ -704,13 +752,13 @@ class TestElectronicBandStructurePath:
     #     assert ebs_path.kpath is not None
     #     assert ebs_path.kpath == sample_kpath
 
-    def test_from_code_classmethod(self, path_calc_dir):
+    def test_from_code_classmethod(self, path_calc_dir: Path) -> None:
         """Test creating ElectronicBandStructurePath from code."""
-        ebs_path = ElectronicBandStructurePath.from_code(code="vasp", dirpath=path_calc_dir)
+        ebs_path = ElectronicBandStructurePath.from_code(code="vasp", dirpath=str(path_calc_dir))
         assert ebs_path is not None
         assert isinstance(ebs_path, ElectronicBandStructurePath)
 
-    def test_bands_property(self, sample_ebs_path):
+    def test_bands_property(self, sample_ebs_path: ElectronicBandStructurePath) -> None:
         """Test bands property returns Property with kpath metadata."""
         bands_prop = sample_ebs_path.bands
 
@@ -719,7 +767,9 @@ class TestElectronicBandStructurePath:
         assert isinstance(bands_prop, Property)
 
         # Check bands data matches
-        assert np.array_equal(bands_prop.value, sample_ebs_path.bands.to_array())
+        bands_data = sample_ebs_path.bands
+        assert bands_data is not None
+        assert np.array_equal(bands_prop.value, bands_data.to_array())
 
         # Check kpath metadata exists
         assert "kpath" in bands_prop.metadata
@@ -727,6 +777,7 @@ class TestElectronicBandStructurePath:
         kpath_meta = bands_prop.metadata["kpath"]
 
         # Check k_distances shape
+        assert isinstance(kpath_meta, dict)
         assert "k_distances" in kpath_meta
         k_distances = kpath_meta["k_distances"]
         assert isinstance(k_distances, np.ndarray)
@@ -748,7 +799,7 @@ class TestElectronicBandStructurePath:
 class TestElectronicBandStructureMesh:
     """Test class for ElectronicBandStructureMesh functionality."""
 
-    def test_initialization(self, sample_ebs_mesh):
+    def test_initialization(self, sample_ebs_mesh: ElectronicBandStructureMesh) -> None:
         """Test mesh initialization."""
         assert sample_ebs_mesh.n_kpoints == 64  # 4x4x4
 
@@ -757,7 +808,7 @@ class TestElectronicBandStructureMesh:
         assert sample_ebs_mesh.n_ky == 4
         assert sample_ebs_mesh.n_kz == 4
 
-    def test_mesh_properties(self, sample_ebs_mesh):
+    def test_mesh_properties(self, sample_ebs_mesh: ElectronicBandStructureMesh) -> None:
         """Test mesh-specific properties."""
         assert sample_ebs_mesh.is_grid == True
         assert sample_ebs_mesh.is_fbz == True
@@ -766,9 +817,10 @@ class TestElectronicBandStructureMesh:
         assert np.allclose(kpoints_mesh.shape, np.array([4, 4, 4, 3]))
 
         bands_mesh = sample_ebs_mesh.get_property_mesh("bands")
+        assert bands_mesh is not None
         assert np.allclose(bands_mesh.shape, np.array([4, 4, 4, 3, 1]))
 
-    def test_padding(self, sample_ebs_mesh):
+    def test_padding(self, sample_ebs_mesh: ElectronicBandStructureMesh) -> None:
         """Test padding functionality."""
         padding = 2
         padded_ebs = sample_ebs_mesh.pad(padding=padding, inplace=False)
@@ -777,7 +829,7 @@ class TestElectronicBandStructureMesh:
         assert np.allclose(padded_ebs.kgrid, expected_shape)
         assert padded_ebs.n_kpoints == np.prod(expected_shape)
 
-    def test_interpolation(self, sample_ebs_mesh):
+    def test_interpolation(self, sample_ebs_mesh: ElectronicBandStructureMesh) -> None:
         """Test interpolation functionality."""
         factor = 2
         interpolated_ebs = sample_ebs_mesh.interpolate(interpolation_factor=factor, inplace=False)
@@ -786,66 +838,66 @@ class TestElectronicBandStructureMesh:
         assert np.allclose(interpolated_ebs.kgrid, expected_shape)
         assert interpolated_ebs.n_kpoints == np.prod(expected_shape)
 
-    def test_differentiable_property_interface(self, sample_ebs_mesh):
+    def test_differentiable_property_interface(
+        self, sample_ebs_mesh: ElectronicBandStructureMesh
+    ) -> None:
         """Test gradient computation on mesh."""
         velocity_property = sample_ebs_mesh.get_property("bands_velocity")
-        assert velocity_property is not None
+        assert isinstance(velocity_property, Property)
         assert velocity_property.value.shape == (64, 3, 1, 3)  # Last 3 is gradient dimensions
 
         speed_property = sample_ebs_mesh.get_property("bands_speed")
-        assert speed_property is not None
+        assert isinstance(speed_property, Property)
         assert speed_property.value.shape == (64, 3, 1)
 
         avg_inv_mass_property = sample_ebs_mesh.get_property("avg_inv_effective_mass")
-        assert avg_inv_mass_property is not None
+        assert isinstance(avg_inv_mass_property, Property)
         assert avg_inv_mass_property.value.shape == (64, 3, 1)
 
-    def test_property_gradient_derived_access(self, sample_ebs_mesh):
+    def test_property_gradient_derived_access(
+        self, sample_ebs_mesh: ElectronicBandStructureMesh
+    ) -> None:
         """Test gradient access for properties."""
-        velocity_property = sample_ebs_mesh.get_property("bands_velocity")
+        _velocity_property_initial = sample_ebs_mesh.get_property("bands_velocity")
         sample_ebs_mesh.compute_gradients(2, names=["bands_velocity"])
         velocity_property = sample_ebs_mesh.get_property("bands_velocity")
-        assert velocity_property is not None
+        assert isinstance(velocity_property, Property)
         assert velocity_property.is_vector == True
-        assert velocity_property.gradients[1] is not None
-        assert velocity_property.gradients[1].shape == (64, 3, 1, 3, 3)
-        assert velocity_property.gradients[2] is not None
-        assert velocity_property.gradients[2].shape == (64, 3, 1, 3, 3, 3)
-        assert velocity_property.magnitude is not None
-        assert velocity_property.magnitude.shape == (64, 3, 1)
 
-        assert velocity_property.divergence is not None
-        assert velocity_property.divergence.shape == (64, 3, 1)
-        assert velocity_property.curl is not None
-        assert velocity_property.curl.shape == (64, 3, 1, 3)
-        assert velocity_property.divergence_gradient is not None
-        assert velocity_property.divergence_gradient.shape == (64, 3, 1, 3)
-        assert velocity_property.curl_gradient is not None
-        assert velocity_property.curl_gradient.shape == (64, 3, 1, 3)
-        assert velocity_property.laplacian is not None
-        assert velocity_property.laplacian.shape == (64, 3, 1, 3)
+        grad_1 = velocity_property.gradients[1]
+        assert grad_1 is not None
+        assert grad_1.shape == (64, 3, 1, 3, 3)
+        grad_2 = velocity_property.gradients[2]
+        assert grad_2 is not None
+        assert grad_2.shape == (64, 3, 1, 3, 3, 3)
 
-    def test_property_interpolator(self, sample_ebs_mesh):
+        magnitude = velocity_property.magnitude
+        assert magnitude is not None
+        assert magnitude.shape == (64, 3, 1)
+
+        divergence = velocity_property.divergence
+        assert divergence is not None
+        assert divergence.shape == (64, 3, 1)
+
+        curl = velocity_property.curl
+        assert curl is not None
+        assert curl.shape == (64, 3, 1, 3)
+
+        divergence_gradient = velocity_property.divergence_gradient
+        assert divergence_gradient is not None
+        assert divergence_gradient.shape == (64, 3, 1, 3)
+
+        curl_gradient = velocity_property.curl_gradient
+        assert curl_gradient is not None
+        assert curl_gradient.shape == (64, 3, 1, 3)
+
+        laplacian = velocity_property.laplacian
+        assert laplacian is not None
+        assert laplacian.shape == (64, 3, 1, 3)
+
+    def test_property_interpolator(self, sample_ebs_mesh: ElectronicBandStructureMesh) -> None:  # pyright: ignore[reportUnusedParameter]
         """Test property interpolator."""
         pytest.skip("get_property_interpolator not yet implemented")
-
-        # velocity_property = sample_ebs_mesh.get_property("bands_velocity")
-        velocity_interpolator = sample_ebs_mesh.get_property_interpolator("bands_velocity")
-
-        new_points = np.array([[0.1, 0.2, 0.3], [0.4, 0.5, 0.6]])
-        new_velocity = velocity_interpolator["value"](new_points)
-        assert new_velocity is not None
-        assert new_velocity.shape == (2, 3, 1, 3)
-
-        assert velocity_interpolator is not None
-        assert velocity_interpolator["value"] is not None
-        assert velocity_interpolator["value"](new_points).shape == (2, 3, 1, 3)
-        assert velocity_interpolator["gradients"][1](new_points).shape == (2, 3, 1, 3, 3)
-        assert velocity_interpolator["gradients"][2](new_points).shape == (2, 3, 1, 3, 3, 3)
-        assert velocity_interpolator["magnitude"](new_points).shape == (2, 3, 1)
-        assert velocity_interpolator["divergence"](new_points).shape == (2, 3, 1)
-        assert velocity_interpolator["curl"](new_points).shape == (2, 3, 1, 3)
-        assert velocity_interpolator["laplacian"](new_points).shape == (2, 3, 1, 3)
 
     # def test_reduce_to_plane(self, sample_ebs_mesh):
     #     """Test reducing mesh to plane."""

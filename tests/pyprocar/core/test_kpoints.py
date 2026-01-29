@@ -6,6 +6,7 @@ coordinate transformation utilities, and the KPath class.
 """
 
 import numpy as np
+import numpy.typing as npt
 import pytest
 
 from pyprocar.core.kpoints import (
@@ -28,7 +29,7 @@ from pyprocar.core.kpoints import (
 
 
 @pytest.fixture
-def simple_cubic_reciprocal_lattice():
+def simple_cubic_reciprocal_lattice() -> npt.NDArray[np.float64]:
     """
     Create a simple cubic reciprocal lattice.
 
@@ -38,17 +39,21 @@ def simple_cubic_reciprocal_lattice():
         A 3x3 array representing a simple cubic reciprocal lattice
         with lattice parameter 2*pi.
     """
-    return np.array([[2 * np.pi, 0.0, 0.0], [0.0, 2 * np.pi, 0.0], [0.0, 0.0, 2 * np.pi]])
+    result: npt.NDArray[np.float64] = np.array(
+        [[2 * np.pi, 0.0, 0.0], [0.0, 2 * np.pi, 0.0], [0.0, 0.0, 2 * np.pi]]
+    )
+    return result
 
 
 @pytest.fixture
-def identity_reciprocal_lattice():
+def identity_reciprocal_lattice() -> npt.NDArray[np.float64]:
     """Create an identity reciprocal lattice for simple testing."""
-    return np.eye(3)
+    result: npt.NDArray[np.float64] = np.eye(3)
+    return result
 
 
 @pytest.fixture
-def simple_kpath_kpoints():
+def simple_kpath_kpoints() -> npt.NDArray[np.float64]:
     """
     Create simple k-points for a Gamma-X-M-Gamma path.
 
@@ -61,20 +66,21 @@ def simple_kpath_kpoints():
     # M to Gamma: (0.5,0.5,0) -> (0,0,0)
     seg3 = np.linspace([0.5, 0.5, 0], [0, 0, 0], 5)
 
-    return np.vstack([seg1, seg2, seg3])
+    result: npt.NDArray[np.float64] = np.vstack([seg1, seg2, seg3])
+    return result
 
 
 @pytest.fixture
-def simple_segment_names():
+def simple_segment_names() -> list[tuple[str, str]]:
     """Create segment names for a Gamma-X-M-Gamma path."""
     return [("Gamma", "X"), ("X", "M"), ("M", "Gamma")]
 
 
 @pytest.fixture
-def special_kpoint_map():
+def special_kpoint_map() -> dict[str, npt.NDArray[np.float64]]:
     """Create a special k-point map for testing."""
     return {
-        "Γ": np.array([0.0, 0.0, 0.0]),
+        "\u0393": np.array([0.0, 0.0, 0.0]),
         "X": np.array([0.5, 0.0, 0.0]),
         "M": np.array([0.5, 0.5, 0.0]),
         "R": np.array([0.5, 0.5, 0.5]),
@@ -89,12 +95,12 @@ def special_kpoint_map():
 class TestKGRIDMODE:
     """Test class for KGRID_MODE enum."""
 
-    def test_kgrid_mode_values(self):
+    def test_kgrid_mode_values(self) -> None:
         """Test that KGRID_MODE has expected values."""
         assert KGRID_MODE.MONKHORST.value == "monkhorst"
         assert KGRID_MODE.GAMMA.value == "gamma"
 
-    def test_kgrid_mode_members(self):
+    def test_kgrid_mode_members(self) -> None:
         """Test that KGRID_MODE has exactly two members."""
         assert len(KGRID_MODE) == 2
 
@@ -102,14 +108,14 @@ class TestKGRIDMODE:
 class TestKGridInfo:
     """Test class for KGridInfo dataclass."""
 
-    def test_kgrid_info_creation(self):
+    def test_kgrid_info_creation(self) -> None:
         """Test KGridInfo can be created with valid parameters."""
         info = KGridInfo(kgrid=(4, 4, 4), kgrid_mode=KGRID_MODE.MONKHORST, kshift=(0.0, 0.0, 0.0))
         assert info.kgrid == (4, 4, 4)
         assert info.kgrid_mode == KGRID_MODE.MONKHORST
         assert info.kshift == (0.0, 0.0, 0.0)
 
-    def test_kgrid_info_with_shift(self):
+    def test_kgrid_info_with_shift(self) -> None:
         """Test KGridInfo with non-zero k-shift."""
         info = KGridInfo(kgrid=(8, 8, 8), kgrid_mode=KGRID_MODE.GAMMA, kshift=(0.5, 0.5, 0.5))
         assert info.kshift == (0.5, 0.5, 0.5)
@@ -123,7 +129,7 @@ class TestKGridInfo:
 class TestGenerateGammaCenteredKpoints:
     """Test class for generate_gamma_centered_kpoints function."""
 
-    def test_basic_grid(self):
+    def test_basic_grid(self) -> None:
         """Test basic gamma-centered grid generation."""
         kpoints = generate_gamma_centered_kpoints((2, 2, 2))
 
@@ -132,7 +138,7 @@ class TestGenerateGammaCenteredKpoints:
         assert np.all(kpoints >= -0.5)
         assert np.all(kpoints <= 0.5)
 
-    def test_grid_contains_gamma(self):
+    def test_grid_contains_gamma(self) -> None:
         """Test that gamma point is included in even grids."""
         kpoints = generate_gamma_centered_kpoints((4, 4, 4))
 
@@ -140,7 +146,7 @@ class TestGenerateGammaCenteredKpoints:
         has_gamma = any(np.allclose(k, [0, 0, 0]) for k in kpoints)
         assert has_gamma, "Gamma point should be in gamma-centered grid"
 
-    def test_grid_with_shift(self):
+    def test_grid_with_shift(self) -> None:
         """Test gamma-centered grid with k-shift."""
         kpoints_no_shift = generate_gamma_centered_kpoints((4, 4, 4), (0.0, 0.0, 0.0))
         kpoints_shifted = generate_gamma_centered_kpoints((4, 4, 4), (0.5, 0.5, 0.5))
@@ -148,13 +154,13 @@ class TestGenerateGammaCenteredKpoints:
         # Shifted grid should be different
         assert not np.allclose(kpoints_no_shift, kpoints_shifted)
 
-    def test_asymmetric_grid(self):
+    def test_asymmetric_grid(self) -> None:
         """Test gamma-centered grid with different dimensions."""
         kpoints = generate_gamma_centered_kpoints((2, 4, 6))
 
         assert kpoints.shape == (2 * 4 * 6, 3)
 
-    def test_single_point_grid(self):
+    def test_single_point_grid(self) -> None:
         """Test 1x1x1 grid returns single point."""
         kpoints = generate_gamma_centered_kpoints((1, 1, 1))
 
@@ -165,13 +171,13 @@ class TestGenerateGammaCenteredKpoints:
 class TestMonkhorstPackKpoints:
     """Test class for monkhorst_pack_kpoints function."""
 
-    def test_basic_grid(self):
+    def test_basic_grid(self) -> None:
         """Test basic Monkhorst-Pack grid generation."""
         kpoints = monkhorst_pack_kpoints((4, 4, 4))
 
         assert kpoints.shape == (64, 3)
 
-    def test_even_grid_excludes_gamma(self):
+    def test_even_grid_excludes_gamma(self) -> None:
         """Test that even Monkhorst-Pack grid excludes gamma point."""
         kpoints = monkhorst_pack_kpoints((4, 4, 4))
 
@@ -179,7 +185,7 @@ class TestMonkhorstPackKpoints:
         has_gamma = any(np.allclose(k, [0, 0, 0]) for k in kpoints)
         assert not has_gamma, "Even Monkhorst-Pack grid should not include gamma"
 
-    def test_odd_grid_includes_gamma(self):
+    def test_odd_grid_includes_gamma(self) -> None:
         """Test that odd Monkhorst-Pack grid includes gamma point."""
         kpoints = monkhorst_pack_kpoints((3, 3, 3))
 
@@ -187,14 +193,14 @@ class TestMonkhorstPackKpoints:
         has_gamma = any(np.allclose(k, [0, 0, 0]) for k in kpoints)
         assert has_gamma, "Odd Monkhorst-Pack grid should include gamma"
 
-    def test_grid_with_shift(self):
+    def test_grid_with_shift(self) -> None:
         """Test Monkhorst-Pack grid with k-shift."""
         kpoints_no_shift = monkhorst_pack_kpoints((4, 4, 4), (0.0, 0.0, 0.0))
         kpoints_shifted = monkhorst_pack_kpoints((4, 4, 4), (0.5, 0.5, 0.5))
 
         assert not np.allclose(kpoints_no_shift, kpoints_shifted)
 
-    def test_grid_symmetry(self):
+    def test_grid_symmetry(self) -> None:
         """Test that Monkhorst-Pack grid is symmetric around gamma."""
         kpoints = monkhorst_pack_kpoints((4, 4, 4))
 
@@ -207,21 +213,21 @@ class TestMonkhorstPackKpoints:
 class TestGetKpointsFromKgrid:
     """Test class for get_kpoints_from_kgrid factory function."""
 
-    def test_monkhorst_mode(self):
+    def test_monkhorst_mode(self) -> None:
         """Test Monkhorst mode selection."""
         kpoints = get_kpoints_from_kgrid((4, 4, 4), mode="monkhorst")
         expected = monkhorst_pack_kpoints((4, 4, 4))
 
         assert np.allclose(kpoints, expected)
 
-    def test_gamma_mode(self):
+    def test_gamma_mode(self) -> None:
         """Test Gamma mode selection."""
         kpoints = get_kpoints_from_kgrid((4, 4, 4), mode="gamma")
         expected = generate_gamma_centered_kpoints((4, 4, 4))
 
         assert np.allclose(kpoints, expected)
 
-    def test_mode_case_insensitive(self):
+    def test_mode_case_insensitive(self) -> None:
         """Test that mode is case insensitive."""
         kpoints_lower = get_kpoints_from_kgrid((4, 4, 4), mode="monkhorst")
         kpoints_upper = get_kpoints_from_kgrid((4, 4, 4), mode="MONKHORST")
@@ -230,14 +236,14 @@ class TestGetKpointsFromKgrid:
         assert np.allclose(kpoints_lower, kpoints_upper)
         assert np.allclose(kpoints_lower, kpoints_mixed)
 
-    def test_mode_first_letter(self):
+    def test_mode_first_letter(self) -> None:
         """Test that only first letter matters for mode."""
         kpoints_m = get_kpoints_from_kgrid((4, 4, 4), mode="m")
         kpoints_full = get_kpoints_from_kgrid((4, 4, 4), mode="monkhorst")
 
         assert np.allclose(kpoints_m, kpoints_full)
 
-    def test_invalid_mode_raises(self):
+    def test_invalid_mode_raises(self) -> None:
         """Test that invalid mode raises ValueError."""
         with pytest.raises(ValueError, match="Invalid mode"):
             get_kpoints_from_kgrid((4, 4, 4), mode="invalid")
@@ -246,24 +252,25 @@ class TestGetKpointsFromKgrid:
 class TestReducedToCartesian:
     """Test class for reduced_to_cartesian function."""
 
-    def test_identity_lattice(self, identity_reciprocal_lattice):
+    def test_identity_lattice(self, identity_reciprocal_lattice: npt.NDArray[np.float64]) -> None:
         """Test conversion with identity lattice."""
         kpoints = np.array([[0.5, 0.0, 0.0], [0.0, 0.5, 0.0]])
 
         cartesian = reduced_to_cartesian(kpoints, identity_reciprocal_lattice)
-
+        assert cartesian is not None
         assert np.allclose(cartesian, kpoints)
 
-    def test_cubic_lattice(self, simple_cubic_reciprocal_lattice):
+    def test_cubic_lattice(self, simple_cubic_reciprocal_lattice: npt.NDArray[np.float64]) -> None:
         """Test conversion with cubic lattice."""
         kpoints = np.array([[0.5, 0.0, 0.0]])
 
         cartesian = reduced_to_cartesian(kpoints, simple_cubic_reciprocal_lattice)
+        assert cartesian is not None
 
         expected = np.array([[np.pi, 0.0, 0.0]])
         assert np.allclose(cartesian, expected)
 
-    def test_none_lattice_returns_none(self):
+    def test_none_lattice_returns_none(self) -> None:
         """Test that None lattice returns None."""
         kpoints = np.array([[0.5, 0.0, 0.0]])
 
@@ -275,33 +282,36 @@ class TestReducedToCartesian:
 class TestCartesianToReduced:
     """Test class for cartesian_to_reduced function."""
 
-    def test_identity_lattice(self, identity_reciprocal_lattice):
+    def test_identity_lattice(self, identity_reciprocal_lattice: npt.NDArray[np.float64]) -> None:
         """Test conversion with identity lattice."""
         cartesian = np.array([[0.5, 0.0, 0.0], [0.0, 0.5, 0.0]])
 
         reduced = cartesian_to_reduced(cartesian, identity_reciprocal_lattice)
-
+        assert reduced is not None
         assert np.allclose(reduced, cartesian)
 
-    def test_cubic_lattice(self, simple_cubic_reciprocal_lattice):
+    def test_cubic_lattice(self, simple_cubic_reciprocal_lattice: npt.NDArray[np.float64]) -> None:
         """Test conversion with cubic lattice."""
         cartesian = np.array([[np.pi, 0.0, 0.0]])
 
         reduced = cartesian_to_reduced(cartesian, simple_cubic_reciprocal_lattice)
+        assert reduced is not None
 
         expected = np.array([[0.5, 0.0, 0.0]])
         assert np.allclose(reduced, expected)
 
-    def test_roundtrip(self, simple_cubic_reciprocal_lattice):
+    def test_roundtrip(self, simple_cubic_reciprocal_lattice: npt.NDArray[np.float64]) -> None:
         """Test that reduced -> cartesian -> reduced is identity."""
         original = np.array([[0.25, 0.5, 0.0], [0.0, 0.0, 0.5]])
 
         cartesian = reduced_to_cartesian(original, simple_cubic_reciprocal_lattice)
+        assert cartesian is not None
         roundtrip = cartesian_to_reduced(cartesian, simple_cubic_reciprocal_lattice)
+        assert roundtrip is not None
 
         assert np.allclose(roundtrip, original)
 
-    def test_none_lattice_returns_none(self):
+    def test_none_lattice_returns_none(self) -> None:
         """Test that None lattice returns None."""
         cartesian = np.array([[0.5, 0.0, 0.0]])
 
@@ -313,7 +323,7 @@ class TestCartesianToReduced:
 class TestSortKpoints:
     """Test class for sort_kpoints function."""
 
-    def test_c_order_sort(self):
+    def test_c_order_sort(self) -> None:
         """Test C-order (row-major) sorting."""
         kpoints = np.array(
             [
@@ -335,7 +345,7 @@ class TestSortKpoints:
         )
         assert np.allclose(sorted_kpoints, expected)
 
-    def test_f_order_sort(self):
+    def test_f_order_sort(self) -> None:
         """Test F-order (column-major) sorting."""
         kpoints = np.array(
             [
@@ -361,7 +371,7 @@ class TestSortKpoints:
 class TestFormatNames:
     """Test class for format_names function."""
 
-    def test_gamma_conversion(self):
+    def test_gamma_conversion(self) -> None:
         """Test that 'gamma' is converted to LaTeX Gamma."""
         names = ["gamma", "X", "M"]
 
@@ -371,7 +381,7 @@ class TestFormatNames:
         assert formatted[1] == "X"
         assert formatted[2] == "M"
 
-    def test_gamma_case_insensitive(self):
+    def test_gamma_case_insensitive(self) -> None:
         """Test that gamma conversion is case insensitive."""
         names = ["GAMMA", "Gamma", "gamma"]
 
@@ -381,7 +391,7 @@ class TestFormatNames:
         for name in formatted:
             assert r"\Gamma" in name
 
-    def test_latex_wrapping(self):
+    def test_latex_wrapping(self) -> None:
         """Test that backslash names get LaTeX wrapping."""
         names = [r"\Gamma", "X"]
 
@@ -390,7 +400,7 @@ class TestFormatNames:
         assert formatted[0] == r"$\Gamma$"
         assert formatted[1] == "X"
 
-    def test_no_latex_wrapping(self):
+    def test_no_latex_wrapping(self) -> None:
         """Test that backslash names are not wrapped when as_latex=False."""
         names = [r"\Gamma", "X"]
 
@@ -402,29 +412,29 @@ class TestFormatNames:
 class TestNormalizeKpointName:
     """Test class for normalize_kpoint_name function."""
 
-    def test_gamma_aliases(self):
+    def test_gamma_aliases(self) -> None:
         """Test that gamma aliases are normalized."""
-        aliases = ["gamma", "Gamma", "G", "g", "Γ"]
+        aliases = ["gamma", "Gamma", "G", "g", "\u0393"]
 
         for alias in aliases:
-            assert normalize_kpoint_name(alias) == "Γ"
+            assert normalize_kpoint_name(alias) == "\u0393"
 
-    def test_x_aliases(self):
+    def test_x_aliases(self) -> None:
         """Test that X aliases are normalized."""
         aliases = ["x", "X"]
 
         for alias in aliases:
             assert normalize_kpoint_name(alias) == "X"
 
-    def test_unknown_name_unchanged(self):
+    def test_unknown_name_unchanged(self) -> None:
         """Test that unknown names are returned unchanged."""
         name = "CustomPoint"
 
         assert normalize_kpoint_name(name) == "CustomPoint"
 
-    def test_whitespace_stripped(self):
+    def test_whitespace_stripped(self) -> None:
         """Test that whitespace is stripped."""
-        assert normalize_kpoint_name("  gamma  ") == "Γ"
+        assert normalize_kpoint_name("  gamma  ") == "\u0393"
         assert normalize_kpoint_name(" X ") == "X"
 
 
@@ -436,7 +446,11 @@ class TestNormalizeKpointName:
 class TestKPathInitialization:
     """Test class for KPath initialization."""
 
-    def test_init_with_kpoints(self, simple_kpath_kpoints, simple_segment_names):
+    def test_init_with_kpoints(
+        self,
+        simple_kpath_kpoints: npt.NDArray[np.float64],
+        simple_segment_names: list[tuple[str, str]],
+    ) -> None:
         """Test KPath initialization with kpoints array."""
         kpath = KPath(
             kpoints=simple_kpath_kpoints,
@@ -446,9 +460,11 @@ class TestKPathInitialization:
         assert kpath.n_kpoints == len(simple_kpath_kpoints)
         assert kpath.kpoints is not None
 
-    def test_init_with_n_grids_and_special_kpoints(self, special_kpoint_map):
+    def test_init_with_n_grids_and_special_kpoints(
+        self, special_kpoint_map: dict[str, npt.NDArray[np.float64]]
+    ) -> None:
         """Test KPath initialization by generating from special kpoints."""
-        segment_names = [("Γ", "X"), ("X", "M"), ("M", "Γ")]
+        segment_names = [("\u0393", "X"), ("X", "M"), ("M", "\u0393")]
         n_grids = [10, 10, 10]
 
         kpath = KPath(
@@ -460,17 +476,17 @@ class TestKPathInitialization:
         assert kpath.n_kpoints == 30  # 3 segments * 10 points
         assert kpath.n_segments == 3
 
-    def test_init_requires_kpoints_or_n_grids(self):
+    def test_init_requires_kpoints_or_n_grids(self) -> None:
         """Test that init raises error without kpoints or n_grids."""
         with pytest.raises(ValueError, match="Either kpoints or n_grids"):
             KPath()
 
     def test_init_with_reciprocal_lattice(
         self,
-        simple_kpath_kpoints,
-        simple_segment_names,
-        simple_cubic_reciprocal_lattice,
-    ):
+        simple_kpath_kpoints: npt.NDArray[np.float64],
+        simple_segment_names: list[tuple[str, str]],
+        simple_cubic_reciprocal_lattice: npt.NDArray[np.float64],
+    ) -> None:
         """Test KPath initialization with reciprocal lattice."""
         kpath = KPath(
             kpoints=simple_kpath_kpoints,
@@ -481,7 +497,9 @@ class TestKPathInitialization:
         assert kpath.reciprocal_lattice is not None
         assert np.allclose(kpath.reciprocal_lattice, simple_cubic_reciprocal_lattice)
 
-    def test_init_normalizes_kpoint_names(self, special_kpoint_map):
+    def test_init_normalizes_kpoint_names(
+        self, special_kpoint_map: dict[str, npt.NDArray[np.float64]]
+    ) -> None:
         """Test that initialization normalizes k-point names."""
         segment_names = [("gamma", "X"), ("X", "M"), ("M", "Gamma")]
         n_grids = [10, 10, 10]
@@ -493,10 +511,16 @@ class TestKPathInitialization:
         )
 
         # Should be normalized to canonical form
-        assert kpath.segment_names[0][0] == "Γ"
-        assert kpath.segment_names[2][1] == "Γ"
+        names = kpath.segment_names
+        assert names is not None
+        assert names[0][0] == "\u0393"
+        assert names[2][1] == "\u0393"
 
-    def test_init_with_discontinuity_threshold(self, simple_kpath_kpoints, simple_segment_names):
+    def test_init_with_discontinuity_threshold(
+        self,
+        simple_kpath_kpoints: npt.NDArray[np.float64],
+        simple_segment_names: list[tuple[str, str]],
+    ) -> None:
         """Test KPath initialization with custom discontinuity threshold."""
         kpath = KPath(
             kpoints=simple_kpath_kpoints,
@@ -506,7 +530,11 @@ class TestKPathInitialization:
 
         assert kpath.discontinuity_threshold == 0.3
 
-    def test_init_with_zero_diff_threshold(self, simple_kpath_kpoints, simple_segment_names):
+    def test_init_with_zero_diff_threshold(
+        self,
+        simple_kpath_kpoints: npt.NDArray[np.float64],
+        simple_segment_names: list[tuple[str, str]],
+    ) -> None:
         """Test KPath initialization with custom zero diff threshold."""
         kpath = KPath(
             kpoints=simple_kpath_kpoints,
@@ -526,32 +554,44 @@ class TestKPathProperties:
     """Test class for KPath properties."""
 
     @pytest.fixture
-    def kpath_with_segments(self, simple_kpath_kpoints, simple_segment_names):
+    def kpath_with_segments(
+        self,
+        simple_kpath_kpoints: npt.NDArray[np.float64],
+        simple_segment_names: list[tuple[str, str]],
+    ) -> KPath:
         """Create a KPath with multiple segments for testing."""
         return KPath(
             kpoints=simple_kpath_kpoints,
             segment_names=simple_segment_names,
         )
 
-    def test_n_kpoints(self, kpath_with_segments, simple_kpath_kpoints):
+    def test_n_kpoints(
+        self,
+        kpath_with_segments: KPath,
+        simple_kpath_kpoints: npt.NDArray[np.float64],
+    ) -> None:
         """Test n_kpoints property."""
         assert kpath_with_segments.n_kpoints == len(simple_kpath_kpoints)
 
-    def test_n_segments(self, kpath_with_segments):
+    def test_n_segments(self, kpath_with_segments: KPath) -> None:
         """Test n_segments property."""
         assert kpath_with_segments.n_segments == 3
 
-    def test_kpoints_property(self, kpath_with_segments, simple_kpath_kpoints):
+    def test_kpoints_property(
+        self,
+        kpath_with_segments: KPath,
+        simple_kpath_kpoints: npt.NDArray[np.float64],
+    ) -> None:
         """Test kpoints property returns correct array."""
         assert np.allclose(kpath_with_segments.kpoints, simple_kpath_kpoints)
 
-    def test_segment_names_property(self, kpath_with_segments):
+    def test_segment_names_property(self, kpath_with_segments: KPath) -> None:
         """Test segment_names property returns correct names."""
         # Names get normalized
-        expected_normalized = [("Γ", "X"), ("X", "M"), ("M", "Γ")]
+        expected_normalized = [("\u0393", "X"), ("X", "M"), ("M", "\u0393")]
         assert kpath_with_segments.segment_names == expected_normalized
 
-    def test_segment_indices_property(self, kpath_with_segments):
+    def test_segment_indices_property(self, kpath_with_segments: KPath) -> None:
         """Test segment_indices property returns list of index arrays."""
         indices = kpath_with_segments.segment_indices
 
@@ -559,37 +599,37 @@ class TestKPathProperties:
         for idx_array in indices:
             assert isinstance(idx_array, np.ndarray)
 
-    def test_special_kpoint_names_property(self, kpath_with_segments):
+    def test_special_kpoint_names_property(self, kpath_with_segments: KPath) -> None:
         """Test special_kpoint_names property."""
         names = kpath_with_segments.special_kpoint_names
 
         # Should contain unique special point names
-        assert "$\\Gamma$" in names or "Γ" in names
+        assert "$\\Gamma$" in names or "\u0393" in names
         assert "X" in names
         assert "M" in names
 
-    def test_special_kpoint_map_property(self, kpath_with_segments):
+    def test_special_kpoint_map_property(self, kpath_with_segments: KPath) -> None:
         """Test special_kpoint_map property returns dict."""
         kpoint_map = kpath_with_segments.special_kpoint_map
 
         assert isinstance(kpoint_map, dict)
         assert len(kpoint_map) > 0
 
-    def test_tick_names_property(self, kpath_with_segments):
+    def test_tick_names_property(self, kpath_with_segments: KPath) -> None:
         """Test tick_names property."""
         tick_names = kpath_with_segments.tick_names
 
         assert isinstance(tick_names, list)
         assert len(tick_names) > 0
 
-    def test_tick_positions_property(self, kpath_with_segments):
+    def test_tick_positions_property(self, kpath_with_segments: KPath) -> None:
         """Test tick_positions property."""
         tick_positions = kpath_with_segments.tick_positions
 
         assert isinstance(tick_positions, list)
         assert len(tick_positions) == len(kpath_with_segments.tick_names)
 
-    def test_k_distances_property(self, kpath_with_segments):
+    def test_k_distances_property(self, kpath_with_segments: KPath) -> None:
         """Test k_distances property returns distances along path."""
         distances = kpath_with_segments.k_distances
 
@@ -599,10 +639,10 @@ class TestKPathProperties:
 
     def test_kpoints_cartesian_property(
         self,
-        simple_kpath_kpoints,
-        simple_segment_names,
-        simple_cubic_reciprocal_lattice,
-    ):
+        simple_kpath_kpoints: npt.NDArray[np.float64],
+        simple_segment_names: list[tuple[str, str]],
+        simple_cubic_reciprocal_lattice: npt.NDArray[np.float64],
+    ) -> None:
         """Test kpoints_cartesian property with reciprocal lattice."""
         kpath = KPath(
             kpoints=simple_kpath_kpoints,
@@ -615,16 +655,16 @@ class TestKPathProperties:
         assert cartesian is not None
         assert cartesian.shape == simple_kpath_kpoints.shape
 
-    def test_knames_alias(self, kpath_with_segments):
+    def test_knames_alias(self, kpath_with_segments: KPath) -> None:
         """Test knames property is alias for segment_names."""
         assert kpath_with_segments.knames == kpath_with_segments.segment_names
 
     def test_brillouin_zone_property(
         self,
-        simple_kpath_kpoints,
-        simple_segment_names,
-        simple_cubic_reciprocal_lattice,
-    ):
+        simple_kpath_kpoints: npt.NDArray[np.float64],
+        simple_segment_names: list[tuple[str, str]],
+        simple_cubic_reciprocal_lattice: npt.NDArray[np.float64],
+    ) -> None:
         """Test brillouin_zone property returns BrillouinZone object."""
         kpath = KPath(
             kpoints=simple_kpath_kpoints,
@@ -648,20 +688,24 @@ class TestKPathMethods:
     """Test class for KPath methods."""
 
     @pytest.fixture
-    def kpath_with_segments(self, simple_kpath_kpoints, simple_segment_names):
+    def kpath_with_segments(
+        self,
+        simple_kpath_kpoints: npt.NDArray[np.float64],
+        simple_segment_names: list[tuple[str, str]],
+    ) -> KPath:
         """Create a KPath with multiple segments for testing."""
         return KPath(
             kpoints=simple_kpath_kpoints,
             segment_names=simple_segment_names,
         )
 
-    def test_get_segments_all(self, kpath_with_segments):
+    def test_get_segments_all(self, kpath_with_segments: KPath) -> None:
         """Test get_segments returns all segments by default."""
         segments = kpath_with_segments.get_segments()
 
         assert len(segments) == 3
 
-    def test_get_segments_specific(self, kpath_with_segments):
+    def test_get_segments_specific(self, kpath_with_segments: KPath) -> None:
         """Test get_segments with specific segment indices."""
         segments = kpath_with_segments.get_segments(isegments=[0, 2])
 
@@ -669,10 +713,10 @@ class TestKPathMethods:
 
     def test_get_segments_cartesian(
         self,
-        simple_kpath_kpoints,
-        simple_segment_names,
-        simple_cubic_reciprocal_lattice,
-    ):
+        simple_kpath_kpoints: npt.NDArray[np.float64],
+        simple_segment_names: list[tuple[str, str]],
+        simple_cubic_reciprocal_lattice: npt.NDArray[np.float64],
+    ) -> None:
         """Test get_segments with cartesian=True."""
         kpath = KPath(
             kpoints=simple_kpath_kpoints,
@@ -686,21 +730,21 @@ class TestKPathMethods:
         # Cartesian coordinates should be scaled by reciprocal lattice
         assert not np.allclose(segments_reduced[0], segments_cartesian[0])
 
-    def test_get_distances_as_segments(self, kpath_with_segments):
+    def test_get_distances_as_segments(self, kpath_with_segments: KPath) -> None:
         """Test get_distances returns list of segment distances."""
         distances = kpath_with_segments.get_distances(as_segments=True)
 
         assert isinstance(distances, list)
         assert len(distances) == 3
 
-    def test_get_distances_concatenated(self, kpath_with_segments):
+    def test_get_distances_concatenated(self, kpath_with_segments: KPath) -> None:
         """Test get_distances returns concatenated array."""
         distances = kpath_with_segments.get_distances(as_segments=False)
 
         assert isinstance(distances, np.ndarray)
         assert len(distances) == kpath_with_segments.n_kpoints
 
-    def test_get_distances_cumulative(self, kpath_with_segments):
+    def test_get_distances_cumulative(self, kpath_with_segments: KPath) -> None:
         """Test get_distances with cumulative_across_segments."""
         distances_cumulative = kpath_with_segments.get_distances(
             as_segments=True, cumlative_across_segments=True
@@ -714,7 +758,7 @@ class TestKPathMethods:
         # Later segments should differ when cumulative
         assert not np.allclose(distances_cumulative[1], distances_not_cumulative[1])
 
-    def test_get_segment_indices(self, kpath_with_segments):
+    def test_get_segment_indices(self, kpath_with_segments: KPath) -> None:
         """Test get_segment_indices returns tuple of lists."""
         segment_indices, continuous, discontinuous = kpath_with_segments.get_segment_indices()
 
@@ -722,14 +766,14 @@ class TestKPathMethods:
         assert isinstance(continuous, list)
         assert isinstance(discontinuous, list)
 
-    def test_get_special_kpoints_as_segments(self, kpath_with_segments):
+    def test_get_special_kpoints_as_segments(self, kpath_with_segments: KPath) -> None:
         """Test get_special_kpoints with as_segments=True."""
         special = kpath_with_segments.get_special_kpoints(as_segments=True)
 
         # Should return list of (start, end) tuples
         assert len(special) == kpath_with_segments.n_segments
 
-    def test_get_special_kpoints_flat(self, kpath_with_segments):
+    def test_get_special_kpoints_flat(self, kpath_with_segments: KPath) -> None:
         """Test get_special_kpoints with as_segments=False."""
         special = kpath_with_segments.get_special_kpoints(as_segments=False)
 
@@ -738,21 +782,21 @@ class TestKPathMethods:
         assert special.ndim == 2
         assert special.shape[1] == 3
 
-    def test_get_special_kpoint_names(self, kpath_with_segments):
+    def test_get_special_kpoint_names(self, kpath_with_segments: KPath) -> None:
         """Test get_special_kpoint_names returns unique names."""
         names = kpath_with_segments.get_special_kpoint_names()
 
         # Should not have duplicates
         assert len(names) == len(set(names))
 
-    def test_get_continuous_segments(self, kpath_with_segments):
+    def test_get_continuous_segments(self, kpath_with_segments: KPath) -> None:
         """Test get_continuous_segments merges continuous segments."""
         continuous = kpath_with_segments.get_continuous_segments()
 
         assert isinstance(continuous, list)
         assert len(continuous) > 0
 
-    def test_str_representation(self, kpath_with_segments):
+    def test_str_representation(self, kpath_with_segments: KPath) -> None:
         """Test __str__ returns formatted string."""
         str_repr = str(kpath_with_segments)
 
@@ -760,7 +804,7 @@ class TestKPathMethods:
         assert "n_kpoints" in str_repr
         assert "n_segments" in str_repr
 
-    def test_equality_same_kpath(self, kpath_with_segments):
+    def test_equality_same_kpath(self, kpath_with_segments: KPath) -> None:
         """Test equality comparison with identical KPath."""
         kpath2 = KPath(
             kpoints=kpath_with_segments.kpoints.copy(),
@@ -769,11 +813,15 @@ class TestKPathMethods:
 
         assert kpath_with_segments == kpath2
 
-    def test_equality_different_kpath(self, kpath_with_segments, special_kpoint_map):
+    def test_equality_different_kpath(
+        self,
+        kpath_with_segments: KPath,
+        special_kpoint_map: dict[str, npt.NDArray[np.float64]],
+    ) -> None:
         """Test equality comparison with different KPath."""
         kpath2 = KPath(
             n_grids=[5, 5, 5],
-            segment_names=[("Γ", "X"), ("X", "M"), ("M", "Γ")],
+            segment_names=[("\u0393", "X"), ("X", "M"), ("M", "\u0393")],
             special_kpoint_map=special_kpoint_map,
         )
 
@@ -790,7 +838,7 @@ class TestKPathDiscontinuities:
     """Test class for KPath discontinuity handling."""
 
     @pytest.fixture
-    def discontinuous_kpath_kpoints(self):
+    def discontinuous_kpath_kpoints(self) -> npt.NDArray[np.float64]:
         """
         Create k-points with a discontinuity between segments.
 
@@ -801,16 +849,19 @@ class TestKPathDiscontinuities:
         # M to R: (0.5,0.5,0) -> (0.5,0.5,0.5) - discontinuous from X
         seg2 = np.linspace([0.5, 0.5, 0], [0.5, 0.5, 0.5], 5)
 
-        return np.vstack([seg1, seg2])
+        result: npt.NDArray[np.float64] = np.vstack([seg1, seg2])
+        return result
 
     @pytest.fixture
-    def discontinuous_segment_names(self):
+    def discontinuous_segment_names(self) -> list[tuple[str, str]]:
         """Create segment names for discontinuous path."""
         return [("Gamma", "X"), ("M", "R")]
 
     def test_discontinuity_detection(
-        self, discontinuous_kpath_kpoints, discontinuous_segment_names
-    ):
+        self,
+        discontinuous_kpath_kpoints: npt.NDArray[np.float64],
+        discontinuous_segment_names: list[tuple[str, str]],
+    ) -> None:
         """Test that discontinuities are detected."""
         kpath = KPath(
             kpoints=discontinuous_kpath_kpoints,
@@ -819,7 +870,11 @@ class TestKPathDiscontinuities:
 
         assert len(kpath.discontinuity_start_indices) > 0
 
-    def test_continuous_detection(self, simple_kpath_kpoints, simple_segment_names):
+    def test_continuous_detection(
+        self,
+        simple_kpath_kpoints: npt.NDArray[np.float64],
+        simple_segment_names: list[tuple[str, str]],
+    ) -> None:
         """Test that continuous segments are detected."""
         kpath = KPath(
             kpoints=simple_kpath_kpoints,
@@ -830,8 +885,10 @@ class TestKPathDiscontinuities:
         assert len(kpath.continuous_start_indices) >= 0
 
     def test_tick_names_with_discontinuity(
-        self, discontinuous_kpath_kpoints, discontinuous_segment_names
-    ):
+        self,
+        discontinuous_kpath_kpoints: npt.NDArray[np.float64],
+        discontinuous_segment_names: list[tuple[str, str]],
+    ) -> None:
         """Test that tick names are generated for discontinuous paths."""
         kpath = KPath(
             kpoints=discontinuous_kpath_kpoints,
@@ -845,11 +902,15 @@ class TestKPathDiscontinuities:
         # Verify we have the expected special point names
         tick_str = " ".join(tick_names)
         # Should contain gamma (or its normalized form) and some other points
-        assert any(name in tick_str for name in ["Γ", "$\\Gamma$", "X", "M", "R"]), (
+        assert any(name in tick_str for name in ["\u0393", "$\\Gamma$", "X", "M", "R"]), (
             f"Tick names should include special k-points: {tick_names}"
         )
 
-    def test_continuous_segments_grouping(self, simple_kpath_kpoints, simple_segment_names):
+    def test_continuous_segments_grouping(
+        self,
+        simple_kpath_kpoints: npt.NDArray[np.float64],
+        simple_segment_names: list[tuple[str, str]],
+    ) -> None:
         """Test get_continuous_segments groups continuous parts."""
         kpath = KPath(
             kpoints=simple_kpath_kpoints,
@@ -862,28 +923,27 @@ class TestKPathDiscontinuities:
         total_points = sum(len(seg) for seg in continuous)
         assert total_points == kpath.n_kpoints
 
-    def test_threshold_affects_detection(self):
+    def test_threshold_affects_detection(self) -> None:
         """Test that discontinuity_threshold affects detection."""
         # Create path with moderate jump
-        kpoints = np.vstack(
+        kpoints: npt.NDArray[np.float64] = np.vstack(
             [
                 np.linspace([0, 0, 0], [0.1, 0, 0], 5),
                 np.linspace([0.25, 0, 0], [0.35, 0, 0], 5),  # Jump of 0.15
             ]
         )
-        segment_names = [("A", "B"), ("C", "D")]
 
-        # With low threshold, should detect discontinuity
+        # With low threshold, should detect discontinuity (2 segments)
         kpath_low = KPath(
             kpoints=kpoints,
-            segment_names=segment_names,
+            segment_names=[("A", "B"), ("C", "D")],
             discontinuity_threshold=0.1,
         )
 
-        # With high threshold, should NOT detect discontinuity
+        # With high threshold, should NOT detect discontinuity (1 segment)
         kpath_high = KPath(
             kpoints=kpoints,
-            segment_names=segment_names,
+            segment_names=[("A", "D")],
             discontinuity_threshold=0.2,
         )
 

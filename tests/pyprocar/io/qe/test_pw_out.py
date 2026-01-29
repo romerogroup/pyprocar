@@ -1293,6 +1293,7 @@ def test_timings_contains_init_run(non_spin_parser: PwOut) -> None:
     """Test that timings contains init_run entry."""
     timings = non_spin_parser.timings
     assert timings is not None
+    assert isinstance(timings, list)
     init_run = next((t for t in timings if t["name"] == "init_run"), None)
     assert init_run is not None
     assert init_run["cpu_s"] == pytest.approx(0.79, abs=0.01)
@@ -1304,6 +1305,7 @@ def test_timings_contains_electrons(non_spin_parser: PwOut) -> None:
     """Test that timings contains electrons entry."""
     timings = non_spin_parser.timings
     assert timings is not None
+    assert isinstance(timings, list)
     electrons = next((t for t in timings if t["name"] == "electrons"), None)
     assert electrons is not None
     assert electrons["cpu_s"] == pytest.approx(6.83, abs=0.01)

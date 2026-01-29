@@ -15,7 +15,7 @@ class TestStructure:
     """Test class for Structure object."""
 
     @pytest.fixture
-    def simple_cubic_structure(self):
+    def simple_cubic_structure(self) -> Structure:
         """
         Create a simple cubic structure with one atom.
 
@@ -36,7 +36,7 @@ class TestStructure:
         )
 
     @pytest.fixture
-    def nacl_structure(self):
+    def nacl_structure(self) -> Structure:
         """
         Create a simple NaCl-like structure.
 
@@ -57,7 +57,7 @@ class TestStructure:
         )
 
     @pytest.fixture
-    def hexagonal_structure(self):
+    def hexagonal_structure(self) -> Structure:
         """
         Create a simple hexagonal structure.
 
@@ -78,16 +78,21 @@ class TestStructure:
             atoms=atoms, fractional_coordinates=fractional_coordinates, lattice=lattice
         )
 
-    def test_structure_initialization_with_fractional_coordinates(self, simple_cubic_structure):
+    def test_structure_initialization_with_fractional_coordinates(
+        self, simple_cubic_structure: Structure
+    ) -> None:
         """Test Structure initialization with fractional coordinates."""
         struct = simple_cubic_structure
 
+        assert struct.atoms is not None
         assert struct.atoms.tolist() == ["H"]
+        assert struct.fractional_coordinates is not None
         assert np.allclose(struct.fractional_coordinates, [[0.0, 0.0, 0.0]])
+        assert struct.cartesian_coordinates is not None
         assert np.allclose(struct.cartesian_coordinates, [[0.0, 0.0, 0.0]])
         assert struct.has_complete_data is True
 
-    def test_structure_initialization_with_cartesian_coordinates(self):
+    def test_structure_initialization_with_cartesian_coordinates(self) -> None:
         """Test Structure initialization with cartesian coordinates."""
         lattice = np.array([[2.0, 0.0, 0.0], [0.0, 2.0, 0.0], [0.0, 0.0, 2.0]])
 
@@ -98,20 +103,24 @@ class TestStructure:
             atoms=atoms, cartesian_coordinates=cartesian_coordinates, lattice=lattice
         )
 
+        assert struct.atoms is not None
         assert struct.atoms.tolist() == ["H"]
+        assert struct.cartesian_coordinates is not None
         assert np.allclose(struct.cartesian_coordinates, [[1.0, 1.0, 1.0]])
+        assert struct.fractional_coordinates is not None
         assert np.allclose(struct.fractional_coordinates, [[0.5, 0.5, 0.5]])
 
-    def test_structure_initialization_incomplete_data(self):
+    def test_structure_initialization_incomplete_data(self) -> None:
         """Test Structure initialization with incomplete data."""
         struct = Structure(atoms=["H"])
 
         assert struct.has_complete_data is False
+        assert struct.atoms is not None
         assert struct.atoms.tolist() == ["H"]
         assert struct.cartesian_coordinates is None
         assert struct.fractional_coordinates is None
 
-    def test_structure_equality(self, simple_cubic_structure):
+    def test_structure_equality(self, simple_cubic_structure: Structure) -> None:
         """Test Structure equality comparison."""
         struct1 = simple_cubic_structure
 
@@ -126,17 +135,21 @@ class TestStructure:
 
         assert struct1 == struct2
 
-    def test_structure_inequality(self, simple_cubic_structure, nacl_structure):
+    def test_structure_inequality(
+        self, simple_cubic_structure: Structure, nacl_structure: Structure
+    ) -> None:
         """Test Structure inequality comparison."""
         assert simple_cubic_structure != nacl_structure
 
-    def test_volume_property(self, simple_cubic_structure):
+    def test_volume_property(self, simple_cubic_structure: Structure) -> None:
         """Test volume property calculation."""
         struct = simple_cubic_structure
         expected_volume = 8.0 * 1e-30  # 2^3 * 1e-30
         assert np.isclose(struct.volume, expected_volume)
 
-    def test_lattice_parameters(self, simple_cubic_structure, hexagonal_structure):
+    def test_lattice_parameters(
+        self, simple_cubic_structure: Structure, hexagonal_structure: Structure
+    ) -> None:
         """Test lattice parameter properties (a, b, c, alpha, beta, gamma)."""
         # Test cubic structure
         cubic = simple_cubic_structure
@@ -156,7 +169,7 @@ class TestStructure:
         assert np.isclose(hex_struct.beta, 90.0)
         assert np.isclose(hex_struct.gamma, 120.0)
 
-    def test_masses_property(self, nacl_structure):
+    def test_masses_property(self, nacl_structure: Structure) -> None:
         """Test masses property calculation."""
         struct = nacl_structure
         masses = struct.masses
@@ -164,14 +177,14 @@ class TestStructure:
         assert len(masses) == 2  # Two atoms
         assert all(mass > 0 for mass in masses)  # All masses should be positive
 
-    def test_density_property(self, simple_cubic_structure):
+    def test_density_property(self, simple_cubic_structure: Structure) -> None:
         """Test density property calculation."""
         struct = simple_cubic_structure
         density = struct.density
 
         assert density > 0  # Density should be positive
 
-    def test_species_properties(self, nacl_structure):
+    def test_species_properties(self, nacl_structure: Structure) -> None:
         """Test species-related properties."""
         struct = nacl_structure
 
@@ -179,7 +192,7 @@ class TestStructure:
         assert struct.nspecies == 2
         assert struct.natoms == 2
 
-    def test_atomic_numbers_property(self, nacl_structure):
+    def test_atomic_numbers_property(self, nacl_structure: Structure) -> None:
         """Test atomic numbers property."""
         struct = nacl_structure
         atomic_numbers = struct.atomic_numbers
@@ -188,14 +201,14 @@ class TestStructure:
         assert all(isinstance(num, int) for num in atomic_numbers)
         assert all(num > 0 for num in atomic_numbers)
 
-    def test_reciprocal_lattice_property(self, simple_cubic_structure):
+    def test_reciprocal_lattice_property(self, simple_cubic_structure: Structure) -> None:
         """Test reciprocal lattice property."""
         struct = simple_cubic_structure
         recip_lattice = struct.reciprocal_lattice
 
         assert recip_lattice.shape == (3, 3)
 
-    def test_lattice_corners_property(self, simple_cubic_structure):
+    def test_lattice_corners_property(self, simple_cubic_structure: Structure) -> None:
         """Test lattice corners property."""
         struct = simple_cubic_structure
         corners = struct.lattice_corners
@@ -217,7 +230,7 @@ class TestStructure:
         for expected_corner in expected_corners:
             assert any(np.allclose(corner, expected_corner) for corner in corners)
 
-    def test_cell_convex_hull_property(self, simple_cubic_structure):
+    def test_cell_convex_hull_property(self, simple_cubic_structure: Structure) -> None:
         """Test cell convex hull property."""
         struct = simple_cubic_structure
         convex_hull = struct.cell_convex_hull
@@ -226,7 +239,7 @@ class TestStructure:
         assert hasattr(convex_hull, "simplices")
         assert len(convex_hull.vertices) == 8  # 8 vertices for a cube
 
-    def test_spglib_cell_property(self, nacl_structure):
+    def test_spglib_cell_property(self, nacl_structure: Structure) -> None:
         """Test _spglib_cell property."""
         struct = nacl_structure
         spglib_cell = struct._spglib_cell
@@ -234,11 +247,13 @@ class TestStructure:
         assert len(spglib_cell) == 3  # (lattice, frac_coords, atomic_numbers)
         lattice, frac_coords, atomic_numbers = spglib_cell
 
+        assert struct.lattice is not None
         assert np.allclose(lattice, struct.lattice)
+        assert struct.fractional_coordinates is not None
         assert np.allclose(frac_coords, struct.fractional_coordinates)
         assert atomic_numbers == struct.atomic_numbers
 
-    def test_get_space_group_number(self, simple_cubic_structure):
+    def test_get_space_group_number(self, simple_cubic_structure: Structure) -> None:
         """Test get_space_group_number method."""
         struct = simple_cubic_structure
         space_group_num = struct.get_space_group_number()
@@ -246,7 +261,7 @@ class TestStructure:
         assert isinstance(space_group_num, int)
         assert 1 <= space_group_num <= 230  # Valid space group numbers
 
-    def test_get_space_group_international(self, simple_cubic_structure):
+    def test_get_space_group_international(self, simple_cubic_structure: Structure) -> None:
         """Test get_space_group_international method."""
         struct = simple_cubic_structure
         space_group_int = struct.get_space_group_international()
@@ -254,7 +269,7 @@ class TestStructure:
         assert isinstance(space_group_int, str)
         assert len(space_group_int) > 0
 
-    def test_get_wyckoff_positions(self, simple_cubic_structure):
+    def test_get_wyckoff_positions(self, simple_cubic_structure: Structure) -> None:
         """Test get_wyckoff_positions method."""
         struct = simple_cubic_structure
         wyckoff_positions = struct.get_wyckoff_positions()
@@ -264,14 +279,14 @@ class TestStructure:
         assert struct.wyckoff_positions is not None
         assert struct.group is not None
 
-    def test_get_spglib_symmetry_dataset(self, simple_cubic_structure):
+    def test_get_spglib_symmetry_dataset(self, simple_cubic_structure: Structure) -> None:
         """Test get_spglib_symmetry_dataset method."""
         struct = simple_cubic_structure
         dataset = struct.get_spglib_symmetry_dataset()
 
         assert isinstance(dataset, dict) or hasattr(dataset, "number")
 
-    def test_is_point_inside_method(self, simple_cubic_structure):
+    def test_is_point_inside_method(self, simple_cubic_structure: Structure) -> None:
         """Test is_point_inside method."""
         struct = simple_cubic_structure
 
@@ -283,7 +298,7 @@ class TestStructure:
         point_outside = np.array([3.0, 3.0, 3.0])
         assert struct.is_point_inside(point_outside) is False
 
-    def test_transform_method(self, simple_cubic_structure):
+    def test_transform_method(self, simple_cubic_structure: Structure) -> None:
         """Test transform method."""
         struct = simple_cubic_structure
 
@@ -294,9 +309,11 @@ class TestStructure:
 
         assert isinstance(transformed, Structure)
         assert transformed.natoms >= struct.natoms  # Should have more atoms
+        assert transformed.lattice is not None
+        assert struct.lattice is not None
         assert np.allclose(transformed.lattice, np.dot(struct.lattice, transformation_matrix))
 
-    def test_transform_invalid_matrix(self, simple_cubic_structure):
+    def test_transform_invalid_matrix(self, simple_cubic_structure: Structure) -> None:
         """Test transform method with invalid transformation matrix."""
         struct = simple_cubic_structure
 
@@ -306,7 +323,7 @@ class TestStructure:
         with pytest.raises(ValueError):
             struct.transform(invalid_matrix)
 
-    def test_supercell_method(self, simple_cubic_structure):
+    def test_supercell_method(self, simple_cubic_structure: Structure) -> None:
         """Test supercell method."""
         struct = simple_cubic_structure
 
@@ -318,15 +335,15 @@ class TestStructure:
         assert isinstance(supercell, Structure)
         assert supercell.natoms >= struct.natoms  # Should have more atoms
 
-    def test_structure_with_empty_arrays(self):
+    def test_structure_with_empty_arrays(self) -> None:
         """Test Structure with empty arrays."""
         with pytest.raises(ValueError):
-            struct = Structure(atoms=[], fractional_coordinates=[], lattice=np.eye(3))
+            _struct = Structure(atoms=[], fractional_coordinates=[], lattice=np.eye(3))
 
         with pytest.raises(ValueError):
-            struct = Structure()
+            _struct = Structure()
 
-    def test_structure_properties_with_single_atom(self, simple_cubic_structure):
+    def test_structure_properties_with_single_atom(self, simple_cubic_structure: Structure) -> None:
         """Test various properties with single atom structure."""
         struct = simple_cubic_structure
 
