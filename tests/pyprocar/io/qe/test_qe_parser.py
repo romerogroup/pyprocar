@@ -43,7 +43,7 @@ CELL_PARAMETERS angstrom
 # Minimal SCF output file
 SCF_OUT = """
 
-     Program PWSCF v.7.2 starts on  1Jan2026 at 12: 0: 0 
+     Program PWSCF v.7.2 starts on  1Jan2026 at 12: 0: 0
 
      bravais-lattice index     =            0
      lattice parameter (alat)  =     10.2608  a.u.
@@ -94,11 +94,11 @@ PROJWFC_IN = """
 # Minimal Projwfc output file
 PROJWFC_OUT = """
 
-     Program PROJWFC v.7.2 starts on  1Jan2026 at 12: 0: 0 
+     Program PROJWFC v.7.2 starts on  1Jan2026 at 12: 0: 0
 
      Parallel version (MPI), running on     1 processors
 
-     Calling projwave .... 
+     Calling projwave ....
 
      Atomic states used for projection
      (read from pseudopotential files):
@@ -318,11 +318,6 @@ def test_parser_detects_projwfc_output(dos_parser: QEParser) -> None:
 def test_parser_detects_data_file_schema_xml(xml_parser: QEParser) -> None:
     """Test that parser detects data-file-schema.xml."""
     assert xml_parser.data_file_schema_xml is not None
-
-
-# =============================================================================
-# Tests: Summary
-# =============================================================================
 
 
 def test_summary_returns_dict(scf_parser: QEParser) -> None:

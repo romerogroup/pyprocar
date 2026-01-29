@@ -16,13 +16,12 @@ OUTCAR_DATA_DIR = DATA_DIR / "io" / "vasp" / "outcar"
 
 
 def get_test_id(outcar_filepath: Path) -> str:
-    """Creates a nice, readable ID for each test run."""
+    """Create a nice, readable ID for each test run."""
     return f"{outcar_filepath.stem}"
 
 
 outcar_files: list[Path] = []
 for filepath in OUTCAR_DATA_DIR.glob("OUTCAR_*"):
-    print(filepath)
     suffix = filepath.suffix
     if suffix in [".json", ".py"]:
         continue

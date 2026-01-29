@@ -43,7 +43,7 @@ PDOS_ATM2_S_SPIN = """# E (eV)  ldosup(E)  ldosdw(E)  pdosup(E)  pdosdw(E)
 
 # Non-colinear k-resolved PDOS file content (s orbital with j=0.5, 2 m_j components)
 # Format matches real QE output: SrVO3.k.pdos_atm#1(Sr)_wfc#1(s_j0.5)
-PDOS_ATM1_S_J05_NON_COLINEAR = """# ik    E (eV)   ldos(E)   pdos(E)_1   pdos(E)_2   
+PDOS_ATM1_S_J05_NON_COLINEAR = """# ik    E (eV)   ldos(E)   pdos(E)_1   pdos(E)_2
     1  -54.824  0.313E-08  0.138E-08  0.175E-08
     1  -54.814  0.353E-08  0.156E-08  0.197E-08
     2  -54.824  0.280E-08  0.120E-08  0.160E-08
@@ -52,7 +52,7 @@ PDOS_ATM1_S_J05_NON_COLINEAR = """# ik    E (eV)   ldos(E)   pdos(E)_1   pdos(E)
 
 # Non-colinear k-resolved PDOS for p orbital with j=1.5 (4 m_j components)
 # Format matches real QE output: SrVO3.k.pdos_atm#2(V)_wfc#4(p_j1.5)
-PDOS_ATM2_P_J15_NON_COLINEAR = """# ik    E (eV)   ldos(E)   pdos(E)_1   pdos(E)_2   pdos(E)_3   pdos(E)_4   
+PDOS_ATM2_P_J15_NON_COLINEAR = """# ik    E (eV)   ldos(E)   pdos(E)_1   pdos(E)_2   pdos(E)_3   pdos(E)_4
     1  -54.824  0.154E-20  0.905E-22  0.965E-21  0.355E-21  0.126E-21
     1  -54.814  0.173E-20  0.102E-21  0.109E-20  0.401E-21  0.142E-21
     2  -54.824  0.148E-20  0.880E-22  0.940E-21  0.340E-21  0.120E-21
@@ -61,7 +61,7 @@ PDOS_ATM2_P_J15_NON_COLINEAR = """# ik    E (eV)   ldos(E)   pdos(E)_1   pdos(E)
 
 # Non-colinear k-resolved PDOS for d orbital with j=1.5 (4 m_j components)
 # Format matches real QE output: SrVO3.k.pdos_atm#2(V)_wfc#5(d_j1.5)
-PDOS_ATM2_D_J15_NON_COLINEAR = """# ik    E (eV)   ldos(E)   pdos(E)_1   pdos(E)_2   pdos(E)_3   pdos(E)_4   
+PDOS_ATM2_D_J15_NON_COLINEAR = """# ik    E (eV)   ldos(E)   pdos(E)_1   pdos(E)_2   pdos(E)_3   pdos(E)_4
     1  -54.824  0.886E-16  0.160E-19  0.449E-16  0.437E-16  0.474E-20
     1  -54.814  0.999E-16  0.181E-19  0.506E-16  0.493E-16  0.536E-20
     2  -54.824  0.850E-16  0.155E-19  0.430E-16  0.420E-16  0.460E-20

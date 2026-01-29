@@ -12,9 +12,9 @@ Follows the same organization as test_dos_plot.py with phases:
 9. Integration tests
 """
 
-import matplotlib
+import matplotlib as mpl
 
-matplotlib.use("Agg")
+mpl.use("Agg")
 
 from unittest.mock import Mock
 
@@ -25,6 +25,8 @@ from matplotlib.collections import LineCollection, PathCollection
 from matplotlib.lines import Line2D
 
 from pyprocar.plotter.bs_plot import BandSeries, BandStructurePlotter
+
+_rng = np.random.default_rng(42)
 
 # =============================================================================
 # Mock Fixtures and Factories
@@ -73,7 +75,7 @@ def _make_mock_scalars_property(
     """Create a mock Property for scalar coloring data."""
     mock = Mock()
 
-    scalars = np.random.rand(n_kpoints, n_bands, n_spins)
+    scalars = _rng.random((n_kpoints, n_bands, n_spins))
     mock.to_array.return_value = scalars
     mock.label = "Projection"
     mock.units = ""
@@ -229,7 +231,7 @@ class TestBandStructurePlotterToSeriesList:
         series_flipped = plotter._to_series_list(mock_property_two_spins, None, None, "flip")
 
         # First spin should be identical
-        for sn, sf in zip(series_normal, series_flipped):
+        for sn, sf in zip(series_normal, series_flipped, strict=False):
             if sn.spin_index == 0:
                 assert np.allclose(sn.y, sf.y)
             else:
@@ -241,7 +243,7 @@ class TestBandStructurePlotterToSeriesList:
     def test_to_series_list_missing_kpath_raises(self) -> None:
         """Test that missing kpath metadata raises error."""
         mock = Mock()
-        mock.to_array.return_value = np.random.rand(50, 5, 1)
+        mock.to_array.return_value = _rng.random((50, 5, 1))
         mock.metadata = {}  # No kpath
 
         plotter = BandStructurePlotter()
@@ -398,7 +400,7 @@ class TestBandStructurePlotterScalarsModes:
             scalars_cmap="viridis",
         )
 
-        scatter = list(plotter.ax.collections)[0]
+        scatter = next(iter(plotter.ax.collections))
         assert scatter.get_cmap().name == "viridis"
         plt.close(plotter.fig)
 
@@ -414,7 +416,7 @@ class TestBandStructurePlotterScalarsModes:
             scalars_clim=(0.2, 0.8),
         )
 
-        scatter = list(plotter.ax.collections)[0]
+        scatter = next(iter(plotter.ax.collections))
         assert scatter.get_clim() == (0.2, 0.8)
         plt.close(plotter.fig)
 
@@ -430,7 +432,7 @@ class TestBandStructurePlotterScalarsModes:
             scalars_cmap="coolwarm",
         )
 
-        lc = list(plotter.ax.collections)[0]
+        lc = next(iter(plotter.ax.collections))
         assert lc.get_cmap().name == "coolwarm"
         plt.close(plotter.fig)
 
@@ -569,7 +571,7 @@ class TestBandStructurePlotterEdgeCases:
     def test_missing_kpath_metadata_raises(self) -> None:
         """Test that missing kpath metadata raises ValueError."""
         mock = Mock()
-        mock.to_array.return_value = np.random.rand(50, 5, 1)
+        mock.to_array.return_value = _rng.random((50, 5, 1))
         mock.metadata = {}  # No kpath
 
         plotter = BandStructurePlotter()
@@ -580,7 +582,7 @@ class TestBandStructurePlotterEdgeCases:
     def test_2d_bands_array(self) -> None:
         """Test that 2D bands array is handled correctly."""
         mock = Mock()
-        mock.to_array.return_value = np.random.rand(50, 5)  # 2D, no spin dim
+        mock.to_array.return_value = _rng.random((50, 5))  # 2D, no spin dim
         mock.metadata = {
             "kpath": {
                 "k_distances": np.linspace(0, 5.0, 50),
@@ -620,7 +622,7 @@ class TestBandStructurePlotterWrapperHelpers:
         from pyprocar.core.property_store import Property
 
         plotter = BandStructurePlotter()
-        bands = np.random.rand(50, 5, 1)
+        bands = _rng.random((50, 5, 1))
 
         prop = plotter._wrap_as_property(mock_kpath, bands)
 
@@ -633,7 +635,7 @@ class TestBandStructurePlotterWrapperHelpers:
     def test_wrap_as_property_includes_kpath_metadata(self, mock_kpath: Mock) -> None:
         """Test _wrap_as_property includes kpath metadata."""
         plotter = BandStructurePlotter()
-        bands = np.random.rand(50, 5, 1)
+        bands = _rng.random((50, 5, 1))
 
         prop = plotter._wrap_as_property(mock_kpath, bands)
 
@@ -648,7 +650,7 @@ class TestBandStructurePlotterWrapperHelpers:
     def test_wrap_as_property_handles_2d_bands(self, mock_kpath: Mock) -> None:
         """Test _wrap_as_property adds spin dimension for 2D bands."""
         plotter = BandStructurePlotter()
-        bands = np.random.rand(50, 5)  # 2D, no spin dimension
+        bands = _rng.random((50, 5))  # 2D, no spin dimension
 
         prop = plotter._wrap_as_property(mock_kpath, bands)
 
@@ -662,7 +664,7 @@ class TestBandStructurePlotterWrapperHelpers:
         from pyprocar.core.property_store import Property
 
         plotter = BandStructurePlotter()
-        scalars = np.random.rand(50, 5, 1)
+        scalars = _rng.random((50, 5, 1))
 
         prop = plotter._wrap_scalars_as_property(scalars)
 
@@ -674,7 +676,7 @@ class TestBandStructurePlotterWrapperHelpers:
     def test_wrap_scalars_as_property_custom_label(self) -> None:
         """Test _wrap_scalars_as_property accepts custom label."""
         plotter = BandStructurePlotter()
-        scalars = np.random.rand(50, 5, 1)
+        scalars = _rng.random((50, 5, 1))
 
         prop = plotter._wrap_scalars_as_property(scalars, label="Orbital Weight")
 
@@ -693,7 +695,7 @@ class TestBandStructurePlotterLegacyAPI:
     def test_plot_plain_creates_lines(self, mock_kpath: Mock) -> None:
         """Test plot_plain creates Line2D artists."""
         plotter = BandStructurePlotter()
-        bands = np.random.rand(50, 5, 1)
+        bands = _rng.random((50, 5, 1))
 
         artists = plotter.plot_plain(mock_kpath, bands)
 
@@ -704,7 +706,7 @@ class TestBandStructurePlotterLegacyAPI:
     def test_plot_plain_sets_axis_properties(self, mock_kpath: Mock) -> None:
         """Test plot_plain sets axis limits and ticks."""
         plotter = BandStructurePlotter()
-        bands = np.random.rand(50, 5, 1)
+        bands = _rng.random((50, 5, 1))
 
         plotter.plot_plain(mock_kpath, bands)
 
@@ -718,8 +720,8 @@ class TestBandStructurePlotterLegacyAPI:
     def test_plot_scatter_creates_scatter(self, mock_kpath: Mock) -> None:
         """Test plot_scatter creates PathCollection artists."""
         plotter = BandStructurePlotter()
-        bands = np.random.rand(50, 5, 1)
-        scalars = np.random.rand(50, 5, 1)
+        bands = _rng.random((50, 5, 1))
+        scalars = _rng.random((50, 5, 1))
 
         artists = plotter.plot_scatter(mock_kpath, bands, scalars=scalars)
 
@@ -730,7 +732,7 @@ class TestBandStructurePlotterLegacyAPI:
     def test_plot_scatter_without_scalars(self, mock_kpath: Mock) -> None:
         """Test plot_scatter works without scalars."""
         plotter = BandStructurePlotter()
-        bands = np.random.rand(50, 5, 1)
+        bands = _rng.random((50, 5, 1))
 
         artists = plotter.plot_scatter(mock_kpath, bands, scalars=None)
 
@@ -740,8 +742,8 @@ class TestBandStructurePlotterLegacyAPI:
     def test_plot_parametric_creates_collections(self, mock_kpath: Mock) -> None:
         """Test plot_parametric creates LineCollection artists."""
         plotter = BandStructurePlotter()
-        bands = np.random.rand(50, 5, 1)
-        scalars = np.random.rand(50, 5, 1)
+        bands = _rng.random((50, 5, 1))
+        scalars = _rng.random((50, 5, 1))
 
         artists = plotter.plot_parametric(mock_kpath, bands, scalars=scalars)
 
@@ -752,7 +754,7 @@ class TestBandStructurePlotterLegacyAPI:
     def test_plot_parametric_without_scalars(self, mock_kpath: Mock) -> None:
         """Test plot_parametric works without scalars."""
         plotter = BandStructurePlotter()
-        bands = np.random.rand(50, 5, 1)
+        bands = _rng.random((50, 5, 1))
 
         artists = plotter.plot_parametric(mock_kpath, bands, scalars=None)
 
@@ -762,7 +764,7 @@ class TestBandStructurePlotterLegacyAPI:
     def test_legacy_methods_record_export_data(self, mock_kpath: Mock) -> None:
         """Test legacy methods record data for export."""
         plotter = BandStructurePlotter()
-        bands = np.random.rand(50, 5, 1)
+        bands = _rng.random((50, 5, 1))
 
         plotter.plot_plain(mock_kpath, bands)
 

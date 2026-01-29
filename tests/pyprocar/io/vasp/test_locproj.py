@@ -16,23 +16,23 @@ set_verbose_level(VERBOSE)
 
 LOCPROJ_STRING = """
      1    2    2    16  # of spin, # of k-points, # of bands, # of proj
-   ISITE:     1    R=      0.0000000     0.0000000     0.0000000  Hydrogen-like    :     py   
-   ISITE:     1    R=      0.0000000     0.0000000     0.0000000  Hydrogen-like    :     pz   
-   ISITE:     1    R=      0.0000000     0.0000000     0.0000000  Hydrogen-like    :     px   
-   ISITE:     1    R=      0.0000000     0.0000000     0.0000000  Hydrogen-like    :    dxy   
-   ISITE:     1    R=      0.0000000     0.0000000     0.0000000  Hydrogen-like    :    dyz   
-   ISITE:     1    R=      0.0000000     0.0000000     0.0000000  Hydrogen-like    :    dz2   
-   ISITE:     1    R=      0.0000000     0.0000000     0.0000000  Hydrogen-like    :    dxz   
-   ISITE:     1    R=      0.0000000     0.0000000     0.0000000  Hydrogen-like    :   dx2-y2 
-   ISITE:     2    R=     -0.5000000    -0.5000000    -0.5000000  Hydrogen-like    :     py   
-   ISITE:     2    R=     -0.5000000    -0.5000000    -0.5000000  Hydrogen-like    :     pz   
-   ISITE:     2    R=     -0.5000000    -0.5000000    -0.5000000  Hydrogen-like    :     px   
-   ISITE:     2    R=     -0.5000000    -0.5000000    -0.5000000  Hydrogen-like    :    dxy   
-   ISITE:     2    R=     -0.5000000    -0.5000000    -0.5000000  Hydrogen-like    :    dyz   
-   ISITE:     2    R=     -0.5000000    -0.5000000    -0.5000000  Hydrogen-like    :    dz2   
-   ISITE:     2    R=     -0.5000000    -0.5000000    -0.5000000  Hydrogen-like    :    dxz   
-   ISITE:     2    R=     -0.5000000    -0.5000000    -0.5000000  Hydrogen-like    :   dx2-y2 
- 
+   ISITE:     1    R=      0.0000000     0.0000000     0.0000000  Hydrogen-like    :     py
+   ISITE:     1    R=      0.0000000     0.0000000     0.0000000  Hydrogen-like    :     pz
+   ISITE:     1    R=      0.0000000     0.0000000     0.0000000  Hydrogen-like    :     px
+   ISITE:     1    R=      0.0000000     0.0000000     0.0000000  Hydrogen-like    :    dxy
+   ISITE:     1    R=      0.0000000     0.0000000     0.0000000  Hydrogen-like    :    dyz
+   ISITE:     1    R=      0.0000000     0.0000000     0.0000000  Hydrogen-like    :    dz2
+   ISITE:     1    R=      0.0000000     0.0000000     0.0000000  Hydrogen-like    :    dxz
+   ISITE:     1    R=      0.0000000     0.0000000     0.0000000  Hydrogen-like    :   dx2-y2
+   ISITE:     2    R=     -0.5000000    -0.5000000    -0.5000000  Hydrogen-like    :     py
+   ISITE:     2    R=     -0.5000000    -0.5000000    -0.5000000  Hydrogen-like    :     pz
+   ISITE:     2    R=     -0.5000000    -0.5000000    -0.5000000  Hydrogen-like    :     px
+   ISITE:     2    R=     -0.5000000    -0.5000000    -0.5000000  Hydrogen-like    :    dxy
+   ISITE:     2    R=     -0.5000000    -0.5000000    -0.5000000  Hydrogen-like    :    dyz
+   ISITE:     2    R=     -0.5000000    -0.5000000    -0.5000000  Hydrogen-like    :    dz2
+   ISITE:     2    R=     -0.5000000    -0.5000000    -0.5000000  Hydrogen-like    :    dxz
+   ISITE:     2    R=     -0.5000000    -0.5000000    -0.5000000  Hydrogen-like    :   dx2-y2
+
 orbital     1     1     1      -34.3671700505        1.0000000000
      1       -0.0328454260       -0.0085019871
      2        0.0028357944        0.0006686975
@@ -50,7 +50,7 @@ orbital     1     1     1      -34.3671700505        1.0000000000
     14        0.0000000000        0.0000000000
     15        0.0000000000       -0.0000000000
     16       -0.0000000000       -0.0000000000
- 
+
 orbital     1     1     2      -34.3671700505        1.0000000000
      1        0.0328945347       -0.0246276625
      2        0.0084925158        0.0019750730
@@ -68,8 +68,8 @@ orbital     1     1     2      -34.3671700505        1.0000000000
     14       -0.0000000000       -0.0000000000
     15       -0.0000000000       -0.0000000000
     16       -0.0000000000        0.0000000000
-    
-    
+
+
 orbital     1     2     1      -34.3847119961        1.0000000000
      1       -0.0000000000       -0.0000000000
      2        0.0000000000       -0.0000000000
@@ -87,7 +87,7 @@ orbital     1     2     1      -34.3847119961        1.0000000000
     14        0.0098611334       -0.0121713624
     15        0.0000000000        0.0000000000
     16       -0.0167489711        0.0206728567
- 
+
 orbital     1     2     2      -34.3663568191        1.0000000000
      1       -0.0296454034       -0.0233658533
      2       -0.0006864077        0.0069222297
@@ -144,7 +144,7 @@ class TestLocproj:
         """Test that angular types are correctly extracted."""
         locproj = vasp.Locproj(locproj_filepath)
 
-        # From LOCPROJ_STRING, we have 8 orbitals per atom × 2 atoms
+        # From LOCPROJ_STRING, we have 8 orbitals per atom x 2 atoms
         # py, pz, px, dxy, dyz, dz2, dxz, dx2-y2 (repeated twice)
         expected_orbitals = ["py", "pz", "px", "dxy", "dyz", "dz2", "dxz", "dx2-y2"]
 

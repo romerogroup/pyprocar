@@ -155,4 +155,4 @@ class TestVaspParserFromStr:
         parser = VaspParser.from_str(outcar=outcar_content)
 
         # dirpath should resolve to current working directory (from BaseParser)
-        assert parser.dirpath == Path().resolve()
+        assert parser.dirpath == Path.cwd()

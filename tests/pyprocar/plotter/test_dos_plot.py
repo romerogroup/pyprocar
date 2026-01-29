@@ -1,6 +1,6 @@
-import matplotlib
+import matplotlib as mpl
 
-matplotlib.use("Agg")
+mpl.use("Agg")
 
 from unittest.mock import MagicMock, Mock
 
@@ -11,6 +11,8 @@ from matplotlib.collections import LineCollection
 
 from pyprocar.core.dos import DensityOfStates
 from pyprocar.plotter.dos_plot import AxesOrientation, DOSPlotter
+
+_rng = np.random.default_rng(42)
 
 
 def _make_dos(n_spins: int = 2) -> DensityOfStates:
@@ -79,10 +81,7 @@ def _make_mock_property(
 
     # Metadata - default includes per-channel labels
     if metadata is None:
-        if n_channels > 1:
-            metadata = {"label": [f"Channel {i}" for i in range(n_channels)]}
-        else:
-            metadata = {}
+        metadata = {"label": [f"Channel {i}" for i in range(n_channels)]} if n_channels > 1 else {}
     mock.metadata = metadata
 
     # Optional data limits
@@ -120,9 +119,9 @@ def _make_mock_property_with_scalars(
     )
     # Scalars values between 0 and 1
     if n_channels == 1:
-        scalars_data.to_array.return_value = np.random.rand(n_points)
+        scalars_data.to_array.return_value = _rng.random(n_points)
     else:
-        scalars_data.to_array.return_value = np.random.rand(n_points, n_channels)
+        scalars_data.to_array.return_value = _rng.random((n_points, n_channels))
 
     # rounded_data_lim is expected to be a list of tuples (one per channel)
     scalars_data.rounded_data_lim = [(0.0, 1.0) for _ in range(n_channels)]

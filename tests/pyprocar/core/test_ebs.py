@@ -17,6 +17,8 @@ from pyprocar.core.kpoints import KGRID_MODE, KGridInfo, KPath
 from pyprocar.core.property_store import Property
 from tests.utils import DATA_DIR
 
+_rng = np.random.default_rng(42)
+
 logger = logging.getLogger("pyprocar")
 logger.setLevel(logging.DEBUG)
 user_logger = logging.getLogger("user")
@@ -24,22 +26,22 @@ user_logger = logging.getLogger("user")
 
 @pytest.fixture
 def mesh_calc_dir() -> Path:
-    """
-    This is the parameterized fixture. Pytest will run any test that
-    uses this fixture once for each item in ALL_TEST_CASES.
+    """Provide parameterized fixture for mesh calculation directory.
 
-    The `request.param` object will be one CalcInfo instance at a time.
+    Pytest will run any test that uses this fixture once for each item
+    in ALL_TEST_CASES. The `request.param` object will be one CalcInfo
+    instance at a time.
     """
     return DATA_DIR / "examples" / "fermi3d" / "non-spin-polarized"
 
 
 @pytest.fixture
 def path_calc_dir() -> Path:
-    """
-    This is the parameterized fixture. Pytest will run any test that
-    uses this fixture once for each item in ALL_TEST_CASES.
+    """Provide parameterized fixture for path calculation directory.
 
-    The `request.param` object will be one CalcInfo instance at a time.
+    Pytest will run any test that uses this fixture once for each item
+    in ALL_TEST_CASES. The `request.param` object will be one CalcInfo
+    instance at a time.
     """
     return DATA_DIR / "examples" / "bands" / "non-spin-polarized"
 
@@ -51,7 +53,7 @@ def ebs(mesh_calc_dir: Path) -> ElectronicBandStructure:
 
 @pytest.fixture
 def sample_kpoints() -> npt.NDArray[np.float64]:
-    """Generate sample kpoints for testing"""
+    """Generate sample kpoints for testing."""
     return np.array(
         [
             [0.0, 0.0, 0.0],
@@ -68,27 +70,27 @@ def sample_kpoints() -> npt.NDArray[np.float64]:
 
 @pytest.fixture
 def sample_bands() -> npt.NDArray[np.float64]:
-    """Generate sample bands for testing"""
+    """Generate sample bands for testing."""
     n_kpoints = 8
     n_bands = 4
     n_spins = 2
-    return np.random.rand(n_kpoints, n_bands, n_spins) * 10 - 5  # Energy range -5 to 5
+    return _rng.random((n_kpoints, n_bands, n_spins)) * 10 - 5  # Energy range -5 to 5
 
 
 @pytest.fixture
 def sample_projected() -> npt.NDArray[np.float64]:
-    """Generate sample projected data for testing"""
+    """Generate sample projected data for testing."""
     n_kpoints = 8
     n_bands = 4
     n_spins = 2
     n_atoms = 2
     n_orbitals = 3
-    return np.random.rand(n_kpoints, n_bands, n_spins, n_atoms, n_orbitals)
+    return _rng.random((n_kpoints, n_bands, n_spins, n_atoms, n_orbitals))
 
 
 @pytest.fixture
 def sample_reciprocal_lattice() -> npt.NDArray[np.float64]:
-    """Generate sample reciprocal lattice for testing"""
+    """Generate sample reciprocal lattice for testing."""
     return np.array(
         [
             [1.0, 0.0, 0.0],
@@ -100,7 +102,7 @@ def sample_reciprocal_lattice() -> npt.NDArray[np.float64]:
 
 @pytest.fixture
 def sample_kgrid_info() -> KGridInfo:
-    """Create a sample KGridInfo for testing"""
+    """Create a sample KGridInfo for testing."""
     return KGridInfo(
         kgrid=(4, 4, 4),
         kgrid_mode=KGRID_MODE.GAMMA,
@@ -115,7 +117,7 @@ def sample_ebs(
     sample_projected: npt.NDArray[np.float64],
     sample_reciprocal_lattice: npt.NDArray[np.float64],
 ) -> ElectronicBandStructure:
-    """Create a sample ElectronicBandStructure for testing"""
+    """Create a sample ElectronicBandStructure for testing."""
     return ElectronicBandStructure(
         kpoints=sample_kpoints,
         bands=sample_bands,
@@ -128,37 +130,38 @@ def sample_ebs(
 
 @pytest.fixture
 def mesh_kpoints() -> npt.NDArray[np.float64]:
-    """Generate mesh kpoints for testing"""
+    """Generate mesh kpoints for testing."""
     nkx, nky, nkz = 4, 4, 4
     kx = np.linspace(0, 1, nkx, endpoint=False)
     ky = np.linspace(0, 1, nky, endpoint=False)
     kz = np.linspace(0, 1, nkz, endpoint=False)
 
-    kpoints_list: list[list[float]] = []
-    for ix in range(nkx):
-        for iy in range(nky):
-            for iz in range(nkz):
-                kpoints_list.append([float(kx[ix]), float(ky[iy]), float(kz[iz])])
+    kpoints_list: list[list[float]] = [
+        [float(kx[ix]), float(ky[iy]), float(kz[iz])]
+        for ix in range(nkx)
+        for iy in range(nky)
+        for iz in range(nkz)
+    ]
 
     return np.array(kpoints_list)
 
 
 @pytest.fixture
 def mesh_bands(mesh_kpoints: npt.NDArray[np.float64]) -> npt.NDArray[np.float64]:
-    """Generate mesh bands for testing"""
+    """Generate mesh bands for testing."""
     n_kpoints = len(mesh_kpoints)
     n_bands = 3
     n_spins = 1
-    return np.random.rand(n_kpoints, n_bands, n_spins) * 10 - 5
+    return _rng.random((n_kpoints, n_bands, n_spins)) * 10 - 5
 
 
 @pytest.fixture
 def mesh_bands_spin_polarized(mesh_kpoints: npt.NDArray[np.float64]) -> npt.NDArray[np.float64]:
-    """Generate mesh bands for testing"""
+    """Generate mesh bands for testing."""
     n_kpoints = len(mesh_kpoints)
     n_bands = 3
     n_spins = 2
-    return np.random.rand(n_kpoints, n_bands, n_spins) * 10 - 5
+    return _rng.random((n_kpoints, n_bands, n_spins)) * 10 - 5
 
 
 @pytest.fixture
@@ -168,14 +171,14 @@ def sample_ebs_mesh(
     sample_reciprocal_lattice: npt.NDArray[np.float64],
     sample_kgrid_info: KGridInfo,
 ) -> ElectronicBandStructureMesh:
-    """Create a sample ElectronicBandStructureMesh for testing"""
+    """Create a sample ElectronicBandStructureMesh for testing."""
     n_kpoints = len(mesh_kpoints)
     n_bands = 3
     n_spins = 1
     n_atoms = 2
     n_orbitals = 3
 
-    projected = np.random.rand(n_kpoints, n_bands, n_spins, n_atoms, n_orbitals)
+    projected = _rng.random((n_kpoints, n_bands, n_spins, n_atoms, n_orbitals))
 
     return ElectronicBandStructureMesh(
         kgrid_info=sample_kgrid_info,
@@ -195,14 +198,14 @@ def sample_ebs_mesh_spin_polarized(
     sample_reciprocal_lattice: npt.NDArray[np.float64],
     sample_kgrid_info: KGridInfo,
 ) -> ElectronicBandStructureMesh:
-    """Create a sample ElectronicBandStructureMesh for testing"""
+    """Create a sample ElectronicBandStructureMesh for testing."""
     n_kpoints = len(mesh_kpoints)
     n_bands = 3
     n_spins = 2
     n_atoms = 2
     n_orbitals = 3
 
-    projected = np.random.rand(n_kpoints, n_bands, n_spins, n_atoms, n_orbitals)
+    projected = _rng.random((n_kpoints, n_bands, n_spins, n_atoms, n_orbitals))
 
     return ElectronicBandStructureMesh(
         kgrid_info=sample_kgrid_info,
@@ -222,14 +225,14 @@ def sample_ebs_mesh_non_colinear(
     sample_reciprocal_lattice: npt.NDArray[np.float64],
     sample_kgrid_info: KGridInfo,
 ) -> ElectronicBandStructureMesh:
-    """Create a sample ElectronicBandStructureMesh for testing"""
+    """Create a sample ElectronicBandStructureMesh for testing."""
     n_kpoints = len(mesh_kpoints)
     n_bands = 3
     n_spins = 4
     n_atoms = 2
     n_orbitals = 3
 
-    projected = np.random.rand(n_kpoints, n_bands, n_spins, n_atoms, n_orbitals)
+    projected = _rng.random((n_kpoints, n_bands, n_spins, n_atoms, n_orbitals))
 
     return ElectronicBandStructureMesh(
         kgrid_info=sample_kgrid_info,
@@ -387,7 +390,7 @@ class TestElectronicBandStructure:
         # Create a new EBS with these kpoints
         test_ebs = ElectronicBandStructure(
             kpoints=kpoints_outside_fbz,
-            bands=np.random.rand(8, 4, 2) * 10 - 5,
+            bands=_rng.random((8, 4, 2)) * 10 - 5,
             fermi=0.0,
         )
 
@@ -410,36 +413,6 @@ class TestElectronicBandStructure:
 
         # Kpoints already in FBZ should remain unchanged
         assert np.allclose(shifted_ebs.kpoints[6], [0.0, 0.0, 0.0])
-
-    # def test_from_code_mock(self, mesh_calc_dir):
-    #     """Test from_code classmethod with mocked parser."""
-    #     # This is a basic test structure - in practice you'd mock the Parser
-    #     # Here we'll test the method exists and has proper signature
-
-    #     # Test that the method exists
-    #     assert hasattr(ElectronicBandStructure, 'from_code')
-    #     assert callable(getattr(ElectronicBandStructure, 'from_code'))
-
-    #     ebs = ElectronicBandStructureMesh.from_code(code="vasp", dirpath=mesh_calc_dir)
-
-    #     print(ebs)
-    #     assert ebs is not None
-    #     assert ebs.n_kpoints == 64
-    #     assert ebs.n_bands == 3
-    #     assert ebs.n_spins == 1
-    #     assert ebs.n_atoms == 2
-    #     assert ebs.n_orbitals == 3
-
-    #     # Test with invalid directory should handle gracefully
-    #     # (This would require mocking the Parser to avoid actual file I/O)
-    #     # For now, just verify the method signature
-    #     import inspect
-    #     sig = inspect.signature(ElectronicBandStructure.from_code)
-    #     expected_params = ['code', 'dirpath', 'use_cache', 'ebs_filename']
-    #     actual_params = list(sig.parameters.keys())
-
-    #     for param in expected_params:
-    #         assert param in actual_params
 
     def test_fix_collinear_spin(self, sample_ebs: ElectronicBandStructure) -> None:
         """Test fixing collinear spin."""
@@ -491,7 +464,7 @@ class TestElectronicBandStructure:
 
 @pytest.fixture
 def sample_kpath() -> KPath:
-    """Create a sample kpoints.KPath for testing"""
+    """Create a sample kpoints.KPath for testing."""
     # Create a simple high-symmetry path: Gamma -> X -> L -> Gamma
     n_grids = [50, 50, 50, 50, 50, 50]
     segment_names = [
@@ -509,24 +482,23 @@ def sample_kpath() -> KPath:
         "P": np.array([0.25, 0.25, 0.25]),
     }
     reciprocal_lattice = np.eye(3)
-    kpath = kpoints.KPath(
+    return kpoints.KPath(
         special_kpoint_map=special_kpoints_map,
         segment_names=segment_names,
         n_grids=n_grids,
         reciprocal_lattice=reciprocal_lattice,
     )
-    return kpath
 
 
 @pytest.fixture
 def path_kpoints(sample_kpath: KPath) -> npt.NDArray[np.float64]:
-    """Generate path kpoints for testing"""
+    """Generate path kpoints for testing."""
     return sample_kpath.kpoints
 
 
 @pytest.fixture
 def path_bands(path_kpoints: npt.NDArray[np.float64]) -> npt.NDArray[np.float64]:
-    """Generate path bands for testing"""
+    """Generate path bands for testing."""
     n_kpoints = len(path_kpoints)
     n_bands = 4
     n_spins = 2
@@ -551,14 +523,14 @@ def sample_ebs_path(
     sample_reciprocal_lattice: npt.NDArray[np.float64],
     sample_kpath: KPath,
 ) -> ElectronicBandStructurePath:
-    """Create a sample ElectronicBandStructurePath for testing"""
+    """Create a sample ElectronicBandStructurePath for testing."""
     n_kpoints = len(path_kpoints)
     n_bands = 4
     n_spins = 2
     n_atoms = 2
     n_orbitals = 3
 
-    projected = np.random.rand(n_kpoints, n_bands, n_spins, n_atoms, n_orbitals)
+    projected = _rng.random((n_kpoints, n_bands, n_spins, n_atoms, n_orbitals))
 
     return ElectronicBandStructurePath(
         kpoints=path_kpoints,
@@ -657,8 +629,8 @@ class TestElectronicBandStructurePath:
         assert np.array_equal(bands_prop.value, bands_data.to_array())
 
         # Test add_property
-        test_property = np.random.rand(
-            sample_ebs_path.n_kpoints, sample_ebs_path.n_bands, sample_ebs_path.n_spins
+        test_property = _rng.random(
+            (sample_ebs_path.n_kpoints, sample_ebs_path.n_bands, sample_ebs_path.n_spins)
         )
         sample_ebs_path.add_property(name="test_prop", value=test_property)
 
@@ -731,27 +703,6 @@ class TestElectronicBandStructurePath:
         assert len(blocks_segments) == expected_segments
         assert len(blocks_continuous) == expected_continuous
 
-    # def test_from_ebs_classmethod(self, sample_ebs, sample_kpath):
-    #     """Test creating ElectronicBandStructurePath from ElectronicBandStructure."""
-    #     # Add kpath to the regular ebs
-    #     sample_ebs._kpath = sample_kpath
-
-    #     # Create path from ebs
-    #     ebs_path = ElectronicBandStructurePath.from_ebs(sample_ebs, kpath=sample_kpath)
-
-    #     # Should be a new instance
-    #     assert ebs_path is not sample_ebs
-    #     assert isinstance(ebs_path, ElectronicBandStructurePath)
-
-    #     # Should have same basic properties
-    #     assert ebs_path.n_kpoints == sample_ebs.n_kpoints
-    #     assert ebs_path.n_bands == sample_ebs.n_bands
-    #     assert ebs_path.fermi == sample_ebs.fermi
-
-    #     # Should have kpath
-    #     assert ebs_path.kpath is not None
-    #     assert ebs_path.kpath == sample_kpath
-
     def test_from_code_classmethod(self, path_calc_dir: Path) -> None:
         """Test creating ElectronicBandStructurePath from code."""
         ebs_path = ElectronicBandStructurePath.from_code(code="vasp", dirpath=str(path_calc_dir))
@@ -810,8 +761,8 @@ class TestElectronicBandStructureMesh:
 
     def test_mesh_properties(self, sample_ebs_mesh: ElectronicBandStructureMesh) -> None:
         """Test mesh-specific properties."""
-        assert sample_ebs_mesh.is_grid == True
-        assert sample_ebs_mesh.is_fbz == True
+        assert sample_ebs_mesh.is_grid
+        assert sample_ebs_mesh.is_fbz
 
         kpoints_mesh = sample_ebs_mesh.get_kpoints_mesh()
         assert np.allclose(kpoints_mesh.shape, np.array([4, 4, 4, 3]))
@@ -862,7 +813,7 @@ class TestElectronicBandStructureMesh:
         sample_ebs_mesh.compute_gradients(2, names=["bands_velocity"])
         velocity_property = sample_ebs_mesh.get_property("bands_velocity")
         assert isinstance(velocity_property, Property)
-        assert velocity_property.is_vector == True
+        assert velocity_property.is_vector
 
         grad_1 = velocity_property.gradients[1]
         assert grad_1 is not None
@@ -898,27 +849,3 @@ class TestElectronicBandStructureMesh:
     def test_property_interpolator(self, sample_ebs_mesh: ElectronicBandStructureMesh) -> None:  # pyright: ignore[reportUnusedParameter]
         """Test property interpolator."""
         pytest.skip("get_property_interpolator not yet implemented")
-
-    # def test_reduce_to_plane(self, sample_ebs_mesh):
-    #     """Test reducing mesh to plane."""
-    #     normal = np.array([0, 0, 1])  # z-normal plane
-    #     origin = np.array([0, 0, 0.5])
-
-    #     plane_ebs = sample_ebs_mesh.reduce_to_plane(
-    #         normal=normal, origin=origin, grid_interpolation=(10, 10)
-    #     )
-
-    #     assert isinstance(plane_ebs, ElectronicBandStructurePlane)
-    #     assert plane_ebs.normal.shape == (3,)
-    #     assert np.allclose(plane_ebs.normal, normal)
-    # def test_compute_gradient_mesh(self, sample_ebs_mesh):
-    #     """Test gradient computation on mesh."""
-    #     gradients, hessians = sample_ebs_mesh.compute_gradient(
-    #         "bands", first_order=True, second_order=True
-    #     )
-
-    #     assert gradients is not None
-    #     assert gradients.shape == (64, 3, 1, 3)  # Last 3 is gradient dimensions
-
-    #     assert hessians is not None
-    #     assert hessians.shape == (64, 3, 1, 3, 3)  # Last 3x3 is hessian

@@ -14,7 +14,7 @@ from pyprocar.utils.units import RYDBERG_TO_EV
 
 NON_SPIN_POLARIZED_ATOMIC_PROJ_XML = """<?xml version="1.0" encoding="UTF-8"?>
 <PROJECTIONS>
-  <HEADER NUMBER_OF_BANDS="2" NUMBER_OF_K-POINTS="2" NUMBER_OF_SPIN_COMPONENTS="1" 
+  <HEADER NUMBER_OF_BANDS="2" NUMBER_OF_K-POINTS="2" NUMBER_OF_SPIN_COMPONENTS="1"
           NUMBER_OF_ATOMIC_WFC="2" NUMBER_OF_ELECTRONS="40" FERMI_ENERGY="0.372"/>
   <EIGENSTATES>
     <K-POINT Weight="0.001">0.0 0.0 0.0</K-POINT>
@@ -47,7 +47,7 @@ NON_SPIN_POLARIZED_ATOMIC_PROJ_XML = """<?xml version="1.0" encoding="UTF-8"?>
 
 SPIN_POLARIZED_ATOMIC_PROJ_XML = """<?xml version="1.0" encoding="UTF-8"?>
 <PROJECTIONS>
-  <HEADER NUMBER_OF_BANDS="2" NUMBER_OF_K-POINTS="2" NUMBER_OF_SPIN_COMPONENTS="2" 
+  <HEADER NUMBER_OF_BANDS="2" NUMBER_OF_K-POINTS="2" NUMBER_OF_SPIN_COMPONENTS="2"
           NUMBER_OF_ATOMIC_WFC="2" NUMBER_OF_ELECTRONS="40" FERMI_ENERGY="0.373"/>
   <EIGENSTATES>
     <K-POINT Weight="0.001">0.0 0.0 0.0</K-POINT>
@@ -214,11 +214,6 @@ def test_eigenvalues_shape_spin_polarized(spin_polarized_parser: AtomicProjXML) 
     assert bands.shape == (2, 2, 2)
 
 
-# =============================================================================
-# Tests: K-points
-# =============================================================================
-
-
 def test_kpoints_returns_correct_shape(non_spin_parser: AtomicProjXML) -> None:
     """Test that kpoints has shape (n_kpoints, 3)."""
     kpoints = non_spin_parser.kpoints
@@ -231,11 +226,6 @@ def test_kpoints_first_is_gamma(non_spin_parser: AtomicProjXML) -> None:
     kpoints = non_spin_parser.kpoints
     assert kpoints is not None
     np.testing.assert_array_almost_equal(kpoints[0], [0.0, 0.0, 0.0])
-
-
-# =============================================================================
-# Tests: Projections
-# =============================================================================
 
 
 def test_projections_shape_non_spin_polarized(non_spin_parser: AtomicProjXML) -> None:
@@ -251,11 +241,6 @@ def test_projections_are_complex(non_spin_parser: AtomicProjXML) -> None:
     projections = non_spin_parser.projections
     assert projections is not None
     assert np.iscomplexobj(projections)
-
-
-# =============================================================================
-# Tests: Weights
-# =============================================================================
 
 
 def test_weights_returns_correct_shape(non_spin_parser: AtomicProjXML) -> None:

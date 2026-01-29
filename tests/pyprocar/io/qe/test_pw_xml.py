@@ -311,11 +311,6 @@ def test_is_file_of_type_returns_false_for_invalid_xml(invalid_filepath: Path) -
     assert parser.root is not None
 
 
-# =============================================================================
-# Tests: Magnetization - is_spin_calc (lsda)
-# =============================================================================
-
-
 def test_is_spin_calc_returns_false_for_non_spin_polarized(
     non_spin_parser: PwXML,
 ) -> None:
@@ -333,11 +328,6 @@ def test_is_spin_calc_returns_false_for_non_colinear(
 ) -> None:
     """Test that is_spin_calc returns False for non-colinear calculation."""
     assert non_colinear_parser.is_spin_calc is False
-
-
-# =============================================================================
-# Tests: Magnetization - is_non_colinear (noncolin)
-# =============================================================================
 
 
 def test_is_non_colinear_returns_false_for_non_spin_polarized(
@@ -359,11 +349,6 @@ def test_is_non_colinear_returns_true_for_non_colinear(
     assert non_colinear_parser.is_non_colinear is True
 
 
-# =============================================================================
-# Tests: Magnetization - is_spin_orbit_calc (spinorbit)
-# =============================================================================
-
-
 def test_is_spin_orbit_calc_returns_false_for_non_spin_polarized(
     non_spin_parser: PwXML,
 ) -> None:
@@ -383,11 +368,6 @@ def test_is_spin_orbit_calc_returns_true_for_non_colinear(
 ) -> None:
     """Test that is_spin_orbit_calc returns True for non-colinear calculation."""
     assert non_colinear_parser.is_spin_orbit_calc is True
-
-
-# =============================================================================
-# Tests: Magnetization - n_spin
-# =============================================================================
 
 
 def test_n_spin_returns_one_for_non_spin_polarized(non_spin_parser: PwXML) -> None:
@@ -479,11 +459,6 @@ def test_eigenvalues_shape_non_colinear(non_colinear_parser: PwXML) -> None:
     """Test that eigenvalues exist for non-colinear."""
     # Just check basic structure
     assert non_colinear_parser.n_bands == 48
-
-
-# =============================================================================
-# Tests: Kpoints
-# =============================================================================
 
 
 def test_kpoints_returns_correct_shape(non_spin_parser: PwXML) -> None:
@@ -578,7 +553,6 @@ def test_spin_polarized_weights_shape(spin_parser: PwXML) -> None:
     weights = spin_parser.weights
     assert weights is not None
     assert isinstance(weights, np.ndarray)
-    # n_kpoints=2
     assert weights.shape == (2,)
 
 
@@ -689,11 +663,6 @@ def test_spin_polarized_atm_wfc(spin_parser: PwXML) -> None:
     """Test that number of atomic wavefunctions is correctly parsed for spin-polarized."""
     # num_of_atomic_wfc in XML: 30
     assert spin_parser.atm_wfc == 30
-
-
-# =============================================================================
-# Tests: Structure
-# =============================================================================
 
 
 def test_structure_lattice_shape(non_spin_parser: PwXML) -> None:
@@ -825,11 +794,6 @@ def test_symmetries_element_returns_none_when_absent(
     assert no_symmetries_parser.symmetries_element is None
 
 
-# =============================================================================
-# Tests: n_symmetries
-# =============================================================================
-
-
 def test_n_symmetries_returns_correct_count(symmetries_parser: PwXML) -> None:
     """Test that n_symmetries returns the correct nsym value."""
     assert symmetries_parser.n_symmetries == 48
@@ -838,11 +802,6 @@ def test_n_symmetries_returns_correct_count(symmetries_parser: PwXML) -> None:
 def test_n_symmetries_returns_zero_when_absent(no_symmetries_parser: PwXML) -> None:
     """Test that n_symmetries returns 0 when no symmetries exist."""
     assert no_symmetries_parser.n_symmetries == 0
-
-
-# =============================================================================
-# Tests: n_rotations
-# =============================================================================
 
 
 def test_n_rotations_returns_correct_count(symmetries_parser: PwXML) -> None:
@@ -1224,11 +1183,6 @@ def dft_lda_parser(dft_lda_filepath: Path) -> PwXML:
 def no_dft_parser(no_dft_filepath: Path) -> PwXML:
     """Create parser instance for no dft test."""
     return PwXML(filepath=no_dft_filepath)
-
-
-# =============================================================================
-# Tests: DFT - functional
-# =============================================================================
 
 
 def test_functional_returns_string_when_present(dft_parser: PwXML) -> None:
@@ -2867,11 +2821,6 @@ def no_input_parser(no_input_filepath: Path) -> PwXML:
     return PwXML(filepath=no_input_filepath)
 
 
-# =============================================================================
-# Tests: Input - control_variables
-# =============================================================================
-
-
 def test_control_variables_returns_dict_when_present(input_parser: PwXML) -> None:
     """Test that control_variables returns a dictionary when tag exists."""
     assert input_parser.control_variables is not None
@@ -3018,11 +2967,6 @@ def test_prefix_property_is_correct(input_parser: PwXML) -> None:
     assert input_parser.prefix == "SrVO3"
 
 
-# =============================================================================
-# Tests: Input - input_atomic_species
-# =============================================================================
-
-
 def test_input_atomic_species_returns_dict_when_present(input_parser: PwXML) -> None:
     """Test that input_atomic_species returns a dictionary when tag exists."""
     assert input_parser.input_atomic_species is not None
@@ -3104,11 +3048,6 @@ def test_input_atomic_species_third_species_name(input_parser: PwXML) -> None:
     assert input_atomic_species["species"][2]["name"] == "O"
 
 
-# =============================================================================
-# Tests: Input - input_spin
-# =============================================================================
-
-
 def test_input_spin_returns_dict_when_present(input_parser: PwXML) -> None:
     """Test that input_spin returns a dictionary when tag exists."""
     assert input_parser.input_spin is not None
@@ -3160,11 +3099,6 @@ def test_input_spin_spinorbit_is_correct(input_parser: PwXML) -> None:
     input_spin = input_parser.input_spin
     assert input_spin is not None
     assert input_spin["spinorbit"] is False
-
-
-# =============================================================================
-# Tests: Input - input_bands
-# =============================================================================
 
 
 def test_input_bands_returns_dict_when_present(input_parser: PwXML) -> None:
@@ -3225,11 +3159,6 @@ def test_input_bands_tot_charge_is_correct(input_parser: PwXML) -> None:
     input_bands = input_parser.input_bands
     assert input_bands is not None
     assert input_bands["tot_charge"] == pytest.approx(0.0)
-
-
-# =============================================================================
-# Tests: Input - input_basis
-# =============================================================================
 
 
 def test_input_basis_returns_dict_when_present(input_parser: PwXML) -> None:
@@ -3322,11 +3251,6 @@ def test_ecutrho_property_is_correct(input_parser: PwXML) -> None:
     assert input_parser.ecutrho == pytest.approx(300.0)
 
 
-# =============================================================================
-# Tests: Input - electron_control
-# =============================================================================
-
-
 def test_electron_control_returns_dict_when_present(input_parser: PwXML) -> None:
     """Test that electron_control returns a dictionary when tag exists."""
     assert input_parser.electron_control is not None
@@ -3408,11 +3332,6 @@ def test_electron_control_max_nstep_is_correct(input_parser: PwXML) -> None:
     assert electron_control["max_nstep"] == 100
 
 
-# =============================================================================
-# Tests: Input - k_points_IBZ
-# =============================================================================
-
-
 def test_k_points_ibz_returns_dict_when_present(input_parser: PwXML) -> None:
     """Test that k_points_ibz returns a dictionary when tag exists."""
     assert input_parser.k_points_ibz is not None
@@ -3469,11 +3388,6 @@ def test_k_points_ibz_first_k_point_coordinates(input_parser: PwXML) -> None:
     np.testing.assert_array_almost_equal(k_points_ibz["k_points"][0]["coordinates"], expected)
 
 
-# =============================================================================
-# Tests: Input - ion_control
-# =============================================================================
-
-
 def test_ion_control_returns_dict_when_present(input_parser: PwXML) -> None:
     """Test that ion_control returns a dictionary when tag exists."""
     assert input_parser.ion_control is not None
@@ -3511,11 +3425,6 @@ def test_ion_control_upscale_is_correct(input_parser: PwXML) -> None:
     ion_control = input_parser.ion_control
     assert ion_control is not None
     assert ion_control["upscale"] == pytest.approx(100.0)
-
-
-# =============================================================================
-# Tests: Input - cell_control
-# =============================================================================
 
 
 def test_cell_control_returns_dict_when_present(input_parser: PwXML) -> None:
@@ -3569,11 +3478,6 @@ def test_cell_control_cell_do_free_is_correct(input_parser: PwXML) -> None:
     cell_control = input_parser.cell_control
     assert cell_control is not None
     assert cell_control["cell_do_free"] == "all"
-
-
-# =============================================================================
-# Tests: Input - symmetry_flags
-# =============================================================================
 
 
 def test_symmetry_flags_returns_dict_when_present(input_parser: PwXML) -> None:

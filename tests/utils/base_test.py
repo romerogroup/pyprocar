@@ -4,8 +4,10 @@ import pytest
 
 
 class BaseTest:
-    """`pytest` based test framework extended to facilitate testing with
-    the following methods:
+    """`pytest` based test framework extended to facilitate testing.
+
+    The following methods are provided:
+
     - tmp_path (attribute): Temporary directory.
     - get_structure: Load a Structure from `util.structures` with its name.
     - assert_str_content_equal: Check if two strings are equal (ignore whitespaces).

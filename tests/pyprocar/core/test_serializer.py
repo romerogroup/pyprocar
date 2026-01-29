@@ -55,6 +55,11 @@ class SimpleSerializableObject:
         )
 
     @override
+    def __hash__(self) -> int:
+        """Return hash based on name and value."""
+        return hash((self.name, self.value))
+
+    @override
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, SimpleSerializableObject):
             return False

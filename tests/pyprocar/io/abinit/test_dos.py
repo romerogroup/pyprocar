@@ -73,5 +73,4 @@ class TestAbinitDOSProjected(BaseTest):
         dos = AbinitDOS(dos_dirpath)
         projected = dos.projected
         if projected is not None:
-            # Shape: (n_energies, n_spins, n_atoms, n_orbitals)
             assert len(projected.shape) == 4

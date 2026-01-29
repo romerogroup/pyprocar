@@ -12,7 +12,7 @@ from pyprocar.io.qe.projwfc import ProjwfcOut
 
 NON_SPIN_POLARIZED_PROJWFC_OUT = """
 
-     Program PROJWFC v.7.2 starts on  1Jan2026 at 12: 0: 0 
+     Program PROJWFC v.7.2 starts on  1Jan2026 at 12: 0: 0
 
      This program is part of the open-source Quantum ESPRESSO suite
 
@@ -35,7 +35,7 @@ NON_SPIN_POLARIZED_PROJWFC_OUT = """
 
      Check: negative core charge=   -0.000001
 
-     Calling projwave .... 
+     Calling projwave ....
 
      Atomic states used for projection
      (read from pseudopotential files):
@@ -74,7 +74,7 @@ NON_SPIN_POLARIZED_PROJWFC_OUT = """
  Sum        1000     500    150                20000    10000    2000
 
 
-     Calling projwave .... 
+     Calling projwave ....
 
      natomwfc =   25
      nbnd     =   24
@@ -114,7 +114,7 @@ NON_SPIN_POLARIZED_PROJWFC_OUT = """
      PROJWFC      :      1.00s CPU      1.10s WALL
 
 
-   This run was terminated on:  12: 0: 1   1Jan2026            
+   This run was terminated on:  12: 0: 1   1Jan2026
 
 =------------------------------------------------------------------------------=
    JOB DONE.
@@ -123,11 +123,11 @@ NON_SPIN_POLARIZED_PROJWFC_OUT = """
 
 SPIN_POLARIZED_PROJWFC_OUT = """
 
-     Program PROJWFC v.7.2 starts on  1Jan2026 at 12: 0: 0 
+     Program PROJWFC v.7.2 starts on  1Jan2026 at 12: 0: 0
 
      Parallel version (MPI), running on     1 processors
 
-     Calling projwave .... 
+     Calling projwave ....
 
      Atomic states used for projection
      (read from pseudopotential files):
@@ -138,7 +138,7 @@ SPIN_POLARIZED_PROJWFC_OUT = """
      state #   4: atom   2 (V  ), wfc  2 (l=2 m= 1)
      state #   5: atom   3 (O  ), wfc  1 (l=0 m= 1)
 
-     Calling projwave .... 
+     Calling projwave ....
 
      natomwfc =    5
      nbnd     =   24
@@ -213,11 +213,11 @@ SPIN_POLARIZED_PROJWFC_OUT = """
 
 NON_COLINEAR_PROJWFC_OUT = """
 
-     Program PROJWFC v.7.2 starts on  1Jan2026 at 12: 0: 0 
+     Program PROJWFC v.7.2 starts on  1Jan2026 at 12: 0: 0
 
      Parallel version (MPI), running on     1 processors
 
-     Calling projwave .... 
+     Calling projwave ....
 
      Atomic states used for projection
      (read from pseudopotential files):
@@ -243,7 +243,7 @@ NON_COLINEAR_PROJWFC_OUT = """
      state #  19: atom   2 (V  ), wfc  2 (l=2 j=2.5 m_j= 1.5)
      state #  20: atom   2 (V  ), wfc  2 (l=2 j=2.5 m_j= 2.5)
 
-     Calling projwave .... 
+     Calling projwave ....
 
      natomwfc =   20
      nbnd     =   50
@@ -533,11 +533,11 @@ def test_atomic_wfc_info_d_orbital_j_2_5(non_colinear_parser: ProjwfcOut) -> Non
 # Non-spin-polarized kpdos.out with 2 kpoints and 2 bands
 KPDOS_NON_SPIN_POLARIZED = """
 
-     Program PROJWFC v.7.2 starts on  1Jan2026 at 12: 0: 0 
+     Program PROJWFC v.7.2 starts on  1Jan2026 at 12: 0: 0
 
      Parallel version (MPI), running on     1 processors
 
-     Calling projwave .... 
+     Calling projwave ....
 
      Atomic states used for projection
      (read from pseudopotential files):
@@ -553,7 +553,7 @@ KPDOS_NON_SPIN_POLARIZED = """
      state #   9: atom   2 (V  ), wfc  2 (l=1 m= 3)
      state #  10: atom   2 (V  ), wfc  3 (l=2 m= 1)
 
-     Calling projwave .... 
+     Calling projwave ....
 
      natomwfc =   10
      nbnd     =    2
@@ -561,18 +561,18 @@ KPDOS_NON_SPIN_POLARIZED = """
      nspin    =    1
 
  k =   0.0000000000  0.0000000000  0.0000000000
-==== e(   1) =   -53.32013 eV ==== 
+==== e(   1) =   -53.32013 eV ====
      psi = 0.942*[#   9]+0.054*[#   2]+0.002*[#  10]
     |psi|^2 = 0.998
-==== e(   2) =   -27.14377 eV ==== 
+==== e(   2) =   -27.14377 eV ====
      psi = 0.327*[#   3]+0.327*[#   4]+0.327*[#   5]+0.006*[#   6]
     |psi|^2 = 0.987
 
  k =   0.0166666667  0.0000000000  0.0000000000
-==== e(   1) =   -53.32014 eV ==== 
+==== e(   1) =   -53.32014 eV ====
      psi = 0.942*[#   9]+0.054*[#   2]+0.002*[#  10]
     |psi|^2 = 0.998
-==== e(   2) =   -27.14388 eV ==== 
+==== e(   2) =   -27.14388 eV ====
      psi = 0.327*[#   3]+0.327*[#   4]+0.327*[#   5]+0.006*[#   6]
     |psi|^2 = 0.987
 
@@ -586,11 +586,11 @@ KPDOS_NON_SPIN_POLARIZED = """
 # Spin-polarized kpdos.out with 4 kpoints (2 per spin) and 2 bands
 KPDOS_SPIN_POLARIZED = """
 
-     Program PROJWFC v.7.2 starts on  1Jan2026 at 12: 0: 0 
+     Program PROJWFC v.7.2 starts on  1Jan2026 at 12: 0: 0
 
      Parallel version (MPI), running on     1 processors
 
-     Calling projwave .... 
+     Calling projwave ....
 
      Atomic states used for projection
      (read from pseudopotential files):
@@ -606,7 +606,7 @@ KPDOS_SPIN_POLARIZED = """
      state #   9: atom   2 (V  ), wfc  2 (l=1 m= 3)
      state #  10: atom   2 (V  ), wfc  3 (l=2 m= 1)
 
-     Calling projwave .... 
+     Calling projwave ....
 
      natomwfc =   10
      nbnd     =    2
@@ -614,34 +614,34 @@ KPDOS_SPIN_POLARIZED = """
      nspin    =    2
 
  k =   0.0000000000  0.0000000000  0.0000000000
-==== e(   1) =   -53.30767 eV ==== 
+==== e(   1) =   -53.30767 eV ====
      psi = 0.942*[#   9]+0.054*[#   2]+0.002*[#  10]
     |psi|^2 = 0.998
-==== e(   2) =   -27.13208 eV ==== 
+==== e(   2) =   -27.13208 eV ====
      psi = 0.327*[#   3]+0.327*[#   4]+0.327*[#   5]+0.006*[#   6]
     |psi|^2 = 0.987
 
  k =   0.0166666667  0.0000000000  0.0000000000
-==== e(   1) =   -53.30767 eV ==== 
+==== e(   1) =   -53.30767 eV ====
      psi = 0.942*[#   9]+0.054*[#   2]+0.002*[#  10]
     |psi|^2 = 0.998
-==== e(   2) =   -27.13218 eV ==== 
+==== e(   2) =   -27.13218 eV ====
      psi = 0.327*[#   3]+0.327*[#   4]+0.327*[#   5]+0.006*[#   6]
     |psi|^2 = 0.987
 
  k =   0.0000000000  0.0000000000  0.0000000000
-==== e(   1) =   -53.30589 eV ==== 
+==== e(   1) =   -53.30589 eV ====
      psi = 0.940*[#   9]+0.055*[#   2]+0.003*[#  10]
     |psi|^2 = 0.998
-==== e(   2) =   -27.13033 eV ==== 
+==== e(   2) =   -27.13033 eV ====
      psi = 0.325*[#   3]+0.325*[#   4]+0.325*[#   5]+0.008*[#   6]
     |psi|^2 = 0.983
 
  k =   0.0166666667  0.0000000000  0.0000000000
-==== e(   1) =   -53.30590 eV ==== 
+==== e(   1) =   -53.30590 eV ====
      psi = 0.940*[#   9]+0.055*[#   2]+0.003*[#  10]
     |psi|^2 = 0.998
-==== e(   2) =   -27.13044 eV ==== 
+==== e(   2) =   -27.13044 eV ====
      psi = 0.325*[#   3]+0.325*[#   4]+0.325*[#   5]+0.008*[#   6]
     |psi|^2 = 0.983
 
@@ -695,7 +695,6 @@ def test_kpdos_non_spin_bands_shape(kpdos_non_spin_parser: ProjwfcOut) -> None:
     """Test that bands array has correct shape for non-spin-polarized kpdos."""
     bands = kpdos_non_spin_parser.bands
     assert bands is not None
-    # Shape: (nkstot, nbnd, n_spin_channels) = (2, 2, 1)
     assert bands.shape == (2, 2, 1)
 
 
@@ -744,7 +743,6 @@ def test_kpdos_non_spin_psi2_shape(kpdos_non_spin_parser: ProjwfcOut) -> None:
     """Test that psi2 array has correct shape for non-spin-polarized kpdos."""
     psi2 = kpdos_non_spin_parser.psi2
     assert psi2 is not None
-    # Shape: (nkstot, nbnd, n_spin_channels) = (2, 2, 1)
     assert psi2.shape == (2, 2, 1)
 
 
@@ -775,7 +773,6 @@ def test_kpdos_non_spin_psi_coeffs_shape(kpdos_non_spin_parser: ProjwfcOut) -> N
     """Test that psi_coeffs array has correct shape for non-spin-polarized kpdos."""
     psi_coeffs = kpdos_non_spin_parser.psi_coeffs
     assert psi_coeffs is not None
-    # Shape: (nkstot, nbnd, n_spin_channels, natomwfc) = (2, 2, 1, 10)
     assert psi_coeffs.shape == (2, 2, 1, 10)
 
 
@@ -829,7 +826,6 @@ def test_kpdos_spin_bands_shape(kpdos_spin_polarized_parser: ProjwfcOut) -> None
     """Test that bands array has correct shape for spin-polarized kpdos."""
     bands = kpdos_spin_polarized_parser.bands
     assert bands is not None
-    # Shape: (2, 2, 2) - actual layout is [spin, kpoint, band]
     assert bands.shape == (2, 2, 2)
 
 
@@ -839,7 +835,6 @@ def test_kpdos_spin_bands_first_kpoint_first_band_spin_up(
     """Test band energy for first k-point, first band, spin up."""
     bands = kpdos_spin_polarized_parser.bands
     assert bands is not None
-    # Indexing: [spin, kpoint, band]
     assert bands[0, 0, 0] == pytest.approx(-53.30767, rel=1e-5)
 
 
@@ -849,7 +844,6 @@ def test_kpdos_spin_bands_first_kpoint_second_band_spin_up(
     """Test band energy for first k-point, second band, spin up."""
     bands = kpdos_spin_polarized_parser.bands
     assert bands is not None
-    # Indexing: [spin, kpoint, band]
     assert bands[0, 0, 1] == pytest.approx(-27.13208, rel=1e-5)
 
 
@@ -859,7 +853,6 @@ def test_kpdos_spin_bands_first_kpoint_first_band_spin_down(
     """Test band energy for first k-point, first band, spin down."""
     bands = kpdos_spin_polarized_parser.bands
     assert bands is not None
-    # Indexing: [spin, kpoint, band]
     assert bands[1, 0, 0] == pytest.approx(-53.30589, rel=1e-5)
 
 
@@ -869,7 +862,6 @@ def test_kpdos_spin_bands_first_kpoint_second_band_spin_down(
     """Test band energy for first k-point, second band, spin down."""
     bands = kpdos_spin_polarized_parser.bands
     assert bands is not None
-    # Indexing: [spin, kpoint, band]
     assert bands[1, 0, 1] == pytest.approx(-27.13033, rel=1e-5)
 
 
@@ -879,7 +871,6 @@ def test_kpdos_spin_bands_second_kpoint_second_band_spin_down(
     """Test band energy for second k-point, second band, spin down."""
     bands = kpdos_spin_polarized_parser.bands
     assert bands is not None
-    # Indexing: [spin, kpoint, band]
     assert bands[1, 1, 1] == pytest.approx(-27.13044, rel=1e-5)
 
 
@@ -893,7 +884,6 @@ def test_kpdos_spin_psi2_shape(kpdos_spin_polarized_parser: ProjwfcOut) -> None:
     """Test that psi2 array has correct shape for spin-polarized kpdos."""
     psi2 = kpdos_spin_polarized_parser.psi2
     assert psi2 is not None
-    # Shape: (2, 2, 2) - actual layout is [spin, kpoint, band]
     assert psi2.shape == (2, 2, 2)
 
 
@@ -903,7 +893,6 @@ def test_kpdos_spin_psi2_first_kpoint_first_band_spin_up(
     """Test psi2 value for first k-point, first band, spin up."""
     psi2 = kpdos_spin_polarized_parser.psi2
     assert psi2 is not None
-    # Indexing: [spin, kpoint, band]
     assert psi2[0, 0, 0] == pytest.approx(0.998, rel=1e-3)
 
 
@@ -913,7 +902,6 @@ def test_kpdos_spin_psi2_first_kpoint_second_band_spin_down(
     """Test psi2 value for first k-point, second band, spin down."""
     psi2 = kpdos_spin_polarized_parser.psi2
     assert psi2 is not None
-    # Indexing: [spin, kpoint, band]
     assert psi2[1, 0, 1] == pytest.approx(0.983, rel=1e-3)
 
 
@@ -927,7 +915,6 @@ def test_kpdos_spin_psi_coeffs_shape(kpdos_spin_polarized_parser: ProjwfcOut) ->
     """Test that psi_coeffs array has correct shape for spin-polarized kpdos."""
     psi_coeffs = kpdos_spin_polarized_parser.psi_coeffs
     assert psi_coeffs is not None
-    # Shape: (2, 2, 2, 10) - actual layout is [spin, kpoint, band, atomwfc]
     assert psi_coeffs.shape == (2, 2, 2, 10)
 
 
@@ -937,7 +924,6 @@ def test_kpdos_spin_psi_coeffs_first_kpoint_first_band_spin_up_state_9(
     """Test psi coefficient for state #9 at first k-point, first band, spin up."""
     psi_coeffs = kpdos_spin_polarized_parser.psi_coeffs
     assert psi_coeffs is not None
-    # Indexing: [spin, kpoint, band, atomwfc]
     # State #9 is index 8 (0-based), coefficient should be 0.942 for spin up
     assert psi_coeffs[0, 0, 0, 8] == pytest.approx(0.942, rel=1e-3)
 
@@ -948,7 +934,6 @@ def test_kpdos_spin_psi_coeffs_first_kpoint_first_band_spin_down_state_9(
     """Test psi coefficient for state #9 at first k-point, first band, spin down."""
     psi_coeffs = kpdos_spin_polarized_parser.psi_coeffs
     assert psi_coeffs is not None
-    # Indexing: [spin, kpoint, band, atomwfc]
     # State #9 is index 8 (0-based), coefficient should be 0.940 for spin down
     assert psi_coeffs[1, 0, 0, 8] == pytest.approx(0.940, rel=1e-3)
 
@@ -959,7 +944,6 @@ def test_kpdos_spin_psi_coeffs_first_kpoint_second_band_spin_up_state_3(
     """Test psi coefficient for state #3 at first k-point, second band, spin up."""
     psi_coeffs = kpdos_spin_polarized_parser.psi_coeffs
     assert psi_coeffs is not None
-    # Indexing: [spin, kpoint, band, atomwfc]
     # State #3 is index 2 (0-based), coefficient should be 0.327 for spin up
     assert psi_coeffs[0, 0, 1, 2] == pytest.approx(0.327, rel=1e-3)
 
@@ -970,7 +954,6 @@ def test_kpdos_spin_psi_coeffs_first_kpoint_second_band_spin_down_state_3(
     """Test psi coefficient for state #3 at first k-point, second band, spin down."""
     psi_coeffs = kpdos_spin_polarized_parser.psi_coeffs
     assert psi_coeffs is not None
-    # Indexing: [spin, kpoint, band, atomwfc]
     # State #3 is index 2 (0-based), coefficient should be 0.325 for spin down
     assert psi_coeffs[1, 0, 1, 2] == pytest.approx(0.325, rel=1e-3)
 
@@ -981,7 +964,6 @@ def test_kpdos_spin_psi_coeffs_different_between_spin_channels(
     """Test that psi coefficients differ between spin channels."""
     psi_coeffs = kpdos_spin_polarized_parser.psi_coeffs
     assert psi_coeffs is not None
-    # Indexing: [spin, kpoint, band, atomwfc]
     # State #6 (index 5) has different values for spin up (0.006) vs spin down (0.008)
     assert psi_coeffs[0, 0, 1, 5] == pytest.approx(0.006, rel=1e-2)
     assert psi_coeffs[1, 0, 1, 5] == pytest.approx(0.008, rel=1e-2)
@@ -996,7 +978,6 @@ def test_kpdos_non_spin_kpoints_shape(kpdos_non_spin_parser: ProjwfcOut) -> None
     """Test that kpoints array has correct shape for non-spin-polarized kpdos."""
     kpoints = kpdos_non_spin_parser.kpoints
     assert kpoints is not None
-    # Shape: (nkstot, 3) = (2, 3)
     assert kpoints.shape == (2, 3)
 
 
@@ -1033,11 +1014,11 @@ def test_kpdos_spin_kpoints_shape(kpdos_spin_polarized_parser: ProjwfcOut) -> No
 # Non-spin-polarized projwfc.out with Lowdin charges
 LOWDIN_NON_SPIN_POLARIZED = """
 
-     Program PROJWFC v.7.2 starts on  1Jan2026 at 12: 0: 0 
+     Program PROJWFC v.7.2 starts on  1Jan2026 at 12: 0: 0
 
      Parallel version (MPI), running on     1 processors
 
-     Calling projwave .... 
+     Calling projwave ....
 
      Atomic states used for projection
      (read from pseudopotential files):
@@ -1073,36 +1054,36 @@ LOWDIN_NON_SPIN_POLARIZED = """
      state #  29: atom   5 (O  ), wfc  2 (l=1 m= 2)
      state #  30: atom   5 (O  ), wfc  2 (l=1 m= 3)
 
-     Calling projwave .... 
+     Calling projwave ....
 
      natomwfc =   30
      nbnd     =   24
      nkstot   =   29
      nspin    =    1
 
-Lowdin Charges: 
+Lowdin Charges:
 
-     Atom #   1: total charge =   8.7713, s =  2.2034, 
-     Atom #   1: total charge =   8.7713, p =  6.5679, pz=  2.1893, px=  2.1893, py=  2.1893, 
-     Atom #   1: total charge =   8.7713, d =  0.0000, dz2=  0.0000, dxz=  0.0000, dyz=  0.0000, dx2-y2=  0.0000, dxy=  0.0000, 
-     Atom #   2: total charge =  12.3518, s =  2.2697, 
-     Atom #   2: total charge =  12.3518, p =  5.9915, pz=  1.9972, px=  1.9972, py=  1.9972, 
-     Atom #   2: total charge =  12.3518, d =  4.0906, dz2=  0.5649, dxz=  0.9869, dyz=  0.9869, dx2-y2=  0.5649, dxy=  0.9869, 
-     Atom #   3: total charge =   6.8633, s =  1.7126, 
-     Atom #   3: total charge =   6.8633, p =  5.1507, pz=  1.7498, px=  1.7498, py=  1.6510, 
-     Atom #   3: total charge =   6.8633, d =  0.0000, dz2=  0.0000, dxz=  0.0000, dyz=  0.0000, dx2-y2=  0.0000, dxy=  0.0000, 
-     Atom #   4: total charge =   6.8633, s =  1.7126, 
-     Atom #   4: total charge =   6.8633, p =  5.1507, pz=  1.7498, px=  1.6510, py=  1.7498, 
-     Atom #   4: total charge =   6.8633, d =  0.0000, dz2=  0.0000, dxz=  0.0000, dyz=  0.0000, dx2-y2=  0.0000, dxy=  0.0000, 
-     Atom #   5: total charge =   6.8633, s =  1.7126, 
-     Atom #   5: total charge =   6.8633, p =  5.1507, pz=  1.6510, px=  1.7498, py=  1.7498, 
-     Atom #   5: total charge =   6.8633, d =  0.0000, dz2=  0.0000, dxz=  0.0000, dyz=  0.0000, dx2-y2=  0.0000, dxy=  0.0000, 
+     Atom #   1: total charge =   8.7713, s =  2.2034,
+     Atom #   1: total charge =   8.7713, p =  6.5679, pz=  2.1893, px=  2.1893, py=  2.1893,
+     Atom #   1: total charge =   8.7713, d =  0.0000, dz2=  0.0000, dxz=  0.0000, dyz=  0.0000, dx2-y2=  0.0000, dxy=  0.0000,
+     Atom #   2: total charge =  12.3518, s =  2.2697,
+     Atom #   2: total charge =  12.3518, p =  5.9915, pz=  1.9972, px=  1.9972, py=  1.9972,
+     Atom #   2: total charge =  12.3518, d =  4.0906, dz2=  0.5649, dxz=  0.9869, dyz=  0.9869, dx2-y2=  0.5649, dxy=  0.9869,
+     Atom #   3: total charge =   6.8633, s =  1.7126,
+     Atom #   3: total charge =   6.8633, p =  5.1507, pz=  1.7498, px=  1.7498, py=  1.6510,
+     Atom #   3: total charge =   6.8633, d =  0.0000, dz2=  0.0000, dxz=  0.0000, dyz=  0.0000, dx2-y2=  0.0000, dxy=  0.0000,
+     Atom #   4: total charge =   6.8633, s =  1.7126,
+     Atom #   4: total charge =   6.8633, p =  5.1507, pz=  1.7498, px=  1.6510, py=  1.7498,
+     Atom #   4: total charge =   6.8633, d =  0.0000, dz2=  0.0000, dxz=  0.0000, dyz=  0.0000, dx2-y2=  0.0000, dxy=  0.0000,
+     Atom #   5: total charge =   6.8633, s =  1.7126,
+     Atom #   5: total charge =   6.8633, p =  5.1507, pz=  1.6510, px=  1.7498, py=  1.7498,
+     Atom #   5: total charge =   6.8633, d =  0.0000, dz2=  0.0000, dxz=  0.0000, dyz=  0.0000, dx2-y2=  0.0000, dxy=  0.0000,
      Spilling Parameter:  -0.0174
- 
+
      PROJWFC      :     32.27s CPU   1m26.28s WALL
 
 
-   This run was terminated on:  11:30: 1  19Jul2024         
+   This run was terminated on:  11:30: 1  19Jul2024
 
 =------------------------------------------------------------------------------=
    JOB DONE.
@@ -1112,11 +1093,11 @@ Lowdin Charges:
 # Spin-polarized projwfc.out with Lowdin charges
 LOWDIN_SPIN_POLARIZED = """
 
-     Program PROJWFC v.7.2 starts on  1Jan2026 at 12: 0: 0 
+     Program PROJWFC v.7.2 starts on  1Jan2026 at 12: 0: 0
 
      Parallel version (MPI), running on     1 processors
 
-     Calling projwave .... 
+     Calling projwave ....
 
      Atomic states used for projection
      (read from pseudopotential files):
@@ -1152,7 +1133,7 @@ LOWDIN_SPIN_POLARIZED = """
      state #  29: atom   5 (O  ), wfc  2 (l=1 m= 2)
      state #  30: atom   5 (O  ), wfc  2 (l=1 m= 3)
 
-     Calling projwave .... 
+     Calling projwave ....
 
      natomwfc =   30
      nbnd     =   24
@@ -1162,54 +1143,54 @@ LOWDIN_SPIN_POLARIZED = """
  k =   0.0000000000  0.0000000000  0.0000000000
  k =   0.0000000000  0.0000000000  0.0000000000
 
-Lowdin Charges: 
+Lowdin Charges:
 
-     Atom #   1: total charge =   8.7712, s =  2.2033, p =  6.5679, d =  0.0000, 
-                 spin up      =   4.3856, s =  1.1017, 
-                 spin up      =   4.3856, p =  3.2839, pz=  1.0946, px=  1.0946, py=  1.0946, 
-                 spin up      =   4.3856, d =  0.0000, dz2=  0.0000, dxz=  0.0000, dyz=  0.0000, dx2-y2=  0.0000, dxy=  0.0000, 
-                 spin down    =   4.3856, s =  1.1017, 
-                 spin down    =   4.3856, p =  3.2839, pz=  1.0946, px=  1.0946, py=  1.0946, 
-                 spin down    =   4.3856, d =  0.0000, dz2=  0.0000, dxz=  0.0000, dyz=  0.0000, dx2-y2=  0.0000, dxy=  0.0000, 
-                 polarization =  -0.0000, s = -0.0000, p = -0.0000, d =  0.0000, 
-     Atom #   2: total charge =  12.3367, s =  2.2696, p =  5.9915, d =  4.0755, 
-                 spin up      =   6.1689, s =  1.1348, 
-                 spin up      =   6.1689, p =  2.9958, pz=  0.9986, px=  0.9986, py=  0.9986, 
-                 spin up      =   6.1689, d =  2.0383, dz2=  0.2821, dxz=  0.4914, dyz=  0.4914, dx2-y2=  0.2821, dxy=  0.4914, 
-                 spin down    =   6.1677, s =  1.1348, 
-                 spin down    =   6.1677, p =  2.9958, pz=  0.9986, px=  0.9986, py=  0.9986, 
-                 spin down    =   6.1677, d =  2.0372, dz2=  0.2821, dxz=  0.4910, dyz=  0.4910, dx2-y2=  0.2821, dxy=  0.4910, 
-                 polarization =   0.0012, s =  0.0000, p = -0.0000, d =  0.0012, 
-     Atom #   3: total charge =   6.8639, s =  1.7127, p =  5.1513, d =  0.0000, 
-                 spin up      =   3.4320, s =  0.8563, 
-                 spin up      =   3.4320, p =  2.5756, pz=  0.8750, px=  0.8750, py=  0.8257, 
-                 spin up      =   3.4320, d =  0.0000, dz2=  0.0000, dxz=  0.0000, dyz=  0.0000, dx2-y2=  0.0000, dxy=  0.0000, 
-                 spin down    =   3.4320, s =  0.8563, 
-                 spin down    =   3.4320, p =  2.5756, pz=  0.8749, px=  0.8749, py=  0.8257, 
-                 spin down    =   3.4320, d =  0.0000, dz2=  0.0000, dxz=  0.0000, dyz=  0.0000, dx2-y2=  0.0000, dxy=  0.0000, 
-                 polarization =  -0.0000, s =  0.0000, p = -0.0000, d =  0.0000, 
-     Atom #   4: total charge =   6.8639, s =  1.7127, p =  5.1513, d =  0.0000, 
-                 spin up      =   3.4320, s =  0.8563, 
-                 spin up      =   3.4320, p =  2.5756, pz=  0.8750, px=  0.8257, py=  0.8750, 
-                 spin up      =   3.4320, d =  0.0000, dz2=  0.0000, dxz=  0.0000, dyz=  0.0000, dx2-y2=  0.0000, dxy=  0.0000, 
-                 spin down    =   3.4320, s =  0.8563, 
-                 spin down    =   3.4320, p =  2.5756, pz=  0.8749, px=  0.8257, py=  0.8749, 
-                 spin down    =   3.4320, d =  0.0000, dz2=  0.0000, dxz=  0.0000, dyz=  0.0000, dx2-y2=  0.0000, dxy=  0.0000, 
-                 polarization =  -0.0000, s =  0.0000, p = -0.0000, d =  0.0000, 
-     Atom #   5: total charge =   6.8639, s =  1.7127, p =  5.1513, d =  0.0000, 
-                 spin up      =   3.4320, s =  0.8563, 
-                 spin up      =   3.4320, p =  2.5756, pz=  0.8257, px=  0.8750, py=  0.8750, 
-                 spin up      =   3.4320, d =  0.0000, dz2=  0.0000, dxz=  0.0000, dyz=  0.0000, dx2-y2=  0.0000, dxy=  0.0000, 
-                 spin down    =   3.4320, s =  0.8563, 
-                 spin down    =   3.4320, p =  2.5756, pz=  0.8257, px=  0.8749, py=  0.8749, 
-                 spin down    =   3.4320, d =  0.0000, dz2=  0.0000, dxz=  0.0000, dyz=  0.0000, dx2-y2=  0.0000, dxy=  0.0000, 
-                 polarization =  -0.0000, s =  0.0000, p = -0.0000, d =  0.0000, 
+     Atom #   1: total charge =   8.7712, s =  2.2033, p =  6.5679, d =  0.0000,
+                 spin up      =   4.3856, s =  1.1017,
+                 spin up      =   4.3856, p =  3.2839, pz=  1.0946, px=  1.0946, py=  1.0946,
+                 spin up      =   4.3856, d =  0.0000, dz2=  0.0000, dxz=  0.0000, dyz=  0.0000, dx2-y2=  0.0000, dxy=  0.0000,
+                 spin down    =   4.3856, s =  1.1017,
+                 spin down    =   4.3856, p =  3.2839, pz=  1.0946, px=  1.0946, py=  1.0946,
+                 spin down    =   4.3856, d =  0.0000, dz2=  0.0000, dxz=  0.0000, dyz=  0.0000, dx2-y2=  0.0000, dxy=  0.0000,
+                 polarization =  -0.0000, s = -0.0000, p = -0.0000, d =  0.0000,
+     Atom #   2: total charge =  12.3367, s =  2.2696, p =  5.9915, d =  4.0755,
+                 spin up      =   6.1689, s =  1.1348,
+                 spin up      =   6.1689, p =  2.9958, pz=  0.9986, px=  0.9986, py=  0.9986,
+                 spin up      =   6.1689, d =  2.0383, dz2=  0.2821, dxz=  0.4914, dyz=  0.4914, dx2-y2=  0.2821, dxy=  0.4914,
+                 spin down    =   6.1677, s =  1.1348,
+                 spin down    =   6.1677, p =  2.9958, pz=  0.9986, px=  0.9986, py=  0.9986,
+                 spin down    =   6.1677, d =  2.0372, dz2=  0.2821, dxz=  0.4910, dyz=  0.4910, dx2-y2=  0.2821, dxy=  0.4910,
+                 polarization =   0.0012, s =  0.0000, p = -0.0000, d =  0.0012,
+     Atom #   3: total charge =   6.8639, s =  1.7127, p =  5.1513, d =  0.0000,
+                 spin up      =   3.4320, s =  0.8563,
+                 spin up      =   3.4320, p =  2.5756, pz=  0.8750, px=  0.8750, py=  0.8257,
+                 spin up      =   3.4320, d =  0.0000, dz2=  0.0000, dxz=  0.0000, dyz=  0.0000, dx2-y2=  0.0000, dxy=  0.0000,
+                 spin down    =   3.4320, s =  0.8563,
+                 spin down    =   3.4320, p =  2.5756, pz=  0.8749, px=  0.8749, py=  0.8257,
+                 spin down    =   3.4320, d =  0.0000, dz2=  0.0000, dxz=  0.0000, dyz=  0.0000, dx2-y2=  0.0000, dxy=  0.0000,
+                 polarization =  -0.0000, s =  0.0000, p = -0.0000, d =  0.0000,
+     Atom #   4: total charge =   6.8639, s =  1.7127, p =  5.1513, d =  0.0000,
+                 spin up      =   3.4320, s =  0.8563,
+                 spin up      =   3.4320, p =  2.5756, pz=  0.8750, px=  0.8257, py=  0.8750,
+                 spin up      =   3.4320, d =  0.0000, dz2=  0.0000, dxz=  0.0000, dyz=  0.0000, dx2-y2=  0.0000, dxy=  0.0000,
+                 spin down    =   3.4320, s =  0.8563,
+                 spin down    =   3.4320, p =  2.5756, pz=  0.8749, px=  0.8257, py=  0.8749,
+                 spin down    =   3.4320, d =  0.0000, dz2=  0.0000, dxz=  0.0000, dyz=  0.0000, dx2-y2=  0.0000, dxy=  0.0000,
+                 polarization =  -0.0000, s =  0.0000, p = -0.0000, d =  0.0000,
+     Atom #   5: total charge =   6.8639, s =  1.7127, p =  5.1513, d =  0.0000,
+                 spin up      =   3.4320, s =  0.8563,
+                 spin up      =   3.4320, p =  2.5756, pz=  0.8257, px=  0.8750, py=  0.8750,
+                 spin up      =   3.4320, d =  0.0000, dz2=  0.0000, dxz=  0.0000, dyz=  0.0000, dx2-y2=  0.0000, dxy=  0.0000,
+                 spin down    =   3.4320, s =  0.8563,
+                 spin down    =   3.4320, p =  2.5756, pz=  0.8257, px=  0.8749, py=  0.8749,
+                 spin down    =   3.4320, d =  0.0000, dz2=  0.0000, dxz=  0.0000, dyz=  0.0000, dx2-y2=  0.0000, dxy=  0.0000,
+                 polarization =  -0.0000, s =  0.0000, p = -0.0000, d =  0.0000,
      Spilling Parameter:  -0.0171
- 
+
      PROJWFC      :     41.67s CPU   1m38.01s WALL
 
- 
-   This run was terminated on:  11:30:30  19Jul2024            
+
+   This run was terminated on:  11:30:30  19Jul2024
 
 =------------------------------------------------------------------------------=
    JOB DONE.
@@ -1219,11 +1200,11 @@ Lowdin Charges:
 # Non-colinear projwfc.out with Lowdin charges
 LOWDIN_NON_COLINEAR = """
 
-     Program PROJWFC v.7.2 starts on  1Jan2026 at 12: 0: 0 
+     Program PROJWFC v.7.2 starts on  1Jan2026 at 12: 0: 0
 
      Parallel version (MPI), running on     1 processors
 
-     Calling projwave .... 
+     Calling projwave ....
 
      Atomic states used for projection
      (read from pseudopotential files):
@@ -1259,35 +1240,35 @@ LOWDIN_NON_COLINEAR = """
      state #  29: atom   5 (O  ), wfc  1 (l=0 j=0.5 m_j=-0.5)
      state #  30: atom   5 (O  ), wfc  1 (l=0 j=0.5 m_j= 0.5)
 
-     Calling projwave .... 
+     Calling projwave ....
 
      natomwfc =   30
      nbnd     =   50
      nkstot   =  151
 
-Lowdin Charges: 
+Lowdin Charges:
 
-     Atom #   1: total charge =   8.7714, s =  2.2034, 
-     Atom #   1: total charge =   8.7714, p =  6.5680, 
-     Atom #   1: total charge =   8.7714, d =  0.0000, 
-     Atom #   2: total charge =  12.3437, s =  2.2697, 
-     Atom #   2: total charge =  12.3437, p =  5.9915, 
-     Atom #   2: total charge =  12.3437, d =  4.0824, 
-     Atom #   3: total charge =   6.7339, s =  1.7441, 
-     Atom #   3: total charge =   6.7339, p =  4.9897, 
-     Atom #   3: total charge =   6.7339, d =  0.0000, 
-     Atom #   4: total charge =   6.7339, s =  1.7441, 
-     Atom #   4: total charge =   6.7339, p =  4.9897, 
-     Atom #   4: total charge =   6.7339, d =  0.0000, 
-     Atom #   5: total charge =   7.1212, s =  1.6496, 
-     Atom #   5: total charge =   7.1212, p =  5.4716, 
-     Atom #   5: total charge =   7.1212, d =  0.0000, 
+     Atom #   1: total charge =   8.7714, s =  2.2034,
+     Atom #   1: total charge =   8.7714, p =  6.5680,
+     Atom #   1: total charge =   8.7714, d =  0.0000,
+     Atom #   2: total charge =  12.3437, s =  2.2697,
+     Atom #   2: total charge =  12.3437, p =  5.9915,
+     Atom #   2: total charge =  12.3437, d =  4.0824,
+     Atom #   3: total charge =   6.7339, s =  1.7441,
+     Atom #   3: total charge =   6.7339, p =  4.9897,
+     Atom #   3: total charge =   6.7339, d =  0.0000,
+     Atom #   4: total charge =   6.7339, s =  1.7441,
+     Atom #   4: total charge =   6.7339, p =  4.9897,
+     Atom #   4: total charge =   6.7339, d =  0.0000,
+     Atom #   5: total charge =   7.1212, s =  1.6496,
+     Atom #   5: total charge =   7.1212, p =  5.4716,
+     Atom #   5: total charge =   7.1212, d =  0.0000,
      Spilling Parameter:  -0.0172
- 
+
      PROJWFC      :     52.32s CPU   2m16.28s WALL
 
- 
-   This run was terminated on:  11:32:24  19Jul2024            
+
+   This run was terminated on:  11:32:24  19Jul2024
 
 =------------------------------------------------------------------------------=
    JOB DONE.
@@ -1361,7 +1342,6 @@ def test_lowdin_non_spin_total_charges_shape(lowdin_non_spin_parser: ProjwfcOut)
     """Test total charges array shape for non-spin-polarized."""
     total_charges = lowdin_non_spin_parser.total_lowdin_charges
     assert total_charges is not None
-    # Shape: (n_atoms, n_l_orbitals) = (5, 4)
     assert total_charges.shape == (5, 4)
 
 
@@ -1465,7 +1445,6 @@ def test_lowdin_spin_total_charges_shape(lowdin_spin_parser: ProjwfcOut) -> None
     """Test total charges array shape for spin-polarized."""
     total_charges = lowdin_spin_parser.total_lowdin_charges
     assert total_charges is not None
-    # Shape: (n_atoms, n_l_orbitals) = (5, 4)
     assert total_charges.shape == (5, 4)
 
 
@@ -1473,7 +1452,6 @@ def test_lowdin_spin_per_l_shape(lowdin_spin_parser: ProjwfcOut) -> None:
     """Test per-l orbital charges array shape for spin-polarized."""
     charges_per_l = lowdin_spin_parser.lowdin_charges_per_l_orbital
     assert charges_per_l is not None
-    # Shape: (n_atoms, n_l_orbitals, n_spin_channels) = (5, 4, 2)
     assert charges_per_l.shape == (5, 4, 2)
 
 
@@ -1521,7 +1499,6 @@ def test_lowdin_spin_polarization_shape(lowdin_spin_parser: ProjwfcOut) -> None:
     """Test polarization array shape for spin-polarized."""
     polarization = lowdin_spin_parser.lowdin_polarization
     assert polarization is not None
-    # Shape: (n_atoms, n_l_orbitals) = (5, 4)
     assert polarization.shape == (5, 4)
 
 
@@ -1612,7 +1589,6 @@ def test_lowdin_non_colinear_total_charges_shape(
     """Test total charges array shape for non-colinear."""
     total_charges = lowdin_non_colinear_parser.total_lowdin_charges
     assert total_charges is not None
-    # Shape: (n_atoms, n_l_orbitals) = (5, 4)
     assert total_charges.shape == (5, 4)
 
 

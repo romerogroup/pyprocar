@@ -27,7 +27,7 @@ Direct
    0.5000000000000000   0.5000000000000000   0.0000000000000000
    0.5000000000000000   0.0000000000000000   0.5000000000000000
    0.0000000000000000   0.5000000000000000   0.5000000000000000
-   
+
 """
 
 POSCAR_STR_CARTESIAN = """Si
@@ -123,7 +123,6 @@ class TestPoscar:
     ) -> None:
         """Test detection of Selective Dynamics line."""
         poscar = vasp.Poscar(poscar_filepath)
-        print(poscar.file_str)
         assert poscar.has_selective_dynamics_line is False
 
         poscar_sd = vasp.Poscar(poscar_filepath_selective_dynamics)

@@ -1,5 +1,5 @@
-from collections.abc import Iterable
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 import numpy as np
 import numpy.typing as npt
@@ -9,6 +9,9 @@ from pyprocar.core.dos import DensityOfStates
 from pyprocar.core.property_store import Property
 from pyprocar.core.structure import Structure
 from tests.utils import DATA_DIR
+
+if TYPE_CHECKING:
+    from collections.abc import Iterable
 
 
 @pytest.fixture
@@ -280,7 +283,6 @@ def test_compute_projected_sum_species_orbital_map_list(dos: DensityOfStates) ->
         f"The result should be a list given a list of species_orbital_map, ({projected_sum})"
     )
     for _projected_sum_item in projected_sum:
-        print(_projected_sum_item.metadata)
         assert isinstance(_projected_sum_item, Property), (
             f"The result should be a Property instance, ({_projected_sum_item})"
         )
@@ -516,7 +518,7 @@ def test_get_species_atom_map_str(dos: DensityOfStates) -> None:
     specie_atom_groups = dos.get_species_atom_map(species="Sr")
 
     assert len(specie_atom_groups) == 1
-    assert set(specie_atom_groups.items()) == set([("Sr", tuple([0]))]), (
+    assert set(specie_atom_groups.items()) == {("Sr", (0,))}, (
         f"Specie atom groups do not match ({specie_atom_groups})"
     )
 
@@ -529,16 +531,16 @@ def test_get_species_atom_map_none(dos: DensityOfStates) -> None:
     assert len(specie_atom_groups) == len(species), (
         f"Specie atom groups do not match ({specie_atom_groups})"
     )
-    assert set(specie_atom_groups.items()) == set(
-        [("Sr", tuple([0])), ("V", tuple([1])), ("O", tuple([2, 3, 4]))]
-    ), f"Specie atom groups do not match ({specie_atom_groups})"
+    assert set(specie_atom_groups.items()) == {("Sr", (0,)), ("V", (1,)), ("O", (2, 3, 4))}, (
+        f"Specie atom groups do not match ({specie_atom_groups})"
+    )
 
 
 def test_get_species_atom_map_list(dos: DensityOfStates) -> None:
     specie_atom_groups = dos.get_species_atom_map(species=["Sr", "O"])
 
     assert len(specie_atom_groups) == 2
-    assert set(specie_atom_groups.items()) == set([("Sr", tuple([0])), ("O", tuple([2, 3, 4]))]), (
+    assert set(specie_atom_groups.items()) == {("Sr", (0,)), ("O", (2, 3, 4))}, (
         f"Specie atom groups do not match ({specie_atom_groups})"
     )
 
@@ -554,4 +556,4 @@ def test_compute_projected_sum_atom_groups(dos: DensityOfStates) -> None:
     assert len(projected_sum_groups) == 2
 
     for _projected_sum in projected_sum_groups:
-        print(repr(_projected_sum))
+        pass

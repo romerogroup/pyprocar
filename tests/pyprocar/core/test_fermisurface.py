@@ -18,151 +18,126 @@ user_logger = logging.getLogger("user")
 
 @pytest.fixture
 def mesh_3d_non_spin_polarized_dir() -> Path:
-    """
-    This is the parameterized fixture. Pytest will run any test that
-    uses this fixture once for each item in ALL_TEST_CASES.
+    """Provide 3D non-spin-polarized mesh directory path.
 
-    The `request.param` object will be one CalcInfo instance at a time.
+    Pytest will run any test that uses this fixture once for each item
+    in ALL_TEST_CASES. The `request.param` object will be one CalcInfo
+    instance at a time.
     """
     return DATA_DIR / "examples" / "fermi3d" / "non-spin-polarized"
 
 
 @pytest.fixture
 def fermisurface_3d_non_spin_polarized(mesh_3d_non_spin_polarized_dir: Path) -> FermiSurface:
-    """
-    This is the parameterized fixture. Pytest will run any test that
-    uses this fixture once for each item in ALL_TEST_CASES.
+    """Provide 3D non-spin-polarized Fermi surface fixture.
 
-    The `request.param` object will be one CalcInfo instance at a time.
+    Pytest will run any test that uses this fixture once for each item
+    in ALL_TEST_CASES. The `request.param` object will be one CalcInfo
+    instance at a time.
     """
-    fs = FermiSurface.from_code(code="vasp", dirpath=str(mesh_3d_non_spin_polarized_dir))
-    return fs
+    return FermiSurface.from_code(code="vasp", dirpath=str(mesh_3d_non_spin_polarized_dir))
 
 
 @pytest.fixture
 def mesh_3d_spin_polarized_dir() -> Path:
-    """
-    This is the parameterized fixture. Pytest will run any test that
-    uses this fixture once for each item in ALL_TEST_CASES.
+    """Provide 3D spin-polarized mesh directory path.
 
-    The `request.param` object will be one CalcInfo instance at a time.
+    Pytest will run any test that uses this fixture once for each item
+    in ALL_TEST_CASES. The `request.param` object will be one CalcInfo
+    instance at a time.
     """
     return DATA_DIR / "examples" / "fermi3d" / "spin-polarized"
 
 
 @pytest.fixture
 def fermisurface_3d_spin_polarized(mesh_3d_spin_polarized_dir: Path) -> FermiSurface:
-    """
-    This is the parameterized fixture. Pytest will run any test that
-    uses this fixture once for each item in ALL_TEST_CASES.
-    """
-    fs = FermiSurface.from_code(code="vasp", dirpath=str(mesh_3d_spin_polarized_dir))
-    return fs
+    """Provide 3D spin-polarized Fermi surface fixture."""
+    return FermiSurface.from_code(code="vasp", dirpath=str(mesh_3d_spin_polarized_dir))
 
 
 @pytest.fixture
 def mesh_3d_non_colinear_dir() -> Path:
-    """
-    This is the parameterized fixture. Pytest will run any test that
-    uses this fixture once for each item in ALL_TEST_CASES.
+    """Provide 3D non-colinear mesh directory path.
 
-    The `request.param` object will be one CalcInfo instance at a time.
+    Pytest will run any test that uses this fixture once for each item
+    in ALL_TEST_CASES. The `request.param` object will be one CalcInfo
+    instance at a time.
     """
     return DATA_DIR / "examples" / "fermi3d" / "non-colinear"
 
 
 @pytest.fixture
 def fermisurface_3d_non_colinear(mesh_3d_non_colinear_dir: Path) -> FermiSurface:
-    """
-    This is the parameterized fixture. Pytest will run any test that
-    uses this fixture once for each item in ALL_TEST_CASES.
-    """
-    fs = FermiSurface.from_code(code="vasp", dirpath=str(mesh_3d_non_colinear_dir))
-    return fs
+    """Provide 3D non-colinear Fermi surface fixture."""
+    return FermiSurface.from_code(code="vasp", dirpath=str(mesh_3d_non_colinear_dir))
 
 
 @pytest.fixture
 def mesh_2d_non_spin_polarized_dir() -> Path:
-    """
-    This is the parameterized fixture. Pytest will run any test that
-    uses this fixture once for each item in ALL_TEST_CASES.
+    """Provide 2D non-spin-polarized mesh directory path.
 
-    The `request.param` object will be one CalcInfo instance at a time.
+    Pytest will run any test that uses this fixture once for each item
+    in ALL_TEST_CASES. The `request.param` object will be one CalcInfo
+    instance at a time.
     """
     return DATA_DIR / "examples" / "fermi2d" / "non-spin-polarized"
 
 
 @pytest.fixture
 def fermisurface_2d_non_spin_polarized(mesh_2d_non_spin_polarized_dir: Path) -> FermiSurface:
-    """
-    This is the parameterized fixture. Pytest will run any test that
-    uses this fixture once for each item in ALL_TEST_CASES.
-    """
-    fs = FermiSurface.from_code(code="vasp", dirpath=str(mesh_2d_non_spin_polarized_dir))
-    return fs
+    """Provide 2D non-spin-polarized Fermi surface fixture."""
+    return FermiSurface.from_code(code="vasp", dirpath=str(mesh_2d_non_spin_polarized_dir))
 
 
 @pytest.fixture
 def mesh_2d_spin_polarized_dir() -> Path:
-    """
-    This is the parameterized fixture. Pytest will run any test that
-    uses this fixture once for each item in ALL_TEST_CASES.
+    """Provide 2D spin-polarized mesh directory path.
 
-    The `request.param` object will be one CalcInfo instance at a time.
+    Pytest will run any test that uses this fixture once for each item
+    in ALL_TEST_CASES. The `request.param` object will be one CalcInfo
+    instance at a time.
     """
     return DATA_DIR / "examples" / "fermi2d" / "spin-polarized"
 
 
 @pytest.fixture
 def fermisurface_2d_spin_polarized(mesh_2d_spin_polarized_dir: Path) -> FermiSurface:
-    """
-    This is the parameterized fixture. Pytest will run any test that
-    uses this fixture once for each item in ALL_TEST_CASES.
-    """
-    fs = FermiSurface.from_code(code="vasp", dirpath=str(mesh_2d_spin_polarized_dir))
-    return fs
+    """Provide 2D spin-polarized Fermi surface fixture."""
+    return FermiSurface.from_code(code="vasp", dirpath=str(mesh_2d_spin_polarized_dir))
 
 
 @pytest.fixture
 def mesh_2d_non_colinear_dir() -> Path:
-    """
-    This is the parameterized fixture. Pytest will run any test that
-    uses this fixture once for each item in ALL_TEST_CASES.
+    """Provide 2D non-colinear mesh directory path.
 
-    The `request.param` object will be one CalcInfo instance at a time.
+    Pytest will run any test that uses this fixture once for each item
+    in ALL_TEST_CASES. The `request.param` object will be one CalcInfo
+    instance at a time.
     """
     return DATA_DIR / "examples" / "fermi2d" / "non-colinear"
 
 
 @pytest.fixture
 def fermisurface_2d_non_colinear(mesh_2d_non_colinear_dir: Path) -> FermiSurface:
-    """
-    This is the parameterized fixture. Pytest will run any test that
-    uses this fixture once for each item in ALL_TEST_CASES.
-    """
-    fs = FermiSurface.from_code(code="vasp", dirpath=str(mesh_2d_non_colinear_dir))
-    return fs
+    """Provide 2D non-colinear Fermi surface fixture."""
+    return FermiSurface.from_code(code="vasp", dirpath=str(mesh_2d_non_colinear_dir))
 
 
 @pytest.fixture
 def bisb_monolayer_dir() -> Path:
-    """
-    This is the parameterized fixture. Pytest will run any test that
-    uses this fixture once for each item in ALL_TEST_CASES.
+    """Provide BiSb monolayer mesh directory path.
 
-    The `request.param` object will be one CalcInfo instance at a time.
+    Pytest will run any test that uses this fixture once for each item
+    in ALL_TEST_CASES. The `request.param` object will be one CalcInfo
+    instance at a time.
     """
     return DATA_DIR / "examples" / "fermi2d" / "bisb_monolayer"
 
 
 @pytest.fixture
 def fermisurface_bisb_monolayer(bisb_monolayer_dir: Path) -> FermiSurface:
-    """
-    This is the parameterized fixture. Pytest will run any test that
-    uses this fixture once for each item in ALL_TEST_CASES.
-    """
-    fs = FermiSurface.from_code(code="vasp", dirpath=str(bisb_monolayer_dir))
-    return fs
+    """Provide BiSb monolayer Fermi surface fixture."""
+    return FermiSurface.from_code(code="vasp", dirpath=str(bisb_monolayer_dir))
 
 
 ALL_TEST_CASES = [
@@ -172,22 +147,21 @@ ALL_TEST_CASES = [
     "fermisurface_2d_non_spin_polarized",
     "fermisurface_2d_spin_polarized",
     "fermisurface_2d_non_colinear",
-    # "fermisurface_bisb_monolayer",  # TODO: Fix array to mesh conversion issue
 ]
 
 
 def get_test_id(fixture_name: str) -> str:
-    """Creates a nice, readable ID for each test run."""
+    """Create a nice, readable ID for each test run."""
     return fixture_name
 
 
 @pytest.fixture(params=ALL_TEST_CASES, ids=get_test_id)
 def fermisurface(request: pytest.FixtureRequest) -> FermiSurface:
-    """
-    This is the parameterized fixture. Pytest will run any test that
-    uses this fixture once for each item in ALL_TEST_CASES.
+    """Provide parameterized Fermi surface fixture across all test cases.
 
-    The `request.param` object will be one fixture name at a time.
+    Pytest will run any test that uses this fixture once for each item
+    in ALL_TEST_CASES. The `request.param` object will be one fixture
+    name at a time.
     """
     fixture_value: FermiSurface = request.getfixturevalue(request.param)
     return fixture_value
@@ -221,7 +195,7 @@ class TestFermiSurface:
         original_point_count = fs.n_points
 
         # Select the first band-spin combination
-        band_spin_mask_key = list(fs.band_spin_mask.keys())[0]
+        band_spin_mask_key = next(iter(fs.band_spin_mask.keys()))
         band_spin_indices = [band_spin_mask_key]
 
         band_spin_mask_sum = fs.band_spin_mask[band_spin_mask_key].sum()
@@ -379,7 +353,7 @@ class TestFermiSurfaceNormalization:
         """Test FSNormMode.from_input raises error on invalid input."""
         from pyprocar.core.fermisurface import FSNormMode
 
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match="Invalid normalization mode"):
             FSNormMode.from_input("invalid_mode")
 
 
@@ -412,7 +386,8 @@ class TestFermiSurfaceSerialization:
         fs = fermisurface_3d_non_spin_polarized
 
         # Add some point data
-        test_data = np.random.rand(fs.n_points)
+        rng = np.random.default_rng(42)
+        test_data = rng.random(fs.n_points)
         fs.point_data["test_scalar"] = test_data
 
         save_path = tmp_path / "test_fs_data.pkl"

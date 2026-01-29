@@ -13,9 +13,7 @@ from pyprocar.core.property_store import PointSet, Property
 def generate_test_inputs(
     n_points: int = 5,
 ) -> dict[str, list[int] | tuple[int, ...] | npt.NDArray[np.int_] | pd.Series[float] | int | float]:
-    """
-    Generate different types of data structures for testing
-    conversion to numpy arrays.
+    """Generate different types of data structures for testing conversion to numpy arrays.
 
     Args:
         n (int): number of elements (points) to generate for sequence-like inputs.
@@ -142,7 +140,7 @@ class TestProperty:
         assert np.allclose(_property.point_set.points, sin_data["x"])
 
     def test_init_error_with_invalid_point_set(self, sin_data: SinDataDict) -> None:
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match="different number of points"):
             _ = Property(name="sin", value=sin_data["sin"], points=sin_data["x"][:50])
 
     def test_getitem_tuple(self, sin_data: SinDataDict) -> None:
@@ -176,9 +174,8 @@ class TestProperty:
         )
         _property = Property(name="sin", value=sin_data["sin"])
         _property.bind_owner(point_set)
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match="Gradient order must be greater than 0"):
             _property.gradient(-1)
-        # assert np.allclose(gradients, sin_data["cos"], atol=1e-2)
 
     def test_gradient_store(self, sin_data: SinDataDict) -> None:
         point_set = PointSet(
@@ -194,7 +191,7 @@ class TestProperty:
         )
         _property = Property(name="sin", value=sin_data["sin"], point_set=point_set)
 
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match="Value and store cannot be used together"):
             _property.gradient(1, store=True, value=sin_data["sin"])
 
 
@@ -210,7 +207,7 @@ class TestPointSet:
         assert np.allclose(point_set.point_data["sin"].value, sin_data["sin"])
 
     def test_init_mismatch(self, sin_data: SinDataDict) -> None:
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match="different number of points"):
             _ = PointSet(
                 points=sin_data["x"],
                 point_data={"sin": Property(name="sin", value=sin_data["sin"][:50])},

@@ -2,16 +2,15 @@
 
 from __future__ import annotations
 
-from collections.abc import Generator
-from pathlib import Path
-
-import matplotlib
+import matplotlib as mpl
 import matplotlib.pyplot as plt
 import numpy as np
 import numpy.typing as npt
 import pytest
 
-matplotlib.use("Agg")  # Use non-interactive backend for testing
+mpl.use("Agg")  # Use non-interactive backend for testing
+
+from typing import TYPE_CHECKING
 
 from pyprocar.core.property_store import Property
 from pyprocar.plotter.ebs_plane_plot import (
@@ -19,6 +18,12 @@ from pyprocar.plotter.ebs_plane_plot import (
     PlaneScalarsMode,
     PlaneSeries,
 )
+
+_rng = np.random.default_rng(42)
+
+if TYPE_CHECKING:
+    from collections.abc import Generator
+    from pathlib import Path
 
 
 class TestPlaneScalarsMode:
@@ -168,8 +173,8 @@ class MockEBSMesh:
     ) -> MockSlice:
         """Return mock slice with points."""
         _ = normal, origin  # interface-matching parameters
-        s_val = np.random.rand(100) if scalars is not None else None
-        v_val = np.random.rand(100, 3) if vectors is not None else None
+        s_val = _rng.random(100) if scalars is not None else None
+        v_val = _rng.random((100, 3)) if vectors is not None else None
         return MockSlice(self.slice_points, s_val, v_val)
 
 
@@ -250,7 +255,7 @@ class TestEBSPlanePlotterToSeries:
         """Test _to_series with Property input for scalars."""
         scalars_prop = Property(
             name="bands",
-            value=np.random.rand(100),
+            value=_rng.random(100),
             units="eV",
             label="Energy",
         )
@@ -264,7 +269,7 @@ class TestEBSPlanePlotterToSeries:
 
     def test_to_series_with_tuple_scalars(self, plotter: EBSPlanePlotter) -> None:
         """Test _to_series with legacy tuple input."""
-        scalars_tuple = ("bands", np.random.rand(100))
+        scalars_tuple = ("bands", _rng.random(100))
 
         series = plotter._to_series(scalars_data=scalars_tuple)
 
@@ -276,7 +281,7 @@ class TestEBSPlanePlotterToSeries:
         """Test _to_series with vector data."""
         vectors_prop = Property(
             name="velocity",
-            value=np.random.rand(100, 3),
+            value=_rng.random((100, 3)),
             units="m/s",
             label="Velocity",
         )
@@ -291,8 +296,8 @@ class TestEBSPlanePlotterToSeries:
 
     def test_to_series_with_both(self, plotter: EBSPlanePlotter) -> None:
         """Test _to_series with both scalars and vectors."""
-        scalars_tuple = ("energy", np.random.rand(100))
-        vectors_tuple = ("velocity", np.random.rand(100, 3))
+        scalars_tuple = ("energy", _rng.random(100))
+        vectors_tuple = ("velocity", _rng.random((100, 3)))
 
         series = plotter._to_series(scalars_data=scalars_tuple, vectors_data=vectors_tuple)
 
@@ -323,7 +328,7 @@ class TestEBSPlanePlotterRenderMethods:
         series = PlaneSeries(
             u_grid=plotter.u_grid,
             v_grid=plotter.v_grid,
-            scalars=np.random.rand(*plotter.u_grid.shape),
+            scalars=_rng.random(plotter.u_grid.shape),
             scalars_label="test",
             scalars_unit="eV",
             scalars_lim=(0.0, 1.0),
@@ -345,7 +350,7 @@ class TestEBSPlanePlotterRenderMethods:
         series = PlaneSeries(
             u_grid=plotter.u_grid,
             v_grid=plotter.v_grid,
-            scalars=np.random.rand(*plotter.u_grid.shape),
+            scalars=_rng.random(plotter.u_grid.shape),
             scalars_label="test",
             scalars_unit="eV",
             scalars_lim=(0.0, 1.0),
@@ -366,7 +371,7 @@ class TestEBSPlanePlotterRenderMethods:
         series = PlaneSeries(
             u_grid=plotter.u_grid,
             v_grid=plotter.v_grid,
-            scalars=np.random.rand(*plotter.u_grid.shape),
+            scalars=_rng.random(plotter.u_grid.shape),
             scalars_label="test",
             scalars_unit="eV",
             scalars_lim=(0.0, 1.0),
@@ -391,9 +396,9 @@ class TestEBSPlanePlotterRenderMethods:
             scalars_label=None,
             scalars_unit=None,
             scalars_lim=None,
-            vectors_u=np.random.rand(*plotter.u_grid.shape),
-            vectors_v=np.random.rand(*plotter.u_grid.shape),
-            vectors_magnitude=np.random.rand(*plotter.u_grid.shape) + 0.1,
+            vectors_u=_rng.random(plotter.u_grid.shape),
+            vectors_v=_rng.random(plotter.u_grid.shape),
+            vectors_magnitude=_rng.random(plotter.u_grid.shape) + 0.1,
             vectors_label="velocity",
             vectors_unit="m/s",
             vectors_lim=(0.0, 1.0),
@@ -417,7 +422,7 @@ class TestEBSPlanePlotterPlot:
 
     def test_plot_scalars_pcolormesh(self, plotter: EBSPlanePlotter) -> None:
         """Test pcolormesh rendering mode."""
-        scalars_tuple = ("bands", np.random.rand(100))
+        scalars_tuple = ("bands", _rng.random(100))
 
         artists = plotter.plot(scalars_data=scalars_tuple, scalars_mode="pcolormesh")
 
@@ -427,7 +432,7 @@ class TestEBSPlanePlotterPlot:
 
     def test_plot_scalars_contour(self, plotter: EBSPlanePlotter) -> None:
         """Test contour rendering mode."""
-        scalars_tuple = ("bands", np.random.rand(100))
+        scalars_tuple = ("bands", _rng.random(100))
 
         artists = plotter.plot(scalars_data=scalars_tuple, scalars_mode="contour")
 
@@ -435,7 +440,7 @@ class TestEBSPlanePlotterPlot:
 
     def test_plot_scalars_contourf(self, plotter: EBSPlanePlotter) -> None:
         """Test contourf rendering mode."""
-        scalars_tuple = ("bands", np.random.rand(100))
+        scalars_tuple = ("bands", _rng.random(100))
 
         artists = plotter.plot(
             scalars_data=scalars_tuple, scalars_mode="contourf", scalars_show_colorbar="single"
@@ -445,7 +450,7 @@ class TestEBSPlanePlotterPlot:
 
     def test_plot_vectors(self, plotter: EBSPlanePlotter) -> None:
         """Test vector plotting."""
-        vectors_tuple = ("velocity", np.random.rand(100, 3))
+        vectors_tuple = ("velocity", _rng.random((100, 3)))
 
         artists = plotter.plot(vectors_data=vectors_tuple)
 
@@ -457,7 +462,7 @@ class TestEBSPlanePlotterPlot:
         """Test plot with Property input."""
         scalars_prop = Property(
             name="bands",
-            value=np.random.rand(100),
+            value=_rng.random(100),
             units="eV",
             label="Energy",
         )
@@ -469,7 +474,7 @@ class TestEBSPlanePlotterPlot:
 
     def test_plot_returns_dict(self, plotter: EBSPlanePlotter) -> None:
         """Test that plot returns a dict of artists."""
-        scalars_tuple = ("bands", np.random.rand(100))
+        scalars_tuple = ("bands", _rng.random(100))
 
         result = plotter.plot(scalars_data=scalars_tuple)
 
@@ -484,7 +489,7 @@ class TestEBSPlanePlotterExport:
         """Create plotter with plotted data."""
         mock_mesh = MockEBSMesh()
         plotter = EBSPlanePlotter(mock_mesh)  # pyright: ignore[reportArgumentType]
-        scalars_tuple = ("bands", np.random.rand(100))
+        scalars_tuple = ("bands", _rng.random(100))
         plotter.plot(scalars_data=scalars_tuple)
         yield plotter, tmp_path
         plt.close(plotter.fig)
@@ -622,7 +627,7 @@ class TestEBSPlanePlotterLegacyAPI:
 
     def test_plot_scalars_with_tuple(self, plotter: EBSPlanePlotter) -> None:
         """Test legacy plot_scalars with tuple."""
-        scalars_tuple = ("bands", np.random.rand(100))
+        scalars_tuple = ("bands", _rng.random(100))
 
         plotter.plot_scalars(scalars=scalars_tuple)
 
@@ -633,7 +638,7 @@ class TestEBSPlanePlotterLegacyAPI:
         """Test legacy plot_scalars with Property."""
         scalars_prop = Property(
             name="bands",
-            value=np.random.rand(100),
+            value=_rng.random(100),
             units="eV",
             label="Energy",
         )
@@ -644,7 +649,7 @@ class TestEBSPlanePlotterLegacyAPI:
 
     def test_plot_scalars_with_grid_points(self, plotter: EBSPlanePlotter) -> None:
         """Test legacy plot_scalars with pre-computed grid points."""
-        grid_points = np.random.rand(plotter.n_points)
+        grid_points = _rng.random(plotter.n_points)
 
         plotter.plot_scalars(grid_points=grid_points, name="test_field")
 
@@ -652,7 +657,7 @@ class TestEBSPlanePlotterLegacyAPI:
 
     def test_plot_vectors_quiver_with_tuple(self, plotter: EBSPlanePlotter) -> None:
         """Test legacy plot_vectors_quiver with tuple."""
-        vectors_tuple = ("velocity", np.random.rand(100, 3))
+        vectors_tuple = ("velocity", _rng.random((100, 3)))
 
         plotter.plot_vectors_quiver(vectors=vectors_tuple)
 
@@ -663,7 +668,7 @@ class TestEBSPlanePlotterLegacyAPI:
         """Test legacy plot_vectors_quiver with Property."""
         vectors_prop = Property(
             name="velocity",
-            value=np.random.rand(100, 3),
+            value=_rng.random((100, 3)),
             units="m/s",
             label="Velocity Field",
         )

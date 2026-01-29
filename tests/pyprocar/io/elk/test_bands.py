@@ -231,7 +231,6 @@ class TestElkBandsEnergies(BaseTest):
             nspin=1,
             high_symmetry_points=HIGH_SYM_POINTS,
         )
-        # Shape is (nkpoints, raw_nbands)
         assert bands.bands_hartree.shape == (5, 2)
 
     def test_bands_shape_non_spin(self) -> None:
@@ -243,7 +242,6 @@ class TestElkBandsEnergies(BaseTest):
             nspin=1,
             high_symmetry_points=HIGH_SYM_POINTS,
         )
-        # Shape is (nkpoints, nbands, nspin)
         assert bands.bands.shape == (5, 2, 1)
 
     def test_bands_shape_spin_polarized(self) -> None:
@@ -255,7 +253,6 @@ class TestElkBandsEnergies(BaseTest):
             nspin=2,
             high_symmetry_points=HIGH_SYM_POINTS,
         )
-        # Shape is (nkpoints, nbands, nspin)
         assert bands.bands.shape == (5, 2, 2)
 
     def test_bands_in_ev(self) -> None:

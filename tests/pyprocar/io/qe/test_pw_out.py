@@ -12,14 +12,14 @@ from pyprocar.io.qe.pw import PwOut
 # =============================================================================
 
 NON_SPIN_POLARIZED_PW_OUT = """
-     Program PWSCF v.7.2 starts on 19Jul2024 at 11:28:15 
+     Program PWSCF v.7.2 starts on 19Jul2024 at 11:28:15
 
      This program is part of the open-source Quantum ESPRESSO suite
      for quantum simulation of materials; please cite
          "P. Giannozzi et al., J. Phys.:Condens. Matter 21 395502 (2009);
          "P. Giannozzi et al., J. Phys.:Condens. Matter 29 465901 (2017);
          "P. Giannozzi et al., J. Chem. Phys. 152 154105 (2020);
-          URL http://www.quantum-espresso.org", 
+          URL http://www.quantum-espresso.org",
      in publications or presentations arising from this work. More details at
      http://www.quantum-espresso.org/quote
 
@@ -27,7 +27,7 @@ NON_SPIN_POLARIZED_PW_OUT = """
 
      MPI processes distributed on     1 nodes
      79188 MiB available memory on the printing compute node when the environment starts
- 
+
      Waiting for input...
      Reading input from standard input
 
@@ -38,20 +38,20 @@ NON_SPIN_POLARIZED_PW_OUT = """
      file Sr.pbe-spn-kjpaw_psl.1.0.0.UPF: wavefunction(s)  4P renormalized
      file V.pbe-spn-kjpaw_psl.1.0.0.UPF: wavefunction(s)  3P 3D renormalized
      file O.pbe-n-kjpaw_psl.0.1.upf: wavefunction(s)  2P renormalized
- 
+
      K-points division:     npool     =       4
      R & G space division:  proc/nbgrp/npool/nimage =      10
      Subspace diagonalization in iterative solution of the eigenvalue problem:
      a serial algorithm will be used
 
- 
+
      Parallelization info
      --------------------
      sticks:   dense  smooth     PW     G-vecs:    dense   smooth      PW
      Min         253      84     24                 9541     1832     296
      Max         254      85     26                 9544     1833     299
      Sum        2537     845    249                95433    18325    2969
- 
+
      Using Slab Decomposition
 
 
@@ -75,14 +75,14 @@ NON_SPIN_POLARIZED_PW_OUT = """
      celldm(4)=   0.000000  celldm(5)=   0.000000  celldm(6)=   0.000000
 
      crystal axes: (cart. coord. in units of alat)
-               a(1) = (   1.000000   0.000000   0.000000 )  
-               a(2) = (   0.000000   1.000000   0.000000 )  
-               a(3) = (   0.000000   0.000000   1.000000 )  
+               a(1) = (   1.000000   0.000000   0.000000 )
+               a(2) = (   0.000000   1.000000   0.000000 )
+               a(3) = (   0.000000   0.000000   1.000000 )
 
      reciprocal axes: (cart. coord. in units 2 pi/alat)
-               b(1) = (  1.000000  0.000000  0.000000 )  
-               b(2) = (  0.000000  1.000000  0.000000 )  
-               b(3) = (  0.000000  0.000000  1.000000 )  
+               b(1) = (  1.000000  0.000000  0.000000 )
+               b(2) = (  0.000000  1.000000  0.000000 )
+               b(3) = (  0.000000  0.000000  1.000000 )
 
 
      PseudoPot. # 1 for Sr read from file:
@@ -91,14 +91,14 @@ NON_SPIN_POLARIZED_PW_OUT = """
      Pseudo is Projector augmented-wave + core cor, Zval = 10.0
      Generated using &quot;atomic&quot; code by A. Dal Corso  v.6.5
      Shape of augmentation charge: PSQ
-     Using radial grid of 1221 points,  6 beta functions with: 
+     Using radial grid of 1221 points,  6 beta functions with:
                 l(1) =   0
                 l(2) =   0
                 l(3) =   1
                 l(4) =   1
                 l(5) =   2
                 l(6) =   2
-     Q(r) pseudized with 0 coefficients 
+     Q(r) pseudized with 0 coefficients
 
 
      PseudoPot. # 2 for V  read from file:
@@ -107,14 +107,14 @@ NON_SPIN_POLARIZED_PW_OUT = """
      Pseudo is Projector augmented-wave + core cor, Zval = 13.0
      Generated using &quot;atomic&quot; code by A. Dal Corso  v.6.5
      Shape of augmentation charge: PSQ
-     Using radial grid of 1181 points,  6 beta functions with: 
+     Using radial grid of 1181 points,  6 beta functions with:
                 l(1) =   0
                 l(2) =   0
                 l(3) =   1
                 l(4) =   1
                 l(5) =   2
                 l(6) =   2
-     Q(r) pseudized with 0 coefficients 
+     Q(r) pseudized with 0 coefficients
 
 
      PseudoPot. # 3 for O  read from file:
@@ -123,12 +123,12 @@ NON_SPIN_POLARIZED_PW_OUT = """
      Pseudo is Projector augmented-wave + core cor, Zval =  6.0
      Generated using "atomic" code by A. Dal Corso  v.5.0.99 svn rev. 10869
      Shape of augmentation charge: BESSEL
-     Using radial grid of 1095 points,  4 beta functions with: 
+     Using radial grid of 1095 points,  4 beta functions with:
                 l(1) =   0
                 l(2) =   0
                 l(3) =   1
                 l(4) =   1
-     Q(r) pseudized with 0 coefficients 
+     Q(r) pseudized with 0 coefficients
 
 
      atomic species   valence    mass     pseudopotential
@@ -167,7 +167,7 @@ NON_SPIN_POLARIZED_PW_OUT = """
 
      starting charge      40.9917, renormalised to      41.0000
      Starting wfcs are   30 randomized atomic wfcs
-     Checking if some PAW data can be deallocated... 
+     Checking if some PAW data can be deallocated...
 
      total cpu time spent up to now is        1.5 secs
 
@@ -296,7 +296,7 @@ NON_SPIN_POLARIZED_PW_OUT = """
      convergence has been achieved in  10 iterations
 
      Writing all to output data dir ./out/SrVO3.save/
- 
+
      init_run     :      0.79s CPU      1.01s WALL (       1 calls)
      electrons    :      6.83s CPU      7.34s WALL (       1 calls)
 
@@ -335,13 +335,13 @@ NON_SPIN_POLARIZED_PW_OUT = """
      ffts         :      0.01s CPU      0.01s WALL (      21 calls)
      fftw         :      2.00s CPU      2.15s WALL (   47080 calls)
      interpolate  :      0.01s CPU      0.01s WALL (      11 calls)
- 
+
      Parallel routines
- 
+
      PWSCF        :      8.05s CPU     10.18s WALL
 
- 
-   This run was terminated on:  11:28:25  19Jul2024            
+
+   This run was terminated on:  11:28:25  19Jul2024
 
 =------------------------------------------------------------------------------=
    JOB DONE.
@@ -349,7 +349,7 @@ NON_SPIN_POLARIZED_PW_OUT = """
 """
 
 SPIN_POLARIZED_PW_OUT = """
-     Program PWSCF v.7.2 starts on  1Jan2026 at 12: 0: 0 
+     Program PWSCF v.7.2 starts on  1Jan2026 at 12: 0: 0
 
      Parallel version (MPI), running on     1 processors
 
@@ -404,7 +404,7 @@ SPIN_POLARIZED_PW_OUT = """
 """
 
 BANDS_CALCULATION_PW_OUT = """
-     Program PWSCF v.7.2 starts on  1Jan2026 at 12: 0: 0 
+     Program PWSCF v.7.2 starts on  1Jan2026 at 12: 0: 0
 
      Parallel version (MPI), running on     1 processors
 
@@ -720,11 +720,6 @@ def test_n_scf_steps_returns_correct_value(non_spin_parser: PwOut) -> None:
     assert non_spin_parser.n_scf_steps == 8
 
 
-# =============================================================================
-# Tests: Exchange-Correlation
-# =============================================================================
-
-
 def test_exchange_correlation_returns_dict(non_spin_parser: PwOut) -> None:
     """Test that exchange_correlation returns dict with functional and params."""
     xc = non_spin_parser.exchange_correlation
@@ -776,11 +771,6 @@ def test_celldm_contains_all_six_values(non_spin_parser: PwOut) -> None:
         assert f"celldm{i}" in celldm
 
 
-# =============================================================================
-# Tests: Lattice
-# =============================================================================
-
-
 def test_crystal_axes_returns_3x3_array(non_spin_parser: PwOut) -> None:
     """Test that crystal_axes returns 3x3 numpy array."""
     lattice = non_spin_parser.crystal_axes
@@ -809,11 +799,6 @@ def test_reciprocal_axes_values_correct(non_spin_parser: PwOut) -> None:
     assert rlattice is not None
     expected = np.array([[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]])
     np.testing.assert_array_almost_equal(rlattice, expected)
-
-
-# =============================================================================
-# Tests: Pseudopotentials
-# =============================================================================
 
 
 def test_pseudopotentials_returns_list(non_spin_parser: PwOut) -> None:

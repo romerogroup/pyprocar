@@ -9,18 +9,22 @@ these tests can use normal imports:
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
-import matplotlib
+import matplotlib as mpl
 
-matplotlib.use("Agg")
+mpl.use("Agg")
 
 
 import matplotlib.pyplot as plt
 import numpy as np
 import numpy.typing as npt
 import pyvista as pv
+
+_rng = np.random.default_rng(42)
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 # ------------------------------------------------------------------
 # FermiSliceSeries Tests (can use direct dataclass creation)
@@ -51,7 +55,7 @@ def _make_series(
     has_vectors: bool = False,
 ) -> FermiSliceSeries:
     """Create a FermiSliceSeries for testing."""
-    points_2d: npt.NDArray[np.float64] = np.random.rand(n_points, 2)
+    points_2d: npt.NDArray[np.float64] = _rng.random((n_points, 2))
     # Create line connectivity: pairs of points
     # PyVista format: [n_pts, p0, p1, n_pts, p2, p3, ...]
     lines_list: list[int] = []
@@ -62,11 +66,11 @@ def _make_series(
     return FermiSliceSeries(
         points_2d=points_2d,
         lines=lines,
-        scalars=np.random.rand(n_points) if has_scalars else None,
+        scalars=_rng.random(n_points) if has_scalars else None,
         scalars_label="Test Scalars" if has_scalars else None,
         scalars_unit="eV" if has_scalars else None,
         scalars_lim=(0.0, 1.0) if has_scalars else None,
-        vectors=np.random.rand(n_points, 2) if has_vectors else None,
+        vectors=_rng.random((n_points, 2)) if has_vectors else None,
         vectors_label="Test Vectors" if has_vectors else None,
         vectors_unit="m/s" if has_vectors else None,
         vectors_lim=(0.0, 1.0) if has_vectors else None,
@@ -382,7 +386,8 @@ class TestShowColorbarEnum:
                     "per_channel": cls.PER_CHANNEL,
                 }
                 if value.lower() not in mapping:
-                    raise ValueError(f"Invalid ShowColorbar: {value}")
+                    msg = f"Invalid ShowColorbar: {value}"
+                    raise ValueError(msg)
                 return mapping[value.lower()]
 
         result = ShowColorbar.from_string("single")

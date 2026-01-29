@@ -9,6 +9,8 @@ import numpy as np
 import pytest
 import pyvista as pv
 
+_rng = np.random.default_rng(42)
+
 
 def _load_fs_plot_module() -> types.ModuleType:
     """Load fs_plot module directly to avoid pyprocar/__init__.py import issues."""
@@ -57,7 +59,7 @@ class TestFermiSeries:
     def test_fermi_series_creation_with_scalars(self) -> None:
         """Test FermiSeries with scalar data."""
         mesh = pv.Sphere()
-        scalars = np.random.rand(mesh.n_points)
+        scalars = _rng.random(mesh.n_points)
         series = FermiSeries(
             mesh=mesh,
             scalars=scalars,
@@ -81,7 +83,7 @@ class TestFermiSeries:
     def test_fermi_series_creation_with_vectors(self) -> None:
         """Test FermiSeries with vector data."""
         mesh = pv.Sphere()
-        vectors = np.random.rand(mesh.n_points, 3)
+        vectors = _rng.random((mesh.n_points, 3))
         series = FermiSeries(
             mesh=mesh,
             scalars=None,

@@ -5,9 +5,9 @@ This module contains unit tests for the Unfolder, ProcarUnfolder,
 and plot_band_weight components.
 """
 
-import matplotlib
+import matplotlib as mpl
 
-matplotlib.use("Agg")  # Non-interactive backend for testing
+mpl.use("Agg")  # Non-interactive backend for testing
 
 import tempfile
 from pathlib import Path
@@ -43,7 +43,7 @@ def rng() -> np.random.Generator:
 
 @pytest.fixture
 def simple_cubic_cell() -> npt.NDArray[np.float64]:
-    """Simple cubic unit cell."""
+    """Provide simple cubic unit cell."""
     return np.eye(3) * 3.0  # 3 Angstrom lattice parameter
 
 
@@ -61,12 +61,8 @@ def supercell_matrix_identity() -> npt.NDArray[np.int64]:
 
 @pytest.fixture
 def simple_basis() -> list[str]:
-    """Simple basis labels for a 2-atom cell with s and p orbitals."""
-    basis: list[str] = []
-    for _atom in range(2):
-        for orb in ["s", "p"]:
-            basis.append(f"None|{orb}|0")
-    return basis
+    """Provide simple basis labels for a 2-atom cell with s and p orbitals."""
+    return [f"None|{orb}|0" for _atom in range(2) for orb in ["s", "p"]]
 
 
 @pytest.fixture
@@ -81,9 +77,9 @@ def simple_positions() -> npt.NDArray[np.float64]:
 
 @pytest.fixture
 def simple_eigenvectors(rng: np.random.Generator) -> npt.NDArray[np.complex128]:
-    """
-    Simple eigenvectors for testing.
-    Shape: (n_kpoints, n_bands, n_basis)
+    """Provide simple eigenvectors for testing.
+
+    Shape: (n_kpoints, n_bands, n_basis).
     """
     n_kpoints = 5
     n_bands = 4
@@ -96,14 +92,12 @@ def simple_eigenvectors(rng: np.random.Generator) -> npt.NDArray[np.complex128]:
 
     # Normalize along basis axis
     norm = np.linalg.norm(eigenvectors, axis=2, keepdims=True)
-    eigenvectors = eigenvectors / norm
-
-    return eigenvectors
+    return eigenvectors / norm
 
 
 @pytest.fixture
 def simple_qpoints() -> npt.NDArray[np.float64]:
-    """Simple k-points for testing."""
+    """Provide simple k-points for testing."""
     return np.array(
         [
             [0.0, 0.0, 0.0],  # Gamma
@@ -207,7 +201,6 @@ class TestUnfolder:
         assert trans_rs.shape[1] == 3  # 3D vectors
 
         # trans_indices maps basis elements across translations
-        # Shape is (n_translations, n_positions)
         trans_indices = simple_unfolder._trans_indices
         assert trans_indices is not None
         assert trans_indices.shape[0] == 8
@@ -304,9 +297,9 @@ class TestUnfolder:
         """Test get_weight with non-zero G vector."""
         evec = simple_eigenvectors[0, 0, :]
         qpt = simple_qpoints[0]
-        G = np.array([1.0, 0.0, 0.0])
+        g_vector = np.array([1.0, 0.0, 0.0])
 
-        weight = simple_unfolder.get_weight(evec, qpt, G=G)
+        weight = simple_unfolder.get_weight(evec, qpt, G=g_vector)
 
         assert isinstance(weight, (float, np.floating))
 

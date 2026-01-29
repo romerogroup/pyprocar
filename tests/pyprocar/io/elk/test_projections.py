@@ -121,7 +121,6 @@ class TestElkProjectionsSPD(BaseTest):
             nbands=2,
             nspin=1,
         )
-        # Shape: (nkpoints, nbands, nspin, natoms+1, norbitals+2)
         assert proj.spd.shape == (3, 2, 1, 3, 18)
 
     def test_spd_not_empty(self) -> None:
@@ -146,7 +145,6 @@ class TestElkProjectionsProjected(BaseTest):
             nbands=2,
             nspin=1,
         )
-        # Shape: (nkpoints, nbands, natoms, nprincipals, norbitals, nspin)
         assert proj.projected is not None
         assert proj.projected.shape == (3, 2, 2, 1, 16, 1)
 

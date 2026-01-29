@@ -15,7 +15,7 @@ def rng() -> np.random.Generator:
 
 @pytest.fixture
 def simple_kpoints() -> npt.NDArray[np.float64]:
-    """Simple k-points for testing."""
+    """Provide simple k-points for testing."""
     return np.array(
         [
             [0.0, 0.0, 0.0],
@@ -28,7 +28,7 @@ def simple_kpoints() -> npt.NDArray[np.float64]:
 
 @pytest.fixture
 def simple_bands(simple_kpoints: npt.NDArray[np.float64]) -> npt.NDArray[np.float64]:
-    """Simple bands data matching k-points."""
+    """Provide simple bands data matching k-points."""
     n_kpoints = len(simple_kpoints)
     n_bands = 4
     return np.arange(n_kpoints * n_bands).reshape(n_kpoints, n_bands).astype(float)
@@ -38,7 +38,7 @@ def simple_bands(simple_kpoints: npt.NDArray[np.float64]) -> npt.NDArray[np.floa
 def simple_character(
     simple_kpoints: npt.NDArray[np.float64], simple_bands: npt.NDArray[np.float64]
 ) -> npt.NDArray[np.float64]:
-    """Simple character data matching k-points and bands."""
+    """Provide simple character data matching k-points and bands."""
     return np.ones((len(simple_kpoints), simple_bands.shape[1]))
 
 

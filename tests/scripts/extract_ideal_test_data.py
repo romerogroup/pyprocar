@@ -2,14 +2,14 @@ import logging
 import sys
 from pathlib import Path
 
+from pyprocar import io
+from tests.utils.data import ALL_TEST_CASES, DOS_CALC_TYPES, EBS_CALC_TYPES
+
 CURRENT_DIR = Path(__file__).parent
 ROOT_TEST_DIR = CURRENT_DIR.parent
 ROOT_DIR = ROOT_TEST_DIR.parent
 
 sys.path.append(str(ROOT_DIR))
-
-from pyprocar import io
-from tests.utils.data import ALL_TEST_CASES, DOS_CALC_TYPES, EBS_CALC_TYPES
 
 user_logger = logging.getLogger("user")
 
@@ -31,9 +31,9 @@ for calc_test_case in ALL_TEST_CASES:
         if parser.dos:
             parser.dos.save(path / "dos.pkl")
         else:
-            user_logger.warning(f"No DOS found for {calc_test_case.get_id()}")
+            user_logger.warning("No DOS found for %s", calc_test_case.get_id())
     elif calc_type in EBS_CALC_TYPES:
         if parser.ebs:
             parser.ebs.save(path / "ebs.pkl")
         else:
-            user_logger.warning(f"No EBS found for {calc_test_case.get_id()}")
+            user_logger.warning("No EBS found for %s", calc_test_case.get_id())

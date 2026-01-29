@@ -320,7 +320,7 @@ class TestStructure:
         # Invalid transformation matrix (not proper)
         invalid_matrix = np.array([[1.5, 0, 0], [0, 1.5, 0], [0, 0, 1.5]])
 
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match="not proper"):
             struct.transform(invalid_matrix)
 
     def test_supercell_method(self, simple_cubic_structure: Structure) -> None:
@@ -337,10 +337,10 @@ class TestStructure:
 
     def test_structure_with_empty_arrays(self) -> None:
         """Test Structure with empty arrays."""
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match="atoms must be a non-empty list"):
             _struct = Structure(atoms=[], fractional_coordinates=[], lattice=np.eye(3))
 
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match="requires at least"):
             _struct = Structure()
 
     def test_structure_properties_with_single_atom(self, simple_cubic_structure: Structure) -> None:

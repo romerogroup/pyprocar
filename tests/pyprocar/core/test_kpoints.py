@@ -826,7 +826,7 @@ class TestKPathMethods:
         )
 
         # Different n_grids should make them unequal
-        assert not (kpath_with_segments == kpath2)
+        assert kpath_with_segments != kpath2
 
 
 # =============================================================================

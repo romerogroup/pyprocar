@@ -155,14 +155,12 @@ class TestElkDOSTotal(BaseTest):
         """Test total DOS shape for non-spin-polarized."""
         dos = ElkDOS.from_str(tdos_content=TDOS_NON_SPIN)
         assert dos.total is not None
-        # Shape: (nspin, nenergies)
         assert dos.total.shape == (1, 10)
 
     def test_total_shape_spin(self) -> None:
         """Test total DOS shape for spin-polarized."""
         dos = ElkDOS.from_str(tdos_content=TDOS_SPIN)
         assert dos.total is not None
-        # Shape: (nspin, nenergies)
         assert dos.total.shape == (2, 5)
 
     def test_total_values_non_spin(self) -> None:
@@ -197,7 +195,6 @@ class TestElkDOSProjected(BaseTest):
         """Test projected DOS shape."""
         dos = ElkDOS(dirpath=dos_dir_spin)
         if dos.projected is not None:
-            # Shape: (natoms, nprincipals, norbitals, nspin, nenergies)
             assert dos.projected.shape[0] == 2  # natoms
             assert dos.projected.shape[1] == 1  # nprincipals
             assert dos.projected.shape[2] == 16  # N_ORBITALS

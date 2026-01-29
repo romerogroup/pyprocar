@@ -26,5 +26,5 @@ def test_expand_grouped_params_to_dicts_aligned_groups():
 
 def test_expand_grouped_params_to_dicts_mismatched_lengths():
     params = {"atoms": [[0], [1]], "orbitals": [[2, 3]]}
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="same length"):
         expand_grouped_params_to_dicts(params)

@@ -9,6 +9,8 @@ import numpy as np
 import pytest
 import pyvista as pv
 
+_rng = np.random.default_rng(42)
+
 
 def _load_bs_2d_plot_module() -> types.ModuleType:
     """Load bs_2d_plot module directly to avoid pyprocar/__init__.py import issues."""
@@ -57,7 +59,7 @@ class TestBS2DSeries:
     def test_bs2d_series_creation_with_scalars(self) -> None:
         """Test BS2DSeries with scalar data."""
         mesh = pv.Plane()
-        scalars = np.random.rand(mesh.n_points)
+        scalars = _rng.random(mesh.n_points)
         series = BS2DSeries(
             mesh=mesh,
             scalars=scalars,
@@ -81,7 +83,7 @@ class TestBS2DSeries:
     def test_bs2d_series_creation_with_vectors(self) -> None:
         """Test BS2DSeries with vector data."""
         mesh = pv.Plane()
-        vectors = np.random.rand(mesh.n_points, 3)
+        vectors = _rng.random((mesh.n_points, 3))
         series = BS2DSeries(
             mesh=mesh,
             scalars=None,

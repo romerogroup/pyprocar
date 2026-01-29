@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 import os
 
 import pyprocar.pyposcar as pp
@@ -85,14 +84,11 @@ tasks = [
 
 
 for task in tasks:
-    print(task["print"])
     for filename in POSCAR:
         # first running analize.py
-        print(filename + " ... ", end="")
         command = executable
         outfile = " >> " + auxdir + "temp"
         cmdline = " ".join([command, task["options"], filename, outfile])
-        # print(cmd_1)
         os.system(cmdline)
 
         # second, moving the useful output to aux and removing the other file
@@ -116,18 +112,6 @@ for task in tasks:
         comparison = pp.poscarUtils.poscarDiff(p1, p2)
 
         if not comparison:
-            print("ok")
+            pass
         else:
-            print("Results differs.")
-            print(path_p1)
-            print(path_p2)
-            print(comparison)
-
-
-#     print(poscarUtils.poscarDiff(poscar_defect_1,poscar_defect_2))
-#   else:
-#     continue
-#   if(poscarUtils.poscarDiff(poscar_cluster_1,poscar_cluster_2)):
-#     print(poscarUtils.poscarDiff(poscar_cluster_1,poscar_cluster_2))
-#   else:
-#     continue
+            pass

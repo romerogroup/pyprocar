@@ -18,13 +18,13 @@ PROJCAR_STRING = """
 
  k-point:     1  spin:   1
 
-   band         py             pz             px            dxy            dyz            dz2            dxz           dx2-y2  
+   band         py             pz             px            dxy            dyz            dz2            dxz           dx2-y2
       1   -0.033 -0.009   0.003  0.001   0.007 -0.041  -0.000  0.000   0.000  0.000   0.000 -0.000  -0.000  0.000  -0.000 -0.000
       2    0.033 -0.025   0.008  0.002  -0.022 -0.025   0.000  0.000   0.000 -0.000  -0.000 -0.000   0.000  0.000  -0.000  0.000
 
  k-point:     2  spin:   1
 
-   band         py             pz             px            dxy            dyz            dz2            dxz           dx2-y2  
+   band         py             pz             px            dxy            dyz            dz2            dxz           dx2-y2
       1   -0.000 -0.000   0.000 -0.000   0.000  0.005   0.000 -0.000  -0.000 -0.000  -0.041  0.004   0.000 -0.000   0.068 -0.007
       2   -0.030 -0.023  -0.001  0.007  -0.000  0.000   0.036 -0.046   0.000  0.000   0.000  0.000  -0.011 -0.001  -0.000 -0.000
 
@@ -32,13 +32,13 @@ PROJCAR_STRING = """
 
  k-point:     1  spin:   1
 
-   band         py             pz             px            dxy            dyz            dz2            dxz           dx2-y2  
+   band         py             pz             px            dxy            dyz            dz2            dxz           dx2-y2
       1    0.532  0.138  -0.046 -0.011  -0.120  0.659   0.000 -0.000  -0.000 -0.000   0.000  0.000   0.000 -0.000  -0.000 -0.000
       2   -0.533  0.399  -0.138 -0.032   0.360  0.402  -0.000 -0.000   0.000  0.000  -0.000 -0.000  -0.000 -0.000  -0.000  0.000
 
  k-point:     2  spin:   1
 
-   band         py             pz             px            dxy            dyz            dz2            dxz           dx2-y2  
+   band         py             pz             px            dxy            dyz            dz2            dxz           dx2-y2
       1   -0.000  0.000  -0.000  0.000  -0.470 -0.381   0.000  0.000   0.000 -0.000   0.010 -0.012   0.000  0.000  -0.017  0.021
       2    0.859 -0.102  -0.101 -0.123  -0.000 -0.000   0.001  0.007   0.000 -0.000   0.000 -0.000   0.001 -0.001  -0.000  0.000
 """
@@ -126,7 +126,6 @@ class TestProjcar(BaseTest):
         projections = projcar.projections
 
         # Check a specific value: k=0, band=0, spin=0, atom=0, orbital=0 (py)
-        # Expected: -0.033 -0.009
         val = projections[0, 0, 0, 0, 0]
         assert np.isclose(val.real, -0.033, atol=1e-3)
         assert np.isclose(val.imag, -0.009, atol=1e-3)

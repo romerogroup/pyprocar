@@ -814,13 +814,13 @@ ATOM_INFO = """<atominfo>
     <rc><c>   3</c><c>O </c><c>     16.00000000</c><c>      6.00000000</c><c>   PAW_PBE O 08Apr2002                  </c></rc>
    </set>
   </array>
- </atominfo> 
+ </atominfo>
 """
 
 
 def parse_atom_info_element() -> None:
     _parser = VaspXML.from_str(ATOM_INFO)
-    assert False
+    raise AssertionError
 
 
 PRIMITIVE_CELL_ELEMENT = """<primitive_cell>
@@ -888,7 +888,7 @@ def parse_kpoints_element() -> None:
     assert kpoints.comment == "listgenerated"
     assert kpoints.mode == "listgenerated"
     assert kpoints.ngrids == 2
-    assert kpoints.automatic == False
+    assert not kpoints.automatic
     assert kpoints.kgrid == [2, 2, 2]
     assert kpoints.kshift == [0, 0, 0]
 
@@ -1915,7 +1915,7 @@ NON_COLINEAR_PROJ_ELEMENT = """ <projected>
         </set>
       </set>
      </set>
-     
+
     <set comment="spin3">
       <set comment="kpoint 1">
        <set comment="band 1">
@@ -2020,4 +2020,4 @@ FINAL_STRUCTURE_ELEMENT = """ <structure name="finalpos" >
 
 def parse_final_structure_element() -> None:
     _parser = VaspXML.from_str(FINAL_STRUCTURE_ELEMENT)
-    assert False
+    raise AssertionError

@@ -22,6 +22,8 @@ from pyprocar.core.ebs import ElectronicBandStructureMesh
 from pyprocar.core.property_store import PointSet, Property
 from tests.utils import DATA_DIR
 
+_rng = np.random.default_rng(42)
+
 logger = logging.getLogger("pyprocar")
 logger.setLevel(logging.DEBUG)
 
@@ -245,7 +247,6 @@ class TestBandStructure2DConstructor:
         # Create PointSet missing spin_band_index
         point_set = PointSet(np.zeros((10, 3)))
         point_set.add_property(Property(name="spin_index", value=np.zeros(10)))
-        # Note: spin_band_index is missing
 
         with pytest.raises(ValueError, match="spin_band_index"):
             BandStructure2D(
@@ -274,7 +275,6 @@ class TestBandStructure2DConstructor:
         # Create PointSet missing spin_index
         point_set = PointSet(np.zeros((10, 3)))
         point_set.add_property(Property(name="spin_band_index", value=np.zeros(10)))
-        # Note: spin_index is missing
 
         with pytest.raises(ValueError, match="spin_index"):
             BandStructure2D(
@@ -470,7 +470,7 @@ class TestBandStructure2DSerialization:
         save_path = tmp_path / "test_bs2d_data.pkl"
 
         # Add test data
-        test_data = np.random.rand(bs2d.n_points)
+        test_data = _rng.random(bs2d.n_points)
         bs2d.point_data["test_scalar"] = test_data
 
         bs2d.save(str(save_path))
@@ -594,7 +594,7 @@ class TestBandStructure2DFunctionality:
         """Test set_scalars method."""
         bs2d = bandstructure2d_3d
         # Use n_points (surface point count) not n_grid_points
-        values = np.random.rand(bs2d.n_points)
+        values = _rng.random(bs2d.n_points)
 
         bs2d.set_scalars("test_scalar", values)
 
