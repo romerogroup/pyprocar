@@ -5,7 +5,7 @@ import shutil
 import zipfile
 from pathlib import Path
 
-os.environ["HF_HUB_ENABLE_HF_TRANSFER"] = "1"
+os.environ["HF_XET_HIGH_PERFORMANCE"] = "1"
 
 from concurrent.futures import ThreadPoolExecutor
 

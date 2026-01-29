@@ -13,6 +13,9 @@ import numpy as np
 import numpy.typing as npt
 import pyvista as pv
 import spglib
+import spglib.error
+
+spglib.error.OLD_ERROR_HANDLING = False
 from scipy.spatial import ConvexHull
 from typing_extensions import override
 
