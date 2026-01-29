@@ -5,7 +5,7 @@
 - Use `pixi run -q -e dev lint-src` to run linting for all files in src. Use `pixi run -q -e dev lint-tests` for tests. Use `pixi run -q -e dev lint` for both.
 - Use `pixi run -q -e dev ruff-lint <file_path>` or `pixi run -q -e dev ruff-format <file_path>` for specific files. Add `--src` or `--tests` to use respective config. Add `--verbose` or `-v` for full output (only works with specific files).
 - Use `pixi run -q -e dev typecheck` to run typechecks on all files. Use `pixi run -q -e dev typecheck <file_path>` to typecheck a specific file. Add `--verbose` or `-v` for full output (only works with specific files).
-- Use `pixi run -q -e dev test` to run all tests. Use `pixi run -q -e dev test <test_pattern>` to run specific tests matching a pattern. Add `--verbose` or `-v` for full output.
+- Use `pixi run -q -e dev test-silent` to run all tests. Use `pixi run -q -e dev test-silent <test_pattern>` to run specific tests matching a pattern. Add `--verbose` or `-v` for full output.
 
 - Do not try to get around the above. You must only use these when testing, linting, and typechecking. You should think on the error message and then go to the place the error is happening it see more context about the code.
 
