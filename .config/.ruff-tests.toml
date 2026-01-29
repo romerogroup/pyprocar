@@ -102,6 +102,18 @@ convention = "numpy"
 "tests/**/*.py" = [
     "PLR2004",  # Magic value used in comparison (expected values in assertions)
     "PTH123",   # open() is acceptable in tests
+    "D101",     # Missing docstring in public class (test classes are self-documenting)
+    "D102",     # Missing docstring in public method (test methods are self-documenting)
+    "D103",     # Missing docstring in public function (test functions are self-documenting)
+    "PLC0415",  # import-outside-top-level (test-local imports are common pattern)
+    "PLR0913",  # Too many arguments in function definition
+    "PLR0915",  # Too many statements
+    "FBT001",   # Boolean-typed positional argument
+    "FBT002",   # Boolean default positional argument
+    "FBT003",   # Boolean positional value in call
+    "ARG002",   # Unused method argument (fixtures often unused directly)
+    "N802",     # Invalid function name (test names may not follow conventions)
+    "S605",     # Start process with a shell (acceptable in test scripts)
 ]
 
 [format]
