@@ -197,8 +197,8 @@ class BandStructureConfig(BaseConfig):
     title: str | None = None
     weighted_color: bool = True
     weighted_width: bool = False
-    figure_size: tuple[int] = field(default_factory=lambda: (9, 6))
-    dpi: int = 300
+    figure_size: tuple[int, int] = field(default_factory=lambda: (9, 6))
+    dpi: int | str = 300
 
     colorbar_tick_params: dict[str, object] = field(default_factory=lambda: {})
     colorbar_label_params: dict[str, object] = field(default_factory=lambda: {})
@@ -232,17 +232,13 @@ class BandStructureConfig(BaseConfig):
     major_x_tick_params: dict[str, object] = field(
         default_factory=lambda: {"which": "major", "axis": "x", "direction": "in"}
     )
-    major_y_locator = None
-    minor_y_locator = None
+    major_y_locator: object | None = None
+    minor_y_locator: object | None = None
 
-    multiple_locator_y_major_value: float = None
-    multiple_locator_y_minor_value: float = None
+    multiple_locator_y_major_value: float | None = None
+    multiple_locator_y_minor_value: float | None = None
 
-    def __post_init__(self):
-        """This method is immediately called after the object is initialized.
-        It is useful to validate the data and set default values.
-        """
-        self.plot_type = PlotType.BAND_STRUCTURE
+    plot_type: PlotType = PlotType.BAND_STRUCTURE
 
     def as_dict(self):
         """

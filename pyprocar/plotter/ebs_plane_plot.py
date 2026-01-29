@@ -3,14 +3,16 @@ from __future__ import annotations
 import logging
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any
+from typing import Any, override
 
+import matplotlib.colors as mcolors
 import matplotlib.pyplot as plt
 import numpy as np
+import pyvista as pv
+from matplotlib import cm
+from matplotlib.colorbar import Colorbar
 from scipy.interpolate import LinearNDInterpolator
 
-from pyprocar.core.property_store import Property
-from pyprocar.plotter.dos_plot import ShowColorbar
 from pyprocar.core.bandstructure2D import (
     find_plane_limits,
     get_orthonormal_basis,
@@ -18,6 +20,8 @@ from pyprocar.core.bandstructure2D import (
     get_uv_grid_points,
     transform_points_to_uv,
 )
+from pyprocar.core.property_store import Property
+from pyprocar.plotter.dos_plot import ShowColorbar
 
 logger = logging.getLogger(__name__)
 
@@ -31,6 +35,7 @@ class PlaneScalarsMode(Enum):
 
     @classmethod
     def from_string(cls, string: str | PlaneScalarsMode) -> PlaneScalarsMode:
+        """Convert a string to a PlaneScalarsMode enum value."""
         if isinstance(string, PlaneScalarsMode):
             return string
         string = string.lower()
@@ -42,7 +47,8 @@ class PlaneScalarsMode(Enum):
         if string in mode_map:
             return mode_map[string]
         valid = ", ".join(mode_map.keys())
-        raise ValueError(f"Invalid scalars mode: {string}. Valid modes: {valid}")
+        msg = f"Invalid scalars mode: {string}. Valid modes: {valid}"
+        raise ValueError(msg)
 
 
 @dataclass
@@ -69,33 +75,62 @@ class PlaneSeries:
 
 
 class EBSPlanePlotter:
+    """Plotter for electronic band structure plane slices."""
+
+    ebs_mesh: pv.PolyData
+    normal: tuple[float, float, float]
+    origin: tuple[float, float, float]
+    grid_interpolation: tuple[int, int]
+    fig: plt.Figure
+    ax: plt.Axes
+    values_dict: dict[str, np.ndarray]
+    u: np.ndarray
+    v: np.ndarray
+    plane_points: np.ndarray
+    u_grid: np.ndarray
+    v_grid: np.ndarray
+    uv_grid_points: np.ndarray
+    n_points: int
+    scalar_name: str
+    scalar_plot: object
+    vector_name: str
+    vector_plot: object
+    colorbars: list[Colorbar]
+
     def __init__(
         self,
-        ebs_mesh,
-        normal=(0, 0, 1),
-        origin=(0, 0, 0),
-        grid_interpolation=(20, 20),
-        ax=None,
-        figsize=(8, 7),
-        dpi=100,
-    ):
+        ebs_mesh: pv.PolyData,
+        normal: tuple[float, float, float] = (0, 0, 1),
+        origin: tuple[float, float, float] = (0, 0, 0),
+        grid_interpolation: tuple[int, int] = (20, 20),
+        ax: plt.Axes | None = None,
+        figsize: tuple[int, int] = (8, 7),
+        dpi: int = 100,
+    ) -> None:
         self.ebs_mesh = ebs_mesh
         self.normal = normal
         self.origin = origin
         self.grid_interpolation = grid_interpolation
 
-        slice = ebs_mesh.slice(normal=normal, origin=origin)
+        slice_data = ebs_mesh.slice(normal=normal, origin=origin)
 
         if ax is None:
             self.fig, self.ax = plt.subplots(figsize=figsize, dpi=dpi)
         else:
-            self.fig = ax.get_figure()
+            fig = ax.get_figure()
+            assert fig is not None
+            self.fig = fig
             self.ax = ax
 
         self.values_dict = {}
+        self.scalar_name = ""
+        self.scalar_plot = None
+        self.vector_name = ""
+        self.vector_plot = None
+        self.colorbars = []
 
-        self.u, self.v = get_orthonormal_basis(normal=normal)
-        self.plane_points = transform_points_to_uv(slice.points, self.u, self.v)
+        self.u, self.v = get_orthonormal_basis(normal=np.array(normal))
+        self.plane_points = transform_points_to_uv(slice_data.points, self.u, self.v)
         u_limits, v_limits = find_plane_limits(self.plane_points)
 
         self.u_grid, self.v_grid = get_uv_grid(
@@ -106,7 +141,8 @@ class EBSPlanePlotter:
 
         self.n_points = self.uv_grid_points.shape[0]
 
-    def interpolate_values(self, values: np.ndarray):
+    def interpolate_values(self, values: np.ndarray) -> np.ndarray:
+        """Interpolate values from plane slice points to UV grid."""
         if values.shape[-1] != 3:
             new_values = np.zeros(self.n_points)
             interpolator = LinearNDInterpolator(self.plane_points, values)
@@ -118,10 +154,12 @@ class EBSPlanePlotter:
                 new_values[..., icoord] = interpolator(self.uv_grid_points)
         return new_values
 
-    def points_to_grid(self, points: np.ndarray):
+    def points_to_grid(self, points: np.ndarray) -> np.ndarray:
+        """Reshape flat points array to match the UV grid shape."""
         return points.reshape(self.u_grid.shape)
 
-    def project_vector_to_plane(self, vectors: np.ndarray):
+    def project_vector_to_plane(self, vectors: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+        """Project 3D vectors onto the plane's UV basis."""
         velocity_u = np.dot(vectors, self.u)
         velocity_v = np.dot(vectors, self.v)
         return velocity_u, velocity_v
@@ -130,7 +168,7 @@ class EBSPlanePlotter:
         self,
         scalars_data: Property | tuple[str, np.ndarray] | None = None,
         vectors_data: Property | tuple[str, np.ndarray] | None = None,
-        **kwargs,
+        **kwargs: Any,
     ) -> PlaneSeries:
         """Convert Property objects or tuples to PlaneSeries for plotting.
 
@@ -141,14 +179,15 @@ class EBSPlanePlotter:
             vectors_data: Property or (name, array) tuple for vector arrows
             **kwargs: Additional kwargs to include in series
 
-        Returns:
+        Returns
+        -------
             PlaneSeries with interpolated data ready for rendering
         """
         # Extract scalars
-        scalars_grid = None
-        s_label = None
-        s_unit = None
-        s_lim = None
+        scalars_grid: np.ndarray | None = None
+        s_label: str | None = None
+        s_unit: str | None = None
+        s_lim: tuple[float, float] | None = None
 
         if scalars_data is not None:
             if isinstance(scalars_data, Property):
@@ -173,12 +212,12 @@ class EBSPlanePlotter:
             scalars_grid = self.points_to_grid(scalars_grid_flat)
 
         # Extract vectors
-        vectors_u_grid = None
-        vectors_v_grid = None
-        vectors_magnitude_grid = None
-        v_label = None
-        v_unit = None
-        v_lim = None
+        vectors_u_grid: np.ndarray | None = None
+        vectors_v_grid: np.ndarray | None = None
+        vectors_magnitude_grid: np.ndarray | None = None
+        v_label: str | None = None
+        v_unit: str | None = None
+        v_lim: tuple[float, float] | None = None
 
         if vectors_data is not None:
             if isinstance(vectors_data, Property):
@@ -242,7 +281,7 @@ class EBSPlanePlotter:
         vectors_scale: float | None = None,
         vectors_arrow_length_factor: float = 1.0,
         contour_levels: int = 10,
-        **kwargs,
+        **kwargs: Any,
     ) -> dict[str, Any]:
         """Plot plane slice data from Property objects or legacy tuples.
 
@@ -382,8 +421,8 @@ class EBSPlanePlotter:
         clim: tuple[float, float] | None,
         alpha: float,
         shading: str = "gouraud",
-        **kwargs,
-    ):
+        **kwargs: Any,
+    ) -> object:
         """Add pcolormesh plot for scalar data."""
         return self.ax.pcolormesh(
             series.u_grid,
@@ -392,7 +431,7 @@ class EBSPlanePlotter:
             cmap=cmap,
             clim=clim,
             alpha=alpha,
-            shading=shading,  # type: ignore[arg-type]
+            shading=shading,
             **kwargs,
         )
 
@@ -402,8 +441,8 @@ class EBSPlanePlotter:
         cmap: str,
         clim: tuple[float, float] | None,
         levels: int,
-        **kwargs,
-    ):
+        **kwargs: Any,
+    ) -> object:
         """Add contour line plot for scalar data."""
         vmin = clim[0] if clim is not None else None
         vmax = clim[1] if clim is not None else None
@@ -425,8 +464,8 @@ class EBSPlanePlotter:
         clim: tuple[float, float] | None,
         alpha: float,
         levels: int,
-        **kwargs,
-    ):
+        **kwargs: Any,
+    ) -> object:
         """Add filled contour plot for scalar data."""
         vmin = clim[0] if clim is not None else None
         vmax = clim[1] if clim is not None else None
@@ -453,8 +492,8 @@ class EBSPlanePlotter:
         angles: str = "uv",
         scale_units: str = "inches",
         units: str = "inches",
-        **kwargs,
-    ):
+        **kwargs: Any,
+    ) -> object:
         """Add quiver plot for vector data."""
         if series.vectors_u is None or series.vectors_v is None or series.vectors_magnitude is None:
             raise ValueError("Series must have vector data for quiver plot")
@@ -467,12 +506,12 @@ class EBSPlanePlotter:
 
         # Auto-scale if not provided
         if scale is None:
-            scale = magnitude.max() * 3 if magnitude.max() > 0 else 1.0
+            scale = float(magnitude.max() * 3) if magnitude.max() > 0 else 1.0
         scale = scale / arrow_length_factor
 
-        vmin = clim[0] if clim is not None else magnitude.min()
-        vmax = clim[1] if clim is not None else magnitude.max()
-        norm = plt.Normalize(vmin=vmin, vmax=vmax)  # type: ignore[attr-defined]
+        vmin = clim[0] if clim is not None else float(magnitude.min())
+        vmax = clim[1] if clim is not None else float(magnitude.max())
+        norm = mcolors.Normalize(vmin=vmin, vmax=vmax)
         cmap_obj = plt.get_cmap(cmap)
 
         return self.ax.quiver(
@@ -492,17 +531,17 @@ class EBSPlanePlotter:
 
     def _add_colorbar(
         self,
-        mappable,
+        mappable: object | None,
         label: str,
         cmap: str,
         clim: tuple[float, float] | None,
-        **kwargs,
-    ):
+        **kwargs: Any,
+    ) -> Colorbar | None:
         """Add colorbar for a plot."""
         if mappable is None and clim is not None:
             # Create ScalarMappable for colorbar
-            norm = plt.Normalize(vmin=clim[0], vmax=clim[1])  # type: ignore[attr-defined]
-            sm = plt.cm.ScalarMappable(norm=norm, cmap=plt.get_cmap(cmap))
+            norm = mcolors.Normalize(vmin=clim[0], vmax=clim[1])
+            sm = cm.ScalarMappable(norm=norm, cmap=plt.get_cmap(cmap))
             sm.set_array([])
             mappable = sm
 
@@ -544,11 +583,12 @@ class EBSPlanePlotter:
         possible_file_types = ["csv", "txt", "json", "dat"]
         file_type = filename.split(".")[-1]
         if file_type not in possible_file_types:
-            raise ValueError(f"File type must be one of {possible_file_types}")
+            msg = f"File type must be one of {possible_file_types}"
+            raise ValueError(msg)
         if not self.values_dict:
             raise ValueError("No values recorded. Plot first before exporting.")
 
-        values = {k: v for k, v in self.values_dict.items() if v is not None}
+        values = dict(self.values_dict)
 
         if file_type in ["csv", "txt", "dat"]:
             df = pd.DataFrame(values)
@@ -571,27 +611,27 @@ class EBSPlanePlotter:
             ylim = (self.v_grid.min(), self.v_grid.max())
         self.ax.set_ylim(ylim)
 
-    def set_xlabel(self, label: str = r"k$_u$ (1/$\AA$)", **kwargs) -> None:
+    def set_xlabel(self, label: str = r"k$_u$ (1/$\AA$)", **kwargs: Any) -> None:
         """Set x-axis label."""
         self.ax.set_xlabel(label, **kwargs)
 
-    def set_ylabel(self, label: str = r"k$_v$ (1/$\AA$)", **kwargs) -> None:
+    def set_ylabel(self, label: str = r"k$_v$ (1/$\AA$)", **kwargs: Any) -> None:
         """Set y-axis label."""
         self.ax.set_ylabel(label, **kwargs)
 
     def set_aspect(self, aspect: str = "equal") -> None:
         """Set axis aspect ratio."""
-        self.ax.set_aspect(aspect)  # type: ignore[arg-type]
+        self.ax.set_aspect(aspect)
 
     def draw_origin(
         self,
         marker: str = "+",
         color: str = "white",
         markersize: int = 10,
-        **kwargs,
+        **kwargs: Any,
     ) -> None:
         """Draw marker at origin (0, 0)."""
-        self.ax.plot(0, 0, marker=marker, color=color, markersize=markersize, **kwargs)
+        self.ax.plot([0.0], [0.0], marker=marker, color=color, markersize=markersize, **kwargs)
 
     def grid(
         self,
@@ -599,7 +639,7 @@ class EBSPlanePlotter:
         color: str = "#cccccc",
         linestyle: str = ":",
         linewidth: float = 0.5,
-        **kwargs,
+        **kwargs: Any,
     ) -> None:
         """Configure grid display."""
         self.ax.grid(enabled, color=color, linestyle=linestyle, linewidth=linewidth, **kwargs)
@@ -613,8 +653,8 @@ class EBSPlanePlotter:
         clim: tuple[float, float] | None = None,
         shading: str = "gouraud",
         alpha: float = 0.7,
-        **kwargs,
-    ):
+        **kwargs: Any,
+    ) -> None:
         """Plot scalar field on the plane slice.
 
         This is the legacy API method. For the modern API, use plot().
@@ -646,7 +686,7 @@ class EBSPlanePlotter:
                 self.u_grid,
                 self.v_grid,
                 scalars_grid,
-                shading=shading,  # type: ignore[arg-type]
+                shading=shading,
                 cmap=cmap,
                 alpha=alpha,
                 clim=clim,
@@ -663,7 +703,9 @@ class EBSPlanePlotter:
                 else:
                     finite = series.scalars[np.isfinite(series.scalars)]
                     resolved_clim = (
-                        (float(finite.min()), float(finite.max())) if len(finite) > 0 else (0.0, 1.0)
+                        (float(finite.min()), float(finite.max()))
+                        if len(finite) > 0
+                        else (0.0, 1.0)
                     )
 
             self.scalar_name = series.scalars_label or name
@@ -681,18 +723,18 @@ class EBSPlanePlotter:
         name: str = "",
         scalar_name: str = "",
         plot_scalar: bool = False,
-        plot_scalar_args: dict | None = None,
+        plot_scalar_args: dict[str, Any] | None = None,
         angles: str = "uv",
         scale: float | None = None,
         arrow_length_factor: float = 1.0,
         arrow_skip: int = 1,
         scale_units: str = "inches",
         units: str = "inches",
-        color=None,
+        color: str | None = None,
         cmap: str = "plasma",
         clim: tuple[float, float] | None = None,
-        **kwargs,
-    ):
+        **kwargs: Any,
+    ) -> None:
         """Plot vector field on the plane slice.
 
         This is the legacy API method. For the modern API, use plot().
@@ -735,7 +777,7 @@ class EBSPlanePlotter:
             grid_u_vec = self.points_to_grid(velocity_u)
             grid_v_vec = self.points_to_grid(velocity_v)
 
-            quiver_args = []
+            quiver_args: list[np.ndarray] = []
             quiver_args.append(self.u_grid[::arrow_skip, ::arrow_skip])
             quiver_args.append(self.v_grid[::arrow_skip, ::arrow_skip])
             quiver_args.append(grid_u_vec[::arrow_skip, ::arrow_skip])
@@ -745,15 +787,15 @@ class EBSPlanePlotter:
                 quiver_args.append(magnitude_grid_points)
 
             if scale is None:
-                scale = magnitude_grid_points.max() * 3
+                scale = float(magnitude_grid_points.max() * 3)
             scale = scale / arrow_length_factor
 
             cmap_obj = plt.get_cmap(cmap)
             if clim is not None:
-                norm = plt.Normalize(vmin=clim[0], vmax=clim[1])
+                norm = mcolors.Normalize(vmin=clim[0], vmax=clim[1])
             else:
-                norm = plt.Normalize(
-                    vmin=magnitude_grid_points.min(), vmax=magnitude_grid_points.max()
+                norm = mcolors.Normalize(
+                    vmin=float(magnitude_grid_points.min()), vmax=float(magnitude_grid_points.max())
                 )
 
             if plot_scalar and not hasattr(self, "scalar_plot"):
@@ -803,11 +845,13 @@ class EBSPlanePlotter:
                     vectors_unit=None,
                     vectors_lim=None,
                 )
-                resolved_clim = plot_scalar_args.get("clim")
+                resolved_clim: tuple[float, float] | None = plot_scalar_args.get("clim")
                 if resolved_clim is None and magnitude_series.scalars is not None:
                     finite = magnitude_series.scalars[np.isfinite(magnitude_series.scalars)]
                     resolved_clim = (
-                        (float(finite.min()), float(finite.max())) if len(finite) > 0 else (0.0, 1.0)
+                        (float(finite.min()), float(finite.max()))
+                        if len(finite) > 0
+                        else (0.0, 1.0)
                     )
 
                 self.scalar_name = scalar_n
@@ -819,20 +863,22 @@ class EBSPlanePlotter:
                 )
 
             # Resolve clim for vectors
-            resolved_clim = clim
-            if resolved_clim is None and series.vectors_magnitude is not None:
+            resolved_vclim = clim
+            if resolved_vclim is None and series.vectors_magnitude is not None:
                 if series.vectors_lim is not None:
-                    resolved_clim = series.vectors_lim
+                    resolved_vclim = series.vectors_lim
                 else:
                     finite = series.vectors_magnitude[np.isfinite(series.vectors_magnitude)]
-                    resolved_clim = (
-                        (float(finite.min()), float(finite.max())) if len(finite) > 0 else (0.0, 1.0)
+                    resolved_vclim = (
+                        (float(finite.min()), float(finite.max()))
+                        if len(finite) > 0
+                        else (0.0, 1.0)
                     )
 
             self.vector_plot = self._add_quiver(
                 series,
                 cmap,
-                resolved_clim,
+                resolved_vclim,
                 arrow_skip,
                 scale,
                 arrow_length_factor,
@@ -852,13 +898,14 @@ class EBSPlanePlotter:
         label: str = "",
         vector_label: str = "",
         scalar_label: str = "",
-        vector_colorbar_args: dict = None,
-        scalar_colorbar_args: dict = None,
-        **kwargs,
-    ):
-        plot_handles = []
-        labels = []
-        colorbar_args_list = []
+        vector_colorbar_args: dict[str, Any] | None = None,
+        scalar_colorbar_args: dict[str, Any] | None = None,
+        **kwargs: Any,
+    ) -> None:
+        """Show colorbar for scalar and/or vector plot."""
+        plot_handles: list[object] = []
+        labels: list[str] = []
+        colorbar_args_list: list[dict[str, Any]] = []
         vector_colorbar_args = vector_colorbar_args if vector_colorbar_args is not None else {}
         scalar_colorbar_args = scalar_colorbar_args if scalar_colorbar_args is not None else {}
 
@@ -866,7 +913,7 @@ class EBSPlanePlotter:
             plot_handles = [self.scalar_plot, self.vector_plot]
             labels = [scalar_label or f"{self.scalar_name}", vector_label or f"{self.vector_name}"]
             colorbar_args_list = []
-            tmp_colorbar_args = kwargs.copy()
+            tmp_colorbar_args: dict[str, Any] = kwargs.copy()
             tmp_colorbar_args.update(scalar_colorbar_args)
             colorbar_args_list.append(tmp_colorbar_args)
             tmp_colorbar_args = kwargs.copy()
@@ -878,12 +925,8 @@ class EBSPlanePlotter:
             tmp_colorbar_args = kwargs.copy()
             tmp_colorbar_args.update(vector_colorbar_args)
             colorbar_args_list = [tmp_colorbar_args]
-        elif (
-            show_scalars
-            and hasattr(self, "scalar_plot")
-            or not show_vectors
-            and not show_scalars
-            and hasattr(self, "scalar_plot")
+        elif (show_scalars and hasattr(self, "scalar_plot")) or (
+            not show_vectors and not show_scalars and hasattr(self, "scalar_plot")
         ):
             plot_handles = [self.scalar_plot]
             labels = [label or f"{self.scalar_name}"]
@@ -900,46 +943,61 @@ class EBSPlanePlotter:
             raise ValueError("No plot to show colorbar for")
 
         self.colorbars = []
-        for plot_handle, label, colorbar_args in zip(plot_handles, labels, colorbar_args_list):
-            self.colorbars.append(self.fig.colorbar(plot_handle, label=label, **colorbar_args))
+        for plot_handle, cb_label, colorbar_args in zip(plot_handles, labels, colorbar_args_list):
+            self.colorbars.append(self.fig.colorbar(plot_handle, label=cb_label, **colorbar_args))
 
-    def set_xaxis(self, label: str = "k$_u$ (1/Å)", fontsize: int = 12, **kwargs):
+    def set_xaxis(
+        self, label: str = r"k$_u$ (1/\u00c5)", fontsize: int = 12, **kwargs: Any
+    ) -> None:
+        """Set x-axis label."""
         self.ax.set_xlabel(label, fontsize=fontsize, **kwargs)
 
-    def set_yaxis(self, label: str = "k$_v$ (1/Å)", fontsize: int = 12, **kwargs):
+    def set_yaxis(
+        self, label: str = r"k$_v$ (1/\u00c5)", fontsize: int = 12, **kwargs: Any
+    ) -> None:
+        """Set y-axis label."""
         self.ax.set_ylabel(label, fontsize=fontsize, **kwargs)
 
-    def set_title(self, title: str = None, fontsize: int = 12, **kwargs):
+    def set_title(
+        self, title: str | None = None, fontsize: int = 12, **kwargs: Any
+    ) -> object | None:
+        """Set plot title."""
         if title is not None:
             return self.ax.set_title(title, fontsize=fontsize, **kwargs)
 
-        if hasattr(self, "scalar_plot"):
+        if hasattr(self, "scalar_plot") and hasattr(self, "vector_plot"):
+            title = f"Scalar {self.scalar_name} and Vector {self.vector_name} Field Plot"
+        elif hasattr(self, "scalar_plot"):
             title = f"Scalar {self.scalar_name} Contour Plot"
         elif hasattr(self, "vector_plot"):
             title = f"Vector {self.vector_name} Field Plot"
-        elif hasattr(self, "scalar_plot") and hasattr(self, "vector_plot"):
-            title = f"Scalar {self.scalar_name} and Vector {self.vector_name} Field Plot"
         else:
             title = ""
         title = title.replace("  ", " ")
         return self.ax.set_title(title, fontsize=fontsize, **kwargs)
 
-    def set_default_params(self):
+    def set_default_params(self) -> None:
+        """Apply default axis labels and title."""
         self.set_xaxis()
         self.set_yaxis()
         self.set_title()
 
-    def show(self, **kwargs):
+    def show(self, **kwargs: Any) -> None:
+        """Display the plot."""
         plt.show(**kwargs)
 
-    def savefig(self, filename: str, **kwargs):
+    def savefig(self, filename: str, **kwargs: Any) -> None:
+        """Save the plot to a file."""
         plt.savefig(filename, **kwargs)
 
-    def close(self, **kwargs):
+    def close(self, **kwargs: Any) -> None:
+        """Close the plot."""
         plt.close(**kwargs)
 
-    def __str__(self):
+    @override
+    def __str__(self) -> str:
         return f"EBSPlanePlotter(ebs_mesh={self.ebs_mesh})"
 
-    def __repr__(self):
+    @override
+    def __repr__(self) -> str:
         return f"EBSPlanePlotter(ebs_mesh={self.ebs_mesh})"

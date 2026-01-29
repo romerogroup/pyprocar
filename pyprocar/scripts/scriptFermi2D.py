@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 __author__ = "Pedram Tavadze and Logan Lang"
 __maintainer__ = "Pedram Tavadze and Logan Lang"
 __email__ = "petavazohi@mail.wvu.edu, lllang@mix.wvu.edu"
@@ -5,8 +7,12 @@ __date__ = "December 01, 2020"
 
 import logging
 from enum import Enum
+from typing import Any
 
 import matplotlib.pyplot as plt
+import numpy as np
+from matplotlib.axes import Axes
+from matplotlib.figure import Figure
 
 from pyprocar.core import FermiSurface
 from pyprocar.plotter import FermiSlicePlotter
@@ -27,28 +33,28 @@ def fermi2D(
     code: str,
     dirname: str,
     mode: Fermi2DMode = Fermi2DMode.plain,
-    fermi: float = None,
-    band_indices: list[list] = None,
-    spins: list[int] = None,
-    atoms: list[int] = None,
-    orbitals: list[int] = None,
+    fermi: float | None = None,
+    band_indices: list[list[int]] | None = None,
+    spins: list[int] | None = None,
+    atoms: list[int] | None = None,
+    orbitals: list[int] | None = None,
     energy: float = 0.0,
     k_z_plane: float = 0.0,
     show: bool = True,
-    savefig: str = None,
-    extend_zone_directions: list[list[int] | tuple] = None,
+    savefig: str | None = None,
+    extend_zone_directions: list[list[int] | tuple[int, int, int]] | None = None,
     show_colorbar: bool = True,
-    plot_line_kwargs: dict = None,
+    plot_line_kwargs: dict[str, Any] | None = None,
     plot_arrows: bool = True,
-    plot_arrows_kwargs: dict = None,
-    show_colorbar_kwargs: dict = None,
+    plot_arrows_kwargs: dict[str, Any] | None = None,
+    show_colorbar_kwargs: dict[str, Any] | None = None,
     use_cache: bool = False,
-    verbose: int = 1,
+    _verbose: int = 1,
     padding: int = 10,
-    figsize: tuple[float, float] = (8, 6),
+    figsize: tuple[int, int] = (8, 6),
     dpi: int = 100,
-    ax: plt.Axes = None,
-):
+    ax: Axes | None = None,
+) -> tuple[Figure, Axes]:
     """Plot the 2D Fermi surface in a constant k_z plane.
 
     This function generates 2D Fermi surface plots by slicing the 3D Fermi surface
@@ -200,7 +206,6 @@ def fermi2D(
     >>> fermi2D(code='vasp', dirname='calculation_dir', mode='spin_texture',
     ...         spin_projection='z', plot_arrows=True)
     """
-
     user_logger.info("If you want more detailed logs, set verbose to 2 or more")
     user_logger.info("_" * 100)
 
@@ -247,17 +252,18 @@ def fermi2D(
     logger.info(f"Created Fermi surface: {fs}")
 
     # Calculate slice properties based on mode and spin texture
-    if mode in [Fermi2DMode.plain.value, Fermi2DMode.plain_bands.value]:
+    property_name: str | None = None
+    if mode in [Fermi2DMode.plain, Fermi2DMode.plain_bands]:
         property_name = None
-    elif mode == Fermi2DMode.parametric.value:
+    elif mode == Fermi2DMode.parametric:
         property_name = "projected_sum"
         fs.get_property(property_name, atoms=atoms, orbitals=orbitals, spins=spins)
 
-    elif mode == Fermi2DMode.spin_texture.value and fs.ebs.is_non_collinear:
+    elif mode == Fermi2DMode.spin_texture and fs.ebs.is_non_collinear:
         property_name = "projected_sum_spin_texture"
         fs.get_property(property_name, atoms=atoms, orbitals=orbitals)
 
-    elif mode == Fermi2DMode.spin_texture.value and not fs.ebs.is_non_collinear:
+    elif mode == Fermi2DMode.spin_texture and not fs.ebs.is_non_collinear:
         raise ValueError("Spin texture is only available for non-collinear calculations")
 
     else:
@@ -269,8 +275,8 @@ def fermi2D(
         fs = fs.extend_surface(zone_directions=extend_zone_directions)
 
     # Create 2D slice plotter
-    normal = (0, 0, 1)
-    origin = (0, 0, k_z_plane)
+    normal = np.array([0, 0, 1])
+    origin = np.array([0, 0, k_z_plane])
 
     fsplt = FermiSlicePlotter(fs, normal=normal, origin=origin, figsize=figsize, dpi=dpi, ax=ax)
 
@@ -280,13 +286,12 @@ def fermi2D(
     plot_line_kwargs = {} if plot_line_kwargs is None else plot_line_kwargs
 
     # Plot the slice
-    if mode == Fermi2DMode.plain.value or property_name is None:
+    if mode == Fermi2DMode.plain or property_name is None:
         fsplt.plot(plot_arrows=plot_arrows, **plot_line_kwargs)
     else:
-        plot_arrows_kwargs = {} if plot_arrows_kwargs is None else plot_arrows_kwargs
         fsplt.plot(
             scalars_name=property_name,
-            vectors_name=property_name if mode == Fermi2DMode.spin_texture.value else None,
+            vectors_name=property_name if mode == Fermi2DMode.spin_texture else None,
             plot_arrows=plot_arrows,
             plot_arrows_kwargs=plot_arrows_kwargs,
             **plot_line_kwargs,

@@ -1,14 +1,23 @@
 #!/usr/bin/env python3
+from __future__ import annotations
+
 import argparse
 import os
 import re
 
-import defects
-import poscar
+from . import defects, poscar
 
 
 class plotBands:
-    def __init__(self, POSCAR, PROCAR="PROCAR", OUTCAR="OUTCAR", savefigure="savefigure"):
+    poscar: str
+    procar: str
+    outcar: str
+    savefigure: str
+    ORB_Dict: dict[str, list[int]]
+    elimit: list[int]
+    mode_: str
+
+    def __init__(self, POSCAR: str, PROCAR: str = "PROCAR", OUTCAR: str = "OUTCAR", savefigure: str = "savefigure") -> None:
         self.poscar = POSCAR
         self.procar = PROCAR
         self.outcar = OUTCAR
@@ -23,7 +32,7 @@ class plotBands:
         self.elimit = [-2, 2]
         self.mode_ = "parametric"
 
-    def plot(self, orbitals):
+    def plot(self, orbitals: list[str]) -> None:
         """Writes a script that uses pyprocar.bansplot() to plot the bands from a PROCAR and OUTCAR file
         for defect atoms from a given POSCAR file
 
@@ -52,13 +61,14 @@ class plotBands:
         # looking for geometry features
         try:
             Defects = defects.FindDefect(POSCAR_)
-            atoms = Defects.all_defects
+            atoms: list[int] | range = Defects.all_defects
         # if there are none it will fail
         except IndexError:
             atoms = []
         # If no defects were found, default to use all atoms instead
         if atoms == []:
             print("No defects were found on ", self.poscar)
+            assert POSCAR_.Ntotal is not None
             atoms = range(POSCAR_.Ntotal)
         line = "#The defects found on " + self.poscar + " were \n"
         f.write(line)
@@ -69,7 +79,7 @@ class plotBands:
             f.write(str(i).rstrip("\n"))
         f.write("] \n")
 
-        asked_orb = []
+        asked_orb: list[int] = []
         # Picking and writing Orbitals
         for i in orbitals:
             asked_orb += self.ORB_Dict[i]
@@ -116,7 +126,6 @@ class plotBands:
         os.system("chmod +rwx plot_file.py")
         # pyprocar.bandsplot(PROCAR,outcar = outcar, elimit = elimit, mode = mode_,savefig = savefigure ,atoms = atoms, orbitals = asked_orb)
 
-        return
 
 
 if __name__ == "__main__":
@@ -131,19 +140,24 @@ if __name__ == "__main__":
     parser.add_argument("--bandplot", "-b", type=str, default="Band_Plot", help="Plot file name")
     parser.add_argument("--run", action="store_true")
     args = parser.parse_args()
+    orbitals_arg: list[str] = [*"spd"]
+    poscar_arg: str = "POSCAR"
+    procar_arg: str = "PROCAR"
+    outcar_arg: str = "OUTCAR"
+    savefigure_arg: str = "Band_Plot"
     if args.orbitals:
-        orbitals = [*args.orbitals]
+        orbitals_arg = [*args.orbitals]
     if args.poscar:
-        POSCAR = args.poscar
+        poscar_arg = args.poscar
     if args.procar:
-        PROCAR = args.procar
+        procar_arg = args.procar
     if args.outcar:
-        OUTCAR = args.outcar
+        outcar_arg = args.outcar
     if args.bandplot:
-        savefigure = args.bandplot
+        savefigure_arg = args.bandplot
 
-    plotBands(POSCAR=POSCAR, PROCAR=PROCAR, OUTCAR=OUTCAR, savefigure=savefigure).plot(
-        orbitals=orbitals
+    plotBands(POSCAR=poscar_arg, PROCAR=procar_arg, OUTCAR=outcar_arg, savefigure=savefigure_arg).plot(
+        orbitals=orbitals_arg
     )
     if args.run:
         os.system("./plot_file.py")

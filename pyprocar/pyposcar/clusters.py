@@ -1,15 +1,34 @@
+from __future__ import annotations
+
 import copy
 import warnings
+from collections.abc import Set
 
 import numpy as np
 
 from .db import DB
 from .latticeUtils import Neighbors
+from .poscar import Poscar
 from .poscarUtils import poscar_modify
 
 
 class Clusters:
-    def __init__(self, poscar, verbose=False, neighbors=None, marked=None):
+    p: Poscar
+    db: DB
+    clusters: list[list[int]]
+    verbose: bool
+    disable_warning: bool
+    neighbors: Neighbors
+    marked: set[int]
+    initial_marked: set[int]
+
+    def __init__(
+        self,
+        poscar: Poscar,
+        verbose: bool = False,
+        neighbors: Neighbors | None = None,
+        marked: Set[int] | None = None,
+    ) -> None:
         """Class to find and define clusters. There are "marked atoms",
         defined by the used, and the idea is to find, create, increase a
         cluster respect to the marked atoms. Always, the marked atoms
@@ -29,10 +48,12 @@ class Clusters:
         self.verbose = verbose
         self.disable_warning = False
         # calculating the neighbors can be demanding, using them if given
-        self.neighbors = neighbors
-        if self.neighbors is None:
+        if neighbors is None:
             self.neighbors = Neighbors(self.p, verbose=False)
+        else:
+            self.neighbors = neighbors
         if marked is None:
+            assert self.p.Ntotal is not None
             self.marked = set(range(self.p.Ntotal))
         else:
             self.marked = set(marked)
@@ -44,22 +65,24 @@ class Clusters:
             print("\n\nclusters.Clusters.__init__():")
             print("atoms marked", self.marked)
         self.find_clusters()
-        return
 
-    def find_clusters(self):
+    def find_clusters(self) -> None:
         """It find the clusters (in the crystal's lattice) within the
         "marked" atoms
 
         """
         # I will start assuming every atom has its own cluster, the
         # interaction will join the sets
-        clusters = [set([i]) for i in self.marked]
+        clusters: list[set[int]] = [set([i]) for i in self.marked]
         nn_list = self.neighbors.nn_list
+        assert nn_list is not None
 
         # In the main iteration I will modify the contents of `clusters`,
         # then I need to loop over another, immutable object.
 
         # which atoms are connected to atom 0
+        c1: set[int] = set()
+        c2: set[int] = set()
         for atom in self.marked:
             # I need to search for all the pairs of interacctions
             neighbors = nn_list[atom]
@@ -85,31 +108,33 @@ class Clusters:
         if self.verbose:
             print("clusters.Clusters.find_clusters(), clusters:", self.clusters)
         # self._set_nn_clusters()
-        return
 
-    def extend_clusters(self, n=1):
+    def extend_clusters(self, n: int = 1) -> None:
         """
         It 'marks' the first neighbors of a cluster (ie: they are added to
         the cluster). It is performed `n` times
         """
+        nn_list = self.neighbors.nn_list
+        assert nn_list is not None
         # the self.marked object is going to be updated, so better to
         # create a new -static- object list(...)
         for i in range(n):
             if self.verbose:
                 print("clusters.Clusters.extend_clusters()... Iteration", i)
             for atom in list(self.marked):
-                for neighbor in self.neighbors.nn_list[atom]:
+                for neighbor in nn_list[atom]:
                     self.marked.add(neighbor)
             self.find_clusters()
             if self.verbose:
                 print("clusters.Clusters.extend_clusters()... clusters:", self.clusters)
 
-    def write(self, filename):
+    def write(self, filename: str) -> None:
         # the poscar object should not be modified
         pu = poscar_modify(copy.deepcopy(self.p), verbose=False)
         # a set with all atoms
-        to_remove = set(list(range(pu.p.Ntotal)))
-        to_remove = list(to_remove - self.marked)
+        assert pu.p.Ntotal is not None
+        to_remove_set = set(list(range(pu.p.Ntotal)))
+        to_remove = list(to_remove_set - self.marked)
         if self.verbose:
             print("cluster.Cluster.write() ... atoms to remove")
             print(to_remove)
@@ -118,7 +143,12 @@ class Clusters:
             print("cluster.Cluster.write() ... going to write ", filename)
         pu.write(filename)
 
-    def smooth_edges(self, ignoreH=False, coordination=1, preserve_original=True):
+    def smooth_edges(
+        self,
+        ignoreH: bool = False,
+        coordination: int = 1,
+        preserve_original: bool = True,
+    ) -> None:
         """It removes all the 'marked' atoms with coordination equal or lower
         than `coordination`. It is useful to invoke after
         Clusters.extend_clusters()
@@ -133,8 +163,10 @@ class Clusters:
 
         """
         nn_list = self.neighbors.nn_list
+        assert nn_list is not None
+        assert self.p.elm is not None
         # not removing while iteration
-        to_unmark = []
+        to_unmark_list: list[int] = []
         if self.verbose:
             print("clusters.Cluster.smooth_edges(): ... looking for undercoordinate edges")
         for i in self.marked:
@@ -147,15 +179,18 @@ class Clusters:
                 cutoff = coordination
 
             if cluster_coord <= cutoff:
-                to_unmark.append(i)
+                to_unmark_list.append(i)
                 if self.verbose:
                     print("atom", i, nn, ". cluster coordination", cluster_coord)
         # The atoms marked as "defects" should not be unmarked, it would
         # change the physics
         if self.verbose:
-            print("undercoordinate atoms:", to_unmark)
+            print("undercoordinate atoms:", to_unmark_list)
+        to_unmark: set[int]
         if preserve_original:
-            to_unmark = set(to_unmark) - self.initial_marked
+            to_unmark = set(to_unmark_list) - self.initial_marked
+        else:
+            to_unmark = set(to_unmark_list)
         if self.verbose:
             print("excluding the initial set of marked atoms,")
             print("undercoordinate atoms:", to_unmark)
@@ -165,7 +200,7 @@ class Clusters:
             print("clusters.Clusters.smooth_edges() ... atoms removed (dangling bonds)")
             print(to_unmark)
 
-    def hydrogenate(self, filename=None):
+    def hydrogenate(self, filename: str | None = None) -> Poscar:
         """It replaces a 'non-marked' nearest neighbor by of the lattice by a H atom.
 
         The angles (directions) of the bonds are the same of the
@@ -182,9 +217,15 @@ class Clusters:
         # I need to iterate over static elements, so better to use a list
         # instead of a set.
         marked = list(self.marked)
+        nn_list = self.neighbors.nn_list
+        assert nn_list is not None
+        assert self.p.dpos is not None
+        assert self.p.cpos is not None
+        assert self.p.lat is not None
+        assert self.p.elm is not None
         # the nearest neighbors need to be converted to sets. Only for
         # marked atoms.
-        nn_set = [set(self.neighbors.nn_list[atom]) for atom in marked]
+        nn_set = [set(nn_list[atom]) for atom in marked]
         if self.verbose:
             print("marked atoms and their neigbors")
             print(list(zip(marked, nn_set)))
@@ -194,11 +235,11 @@ class Clusters:
             print("missing_atoms", missing_atoms)
 
         # second, adding the H atoms
-        new_H_atoms = []
+        new_H_atoms: list[np.ndarray] = []
         #  Suppose that atoms 1,2 have a common missing neighbor. The
         #  following procedure could have two very close H atoms. I don't
         #  know what to do. But at least print a warning to the user
-        missing_used = []
+        missing_used: list[int] = []
         for atom, mas in zip(marked, missing_atoms):
             if len(mas) > 0 and self.verbose:
                 print("atom", atom, "missing atom", mas)
@@ -223,15 +264,15 @@ class Clusters:
                 # delta is the vector to put the H atom
                 delta = p1 - p0
                 shift = np.array([0, 0, 0])
-                # shifted = False
+                # _shifted = False
                 for i in [0, 1, 2]:
                     if delta[i] > 0.5:
-                        shifted = True
+                        _shifted = True
                         shift[i] = -1
                     elif delta[i] < -0.5:
-                        shifted = True
+                        _shifted = True
                         shift[i] = 1
-                # if shifted:
+                # if _shifted:
                 #   print('delta (rec)', delta)
                 #   print('shift direct',shift)
                 # Now that we have the rigth lattice shift, we will aply it to
@@ -248,7 +289,7 @@ class Clusters:
                 shift = np.dot(shift, self.p.lat)
                 delta = p1 - p0 + shift
                 # print('p0', p0, 'p1', p1, 'shift', shift, 'delta', delta)
-                # if shifted:
+                # if _shifted:
                 #   print('shift cart', shift)
                 #   print('p1', p1)
                 #   print('p0', p0)
@@ -259,7 +300,7 @@ class Clusters:
                 bond_length = 1.08  # self.db.estimateBond(self.p.elm[atom], self.p.elm[ma])
                 new_H_pos = p0 + delta * bond_length
                 # print('new_H_pos',new_H_pos )
-                # if shifted:
+                # if _shifted:
                 #   print('adding H at', atom, p0,p1, new_H_pos)
                 # only left to add a 'H' atom to the poscar, and mark it
                 new_H_atoms.append(new_H_pos)
@@ -282,8 +323,9 @@ class Clusters:
             )
         pu = poscar_modify(copy.deepcopy(self.p), verbose=False)
         # a set with all atoms, then removing all non-marked atoms
-        to_remove = set(list(range(pu.p.Ntotal)))
-        to_remove = list(to_remove - self.marked)
+        assert pu.p.Ntotal is not None
+        to_remove_set = set(list(range(pu.p.Ntotal)))
+        to_remove = list(to_remove_set - self.marked)
         pu.remove(to_remove)
         # adding the new H atoms
         [pu.add("H", x, cartesian=True) for x in new_H_atoms]

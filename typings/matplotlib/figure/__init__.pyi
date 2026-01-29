@@ -3,9 +3,12 @@
 from collections.abc import Sequence
 
 from matplotlib.axes import Axes
+from matplotlib.colorbar import Colorbar
 
 class Figure:
     """Matplotlib Figure class."""
+
+    axes: list[Axes]
 
     def __init__(
         self,
@@ -52,10 +55,23 @@ class Figure:
         w_pad: float | None = ...,
         rect: Sequence[float] | None = ...,
     ) -> None: ...
+    def set_size_inches(
+        self,
+        w: float | tuple[float, float],
+        h: float | None = ...,
+        forward: bool = ...,
+    ) -> None: ...
     def suptitle(
         self,
         t: str,
         **kwargs: object,
     ) -> object: ...
+    def colorbar(
+        self,
+        mappable: object,
+        cax: Axes | None = ...,
+        ax: Axes | None = ...,
+        **kwargs: object,
+    ) -> Colorbar: ...
 
 __all__ = ["Figure"]

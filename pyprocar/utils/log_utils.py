@@ -1,5 +1,8 @@
+from __future__ import annotations
+
 import logging
 import logging.config
+from typing import override
 
 
 def set_verbose_level(verbose: int):
@@ -18,15 +21,16 @@ def set_verbose_level(verbose: int):
 
 
 class UserFriendlyFormatter(logging.Formatter):
-    """Custom formatter that makes warnings and errors more noticeable to users"""
+    """Custom formatter that makes warnings and errors more noticeable to users."""
 
     # ANSI color codes for terminal output
-    YELLOW = "\033[93m"  # Warning
-    RED = "\033[91m"  # Error/Critical
-    BOLD = "\033[1m"  # Bold text
-    RESET = "\033[0m"  # Reset formatting
+    YELLOW: str = "\033[93m"  # Warning
+    RED: str = "\033[91m"  # Error/Critical
+    BOLD: str = "\033[1m"  # Bold text
+    RESET: str = "\033[0m"  # Reset formatting
 
-    def format(self, record):
+    @override
+    def format(self, record: logging.LogRecord) -> str:
         # Default format for regular messages
         self._style._fmt = "%(message)s"
 

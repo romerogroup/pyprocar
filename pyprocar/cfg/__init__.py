@@ -1,8 +1,8 @@
-from typing import Any
+from typing import Any, assert_never
 
 from pyprocar.cfg.band_structure import BandStructureConfig
 from pyprocar.cfg.band_structure_2d import Bandstructure2DConfig
-from pyprocar.cfg.base import BaseConfig, PlotType
+from pyprocar.cfg.base import BaseConfig as BaseConfig, PlotType as PlotType
 from pyprocar.cfg.dos import DensityOfStatesConfig
 from pyprocar.cfg.fermi_surface_2d import FermiSurface2DConfig
 from pyprocar.cfg.fermi_surface_3d import FermiSurface3DConfig
@@ -51,7 +51,7 @@ class ConfigFactory:
         elif plot_type == PlotType.FERMI_SURFACE_2D:
             return FermiSurface2DConfig(plot_type=plot_type, **kwargs)
         else:
-            raise ValueError(f"Unknown plot type: {plot_type}")
+            assert_never(plot_type)
 
 
 class ConfigManager:

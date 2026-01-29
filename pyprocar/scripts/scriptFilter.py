@@ -5,14 +5,14 @@ from pyprocar.utils.splash import welcome
 def filter(
     inFile: str,
     outFile: str,
-    atoms: list[int] = None,
-    orbitals: list[int] = None,
-    orbital_names: list[str] = None,
-    bands: list[int] = None,
-    spin=None,
-    kpoints=None,
+    atoms: list[int] | None = None,
+    orbitals: list[int] | None = None,
+    orbital_names: list[str] | None = None,
+    bands: list[int] | None = None,
+    spin: list[int] | None = None,
+    kpoints: list[int] | None = None,
     human_atoms: bool = False,
-):
+) -> None:
     """This module filters the PROCAR file and re-write a new one.
 
     Parameters
@@ -64,11 +64,14 @@ def filter(
         print("Manipulating the atoms")
 
         if human_atoms:
-            atoms = [[y - 1 for y in x] for x in atoms]
+            atoms = [x - 1 for x in atoms]
             print("new atoms list :", atoms)
 
         # Now just left to call the driver member
-        FileFilter.FilterAtoms(atoms)
+        # FilterAtoms accepts list[list[int] | int]; list invariance requires
+        # an intermediate variable typed as the union list.
+        atoms_groups: list[list[int] | int] = list(atoms)
+        FileFilter.FilterAtoms(atoms_groups)
 
     # for orbitals
     elif orbitals:
@@ -81,7 +84,10 @@ def filter(
         if len(orbitals) != len(orbital_names):
             raise RuntimeError("length of orbitals and orbitals names do not match")
 
-        FileFilter.FilterOrbitals(orbitals, orbital_names)
+        # FilterOrbitals expects list[list[int]]; wrap each orbital index
+        # in a single-element list to match the expected nested structure.
+        orbital_groups: list[list[int]] = [[o] for o in orbitals]
+        FileFilter.FilterOrbitals(orbital_groups, orbital_names)
 
     # for bands
     elif bands:

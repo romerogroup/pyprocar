@@ -6,22 +6,29 @@ from .poscar import Poscar
 class autoPlot:
     # Goals:
     # - get_defect indexes, all of them
+
+    poscar: Poscar
+    verbose: bool
+    defects: list[int] | None
+    clusters: list[list[int]] | None
+
     def __init__(self, poscar: Poscar, verbose: bool = False):
         self.poscar = poscar
         self.verbose = verbose
-        if self.poscar.loaded == False:
+        if not self.poscar.loaded:
             self.poscar.parse()
         self.defects = None
         self.clusters = None
 
-    def get_defects(self) -> list[int]:
+    def get_defects(self) -> None:
         d = FindDefect(self.poscar)
+        all_defects = d.all_defects
         if self.verbose:
-            print(d.all_defects)
-        self.defects = d.all_defects
+            print(all_defects)
+        self.defects = all_defects
 
-    def get_clusters(self) -> list[list[int]]:
-        c = Clusters(self.poscar, marked=self.defects)
+    def get_clusters(self) -> None:
+        c = Clusters(self.poscar, marked=set(self.defects) if self.defects is not None else None)
         # These are the individual atoms marked as defects. Are part of a
         # single cluster? I just need to add nearest neighbors and test
         # whether they merge. I will do that only twice, otherwise the

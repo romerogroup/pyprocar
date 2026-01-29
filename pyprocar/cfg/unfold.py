@@ -1,5 +1,6 @@
 from dataclasses import asdict, dataclass, field
 from enum import Enum
+from typing import override
 
 from pyprocar.cfg.band_structure import BandStructureConfig
 from pyprocar.cfg.base import PlotType
@@ -155,28 +156,28 @@ class UnfoldingConfig(BandStructureConfig):
     modes: list[str] = field(default_factory=lambda: [mode.value for mode in UnfoldMode])
     # Basic Plot Settings
     color: str = "#eeeeee"
-    spin_colors: tuple[str] = ("blue", "red")
+    spin_colors: tuple[str, ...] = field(default_factory=lambda: ("blue", "red"))
     fermi_color: str = "blue"
     grid_color: str = "grey"
 
     # Line Styles
     fermi_linestyle: str = "dotted"
     grid_linestyle: str = "solid"
-    linestyle: list[str] = field(default_factory=lambda: ["solid", "dashed"])
+    linestyle: tuple[str, ...] = field(default_factory=lambda: ("solid", "dashed"))
 
     # Line Widths
-    fermi_linewidth: int = 1
-    grid_linewidth: int = 1
-    linewidth: list[float] = field(default_factory=lambda: [1.0, 1.0])
+    fermi_linewidth: float = 1
+    grid_linewidth: float = 1
+    linewidth: tuple[float, ...] = field(default_factory=lambda: (1.0, 1.0))
 
     # Markers
-    marker: list[str] = field(default_factory=lambda: ["o", "v", "^", "D"])
-    markersize: list[float] = field(default_factory=lambda: [0.2, 0.2])
+    marker: tuple[str, ...] = field(default_factory=lambda: ("o", "v", "^", "D"))
+    markersize: tuple[float, ...] = field(default_factory=lambda: (0.2, 0.2))
 
     # Color and Opacity Settings
     cmap: str = "jet"
     clim: tuple[float, float] | None = (0.0, 1.0)
-    opacity: list[float] = field(default_factory=lambda: [0.3, 0.3])
+    opacity: tuple[float, ...] = field(default_factory=lambda: (0.3, 0.3))
     plot_color_bar: bool = True
 
     # Grid and Legend
@@ -186,12 +187,12 @@ class UnfoldingConfig(BandStructureConfig):
     legend: bool = True
 
     # Labels and Title
-    label: list[str] = field(default_factory=lambda: [r"$\uparrow$", r"$\downarrow$"])
+    label: tuple[str, ...] = field(default_factory=lambda: (r"$\uparrow$", r"$\downarrow$"))
     title: str | None = None
 
     # Miscellaneous
-    figure_size: tuple[int] = (9, 6)
-    dpi: str = "figure"
+    figure_size: tuple[int, int] = field(default_factory=lambda: (9, 6))
+    dpi: int | str = "figure"
     savefig: str | None = None
 
     # Advanced Configurations
@@ -232,18 +233,14 @@ class UnfoldingConfig(BandStructureConfig):
     )
 
     # locators
-    major_y_locator = None
-    minor_y_locator = None
-    multiple_locator_y_major_value: float = None
-    multiple_locator_y_minor_value: float = None
+    major_y_locator: object | None = None
+    minor_y_locator: object | None = None
+    multiple_locator_y_major_value: float | None = None
+    multiple_locator_y_minor_value: float | None = None
 
-    weighted_width: bool = False
-    weighted_color: bool = True
+    plot_type: PlotType = PlotType.UNFOLD
 
-    def __post_init__(self):
-        """Post-initialization to validate the data and set default values."""
-        self.plot_type = PlotType.UNFOLD
-
+    @override
     def as_dict(self):
         """Returns a dictionary of the configuration settings."""
         return asdict(self)

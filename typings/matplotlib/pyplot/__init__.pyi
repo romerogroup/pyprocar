@@ -1,15 +1,30 @@
 """Type stubs for matplotlib.pyplot."""
 
 from collections.abc import Sequence
-from typing import overload
+from typing import Literal, overload
 
 import numpy as np
 import numpy.typing as npt
 
-from matplotlib.axes import Axes
-from matplotlib.figure import Figure
+from matplotlib.axes import Axes as Axes
+from matplotlib.figure import Figure as Figure
 from matplotlib.lines import Line2D
 
+@overload
+def subplots(
+    nrows: Literal[1] = ...,
+    ncols: Literal[1] = ...,
+    *,
+    sharex: bool | str = ...,
+    sharey: bool | str = ...,
+    squeeze: bool = ...,
+    width_ratios: Sequence[float] | None = ...,
+    height_ratios: Sequence[float] | None = ...,
+    subplot_kw: dict[str, object] | None = ...,
+    gridspec_kw: dict[str, object] | None = ...,
+    **fig_kw: object,
+) -> tuple[Figure, Axes]: ...
+@overload
 def subplots(
     nrows: int = ...,
     ncols: int = ...,
@@ -22,7 +37,7 @@ def subplots(
     subplot_kw: dict[str, object] | None = ...,
     gridspec_kw: dict[str, object] | None = ...,
     **fig_kw: object,
-) -> tuple[Figure, Axes] | tuple[Figure, npt.NDArray[np.object_]]: ...
+) -> tuple[Figure, npt.NDArray[np.object_]]: ...
 
 def figure(
     num: int | str | Figure | None = ...,
@@ -37,11 +52,14 @@ def figure(
 ) -> Figure: ...
 
 def plot(
-    *args: npt.NDArray[np.float64] | Sequence[float],
+    *args: npt.NDArray[np.float64] | npt.NDArray[np.integer[object]] | Sequence[float] | str,
     **kwargs: object,
 ) -> list[Line2D]: ...
 
+def get_cmap(name: str | None = ..., lut: int | None = ...) -> Colormap: ...
 def show(*, block: bool | None = ...) -> None: ...
+def ioff() -> None: ...
+def ion() -> None: ...
 
 def savefig(
     fname: str,
@@ -60,6 +78,14 @@ def savefig(
 ) -> None: ...
 
 def close(fig: Figure | str | int | None = ...) -> None: ...
+def clf() -> None: ...
+def tight_layout(
+    *,
+    pad: float = ...,
+    h_pad: float | None = ...,
+    w_pad: float | None = ...,
+    rect: Sequence[float] | None = ...,
+) -> None: ...
 
 def xlabel(xlabel: str, **kwargs: object) -> object: ...
 def ylabel(ylabel: str, **kwargs: object) -> object: ...
@@ -76,6 +102,22 @@ def ylim(
 def gca(**kwargs: object) -> Axes: ...
 def gcf() -> Figure: ...
 
+class _Cycler:
+    """Cycler object for property cycling."""
+    ...
+
+def cycler(
+    *args: object,
+    **kwargs: object,
+) -> _Cycler: ...
+
+class _RcParams(dict[str, object]):
+    """Runtime configuration parameters."""
+    def __setitem__(self, key: str, val: object) -> None: ...
+    def __getitem__(self, key: str) -> object: ...
+
+rcParams: _RcParams
+
 class _ColormapRegistry:
     """Registry of colormaps accessible via plt.colormaps."""
 
@@ -85,9 +127,15 @@ class _ColormapRegistry:
 
 colormaps: _ColormapRegistry
 
-from matplotlib.colors import Colormap
+from matplotlib.colors import Colormap as Colormap
+from matplotlib.colors import Normalize as Normalize
+from matplotlib.ticker import NullLocator as NullLocator
+
+import matplotlib.cm as cm
 
 __all__ = [
+    "Axes",
+    "Figure",
     "subplots",
     "figure",
     "plot",

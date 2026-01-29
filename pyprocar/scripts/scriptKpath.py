@@ -3,22 +3,23 @@
 """
 
 import numpy as np
+import numpy.typing as npt
 import seekpath
 
 from pyprocar.utils import welcome
 
 
 def kpath(
-    infile=None,
-    outfile="KPOINTS",
-    grid_size=40,
-    with_time_reversal=True,
-    recipe="hpkot",
-    threshold=1e-07,
-    symprec=1e-05,
-    angle_tolerence=-1.0,
-    supercell_matrix=np.eye(3),
-):
+    infile: str | None = None,
+    outfile: str = "KPOINTS",
+    grid_size: int = 40,
+    with_time_reversal: bool = True,
+    recipe: str = "hpkot",
+    threshold: float = 1e-07,
+    symprec: float = 1e-05,
+    angle_tolerence: float = -1.0,
+    supercell_matrix: npt.NDArray[np.float64] | None = None,
+) -> tuple[npt.NDArray[np.float64], list[str]]:
     """
     This module creates a KPOINTS file for band structure
     plotting.
@@ -47,6 +48,11 @@ def kpath(
     """
     welcome()
 
+    if supercell_matrix is None:
+        supercell_matrix = np.eye(3)
+
+    assert infile is not None, "infile must be provided"
+
     with open(infile) as file:
         POSCAR = file.readlines()
     # cell
@@ -70,12 +76,12 @@ def kpath(
         positions[j, :] = positions_matrix0.astype(float)
 
     # numbers
-    numbers = np.zeros(sum(atoms))
+    numbers = np.zeros(sum(atoms), dtype=np.int64)
     counter = 0
     atom_counter = 1
 
     for ii in atoms:
-        for kk in range(ii):
+        for _kk in range(ii):
             numbers[counter] = atom_counter
             counter = counter + 1
         atom_counter = atom_counter + 1
@@ -110,8 +116,8 @@ def kpath(
         k_file.write("Line_mode\n")
         k_file.write("reciprocal\n")
 
-        k_path = []
-        k_labels = []
+        k_path: list[list[float]] = []
+        k_labels: list[str] = []
         for iterator in range(len(coord_matrix)):
             if iterator % 2 == 0:
                 k_file.write(
@@ -142,5 +148,5 @@ def kpath(
                 ]
             )
             k_labels.append(path_array[iterator])
-    k_path = np.array(k_path)
-    return k_path, k_labels
+    k_path_array = np.array(k_path)
+    return k_path_array, k_labels

@@ -1,5 +1,8 @@
+from __future__ import annotations
+
 import logging
 import re
+from typing import Any
 
 import numpy as np
 
@@ -47,7 +50,17 @@ class ProcarFileFilter:
 
     """
 
-    def __init__(self, infile=None, outfile=None, loglevel=logging.DEBUG):
+    infile: str | None
+    outfile: str | None
+    log: logging.Logger
+    ch: logging.Handler
+
+    def __init__(
+        self,
+        infile: str | None = None,
+        outfile: str | None = None,
+        loglevel: int = logging.DEBUG,
+    ) -> None:
         """Initialize the class.
 
         Params: `infile=None`, input fileName
@@ -66,85 +79,22 @@ class ProcarFileFilter:
         self.log.addHandler(self.ch)
         # At last, one message to the logger.
         self.log.debug("ProcarFileFilter instanciated")
-        return
 
-    ##########################SCRIPTS#################################
-
-    # def scriptFilter(self,inFile,outFile,atoms=None,orbitals=None,orbital_names=None,bands=None,spin=None,human_atoms=False):
-    #   print "Input file  :", inFile
-    #   print "Output file :", outFile
-
-    #   print "atoms       :", atoms
-    #   if atoms:
-    #     print "human_atoms     :", human_atoms
-    #   print "orbitals  :", orbitals
-    #   if orbitals:
-    #       print "orb. names  :", orbital_names
-    #     print "bands       :", bands
-    #     print "spins       :", spin
-
-    #   #Access init class of ProcarFileFilter and pass two arguments
-    #   FileFilter = ProcarFileFilter(inFile,outFile)
-
-    #   #for atoms
-    #   if atoms:
-    #     print "Manipulating the atoms"
-
-    #     if human_atoms:
-    #       atoms = [[y-1 for y in x] for x in atoms]
-    #       print "new atoms list :", atoms
-
-    #     #Now just left to call the driver member
-    #     FileFilter.FilterAtoms(atoms)
-
-    #   #for orbitals
-    #   elif orbitals:
-    #     print "Manipulating the orbitals"
-    #     #If orbitals orbital_names is None, it needs to be filled
-    #     if orbital_names is None:
-    #       orbital_names = ["o"+str(x) for x in range(len(orbitals))]
-    #       print "New orbitals names (default): ", orbital_names
-    #     #testing if makes sense
-    #     if len(orbitals) != len(orbital_names):
-    #       raise RuntimeError("length of orbitals and orbitals names do not match")
-
-    #     FileFilter.FilterOrbitals(orbitals,orbital_names)
-
-    #   #for bands
-    #   elif bands:
-    #     print "Manipulating the bands"
-
-    #     bmin = bands[0]
-    #     bmax = bands[1]
-    #     if bmax < bmin:
-    #       bmax, bmin = bmin, bmax
-    #       print "New bands limits: ", bmin, " to ", bmax
-
-    #     FileFilter.FilterBands(bmin,bmax)
-
-    #   #for spin
-    #   elif spin:
-    #     print "Manipulating the spin"
-
-    #     FileFilter.FilterSpin(spin)
-
-    #   return
-
-    ##################################################################
-
-    def setInFile(self, infile):
+    def setInFile(self, infile: str) -> None:
         """Sets a input file `infile`, it can contains the path to the file"""
         self.infile = infile
         self.log.info("Input File: " + infile)
-        return
 
-    def setOutFile(self, outfile):
+    def setOutFile(self, outfile: str) -> None:
         """Sets a output file `outfile`, it can contains the path to the file"""
         self.outfile = outfile
         self.log.info("Out File: " + outfile)
-        return
 
-    def FilterOrbitals(self, orbitals, orbitalsNames):
+    def FilterOrbitals(
+        self,
+        orbitals: list[list[int]],
+        orbitalsNames: list[str],
+    ) -> None:
         """
         Reads the file already set by SetInFile() and writes a new
         file already set by SetOutFile(). The new file only has the
@@ -167,6 +117,8 @@ class ProcarFileFilter:
           -The last column ('tot') is so important that it is always
            included. Do not needs to be called
         """
+        assert self.infile is not None
+        assert self.outfile is not None
         # setting iostuff, this method -and class- should not made any
         # checking about IO, that is the job of the caller
         self.log.info("In File: " + self.infile)
@@ -182,23 +134,22 @@ class ProcarFileFilter:
 
             elif re.match(r"\s*\d+\s*", line) or re.match(r"\s*tot\s*", line):
                 # self.log.debug("data line found: " + line)
-                line = line.split()
+                fields = line.split()
                 # all floats to an array
-                data = np.array(line[1:], dtype=float)
+                data = np.array(fields[1:], dtype=float)
                 # setting a new line, keeping just the first value
-                line = line[:1]
+                new_fields: list[str | np.floating[Any]] = list(fields[:1])
                 for orbset in orbitals:
-                    line.append(data[orbset].sum())
+                    new_fields.append(data[orbset].sum())
                 # the last value ("tot") always  should be written
-                line.append(data[-1])
+                new_fields.append(data[-1])
                 # converting to str
-                line = [str(x) for x in line]
-                line = " ".join(line) + "\n"
+                str_fields = [str(x) for x in new_fields]
+                line = " ".join(str_fields) + "\n"
             fout.write(line)
 
-        return
 
-    def FilterAtoms(self, atomsGroups):
+    def FilterAtoms(self, atomsGroups: list[list[int] | int]) -> None:
         """
         Reads the file already set by SetInFile() and writes a new
         file already set by SetOutFile(). The new file only has the
@@ -217,12 +168,15 @@ class ProcarFileFilter:
 
         """
         # if the user forgot the [...], i.e. [0,[1,2]], we need to add them
-        for i in range(len(atomsGroups)):
-            try:
-                iter(atomsGroups[i])
-            except TypeError:
-                atomsGroups[i] = [atomsGroups[i]]
+        normalized: list[list[int]] = []
+        for item in atomsGroups:
+            if isinstance(item, int):
+                normalized.append([item])
+            else:
+                normalized.append(item)
 
+        assert self.infile is not None
+        assert self.outfile is not None
         # setting iostuff, this method -and class- should not made any
         # checking about IO, that is the job of the caller
         self.log.info("In File: " + self.infile)
@@ -235,49 +189,48 @@ class ProcarFileFilter:
             # line. The first one is not needed
             fout.write(fin.readline())
             line = fin.readline()
-            line = line.split()
+            fields = line.split()
             # the very last value needs to be changed
-            line[-1] = str(len(atomsGroups))
-            line = " ".join(line)
+            fields[-1] = str(len(normalized))
+            line = " ".join(fields)
             fout.write(line + "\n")
 
             # now parsing the rest of the file
-            data = []
+            data_lines: list[str] = []
             for line in fin:
                 # if line has data just capture it
                 if re.match(r"\s*\d+\s*", line):
                     # self.log.debug("atoms line found: " + line)
-                    data.append(line)
+                    data_lines.append(line)
                 # if `line` is a end of th block (begins with 'tot'), do the
                 # work. And clean up data then
                 elif re.match(r"\s*tot\s*", line):
                     # self.log.debug("tot line found: " + line)
                     # making an array
-                    data = [x.split() for x in data]
-                    data = np.array(data, dtype=float)
+                    split_data = [x.split() for x in data_lines]
+                    data = np.array(split_data, dtype=float)
                     # iterating on the atoms groups
-                    for index in range(len(atomsGroups)):
-                        atoms = atomsGroups[index]
+                    for index in range(len(normalized)):
+                        atoms = normalized[index]
                         # summing colum-wise
                         atomLine = data[atoms].sum(axis=0)
-                        atomLine = [str(x) for x in atomLine]
+                        atom_strs = [str(x) for x in atomLine]
                         # the atom index should not be averaged (anyway now is
                         # meaningless)
-                        atomLine[0] = str(index + 1)
-                        atomLine = " ".join(atomLine)
-                        fout.write(atomLine + "\n")
+                        atom_strs[0] = str(index + 1)
+                        atomLineStr = " ".join(atom_strs)
+                        fout.write(atomLineStr + "\n")
 
                     # clean the buffer
-                    data = []
+                    data_lines = []
                     # and write the `tot` line
                     fout.write(line)
                 # otherwise just write this line
                 else:
                     fout.write(line)
 
-        return
 
-    def FilterBands(self, Min, Max):
+    def FilterBands(self, Min: int, Max: int) -> None:
         """
         Reads the file already set by SetInFile() and writes a new
         file already set by SetOutFile(). The new file only has the
@@ -294,6 +247,8 @@ class ProcarFileFilter:
           consider a large region and made some trial and error
 
         """
+        assert self.infile is not None
+        assert self.outfile is not None
         # setting iostuff, this method -and class- should not made any
         # checking about IO, that is the job of the caller
         self.log.info("In File: " + self.infile)
@@ -323,7 +278,9 @@ class ProcarFileFilter:
         for line in fin:
             if re.match(r"\s*band\s*", line):
                 # self.log.debug("bands line found: " + line)
-                band = int(re.match(r"\s*band\s*(\d+)", line).group(1))
+                match = re.match(r"\s*band\s*(\d+)", line)
+                assert match is not None
+                band = int(match.group(1))
                 if band < Min or band > Max:
                     write = False
                 else:
@@ -332,9 +289,8 @@ class ProcarFileFilter:
                 write = True
             if write:
                 fout.write(line)
-        return
 
-    def FilterSpin(self, components):
+    def FilterSpin(self, components: list[int]) -> None:
         """Reads the file already set by SetInFile() and writes a new
         file already set by SetOutFile(). The new file only has the
         selected part of the density (sigma_i).
@@ -352,6 +308,8 @@ class ProcarFileFilter:
                 check for the type of calculation. Hopefully, this won't
                 be an issue with memory nowadays.
         """
+        assert self.infile is not None
+        assert self.outfile is not None
         # setting iostuff, this method -and class- should not made any
         # checking about IO, that is the job of the caller
         self.log.info("In File: " + self.infile)
@@ -404,7 +362,7 @@ class ProcarFileFilter:
             # open the files
             fout = open(self.outfile, "w")
             fopener = UtilsProcar()
-            spindown_buffer = []
+            spindown_buffer: list[str] = []
             component_counter = 0
 
             with fopener.OpenFile(self.infile) as fin:
@@ -428,12 +386,10 @@ class ProcarFileFilter:
                         spindown_buffer.append(line)
 
             if components[0] == 1:
-                for i in spindown_buffer:
-                    fout.write(i)
+                fout.writelines(spindown_buffer)
 
-        return
 
-    def FilterKpoints(self, Min, Max):
+    def FilterKpoints(self, Min: int, Max: int) -> None:
         """
         Reads the file already set by SetInFile() and writes a new
         file already set by SetOutFile(). The new file the
@@ -445,6 +401,8 @@ class ProcarFileFilter:
           the minimum/maximum band  kpoint to be considered, the indexes
           are the same used by vasp (i.e. written in the file). Not starting from zero
         """
+        assert self.infile is not None
+        assert self.outfile is not None
         # setting iostuff, this method -and class- should not made any
         # checking about IO, that is the job of the caller
         self.log.info("In File: " + self.infile)
@@ -460,10 +418,10 @@ class ProcarFileFilter:
         line = fin.readline()
         # the third value needs to be changed, however better print it
         self.log.debug("The line contaning kpoints number is " + line)
-        line = line.split()
-        self.log.debug("The number of kpoints is: " + line[3])
-        line[3] = str(Max - Min + 1)
-        line = " ".join(line)
+        fields = line.split()
+        self.log.debug("The number of kpoints is: " + fields[3])
+        fields[3] = str(Max - Min + 1)
+        line = " ".join(fields)
         fout.write(line + "\n")
 
         # now parsing the rest of the file
@@ -471,11 +429,12 @@ class ProcarFileFilter:
         for line in fin:
             if re.match(r"\s*k-point\s*", line):
                 self.log.debug("bands line found: " + line)
-                kpoint = int(re.match(r"\s*k-point\s*(\d+)", line).group(1))
+                match = re.match(r"\s*k-point\s*(\d+)", line)
+                assert match is not None
+                kpoint = int(match.group(1))
                 if kpoint < Min or kpoint > Max:
                     write = False
                 else:
                     write = True
             if write:
                 fout.write(line)
-        return

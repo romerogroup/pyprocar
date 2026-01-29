@@ -17,7 +17,7 @@ from abc import ABC, abstractmethod
 from collections.abc import Iterable, Mapping, Sequence
 from enum import Enum
 from pathlib import Path
-from typing import Any, cast
+from typing import Any, Literal, cast
 
 import numpy as np
 import numpy.typing as npt
@@ -40,8 +40,6 @@ from pyprocar.core.serializer import get_serializer
 from pyprocar.core.structure import Structure
 from pyprocar.utils import math, np_utils, physics
 from pyprocar.utils.math import np_round_to_half
-from pyprocar.utils.unfolder import Unfolder
-
 pv.global_theme.allow_empty_mesh = True
 
 logger = logging.getLogger(__name__)
@@ -1698,7 +1696,7 @@ class ElectronicBandStructure(PointSet, PyvistaInterface):
 
     def unfold(
         self,
-        transformation_matrix: npt.NDArray[np.float64] | None = None,
+        transformation_matrix: npt.NDArray[np.int_] | npt.NDArray[np.float64] | None = None,
         structure: Structure | None = None,
         inplace: bool = True,
     ) -> ElectronicBandStructure:
@@ -1707,7 +1705,7 @@ class ElectronicBandStructure(PointSet, PyvistaInterface):
 
         Parameters
         ----------
-        transformation_matrix : npt.NDArray[np.float64] | None, optional
+        transformation_matrix : npt.NDArray[np.int_] | None, optional
             The transformation matrix to transform the basis. Expected size is (3,3), by default None
         structure : Structure | None, optional
             The structure of a material, by default None
@@ -1725,8 +1723,10 @@ class ElectronicBandStructure(PointSet, PyvistaInterface):
             ebs = copy.deepcopy(self)
 
         # Provide default transformation matrix if None
-        trans_matrix = transformation_matrix if transformation_matrix is not None else np.diag([1, 1, 1]).astype(np.float64)
+        trans_matrix = transformation_matrix if transformation_matrix is not None else np.diag(np.array([1, 1, 1], dtype=np.int_))
         struct = structure if structure is not None else self.structure
+
+        from pyprocar.utils.unfolder import Unfolder
 
         uf = Unfolder(
             ebs=ebs,
@@ -2498,7 +2498,7 @@ class ElectronicBandStructureMesh(  # pyright: ignore[reportIncompatibleMethodOv
             return super().compute_property(name, **kwargs)
 
     def pad(
-        self, padding: int = 10, order: str = "F", inplace: bool = True
+        self, padding: int = 10, order: Literal["A", "C", "F"] = "F", inplace: bool = True
     ) -> ElectronicBandStructureMesh:
         logger.info(f"Padding kpoints by {padding} in all directions")
         if inplace:
@@ -2645,12 +2645,7 @@ class ElectronicBandStructureMesh(  # pyright: ignore[reportIncompatibleMethodOv
             value_mesh = math.array_to_mesh(
                 array=value_array, nkx=ebs.n_kx, nky=ebs.n_ky, nkz=ebs.n_kz
             )
-            # numpy cast: fft_interpolate_nd_3dmesh returns interpolated array with same dtype.
-            # Function has partially unknown types due to internal numpy operations.
-            interpolated_mesh = cast(
-                npt.NDArray[np.float64],
-                math.fft_interpolate_nd_3dmesh(value_mesh, interpolation_factor),  # pyright: ignore[reportUnknownMemberType]
-            )
+            interpolated_mesh = math.fft_interpolate_nd_3dmesh(value_mesh, interpolation_factor)
             interpolated_value = math.mesh_to_array(interpolated_mesh)
             if interpolated_value is None:
                 continue

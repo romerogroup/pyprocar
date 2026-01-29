@@ -1,14 +1,24 @@
 #!/usr/bin/env python
+from __future__ import annotations
 
 import numpy as np
-from poscar import Poscar
+
+from .latticeUtils import distances
+from .poscar import Poscar
 
 np.set_printoptions(precision=4, linewidth=160, suppress=True)
 
 
 class Neighbors:
-    def __init__(self, poscar=None, verbose=True):
-        """poscar can be the filename or a Poscar file, already parsed"""
+    verbose: bool
+    p: Poscar | None
+    nn_list: list[list[int]] | None
+    distances: np.ndarray | None
+    clusters: list[list[int]] | None
+    nn_dict_clusters: list[dict[int, list[int]]] | None
+
+    def __init__(self, poscar: Poscar | str | None = None, verbose: bool = True) -> None:
+        """Poscar can be the filename or a Poscar file, already parsed"""
         self.verbose = verbose
         self.p = None  # a poscar-object
         self.nn_list = None
@@ -24,14 +34,12 @@ class Neighbors:
             self.p.parse()
             if self.verbose:
                 print("Loaded the file:", poscar)
-        else:
+        elif isinstance(poscar, Poscar):
             self.p = poscar
 
-        return
-
     # there should be severals ways to define nearest neighbors
-    def set_neighbors(self, method, parameters):
-        """methods should have several posibilities, each `method` has a
+    def set_neighbors(self, method: str, parameters: dict[str, object]) -> None:
+        """Methods should have several posibilities, each `method` has a
         respective set of `parameters`. Currently supported:
 
         1) method='distance' (a single cutoff distance)
@@ -42,10 +50,13 @@ class Neighbors:
         # checking whether  the method exists and has the rigth parameters
         if method == "distance":
             try:
-                dCutoff = parameters["max_dis"]
+                dCutoff = float(parameters["max_dis"])  # pyright: ignore[reportArgumentType]
             except KeyError:
                 raise RuntimeError("the parameter argument doesnt have the key `max_dis`")
 
+            assert self.p is not None
+            assert self.p.cpos is not None
+            assert self.p.lat is not None
             d = distances(self.p.cpos, lattice=self.p.lat)
             self.distances = d
             if self.verbose:
@@ -55,7 +66,7 @@ class Neighbors:
             # setting an empty list to contain the list of neighbors
             self.nn_list = []
             for i in range(N):
-                temp = []
+                temp: list[int] = []
                 # is j a neighbor of i?
                 for j in range(N):
                     if d[i, j] < dCutoff:
@@ -72,15 +83,15 @@ class Neighbors:
                 print(self.nn_list)
         else:
             raise RuntimeError("set_neighbors() does not support the method " + str(method))
-        return
 
-    def find_clusters(self):
+    def find_clusters(self) -> None:
+        assert self.nn_list is not None
         N = len(self.nn_list)
         if self.verbose:
             print(N, "atoms")
         # I will start assuming every atom has its own cluster, the
         # interaction will join the sets
-        clusters = [set([i]) for i in range(N)]
+        clusters: list[set[int]] = [{i} for i in range(N)]
         nn_list = self.nn_list
 
         # which atoms are connected to atom 0
@@ -91,6 +102,8 @@ class Neighbors:
                 # print(atom, neighbor)
                 # finding the clusters with 'atom' and 'neighbor', removing
                 # them and then appending its union
+                c1: set[int] = set()
+                c2: set[int] = set()
                 for c in clusters:
                     if atom in c:
                         c1 = c
@@ -107,28 +120,36 @@ class Neighbors:
         if self.verbose:
             print("clusters:", clusters)
         self._set_nn_clusters()
-        return
 
-    def _set_nn_clusters(self):
+    def _set_nn_clusters(self) -> None:
+        assert self.clusters is not None
+        assert self.nn_list is not None
         # a list of nearest neighbors dict, one per cluster
-        nn_dicts = []
+        nn_dicts: list[dict[int, list[int]]] = []
         for cluster in self.clusters:
-            nn_dict = dict()
+            nn_dict: dict[int, list[int]] = {}
             for atom in cluster:
                 nn_dict[atom] = self.nn_list[atom]
             nn_dicts.append(nn_dict)
         self.nn_dict_clusters = nn_dicts
         if self.verbose:
             print("clusters found:", len(self.clusters))
-            for cluster, nn_dict in zip(self.clusters, self.nn_dict_clusters):
+            for cluster, nn_dict_item in zip(self.clusters, self.nn_dict_clusters):
                 print("cluster", cluster)
-                print("nearest neighbors", nn_dict)
-
-        return
+                print("nearest neighbors", nn_dict_item)
 
 
 class Graphene:
-    def __init__(self, poscarFile, verbose=False):
+    verbose: bool
+    p: Poscar
+    nn_list: list[list[int]] | None
+    neighbors: Neighbors | None
+    clusters: list[list[int]] | None
+    sublattices: list[dict[str, set[int]]] | None
+    edges: list[list[int]] | None
+    bonding: object | None
+
+    def __init__(self, poscarFile: str, verbose: bool = False) -> None:
         self.verbose = verbose
         if self.verbose:
             print("loading file ", poscarFile)
@@ -151,9 +172,7 @@ class Graphene:
         self.set_sublattices()
         self.find_edges()
 
-        return
-
-    def set_sublattices(self):
+    def set_sublattices(self) -> None:
         # getting the nearest neighbors
         n = Neighbors(self.p, verbose=False)
         n.set_neighbors(method="distance", parameters={"max_dis": 1.6})
@@ -163,17 +182,19 @@ class Graphene:
         self.clusters = n.clusters
         self.neighbors = n
 
+        assert n.clusters is not None
         if self.verbose:
             print("\nclusters found:", len(n.clusters), "\n", n.clusters)
 
         self.sublattices = []
+        assert n.nn_dict_clusters is not None
         # looping over the clusters
         for icluster in range(len(n.clusters)):
             cluster = n.clusters[icluster]
-            nn_dict = n.nn_dict_clusters[icluster]
+            nn_dict: dict[int, list[int]] = dict(n.nn_dict_clusters[icluster])
             # two empty sublattices
-            sublatticeA = set()
-            sublatticeB = set()
+            sublatticeA: set[int] = set()
+            sublatticeB: set[int] = set()
             # I need a first element
             current = cluster[0]
             # and it must have a sublattice, lets say `A`
@@ -200,13 +221,18 @@ class Graphene:
             # finally storing the sublattices
             self.sublattices.append({"A": sublatticeA, "B": sublatticeB})
 
-    def find_edges(self, ignoreH=True):
+    def find_edges(self, ignoreH: bool = True) -> None:
+        assert self.clusters is not None
+        assert self.nn_list is not None
+        assert self.p.Ntotal is not None
+        assert self.p.elm is not None
         self.edges = []
         for icluster in range(len(self.clusters)):
-            cluster = self.clusters[icluster]
+            _cluster = self.clusters[icluster]
             # an edge is a C atom with less than 3 nearest neighbors, or an H
             # atom next to a C atom with coor
-            edge = []
+            edge: list[int] = []
+            counter = 0
             for i in range(self.p.Ntotal):
                 if ignoreH and self.p.elm[i] == "H":
                     pass  # ignoring an H atom
@@ -214,7 +240,7 @@ class Graphene:
                     neighbors = self.nn_list[i]
                     counter = 0
                     for neighbor in neighbors:
-                        if self.p.elm[neighbor] != "H" or ignoreH == False:
+                        if self.p.elm[neighbor] != "H" or ignoreH is False:
                             counter += 1
                 if counter < 3:
                     edge.append(i)
@@ -222,8 +248,16 @@ class Graphene:
                 print("edge:", edge)
             self.edges.append(edge)
 
-    def hidrogenate(self, outFile="POSCAR.hydrogenated"):
-        newHatoms = []
+    def hidrogenate(self, outFile: str = "POSCAR.hydrogenated") -> None:
+        assert self.clusters is not None
+        assert self.edges is not None
+        assert self.nn_list is not None
+        assert self.neighbors is not None
+        assert self.neighbors.distances is not None
+        assert self.p.cpos is not None
+        assert self.p.lat is not None
+        assert self.p.elm is not None
+        newHatoms: list[np.ndarray] = []
         for icluster in range(len(self.clusters)):
             for iatom in self.edges[icluster]:
                 elem = self.p.elm[iatom]
@@ -244,6 +278,8 @@ class Graphene:
                         lat = self.p.lat
                         # getting all the periodic disatances, if one of them
                         # fits, I will store it
+                        p1: np.ndarray = self.p.cpos[n1]
+                        p2: np.ndarray = self.p.cpos[n2]
                         for i in [-1, 0, 1]:
                             for j in [-1, 0, 1]:
                                 for k in [-1, 0, 1]:
@@ -272,49 +308,56 @@ class Graphene:
         # writing the data to file
         self.p.write(outFile, direct=False)
 
-    def sublattice_polarization(self):
+    def sublattice_polarization(self) -> None:
         import pyprocar
 
         pro = pyprocar.ProcarParser()
         pro.readFile("PROCAR")
         # just gamma
-        spd = pro.spd[0]
+        assert pro.spd is not None
+        assert not isinstance(pro.spd, list)
+        spd_data: np.ndarray = pro.spd[0]
         # all bands all atoms, spin 0, just 'tot' orbital value
         # spd = spd[bands, atoms]
-        spd = spd[:, 0, :, -1]
+        spd_data = spd_data[:, 0, :, -1]
         # bands with almost no projection at all can bring numerical
         # problems. I will normalize them to have a `tot` value of 1
-        spd = (spd.T / spd[:, -1]).T  # all bands, just sum of all atoms
-        print(spd.shape)
+        spd_data = (spd_data.T / spd_data[:, -1]).T  # all bands, just sum of all atoms
+        print(spd_data.shape)
 
         nn_list = self.nn_list
         print("nearest neighbors", nn_list)
+        assert nn_list is not None
         # an empty array
-        overlap = 0 * spd[:, 0]
+        overlap: np.ndarray = 0 * spd_data[:, 0]
         counter = 0
         for atom in range(len(nn_list)):
             for neighbor in nn_list[atom]:
-                # print('\natom', spd[:,atom])
-                # print('neighbor', spd[:,neighbor])
-                overlap += spd[:, atom] * spd[:, neighbor]
+                # print('\natom', spd_data[:,atom])
+                # print('neighbor', spd_data[:,neighbor])
+                overlap += spd_data[:, atom] * spd_data[:, neighbor]
                 # print(overlap)
                 counter += 1
 
         import matplotlib.pyplot as plt
 
-        x = np.arange(len(overlap)) + 1
+        x = np.arange(len(overlap), dtype=np.float64) + 1
         plt.plot(x, 1 / overlap / counter, "ro--")
         plt.show()
 
 
 if __name__ == "__main__":
     g = Graphene("POSCAR")
+    assert g.clusters is not None
+    assert g.sublattices is not None
+    assert g.edges is not None
     print("Clusters found", len(g.clusters))
     for i in range(len(g.clusters)):
         print("cluster " + str(i) + ":")
         print(g.clusters[i])
         print("Sublattices:")
-        [print(x, y) for x, y in g.sublattices[i].items()]
+        for x, y in g.sublattices[i].items():
+            print(x, y)
         print("edges:")
         print(g.edges[i])
 

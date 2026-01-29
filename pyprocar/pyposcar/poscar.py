@@ -34,7 +34,7 @@ class Poscar:
 
     """
 
-    def __init__(self, filename: str = "POSCAR", verbose: bool = False):
+    def __init__(self, filename: str = "POSCAR", verbose: bool = False) -> None:
         """The file is not automatically loaded, you need to run
         `self.parse()`
 
@@ -66,53 +66,53 @@ class Poscar:
 
 
         """
-        self.verbose = verbose
-        self.filename = filename
-        self.poscar: str = None
-        self.cpos: np.ndarray = None  # cartesian coordinates
-        self.dpos: np.ndarray = None  # direct coordinates
-        self.lat: np.ndarray = None  # lattice
-        self.typeSp: list[str] = None  # Name of atomic species
-        self.numberSp: np.ndarray = None  # Number of atoms per specie
-        self.Ntotal: int = None  # Total atoms in system
-        self.elm: list[str] = None  # Element of each atoms one-by-one.
-        self.selective: bool = None  # Selective dynamics
-        self.selectFlags: np.ndarray = None  # all the T,F from selective dynamics
-        self.flags: dict = {}  # list of flags, not used here just for convenience
-        self.volume: float = None
+        self.verbose: bool = verbose
+        self.filename: str = filename
+        self.poscar: str | list[str] | None = None
+        self.cpos: np.ndarray | None = None  # cartesian coordinates
+        self.dpos: np.ndarray | None = None  # direct coordinates
+        self.lat: np.ndarray | None = None  # lattice
+        self.typeSp: list[str] | None = None  # Name of atomic species
+        self.numberSp: np.ndarray | list[int] | None = None  # Number of atoms per specie
+        self.Ntotal: int | None = None  # Total atoms in system
+        self.elm: list[str] | None = None  # Element of each atoms one-by-one.
+        self.selective: bool | None = None  # Selective dynamics
+        self.selectFlags: np.ndarray | None = None  # all the T,F from selective dynamics
+        self.flags: dict[int, dict[str, object]] = {}  # list of flags, not used here just for convenience
+        self.volume: float | None = None
         self.loaded: bool = False  # was the POSCAR-file loaded? i.e. self.parse()
         return
 
-    def parse(self, fromString: str = None):
+    def parse(self, fromString: str | list[str] | None = None) -> None:
         """Loads into memory all the content of the POSCAR file.
 
         Parameters
         ----------
 
-        fromString : str
+        fromString : str | list[str] | None
           If present, instead of loading a file, it uses
           this variable to populate the class. Default=None
 
         """
-        if fromString and isinstance(fromString, str):
+        if isinstance(fromString, str):
             self.poscar = fromString.split("\n")
-        elif fromString and isinstance(fromString, list):
+        elif isinstance(fromString, list):
             self.poscar = fromString
         else:
-            self.poscar = open(self.filename)
-            self.poscar = self.poscar.readlines()
+            file_handle = open(self.filename)
+            self.poscar = file_handle.readlines()
 
         # getting the scale factor
         scale = re.findall(r"[.\deE]+", self.poscar[1])
-        scale = float(scale[0])
+        scale_val = float(scale[0])
         if self.verbose:
-            print("scaling factor: ", scale)
+            print("scaling factor: ", scale_val)
 
         # parsing the lattice
-        self.lat = re.findall(
+        lat_strings = re.findall(
             r"[-.\deE]+\s+[-.\deE]+\s+[-.\deE]+\s*\n*", " ".join(self.poscar[2:5])
         )
-        self.lat = np.array([x.split() for x in self.lat], dtype=float) * scale
+        self.lat = np.array([x.split() for x in lat_strings], dtype=float) * scale_val
         if self.verbose:
             print("lattice:\n", self.lat)
 
@@ -122,9 +122,9 @@ class Poscar:
             raise RuntimeError("No data about the atomic species found. Correct it.")
         if self.verbose:
             print("atoms per species:\n", self.typeSp)
-        self.numberSp = re.findall(r"(\d+)\s*", self.poscar[6])
-        self.numberSp = np.array(self.numberSp, dtype=int)
-        self.Ntotal = np.sum(self.numberSp)
+        numberSp_strings = re.findall(r"(\d+)\s*", self.poscar[6])
+        self.numberSp = np.array(numberSp_strings, dtype=int)
+        self.Ntotal = int(np.sum(self.numberSp))
         if self.verbose:
             print("atomic species:\n", self.numberSp)
             print("The total is " + str(self.Ntotal) + " atoms")
@@ -173,12 +173,12 @@ class Poscar:
 
         # setting a list of elements:
         elementList = zip(self.typeSp, self.numberSp)
-        self.elm = " ".join([" ".join([x] * y) for x, y in elementList]).split()
+        self.elm = " ".join([" ".join([x] * int(y)) for x, y in elementList]).split()
         if self.verbose:
             print("Elements: ", self.elm)
 
         # setting the volume, just as an utility
-        self.volume = np.linalg.det(self.lat)
+        self.volume = float(np.linalg.det(self.lat))
         self.loaded = True
         # empty list as flags, one per atom
         for i in range(self.Ntotal):
@@ -187,7 +187,7 @@ class Poscar:
 
     def load_from_data(
         self, direct_positions: np.ndarray, lattice: np.ndarray, elements: list[str]
-    ):
+    ) -> None:
         """
         It loades the Poscar class with essencial data.
 
@@ -203,40 +203,44 @@ class Poscar:
         """
         self.lat = lattice
         self.dpos = direct_positions
-        self.elm = elements
+        self.elm = list(elements)
 
         self._set_cartesian()
-        typeSp = []
-        elements = list(elements)
-        for element in elements:
+        typeSp: list[str] = []
+        elements_list = list(elements)
+        for element in elements_list:
             if element not in typeSp:
                 typeSp.append(element)
         self.typeSp = typeSp
-        numberSp = []
+        numberSp: list[int] = []
         for item in typeSp:
-            N = elements.count(item)
+            N = elements_list.count(item)
             numberSp.append(N)
         self.numberSp = numberSp
         self.Ntotal = sum(numberSp)
 
-        self.volume = np.linalg.det(self.lat)
+        self.volume = float(np.linalg.det(self.lat))
         self.loaded = True
         return
 
-    def _set_cartesian(self):
+    def _set_cartesian(self) -> None:
         """set the cartesian positions (self.cpos) from direct positions (self.dpos)."""
+        assert self.lat is not None
+        assert self.dpos is not None
         cart = np.dot(self.lat.T, self.dpos.T)
         cart = cart.T
         self.cpos = cart
 
-    def _set_direct(self):
+    def _set_direct(self) -> None:
         """set the direct positions (self.dpos) from Cartesian positions (self.cpos)."""
+        assert self.lat is not None
+        assert self.cpos is not None
         inverse = np.linalg.inv(self.lat)
         direct = np.dot(inverse.T, self.cpos.T)
         direct = direct.T
         self.dpos = direct
 
-    def _unparse(self, direct: bool = True):
+    def _unparse(self, direct: bool = True) -> None:
         """Internal method to be used previously to to writing a POSCAR
         file. It group together all the information in a single str,
         `self.poscar`. The information is as it is. No PBC are applied,
@@ -251,44 +255,50 @@ class Poscar:
             direct positons is True, Cartesian is Falsepositions. Default is True
 
         """
+        assert self.dpos is not None
+        assert self.cpos is not None
+        assert self.lat is not None
+        assert self.typeSp is not None
+        assert self.numberSp is not None
 
         # We will start with getting the positions
         if direct == True:
-            pos = self.dpos
+            pos_arr = self.dpos
         else:
-            pos = self.cpos
+            pos_arr = self.cpos
 
         # creating a list of text lines with positions
-        pos = [" ".join([str(coord) for coord in line]) for line in pos]
+        pos_lines = [" ".join([str(coord) for coord in line]) for line in pos_arr]
 
         # Now we will look whether selective dynamics are used
         if self.selective == True:
             # a list of text lines with flags
-            flags = [" ".join([flag for flag in line]) for line in pos]
-            pos = [pos + " " + flag for (pos, flag) in zip(pos, flags)]
+            flags = [" ".join([flag for flag in line]) for line in pos_arr]
+            pos_lines = [p + " " + flag for (p, flag) in zip(pos_lines, flags)]
 
-        pos = "\n".join(pos)
+        pos_text = "\n".join(pos_lines)
 
         # Creating the POSCAR text string
-        self.poscar = "poscar.py\n"
-        self.poscar += "1.0\n"
-        self.poscar += "\n".join([" ".join([str(y) for y in x]) for x in self.lat]) + "\n"
-        self.poscar += " ".join(self.typeSp) + "\n"
-        self.poscar += " ".join([str(x) for x in self.numberSp]) + "\n"
+        poscar_str = "poscar.py\n"
+        poscar_str += "1.0\n"
+        poscar_str += "\n".join([" ".join([str(y) for y in x]) for x in self.lat]) + "\n"
+        poscar_str += " ".join(self.typeSp) + "\n"
+        poscar_str += " ".join([str(x) for x in self.numberSp]) + "\n"
         if self.selective:
-            self.poscar += "Selective Dynamics\n"
+            poscar_str += "Selective Dynamics\n"
         if direct == False:
-            self.poscar += "Cartesian\n"
+            poscar_str += "Cartesian\n"
         else:
-            self.poscar += "Direct\n"
-        self.poscar += pos  # already set with the the T, F -if needed
-        self.poscar += "\n"
+            poscar_str += "Direct\n"
+        poscar_str += pos_text  # already set with the the T, F -if needed
+        poscar_str += "\n"
+        self.poscar = poscar_str
 
         if self.verbose:
             print("\n\n unparsed POSCAR\n\n")
             print("unparse, self.poscar\n", self.poscar)
 
-    def write(self, filename: str = "POSCAR.out", direct: bool = True):
+    def write(self, filename: str = "POSCAR.out", direct: bool = True) -> None:
         """Writes a poscar file with the information stored in the class.
 
         Parameters
@@ -301,12 +311,13 @@ class Poscar:
         """
         self._unparse(direct=direct)
         fout = open(filename, "w")
+        assert isinstance(self.poscar, str)
         fout.write(self.poscar)
         if self.verbose:
             print("File " + filename + " written.")
         return
 
-    def xyz(self, filename: str):
+    def xyz(self, filename: str) -> None:
         """Writes an xyz file, the lattice is written as a comment line
 
         Parameters
@@ -315,6 +326,9 @@ class Poscar:
         filename: str
             the name of the .xyz file, The .xyz extension is not automatically added
         """
+        assert self.lat is not None
+        assert self.cpos is not None
+        assert self.elm is not None
         xyzf = open(filename, "w")
         xyzf.write(str(self.Ntotal) + "\n")
 
@@ -325,17 +339,17 @@ class Poscar:
 
         # continuing with the positions
         pos = self.cpos
-        pos = np.array(pos, dtype=str)
-        pos = [" ".join(x) for x in pos]
+        pos_str = np.array(pos, dtype=str)
+        pos_lines = [" ".join(x) for x in pos_str]
         elm = list(self.elm)
-        xyzstr = "\n".join([x + " " + y for x, y in zip(elm, pos)])
+        xyzstr = "\n".join([x + " " + y for x, y in zip(elm, pos_lines)])
         xyzf.write(xyzstr)
         xyzf.write("\n")
         xyzf.close()
         if self.verbose:
             print(filename + " written as xyz")
 
-    def sort(self):
+    def sort(self) -> None:
         """This method updates the internal arrays related to elements and
         atoms per element. Automatically used when using `self.add`
         """
@@ -345,13 +359,17 @@ class Poscar:
         #
         from collections import OrderedDict
 
+        assert self.typeSp is not None
+        assert self.elm is not None
+        assert self.dpos is not None
+
         # getting the different element's names, without repetitions
         self.typeSp = list(OrderedDict.fromkeys(self.typeSp))
         if self.verbose:
             print("The list of elements is ", self.typeSp)
         # lists of ordered atoms
-        atoms = []
-        elements = []
+        atoms: list[np.ndarray] = []
+        elements: list[str] = []
         if self.verbose:
             print("to sort: ", self.elm, "\n", self.dpos)
 
@@ -382,21 +400,24 @@ class Poscar:
         if self.verbose:
             print("N atoms per specie, ", self.numberSp, ". Total: ", self.Ntotal)
 
-    def remove(self, atoms: list | int):
+    def remove(self, atoms: list[int] | int) -> None:
         """
         Remove one or more atoms.
 
         Parameters:
 
-        atoms : int|list
+        atoms : int|list[int]
             removes the atom(s) with given indexes (0-based)
         """
+        assert self.Ntotal is not None
+        assert self.cpos is not None
+        assert self.dpos is not None
+        assert self.elm is not None
+
         # atoms maybe (or not) just one atom (an int, not a one-sized list)
         if self.verbose:
             print("going to delete the following atom(s):", atoms)
-        try:
-            iterator = iter(atoms)
-        except TypeError:
+        if isinstance(atoms, int):
             atoms = [atoms]
 
         # we will populate a list with the atoms to keep
@@ -411,11 +432,11 @@ class Poscar:
         self.Ntotal = len(self.cpos)
 
         # self.elm is a list, I am not sure why, but I will cast it back to list
-        self.elm = np.array(self.elm)
-        self.elm = self.elm[keep]
-        self.elm = list(self.elm)
+        elm_arr = np.array(self.elm)
+        self.elm = list(elm_arr[keep])
 
         if self.selective:
+            assert self.selectFlags is not None
             self.selectFlags = self.selectFlags[keep]
         # the atoms types and their number can be modified, we need to
         # count them from self.elm
@@ -435,8 +456,8 @@ class Poscar:
         position: np.ndarray,
         element: str,
         direct: bool = True,
-        selectiveFlags: np.ndarray = None,
-    ):
+        selectiveFlags: np.ndarray | None = None,
+    ) -> None:
         """Adds one atom to the class. Only one atom at the time
 
         Parameters
@@ -449,12 +470,16 @@ class Poscar:
         direct : bool
             are the positions given  direct (True) or Cartesian (False)
             coordinates? Default is True
-        selectiveFlags : np.ndarray(str)
+        selectiveFlags : np.ndarray | None
             only of `self.selective == True`
 
         """
+        assert self.dpos is not None
+        assert self.cpos is not None
+        assert self.elm is not None
+
         position = np.array(position, dtype=float)
-        position.shape = (1, 3)
+        position = position.reshape(1, 3)
         if self.verbose:
             print("going to add an " + element + " atom at", position, end=",")
             if direct:
@@ -466,13 +491,14 @@ class Poscar:
             self.dpos = np.concatenate((self.dpos, position))
         else:
             self.cpos = np.concatenate((self.cpos, position))
-        self.Ntotal = self.Ntotal + 1
+        self.Ntotal = (self.Ntotal or 0) + 1
         self.elm.append(element)
-        if self.selective and selectiveFlags:
+        if self.selective and selectiveFlags is not None:
             if self.verbose:
                 print("selective flag found.")
-            selectiveFlags = np.array(selectiveFlags, dtype=str)
-            self.selectFlags = np.concatenate(self.selectFlags, selectiveFlags)
+            selectiveFlags_arr = np.array(selectiveFlags, dtype=str)
+            assert self.selectFlags is not None
+            self.selectFlags = np.concatenate((self.selectFlags, selectiveFlags_arr))
         # setting the other data
         if direct:
             self._set_cartesian()

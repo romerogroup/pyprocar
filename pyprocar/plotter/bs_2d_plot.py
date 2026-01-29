@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import logging
 import os
 from dataclasses import dataclass, field
@@ -5,9 +7,9 @@ from functools import partial
 from typing import Any
 
 import numpy as np
+import numpy.typing as npt
 import pyvista as pv
 import vtk
-from pyvista import ColorLike
 from pyvista.core.filters import _get_output
 from pyvista.plotting.utilities.algorithms import (
     add_ids_algorithm,
@@ -45,25 +47,29 @@ class BS2DSeries:
     additional_kwargs: dict[str, Any] = field(default_factory=dict)
 
 
-def find_nearest(array, value):
-    array = np.asarray(array)
-    idx = (np.abs(array - value)).argmin()
+def find_nearest(array: npt.ArrayLike, value: float) -> np.intp:
+    arr = np.asarray(array)
+    idx = np.abs(arr - value).argmin()
     return idx
 
 
-def normalize_to_range(scalars, clim=(0, 1)):
+def normalize_to_range(
+    scalars: npt.NDArray[np.floating[Any]],
+    clim: tuple[float, float] | None = (0, 1),
+) -> npt.NDArray[np.floating[Any]]:
     if clim is None:
         clim = (0, 1)
-    return (scalars - scalars.min()) / (scalars.max() - scalars.min()) * (clim[1] - clim[0]) + clim[
-        0
-    ]
+    result: npt.NDArray[np.floating[Any]] = (scalars - scalars.min()) / (
+        scalars.max() - scalars.min()
+    ) * (clim[1] - clim[0]) + clim[0]
+    return result
 
 
 def get_uv_bands_grid(
     grid_interpolation: tuple[int, int],
     u_limits: tuple[float, float],
     v_limits: tuple[float, float],
-):
+) -> tuple[npt.NDArray[np.floating[Any]], npt.NDArray[np.floating[Any]]]:
     grid_u, grid_v = np.mgrid[
         u_limits[0] : u_limits[1] : complex(0, grid_interpolation[0]),
         v_limits[0] : v_limits[1] : complex(0, grid_interpolation[1]),
@@ -72,18 +78,32 @@ def get_uv_bands_grid(
 
 
 class BS2DPlotter(pv.Plotter):
-    def __init__(self, bandstructure2d, **kwargs):
+    bs2d: Any
+    camera_position: (
+        tuple[
+            tuple[float, float, float],
+            tuple[float, float, float],
+            tuple[float, float, float],
+        ]
+        | str
+    )
+
+    def __init__(self, bandstructure2d: Any, **kwargs: Any) -> None:
         super().__init__(**kwargs)
         self.bs2d = bandstructure2d
         self._meshes: list[pv.PolyData] = []
-        self.values_dict: dict[str, np.ndarray] = {}
+        self.values_dict: dict[str, np.ndarray[Any, Any]] = {}
+        self.brillouin_zone: pv.PolyData | None = None
+        self.cross_section_area: bool = False
+        self.clipper: vtk.vtkBoxClipDataSet = vtk.vtkBoxClipDataSet()
+        self.add_text_args: dict[str, Any] = {}
 
     def _to_series_list(
         self,
-        bandstructure2d,
-        scalars_data=None,
-        vectors_data=None,
-        **kwargs,
+        bandstructure2d: Any,
+        scalars_data: Any = None,
+        vectors_data: Any = None,
+        **kwargs: Any,
     ) -> list[BS2DSeries]:
         """Convert BandStructure2D and Properties to list of BS2DSeries.
 
@@ -175,17 +195,17 @@ class BS2DPlotter(pv.Plotter):
 
     def plot(
         self,
-        bandstructure2d=None,
-        scalars_data=None,
-        vectors_data=None,
+        bandstructure2d: Any = None,
+        scalars_data: Any = None,
+        vectors_data: Any = None,
         scalars_mode: str = "surface",
         show_brillouin_zone: bool = True,
         show_scalar_bar: bool = True,
         scalars_cmap: str = "plasma",
         scalars_clim: tuple[float, float] | None = None,
-        add_surface_kwargs: dict | None = None,
-        add_texture_kwargs: dict | None = None,
-        **kwargs,
+        add_surface_kwargs: dict[str, Any] | None = None,
+        add_texture_kwargs: dict[str, Any] | None = None,
+        **kwargs: Any,
     ) -> dict[tuple[int, int], pv.PolyData]:
         """Plot 2D band structure from BandStructure2D with Property-based coloring.
 
@@ -264,7 +284,7 @@ class BS2DPlotter(pv.Plotter):
 
             # Build add_mesh kwargs - only show scalar bar for first surface
             is_first_surface = key == band_keys[0]
-            mesh_kwargs = {
+            mesh_kwargs: dict[str, Any] = {
                 "cmap": scalars_cmap,
                 "clim": scalars_clim,
                 "show_scalar_bar": show_scalar_bar and is_first_surface,
@@ -276,14 +296,17 @@ class BS2DPlotter(pv.Plotter):
             if show_scalar_bar and series.scalars_label:
                 if "scalar_bar_args" not in mesh_kwargs:
                     mesh_kwargs["scalar_bar_args"] = {}
-                mesh_kwargs["scalar_bar_args"]["title"] = series.scalars_label  # type: ignore[index]
+                sbar_dict: dict[str, Any] = mesh_kwargs.get("scalar_bar_args", {})
+                if isinstance(sbar_dict, dict):
+                    sbar_dict["title"] = series.scalars_label
+                    mesh_kwargs["scalar_bar_args"] = sbar_dict
 
             self.add_mesh(mesh, **mesh_kwargs)
             self._meshes.append(mesh)
 
             # Add vectors if present
             if series.vectors is not None:
-                texture_kwargs = {
+                texture_kwargs: dict[str, Any] = {
                     "cmap": scalars_cmap,
                     "clim": scalars_clim,
                     **add_texture_kwargs,
@@ -347,20 +370,18 @@ class BS2DPlotter(pv.Plotter):
                 combined.save(filename)
         elif ext == ".npz":
             if self.values_dict:
-                np.savez(filename, **self.values_dict)
+                np.savez(filename, **self.values_dict)  # pyright: ignore[reportArgumentType] - numpy savez accepts ndarray kwargs
         else:
-            raise ValueError(
-                f"Unsupported file format: {ext}. Use .vtk, .vtp, .ply, .stl, or .npz"
-            )
+            raise ValueError(f"Unsupported file format: {ext}. Use .vtk, .vtp, .ply, .stl, or .npz")
 
     def add_brillouin_zone(
         self,
-        brillouin_zone: pv.PolyData = None,
+        brillouin_zone: pv.PolyData | None = None,
         style: str = "wireframe",
         line_width: float = 2.0,
-        color: ColorLike = "black",
+        color: str = "black",
         opacity: float = 1.0,
-    ):
+    ) -> None:
         self.brillouin_zone = brillouin_zone
         self.add_mesh(
             brillouin_zone,
@@ -375,12 +396,12 @@ class BS2DPlotter(pv.Plotter):
         surface: pv.PolyData,
         normalize: bool = False,
         clip_surface: bool = False,
-        add_texture_args: dict = None,
+        add_texture_args: dict[str, Any] | None = None,
         add_active_vectors: bool = False,
         show_scalar_bar: bool = True,
-        add_mesh_args: dict = None,
-        **kwargs,
-    ):
+        add_mesh_args: dict[str, Any] | None = None,
+        **kwargs: Any,
+    ) -> None:
         logger.info("____Adding Surface to Plotter____")
 
         if add_texture_args is None:
@@ -392,28 +413,31 @@ class BS2DPlotter(pv.Plotter):
 
         if show_scalar_bar:
             active_scalar_name = surface.active_scalars_name
-            if "norm" in active_scalar_name:
+            if active_scalar_name is not None and "norm" in active_scalar_name:
                 active_scalar_name = active_scalar_name.replace("-norm", "")
             add_mesh_args["show_scalar_bar"] = add_mesh_args.get("show_scalar_bar", True)
-            add_mesh_args["scalar_bar_args"] = add_mesh_args.get("scalar_bar_args", {})
-            add_mesh_args["scalar_bar_args"]["title"] = add_mesh_args.get(
-                "scalar_bar_args", {}
-            ).get("title", active_scalar_name)
+            sbar_args: dict[str, Any] = add_mesh_args.get("scalar_bar_args", {})
+            if isinstance(sbar_args, dict):
+                sbar_args.setdefault("title", active_scalar_name)
+            add_mesh_args["scalar_bar_args"] = sbar_args
 
         add_mesh_args["cmap"] = add_mesh_args.get("cmap", "plasma")
         add_mesh_args["clim"] = add_mesh_args.get("clim")
         add_mesh_args["name"] = add_mesh_args.get("name", "surface")
         add_mesh_args.update(kwargs)
 
-        clim = add_mesh_args.get("clim")
-        cmap = add_mesh_args.get("cmap", "plasma")
+        clim: Any = add_mesh_args.get("clim")
+        cmap: Any = add_mesh_args.get("cmap", "plasma")
 
-        if normalize:
-            scalars = normalize_to_range(surface.active_scalars, clim=clim)
-            add_mesh_args["scalars"] = scalars
+        if normalize and surface.active_scalars is not None:
+            normalized_scalars = normalize_to_range(
+                surface.active_scalars,
+                clim=clim,
+            )
+            add_mesh_args["scalars"] = normalized_scalars
         add_mesh_args["scalars"] = add_mesh_args.get("scalars")
 
-        if clip_surface:
+        if clip_surface and self.brillouin_zone is not None:
             surface = self.clip_surface(surface, self.brillouin_zone)
 
         self.add_mesh(surface, **add_mesh_args)
@@ -425,7 +449,7 @@ class BS2DPlotter(pv.Plotter):
 
             self.add_texture(surface, **add_texture_args)
 
-    def clip_surface(self, surface: pv.PolyData, brillouin_zone: pv.PolyData):
+    def clip_surface(self, surface: pv.PolyData, brillouin_zone: pv.PolyData) -> pv.PolyData:
         for normal, center in zip(brillouin_zone.face_normals, brillouin_zone.centers):
             surface = surface.clip(origin=center, normal=normal, inplace=False)
             if surface.points.shape[0] == 0:
@@ -438,10 +462,10 @@ class BS2DPlotter(pv.Plotter):
         surface: pv.PolyData,
         vectors: str | bool = True,
         factor: float = 1.0,
-        add_mesh_args: dict = None,
-        glyph_args: dict = None,
-        **kwargs,
-    ):
+        add_mesh_args: dict[str, Any] | None = None,
+        glyph_args: dict[str, Any] | None = None,
+        **kwargs: Any,
+    ) -> pv.PolyData | None:
         active_vectors = surface.active_vectors
         if active_vectors is None:
             return None
@@ -463,9 +487,11 @@ class BS2DPlotter(pv.Plotter):
         glyph_args["scale"] = glyph_args.get("scale", True)
         glyph_args["orient"] = glyph_args.get("orient", vectors)
 
-        active_vector_magnitude = np.linalg.norm(surface.active_vectors, axis=1)
-        vector_scale_factor = 1 / active_vector_magnitude.max()
-        factor = vector_scale_factor * BZ_SCALE_FACTOR * factor
+        active_vector_magnitude: npt.NDArray[np.floating[Any]] = np.linalg.norm(
+            active_vectors, axis=1
+        )
+        vector_scale_factor: np.floating[Any] = 1 / active_vector_magnitude.max()
+        factor = float(vector_scale_factor) * BZ_SCALE_FACTOR * factor
 
         glyph_args["factor"] = factor
         glyph_args["indices"] = glyph_args.get("indices")
@@ -476,13 +502,13 @@ class BS2DPlotter(pv.Plotter):
 
     def add_slicer(
         self,
-        surface,
-        normal=(1, 0, 0),
-        origin=(0, 0, 0),
-        add_surface_args=None,
-        add_active_vectors=False,
-        add_plane_widget_args=None,
-    ):
+        surface: pv.PolyData,
+        normal: tuple[float, float, float] = (1, 0, 0),
+        origin: tuple[float, float, float] = (0, 0, 0),
+        add_surface_args: dict[str, Any] | None = None,
+        add_active_vectors: bool = False,
+        add_plane_widget_args: dict[str, Any] | None = None,
+    ) -> None:
         if add_surface_args is None:
             add_surface_args = {}
         if add_plane_widget_args is None:
@@ -506,13 +532,13 @@ class BS2DPlotter(pv.Plotter):
 
     def _slice_callback(
         self,
-        normal,
-        origin,
-        mesh=None,
-        add_surface_args=None,
-        add_text_args=None,
-        cross_section_area=False,
-    ):
+        normal: tuple[float, float, float] | str,
+        origin: tuple[float, float, float],
+        mesh: pv.PolyData | None = None,
+        add_surface_args: dict[str, Any] | None = None,
+        add_text_args: dict[str, Any] | None = None,
+        cross_section_area: bool = False,
+    ) -> pv.PolyData | None:
         if add_surface_args is None:
             add_surface_args = {}
 
@@ -539,24 +565,26 @@ class BS2DPlotter(pv.Plotter):
         if cross_section_area:
             surface = slc.delaunay_2d()
             text = f"Cross sectional area : {surface.area:.4f}" + " Ang^-2"
+            if add_text_args is None:
+                add_text_args = {}
             self.add_text(text, name="area_text", **add_text_args)
 
         return slc
 
     def add_box_slicer(
         self,
-        surface,
-        normal=(1, 0, 0),
-        origin=(0, 0, 0),
-        add_surface_args=None,
-        add_active_vectors=False,
-        add_plane_widget_args=None,
-        add_text_args=None,
-        cross_section_area=False,
-        save_2d=None,
-        save_2d_slice=None,
-        **kwargs,
-    ):
+        surface: pv.PolyData,
+        normal: tuple[float, float, float] = (1, 0, 0),
+        origin: tuple[float, float, float] = (0, 0, 0),
+        add_surface_args: dict[str, Any] | None = None,
+        add_active_vectors: bool = False,
+        add_plane_widget_args: dict[str, Any] | None = None,
+        add_text_args: dict[str, Any] | None = None,
+        cross_section_area: bool = False,
+        _save_2d: Any = None,
+        _save_2d_slice: Any = None,
+        **kwargs: Any,
+    ) -> None:
         self.cross_section_area = cross_section_area
         if add_surface_args is None:
             add_surface_args = {}
@@ -612,8 +640,13 @@ class BS2DPlotter(pv.Plotter):
             **add_plane_widget_args,
         )
 
-    def _box_callback(self, planes, port=0, add_surface_args=None):
-        bounds = []
+    def _box_callback(
+        self,
+        planes: vtk.vtkPlanes,
+        port: int = 0,
+        add_surface_args: dict[str, Any] | None = None,
+    ) -> None:
+        bounds: list[tuple[float, float, float]] = []
 
         for i in range(planes.GetNumberOfPlanes()):
             plane = planes.GetPlane(i)
@@ -623,7 +656,12 @@ class BS2DPlotter(pv.Plotter):
         self.clipper.SetBoxClip(*bounds)
         self.clipper.Update()
 
-        clipped = _get_output(self.clipper, oport=port)
+        clipped_output = _get_output(self.clipper, oport=port)
+        clipped = (
+            pv.PolyData(clipped_output)
+            if not isinstance(clipped_output, pv.PolyData)
+            else clipped_output
+        )
 
         if len(self._meshes) == 0:
             self._meshes.append(clipped)
@@ -643,10 +681,20 @@ class BS2DPlotter(pv.Plotter):
                 add_text_args=self.add_text_args,
             )
 
-    def savefig(self, filename, camera_position=None, **kwargs):
+    def savefig(
+        self,
+        filename: str,
+        camera_position: tuple[
+            tuple[float, float, float],
+            tuple[float, float, float],
+            tuple[float, float, float],
+        ]
+        | str
+        | None = None,
+    ) -> None:
         logger.info("Saving plot")
 
-        if camera_position:
+        if camera_position is not None:
             self.camera_position = camera_position
         else:
             self.view_isometric()

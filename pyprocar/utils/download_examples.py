@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import os
 import shutil
 import zipfile
@@ -13,7 +15,7 @@ REPO_ID = "lllangWV/pyprocar_test_data"
 REPO_TYPE = "dataset"
 
 
-def compress_dirpath(dirpath: str | Path, output_path: str | Path = None):
+def compress_dirpath(dirpath: str | Path, output_path: str | Path | None = None) -> None:
     """Compress test data directory into a zip archive.
 
     Parameters
@@ -21,7 +23,6 @@ def compress_dirpath(dirpath: str | Path, output_path: str | Path = None):
         dirpath (Union[str, Path]): Path to the test data directory to compress
         output_path (Union[str, Path]): Path to the compressed test data archive
     """
-
     dirpath = Path(dirpath)
     if not dirpath.exists():
         raise FileNotFoundError(f"Test data directory not found: {dirpath}")
@@ -32,14 +33,13 @@ def compress_dirpath(dirpath: str | Path, output_path: str | Path = None):
             zipf.write(file, file.relative_to(dirpath.parent))
 
 
-def uncompress_dirpath(dirpath: str | Path):
+def uncompress_dirpath(dirpath: str | Path) -> None:
     """Uncompress test data from a zip archive.
 
     Parameters
     ----------
         dirpath (Union[str, Path]): Path to the compressed test data archive.
     """
-
     archive_path = Path(dirpath)
     if archive_path.suffix == ".zip":
         outpath = archive_path.with_suffix("")
@@ -53,39 +53,40 @@ def uncompress_dirpath(dirpath: str | Path):
         zipf.extractall(path=outpath)
 
 
-def compress_test_data(data_dirpath: str | Path):
+def compress_test_data(data_dirpath: str | Path) -> None:
     """Compress test data with custom logic for different directories.
 
     - codes, io, issues directories are compressed as whole directories
     - examples directory: compress directories that are 3 levels deep
     """
-    CODES_DIRPATH = data_dirpath / "codes"
-    EXAMPLES_DIRPATH = data_dirpath / "examples"
-    IO_DIRPATH = data_dirpath / "io"
-    ISSUES_DIRPATH = data_dirpath / "issues"
+    data_dirpath = Path(data_dirpath)
+    codes_dirpath = data_dirpath / "codes"
+    examples_dirpath = data_dirpath / "examples"
+    io_dirpath = data_dirpath / "io"
+    issues_dirpath = data_dirpath / "issues"
 
     # Compress codes, io, and issues directories as whole directories
-    for dirpath in [CODES_DIRPATH, IO_DIRPATH, ISSUES_DIRPATH]:
-        if dirpath.exists() and dirpath.is_dir():
-            print(f"Compressing {dirpath.name} directory...")
-            compress_dirpath(dirpath)
+    for dp in [codes_dirpath, io_dirpath, issues_dirpath]:
+        if dp.exists() and dp.is_dir():
+            print(f"Compressing {dp.name} directory...")
+            compress_dirpath(dp)
 
     # For examples directory, compress directories that are 3 levels deep
-    if EXAMPLES_DIRPATH.exists() and EXAMPLES_DIRPATH.is_dir():
+    if examples_dirpath.exists() and examples_dirpath.is_dir():
         print("Compressing examples subdirectories...")
-        for level1_dir in EXAMPLES_DIRPATH.iterdir():
+        for level1_dir in examples_dirpath.iterdir():
             if level1_dir.is_dir():
                 for level2_dir in level1_dir.iterdir():
                     print(f"Compressing {level2_dir.relative_to(data_dirpath)}...")
                     if "zip" in level2_dir.name:
                         continue
                     if level2_dir.is_dir():
-                        shutil.make_archive(level2_dir, "zip", level2_dir)
+                        shutil.make_archive(str(level2_dir), "zip", str(level2_dir))
                     else:
                         compress_dirpath(level2_dir)
 
 
-def uncompress_test_data(data_dirpath: str | Path):
+def uncompress_test_data(data_dirpath: str | Path) -> None:
     """Uncompress test data with custom logic for different directories.
 
     - codes, io, issues directories are uncompressed from whole directory zip files
@@ -127,10 +128,8 @@ def uncompress_test_data(data_dirpath: str | Path):
                         level2_dir.unlink()
 
 
-def download_test_data(relpath: str, output_path: str | Path = ".", force: bool = False):
-    """
-    Download test data from:
-    https://huggingface.co/datasets/lllangWV/pyprocar_test_data/tree/main/
+def download_test_data(relpath: str, output_path: str | Path = ".", force: bool = False) -> Path:
+    """Download test data from HuggingFace Hub.
 
     Parameters
     ----------
@@ -139,12 +138,11 @@ def download_test_data(relpath: str, output_path: str | Path = ".", force: bool 
 
         output_path (str): Path to the directory to download the examples to.
     """
+    output_path = Path(output_path)
     full_data_path = output_path / relpath
     if full_data_path.exists() and not force:
         print(f"Data already exists at {full_data_path}")
         return full_data_path
-
-    output_path = Path(output_path)
 
     # Ensure the output directory exists - this is critical for Jupyter notebooks
     output_path.mkdir(parents=True, exist_ok=True)
@@ -180,13 +178,13 @@ def download_test_data(relpath: str, output_path: str | Path = ".", force: bool 
     return full_data_path
 
 
-def download_from_hf(relpath: str, output_path: str | Path = ".", force: bool = False):
+def download_from_hf(relpath: str, output_path: str | Path = ".", force: bool = False) -> Path:
     with ThreadPoolExecutor(1) as executor:
         future = executor.submit(download_test_data, relpath, output_path, force)
         return future.result()
 
 
-def remove_zip_files(dirpath: str | Path):
+def remove_zip_files(dirpath: str | Path) -> None:
     """Remove all zip files from a directory and its subdirectories.
 
     Parameters
@@ -227,7 +225,7 @@ def remove_zip_files(dirpath: str | Path):
     print(f"Finished removing zip files from {dirpath}")
 
 
-def upload_test_data_to_hf(data_dirpath: str | Path):
+def upload_test_data_to_hf(data_dirpath: str | Path) -> None:
     """Upload test data to Hugging Face Hub.
 
     Compresses the test data directory and uploads it to the Hugging Face Hub.
@@ -236,7 +234,6 @@ def upload_test_data_to_hf(data_dirpath: str | Path):
     ----------
         data_dirpath (Union[str, Path]): Path to the directory containing test data to upload
     """
-
     compress_test_data(data_dirpath)
     api = HfApi()
     api.upload_folder(

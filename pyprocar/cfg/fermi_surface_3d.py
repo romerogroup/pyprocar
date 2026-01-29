@@ -196,8 +196,8 @@ class FermiSurface3DConfig(BaseConfig):
 
     # Basic Plot Settings
     mode: FermiSurfaceMode = FermiSurfaceMode.PLAIN
-    property: FermiSurfaceProperty = None
-    property_name: str = None
+    property: FermiSurfaceProperty | None = None
+    property_name: str | None = None
     background_color: str = "white"
     plotter_offscreen: bool = False
     plotter_camera_pos: list[int] = field(default_factory=lambda: [1, 1, 1])
@@ -210,7 +210,7 @@ class FermiSurface3DConfig(BaseConfig):
     surface_bands_colors: list[str] = field(default_factory=list)
 
     # Spin Settings
-    spin_colors: tuple[str] | None = (None, None)
+    spin_colors: tuple[str | None, ...] = (None, None)
     arrow_size: int = 3  # Size of arrows for spin texture
     texture_cmap: str = "jet"
     texture_color: str | None = None
@@ -236,7 +236,7 @@ class FermiSurface3DConfig(BaseConfig):
 
     # Scalar Bar Configurations
     show_scalar_bar: bool = True
-    scalar_bar_config: dict = field(
+    scalar_bar_config: dict[str, object] = field(
         default_factory=lambda: {
             "italic": False,
             "bold": False,
@@ -268,7 +268,7 @@ class FermiSurface3DConfig(BaseConfig):
     isoslider_color: str = "black"
 
     # Miscellaneous
-    save_gif_config: dict = field(
+    save_gif_config: dict[str, object] = field(
         default_factory=lambda: {
             "generate_orbital_path_kwargs": {"n_points": 36},
             "open_gif_kwargs": {},
@@ -276,7 +276,7 @@ class FermiSurface3DConfig(BaseConfig):
         }
     )
 
-    save_mp4_config: dict = field(
+    save_mp4_config: dict[str, object] = field(
         default_factory=lambda: {
             "generate_orbital_path_kwargs": {"n_points": 36},
             "open_movie_kwargs": {},
@@ -284,17 +284,13 @@ class FermiSurface3DConfig(BaseConfig):
         }
     )
 
-    save_mesh_config: dict = field(
+    save_mesh_config: dict[str, object] = field(
         default_factory=lambda: {
             "save_meshio_kwargs": {},
         }
     )
 
-    def __post_init__(self):
-        """This method is immediately called after the object is initialized.
-        It is useful to validate the data and set default values.
-        """
-        self.plot_type = PlotType.FERMI_SURFACE_3D
+    plot_type: PlotType = PlotType.FERMI_SURFACE_3D
 
     def as_dict(self):
         """

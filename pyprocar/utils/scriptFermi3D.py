@@ -5,47 +5,53 @@ Created on Fri May 10 16:23:30 2019
 
 """
 
+from __future__ import annotations
+
 from multiprocessing import Pool
+from typing import Any
 
 import numpy as np
-import scipy.interpolate as interpolate
+import numpy.typing as npt
+from scipy import interpolate
 from scipy.spatial import ConvexHull, Voronoi
 from skimage import measure
 
 from ..core import ProcarSelect
 from ..io import ProcarParser
-from ..utils import UtilsProcar
+from ..utils.utilsprocar import UtilsProcar
 from .splash import welcome
 
 
-def get_wigner_seitz(recLat):
-    kpoints = []
+def get_wigner_seitz(recLat: npt.NDArray[np.float64]) -> npt.NDArray[np.float64]:
+    kpoints: list[npt.NDArray[np.float64]] = []
     for i in range(-1, 2):
         for j in range(-1, 2):
             for k in range(-1, 2):
                 vec = i * recLat[0] + j * recLat[1] + k * recLat[2]
                 kpoints.append(vec)
     brill = Voronoi(np.array(kpoints))
-    faces = []
+    faces: list[list[int]] = []
     for idict in brill.ridge_dict:
         if idict[0] == 13 or idict[1] == 13:
             faces.append(brill.ridge_dict[idict])
     verts = brill.vertices
-    poly = []
+    poly: list[npt.NDArray[np.float64]] = []
     for ix in range(len(faces)):
-        temp = []
+        temp: list[npt.NDArray[np.float64]] = []
         for iy in range(len(faces[ix])):
             temp.append(verts[faces[ix][iy]])
         poly.append(np.array(temp))
     return np.array(poly)
 
 
-def mapping_func(kpoints, bands):
+def mapping_func(
+    kpoints: npt.NDArray[np.float64], bands: npt.NDArray[np.float64]
+) -> tuple[npt.NDArray[np.float64], npt.NDArray[np.float64]]:
     kx = np.unique(kpoints[:, 0])
     ky = np.unique(kpoints[:, 1])
     kz = np.unique(kpoints[:, 2])
-    mapped_func = np.zeros(shape=(len(kx), len(ky), len(kz)))
-    kpoint_matrix = np.zeros(shape=(len(kx), len(ky), len(kz), 3))
+    mapped_func: npt.NDArray[np.float64] = np.zeros(shape=(len(kx), len(ky), len(kz)))
+    kpoint_matrix: npt.NDArray[np.float64] = np.zeros(shape=(len(kx), len(ky), len(kz), 3))
     for ikx in range(len(kx)):
         cond1 = kpoints[:, 0] == kx[ikx]
         for iky in range(len(ky)):
@@ -67,7 +73,10 @@ def mapping_func(kpoints, bands):
 # using FFT interpolate we will loose center. The fermi surface will not be symmetric with
 # respect to the center. To avoid this we will add the points from 0.5 to -0.5 so the mesh will be like
 # [-0.5,-0.45,..,0,...,0.45,0.5]
-def symmetrize(data):
+def symmetrize(data: ProcarSelect) -> ProcarSelect:
+    assert data.kpoints is not None
+    assert data.bands is not None
+    assert data.spd is not None
     # kpoints with one 0.5
     idx = (data.kpoints == 0.5).sum(axis=1) == 1
     #    idx = np.any(data.kpoints == 0.5,axis=1)
@@ -122,9 +131,14 @@ def symmetrize(data):
     return data
 
 
-def bring_pnts_to_BZ(recLat, kvector_cart, kvector_red, br_points):
-    outsides = []
-    directions = []
+def bring_pnts_to_BZ(
+    recLat: npt.NDArray[np.float64],
+    kvector_cart: npt.NDArray[np.float64],
+    kvector_red: npt.NDArray[np.float64],
+    br_points: npt.NDArray[np.float64],
+) -> tuple[npt.NDArray[np.float64], npt.NDArray[np.float64], bool]:
+    outsides: list[npt.NDArray[np.float64]] = []
+    directions: list[npt.NDArray[np.float64]] = []
     # This section finds points that are outside of the 1st BZ and and creates those points in the 1st BZ
     movements = np.array(
         [
@@ -149,14 +163,16 @@ def bring_pnts_to_BZ(recLat, kvector_cart, kvector_red, br_points):
             directions.append(np.dot(movements[idirection - 1], np.linalg.pinv(recLat)).round(2))
         kvector_cart[ik] = ik_copy[:]
         kvector_red[ik] = np.dot(ik_copy, np.linalg.pinv(recLat)).round(2)
-    if len(outsides):
+    if outsides:
         has_points_out = True
     else:
         has_points_out = False
     return kvector_cart, kvector_red, has_points_out
 
 
-def fft_interpolate(function, scale):
+def fft_interpolate(
+    function: npt.NDArray[np.float64], scale: int
+) -> npt.NDArray[np.float64]:
     eigen_fft = np.fft.fftn(function)
     shifted_fft = np.fft.fftshift(eigen_fft)
     nx, ny, nz = np.array(shifted_fft.shape)
@@ -175,7 +191,7 @@ def fft_interpolate(function, scale):
     return interpolated
 
 
-def is_outside(args):
+def is_outside(args: list[Any]) -> bool:
     br_points = args[0]
     point = args[1]
     Hull1 = ConvexHull(br_points)
@@ -189,13 +205,21 @@ def is_outside(args):
     return False
 
 
-def to_remove(args):
+def to_remove(args: list[Any]) -> npt.NDArray[np.bool_]:
     faces = args[0]
     vert = args[1]
     return np.any(faces == vert, axis=1)
 
 
-def fermi3D(procar, outcar, bands=-1, scale=1, mode="plain", st=False, **kwargs):
+def fermi3D(
+    procar: str,
+    outcar: str,
+    bands: int | range = -1,
+    scale: int = 1,
+    mode: str = "plain",
+    st: bool = False,
+    **kwargs: Any,
+) -> None:
     """
     This function plots 3d fermi surface
     list of acceptable kwargs :
@@ -214,89 +238,111 @@ def fermi3D(procar, outcar, bands=-1, scale=1, mode="plain", st=False, **kwargs)
     # Initilizing the arguments :
 
     if "plotting_package" in kwargs:
-        plotting_package = kwargs["plotting_package"]
+        plotting_package: str = kwargs["plotting_package"]
     else:
         plotting_package = "mayavi"
 
     if "nprocess" in kwargs:
-        nprocess = kwargs["nprocess"]
+        nprocess: int = kwargs["nprocess"]
     else:
         nprocess = 2
 
     if "face_colors" in kwargs:
-        face_colors = kwargs["face_colors"]
+        face_colors: Any = kwargs["face_colors"]
     else:
         face_colors = None
     if "cmap" in kwargs:
-        cmap = kwargs["cmap"]
+        cmap: Any = kwargs["cmap"]
     else:
         cmap = "jet"
     if "atoms" in kwargs:
-        atoms = kwargs["atoms"]
+        atoms: list[int] = kwargs["atoms"]
     else:
         atoms = [-1]  # project all atoms
     if "orbitals" in kwargs:
-        orbitals = kwargs["orbitals"]
+        orbitals: list[int] = kwargs["orbitals"]
     else:
         orbitals = [-1]
 
     if "spin" in kwargs:
-        spin = kwargs["spin"]
+        spin: list[int] = kwargs["spin"]
     else:
         spin = [0]
     if "mask_points" in kwargs:
-        mask_points = kwargs["mask_points"]
+        mask_points: int = kwargs["mask_points"]
     else:
         mask_points = 1
     if "energy" in kwargs:
-        energy = kwargs["energy"]
+        energy: float = kwargs["energy"]
     else:
         energy = 0
     if "transparent" in kwargs:
-        transparent = kwargs["transparent"]
+        transparent: bool = kwargs["transparent"]
     else:
         transparent = False
 
     if "arrow_projection" in kwargs:
-        arrow_projection = kwargs["arrow_projection"]
+        arrow_projection: int = kwargs["arrow_projection"]
     else:
         arrow_projection = 2
 
+    # Initialize plotting library references (set conditionally below)
+    mlab: Any = None
+    tvtk: Any = None
+    ff: Any = None
+    go: Any = None
+    plt: Any = None
+    Poly3DCollection: Any = None
+    ipv: Any = None
+    figs: list[Any] = []
+    ax: Any = None
+
     if plotting_package == "mayavi":
         try:
-            from mayavi import mlab
-            from tvtk.api import tvtk
-        except:
+            from mayavi import mlab as _mlab  # pyright: ignore[reportMissingModuleSource]
+            from tvtk.api import tvtk as _tvtk  # pyright: ignore[reportMissingModuleSource]
+
+            mlab = _mlab
+            tvtk = _tvtk
+        except Exception:
             print(
                 "You have selected mayavi as plottin package. please install mayavi and tvtk or choose a different package"
             )
             return
     elif plotting_package == "plotly":
         try:
-            import plotly.figure_factory as ff
-            import plotly.graph_objs as go
+            import matplotlib.cm as mcm
+            import plotly.figure_factory as _ff  # pyright: ignore[reportMissingModuleSource]
+            import plotly.graph_objs as _go  # pyright: ignore[reportMissingModuleSource]
 
-            cmap = mpl.cm.get_cmap(cmap)
+            ff = _ff
+            go = _go
+            cmap = mcm.get_cmap(cmap)
             figs = []
 
-        except:
+        except Exception:
             print(
                 "You have selected plotly as plottin package. please install plotly or choose a different package"
             )
             return
     elif plotting_package == "matplotlib":
         try:
-            import matplotlib.pylab as plt
-            from mpl_toolkits.mplot3d.art3d import Poly3DCollection
-        except:
+            import matplotlib.pylab as _plt
+            from mpl_toolkits.mplot3d.art3d import Poly3DCollection as _Poly3DCollection
+
+            plt = _plt
+            Poly3DCollection = _Poly3DCollection
+        except Exception:
             print(
                 "You have selected matplotlib as plotting package. please install matplotlib or choose a different package"
             )
             return
     elif plotting_package == "ipyvolume":
         try:
-            import ipyvolume.pylab as ipv
-        except:
+            import ipyvolume.pylab as _ipv  # pyright: ignore[reportMissingModuleSource]
+
+            ipv = _ipv
+        except Exception:
             print(
                 "You have selected ipyvolume as plotting package. please install ipyvolume or choose a different package"
             )
@@ -336,11 +382,11 @@ def fermi3D(procar, outcar, bands=-1, scale=1, mode="plain", st=False, **kwargs)
     poly = get_wigner_seitz(recLat)
     # plot brilliouin zone
     if plotting_package == "mayavi":
-        brillouin_point = []
-        brillouin_faces = []
+        brillouin_point: list[list[float]] = []
+        brillouin_faces: list[list[int]] = []
         point_count = 0
         for iface in poly:
-            single_face = []
+            single_face: list[int] = []
             for ipoint in iface:
                 single_face.append(point_count)
                 brillouin_point.append(list(ipoint))
@@ -356,9 +402,9 @@ def fermi3D(procar, outcar, bands=-1, scale=1, mode="plain", st=False, **kwargs)
             name="BRZ",
         )
     elif plotting_package == "plotly":
-        for iface in poly:
-            iface = np.pad(iface, ((0, 1), (0, 0)), "wrap")
-            x, y, z = iface[:, 0], iface[:, 1], iface[:, 2]
+        for iface_arr in poly:
+            iface_arr = np.pad(iface_arr, ((0, 1), (0, 0)), "wrap")
+            x, y, z = iface_arr[:, 0], iface_arr[:, 1], iface_arr[:, 2]
             plane = go.Scatter3d(x=x, y=y, z=z, mode="lines", line=dict(color="black", width=4))
             figs.append(plane)
 
@@ -371,11 +417,11 @@ def fermi3D(procar, outcar, bands=-1, scale=1, mode="plain", st=False, **kwargs)
         brillouin_zone.set_edgecolor("k")
         ax.add_collection3d(brillouin_zone, zs=0, zdir="z")
 
-    br_points = []
-    for iface in poly:
-        for ipoint in iface:
+    br_points: list[Any] = []
+    for iface_arr in poly:
+        for ipoint in iface_arr:
             br_points.append(ipoint)
-    br_points = np.unique(br_points, axis=0)
+    br_points_arr: npt.NDArray[np.float64] = np.unique(br_points, axis=0)
     print("Number of bands: %d" % procarFile.bandsCount)
     print("Number of koints %d" % procarFile.kpointsCount)
     print("Number of ions: %d" % procarFile.ionsCount)
@@ -383,9 +429,19 @@ def fermi3D(procar, outcar, bands=-1, scale=1, mode="plain", st=False, **kwargs)
     print("Number of spins: %d" % procarFile.ispin)
 
     # selecting the data
-    data = ProcarSelect(procarFile, deepCopy=True)
-    if bands == -1:
-        bands = range(data.bands.shape[1])
+    # ProcarParser has nullable field types that don't match ProcarDataProtocol
+    # at the type level, but after readFile() the fields are populated
+    procar_data: Any = procarFile
+    data = ProcarSelect(procar_data, deepCopy=True)
+    assert data.bands is not None
+    assert data.kpoints is not None
+    assert data.spd is not None
+
+    band_indices: range
+    if isinstance(bands, int):
+        band_indices = range(data.bands.shape[1])
+    else:
+        band_indices = bands
 
     kvector = data.kpoints
     kmax = np.max(kvector)
@@ -395,14 +451,16 @@ def fermi3D(procar, outcar, bands=-1, scale=1, mode="plain", st=False, **kwargs)
         print("The mesh provided is gamma center, symmetrizing data")
         print("For a better fermi surface, use a non-gamma centered k-mesh")
         data = symmetrize(data)
+        assert data.kpoints is not None
         kvector = data.kpoints
 
+    assert data.kpoints is not None
     kvector_red = data.kpoints.copy()
     kvector_cart = np.dot(kvector_red, recLat)
 
     # This section finds points that are outside of the 1st BZ and and creates those points in the 1st BZ
     kvector_cart, kvector_red, has_points_out = bring_pnts_to_BZ(
-        recLat, kvector_cart, kvector_red, br_points
+        recLat, kvector_cart, kvector_red, br_points_arr
     )
     #    has_points_out = False
 
@@ -432,6 +490,16 @@ def fermi3D(procar, outcar, bands=-1, scale=1, mode="plain", st=False, **kwargs)
     padding_y = (nky_red - nky_orig) // 2
     padding_z = (nkz_red - nkz_orig) // 2
 
+    # Initialize mode-specific variables (set conditionally below)
+    color_kvector_cart: npt.NDArray[np.float64] | None = None
+    color_eigen: list[list[float]] = []
+    colors: npt.NDArray[np.floating[Any]] | None = None
+    spin_arrows: npt.NDArray[np.floating[Any]] | None = None
+    centers: npt.NDArray[np.float64] | None = None
+    dataX: ProcarSelect | None = None
+    dataY: ProcarSelect | None = None
+    dataZ: ProcarSelect | None = None
+
     if mode == "parametric":
         data.selectIspin(spin)
         data.selectAtoms(atoms, fortran=False)
@@ -442,39 +510,39 @@ def fermi3D(procar, outcar, bands=-1, scale=1, mode="plain", st=False, **kwargs)
 
             lines = rf.readlines()
             counter = 0
-            color_kvector = []
-            color_eigen = []
+            color_kvector: list[list[float]] = []
             for iline in lines:
                 if counter < 2:
                     if "band" in iline:
                         counter += 1
                         continue
-                    temp = [float(x) for x in iline.split()]
-                    color_kvector.append([temp[0], temp[1], temp[2]])
+                    temp_floats = [float(x) for x in iline.split()]
+                    color_kvector.append([temp_floats[0], temp_floats[1], temp_floats[2]])
             counter = -1
             for iline in lines:
                 if "band" in iline:
                     counter += 1
-                    iband = int(iline.split()[-1])
+                    _iband = int(iline.split()[-1])
                     color_eigen.append([])
                     continue
                 color_eigen[counter].append(float(iline.split()[-1]))
             rf.close()
 
-            color_kvector = np.array(color_kvector)
-            color_kvector_red = color_kvector.copy()
-            color_kvector_cart = np.dot(color_kvector, recLat)
+            color_kvector_np = np.array(color_kvector)
+            color_kvector_red = color_kvector_np.copy()
+            color_kvector_cart = np.dot(color_kvector_np, recLat)
             if has_points_out:
-                color_kvector_cart, color_kvector_red, temp = bring_pnts_to_BZ(
-                    recLat, color_kvector_cart, color_kvector_red, br_points
+                assert color_kvector_cart is not None
+                color_kvector_cart, color_kvector_red, _temp_flag = bring_pnts_to_BZ(
+                    recLat, color_kvector_cart, color_kvector_red, br_points_arr
                 )
         else:
             print("mode selected was external, but no color_file name was provided")
             return
     if st:
-        dataX = ProcarSelect(procarFile, deepCopy=True)
-        dataY = ProcarSelect(procarFile, deepCopy=True)
-        dataZ = ProcarSelect(procarFile, deepCopy=True)
+        dataX = ProcarSelect(procar_data, deepCopy=True)
+        dataY = ProcarSelect(procar_data, deepCopy=True)
+        dataZ = ProcarSelect(procar_data, deepCopy=True)
 
         dataX.kpoints = data.kpoints
         dataY.kpoints = data.kpoints
@@ -500,13 +568,16 @@ def fermi3D(procar, outcar, bands=-1, scale=1, mode="plain", st=False, **kwargs)
         dataY.selectOrbital(orbitals)
         dataZ.selectOrbital(orbitals)
     ic = 0
-    for iband in bands:
+    for iband in band_indices:
         print("Plotting band %d" % iband)
 
+        assert data.bands is not None
+        assert data.spd is not None
+        assert data.kpoints is not None
         eigen = data.bands[:, iband]
 
         # mapping the eigen values on the mesh grid to a matrix
-        mapped_func, kpoint_matrix = mapping_func(kvector, eigen)
+        mapped_func, _kpoint_matrix = mapping_func(kvector, eigen)
 
         # adding the points from the 2nd BZ to 1st BZ to fully sample the BZ. Check np.pad("wrap") for more information
         mapped_func = np.pad(
@@ -523,9 +594,9 @@ def fermi3D(procar, outcar, bands=-1, scale=1, mode="plain", st=False, **kwargs)
 
         try:
             # creating the isosurface if possible
-            verts, faces, normals, values = measure.marching_cubes_lewiner(surf_equation, e_fermi)
+            verts, faces, _normals, _values = measure.marching_cubes_lewiner(surf_equation, e_fermi)
 
-        except:
+        except Exception:
             print("No isosurface for this band")
             continue
         # the vertices provided are scaled and shifted to start from zero
@@ -541,27 +612,27 @@ def fermi3D(procar, outcar, bands=-1, scale=1, mode="plain", st=False, **kwargs)
 
         # identifying the points in 2nd BZ and removing them
         if has_points_out:
-            args = []
+            args: list[list[Any]] = []
             for ivert in range(len(verts)):
-                args.append([br_points, verts[ivert]])
+                args.append([br_points_arr, verts[ivert]])
 
             p = Pool(nprocess)
             results = np.array(p.map(is_outside, args))
             p.close()
             out_verts = np.arange(0, len(results))[results]
-            new_faces = []
+            new_faces: list[npt.NDArray[np.intp]] = []
             #            outs_bool_mat = np.zeros(shape=faces.shape,dtype=np.bool)
 
-            for iface in faces:
+            for iface_row in faces:
                 remove = False
-                for ivert in iface:
+                for ivert in iface_row:
                     if ivert in out_verts:
                         remove = True
 
                         continue
 
                 if not remove:
-                    new_faces.append(iface)
+                    new_faces.append(iface_row)
             faces = np.array(new_faces)
 
         print("done removing")
@@ -572,25 +643,32 @@ def fermi3D(procar, outcar, bands=-1, scale=1, mode="plain", st=False, **kwargs)
             character = data.spd[:, iband]
 
             centers = np.zeros(shape=(len(faces), 3))
-            for iface in range(len(faces)):
-                centers[iface, 0:3] = np.average(verts[faces[iface]], axis=0)
+            for iface_idx in range(len(faces)):
+                centers[iface_idx, 0:3] = np.average(verts[faces[iface_idx]], axis=0)
 
             colors = interpolate.griddata(kvector_cart, character, centers, method="nearest")
         elif mode == "external":
             character = np.array(color_eigen[ic])
             ic += 1
             centers = np.zeros(shape=(len(faces), 3))
-            for iface in range(len(faces)):
-                centers[iface, 0:3] = np.average(verts[faces[iface]], axis=0)
+            for iface_idx in range(len(faces)):
+                centers[iface_idx, 0:3] = np.average(verts[faces[iface_idx]], axis=0)
 
+            assert color_kvector_cart is not None
             colors = interpolate.griddata(color_kvector_cart, character, centers, method="nearest")
 
         if st:
+            assert dataX is not None
+            assert dataY is not None
+            assert dataZ is not None
+            assert dataX.spd is not None
+            assert dataY.spd is not None
+            assert dataZ.spd is not None
             projection_x = dataX.spd[:, iband]
             projection_y = dataY.spd[:, iband]
             projection_z = dataZ.spd[:, iband]
 
-            verts_spin, faces_spin, normals, values = measure.marching_cubes_lewiner(
+            verts_spin, faces_spin, _normals2, _values2 = measure.marching_cubes_lewiner(
                 mapped_func, e_fermi
             )
 
@@ -603,27 +681,27 @@ def fermi3D(procar, outcar, bands=-1, scale=1, mode="plain", st=False, **kwargs)
             if has_points_out:
                 args = []
                 for ivert in range(len(verts_spin)):
-                    args.append([br_points, verts_spin[ivert]])
+                    args.append([br_points_arr, verts_spin[ivert]])
 
                 p = Pool(nprocess)
                 results = np.array(p.map(is_outside, args))
                 p.close()
                 out_verts = np.arange(0, len(results))[results]
 
-                new_faces = []
-                for iface in faces_spin:
+                new_faces_spin: list[npt.NDArray[np.intp]] = []
+                for iface_row in faces_spin:
                     remove = False
-                    for ivert in iface:
+                    for ivert in iface_row:
                         if ivert in out_verts:
                             remove = True
                             continue
                     if not remove:
-                        new_faces.append(iface)
-                faces_spin = np.array(new_faces)
+                        new_faces_spin.append(iface_row)
+                faces_spin = np.array(new_faces_spin)
 
             centers = np.zeros(shape=(len(faces_spin), 3))
-            for iface in range(len(faces_spin)):
-                centers[iface, 0:3] = np.average(verts_spin[faces_spin[iface]], axis=0)
+            for iface_idx in range(len(faces_spin)):
+                centers[iface_idx, 0:3] = np.average(verts_spin[faces_spin[iface_idx]], axis=0)
 
             colors1 = interpolate.griddata(kvector_cart, projection_x, centers, method="linear")
             colors2 = interpolate.griddata(kvector_cart, projection_y, centers, method="linear")
@@ -642,24 +720,29 @@ def fermi3D(procar, outcar, bands=-1, scale=1, mode="plain", st=False, **kwargs)
                     name="band-" + str(iband),
                 )
                 ic += 1
-            else:
-                if mode == "plain":
-                    if not (transparent):
-                        s = mlab.pipeline.surface(
-                            polydata,
-                            representation="surface",
-                            color=(0, 0.5, 1),
-                            opacity=1,
-                            name="band-" + str(iband),
-                        )
+            elif mode == "plain":
+                if not (transparent):
+                    _s = mlab.pipeline.surface(
+                        polydata,
+                        representation="surface",
+                        color=(0, 0.5, 1),
+                        opacity=1,
+                        name="band-" + str(iband),
+                    )
 
-                elif mode == "parametric" or mode == "external":
-                    polydata.cell_data.scalars = colors
-                    polydata.cell_data.scalars.name = "celldata"
-                    mlab.pipeline.surface(polydata, vmin=0, vmax=colors.max(), colormap=cmap)
-                    cb = mlab.colorbar(orientation="vertical")
+            elif mode == "parametric" or mode == "external":
+                assert colors is not None
+                cell_data: Any = polydata.cell_data
+                cell_data.scalars = colors
+                # tvtk scalars have a .name attribute not present on NDArray
+                scalars_ref: Any = cell_data.scalars
+                scalars_ref.name = "celldata"
+                mlab.pipeline.surface(polydata, vmin=0, vmax=colors.max(), colormap=cmap)
+                _cb = mlab.colorbar(orientation="vertical")
 
             if st:
+                assert spin_arrows is not None
+                assert centers is not None
                 x, y, z = list(zip(*centers))
                 u, v, w = list(zip(*spin_arrows))
 
@@ -689,7 +772,7 @@ def fermi3D(procar, outcar, bands=-1, scale=1, mode="plain", st=False, **kwargs)
             if mode == "plain":
                 if not (transparent):
                     x, y, z = zip(*verts)
-                    fig = ff.create_trisurf(
+                    plotly_fig = ff.create_trisurf(
                         x=x,
                         y=y,
                         z=z,
@@ -698,26 +781,26 @@ def fermi3D(procar, outcar, bands=-1, scale=1, mode="plain", st=False, **kwargs)
                         title="band-%d" % ic,
                     )
 
-                    figs.append(fig["data"][0])
+                    figs.append(plotly_fig["data"][0])
 
             elif mode == "parametric" or mode == "external":
                 face_colors = cmap(colors)
-                colormap = [
+                colormap_list = [
                     "rgb(%i,%i,%i)" % (x[0], x[1], x[2]) for x in (face_colors * 255).round()
                 ]
                 x, y, z = zip(*verts)
-                fig = ff.create_trisurf(
+                plotly_fig = ff.create_trisurf(
                     x=x,
                     y=y,
                     z=z,
                     plot_edges=False,
-                    colormap=colormap,
+                    colormap=colormap_list,
                     simplices=faces,
                     show_colorbar=True,
                     title="band-%d" % ic,
                 )
 
-                figs.append(fig["data"][0])
+                figs.append(plotly_fig["data"][0])
         elif plotting_package == "matplotlib":
             if mode == "plain":
                 x, y, z = zip(*verts)
@@ -733,7 +816,7 @@ def fermi3D(procar, outcar, bands=-1, scale=1, mode="plain", st=False, **kwargs)
 
             elif mode == "paramteric" or mode == "external":
                 face_colors = cmap(colors)
-                colormap = [
+                colormap_list = [
                     "rgb(%i,%i,%i)" % (x[0], x[1], x[2]) for x in (face_colors * 255).round()
                 ]
                 ipv.figure()

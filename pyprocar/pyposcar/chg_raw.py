@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+from __future__ import annotations
 
 ######################
 ## TODO:
@@ -6,36 +7,60 @@
 ## -Chg.plot_atoms (maybe in poscar.py)
 ## -Chg.Charge_redistributions
 ######################
-
 import argparse
 import math
 import os
 import re
 import warnings
+from typing import Any
 
 import matplotlib.pyplot as plt
 import numpy as np
-import plot3d
-import poscar
+import numpy.typing as npt
+from matplotlib.figure import Figure
 from scipy.interpolate import griddata
+
+from . import plot3d
+from .poscar import Poscar
 
 
 class Chg_base:
-    def __init__(self):
+    comment: str | None
+    Ispin: int
+    ngf: npt.NDArray[np.signedinteger[Any]]
+    poscar: Poscar | None
+    file_content: str
+    Data_blocks: list[object]
+    Data0: npt.NDArray[np.float64]
+    Data1: npt.NDArray[np.float64]
+    Data2: npt.NDArray[np.float64]
+    Data3: npt.NDArray[np.float64]
+    is_chg: bool
+    is_locpot: bool | None
+    verbose: bool | str
+
+    def __init__(self) -> None:
         self.comment = None
         self.Ispin = 1
-        self.NGF = []
+        self.ngf = np.array([], dtype=int)
         self.poscar = None
-        self.File = []
+        self.file_content = ""
         self.Data_blocks = []
-        self.Data0 = np.array([])
-        self.Data1 = np.array([])
-        self.Data2 = np.array([])
-        self.Data3 = np.array([])
+        self.Data0 = np.array([], dtype=np.float64)
+        self.Data1 = np.array([], dtype=np.float64)
+        self.Data2 = np.array([], dtype=np.float64)
+        self.Data3 = np.array([], dtype=np.float64)
         self.is_chg = True
         self.is_locpot = None
+        self.verbose = False
 
-    def Load(self, filename="CHGCAR", frame=0, is_chg=None, verbose=None):
+    def Load(
+        self,
+        filename: str = "CHGCAR",
+        frame: int = 0,
+        is_chg: bool | None = None,
+        verbose: bool | str | None = None,
+    ) -> None:
         """Load a CHG-like file
 
         `verbose` = False: No verbosity
@@ -43,9 +68,9 @@ class Chg_base:
                   = 'debug': usually unwanted verbosity level
 
         """
-        if verbose != None:
+        if verbose is not None:
             self.verbose = verbose
-        if is_chg != None:
+        if is_chg is not None:
             self.is_chg = is_chg
         if self.verbose:
             print("\nINFO: Loading a CHG-like with the following parameters:")
@@ -55,39 +80,40 @@ class Chg_base:
         if not os.path.isfile(filename):
             print("ERROR: can't open the file, please check:", filename)
             raise RuntimeError("File does not exist")
-        self.File = open(filename).read()
+        self.file_content = open(filename).read()
 
         # getting how many ionic steps were loaded
-        self.comment = re.findall(r"^[^\n]*\n", self.File)[0]
+        comment = re.findall(r"^[^\n]*\n", self.file_content)[0]
+        self.comment = comment
         if self.verbose == "debug":
             print("DEBUG: Comment line:")
             print(self.comment)
 
-        Nframes = len(re.findall(self.comment, self.File))
+        Nframes = len(re.findall(comment, self.file_content))
         if self.verbose == "debug":
             print("DEBUG: Number of frames found:", Nframes)
 
         if self.verbose:
             print("INFO: Selecting the frame:", frame)
-        frames = re.split(self.comment, self.File)
+        frames: list[str] = re.split(comment, self.file_content)
         # if the first frame is empty (a `re` thing), should be discarded
         if len(frames[0]) == 0:
             frames.pop(0)
-        self.File = frames[frame]
+        self.file_content = frames[frame]
 
         # next string to find is the line with
         # NGFx NGFy NGFz
-        NGFline = re.findall(r"\n\s*\n(\s+\d+\s+\d+\s+\d+)\n", self.File)
+        ngf_line_list = re.findall(r"\n\s*\n(\s+\d+\s+\d+\s+\d+)\n", self.file_content)
         if verbose:
-            print("INFO: NGFx NGFy NGFz", NGFline)
-        if len(NGFline) != 1:
+            print("INFO: NGFx NGFy NGFz", ngf_line_list)
+        if len(ngf_line_list) != 1:
             raise RuntimeError("NGFline should have one and only one occurrence")
-        NGFline = NGFline[0]
-        self.NGF = np.array(NGFline.split(), dtype=int)
+        ngf_line = ngf_line_list[0]
+        self.ngf = np.array(ngf_line.split(), dtype=int)
         if verbose == "debug":
-            print("DEBUG: grid size,", self.NGF)
+            print("DEBUG: grid size,", self.ngf)
 
-        data = re.split(NGFline, self.File)
+        data: list[str] = re.split(ngf_line, self.file_content)
         ndata = len(data)
         if self.verbose:
             print("INFO: number of data blocks", ndata)
@@ -109,36 +135,43 @@ class Chg_base:
             raise RuntimeError("Number of block data is unexpected," + str(ndata))
 
         # The poscar-like string would be passed to a POSCAR class
+        assert self.comment is not None
         poscarString = self.comment + data.pop(0)
-        # print(poscarString)
-        self.poscar = poscar.Poscar(filename=None)
+        self.poscar = Poscar(filename="")
         self.poscar.parse(fromString=poscarString)
         if self.verbose == "debug":
             print("DEBUG: POSCAR-like info:")
-            print("\n".join(self.poscar.poscar))
+            assert self.poscar.poscar is not None
+            if isinstance(self.poscar.poscar, list):
+                print("\n".join(self.poscar.poscar))
+            else:
+                print(self.poscar.poscar)
 
         # Now we will search for augmentation charges
         # 'augmentation occupancies'
         # That info will be discarded
-        temp = []
+        cleaned: list[str] = []
         for block in data:
-            temp.append(re.split(r"augmentation occupancies", block)[0])
-        data = temp
+            cleaned.append(re.split(r"augmentation occupancies", block)[0])
+        data = cleaned
 
         # The grid data will be processed
-        Ndata = self.NGF[0] * self.NGF[1] * self.NGF[2]
+        Ndata = int(self.ngf[0]) * int(self.ngf[1]) * int(self.ngf[2])
         if self.verbose == "debug":
             print("DEBUG: Data points expected:", Ndata)
 
-        self.Data0 = data[0].split()
-        ngfx, ngfy, ngfz = self.NGF[0], self.NGF[1], self.NGF[2]
+        data0_split = data[0].split()
+        ngfx, ngfy, ngfz = int(self.ngf[0]), int(self.ngf[1]), int(self.ngf[2])
 
         # If the grid points don't agree it could be a LOCPOT with residual data
-        if len(self.Data0) != Ndata:
+        if len(data0_split) != Ndata:
+            assert self.poscar.Ntotal is not None
             N = self.poscar.Ntotal
-            if len(self.Data0) == Ndata + N:
+            if len(data0_split) == Ndata + N:
                 self.is_locpot = True
-                self.Data0 = np.array(self.Data0[:-N], dtype=float).reshape(ngfz, ngfy, ngfx)
+                self.Data0 = np.array(data0_split[:-N], dtype=np.float64).reshape(
+                    ngfz, ngfy, ngfx
+                )
                 if self.verbose == "debug":
                     print("INFO: a LOCTOP file was detected")
                 if self.is_chg and self.is_locpot:
@@ -156,7 +189,7 @@ class Chg_base:
             else:
                 raise RuntimeError("Grid points do not agree")
         else:
-            self.Data0 = np.array(self.Data0, dtype=float).reshape(ngfz, ngfy, ngfx)
+            self.Data0 = np.array(data0_split, dtype=np.float64).reshape(ngfz, ngfy, ngfx)
 
         if self.is_chg:
             self.Data0 = self.Data0 / Ndata
@@ -164,37 +197,62 @@ class Chg_base:
                 print("Total charge", np.sum(self.Data0))
 
         if self.Ispin > 1:
-            self.Data1 = data[1].split()
-            if len(self.Data1) != Ndata:
+            data1_split = data[1].split()
+            if len(data1_split) != Ndata:
                 raise RuntimeError("Grid points do not agree")
-            self.Data1 = np.array(self.Data1, dtype=float).reshape(ngfz, ngfy, ngfx)
+            self.Data1 = np.array(data1_split, dtype=np.float64).reshape(ngfz, ngfy, ngfx)
             if self.is_chg:
                 self.Data1 = self.Data1 / Ndata
                 if self.verbose and self.Ispin == 2:
                     print("INFO: total magnetization,", np.sum(self.Data1))
 
         if self.Ispin == 4:
-            self.Data2 = data[2].split()
-            self.Data3 = data[3].split()
-            if len(self.Data2) != Ndata or len(self.Data3) != Ndata:
+            data2_split = data[2].split()
+            data3_split = data[3].split()
+            if len(data2_split) != Ndata or len(data3_split) != Ndata:
                 raise RuntimeError("Grid points do not agree")
-            self.Data2 = np.array(self.Data2, dtype=float).reshape(ngfz, ngfy, ngfx)
-            self.Data3 = np.array(self.Data3, dtype=float).reshape(ngfz, ngfy, ngfx)
+            self.Data2 = np.array(data2_split, dtype=np.float64).reshape(ngfz, ngfy, ngfx)
+            self.Data3 = np.array(data3_split, dtype=np.float64).reshape(ngfz, ngfy, ngfx)
             if self.is_chg:
                 self.Data2 = self.Data2 / Ndata
                 self.Data3 = self.Data3 / Ndata
 
 
 class Chg:
-    def __init__(self, filename="CHG", is_chg=True, verbose=False):
+    chg: Chg_base
+    filename: str
+    is_chg: bool
+    verbose: bool | str
+
+    def __init__(
+        self, filename: str = "CHG", is_chg: bool = True, verbose: bool | str = False
+    ) -> None:
         self.chg = Chg_base()
         self.filename = filename
         self.is_chg = is_chg
         self.verbose = verbose
         self.chg.Load(filename=self.filename, frame=0, is_chg=self.is_chg, verbose=self.verbose)
 
-    def Zplot(self, level=None, spin=0, cart_level=None, direct_level=None):
-        """it plots the CHG-like file at an specific z-value, given by
+    def _get_data_for_spin(self, spin: int) -> npt.NDArray[np.float64]:
+        """Return the data array for the given spin channel."""
+        if spin == 0:
+            return self.chg.Data0
+        if spin == 1:
+            return self.chg.Data1
+        if spin == 2:
+            return self.chg.Data2
+        if spin == 3:
+            return self.chg.Data3
+        raise RuntimeError("No such spin channel, " + str(spin))
+
+    def Zplot(
+        self,
+        level: int | None = None,
+        spin: int = 0,
+        cart_level: float | None = None,
+        direct_level: float | None = None,
+    ) -> Figure:
+        """It plots the CHG-like file at an specific z-value, given by
         level. Only works properly when the Z-axis (c-vector) is perpendicular to the
         other axes.
 
@@ -216,28 +274,35 @@ class Chg:
             raise RuntimeError(
                 "only one among `level`, `direct_level`, and `cart_level` has to be provided"
             )
+
+        assert self.chg.poscar is not None
+        assert self.chg.poscar.lat is not None
+
+        # Initialize with defaults (midpoint of axis)
+        level_floor: int = int(self.chg.ngf[2]) // 2
+        level_ceil: int = level_floor
+        delta_floor: float = 0
+        delta_ceil: float = 1
+
         # setting the different kind of levels in order, `cart_level` sets
         # `direct_level` and so on
-        if cart_level:
-            c = np.linalg.norm(self.chg.poscar.lat[2])
+        if cart_level is not None:
+            c = float(np.linalg.norm(self.chg.poscar.lat[2]))
             direct_level = cart_level / c
             if self.verbose:
                 print("INFO: cart_level,", cart_level)
-        if direct_level:
+        if direct_level is not None:
             # going to a grid level, crude interpolation of the level
-            level_float = direct_level * self.chg.NGF[2]
+            level_float = direct_level * int(self.chg.ngf[2])
             level_floor = math.floor(level_float)
             level_ceil = math.ceil(level_float)
-            delta_floor = 1 - np.abs(level_float - level_floor)
-            delta_ceil = 1 - np.abs(level_ceil - level_float)
+            delta_floor = 1 - abs(level_float - level_floor)
+            delta_ceil = 1 - abs(level_ceil - level_float)
             if level_floor == level_ceil:
                 delta_floor, delta_ceil = 1, 0
             if self.verbose == "debug":
                 print("INFO: direct_level", direct_level)
-                # print('level_float', level_float)
-                # print('level_floor, level_floor', level_floor, level_floor)
-                # print('delta_floor,delta_ceil', delta_floor,delta_ceil)
-        if level:
+        if level is not None:
             # in this case the crude interpolation shouldn't do anything
             level_floor = level
             level_ceil = level
@@ -245,26 +310,14 @@ class Chg:
             if self.verbose == "debug":
                 print("INFO: level", level)
         if level is None and cart_level is None and direct_level is None:
-            level_floor = self.chg.NGF[2] / 2
-            level_ceil = level_floor
-            delta_floor, delta_ceil = 0, 1
             if self.verbose == "debug":
                 print("INFO: default is the midpoint of the axis", level_floor)
 
-        if spin == 0:
-            data = self.chg.Data0
-        elif spin == 1:
-            data = self.chg.Data1
-        elif spin == 2:
-            data = self.chg.Data2
-        elif spin == 3:
-            data = self.chg.Data3
-        else:
-            raise RuntimeError("No such spin channel, " + str(spin))
+        data = self._get_data_for_spin(spin)
 
         zcolor = data[level_floor] * delta_floor + data[level_ceil] * delta_ceil
 
-        Agrid, Bgrid = np.mgrid[0 : 1 : self.chg.NGF[0] * 1j, 0 : 1 : self.chg.NGF[1] * 1j]
+        Agrid, Bgrid = np.mgrid[0 : 1 : int(self.chg.ngf[0]) * 1j, 0 : 1 : int(self.chg.ngf[1]) * 1j]
         # cartesian value of each point of the grid
         xgrid = Agrid * self.chg.poscar.lat[0, 0] + Bgrid * self.chg.poscar.lat[1, 0]
         ygrid = Agrid * self.chg.poscar.lat[0, 1] + Bgrid * self.chg.poscar.lat[1, 1]
@@ -275,7 +328,9 @@ class Chg:
 
         xmin, xmax = xgrid.min(), xgrid.max()
         ymin, ymax = ygrid.min(), ygrid.max()
-        xi, yi = np.mgrid[xmin : xmax : self.chg.NGF[0] * 4j, ymin : ymax : self.chg.NGF[1] * 4j]
+        xi, yi = np.mgrid[
+            xmin : xmax : int(self.chg.ngf[0]) * 4j, ymin : ymax : int(self.chg.ngf[1]) * 4j
+        ]
         points = np.vstack((xgrid.flatten(), ygrid.flatten())).T
         values = zcolor.flatten()
         if self.verbose == "debug":
@@ -292,8 +347,15 @@ class Chg:
         ax.set_aspect("equal")
         return fig
 
-    def CutPlot(self, level=None, spin=0, cart_level=None, direct_level=None, axis="c"):
-        """it plots the CHG-like file at an specific value of `axis`, given by
+    def CutPlot(
+        self,
+        level: int | None = None,
+        spin: int = 0,
+        cart_level: float | None = None,
+        direct_level: float | None = None,
+        axis: str = "c",
+    ) -> Figure:
+        """It plots the CHG-like file at an specific value of `axis`, given by
         `level`. Only works properly when the selected `axis` (basis vector) is perpendicular
         to the other axes.
 
@@ -313,12 +375,15 @@ class Chg:
         axis: 'a', 'b', 'c', the basis vector to fix its value
 
         """
+        assert self.chg.poscar is not None
+        assert self.chg.poscar.lat is not None
+
         # an utilitary dict to choose the desired axes
-        ax_dict = {"a": 0, "b": 1, "c": 2}
+        ax_dict: dict[str, int] = {"a": 0, "b": 1, "c": 2}
         # axis 3 is the axis to make the cut
         ax3 = ax_dict[axis]
-        ax1 = np.remainder(ax_dict[axis] + 1, 3)
-        ax2 = np.remainder(ax_dict[axis] + 2, 3)
+        ax1 = int(np.remainder(ax_dict[axis] + 1, 3))
+        ax2 = int(np.remainder(ax_dict[axis] + 2, 3))
         if self.verbose:
             print("INFO: Selected axis to cut:", ax3)
         if self.verbose == "debug":
@@ -328,29 +393,33 @@ class Chg:
             raise RuntimeError(
                 "only one among `level`, `direct_level`, and `cart_level` has to be provided"
             )
+
+        # Initialize with defaults (midpoint of axis)
+        level_floor: int = int(self.chg.ngf[ax3]) // 2
+        level_ceil: int = level_floor
+        delta_floor: float = 0
+        delta_ceil: float = 1
+
         # setting the different kind of levels in order, `cart_level` sets
         # `direct_level` and so on
-        if cart_level:
+        if cart_level is not None:
             # length of the perpendicular vector
-            L = np.linalg.norm(self.chg.poscar.lat[ax3])
+            L = float(np.linalg.norm(self.chg.poscar.lat[ax3]))
             direct_level = cart_level / L
             if self.verbose:
                 print("INFO: cart_level,", cart_level)
-        if direct_level:
+        if direct_level is not None:
             # going to a grid level, crude interpolation of the level
-            level_float = direct_level * self.chg.NGF[ax3]
+            level_float = direct_level * int(self.chg.ngf[ax3])
             level_floor = math.floor(level_float)
             level_ceil = math.ceil(level_float)
-            delta_floor = 1 - np.abs(level_float - level_floor)
-            delta_ceil = 1 - np.abs(level_ceil - level_float)
+            delta_floor = 1 - abs(level_float - level_floor)
+            delta_ceil = 1 - abs(level_ceil - level_float)
             if level_floor == level_ceil:
                 delta_floor, delta_ceil = 1, 0
             if self.verbose:
                 print("INFO: direct_level", direct_level)
-                # print('level_float', level_float)
-                # print('level_floor, level_floor', level_floor, level_floor)
-                # print('delta_floor,delta_ceil', delta_floor,delta_ceil)
-        if level:
+        if level is not None:
             # in this case the crude interpolation shouldn't do anything
             level_floor = level
             level_ceil = level
@@ -359,45 +428,45 @@ class Chg:
                 print("INFO: level", level)
 
         if level is None and cart_level is None and direct_level is None:
-            level_floor = self.chg.NGF[ax3] / 2
-            level_ceil = level_floor
-            delta_floor, delta_ceil = 0, 1
             if self.verbose == "debug":
                 print("INFO: default is the midpoint of the axis", level_floor)
 
-        if spin == 0:
-            data = self.chg.Data0
-        elif spin == 1:
-            data = self.chg.Data1
-        elif spin == 2:
-            data = self.chg.Data2
-        elif spin == 3:
-            data = self.chg.Data3
-        else:
-            raise RuntimeError("No such spin channel, " + str(spin))
+        data = self._get_data_for_spin(spin)
 
         # building a grid with existent points
+        zcolor: npt.NDArray[np.float64]
+        Agrid: npt.NDArray[np.float64]
+        Bgrid: npt.NDArray[np.float64]
+        xgrid: npt.NDArray[np.float64]
+        ygrid: npt.NDArray[np.float64]
+
         if axis == "c":
             zcolor = data[level_floor] * delta_floor + data[level_ceil] * delta_ceil
             # a regular orthogonal grid
-            Agrid, Bgrid = np.mgrid[0 : 1 : self.chg.NGF[0] * 1j, 0 : 1 : self.chg.NGF[1] * 1j]
+            Agrid, Bgrid = np.mgrid[
+                0 : 1 : int(self.chg.ngf[0]) * 1j, 0 : 1 : int(self.chg.ngf[1]) * 1j
+            ]
             # cartesian grid
             xgrid = Agrid * self.chg.poscar.lat[0, 0] + Bgrid * self.chg.poscar.lat[1, 0]
             ygrid = Agrid * self.chg.poscar.lat[0, 1] + Bgrid * self.chg.poscar.lat[1, 1]
 
         elif axis == "b":
             zcolor = data[:, level_floor, :] * delta_floor + data[:, level_ceil, :] * delta_ceil
-            Agrid, Bgrid = np.mgrid[0 : 1 : self.chg.NGF[2] * 1j, 0 : 1 : self.chg.NGF[0] * 1j]
+            Agrid, Bgrid = np.mgrid[
+                0 : 1 : int(self.chg.ngf[2]) * 1j, 0 : 1 : int(self.chg.ngf[0]) * 1j
+            ]
             xgrid = Agrid * self.chg.poscar.lat[2, 2] + Bgrid * self.chg.poscar.lat[0, 2]
             ygrid = Agrid * self.chg.poscar.lat[2, 0] + Bgrid * self.chg.poscar.lat[0, 0]
 
         elif axis == "a":
             zcolor = data[:, :, level_floor] * delta_floor + data[:, :, level_ceil] * delta_ceil
-            Agrid, Bgrid = np.mgrid[0 : 1 : self.chg.NGF[1] * 1j, 0 : 1 : self.chg.NGF[2] * 1j]
-            # xgrid = Agrid*self.chg.poscar.lat[1,1] + Bgrid*self.chg.poscar.lat[1,2]
-            # ygrid = Agrid*self.chg.poscar.lat[2,1] + Bgrid*self.chg.poscar.lat[2,2]
+            Agrid, Bgrid = np.mgrid[
+                0 : 1 : int(self.chg.ngf[1]) * 1j, 0 : 1 : int(self.chg.ngf[2]) * 1j
+            ]
             xgrid = Agrid * self.chg.poscar.lat[1, 1]
             ygrid = Bgrid * self.chg.poscar.lat[2, 2] + Agrid * self.chg.poscar.lat[1, 0]
+        else:
+            raise ValueError(f"Invalid axis: {axis}")
 
         if self.verbose == "debug":
             print("DEBUG: zcolor.shape", zcolor.shape)
@@ -411,7 +480,7 @@ class Chg:
         ymin, ymax = ygrid.min(), ygrid.max()
         # creating a regular grid to interpolate (the `4` is the resolution)
         xi, yi = np.mgrid[
-            xmin : xmax : self.chg.NGF[ax1] * 4j, ymin : ymax : self.chg.NGF[ax2] * 4j
+            xmin : xmax : int(self.chg.ngf[ax1]) * 4j, ymin : ymax : int(self.chg.ngf[ax2]) * 4j
         ]
         points = np.vstack((xgrid.flatten(), ygrid.flatten())).T
         values = zcolor.flatten()
@@ -423,42 +492,53 @@ class Chg:
         zi = griddata(points, values, (xi, yi), method="linear")
 
         fig = plt.figure()
-        ax = fig.add_subplot(111)
-        p1 = ax.pcolormesh(xi, yi, zi, cmap="seismic")
+        ax_plot = fig.add_subplot(111)
+        p1 = ax_plot.pcolormesh(xi, yi, zi, cmap="seismic")
         fig.colorbar(p1)
-        ax.set_aspect("equal")
+        ax_plot.set_aspect("equal")
         return fig
 
-    def shift(self, x=None, y=None, z=None):
+    def shift(
+        self,
+        _x: float | None = None,
+        _y: float | None = None,
+        _z: float | None = None,
+    ) -> None:
         pass
 
-    def plot_atoms(self):
-        postitions = self.chg.poscar.cpos
-        pass
+    def plot_atoms(self) -> None:
+        _positions = self.chg.poscar.cpos if self.chg.poscar else None
 
-    def plot_cut_new(self, axis, value):
+    def plot_cut_new(self, _axis: npt.NDArray[np.float64], _value: float | None) -> None:
         """Temporary function to use the plot3D class... very limited
         functionality for now
 
         """
+        assert self.chg.poscar is not None
+        assert self.chg.poscar.lat is not None
         p3d = plot3d.data3D(data=self.chg.Data0, lattice=self.chg.poscar.lat, verbose="debug")
         p3d.cut_plane(axis=np.array([0.0, 0.0, 1.0]), value=10)
-        pass
 
-    def average(self, axis):
-        data = self.chg.Data0
+    def average(self, axis: str) -> None:
+        assert self.chg.poscar is not None
+        assert self.chg.poscar.lat is not None
+
+        data: npt.NDArray[np.float64] = self.chg.Data0
+        length: float
         if axis == "c":
-            data = np.average(data, axis=2)
-            data = np.average(data, axis=1)
-            length = np.linalg.norm(self.chg.poscar.lat[2])
-        if axis == "b":
-            data = np.average(data, axis=2)
-            data = np.average(data, axis=0)
-            length = np.linalg.norm(self.chg.poscar.lat[1])
-        if axis == "a":
-            data = np.average(data, axis=1)
-            data = np.average(data, axis=0)
-            length = np.linalg.norm(self.chg.poscar.lat[0])
+            data = np.asarray(np.average(data, axis=2), dtype=np.float64)
+            data = np.asarray(np.average(data, axis=1), dtype=np.float64)
+            length = float(np.linalg.norm(self.chg.poscar.lat[2]))
+        elif axis == "b":
+            data = np.asarray(np.average(data, axis=2), dtype=np.float64)
+            data = np.asarray(np.average(data, axis=0), dtype=np.float64)
+            length = float(np.linalg.norm(self.chg.poscar.lat[1]))
+        elif axis == "a":
+            data = np.asarray(np.average(data, axis=1), dtype=np.float64)
+            data = np.asarray(np.average(data, axis=0), dtype=np.float64)
+            length = float(np.linalg.norm(self.chg.poscar.lat[0]))
+        else:
+            raise ValueError(f"Invalid axis: {axis}")
         print("Averaged Data shape, ", data.shape)
         x = np.linspace(0, length, len(data))
         plt.plot(x, data)
@@ -495,34 +575,45 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
+    verbose_val: bool | str = bool(args.verbose)
     if args.debug:
-        args.verbose = "debug"
+        verbose_val = "debug"
 
-    if "POT" in args.inputfile or "ELF" in args.inputfile:
-        if args.no_scale == False:
+    inputfile: str = args.inputfile
+    no_scale: bool = args.no_scale
+    axis_val: str = args.axis
+    z_flag: bool = args.z
+    new_flag: bool = args.new
+    average_flag: bool = args.average
+    direct_level_val: float | None = args.direct_level
+    cartesian_level_val: float | None = args.cartesian_level
+
+    if "POT" in inputfile or "ELF" in inputfile:
+        if no_scale is False:
             warnings.warn(
                 "It seems you are openning a LOCPOT or ELFCAR file."
                 " If so, you should add the option '-n' to get the "
                 "correct scaling"
             )
-    elif "CHG" in args.inputfile and args.no_scale == True:
+    elif "CHG" in inputfile and no_scale is True:
         warnings.warn(
             "It seems you are openning a CHG or CHGCAR file."
             " If so, you should not add the option '-n' to get the "
             "correct scaling"
         )
-    is_chg = not args.no_scale
+    is_chg = not no_scale
 
-    chg = Chg(filename=args.inputfile, is_chg=is_chg, verbose=args.verbose)
+    chg = Chg(filename=inputfile, is_chg=is_chg, verbose=verbose_val)
 
-    if args.z:
-        fig = chg.Zplot(cart_level=args.cartesian_level, direct_level=args.direct_level)
-    elif args.new:
-        chg.plot_cut_new(value=args.direct_level, axis=args.axis)
-    elif args.average:
-        chg.average(axis=args.axis)
+    fig: Figure
+    if z_flag:
+        fig = chg.Zplot(cart_level=cartesian_level_val, direct_level=direct_level_val)
+    elif new_flag:
+        chg.plot_cut_new(_value=direct_level_val, _axis=np.array([0.0, 0.0, 1.0]))
+    elif average_flag:
+        chg.average(axis=axis_val)
     else:
         fig = chg.CutPlot(
-            cart_level=args.cartesian_level, direct_level=args.direct_level, axis=args.axis
+            cart_level=cartesian_level_val, direct_level=direct_level_val, axis=axis_val
         )
     plt.show()

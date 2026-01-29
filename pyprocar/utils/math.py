@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+from typing import Any, Literal
 
 import numpy as np
 import numpy.typing as npt
@@ -48,11 +49,14 @@ def get_angle(
 
     if radians:
         return float(np.arccos(cosine))
-    else:
-        return float(np.rad2deg(np.arccos(cosine)))
+    return float(np.rad2deg(np.arccos(cosine)))
 
 
-def fft_interpolate(function, interpolation_factor=2, axis=None):
+def fft_interpolate(
+    function: npt.NDArray[np.float64],
+    interpolation_factor: int = 2,
+    axis: list[int] | int | None = None,
+) -> npt.NDArray[np.float64]:
     """
     This method will interpolate using a Fast-Fourier Transform
 
@@ -72,18 +76,20 @@ def fft_interpolate(function, interpolation_factor=2, axis=None):
     np.ndarray
         The interpolated points
     """
-
+    resolved_axis: list[int]
     if axis is None:
-        axis = np.arange(function.ndim)
-    if type(axis) is int:
-        axis = [axis]
-    function = np.array(function)
+        resolved_axis = list(range(function.ndim))
+    elif isinstance(axis, int):
+        resolved_axis = [axis]
+    else:
+        resolved_axis = axis
+    function = np.array(function, dtype=np.float64)
     eigen_fft = np.fft.fftn(function)
     shifted_fft = np.fft.fftshift(eigen_fft)
-    pad_width = []
+    pad_width: list[list[int]] = []
     factor = 0
     for idim in range(function.ndim):
-        if idim in axis:
+        if idim in resolved_axis:
             n = shifted_fft.shape[idim]
             pad = n * (interpolation_factor - 1) // 2
             factor += 1
@@ -93,14 +99,20 @@ def fft_interpolate(function, interpolation_factor=2, axis=None):
     new_matrix = np.pad(shifted_fft, pad_width, "constant", constant_values=0)
     new_matrix = np.fft.ifftshift(new_matrix)
     if "complex" in function.dtype.name:
-        interpolated = np.fft.ifftn(new_matrix) * (interpolation_factor * factor)
+        interpolated: npt.NDArray[np.float64] = np.asarray(
+            np.fft.ifftn(new_matrix) * (interpolation_factor * factor), dtype=np.float64
+        )
     else:
-        interpolated = np.real(np.fft.ifftn(new_matrix)) * (interpolation_factor * factor)
+        interpolated = np.asarray(
+            np.real(np.fft.ifftn(new_matrix)) * (interpolation_factor * factor), dtype=np.float64
+        )
     return interpolated
 
 
-def change_of_basis(tensor, A, B):
-    """changes the basis of a tensor given the column vectors of A and B
+def change_of_basis(
+    tensor: npt.NDArray[np.float64], A: npt.NDArray[np.float64], B: npt.NDArray[np.float64]
+) -> npt.NDArray[np.float64]:
+    """Changes the basis of a tensor given the column vectors of A and B
 
     This changes the basis from B to A. The tensor has to be in the A basis.
 
@@ -113,18 +125,28 @@ def change_of_basis(tensor, A, B):
     B : np.ndarray
         column vectors of the B basis
     """
-    transform = np.linalg.inv(B).dot(A)
+    transform: npt.NDArray[np.float64] = np.asarray(np.linalg.inv(B).dot(A), dtype=np.float64)
     n_dim = len(tensor.shape)
+    tensor_b: npt.NDArray[np.float64]
     if n_dim == 1:
-        tensor_b = transform.dot(tensor)
+        tensor_b = np.asarray(transform.dot(tensor), dtype=np.float64)
     else:
-        transform_inv = np.linalg.inv(transform)
-        tensor_b = transform_inv.dot(tensor).dot(transform)
+        transform_inv: npt.NDArray[np.float64] = np.asarray(
+            np.linalg.inv(transform), dtype=np.float64
+        )
+        tensor_b = np.asarray(transform_inv.dot(tensor).dot(transform), dtype=np.float64)
         # tensor_b = transform.dot(tensor).dot(transform_inv)
     return tensor_b
 
 
-def interpolate_nd_3dmesh(x_values, y_values, z_values, mesh, interpolation_factor, **kwargs):
+def interpolate_nd_3dmesh(
+    x_values: npt.NDArray[np.float64],
+    y_values: npt.NDArray[np.float64],
+    z_values: npt.NDArray[np.float64],
+    mesh: npt.NDArray[np.float64],
+    interpolation_factor: int,
+    **kwargs: Any,
+) -> npt.NDArray[np.float64]:
     """Interpolate a Nd 3D mesh using FFT while preserving coordinate ranges and C-ordering.
 
     Parameters
@@ -162,9 +184,9 @@ def interpolate_nd_3dmesh(x_values, y_values, z_values, mesh, interpolation_fact
     for idx in np.ndindex(*scalar_dims):
         # Extract the 3D grid at the current scalar indices
         # Convert idx to a tuple of slices for proper indexing
-        idx_slices = (slice(None), slice(None), slice(None)) + idx
+        idx_slices: Any = (slice(None), slice(None), slice(None)) + idx
 
-        grid_3d = mesh[idx_slices]  # Take just the first three dimensions
+        grid_3d: npt.NDArray[np.float64] = mesh[idx_slices]
 
         # Interpolate the 3D grid
         interpolated_grid = interpolate_3d_mesh(
@@ -184,14 +206,14 @@ def interpolate_nd_3dmesh(x_values, y_values, z_values, mesh, interpolation_fact
 
 
 def interpolate_3d_mesh(
-    x_values,
-    y_values,
-    z_values,
-    mesh,
-    interpolation_factor,
-    wrap_axes=None,
-    **kwargs,
-):
+    x_values: npt.NDArray[np.float64],
+    y_values: npt.NDArray[np.float64],
+    z_values: npt.NDArray[np.float64],
+    mesh: npt.NDArray[np.float64],
+    interpolation_factor: int,
+    wrap_axes: list[int] | None = None,
+    **kwargs: Any,
+) -> npt.NDArray[np.float64]:
     """
     Interpolate a 3D scalar mesh using FFT while ensuring coordinates stay
     within the range [-0.5, 0.5] and preventing duplicate points.
@@ -255,7 +277,9 @@ def interpolate_3d_mesh(
     return interpolated_values
 
 
-def fft_interpolate_nd_3dmesh(mesh, interpolation_factor):
+def fft_interpolate_nd_3dmesh(
+    mesh: npt.NDArray[np.float64], interpolation_factor: int
+) -> npt.NDArray[np.float64]:
     """Interpolate a Nd 3D mesh using FFT while preserving coordinate ranges and C-ordering.
 
     Parameters
@@ -283,7 +307,7 @@ def fft_interpolate_nd_3dmesh(mesh, interpolation_factor):
 
     # If this is just a 3D array, use fft_interpolate directly
     if len(scalar_dims) == 0:
-        return fft_interpolate_mesh(grid_3d, interpolation_factor)
+        return fft_interpolate_mesh(mesh, interpolation_factor)
 
     # For higher dimensional arrays, iterate through the scalar dimensions
 
@@ -291,9 +315,9 @@ def fft_interpolate_nd_3dmesh(mesh, interpolation_factor):
     for idx in np.ndindex(*scalar_dims):
         # Extract the 3D grid at the current scalar indices
         # Convert idx to a tuple of slices for proper indexing
-        idx_slices = (slice(None), slice(None), slice(None)) + idx
+        idx_slices: Any = (slice(None), slice(None), slice(None)) + idx
 
-        grid_3d = mesh[idx_slices]  # Take just the first three dimensions
+        grid_3d: npt.NDArray[np.float64] = mesh[idx_slices]
 
         # Interpolate the 3D grid
         interpolated_grid = fft_interpolate_mesh(grid_3d, interpolation_factor)
@@ -304,7 +328,9 @@ def fft_interpolate_nd_3dmesh(mesh, interpolation_factor):
     return new_mesh
 
 
-def fft_interpolate_mesh(function, interpolation_factor=2):
+def fft_interpolate_mesh(
+    function: npt.NDArray[np.float64], interpolation_factor: int = 2
+) -> npt.NDArray[np.float64]:
     """
     This method will interpolate using a Fast-Fourier Transform
 
@@ -368,7 +394,9 @@ def fft_interpolate_mesh(function, interpolation_factor=2):
     return interpolated
 
 
-def calculate_central_differences_on_meshgrid_axis(scalar_mesh, axis):
+def calculate_central_differences_on_meshgrid_axis(
+    scalar_mesh: npt.NDArray[np.float64], axis: int
+) -> npt.NDArray[np.float64] | None:
     """Calculates the scalar differences over the
     k mesh grid using central differences
 
@@ -382,26 +410,28 @@ def calculate_central_differences_on_meshgrid_axis(scalar_mesh, axis):
     np.ndarray
         scalar_gradient_mesh shape = [n_kx,n_ky,n_kz]
     """
-    n = scalar_mesh.shape[axis]
+    n = int(scalar_mesh.shape[axis])
     # Calculate indices with periodic boundary conditions
-    plus_one_indices = np.arange(n) + 1
-    minus_one_indices = np.arange(n) - 1
+    plus_one_indices: npt.NDArray[np.intp] = np.arange(n) + 1
+    minus_one_indices: npt.NDArray[np.intp] = np.arange(n) - 1
     plus_one_indices[-1] = 0
     minus_one_indices[0] = n - 1
 
     if axis == 0:
         return (scalar_mesh[plus_one_indices, ...] - scalar_mesh[minus_one_indices, ...]) / 2
-    elif axis == 1:
+    if axis == 1:
         return (
             scalar_mesh[:, plus_one_indices, :, ...] - scalar_mesh[:, minus_one_indices, :, ...]
         ) / 2
-    elif axis == 2:
+    if axis == 2:
         return (
             scalar_mesh[:, :, plus_one_indices, ...] - scalar_mesh[:, :, minus_one_indices, ...]
         ) / 2
 
 
-def calculate_forward_averages_on_meshgrid_axis(scalar_mesh, axis):
+def calculate_forward_averages_on_meshgrid_axis(
+    scalar_mesh: npt.NDArray[np.float64], axis: int
+) -> npt.NDArray[np.float64] | None:
     """Calculates the scalar differences over the
     k mesh grid using central differences
 
@@ -415,34 +445,39 @@ def calculate_forward_averages_on_meshgrid_axis(scalar_mesh, axis):
     np.ndarray
         scalar_gradient_mesh shape = [n_kx,n_ky,n_kz]
     """
-    n = scalar_mesh.shape[axis]
+    n = int(scalar_mesh.shape[axis])
 
     # Calculate indices with periodic boundary conditions
-    plus_one_indices = np.arange(n) + 1
-    zero_one_indices = np.arange(n)
+    plus_one_indices: npt.NDArray[np.intp] = np.arange(n) + 1
+    zero_one_indices: npt.NDArray[np.intp] = np.arange(n)
     plus_one_indices[-1] = 0
     if axis == 0:
         return (scalar_mesh[zero_one_indices, ...] + scalar_mesh[plus_one_indices, ...]) / 2
-    elif axis == 1:
+    if axis == 1:
         return (
             scalar_mesh[:, zero_one_indices, :, ...] + scalar_mesh[:, plus_one_indices, :, ...]
         ) / 2
-    elif axis == 2:
+    if axis == 2:
         return (
             scalar_mesh[:, :, zero_one_indices, ...] + scalar_mesh[:, :, plus_one_indices, ...]
         ) / 2
 
 
-def calculate_scalar_volume_averages(scalar_mesh):
+def calculate_scalar_volume_averages(
+    scalar_mesh: npt.NDArray[np.float64],
+) -> npt.NDArray[np.float64]:
     """Calculates the scalar averages over the k mesh grid in cartesian coordinates"""
     scalar_sums_i = calculate_forward_averages_on_meshgrid_axis(scalar_mesh, axis=0)
     scalar_sums_j = calculate_forward_averages_on_meshgrid_axis(scalar_mesh, axis=1)
     scalar_sums_k = calculate_forward_averages_on_meshgrid_axis(scalar_mesh, axis=2)
-    scalar_sums = (scalar_sums_i + scalar_sums_j + scalar_sums_k) / 3
+    assert scalar_sums_i is not None
+    assert scalar_sums_j is not None
+    assert scalar_sums_k is not None
+    scalar_sums: npt.NDArray[np.float64] = (scalar_sums_i + scalar_sums_j + scalar_sums_k) / 3
     return scalar_sums
 
 
-def calculate_scalar_differences(scalar_mesh):
+def calculate_scalar_differences(scalar_mesh: npt.NDArray[np.float64]) -> npt.NDArray[np.float64]:
     """Calculates the scalar gradient over the k mesh grid in cartesian coordinates
 
     Uses gradient trnasformation matrix to calculate the gradient
@@ -462,7 +497,9 @@ def calculate_scalar_differences(scalar_mesh):
     return scalar_diffs
 
 
-def calculate_scalar_differences_2(scalar_mesh, transform_matrix):
+def calculate_scalar_differences_2(
+    scalar_mesh: npt.NDArray[np.float64], transform_matrix: npt.NDArray[np.float64]
+) -> npt.NDArray[np.float64]:
     """Calculates the scalar gradient over the k mesh grid in cartesian coordinates
 
     Uses gradient trnasformation matrix to calculate the gradient
@@ -558,19 +595,23 @@ def calculate_3d_mesh_scalar_integral(
 ) -> npt.NDArray[np.float64]:
     """Calculate the scalar integral"""
     n1, n2, n3 = scalar_mesh.shape[:3]
-    volume_reduced_vector = np.array([1, 1, 1])
-    volume_cartesian_vector = np.dot(reciprocal_lattice, volume_reduced_vector)
-    volume = np.prod(volume_cartesian_vector)
-    dv = volume / (n1 * n2 * n3)
+    volume_reduced_vector: npt.NDArray[np.float64] = np.array([1, 1, 1], dtype=np.float64)
+    volume_cartesian_vector: npt.NDArray[np.float64] = np.asarray(
+        np.dot(reciprocal_lattice, volume_reduced_vector), dtype=np.float64
+    )
+    volume: float = float(np.prod(volume_cartesian_vector))
+    dv: float = volume / (n1 * n2 * n3)
 
     scalar_volume_avg = calculate_scalar_volume_averages(scalar_mesh)
     # Compute the integral by summing up the product of scalar values and the volume of each grid cell.
-    integral = np.sum(scalar_volume_avg * dv, axis=(0, 1, 2))
+    integral: npt.NDArray[np.float64] = np.asarray(
+        np.sum(scalar_volume_avg * dv, axis=(0, 1, 2)), dtype=np.float64
+    )
 
     return integral
 
 
-def q_multi(q1, q2):
+def q_multi(q1: npt.NDArray[np.float64], q2: npt.NDArray[np.float64]) -> npt.NDArray[np.float64]:
     """
     Multiplication of quaternions, it doesn't fit in any other place
     """
@@ -583,15 +624,17 @@ def q_multi(q1, q2):
     return np.array((w, x, y, z))
 
 
-def fourier_reciprocal_gradient(scalar_grid, reciprocal_lattice):
+def fourier_reciprocal_gradient(
+    scalar_grid: npt.NDArray[np.float64], reciprocal_lattice: npt.NDArray[np.float64]
+) -> npt.NDArray[np.float64]:
     """
     Calculate the reciprocal space gradient of a scalar field using Fourier methods.
     It first finds the gradient in the fractional basis,
     and then transforms to cartesian coordinates through the reciprocal lattice vectors.
     Units of angstoms and eV are assumed.
 
-    Parameters:
-    -----------
+    Parameters
+    ----------
     scalar_grid : ndarray
         N-dimensional array of scalar values on a mesh grid
     dk_values : tuple or list
@@ -599,8 +642,8 @@ def fourier_reciprocal_gradient(scalar_grid, reciprocal_lattice):
     reciprocal_lattice : ndarray, optional
         Reciprocal lattice vectors for non-orthogonal grids
 
-    Returns:
-    --------
+    Returns
+    -------
     gradient : list of ndarrays
         List of gradient components, one for each dimension
     """
@@ -616,14 +659,16 @@ def fourier_reciprocal_gradient(scalar_grid, reciprocal_lattice):
 
     dk_values = np.array([1 / nx, 1 / ny, 1 / nz])
 
-    wavenumbers = []
+    wavenumbers: list[npt.NDArray[np.float64]] = []
     for i in range(ndim):
-        wavenumbers_1d_full = np.fft.fftfreq(scalar_grid_shape[i], d=dk_values[i]) * 2 * np.pi
+        wavenumbers_1d_full: npt.NDArray[np.float64] = np.asarray(
+            np.fft.fftfreq(scalar_grid_shape[i], d=dk_values[i]) * 2 * np.pi, dtype=np.float64
+        )
         wavenumbers.append(wavenumbers_1d_full)
 
-    freq_mesh = np.stack(np.meshgrid(*wavenumbers, indexing="ij"))
+    freq_mesh: npt.NDArray[np.float64] = np.stack(np.meshgrid(*wavenumbers, indexing="ij"))
     # Get the shape of scalar_grid beyond the first 3 dimensions (if any)
-    extra_dims = scalar_grid_shape[3:] if len(scalar_grid_shape) > 3 else ()
+    _extra_dims = scalar_grid_shape[3:] if len(scalar_grid_shape) > 3 else ()
 
     # Expand freq_mesh to match the expected scalar_gradient_grid_shape
     # First, create a list to hold the expanded dimensions
@@ -685,7 +730,7 @@ def fourier_reciprocal_gradient(scalar_grid, reciprocal_lattice):
     return cart_derivatives
 
 
-def ravel_array(mesh_grid):
+def ravel_array(mesh_grid: npt.NDArray[np.float64]) -> npt.NDArray[np.float64]:
     shape = mesh_grid.shape
     mesh_grid = mesh_grid.reshape(shape[:-3] + (-1,))
     mesh_grid = np.moveaxis(mesh_grid, -1, 0)
@@ -693,7 +738,11 @@ def ravel_array(mesh_grid):
 
 
 def array_to_mesh(
-    array: npt.NDArray[np.float64], nkx: int, nky: int, nkz: int, order: str = "F"
+    array: npt.NDArray[np.float64],
+    nkx: int,
+    nky: int,
+    nkz: int,
+    order: Literal["A", "C", "F"] = "F",
 ) -> npt.NDArray[np.float64]:
     """
     Converts a list to a mesh that corresponds to ebs.kpoints
@@ -736,11 +785,12 @@ def array_to_mesh(
 
 
 def mesh_to_array(
-    mesh: npt.NDArray[np.float64] | None, order: str = "F"
+    mesh: npt.NDArray[np.float64] | None, order: Literal["A", "C", "F"] = "F"
 ) -> npt.NDArray[np.float64] | None:
     """
     Converts a mesh to a list that corresponds to ebs.kpoints
     [n_kx,n_ky,n_kz,...]->[n_kx*n_ky*n_kz,...]
+
     Parameters
     ----------
     mesh : np.ndarray
@@ -761,18 +811,16 @@ def mesh_to_array(
     return array
 
 
-def get_padding_dims(n_coords, padding):
+def get_padding_dims(n_coords: int, padding: int) -> int:
     if n_coords == 1:
         return 1
-    else:
-        return n_coords + 2 * padding
+    return n_coords + 2 * padding
 
 
-def get_coord_diffs(coords):
+def get_coord_diffs(coords: npt.NDArray[np.float64]) -> npt.NDArray[np.float64] | int:
     if len(coords) == 1:
         return 0
-    else:
-        return np.diff(coords)
+    return np.diff(coords)
 
 
 def get_grid_dims(
@@ -801,7 +849,7 @@ def get_grid_dims(
     for icoord in range(3):
         coords = points[:, icoord]
         coord_min, coord_max = np.min(coords), np.max(coords)
-        hist, bin_edges = np.histogram(
+        hist, _bin_edges = np.histogram(
             coords, bins=num_bins, range=(coord_min - coord_tol, coord_max + coord_tol)
         )
 
@@ -830,7 +878,6 @@ def compare_arrays(
     """
     if array1 is not None and array2 is not None:
         return bool(np.allclose(array1, array2))
-    elif array1 is None and array2 is None:
+    if array1 is None and array2 is None:
         return True
-    else:
-        return False
+    return False

@@ -1,4 +1,5 @@
 import numpy as np
+import numpy.typing as npt
 
 from pyprocar.utils import welcome
 
@@ -11,7 +12,7 @@ def generate2dkmesh(
     z: float,
     nkx: int,
     nky: int,
-):
+) -> npt.NDArray[np.float64]:
     """_summary_
 
     Parameters
@@ -36,7 +37,6 @@ def generate2dkmesh(
     _type_
         _description_
     """
-
     welcome()
 
     kx = np.linspace(x1, x2, nkx)
@@ -47,11 +47,11 @@ def generate2dkmesh(
         wf.write("%d\n" % (nkx * nky))
         wf.write("Reciprocal\n")
 
-        kpoints = []
+        kpoints: list[list[float]] = []
         for ikx in kx:
             for iky in ky:
                 wf.write(f" {ikx: >12.7f}   {iky: >12.7f}   {z: >12.7f}   {1.0: >12.7f}\n")
-                kpoints.append([ikx, iky, z])
+                kpoints.append([float(ikx), float(iky), z])
 
-    kpoints = np.array(kpoints)
-    return kpoints
+    kpoints_arr = np.array(kpoints)
+    return kpoints_arr

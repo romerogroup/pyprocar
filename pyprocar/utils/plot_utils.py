@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import matplotlib.colors as mcolors
 import matplotlib.pyplot as plt
 
@@ -52,7 +54,7 @@ wes_anderson_palettes = {
 
 
 # Function to set a specific color palette
-def set_palette(palette_name):
+def set_palette(palette_name: str) -> None:
     if palette_name in wes_anderson_palettes:
         plt.rcParams["axes.prop_cycle"] = plt.cycler(color=wes_anderson_palettes[palette_name])
     else:
@@ -60,14 +62,13 @@ def set_palette(palette_name):
 
 
 # Function to create a custom colormap from a palette
-def create_colormap(palette_name):
+def create_colormap(palette_name: str) -> mcolors.LinearSegmentedColormap | None:
     if palette_name in wes_anderson_palettes:
         return mcolors.LinearSegmentedColormap.from_list(
             palette_name, wes_anderson_palettes[palette_name]
         )
-    else:
-        print(f"Palette '{palette_name}' not found.")
-        return None
+    print(f"Palette '{palette_name}' not found.")
+    return None
 
 
 # DEFAULT_COLOR_MAP = mcolors.LinearSegmentedColormap.from_list(

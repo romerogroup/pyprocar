@@ -55,4 +55,16 @@ def to_rgb(
     c: str | tuple[float, ...] | Sequence[float],
 ) -> tuple[float, float, float]: ...
 
-__all__ = ["Colormap", "Normalize", "colorConverter", "to_rgba", "to_rgb"]
+class LinearSegmentedColormap(Colormap):
+    """Colormap created from a list of linear segments."""
+
+    @classmethod
+    def from_list(
+        cls,
+        name: str,
+        colors: Sequence[str] | Sequence[tuple[float, ...]] | Sequence[tuple[float, str]],
+        N: int = ...,
+        gamma: float = ...,
+    ) -> LinearSegmentedColormap: ...
+
+__all__ = ["Colormap", "LinearSegmentedColormap", "Normalize", "colorConverter", "to_rgba", "to_rgb"]

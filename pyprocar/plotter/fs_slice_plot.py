@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+from collections.abc import Iterator
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any, Literal
 
@@ -110,12 +111,12 @@ class FermiSlicePlotter:
         self.origin = centroid if origin is None else np.asarray(origin)
         self.normal = np.array([0, 0, 1]) if normal is None else np.asarray(normal)
 
-        # Handle 2D Fermi surfaces
-        if hasattr(fermi_surface, "is2d") and fermi_surface.is2d:
+        # Handle 2D Fermi surfaces (is2d/ebs are dynamic attributes added at runtime)
+        if hasattr(fermi_surface, "is2d") and fermi_surface.is2d:  # pyright: ignore[reportUnknownMemberType, reportAttributeAccessIssue]
             self.origin = centroid
-            n_kx = fermi_surface.ebs.n_kx
-            n_ky = fermi_surface.ebs.n_ky
-            n_kz = fermi_surface.ebs.n_kz
+            n_kx: int = fermi_surface.ebs.n_kx  # pyright: ignore[reportUnknownMemberType, reportAttributeAccessIssue, reportUnknownVariableType]
+            n_ky: int = fermi_surface.ebs.n_ky  # pyright: ignore[reportUnknownMemberType, reportAttributeAccessIssue, reportUnknownVariableType]
+            n_kz: int = fermi_surface.ebs.n_kz  # pyright: ignore[reportUnknownMemberType, reportAttributeAccessIssue, reportUnknownVariableType]
             if n_kz == 1:
                 self.normal = np.array([0, 0, 1])
             elif n_ky == 1:
@@ -197,7 +198,7 @@ class FermiSlicePlotter:
 
         return lines, points, scalars, vectors
 
-    def _iter_segments(self, lines: np.ndarray):
+    def _iter_segments(self, lines: np.ndarray) -> Iterator[tuple[int, int]]:
         """Yield (start_idx, end_idx) for each line segment.
 
         Handles PyVista's line connectivity array format.
@@ -214,6 +215,26 @@ class FermiSlicePlotter:
 
             i += num_points_in_line + 1
 
+    @staticmethod
+    def _extract_lim(raw: Any) -> tuple[float, float] | None:
+        """Extract a (min, max) limit tuple from a raw value.
+
+        Handles nested lists/tuples like [[vmin, vmax]] or flat [vmin, vmax].
+        """
+        if raw is None:
+            return None
+        try:
+            if len(raw) == 0:
+                return None
+            first: Any = raw[0]
+            if hasattr(first, "__len__") and len(first) >= 2:
+                return (float(first[0]), float(first[1]))
+            if len(raw) >= 2:
+                return (float(raw[0]), float(raw[1]))
+        except (TypeError, ValueError, IndexError):
+            return None
+        return None
+
     # ------------------------------------------------------------------
     # Property-based _to_series method (Phase 4)
     # ------------------------------------------------------------------
@@ -225,7 +246,7 @@ class FermiSlicePlotter:
         vectors_data: Property | None = None,
         scalars_name: str | None = None,
         vectors_name: str | None = None,
-        **kwargs,
+        **kwargs: Any,
     ) -> FermiSliceSeries:
         """Convert Property objects or FermiSurface data to FermiSliceSeries.
 
@@ -274,28 +295,13 @@ class FermiSlicePlotter:
         # Extract metadata from Property objects
         s_label = scalars_data.label if scalars_data else resolved_scalars_name
         s_unit = scalars_data.units if scalars_data else None
-        s_lim_raw = getattr(scalars_data, "rounded_data_lim", None) if scalars_data else None
-        s_lim: tuple[float, float] | None = None
-        if s_lim_raw is not None and isinstance(s_lim_raw, (list, tuple)) and len(s_lim_raw) > 0:
-            first = s_lim_raw[0]
-            if isinstance(first, (list, tuple)) and len(first) >= 2:
-                s_lim = (float(first[0]), float(first[1]))
-            elif isinstance(first, (int, float)):
-                # Handle case where it's a flat tuple
-                if len(s_lim_raw) >= 2:
-                    s_lim = (float(s_lim_raw[0]), float(s_lim_raw[1]))
+        s_lim_raw: Any = getattr(scalars_data, "rounded_data_lim", None) if scalars_data else None
+        s_lim = self._extract_lim(s_lim_raw)
 
         v_label = vectors_data.label if vectors_data else resolved_vectors_name
         v_unit = vectors_data.units if vectors_data else None
-        v_lim_raw = getattr(vectors_data, "rounded_data_lim", None) if vectors_data else None
-        v_lim: tuple[float, float] | None = None
-        if v_lim_raw is not None and isinstance(v_lim_raw, (list, tuple)) and len(v_lim_raw) > 0:
-            first = v_lim_raw[0]
-            if isinstance(first, (list, tuple)) and len(first) >= 2:
-                v_lim = (float(first[0]), float(first[1]))
-            elif isinstance(first, (int, float)):
-                if len(v_lim_raw) >= 2:
-                    v_lim = (float(v_lim_raw[0]), float(v_lim_raw[1]))
+        v_lim_raw: Any = getattr(vectors_data, "rounded_data_lim", None) if vectors_data else None
+        v_lim = self._extract_lim(v_lim_raw)
 
         return FermiSliceSeries(
             points_2d=points[:, :2],
@@ -332,10 +338,10 @@ class FermiSlicePlotter:
         vectors_clim: tuple[float, float] | None = None,
         vectors_show_colorbar: ShowColorbar | str = ShowColorbar.NONE,
         plot_arrows: bool = False,
-        line_kwargs: dict | None = None,
-        scatter_kwargs: dict | None = None,
-        quiver_kwargs: dict | None = None,
-        **kwargs,
+        line_kwargs: dict[str, Any] | None = None,
+        scatter_kwargs: dict[str, Any] | None = None,
+        quiver_kwargs: dict[str, Any] | None = None,
+        **kwargs: Any,
     ) -> dict[str, Any]:
         """Plot Fermi surface slice with Property-based API.
 
@@ -432,9 +438,7 @@ class FermiSlicePlotter:
             label = series.scalars_label or ""
             if series.scalars_unit:
                 label = f"{label} ({series.scalars_unit})"
-            self._add_colorbar(
-                artists.get("scalars"), label, scalars_cmap, scalars_clim, "scalars"
-            )
+            self._add_colorbar(artists.get("scalars"), label, scalars_cmap, scalars_clim, "scalars")
 
         if vectors_show_colorbar is ShowColorbar.SINGLE and series.vectors is not None:
             label = series.vectors_label or "Magnitude"
@@ -463,11 +467,11 @@ class FermiSlicePlotter:
         series: FermiSliceSeries,
         cmap: str,
         clim: tuple[float, float] | None,
-        line_kwargs: dict,
+        line_kwargs: dict[str, Any],
     ) -> LineCollection:
         """Add line segments colored by scalar values."""
-        line_segments = []
-        colors = []
+        line_segments: list[list[tuple[Any, Any]]] = []
+        colors_list: list[Any] = []
 
         cmap_obj = plt.get_cmap(cmap)
         if clim is not None:
@@ -485,15 +489,12 @@ class FermiSlicePlotter:
 
             if series.scalars is not None:
                 avg_scalar = (series.scalars[start_idx] + series.scalars[end_idx]) / 2.0
-                colors.append(avg_scalar)
+                colors_list.append(avg_scalar)
 
-        if len(colors) == 0:
-            colors = None
+        colors: list[Any] | None = colors_list if len(colors_list) > 0 else None
 
         merged_kwargs = {**series.additional_kwargs, **line_kwargs}
-        lc = LineCollection(
-            line_segments, array=colors, cmap=cmap_obj, norm=norm, **merged_kwargs
-        )
+        lc = LineCollection(line_segments, array=colors, cmap=cmap_obj, norm=norm, **merged_kwargs)
         self._scalar_plot = self.ax.add_collection(lc)
         return lc
 
@@ -502,8 +503,8 @@ class FermiSlicePlotter:
         series: FermiSliceSeries,
         cmap: str,
         clim: tuple[float, float] | None,
-        scatter_kwargs: dict,
-    ):
+        scatter_kwargs: dict[str, Any],
+    ) -> Any:
         """Add scatter plot with scalar coloring."""
         merged_kwargs = {**series.additional_kwargs, **scatter_kwargs}
 
@@ -524,8 +525,8 @@ class FermiSlicePlotter:
         series: FermiSliceSeries,
         cmap: str,
         clim: tuple[float, float] | None,
-        quiver_kwargs: dict,
-    ):
+        quiver_kwargs: dict[str, Any],
+    ) -> Quiver | None:
         """Add vector arrows."""
         vectors = series.vectors
         if vectors is None:
@@ -562,11 +563,11 @@ class FermiSlicePlotter:
 
     def _add_colorbar(
         self,
-        mappable,
+        mappable: Any,
         label: str,
-        cmap: str,  # noqa: ARG002
-        clim: tuple[float, float] | None,  # noqa: ARG002
-        kind: str,  # noqa: ARG002
+        cmap: str,
+        clim: tuple[float, float] | None,
+        kind: str,
     ) -> None:
         """Add colorbar to the plot."""
         del cmap, clim, kind  # Unused but kept for API consistency
@@ -590,29 +591,27 @@ class FermiSlicePlotter:
     # Axis configuration methods (Phase 7)
     # ------------------------------------------------------------------
 
-    def set_xlabel(self, label: str, **kwargs) -> None:
+    def set_xlabel(self, label: str, **kwargs: Any) -> None:
         self.ax.set_xlabel(label, **kwargs)
 
-    def set_ylabel(self, label: str, **kwargs) -> None:
+    def set_ylabel(self, label: str, **kwargs: Any) -> None:
         self.ax.set_ylabel(label, **kwargs)
 
-    def set_title(self, title: str, **kwargs) -> None:
+    def set_title(self, title: str, **kwargs: Any) -> None:
         self.ax.set_title(title, **kwargs)
 
-    def set_xlim(self, lim: tuple[float, float] | None = None, **kwargs) -> None:
+    def set_xlim(self, lim: tuple[float, float] | None = None, **kwargs: Any) -> None:
         if lim is not None:
             self.ax.set_xlim(lim, **kwargs)
 
-    def set_ylim(self, lim: tuple[float, float] | None = None, **kwargs) -> None:
+    def set_ylim(self, lim: tuple[float, float] | None = None, **kwargs: Any) -> None:
         if lim is not None:
             self.ax.set_ylim(lim, **kwargs)
 
-    def set_aspect(
-        self, aspect: float | Literal["auto", "equal"] = "equal", **kwargs
-    ) -> None:
+    def set_aspect(self, aspect: float | Literal["auto", "equal"] = "equal", **kwargs: Any) -> None:
         self.ax.set_aspect(aspect, **kwargs)
 
-    def set_grid(self, visible: bool = True, **kwargs) -> None:
+    def set_grid(self, visible: bool = True, **kwargs: Any) -> None:
         self.ax.grid(visible, **kwargs)
 
     def set_default_labels(self) -> None:
@@ -639,7 +638,7 @@ class FermiSlicePlotter:
             y_label = r"$k_z$ (1/$\AA$)"
             title = f"Fermi Surface Slice at $k_x$ = {self.origin[0]:.2f} (1/$\\AA$)"
         else:
-            _u, _v = self.get_orthonormal_basis()  # noqa: F841
+            self.get_orthonormal_basis()  # Compute basis (currently unused for generic slices)
             x_label = r"$k_u$ (1/$\AA$)"
             y_label = r"$k_v$ (1/$\AA$)"
             title = f"Fermi Surface Slice (origin={self.origin}, normal={self.normal})"
@@ -673,7 +672,7 @@ class FermiSlicePlotter:
         if not self.values_dict:
             raise ValueError("No values recorded. Plot first before exporting.")
 
-        values = {}
+        values: dict[str, np.ndarray] = {}
         for key, value in self.values_dict.items():
             arr = np.atleast_1d(value)
             if arr.size > 0:
@@ -684,7 +683,9 @@ class FermiSlicePlotter:
             sep = "," if file_type == "csv" else "\t" if file_type == "txt" else " "
             df.to_csv(filename, sep=sep, index=False)
         else:  # json
-            serializable = {k: np.asarray(v).tolist() for k, v in values.items()}
+            serializable: dict[str, list[Any]] = {
+                k: np.asarray(v).tolist() for k, v in values.items()
+            }
             with open(filename, "w") as f:
                 json.dump(serializable, f)
 
@@ -692,14 +693,14 @@ class FermiSlicePlotter:
         """Display the plot."""
         plt.show()
 
-    def savefig(self, filename: str, **kwargs) -> None:
+    def savefig(self, filename: str, **kwargs: Any) -> None:
         """Save figure to file."""
         kwargs.setdefault("bbox_inches", "tight")
         kwargs.setdefault("dpi", self.dpi)
         self.fig.savefig(filename, **kwargs)
 
     @property
-    def colorbar(self):
+    def colorbar(self) -> Colorbar | None:
         """Return the colorbar if one exists."""
         return self._colorbar
 
@@ -713,7 +714,7 @@ class FermiSlicePlotter:
         scalars_name: str | None = None,
         vectors_name: str | None = None,
         cmap: str = "plasma",
-        **kwargs,
+        **kwargs: Any,
     ) -> LineCollection | None:
         """Plot line segments (legacy API).
 
@@ -736,8 +737,8 @@ class FermiSlicePlotter:
         scalars_name: str | None = None,
         vectors_name: str | None = None,
         cmap: str = "plasma",
-        **kwargs,
-    ):
+        **kwargs: Any,
+    ) -> Any:
         """Plot scatter points (legacy API).
 
         Delegates to plot() with scalars_mode="scatter".
@@ -760,8 +761,8 @@ class FermiSlicePlotter:
         vectors_name: str | None = None,
         cmap: str = "plasma",
         clim: tuple[float, float] | None = None,
-        **kwargs,
-    ):
+        **kwargs: Any,
+    ) -> Any:
         """Plot vector arrows (legacy API).
 
         Delegates to plot() with plot_arrows=True.
@@ -785,7 +786,7 @@ class FermiSlicePlotter:
         show_vectors: bool = False,
         show_scalars: bool = False,
         label: str = "",
-        **kwargs,
+        **kwargs: Any,
     ) -> None:
         """Show colorbar (legacy API).
 

@@ -1,0 +1,13 @@
+"""Type stubs for plotly.graph_objs."""
+
+from _typeshed import Incomplete
+
+def Scatter3d(**kwargs: Incomplete) -> Incomplete: ...
+
+class Layout:
+    def __init__(self, **kwargs: Incomplete) -> None: ...
+
+class Figure:
+    def __init__(self, data: Incomplete = ..., layout: Incomplete = ...) -> None: ...
+
+def __getattr__(name: str) -> Incomplete: ...

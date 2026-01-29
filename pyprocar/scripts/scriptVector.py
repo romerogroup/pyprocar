@@ -1,20 +1,23 @@
+from __future__ import annotations
+
 from pyprocar.core import FermiSurface, ProcarSelect
 from pyprocar.io import ProcarParser
-from pyprocar.utils import UtilsProcar, welcome
+from pyprocar.utils.splash import welcome
+from pyprocar.utils.utilsprocar import UtilsProcar
 
 
 def Vector(
-    infile,
-    bands=None,
-    energy=None,
-    fermi=None,
-    atoms=None,
-    orbitals=None,
-    outcar=None,
-    scale=0.1,
-    code="vasp",
-    repair=True,
-):
+    infile: str,
+    bands: list[int] | None = None,
+    energy: float | None = None,
+    fermi: float | None = None,
+    atoms: list[int] | None = None,
+    orbitals: list[int] | None = None,
+    outcar: str | None = None,
+    scale: float = 0.1,
+    code: str = "vasp",
+    repair: bool = True,
+) -> None:
     welcome()
 
     if code == "vasp" or code == "abinit":
@@ -34,7 +37,7 @@ def Vector(
 
     if bands == [] and energy is None:
         raise RuntimeError("You must provide the bands or energy.")
-    if fermi == None and outcar == None:
+    if fermi is None and outcar is None:
         print("WARNING: Fermi's Energy not set")
 
     # first parse the outcar if given
@@ -57,37 +60,44 @@ def Vector(
     procarFile.readFile(infile, recLattice=recLat)
 
     # processing the data
-    sx = ProcarSelect(procarFile, deepCopy=True)
+    sx = ProcarSelect(procarFile, deepCopy=True)  # pyright: ignore[reportArgumentType]
     sx.selectIspin([1])
     sx.selectAtoms(atoms)
     sx.selectOrbital(orbitals)
 
-    sy = ProcarSelect(procarFile, deepCopy=True)
+    sy = ProcarSelect(procarFile, deepCopy=True)  # pyright: ignore[reportArgumentType]
     sy.selectIspin([2])
     sy.selectAtoms(atoms)
     sy.selectOrbital(orbitals)
 
-    sz = ProcarSelect(procarFile, deepCopy=True)
+    sz = ProcarSelect(procarFile, deepCopy=True)  # pyright: ignore[reportArgumentType]
     sz.selectIspin([3])
     sz.selectAtoms(atoms)
     sz.selectOrbital(orbitals)
 
+    assert sx.kpoints is not None
     x = sx.kpoints[:, 0]
     y = sx.kpoints[:, 1]
     z = sx.kpoints[:, 2]
 
     # if energy was given I need to find the bands indexes crossing it
-    if energy != None:
-        FerSurf = FermiSurface(sx.kpoints, sx.bands - fermi, sx.spd)
-        FerSurf.FindEnergy(energy)
-        bands = list(FerSurf.useful[0])
+    if energy is not None:
+        assert sx.bands is not None
+        assert fermi is not None
+        FerSurf = FermiSurface(sx.kpoints, sx.bands - fermi, sx.spd)  # pyright: ignore[reportCallIssue]
+        FerSurf.FindEnergy(energy)  # pyright: ignore[reportAttributeAccessIssue, reportUnknownMemberType]
+        bands = list(FerSurf.useful[0])  # pyright: ignore[reportAttributeAccessIssue, reportUnknownMemberType, reportUnknownArgumentType]
         print("Bands indexes crossing Energy  ", energy, ", are: ", bands)
 
-    from mayavi import mlab
+    from mayavi import mlab  # pyright: ignore[reportMissingModuleSource]
 
-    fig = mlab.figure(bgcolor=(1, 1, 1))
+    _fig = mlab.figure(bgcolor=(1, 1, 1))
 
+    assert bands is not None
     for band in bands:
+        assert sx.spd is not None
+        assert sy.spd is not None
+        assert sz.spd is not None
         # z = sx.bands[:,band]-fermi
         u = sx.spd[:, band]
         v = sy.spd[:, band]

@@ -106,7 +106,7 @@ class FermiSurface2DConfig(BaseConfig):
 
     # Plot Appearance
     cmap: str = "jet"
-    clim: tuple[float, float] | None = field(default_factory=lambda: (None, None))
+    clim: tuple[float, float] | None = None
     color: list[str] = field(default_factory=lambda: ["blue", "red"])
     linestyle: list[str] = field(default_factory=lambda: ["solid", "dashed"])
     linewidth: float = 0.2
@@ -118,11 +118,7 @@ class FermiSurface2DConfig(BaseConfig):
     marker: str = "."
     dpi: str = "figure"
 
-    def __post_init__(self):
-        """This method is immediately called after the object is initialized.
-        It is useful to validate the data and set default values.
-        """
-        self.plot_type = PlotType.FERMI_SURFACE_2D
+    plot_type: PlotType = PlotType.FERMI_SURFACE_2D
 
     def as_dict(self):
         """

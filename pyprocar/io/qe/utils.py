@@ -79,7 +79,7 @@ def parse_qe_input_cards(text: str | list[str]) -> dict[str, QEValue]:
             existing = params.get(key)
             if not isinstance(existing, dict):
                 existing = {}
-                params[key] = existing  # type: ignore[assignment]
+                params[key] = existing
             assert isinstance(existing, dict)
             existing[index_tuple] = typed_val
     return params

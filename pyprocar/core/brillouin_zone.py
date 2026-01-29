@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import logging
-from typing import cast
+from typing import cast, override
 
 import numpy as np
 import numpy.typing as npt
@@ -122,6 +122,7 @@ class BrillouinZone(pv.PolyData):
         return None
 
     @property
+    @override
     def centers(self) -> npt.NDArray[np.float64]:
         return self.cell_centers().points
 
@@ -280,6 +281,7 @@ class BrillouinZone2D(pv.PolyData):
         return None
 
     @property
+    @override
     def centers(self) -> npt.NDArray[np.float64]:
         return self.cell_centers().points
 

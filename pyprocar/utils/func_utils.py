@@ -4,14 +4,23 @@ import inspect
 from collections.abc import Callable, Iterable
 from functools import wraps
 from itertools import product
-from typing import Any, Literal, TypeVar, Union
+from typing import Any, Literal, TypeVar
 
 
-def example_func(a, b, c=10, d=20, *, e=30, f=40, **kwargs):
+def example_func(
+    _a: object,
+    _b: object,
+    _c: int = 10,
+    _d: int = 20,
+    *,
+    _e: int = 30,
+    _f: int = 40,
+    **_kwargs: object,
+) -> None:
     pass
 
 
-def get_kwargs(func: Callable[..., Any], defaults: bool = True) -> dict[str, Any]:
+def get_kwargs(func: Callable[..., Any], _defaults: bool = True) -> dict[str, Any]:
     sig = inspect.signature(func)
     return {
         name: param.default if param.default is not param.empty else None
@@ -25,7 +34,7 @@ def get_kwargs(func: Callable[..., Any], defaults: bool = True) -> dict[str, Any
     }
 
 
-def get_args(func: Callable[..., Any], defaults: bool = True) -> list[str]:
+def get_args(func: Callable[..., Any], _defaults: bool = True) -> list[str]:
     sig = inspect.signature(func)
     return [
         name
@@ -34,9 +43,7 @@ def get_args(func: Callable[..., Any], defaults: bool = True) -> list[str]:
     ]
 
 
-def get_params(
-    func: Callable[..., Any], defaults: bool = True
-) -> dict[str, inspect.Parameter]:
+def get_params(func: Callable[..., Any], _defaults: bool = True) -> dict[str, inspect.Parameter]:
     sig = inspect.signature(func)
     return {name: param for name, param in sig.parameters.items()}
 
@@ -49,22 +56,34 @@ def keep_func_kwargs(
     return {k: v for k, v in kwargs.items() if k in func_kwargs}
 
 
-def keep_func_args(args, func, defaults=True):
-    func_args = get_args(func, defaults)
+def keep_func_args(
+    args: list[str],
+    func: Callable[..., Any],
+    _defaults: bool = True,
+) -> list[str]:
+    func_args = get_args(func)
     return [v for v in args if v in func_args]
 
 
-def keep_func_kwargs_and_args(kwargs, func, defaults=True):
-    func_kwargs = get_kwargs(func, defaults)
-    func_args = get_args(func, defaults)
+def keep_func_kwargs_and_args(
+    kwargs: dict[str, Any],
+    func: Callable[..., Any],
+    _defaults: bool = True,
+) -> tuple[list[Any], dict[str, Any]]:
+    func_kwargs = get_kwargs(func)
+    func_args = get_args(func)
     return (
         [v for k, v in kwargs.items() if k in func_args],
         {k: v for k, v in kwargs.items() if k in func_kwargs},
     )
 
 
-def keep_func_params(params, func, defaults=True):
-    func_params = get_params(func, defaults)
+def keep_func_params(
+    params: dict[str, Any],
+    func: Callable[..., Any],
+    _defaults: bool = True,
+) -> dict[str, Any]:
+    func_params = get_params(func)
     func_param_keys = set(func_params.keys())
     return {k: v for k, v in params.items() if k in func_param_keys}
 
@@ -86,7 +105,7 @@ def _flatten_special_kwargs(
         for k in keys:
             v = out.pop(k, None)
             if isinstance(v, dict):
-                out.update(v)
+                out.update(v)  # pyright: ignore[reportUnknownArgumentType] - dict narrowed from Any
                 expanded = True
         if not (deep and expanded):
             break
@@ -95,10 +114,6 @@ def _flatten_special_kwargs(
 
 def _is_seq(x: Any) -> bool:
     # treat numpy arrays / lists / tuples as sequences; exclude str/bytes
-    try:
-        from collections.abc import Iterable
-    except Exception:
-        Iterable = tuple  # fallback, shouldn't happen
     return isinstance(x, Iterable) and not isinstance(x, (str, bytes))
 
 
@@ -174,9 +189,9 @@ def expand_grouped_params_to_dicts(params: dict[str, Any]) -> list[dict[str, Any
     n_groups = list(group_lengths.values())[0]
 
     # Build list of parameter dicts
-    result = []
+    result: list[dict[str, Any]] = []
     for i in range(n_groups):
-        param_dict = {}
+        param_dict: dict[str, Any] = {}
         for key, value in params.items():
             if key in grouped_params:
                 # Use i-th element from grouped param
@@ -215,7 +230,7 @@ def _to_groups_explode(x: Any, as_selection: Callable[[Any], Any]) -> list[Any]:
 
 # --- decorator -------------------------------------------------------------
 
-ParamSpec = Union[str, tuple[str, Mode]]
+ParamSpec = str | tuple[str, Mode]
 
 
 def expand_grouped_params(

@@ -2,14 +2,18 @@
 from __future__ import annotations
 
 import argparse
+from typing import Any
 
 import numpy as np
+import numpy.typing as npt
 
-from . import latticeUtils
+from .latticeUtils import distances as _distances
 from .poscar import Poscar
 
 
-def poscarDiff(poscar1: Poscar | str, poscar2: Poscar | str, tolerance: float = 0.01) -> dict:
+def poscarDiff(
+    poscar1: Poscar | str, poscar2: Poscar | str, tolerance: float = 0.01
+) -> dict[str, object]:
     """It compares two different Poscar objects. Small numerical errors
     up to `tolerance` are ignored.
 
@@ -23,7 +27,6 @@ def poscarDiff(poscar1: Poscar | str, poscar2: Poscar | str, tolerance: float = 
 
     Parameters
     ----------
-
     poscar1 : Poscar | str
         the first Poscar filename or object
     poscar2 : Poscar | str
@@ -34,7 +37,6 @@ def poscarDiff(poscar1: Poscar | str, poscar2: Poscar | str, tolerance: float = 
 
     Returns
     -------
-
     dict:
       the differences are stored with keys 'Elements', 'lattices',
       'distances'. If no differences are found an empty dict is
@@ -52,13 +54,17 @@ def poscarDiff(poscar1: Poscar | str, poscar2: Poscar | str, tolerance: float = 
     if poscar2.loaded is False:
         poscar2.parse()
 
-    differences = {}
+    differences: dict[str, object] = {}
     # Checking for type of elements
+    assert poscar1.elm is not None
+    assert poscar2.elm is not None
     if list(poscar1.elm) != list(poscar2.elm):
         differences["Elements"] = (list(poscar1.elm), list(poscar2.elm))
         return differences
     # The rest only makes sense to check if elements are the same
     # Checking lattice
+    assert poscar1.lat is not None
+    assert poscar2.lat is not None
     lat_delta = np.zeros((3, 3))
     for i in [0, 1, 2]:
         for j in [0, 1, 2]:
@@ -66,18 +72,20 @@ def poscarDiff(poscar1: Poscar | str, poscar2: Poscar | str, tolerance: float = 
             lat_1 = np.dot(poscar1.lat[i], poscar1.lat[j])
             lat_2 = np.dot(poscar2.lat[i], poscar2.lat[j])
             lat_delta[i, j] = np.abs(lat_1 - lat_2)
-    for delta in lat_delta:
-        if any([x > tolerance for x in delta]):
+    for delta_row in lat_delta:
+        if any([x > tolerance for x in delta_row]):
             differences["lattices"] = lat_delta
     # Checking distances
     # We get the distance matrix, wich includes distances between atoms for all atoms
-    d1 = latticeUtils.distances(poscar1.cpos, lattice=poscar1.lat)
-    d2 = latticeUtils.distances(poscar2.cpos, lattice=poscar2.lat)
+    assert poscar1.cpos is not None
+    assert poscar2.cpos is not None
+    d1 = _distances(poscar1.cpos, lattice=poscar1.lat)
+    d2 = _distances(poscar2.cpos, lattice=poscar2.lat)
     delta = d1 - d2
     # We take the norm of the difference between the distances
-    delta = np.linalg.norm(delta)
-    if delta > tolerance:
-        differences["distances"] = delta
+    delta_norm = np.linalg.norm(delta)
+    if delta_norm > tolerance:
+        differences["distances"] = delta_norm
     return differences
 
 
@@ -86,7 +94,6 @@ class poscar_modify:
 
     Methods
     -------
-
     write(filename, cartesian, xyz)   # write the poscar with `filename`, in `cartesian`?
     pos_multiply(factor, cartesian)   # multiply the position of each atoms by `factor`
     pos_sum(factor, cartesian)        # sums `factor` to each position
@@ -97,12 +104,14 @@ class poscar_modify:
 
     """
 
+    p: Poscar
+    verbose: bool
+
     def __init__(self, poscar: Poscar | str, verbose: bool = False):
         """High-level class to change properties of a Poscar-object.
 
         Parameters
         ----------
-
         poscar : Poscar|str
             Filename or Poscar instance to be modified
         verbose : bool
@@ -117,13 +126,12 @@ class poscar_modify:
             self.p.parse()
         self.verbose = verbose
 
-    def write(self, filename: str, cartesian: bool = False, xyz: bool = False):
+    def write(self, filename: str, cartesian: bool = False, xyz: bool = False) -> None:
         """Writes the content of this class into a file. It just invokes the
         write method from the `Poscar` class. Is here just for convenience.
 
         Parameters
         ----------
-
         filename : str
             the name of the file to be written
         cartesian: bool:
@@ -146,12 +154,11 @@ class poscar_modify:
             if xyz:
                 print("XYZ file written")
 
-    def pos_multiply(self, factor: np.ndarray | list[float], cartesian: bool = True):
+    def pos_multiply(self, factor: np.ndarray | list[float], cartesian: bool = True) -> None:
         """Multiplies each (x,y,z) position by the Factor (Fx,Fy,Fz)
 
         Parameters
         ----------
-
         factor : np.ndarray|list[float]
             array or list with 3 numbers, the x,y,z factors to scale each position
         cartesian: bool
@@ -160,7 +167,7 @@ class poscar_modify:
 
         """
         factor = np.array(factor, dtype=float)
-        if verbose:
+        if self.verbose:
             print("Multiply positions, factor = ", factor)
             print("old positions:")
             if cartesian:
@@ -170,24 +177,23 @@ class poscar_modify:
 
         if cartesian is True:
             self.p.cpos = self.p.cpos * factor
-            self.p._set_direct()
+            self.p._set_direct()  # pyright: ignore[reportPrivateUsage]
         else:
             self.p.dpos = self.p.dpos * factor
-            self.p._set_cartesian()
+            self.p._set_cartesian()  # pyright: ignore[reportPrivateUsage]
 
-        if verbose:
+        if self.verbose:
             print("\nnew positions:")
             if cartesian:
                 print(self.p.cpos)
             else:
                 print(self.p.dpos)
-        return
 
-    def pos_sum(self, factor: np.ndarray | list[float], cartesian=False):
+    def pos_sum(self, factor: np.ndarray | list[float], cartesian: bool = False) -> None:
         """Add the Factor (Fx,Fy,Fz) to each position
 
-        Parameters:
-
+        Parameters
+        ----------
         factor : np.ndarray|list[float]
             3 numbers, the factor to add to each position
         cartesian : bool
@@ -197,7 +203,7 @@ class poscar_modify:
         """
         factor = np.array(factor, dtype=float)
 
-        if verbose:
+        if self.verbose:
             print("summing to positions, factor = ", factor)
             print("old positions:")
             if cartesian:
@@ -207,30 +213,28 @@ class poscar_modify:
 
         if cartesian is True:
             self.p.cpos = self.p.cpos + factor
-            self.p._set_direct()
+            self.p._set_direct()  # pyright: ignore[reportPrivateUsage]
         else:
             self.p.dpos = self.p.dpos + factor
-            self.p._set_cartesian()
+            self.p._set_cartesian()  # pyright: ignore[reportPrivateUsage]
 
-        if verbose:
+        if self.verbose:
             print("\nnew positions:")
             if cartesian:
                 print(self.p.cpos)
             else:
                 print(self.p.dpos)
-        return
 
     def change_elements(
         self,
         indexes: np.ndarray | list[int] | int,
         newElements: np.ndarray | list[str] | str,
         human: bool = False,
-    ):
+    ) -> None:
         """It changes the Element of one or more atoms in this poscar object.
 
         Parameters
         ----------
-
         indexes : np.ndarray | list[int] | int
             the 0-based index(es) of the atom to be replaced.
         newElements : np.ndarray | list[str] | str
@@ -251,46 +255,47 @@ class poscar_modify:
             newElements = [newElements]
 
         # first retrive the positions
+        assert self.p.dpos is not None
         dpos = self.p.dpos[indexes]
 
         # then removing
-        self.remove(indexes, human=False)
+        self.remove(list(indexes), human=False)
         # and finally adding a new atoms, one at a time
         for pos, elem in zip(dpos, newElements):
             self.add(elem, pos, cartesian=False)
 
         if self.verbose:
-            print("Added element ", newElement, "at direct coord:", dpos)
+            print("Added element ", newElements, "at direct coord:", dpos)
 
-    def remove(self, atoms: list[int] | np.ndarray, human: bool = False):
+    def remove(self, atoms: list[int] | np.ndarray, human: bool = False) -> None:
         """Removes a list of atoms from the Poscar object. The order of
         removal is not trivial, and it is equivalent to removing all the
         desired atoms at once.
 
         Parameters
         ----------
-
         atoms : list[int] | np.ndarray
             a list with the indexes of the atoms to remove
         human : bool
             does `atoms` start from 1 (True) or 0 (False)? Default is False
 
         """
-        atoms = np.array(atoms)
+        atoms_arr = np.array(atoms)
         # the atoms list could be disordered, Poscar.remove is safe
         if human:
-            atoms = atoms - 1
-        self.p.remove(atoms)
+            atoms_arr = atoms_arr - 1
+        self.p.remove(list(int(x) for x in atoms_arr))
         if self.verbose:
             print("removing the following atoms (0-based indexes):", atoms)
             print(self.p.numberSp, self.p.typeSp)
 
-    def add(self, element: str, position: list[float] | np.ndarray, cartesian: bool = False):
+    def add(
+        self, element: str, position: list[float] | np.ndarray, cartesian: bool = False
+    ) -> None:
         """Adds a single atom to the Poscar object.
 
         Parameters
         ----------
-
         element : str
             a string with the atomic specie, e.g. 'Cu'
         position : list[float] | np.ndarray
@@ -307,7 +312,7 @@ class poscar_modify:
             direct = False
         self.p.add(position=position, element=element, direct=direct)
 
-    def shift(self, amount: list[float] | np.ndarray, cartesian: bool = False):
+    def shift(self, amount: list[float] | np.ndarray, cartesian: bool = False) -> None:
         """Shift all the positions by `amount`, given in Cartesian or direct
         coordinates. The PBCs are always enforced (i.e. [0,1] in direct
         coords). If amount = [0,0,0] it just applies the perodic boundary
@@ -315,7 +320,6 @@ class poscar_modify:
 
         Parameters
         ----------
-
         amount : list[float] | np.ndarray
             [X,Y,Z] the shift along each basis vector or along Cartesian axis.
         cartesian : bool
@@ -326,38 +330,39 @@ class poscar_modify:
         if cartesian:
             if self.verbose:
                 print("\nOriginal Cartesian coords:")
-                print(p.cpos)
+                print(self.p.cpos)
             self.p.cpos = self.p.cpos + amount
-            self.p._set_direct()
+            self.p._set_direct()  # pyright: ignore[reportPrivateUsage]
             if self.verbose:
                 print("\nShifted Cartesian coords:")
-                print(p.cpos)
+                print(self.p.cpos)
         else:
             if self.verbose:
                 print("\nOriginal Direct coords:")
-                print(p.dpos)
+                print(self.p.dpos)
             self.p.dpos = self.p.dpos + amount
-            self.p._set_cartesian()
+            self.p._set_cartesian()  # pyright: ignore[reportPrivateUsage]
             if self.verbose:
                 print("\nShifted Cartesian coords:")
-                print(p.cpos)
+                print(self.p.cpos)
 
         # enforcing the PBCs
+        assert self.p.dpos is not None
         self.p.dpos = np.mod(self.p.dpos, 1.0)
-        self.p._set_cartesian()
-        return
+        self.p._set_cartesian()  # pyright: ignore[reportPrivateUsage]
 
-    def scale_lattice(self, factor: np.ndarray, keep_cartesian: bool = False):
+    def scale_lattice(self, factor: np.ndarray, keep_cartesian: bool = False) -> None:
         """Scale the lattice vectors by factor [a,b,c]
 
-        Parameters:
-
+        Parameters
+        ----------
         factor : np.ndarray
            [A,B,C], the first lattice vector is multiplied by A, etc.
         keep_cartesian : bool
             What cooddinates should remain constant? Cartesian or direct? Default is False
 
         """
+        assert self.p.lat is not None
         if self.verbose:
             print("Old lattice")
             print(self.p.lat)
@@ -372,20 +377,23 @@ class poscar_modify:
         if keep_cartesian:
             # if cartesian positions are to remain constant, the direct ones
             # needs to be updated
-            self.p._set_direct()
+            self.p._set_direct()  # pyright: ignore[reportPrivateUsage]
         else:
-            self.p._set_cartesian()
-        return
+            self.p._set_cartesian()  # pyright: ignore[reportPrivateUsage]
 
 
 class poscar_supercell:
     """class to generate a supercell by providing a supercell matrix."""
+
+    poscar: Poscar
+    verbose: bool
 
     def __init__(self, poscar: Poscar | str, verbose: bool = False):
         """This class created a supercell of `poscar`, see the `supercell`
         method
 
         Parameters
+        ----------
         __________
 
         poscar : Poscar | str
@@ -415,7 +423,6 @@ class poscar_supercell:
 
         Parameters
         ----------
-
         size : ndarray
             (3x3) array of integers with the supercell vectors in term of the
             original lattice vectors. The order is [[b1x, b1y, b1z], [b2x, ...] ...]
@@ -423,13 +430,15 @@ class poscar_supercell:
 
         Returns
         -------
-
         Poscar
             A Poscar object with the desired supercell. It is the same instance
             stored in this class. Note, the creation of `poscar_supercell` makes
             a deep copy of the `Poscar` instance provided
 
         """
+        assert self.poscar.lat is not None
+        assert self.poscar.dpos is not None
+        assert self.poscar.elm is not None
         lat = self.poscar.lat
         pos = self.poscar.dpos
         elem = self.poscar.elm
@@ -455,30 +464,29 @@ class poscar_supercell:
         # n_i*a_i = n_i*ocell_ij*b_j
         # then, the condition is : 0 < n_i*ocell_ij < 1
         b = np.ones(3)
-        n = np.einsum("j,ji", b, scell)
-        n = int(np.max(np.abs(n)))
+        n_max = int(np.max(np.abs(np.einsum("j,ji", b, scell))))
         if self.verbose:
-            print("maximum value of n to search for repetitions : ", n)
+            print("maximum value of n to search for repetitions : ", n_max)
 
-        n = np.arange(-n, n)
+        n_range = np.arange(-n_max, n_max)
 
-        n = np.array([(x, y, z) for z in n for y in n for x in n])
-        nuseful = []
+        n_grid = np.array([(x, y, z) for z in n_range for y in n_range for x in n_range])
+        nuseful: list[npt.NDArray[np.signedinteger[Any]]] = []
         # checking which of the previous repetitions works
-        for trial in n:
+        for trial in n_grid:
             value = np.einsum("i,ij", trial, ocell)
             if value.min() >= 0 and value.max() < 1:
                 nuseful.append(trial)
 
         if self.verbose:
             print("set of new coords\n", nuseful)
-        npos = []
+        npos_list: list[npt.NDArray[np.floating[Any]]] = []
         for nn in nuseful:
-            npos.append(spos + np.einsum("i,ij", nn, ocell))
+            npos_list.append(spos + np.einsum("i,ij", nn, ocell))
 
         if self.verbose:
             print("positions:")
-        npos = np.concatenate(npos)
+        npos = np.concatenate(npos_list)
         npos = np.mod(npos, 1)
         if self.verbose:
             print(npos, npos.shape)
@@ -486,7 +494,7 @@ class poscar_supercell:
         # I can have repeated elements, such as '0 0 1', and '0 0 0'
         # (the 1 can be 0.9999999 and fail the previous filter)
         tol = 0.001
-        temp = []
+        temp_list: list[npt.NDArray[np.floating[Any]]] = []
         for i in range(len(npos)):
             repeated = False
             for j in range(i):
@@ -494,36 +502,33 @@ class poscar_supercell:
                 for k in range(len(d)):
                     if abs(d[k] - 1) < d[k]:
                         d[k] = d[k] - 1
-                # print d
                 if np.linalg.norm(d) < tol and i != j:
                     repeated = True
                     if self.verbose:
                         print(i, j, npos[i], npos[j])
             if not repeated:
-                temp.append(npos[i])
+                temp_list.append(npos[i])
 
-        temp = np.concatenate(temp)
-        temp.shape = (-1, 3)
+        temp = np.concatenate(temp_list)
+        temp = temp.reshape(-1, 3)
         if self.verbose:
             print(temp.shape)
         npos = temp[:]
-        elem = list(elem) * len(nuseful)
-        # print elem
-        self.poscar.elm = elem
+        new_elem = list(elem) * len(nuseful)
+        self.poscar.elm = new_elem
         self.poscar.lat = np.dot(scell, lat)
         self.poscar.dpos = npos
-        self.poscar._set_cartesian()
+        self.poscar._set_cartesian()  # pyright: ignore[reportPrivateUsage]
 
         self.poscar.sort()
 
         return self.poscar
 
-    def write(self, filename: str, cartesian: bool = False, xyz: bool = False):
+    def write(self, filename: str, cartesian: bool = False, xyz: bool = False) -> None:
         """Just a convenience method to save the content into a file.
 
         Parameters
         ----------
-
         filename : str
             the name of the file to be written
         cartesian : bool
@@ -536,128 +541,159 @@ class poscar_supercell:
         pm = poscar_modify(self.poscar, verbose=False)
         pm.write(filename=filename, cartesian=cartesian, xyz=xyz)
 
-        return
 
-
-def p_atoms_f(args):
+def p_atoms_f(args: argparse.Namespace) -> None:
     print("Operations related with atomic positions")
-    if args.verbose:
-        print("Input:     ", args.input)
-        print("Output:    ", args.output)
-        print("sum:       ", args.sum)
-        print("multiply:  ", args.multiply)
-        print("xyz:       ", args.xyz)
-        print("cartesian: ", args.cart)
-        print("save_cart: ", args.sc)
-        print("remove:    ", args.remove)
-        print("human:     ", args.human)
-        print("add:       ", args.add)
+    verbose: bool = args.verbose
+    input_file: str = args.input
+    output_file: str = args.output
+    sum_val: list[float] | None = args.sum
+    multiply_val: list[float] | None = args.multiply
+    xyz: bool = args.xyz
+    cart: bool = args.cart
+    sc: bool = args.sc
+    remove_val: list[int] | None = args.remove
+    human: bool = args.human
+    add_val: list[str] | None = args.add
 
-    p = Poscar(args.input, verbose=False)
+    if verbose:
+        print("Input:     ", input_file)
+        print("Output:    ", output_file)
+        print("sum:       ", sum_val)
+        print("multiply:  ", multiply_val)
+        print("xyz:       ", xyz)
+        print("cartesian: ", cart)
+        print("save_cart: ", sc)
+        print("remove:    ", remove_val)
+        print("human:     ", human)
+        print("add:       ", add_val)
+
+    p = Poscar(input_file, verbose=False)
     p.parse()
 
-    Modifier = poscar_modify(p, verbose=args.verbose)
+    modifier = poscar_modify(p, verbose=verbose)
 
     # first dealing with the maths
-    if args.multiply:
-        Modifier.pos_multiply(factor, cartesian=args.cart)
+    if multiply_val:
+        modifier.pos_multiply(multiply_val, cartesian=cart)
 
-    if args.sum:
-        Modifier.pos_sum(factor, cartesian=args.cart)
+    if sum_val:
+        modifier.pos_sum(sum_val, cartesian=cart)
 
-    if args.remove:
-        Modifier.remove(args.remove, human=args.human)
+    if remove_val:
+        modifier.remove(remove_val, human=human)
 
-    if args.add:
+    if add_val:
         # parsing the string: 'C 1.2 4 -5.0'
-        # args.add = args.add.split()
-        element = args.add[0]
-        position = args.add[1:]
-        if len(position) != 3:
-            raise RuntimeError("the --add parameter has a wrong format, " + args.add)
-        position = np.array(position, dtype=float)
-        Modifier.add(element=element, position=position, cartesian=args.cartesian)
+        element = add_val[0]
+        position_strs = add_val[1:]
+        if len(position_strs) != 3:
+            raise RuntimeError("the --add parameter has a wrong format, " + str(add_val))
+        position = np.array(position_strs, dtype=float)
+        modifier.add(element=element, position=position, cartesian=cart)
 
     # Now we are done with all modifications
 
-    Modifier.write(args.output, cartesian=args.sc, xyz=args.xyz)
-    return
+    modifier.write(output_file, cartesian=sc, xyz=xyz)
 
 
-def p_pbc_f(args):
+def p_pbc_f(args: argparse.Namespace) -> None:
     print("PBC-related utilities")
-    if args.verbose:
-        print("Input:     ", args.input)
-        print("Output:    ", args.output)
-        print("shift:     ", args.shift)
-        print("xyz:       ", args.xyz)
-        print("cartesian: ", args.cart)
-        print("save_cart: ", args.sc)
+    verbose: bool = args.verbose
+    input_file: str = args.input
+    output_file: str = args.output
+    shift_val: list[float] | None = args.shift
+    xyz: bool = args.xyz
+    cart: bool = args.cart
+    sc: bool = args.sc
 
-    p = Poscar(args.input, verbose=False)
+    if verbose:
+        print("Input:     ", input_file)
+        print("Output:    ", output_file)
+        print("shift:     ", shift_val)
+        print("xyz:       ", xyz)
+        print("cartesian: ", cart)
+        print("save_cart: ", sc)
+
+    p = Poscar(input_file, verbose=False)
     p.parse()
 
-    Modifier = poscar_modify(p, verbose=args.verbose)
+    modifier = poscar_modify(p, verbose=verbose)
 
-    if args.shift:
-        Modifier.shift(args.shift, args.cart)
-    Modifier.write(args.output, cartesian=args.sc, xyz=args.xyz)
-
-    return
+    if shift_val:
+        modifier.shift(shift_val, cart)
+    modifier.write(output_file, cartesian=sc, xyz=xyz)
 
 
-def p_lattice_f(args):
+def p_lattice_f(args: argparse.Namespace) -> None:
     print("Lattice stuff")
-    if args.verbose:
-        print("Input:     ", args.input)
-        print("Output:    ", args.output)
-        print("scale:     ", args.scale)
-        print("factor:    ", args.factor)
-        print("xyz:       ", args.xyz)
-        print("cartesian: ", args.cart)
-        print("save_cart: ", args.sc)
+    verbose: bool = args.verbose
+    input_file: str = args.input
+    output_file: str = args.output
+    scale_val: list[float] | None = args.scale
+    factor_val: float = args.factor
+    xyz: bool = args.xyz
+    cart: bool = args.cart
+    sc: bool = args.sc
 
-    p = Poscar(args.input, verbose=False)
+    if verbose:
+        print("Input:     ", input_file)
+        print("Output:    ", output_file)
+        print("scale:     ", scale_val)
+        print("factor:    ", factor_val)
+        print("xyz:       ", xyz)
+        print("cartesian: ", cart)
+        print("save_cart: ", sc)
+
+    p = Poscar(input_file, verbose=False)
     p.parse()
 
-    Modifier = poscar_modify(p, verbose=args.verbose)
+    modifier = poscar_modify(p, verbose=verbose)
 
     # first dealing with the factors, if any
-    if args.factor == None:
-        args.factor = 1.0
-    if args.scale == None:
+    scale: npt.NDArray[np.floating[Any]]
+    if scale_val is None:
         scale = np.array([1.0, 1.0, 1.0])
+    else:
+        scale = np.array(scale_val)
 
-    factor = factor * scale
+    factor = factor_val * scale
     # Now changing the lattice vectors
-    Modifier.scale_lattice(factor=factor, cartesian=args.cart)
+    modifier.scale_lattice(factor=factor, keep_cartesian=cart)
     # and writing
-    Modifier.write(args.output, cartesian=args.sc, xyz=args.xyz)
-    return
+    modifier.write(output_file, cartesian=sc, xyz=xyz)
 
 
-def p_scell_f(args):
+def p_scell_f(args: argparse.Namespace) -> None:
     print("Supercell creation")
-    if args.verbose:
-        print("Input:     ", args.input)
-        print("Output:    ", args.output)
-        print("b1:        ", args.b1)
-        print("b2:        ", args.b2)
-        print("b3:        ", args.b3)
-        print("xyz:       ", args.xyz)
-        print("save_cart: ", args.sc)
+    verbose: bool = args.verbose
+    input_file: str = args.input
+    output_file: str = args.output
+    b1: list[int] = args.b1
+    b2: list[int] = args.b2
+    b3: list[int] = args.b3
+    xyz: bool = args.xyz
+    sc: bool = args.sc
 
-    p = Poscar(args.input)
+    if verbose:
+        print("Input:     ", input_file)
+        print("Output:    ", output_file)
+        print("b1:        ", b1)
+        print("b2:        ", b2)
+        print("b3:        ", b3)
+        print("xyz:       ", xyz)
+        print("save_cart: ", sc)
+
+    p = Poscar(input_file)
     p.parse()
 
-    supercell = poscar_supercell(p, verbose=args.verbose)
-    supercell.supercell(size=[args.b1, args.b2, args.b3])
+    supercell = poscar_supercell(p, verbose=verbose)
+    supercell.supercell(size=np.array([b1, b2, b3]))
     supercell.write(
-        args.output,
+        output_file,
     )
 
-    supercell.write(filename=args.output, cartesian=args.sc, xyz=args.xyz)
-    return
+    supercell.write(filename=output_file, cartesian=sc, xyz=xyz)
 
 
 if __name__ == "__main__":

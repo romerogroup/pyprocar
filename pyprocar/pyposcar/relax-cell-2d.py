@@ -1,16 +1,19 @@
 #!/usr/bin/env python3
+from __future__ import annotations
 
 import argparse
 import os
 import re
 import sys
+from typing import Any
 
 import numpy as np
-import poscar
-import poscarUtils
+
+from . import poscar as poscar_mod
+from . import poscarUtils
 
 
-def get_data(old=12, max_iterations=100):
+def get_data(old: int = 12, max_iterations: int = 100) -> np.ndarray:
     """Getting the information from two sources:
     1) The 'OPT_SUM' file, if it exists it has the energies and lattice
     data of previous iterations
@@ -27,34 +30,33 @@ def get_data(old=12, max_iterations=100):
     `old`: discard history data older than this iteration
     `max_iterations`: if reached the calculation stops
     """
-
     if not os.path.isfile("OUTCAR"):
         raise RuntimeError("File OUTCAR does not exist")
     outcar = open("OUTCAR").read()
-    energy = re.findall(r"energy without entropy =\s*([-.\d]+)", outcar)
-    energy = float(energy[-1])
+    energy_matches = re.findall(r"energy without entropy =\s*([-.\d]+)", outcar)
+    energy = float(energy_matches[-1])
     print("energy, ", energy)
 
-    stress = re.findall(r"Total[-.\s\d]+\s*in kB", outcar)
-    stress = stress[-1].split()
-    stress_A = float(stress[1])
-    stress_B = float(stress[2])
-    stress_theta = float(stress[4])
+    stress_matches = re.findall(r"Total[-.\s\d]+\s*in kB", outcar)
+    stress_parts = stress_matches[-1].split()
+    stress_A = float(stress_parts[1])
+    stress_B = float(stress_parts[2])
+    stress_theta = float(stress_parts[4])
     print("stress A,", stress_A)
     print("stress B,", stress_B)
     print("stress theta,", stress_theta)
 
     # locating the parameters
-    vectors = re.findall(r"reciprocal lattice vectors[-.\d\s]*", outcar)
-    vectors = vectors[-1].split()
-    vec_a = np.array(vectors[3:6], dtype=float)
-    vec_b = np.array(vectors[9:12], dtype=float)
+    vectors_matches = re.findall(r"reciprocal lattice vectors[-.\d\s]*", outcar)
+    vectors_parts = vectors_matches[-1].split()
+    vec_a = np.array(vectors_parts[3:6], dtype=float)
+    vec_b = np.array(vectors_parts[9:12], dtype=float)
     print("2D lattice, ", vec_a, vec_b)
-    length_a = np.linalg.norm(vec_a)
-    length_b = np.linalg.norm(vec_b)
+    length_a = float(np.linalg.norm(vec_a))
+    length_b = float(np.linalg.norm(vec_b))
     print("length A, ", length_a)
     print("length B, ", length_b)
-    angle_ab = np.arccos(np.dot(vec_a, vec_b) / length_a / length_b)
+    angle_ab = float(np.arccos(np.dot(vec_a, vec_b) / length_a / length_b))
     print("angle AB", angle_ab * 180 / np.pi, "(deg)", ", ", angle_ab, " (rad)")
 
     # updating and perhaps creating a file with energies
@@ -73,17 +75,17 @@ def get_data(old=12, max_iterations=100):
     f_histo.close()
 
     # reading the full history
-    history = open("OPT_SUM").readlines()
-    print("number of history points", len(history))
-    if len(history) > max_iterations:
+    history_lines = open("OPT_SUM").readlines()
+    print("number of history points", len(history_lines))
+    if len(history_lines) > max_iterations:
         continue_loop(False)
         raise RuntimeError("Maximum number of iteration reached")
-    if len(history) > old:
-        history = history[-old:]
+    if len(history_lines) > old:
+        history_lines = history_lines[-old:]
         print("Deleting old values from history")
-    history = list(set(history))
-    history = [x.split() for x in history]
-    history = np.array(history, dtype=float)
+    history_lines = list(set(history_lines))
+    history_split = [x.split() for x in history_lines]
+    history = np.array(history_split, dtype=float)
     print("History (excluding duplicate points, unsorted)")
     print(history)
 
@@ -91,23 +93,23 @@ def get_data(old=12, max_iterations=100):
     return history
 
 
-def make_prediction_a(history, maxStep=0.01):
+def make_prediction_a(_history: np.ndarray, _maxStep: float = 0.01) -> bool:
     raise NotImplementedError
 
 
-def make_prediction_b(history, maxStep=0.01):
+def make_prediction_b(_history: np.ndarray, _maxStep: float = 0.01) -> bool:
     raise NotImplementedError
 
 
-def make_prediction_a_and_b(history, maxStep=0.01):
+def make_prediction_a_and_b(_history: np.ndarray, _maxStep: float = 0.01) -> bool:
     raise NotImplementedError
 
 
-def make_prediction_theta(history, maxStep=0.01):
+def make_prediction_theta(_history: np.ndarray, _maxStep: float = 0.01) -> bool:
     raise NotImplementedError
 
 
-def make_prediction_ab(history, tolerance=0.1, maxStep=0.01):
+def make_prediction_ab(history: np.ndarray, tolerance: float = 0.1, maxStep: float = 0.01) -> bool:
     """`history` is an array with the form:
     [[lat_a lat_b angle_ab energy stress_a stress_b stress_theta],
      [...],
@@ -132,6 +134,9 @@ def make_prediction_ab(history, tolerance=0.1, maxStep=0.01):
     param_b = history[:, 1]
     energy = history[:, 3]
 
+    new_param_a: float = 0.0
+    new_param_b: float = 0.0
+
     # looking if the convergence has been achieved
     if np.min(np.abs(stress)) <= tolerance:
         print("Convergence achieved!")
@@ -140,18 +145,19 @@ def make_prediction_ab(history, tolerance=0.1, maxStep=0.01):
     # with one data points, there is nothing to interpolate. Just
     # moving a little bit from the lowest energy point
     if len(history) == 1:
-        e = energy[0]  # just one data point
+        _e = energy[0]  # just one data point
         s = stress[0]  # just one data point
         print("Initial point, initial stress", s, "initial parameters,", param_a, param_b)
         if s < 0:  # negative stress -> decrease the unit cell
-            new_param_a = param_a[0] * (1 - maxStep)
-            new_param_b = param_b[0] * (1 - maxStep)
+            new_param_a = float(param_a[0] * (1 - maxStep))
+            new_param_b = float(param_b[0] * (1 - maxStep))
         else:
-            new_param_a = param_a[0] * (1 + maxStep)
-            new_param_b = param_b[0] * (1 + maxStep)
+            new_param_a = float(param_a[0] * (1 + maxStep))
+            new_param_b = float(param_b[0] * (1 + maxStep))
     # I will handle the cases of 2, 3 or more data points together
     elif len(history) >= 2:
-        i_min, i_max = np.argmin(energy), np.argmax(energy)
+        i_min = int(np.argmin(energy))
+        _i_max = int(np.argmax(energy))
         # The fitting of the parabola depends on how many data points
         if len(history) == 2:
             print("There are two data points...")
@@ -176,7 +182,7 @@ def make_prediction_ab(history, tolerance=0.1, maxStep=0.01):
         else:
             parabola = fit_parabola_1D_close_min(param_a, energy)
         # y = a*x^2 + b*x + c
-        a, b, c = parabola[0], parabola[1], parabola[2]
+        a, b, c = float(parabola[0]), float(parabola[1]), float(parabola[2])
         # the minimum of the parabola is
         new_param_a = -b / 2 / a
 
@@ -185,22 +191,22 @@ def make_prediction_ab(history, tolerance=0.1, maxStep=0.01):
         if a < 0:
             print("\nThe parabola is inverted!\n, falling back to a simple prediction\n")
             if stress[i_min] < 0:  # negative stress -> decrease the unit cell
-                new_param_a = param_a[i_min] * (1 - maxStep)
-                new_param_b = param_b[i_min] * (1 - maxStep)
+                new_param_a = float(param_a[i_min] * (1 - maxStep))
+                new_param_b = float(param_b[i_min] * (1 - maxStep))
             else:
-                new_param_a = param_a[i_min] * (1 + maxStep)
-                new_param_b = param_b[i_min] * (1 + maxStep)
+                new_param_a = float(param_a[i_min] * (1 + maxStep))
+                new_param_b = float(param_b[i_min] * (1 + maxStep))
 
         # if stress is negative param_a has to decrease
         if stress[i_min] < 0:
             # I will keep the smaller decrement (larger value) among the
             # predicted minimum and the maxStep
-            new_param_a = max(param_a[i_min] * (1 - maxStep), new_param_a)
+            new_param_a = float(max(param_a[i_min] * (1 - maxStep), new_param_a))
         else:
-            new_param_a = min(param_a[i_min] * (1 + maxStep), new_param_a)
+            new_param_a = float(min(param_a[i_min] * (1 + maxStep), new_param_a))
         # fitting param_b from new_param_a
-        factor = new_param_a / param_a[i_min]
-        new_param_b = param_b[i_min] * factor
+        factor = new_param_a / float(param_a[i_min])
+        new_param_b = float(param_b[i_min]) * factor
 
     print("New parameter a,", new_param_a)
     print("New parameter b,", new_param_b)
@@ -209,62 +215,70 @@ def make_prediction_ab(history, tolerance=0.1, maxStep=0.01):
     ##### Caution, the factors should be applied on the MINIMUM values,
     ##### not on the current POSCAR file
     #####
-    p = poscar.Poscar("CONTCAR")
+    p = poscar_mod.Poscar("CONTCAR")
     p.parse()
-    lat_a = np.linalg.norm(p.lat[0])
-    factor = new_param_a / lat_a
-    factor = np.array([factor, factor, 1.0])
-    print("factors to modify current POSCAR:", factor)
+    assert p.lat is not None
+    lat_a = float(np.linalg.norm(p.lat[0]))
+    factor_val = new_param_a / lat_a
+    factor_arr = np.array([factor_val, factor_val, 1.0])
+    print("factors to modify current POSCAR:", factor_arr)
     new_p = poscarUtils.poscar_modify(p)
-    new_p.scale_lattice(factor, cartesian=False)
+    new_p.scale_lattice(factor_arr, keep_cartesian=False)
     new_p.write("POSCAR-NEW")
 
     return True
 
 
-def parabola_two_points_derivative(x1, y1, dy1, x2, y2, dy2):
+def parabola_two_points_derivative(
+    x1: float | np.floating[Any],
+    y1: float | np.floating[Any],
+    dy1: float | np.floating[Any],
+    x2: float | np.floating[Any],
+    y2: float | np.floating[Any],
+    dy2: float | np.floating[Any],
+) -> np.ndarray:
     """It calculates the of a parabola passing by (x1, y1) and (x2, y2),
     and with derivatives `dy1`, `dy2`
     """
     A = np.array([[2 * (dy1 * x2 - dy2 * x1), dy1 - dy2, 0], [x1 * x1, x1, 1], [x2 * x2, x2, 1]])
     C = np.array([[0], [y1], [y2]])
-    # print('The matrix A is')
-    # print(A)
-    # print('The matrix C is')
-    # print(C)
-    X = np.dot(np.linalg.inv(A), C)
-    X.shape = 3
-    # print('the solution is,' )
-    # print(X)
+    X: np.ndarray = np.dot(np.linalg.inv(A), C).reshape(3)
     return X
 
 
-def parabola_three_points(x1, y1, x2, y2, x3, y3):
+def parabola_three_points(
+    x1: float | np.floating[Any],
+    y1: float | np.floating[Any],
+    x2: float | np.floating[Any],
+    y2: float | np.floating[Any],
+    x3: float | np.floating[Any],
+    y3: float | np.floating[Any],
+) -> np.ndarray:
     """It calculates the of a parabola passing by (x1, y1) , (x2, y2) and
     (x3, y3)
 
     """
     A = np.array([[x1 * x1, x1, 1], [x2 * x2, x2, 1], [x3 * x3, x3, 1]])
     C = np.array([[y1], [y2], [y3]])
-    X = np.dot(np.linalg.inv(A), C)
-    X.shape = 3
+    X: np.ndarray = np.dot(np.linalg.inv(A), C).reshape(3)
     return X
 
 
-def fit_parabola_1D(x, y):
-    #
+def fit_parabola_1D(x: np.ndarray, y: np.ndarray) -> np.ndarray:
     import scipy.optimize
 
-    def parabola(x, a, b, c):
-        return a * x * x + b * x + c
+    def parabola(x: np.ndarray, a: float, b: float, c: float) -> np.ndarray:
+        result: np.ndarray = a * x * x + b * x + c
+        return result
 
-    fit_params, pcov = scipy.optimize.curve_fit(parabola, x, y)
+    fit_params: np.ndarray
+    fit_params, _pcov = scipy.optimize.curve_fit(parabola, x, y)
     # print('fitting,', fit_params)
     return fit_params
 
 
-def continue_loop(value):
-    if value == True:
+def continue_loop(value: bool) -> None:
+    if value is True:
         # convergence has NOT been achieved
         open("RELAX-CONTINUE", "a").close()
     else:
@@ -274,7 +288,7 @@ def continue_loop(value):
             pass
 
 
-def fit_parabola_1D_close_min(x, y, max_data=6):
+def fit_parabola_1D_close_min(x: np.ndarray, y: np.ndarray, max_data: int = 6) -> np.ndarray:
     """It fits a parabola with all the data, locates the minimum, and then
     it keeps up to `max_data` data points, discarding those farther from
     the minimum.
@@ -288,22 +302,21 @@ def fit_parabola_1D_close_min(x, y, max_data=6):
     """
     x = np.array(x)  # just in case
     params = fit_parabola_1D(x, y)
-    a, b, c = params[0], params[1], params[2]
+    a, b, _c = float(params[0]), float(params[1]), float(params[2])
     x_min = -b / 2 / a
-    distances = np.abs(x - x_min)
+    distances_arr = np.abs(x - x_min)
 
     if len(x) <= max_data:
         return params
-    else:
-        d_cutoff = np.sort(distances)[max_data]
-        new_x = []
-        new_y = []
-        for i in range(len(x)):
-            if distances[i] <= d_cutoff:
-                new_x.append(x[i])
-                new_y.append(y[i])
-        params = fit_parabola_1D(x, y)
-        return params
+    d_cutoff = float(np.sort(distances_arr)[max_data])
+    new_x: list[float] = []
+    new_y: list[float] = []
+    for i in range(len(x)):
+        if distances_arr[i] <= d_cutoff:
+            new_x.append(float(x[i]))
+            new_y.append(float(y[i]))
+    params = fit_parabola_1D(np.array(new_x), np.array(new_y))
+    return params
 
 
 if __name__ == "__main__":
@@ -370,6 +383,7 @@ if __name__ == "__main__":
         sys.exit()
 
     history = get_data(old=args.discard_old, max_iterations=args.max_iterations)
+    prediction: bool = False
     if args.constrain == "a":
         prediction = make_prediction_a(history, args.tolerance)
     if args.constrain == "b":

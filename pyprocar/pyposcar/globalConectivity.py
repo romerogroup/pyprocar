@@ -1,7 +1,15 @@
 #!/usr/bin/env python3
-import numpy as np
+from __future__ import annotations
 
-from . import latticeUtils
+from typing import TYPE_CHECKING, Any
+
+import numpy as np
+import numpy.typing as npt
+
+from .latticeUtils import Neighbors
+
+if TYPE_CHECKING:
+    from .poscar import Poscar
 
 ###
 ### Phys. Rev. Lett. 131, 108001
@@ -9,17 +17,24 @@ from . import latticeUtils
 
 
 class globalConectivity:
+    poscar: Poscar
+    Neighbors: Neighbors
+    nn_list: list[list[int]]
+    N: int
+    Laplacian: npt.NDArray[np.float64]
+    GC: np.floating[Any]
+
     def __init__(
         self,
-        POSCAR,
-        custom_nn_dist=None,
-        filter_Neighbors=True,
-        custom_Radii=None,
-        fcc_scaling=False,
-        rdf=False,
-    ):
+        POSCAR: Poscar,
+        custom_nn_dist: dict[str, float] | None = None,
+        filter_Neighbors: bool = True,
+        custom_Radii: dict[str, float] | None = None,
+        fcc_scaling: bool = False,
+        rdf: bool = False,
+    ) -> None:
         self.poscar = POSCAR
-        self.Neighbors = latticeUtils.Neighbors(
+        self.Neighbors = Neighbors(
             self.poscar,
             custom_nn_dist=custom_nn_dist,
             customDB=custom_Radii,
@@ -29,38 +44,39 @@ class globalConectivity:
         # Re-obtaining neighbors allowing for pbc neighbors
         self.Neighbors.set_neighbors(allow_self=True)
         if filter_Neighbors:
-            self.Neighbors._filter_exclusiveSpNeighbors()
+            self.Neighbors._filter_exclusiveSpNeighbors()  # pyright: ignore[reportPrivateUsage]
 
+        assert self.Neighbors.nn_list is not None
         self.nn_list = self.Neighbors.nn_list
-        self.N = len(self.nn_list)
+        self.N = len(self.nn_list)  # pyright: ignore[reportConstantRedefinition]
         self.Laplacian = self.getLaplacian()
-        self.GC = self.getGC()
-        return
+        self.GC = self.getGC()  # pyright: ignore[reportConstantRedefinition]
 
-    def getGC(self):
-        eigenvalues, eigenvectors = np.linalg.eigh(self.Laplacian)
+    def getGC(self) -> np.floating[Any]:
+        eigenvalues_raw = np.linalg.eigvalsh(self.Laplacian)
         # Getting rid of -0 type results
-        eigenvalues = [np.abs(x) for x in eigenvalues]
+        eigenvalues = [np.abs(x) for x in eigenvalues_raw]
         for index, eigen in enumerate(eigenvalues):
             if eigen <= 10e-4:
-                eigenvalues[index] = 0
+                eigenvalues[index] = np.float64(0)
         # Getting LEL
-        LEL = 0
+        lel: np.floating[Any] = np.float64(0)
         for eigen in eigenvalues:
-            LEL += np.sqrt(eigen)
+            lel += np.sqrt(eigen)
         # Getting l_1
         sorted_eigen = sorted(eigenvalues)
         l_1 = sorted_eigen[1]
         # Getting l_e
+        l_e: np.floating[Any] = np.float64(0)
         for eigen in sorted_eigen:
             if eigen != 0:
                 l_e = eigen
                 break
-        Omega = (np.sqrt(l_1) + np.sqrt(l_e)) / LEL
+        omega: np.floating[Any] = (np.sqrt(l_1) + np.sqrt(l_e)) / lel
 
-        return Omega
+        return omega
 
-    def getLaplacian(self):
+    def getLaplacian(self) -> npt.NDArray[np.float64]:
         # Calculating L
         L = np.zeros((self.N, self.N))
         for u in range(self.N):
@@ -74,14 +90,13 @@ class globalConectivity:
                     if d_u == 0 or d_v == 0:
                         pass
                     else:
-                        for i in range(times):
+                        for _ in range(times):
                             L[u][v] += -(1.0) / (np.sqrt(d_u * d_v))
                 else:
                     continue
         return L
 
-    def _isAdjacent(self, i, j):
+    def _isAdjacent(self, i: int, j: int) -> bool:
         if j in self.nn_list[i]:
             return True
-        else:
-            return False
+        return False

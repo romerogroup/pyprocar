@@ -1,8 +1,20 @@
+from typing import cast
+
 import numpy as np
+import numpy.typing as npt
 
 
 class data3D:
-    def __init__(self, data, lattice, verbose="debug"):
+    data: npt.NDArray[np.float64]
+    verbose: bool | str
+    lattice: npt.NDArray[np.float64]
+
+    def __init__(
+        self,
+        data: npt.NDArray[np.float64],
+        lattice: npt.NDArray[np.float64],
+        verbose: bool | str = "debug",
+    ) -> None:
         """args:
 
         `data` is a 3D mesh numpy array. It is understood that their
@@ -23,7 +35,9 @@ class data3D:
             print("DEBUG: data.shape, ", self.data.shape)
         return
 
-    def _get_plane_vectors(self, axis):
+    def _get_plane_vectors(
+        self, axis: npt.NDArray[np.float64]
+    ) -> tuple[npt.NDArray[np.float64], npt.NDArray[np.float64]]:
         """This method find two vectors perpendicular to a given axis. It
         doesn't matter how axis is chosen (it does matter in the method
         that invokes it)
@@ -36,8 +50,8 @@ class data3D:
         proj_y = np.dot(y, axis)
         proj_z = np.dot(z, axis)
 
-        v1 = None
-        v2 = None
+        v1: npt.NDArray[np.float64] | None = None
+        v2: npt.NDArray[np.float64] | None = None
         # I will choose the least projected cartesian vector, and get the
         # perpendicular (to `axis`) component
         if np.abs(proj_x) <= np.abs(proj_y) and np.abs(proj_x) <= np.abs(proj_z):
@@ -46,6 +60,7 @@ class data3D:
             v1 = y - proj_y * axis
         if np.abs(proj_z) <= np.abs(proj_x) and np.abs(proj_z) <= np.abs(proj_y) and v1 is None:
             v1 = z - proj_z * axis
+        assert v1 is not None
         v1 = v1 / np.linalg.norm(v1)
 
         # the second vector is orthogonal to both, axis
@@ -59,7 +74,7 @@ class data3D:
             print(v1, v2)
         return v1, v2
 
-    def cut_plane(self, axis, value):
+    def cut_plane(self, axis: npt.NDArray[np.float64], value: float) -> None:
         """
         plot the data along the desired axis at the selected `value`.
 
@@ -75,7 +90,7 @@ class data3D:
             print("DEBUG: value,", value)
 
         # I need to vectors passing for the plane
-        v1, v2 = self._get_plane_vectors(axis)
+        v1, _v2 = self._get_plane_vectors(axis)
 
         # from these points I need to get points to interpolate. Several
         # points will be generated, and these outside of the box will be
@@ -86,7 +101,8 @@ class data3D:
         ###
         d_shape = self.data.shape
         s_max = np.max(d_shape)
-        coord_x = v1 * np.linspace(-smax, smax, d_shape * 0)
+        # numpy cast: linspace on int shape values returns float64 array, multiplied by float64 vector
+        _coord_x = cast(npt.NDArray[np.float64], v1 * np.linspace(-s_max, s_max, d_shape[0]))
 
         ###
         ### I will disregard anything related to lattices by the moment
@@ -108,10 +124,14 @@ class data3D:
         vp = vp / np.linalg.norm(vp)
         # `value` is not scaled by this transformation
 
-    def interpolate_data(self, method="nearest"):
-        pss
+    def interpolate_data(self, method: str = "nearest") -> None:  # pyright: ignore[reportUnusedParameter]
+        pass
 
-    def rot_matrix_2vec(self, axis1, axis2):
+    def rot_matrix_2vec(
+        self,
+        axis1: npt.NDArray[np.float64],
+        axis2: npt.NDArray[np.float64],
+    ) -> npt.NDArray[np.float64]:
         """
 
         It returns a rotation matrix to rotate `axis1` to `axis2`
@@ -144,7 +164,7 @@ class data3D:
 
         cT, sT = np.cos(T), np.sin(T)
 
-        R = np.array(
+        R: npt.NDArray[np.float64] = np.array(
             [
                 [cT + uxx * (1 - cT), uxy * (1 - cT) - uz * sT, uxz * (1 - cT) + uy * sT],
                 [uyx * (1 - cT) + uz * sT, cT + uyy * (1 - cT), uyz * (1 - cT) - ux * sT],

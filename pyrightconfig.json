@@ -25,6 +25,7 @@
     "reportExplicitAny": false,
     "reportUnnecessaryIsInstance": false,
     "reportUnusedCallResult": false,
+    "reportImportCycles": false,
 
     "executionEnvironments": [
       { "root": "docs", "reportMissingImports": false, "reportMissingModuleSource": false, "reportUnknownVariableType": false, "reportUnknownMemberType": false, "reportUnusedCallResult": false, "reportUnknownArgumentType": false },

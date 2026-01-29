@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 __author__ = "Logan Lang"
 __maintainer__ = "Logan Lang"
 __email__ = "lllang@mix.wvu.edu"
@@ -5,10 +7,13 @@ __date__ = "March 31, 2020"
 
 import logging
 import sys
+from typing import Any
 
 import numpy as np
+import numpy.typing as npt
 
 from pyprocar.cfg import ConfigFactory, ConfigManager, PlotType
+from pyprocar.cfg.fermi_surface_3d import FermiSurface3DConfig
 from pyprocar.core.fermisurface import FermiSurface
 from pyprocar.plotter import FermiPlotter
 from pyprocar.utils import welcome
@@ -19,23 +24,30 @@ logger = logging.getLogger(__name__)
 np.set_printoptions(threshold=sys.maxsize)
 
 
-def find_nearest(array, value):
-    array = np.asarray(array)
-    idx = (np.abs(array - value)).argmin()
+def find_nearest(array: npt.ArrayLike, value: float) -> int:
+    arr = np.asarray(array, dtype=np.float64)
+    idx: int = int(np.abs(arr - value).argmin())
     return idx
 
 
 class FermiHandler:
+    default_config: FermiSurface3DConfig
+    code: str
+    dirname: str
+    ebs_interpolation_factor: int
+    e_fermi: float
+    notification_message: str
+
     def __init__(
         self,
         code: str,
         dirname: str = "",
-        fermi: float = None,
-        ebs_interpolation_factor=1,
+        fermi: float | None = None,
+        ebs_interpolation_factor: int = 1,
         use_cache: bool = False,
         ebs_filename: str = "ebs.pkl",
         verbose: int = 1,
-    ):
+    ) -> None:
         """
         This class handles the plotting of the fermi surface. Initialize by specifying the code and directory name where the data is stored.
         Then call one of the plotting methods provided.
@@ -56,12 +68,13 @@ class FermiHandler:
         use_cache : bool, optional
             Boolean to use cached Pickle files, by default True
         """
-
         welcome()
 
         user_logger.info("_" * 100)
 
-        self.default_config = ConfigFactory.create_config(PlotType.FERMI_SURFACE_3D)
+        config = ConfigFactory.create_config(PlotType.FERMI_SURFACE_3D)
+        assert isinstance(config, FermiSurface3DConfig)
+        self.default_config = config
 
         # Store parameters for creating FermiSurface objects
         self.code = code
@@ -85,7 +98,7 @@ class FermiHandler:
         modes_txt = " , ".join(modes)
         props_txt = " , ".join(props)
         self.notification_message = f"""
-                There are additional plot options that are defined in a configuration file. 
+                There are additional plot options that are defined in a configuration file.
                 You can change these configurations by passing the keyword argument to the function
                 To print a list of plot options set print_plot_opts=True
 
@@ -93,8 +106,14 @@ class FermiHandler:
                 Here is a list of properties: {props_txt}"""
 
     def _map_mode_to_property(
-        self, mode, bands=None, atoms=None, orbitals=None, spins=None, spin_texture=False
-    ):
+        self,
+        mode: str,
+        bands: list[int] | None = None,  # pyright: ignore[reportUnusedParameter]
+        atoms: list[int] | None = None,  # pyright: ignore[reportUnusedParameter]
+        orbitals: list[int] | None = None,  # pyright: ignore[reportUnusedParameter]
+        spins: list[int] | None = None,  # pyright: ignore[reportUnusedParameter]
+        spin_texture: bool = False,
+    ) -> str | None:
         """
         Maps old mode system to new property system
 
@@ -120,25 +139,29 @@ class FermiHandler:
         """
         if mode == "plain":
             return "spin_band_index"
-        elif mode == "parametric":
+        if mode == "parametric":
             # For parametric mode, we need to compute projections
             return "projected_sum"
-        elif mode == "spin_texture":
+        if mode == "spin_texture":
             if spin_texture:
                 return "projected_sum_spin_texture"
-            else:
-                return "projected_sum"
-        elif mode == "fermi_speed" or mode == "fermi_velocity":
-            return mode
-        elif mode == "overlay":
             return "projected_sum"
-        else:
-            user_logger.warning(f"Unknown mode: {mode}. Using plain mode.")
-            return None
+        if mode == "fermi_speed" or mode == "fermi_velocity":
+            return mode
+        if mode == "overlay":
+            return "projected_sum"
+        user_logger.warning(f"Unknown mode: {mode}. Using plain mode.")
+        return None
 
     def _create_fermi_surface(
-        self, fermi=None, fermi_shift=0.0, bands=None, atoms=None, orbitals=None, spins=None
-    ):
+        self,
+        fermi: float | None = None,
+        fermi_shift: float = 0.0,
+        bands: list[int] | None = None,  # pyright: ignore[reportUnusedParameter]
+        atoms: list[int] | None = None,  # pyright: ignore[reportUnusedParameter]
+        orbitals: list[int] | None = None,  # pyright: ignore[reportUnusedParameter]
+        spins: list[int] | None = None,  # pyright: ignore[reportUnusedParameter]
+    ) -> FermiSurface:
         """
         Creates a FermiSurface object with the stored parameters
 
@@ -173,22 +196,22 @@ class FermiHandler:
 
     def plot_fermi_surface(
         self,
-        mode,
-        bands=None,
-        atoms=None,
-        orbitals=None,
-        spins=None,
-        spin_texture=False,
-        fermi_shift=0.0,
-        show=True,
-        save_2d=None,
-        save_gif=None,
-        save_mp4=None,
-        save_3d=None,
+        mode: str,
+        bands: list[int] | None = None,
+        atoms: list[int] | None = None,
+        orbitals: list[int] | None = None,
+        spins: list[int] | None = None,
+        spin_texture: bool = False,
+        fermi_shift: float = 0.0,
+        show: bool = True,
+        save_2d: str | None = None,
+        save_gif: str | None = None,
+        save_mp4: str | None = None,
+        save_3d: str | None = None,
         print_plot_opts: bool = False,
         show_colorbar: bool = False,
-        **kwargs,
-    ):
+        **kwargs: Any,
+    ) -> None:
         """A method to plot the 3d fermi surface
 
         Parameters
@@ -221,7 +244,9 @@ class FermiHandler:
             Boolean to print the plotting options
         """
         config = ConfigManager.merge_configs(self.default_config, kwargs)
+        assert isinstance(config, FermiSurface3DConfig)
         config = ConfigManager.merge_config(config, "mode", mode)
+        assert isinstance(config, FermiSurface3DConfig)
 
         user_logger.info("_" * 100)
         user_logger.info(self.notification_message)
@@ -231,26 +256,35 @@ class FermiHandler:
 
         # Create FermiSurface object
         fermi_surface = self._create_fermi_surface(
-            fermi_shift=fermi_shift, bands=bands, atoms=atoms, orbitals=orbitals, spins=spins
+            fermi_shift=fermi_shift,
+            bands=bands,
+            atoms=atoms,
+            orbitals=orbitals,
+            spins=spins,
         )
 
         if fermi_surface.n_points == 0:
             user_logger.warning(
                 "No Fermi surface found for the given parameters. Skipping plotting."
             )
-            return None
+            return
 
         # Determine and compute property based on mode
         property_name = self._map_mode_to_property(
             mode, bands, atoms, orbitals, spins, spin_texture
         )
         if property_name and mode != "plain":
-            fermi_surface.get_property(property_name, atoms=atoms, orbitals=orbitals, spins=spins)
+            fermi_surface.get_property(
+                property_name, atoms=atoms, orbitals=orbitals, spins=spins
+            )
 
         # Create plotter and add components
-        fsplt = FermiPlotter(
-            **{k: v for k, v in kwargs.items() if k in ["off_screen", "window_size", "theme"]}
-        )
+        plotter_kwargs: dict[str, Any] = {
+            k: v
+            for k, v in kwargs.items()
+            if k in ["off_screen", "window_size", "theme"]
+        }
+        fsplt = FermiPlotter(**plotter_kwargs)
 
         if config.show_brillouin_zone:
             fsplt.add_brillouin_zone(fermi_surface.brillouin_zone)
@@ -280,7 +314,7 @@ class FermiHandler:
         # Handle saving and showing
         if save_2d:
             fsplt.savefig(filename=save_2d)
-            return None
+            return
 
         if show and (save_gif is None and save_mp4 is None and save_3d is None):
             fsplt.show()
@@ -296,20 +330,20 @@ class FermiHandler:
 
     def plot_fermi_isoslider(
         self,
-        mode,
-        iso_range: float = None,
-        iso_surfaces: int = None,
-        iso_values: list[float] = None,
-        bands=None,
-        atoms=None,
-        orbitals=None,
-        spins=None,
-        spin_texture=False,
-        show=True,
-        save_2d=None,
+        mode: str,
+        iso_range: float | None = None,
+        iso_surfaces: int | None = None,
+        iso_values: list[float] | None = None,
+        bands: list[int] | None = None,
+        atoms: list[int] | None = None,
+        orbitals: list[int] | None = None,
+        spins: list[int] | None = None,
+        spin_texture: bool = False,
+        show: bool = True,
+        save_2d: str | None = None,
         print_plot_opts: bool = False,
-        **kwargs,
-    ):
+        **kwargs: Any,
+    ) -> None:
         """A method to plot the 3d fermi surface with an energy slider
 
         Parameters
@@ -340,7 +374,9 @@ class FermiHandler:
             Boolean to print the plotting options
         """
         config = ConfigManager.merge_configs(self.default_config, kwargs)
+        assert isinstance(config, FermiSurface3DConfig)
         config = ConfigManager.merge_config(config, "mode", mode)
+        assert isinstance(config, FermiSurface3DConfig)
 
         user_logger.info("_" * 100)
         user_logger.info(self.notification_message)
@@ -349,6 +385,7 @@ class FermiHandler:
         user_logger.info("_" * 100)
 
         # Determine energy values for the slider
+        energy_values: list[float] | npt.NDArray[np.floating[Any]]
         if iso_surfaces is not None and iso_range is not None:
             energy_values = np.linspace(
                 self.e_fermi - iso_range / 2, self.e_fermi + iso_range / 2, iso_surfaces
@@ -356,7 +393,9 @@ class FermiHandler:
         elif iso_values:
             energy_values = iso_values
         else:
-            raise ValueError("Either iso_surfaces and iso_range or iso_values must be provided")
+            raise ValueError(
+                "Either iso_surfaces and iso_range or iso_values must be provided"
+            )
 
         # Determine property to compute based on mode
         property_name = self._map_mode_to_property(
@@ -364,15 +403,21 @@ class FermiHandler:
         )
 
         # Create FermiSurface objects for each energy value
-        fermi_surfaces = []
+        fermi_surfaces: list[FermiSurface] = []
         for e_value in energy_values:
             fs = self._create_fermi_surface(
-                fermi=e_value, bands=bands, atoms=atoms, orbitals=orbitals, spins=spins
+                fermi=float(e_value),
+                bands=bands,
+                atoms=atoms,
+                orbitals=orbitals,
+                spins=spins,
             )
 
             # Compute property if needed
             if property_name:
-                fs.get_property(property_name, atoms=atoms, orbitals=orbitals, spins=spins)
+                fs.get_property(
+                    property_name, atoms=atoms, orbitals=orbitals, spins=spins
+                )
 
             fermi_surfaces.append(fs)
 
@@ -380,14 +425,17 @@ class FermiHandler:
             logger.debug(f"Surface has {fs.n_points} points")
 
         # Create plotter and add isoslider
-        fsplt = FermiPlotter(
-            **{k: v for k, v in kwargs.items() if k in ["off_screen", "window_size", "theme"]}
-        )
+        plotter_kwargs: dict[str, Any] = {
+            k: v
+            for k, v in kwargs.items()
+            if k in ["off_screen", "window_size", "theme"]
+        }
+        fsplt = FermiPlotter(**plotter_kwargs)
 
         add_active_vectors = spin_texture or property_name == "fermi_velocity"
         fsplt.add_isoslider(
             fermi_surfaces,
-            energy_values,
+            np.asarray(energy_values),
             add_active_vectors=add_active_vectors,
             add_surface_args={
                 "show_scalar_bar": config.show_scalar_bar and property_name is not None,
@@ -400,26 +448,26 @@ class FermiHandler:
         # Handle saving and showing
         if save_2d:
             fsplt.savefig(filename=save_2d)
-            return None
+            return
 
         if show:
             fsplt.show()
 
     def create_isovalue_gif(
         self,
-        mode,
-        iso_range: float = None,
-        iso_surfaces: int = None,
-        iso_values: list[float] = None,
-        bands=None,
-        atoms=None,
-        orbitals=None,
-        spins=None,
-        spin_texture=False,
-        save_gif=None,
+        mode: str,
+        iso_range: float | None = None,
+        iso_surfaces: int | None = None,
+        iso_values: list[float] | None = None,
+        bands: list[int] | None = None,
+        atoms: list[int] | None = None,
+        orbitals: list[int] | None = None,
+        spins: list[int] | None = None,
+        spin_texture: bool = False,
+        save_gif: str | None = None,
         print_plot_opts: bool = False,
-        **kwargs,
-    ):
+        **kwargs: Any,
+    ) -> None:
         """A method to create a GIF of fermi surfaces at different energies
 
         Parameters
@@ -448,7 +496,9 @@ class FermiHandler:
             Boolean to print the plotting options
         """
         config = ConfigManager.merge_configs(self.default_config, kwargs)
+        assert isinstance(config, FermiSurface3DConfig)
         config = ConfigManager.merge_config(config, "mode", mode)
+        assert isinstance(config, FermiSurface3DConfig)
 
         user_logger.info("_" * 100)
         user_logger.info(self.notification_message)
@@ -457,6 +507,7 @@ class FermiHandler:
         user_logger.info("_" * 100)
 
         # Determine energy values for the GIF
+        energy_values: list[float] | npt.NDArray[np.floating[Any]]
         if iso_surfaces is not None and iso_range is not None:
             energy_values = np.linspace(
                 self.e_fermi - iso_range / 2, self.e_fermi + iso_range / 2, iso_surfaces
@@ -464,7 +515,9 @@ class FermiHandler:
         elif iso_values:
             energy_values = iso_values
         else:
-            raise ValueError("Either iso_surfaces and iso_range or iso_values must be provided")
+            raise ValueError(
+                "Either iso_surfaces and iso_range or iso_values must be provided"
+            )
 
         # Determine property to compute based on mode
         property_name = self._map_mode_to_property(
@@ -472,15 +525,21 @@ class FermiHandler:
         )
 
         # Create FermiSurface objects for each energy value
-        fermi_surfaces = []
+        fermi_surfaces: list[FermiSurface] = []
         for e_value in energy_values:
             fs = self._create_fermi_surface(
-                fermi=e_value, bands=bands, atoms=atoms, orbitals=orbitals, spins=spins
+                fermi=float(e_value),
+                bands=bands,
+                atoms=atoms,
+                orbitals=orbitals,
+                spins=spins,
             )
 
             # Compute property if needed
             if property_name:
-                fs.get_property(property_name, atoms=atoms, orbitals=orbitals, spins=spins)
+                fs.get_property(
+                    property_name, atoms=atoms, orbitals=orbitals, spins=spins
+                )
 
             fermi_surfaces.append(fs)
 
@@ -488,7 +547,9 @@ class FermiHandler:
             logger.debug(f"Surface has {fs.n_points} points")
 
         if save_gif is None:
-            user_logger.warning("No filename provided for GIF. Setting default filename.")
+            user_logger.warning(
+                "No filename provided for GIF. Setting default filename."
+            )
             save_gif = "fermi_surface.gif"
 
         # Create plotter and add isovalue gif
@@ -511,22 +572,22 @@ class FermiHandler:
 
     def plot_fermi_cross_section(
         self,
-        mode,
+        mode: str,
         slice_normal: tuple[float, float, float] = (1, 0, 0),
         slice_origin: tuple[float, float, float] = (0, 0, 0),
         show_van_alphen_frequency: bool = False,
         show_cross_section_area: bool = False,
-        bands=None,
-        atoms=None,
-        orbitals=None,
-        spins=None,
-        spin_texture=False,
-        show=True,
-        save_2d=None,
-        save_2d_slice=None,
+        bands: list[int] | None = None,
+        atoms: list[int] | None = None,
+        orbitals: list[int] | None = None,
+        spins: list[int] | None = None,
+        spin_texture: bool = False,
+        show: bool = True,
+        save_2d: str | None = None,
+        save_2d_slice: str | None = None,
         print_plot_opts: bool = False,
-        **kwargs,
-    ):
+        **kwargs: Any,
+    ) -> None:
         """A method to plot fermi surface cross sections with an interactive plane slicer
 
         Parameters
@@ -557,7 +618,9 @@ class FermiHandler:
             Boolean to print the plotting options
         """
         config = ConfigManager.merge_configs(self.default_config, kwargs)
+        assert isinstance(config, FermiSurface3DConfig)
         config = ConfigManager.merge_config(config, "mode", mode)
+        assert isinstance(config, FermiSurface3DConfig)
 
         user_logger.info("_" * 100)
         user_logger.info(self.notification_message)
@@ -574,19 +637,24 @@ class FermiHandler:
             user_logger.warning(
                 "No Fermi surface found for the given parameters. Skipping plotting."
             )
-            return None
+            return
 
         # Determine and compute property based on mode
         property_name = self._map_mode_to_property(
             mode, bands, atoms, orbitals, spins, spin_texture
         )
         if property_name:
-            fermi_surface.get_property(property_name, atoms=atoms, orbitals=orbitals, spins=spins)
+            fermi_surface.get_property(
+                property_name, atoms=atoms, orbitals=orbitals, spins=spins
+            )
 
         # Create plotter and add slicer
-        fsplt = FermiPlotter(
-            **{k: v for k, v in kwargs.items() if k in ["off_screen", "window_size", "theme"]}
-        )
+        plotter_kwargs: dict[str, Any] = {
+            k: v
+            for k, v in kwargs.items()
+            if k in ["off_screen", "window_size", "theme"]
+        }
+        fsplt = FermiPlotter(**plotter_kwargs)
 
         add_active_vectors = spin_texture or property_name == "fermi_velocity"
 
@@ -617,7 +685,7 @@ class FermiHandler:
         # Handle saving and showing
         if save_2d:
             fsplt.savefig(filename=save_2d)
-            return None
+            return
 
         if show:
             fsplt.show()
@@ -627,23 +695,23 @@ class FermiHandler:
 
     def plot_fermi_cross_section_box_widget(
         self,
-        mode,
+        mode: str,
         slice_normal: tuple[float, float, float] = (1, 0, 0),
         slice_origin: tuple[float, float, float] = (0, 0, 0),
         show_cross_section_area: bool = False,
         show_van_alphen_frequency: bool = False,
-        bands=None,
-        atoms=None,
-        orbitals=None,
-        spins=None,
-        spin_texture=False,
-        show=True,
-        save_2d=None,
-        save_2d_slice=None,
+        bands: list[int] | None = None,
+        atoms: list[int] | None = None,
+        orbitals: list[int] | None = None,
+        spins: list[int] | None = None,
+        spin_texture: bool = False,
+        show: bool = True,
+        save_2d: str | None = None,
+        save_2d_slice: str | None = None,
         print_plot_opts: bool = False,
         show_colorbar: bool = True,
-        **kwargs,
-    ):
+        **kwargs: Any,
+    ) -> None:
         """A method to plot fermi surface cross sections with box and plane slicing widgets
 
         Parameters
@@ -674,7 +742,9 @@ class FermiHandler:
             Boolean to print the plotting options
         """
         config = ConfigManager.merge_configs(self.default_config, kwargs)
+        assert isinstance(config, FermiSurface3DConfig)
         config = ConfigManager.merge_config(config, "mode", mode)
+        assert isinstance(config, FermiSurface3DConfig)
 
         user_logger.info("_" * 100)
         user_logger.info(self.notification_message)
@@ -691,21 +761,28 @@ class FermiHandler:
             user_logger.warning(
                 "No Fermi surface found for the given parameters. Skipping plotting."
             )
-            return None
+            return
 
         # Determine and compute property based on mode
         property_name = self._map_mode_to_property(
             mode, bands, atoms, orbitals, spins, spin_texture
         )
         if property_name:
-            fermi_surface.get_property(property_name, atoms=atoms, orbitals=orbitals, spins=spins)
+            fermi_surface.get_property(
+                property_name, atoms=atoms, orbitals=orbitals, spins=spins
+            )
 
-        user_logger.info(f"Generated Fermi surface with {fermi_surface.n_points} points")
+        user_logger.info(
+            f"Generated Fermi surface with {fermi_surface.n_points} points"
+        )
 
         # Create plotter and add box slicer
-        fsplt = FermiPlotter(
-            **{k: v for k, v in kwargs.items() if k in ["off_screen", "window_size", "theme"]}
-        )
+        plotter_kwargs: dict[str, Any] = {
+            k: v
+            for k, v in kwargs.items()
+            if k in ["off_screen", "window_size", "theme"]
+        }
+        fsplt = FermiPlotter(**plotter_kwargs)
 
         add_active_vectors = spin_texture or property_name == "fermi_velocity"
         fsplt.add_surface(
@@ -741,7 +818,7 @@ class FermiHandler:
         if show:
             fsplt.show()
 
-    def print_default_settings(self):
+    def print_default_settings(self) -> None:
         """
         Prints all the configuration settings with their current values.
         """

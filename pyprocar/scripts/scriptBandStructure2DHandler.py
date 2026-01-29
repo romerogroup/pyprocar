@@ -5,11 +5,14 @@ __date__ = "March 31, 2020"
 
 import logging
 import sys
+from typing import cast
 
 import numpy as np
 import pyvista as pv
 
-from pyprocar.cfg import ConfigFactory, ConfigManager, PlotType
+from pyprocar.cfg import ConfigManager
+from pyprocar.cfg.band_structure_2d import Bandstructure2DConfig
+from pyprocar.cfg.base import PlotType
 from pyprocar.core import BandStructure2D
 from pyprocar.plotter import BS2DPlotter
 from pyprocar.utils import welcome
@@ -63,13 +66,13 @@ class BandStructure2DHandler:
 
         user_logger.info("_" * 100)
 
-        self.default_config = ConfigFactory.create_config(PlotType.BAND_STRUCTURE_2D)
+        self.default_config: Bandstructure2DConfig = Bandstructure2DConfig(plot_type=PlotType.BAND_STRUCTURE_2D)
 
         modes = ["plain", "parametric", "spin_texture"]
         props = ["bands_speed", "bands_velocity", "avg_inv_effective_mass"]
         modes_txt = " , ".join(modes)
         props_txt = " , ".join(props)
-        self.notification_message = f"""
+        self.notification_message: str = f"""
                 There are additional plot options that are defined in a configuration file.
                 You can change these configurations by passing the keyword argument to the function
                 To print a list of plot options set print_plot_opts=True
@@ -78,12 +81,15 @@ class BandStructure2DHandler:
                 Here is a list of properties: {props_txt}
                 """
 
-        self.code = code
-        self.dirname = dirname
-        self.fermi = fermi
-        self.fermi_shift = fermi_shift
+        self.code: str = code
+        self.dirname: str = dirname
+        self.fermi: float | None = fermi
+        self.fermi_shift: float = fermi_shift
 
         # Set up energy labels based on Fermi level
+        self.fermi_level: float | None
+        self.energy_label: str
+        self.fermi_message: str | None
         if fermi is not None:
             self.fermi_level = fermi_shift
             self.energy_label = r"E - E$_F$ (eV)"
@@ -100,9 +106,9 @@ class BandStructure2DHandler:
         self,
         mode: str,
         bands: list[int] | None = None,
-        atoms: list[int] | None = None,
-        orbitals: list[int] | None = None,
-        spins: list[int] | None = None,
+        _atoms: list[int] | None = None,
+        _orbitals: list[int] | None = None,
+        _spins: list[int] | None = None,
         spin_texture: bool = False,
         property_name: str | None = None,
         normal: tuple[float, float, float] = (0, 0, 1),
@@ -116,8 +122,8 @@ class BandStructure2DHandler:
         save_mp4: str | None = None,
         save_3d: str | None = None,
         print_plot_opts: bool = False,
-        **kwargs,
-    ):
+        **kwargs: object,
+    ) -> None:
         """Plot 2D band structure surface.
 
         Parameters
@@ -126,11 +132,11 @@ class BandStructure2DHandler:
             The plotting mode ('plain', 'parametric', 'spin_texture')
         bands : list[int] | None, optional
             List of band indices to plot, by default None (uses bands near Fermi)
-        atoms : list[int] | None, optional
+        _atoms : list[int] | None, optional
             List of atom indices for projections, by default None
-        orbitals : list[int] | None, optional
+        _orbitals : list[int] | None, optional
             List of orbital indices for projections, by default None
-        spins : list[int] | None, optional
+        _spins : list[int] | None, optional
             List of spin indices, by default None
         spin_texture : bool, optional
             Whether to plot spin texture, by default False
@@ -161,8 +167,9 @@ class BandStructure2DHandler:
         **kwargs
             Additional keyword arguments for configuration
         """
-        config = ConfigManager.merge_configs(self.default_config, kwargs)
-        config = ConfigManager.merge_config(config, "mode", mode)
+        config_base = ConfigManager.merge_configs(self.default_config, kwargs)
+        config_base = ConfigManager.merge_config(config_base, "mode", mode)
+        config = cast("Bandstructure2DConfig", config_base)
 
         user_logger.info("_" * 100)
         user_logger.info(self.notification_message)
@@ -199,7 +206,7 @@ class BandStructure2DHandler:
             plotter.add_brillouin_zone(bz)
 
         # Clip to Brillouin zone if configured
-        if config.clip_brillouin_zone and hasattr(plotter, "brillouin_zone"):
+        if config.clip_brillouin_zone and plotter.brillouin_zone is not None:
             bs2d = plotter.clip_surface(bs2d, plotter.brillouin_zone)
 
         # Add surface to plotter
@@ -237,7 +244,7 @@ class BandStructure2DHandler:
         if save_2d:
             plotter.screenshot(filename=save_2d)
             plotter.close()
-            return None
+            return
 
         if show and not (save_gif or save_mp4 or save_3d):
             plotter.show()
@@ -255,7 +262,7 @@ class BandStructure2DHandler:
 
         plotter.close()
 
-    def print_default_settings(self):
+    def print_default_settings(self) -> None:
         """
         Prints all the configuration settings with their current values.
         """

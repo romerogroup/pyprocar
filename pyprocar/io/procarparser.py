@@ -515,7 +515,7 @@ class ProcarParser:
         self.recLattice = recLattice
 
         self.log.debug("Opening file: '" + str(procar) + "'")
-        f = self.utils.OpenFile(procar)  # pyright: ignore[reportUnknownMemberType]
+        f = self.utils.OpenFile(procar)
         # Line 1: PROCAR lm decomposed
         f.readline()  # throwaway
         # Line 2: # of k-points:  816   # of bands:  52   # of ions:   8
@@ -698,7 +698,7 @@ class ProcarParser:
         iband = 0
         nkread = 0
         # with open(self.fname) as myfile:
-        f = self.utils.OpenFile(procar)  # pyright: ignore[reportUnknownMemberType]
+        f = self.utils.OpenFile(procar)
         lines = iter(f.readlines())
         last_iband = -1
         for line in lines:

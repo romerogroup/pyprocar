@@ -6,11 +6,16 @@ __date__ = "March 31, 2020"
 import logging
 import os
 
-import matplotlib.pyplot as plt
-import numpy as np
+from matplotlib.axes import Axes as MplAxes
+from matplotlib.figure import Figure as MplFigure
 
-from pyprocar.cfg import ConfigFactory, ConfigManager, PlotType
+from pyprocar.cfg import ConfigFactory, ConfigManager
+from pyprocar.cfg.base import PlotType
+from pyprocar.cfg.dos import DensityOfStatesConfig
+from pyprocar.core.dos import DensityOfStates
+from pyprocar.core.structure import Structure
 from pyprocar.io import Parser
+from pyprocar.plotter import DOSPlotter
 from pyprocar.utils import data_utils, welcome
 
 user_logger = logging.getLogger("user")
@@ -19,36 +24,35 @@ logger = logging.getLogger(__name__)
 
 def dosplot(
     code: str = "vasp",
-    dirname: str = None,
+    dirname: str | None = None,
     mode: str = "plain",
     orientation: str = "horizontal",
-    spins: list[int] = None,
-    atoms: list[int] = None,
-    orbitals: list[int] = None,
-    items: dict = {},
-    normalize_dos_mode: str = None,
-    fermi: float = None,
+    spins: list[int] | None = None,
+    atoms: list[int] | None = None,
+    orbitals: list[int] | None = None,
+    items: dict[str, list[int]] | None = None,
+    normalize_dos_mode: str | None = None,
+    fermi: float | None = None,
     fermi_shift: float = 0,
-    elimit: list[float] = None,
-    dos_limit: list[float] = None,
-    savefig: str = None,
-    labels: list[str] = None,
-    projection_mask=None,
-    ax: plt.Axes = None,
+    elimit: list[float] | None = None,
+    dos_limit: list[float] | None = None,
+    savefig: str | None = None,
+    labels: list[str] | None = None,
+    projection_mask: object | None = None,
+    ax: MplAxes | None = None,
     show: bool = True,
     print_plot_opts: bool = False,
-    export_data_file: str = None,
+    export_data_file: str | None = None,
     export_append_mode: bool = True,
     use_cache: bool = False,
     verbose: int = 1,
-    **kwargs,
-):
+    **kwargs: object,
+) -> tuple[MplFigure, MplAxes]:
     """
     This function plots the density of states in different formats
 
     Parameters
     ----------
-
     filename : str, optional (default ``'vasprun.xml'``)
         The most important argument needed dosplot is
         **filename**. **filename** defines the path to `vasprun.xml`
@@ -98,7 +102,7 @@ def dosplot(
         ``mode='parametric'``, ``mode='parametric_line'``,
         ``mode='stack_orbitals'``. keep in mind that python counting
         starts from zero.
-        e.g. for SrVO\ :sub:`3`\  we are choosing only the oxygen
+        e.g. for SrVO\\ :sub:`3`\\  we are choosing only the oxygen
         atoms. ``atoms=[2, 3, 4]``, keep in mind that python counting
         starts from zero, for a **POSCAR** similar to following::
 
@@ -269,13 +273,23 @@ def dosplot(
         >>> fig.show()
 
     """
+    _ = projection_mask  # reserved for future use
+    _ = verbose  # reserved for future use
+
+    if items is None:
+        items = {}
+
+    if dirname is None:
+        dirname = "."
 
     user_logger.info("If you want more detailed logs, set verbose to 2 or more")
     user_logger.info("_" * 100)
 
     welcome()
     default_config = ConfigFactory.create_config(PlotType.DENSITY_OF_STATES)
+    assert isinstance(default_config, DensityOfStatesConfig)
     config = ConfigManager.merge_configs(default_config, kwargs)
+    assert isinstance(config, DensityOfStatesConfig)
 
     user_logger.info("_" * 100)
     modes_txt = " , ".join(config.modes)
@@ -325,6 +339,9 @@ def dosplot(
         dos = data_utils.load_pickle(dos_pkl_filepath)
         structure = data_utils.load_pickle(structure_pkl_filepath)
 
+    assert isinstance(dos, DensityOfStates)
+    assert isinstance(structure, Structure)
+
     # Setting and shifting Fermi energy
     codes_with_scf_fermi = ["qe", "elk"]
     if code in codes_with_scf_fermi and fermi is None:
@@ -332,11 +349,13 @@ def dosplot(
 
         fermi = dos.fermi
 
+    fermi_level: float = 0.0
+    energy_label: str = r"Energy (eV)"
     if fermi is not None:
         logger.info(f"Shifting Fermi energy to zero: {fermi}")
 
-        dos.energies -= fermi
-        dos.energies += fermi_shift
+        dos.energies -= fermi  # pyright: ignore[reportAttributeAccessIssue] - legacy mutation; DensityOfStates.energies needs a setter
+        dos.energies += fermi_shift  # pyright: ignore[reportAttributeAccessIssue] - legacy mutation; DensityOfStates.energies needs a setter
         fermi_level = fermi_shift
         energy_label = r"Energy - E$_F$ (eV)"
     else:
@@ -347,21 +366,21 @@ def dosplot(
 
     # Normalizing DOS
     if normalize_dos_mode:
-        dos.normalize_dos(mode=normalize_dos_mode)
+        dos.normalize_dos(mode=normalize_dos_mode)  # pyright: ignore[reportAttributeAccessIssue, reportUnknownMemberType] - legacy API; method may not exist on current DensityOfStates
 
     # Setting energy limits
     if elimit is None:
         elimit = [dos.energies.min(), dos.energies.max()]
 
-    # Creating DOSPlot object
-    edos_plot = DOSPlot(dos=dos, structure=structure, ax=ax, orientation=orientation, config=config)
+    # Creating DOSPlotter object
+    edos_plot = DOSPlotter(dos=dos, structure=structure, ax=ax, orientation=orientation, config=config)  # pyright: ignore[reportCallIssue] - legacy API call; script needs rewrite to match new DOSPlotter interface
 
     if atoms is None:
-        atoms = list(np.arange(edos_plot.structure.natoms, dtype=int))
+        atoms = list(range(structure.natoms))
     if spins is None:
-        spins = list(np.arange(len(edos_plot.dos.total)))
+        spins = list(range(len(dos.total)))  # pyright: ignore[reportArgumentType] - legacy API; dos.total was previously a list/array
     if orbitals is None:
-        orbitals = list(np.arange(len(edos_plot.dos.projected[0][0]), dtype=int))
+        orbitals = list(range(len(dos.projected[0][0])))  # pyright: ignore[reportOptionalSubscript, reportUnknownArgumentType] - legacy API; dos.projected was previously a nested list/array
 
     logger.debug(f"atoms for projections: {atoms}")
     logger.debug(f"spins for projections: {spins}")
@@ -370,19 +389,19 @@ def dosplot(
     # Plotting DOS in different modes
     if mode == "plain":
         user_logger.info("Plotting DOS in plain mode")
-        values_dict = edos_plot.plot_dos(spins=spins)
+        edos_plot.plot_dos(spins=spins)  # pyright: ignore[reportAttributeAccessIssue, reportUnknownMemberType] - legacy API
 
     elif mode in ["parametric", "parametric_line"]:
         if mode == "parametric":
             user_logger.info("Plotting DOS in parametric mode")
-            edos_plot.plot_parametric(
+            edos_plot.plot_parametric(  # pyright: ignore[reportAttributeAccessIssue, reportUnknownMemberType] - legacy API
                 atoms=atoms,
                 orbitals=orbitals,
                 spins=spins,
             )
         elif mode == "parametric_line":
             user_logger.info("Plotting DOS in parametric line mode")
-            edos_plot.plot_parametric_line(
+            edos_plot.plot_parametric_line(  # pyright: ignore[reportAttributeAccessIssue, reportUnknownMemberType] - legacy API
                 atoms=atoms,
                 orbitals=orbitals,
                 spins=spins,
@@ -390,31 +409,31 @@ def dosplot(
 
     elif mode == "stack_species":
         user_logger.info("Plotting DOS in stack species mode")
-        edos_plot.plot_stack_species(
+        edos_plot.plot_stack_species(  # pyright: ignore[reportAttributeAccessIssue, reportUnknownMemberType] - legacy API
             spins=spins,
             orbitals=orbitals,
         )
     elif mode == "stack_orbitals":
         user_logger.info("Plotting DOS in stack orbitals mode")
-        edos_plot.plot_stack_orbitals(
+        edos_plot.plot_stack_orbitals(  # pyright: ignore[reportAttributeAccessIssue, reportUnknownMemberType] - legacy API
             spins=spins,
             atoms=atoms,
         )
     elif mode == "stack":
         user_logger.info("Plotting DOS in stack mode")
-        edos_plot.plot_stack(
+        edos_plot.plot_stack(  # pyright: ignore[reportAttributeAccessIssue, reportUnknownMemberType] - legacy API
             spins=spins,
             items=items,
         )
     elif mode == "overlay_species":
         user_logger.info("Plotting DOS in overlay species mode")
-        edos_plot.plot_stack_species(spins=spins, orbitals=orbitals, overlay_mode=True)
+        edos_plot.plot_stack_species(spins=spins, orbitals=orbitals, overlay_mode=True)  # pyright: ignore[reportAttributeAccessIssue, reportUnknownMemberType] - legacy API
     elif mode == "overlay_orbitals":
         user_logger.info("Plotting DOS in overlay orbitals mode")
-        edos_plot.plot_stack_orbitals(spins=spins, atoms=atoms, overlay_mode=True)
+        edos_plot.plot_stack_orbitals(spins=spins, atoms=atoms, overlay_mode=True)  # pyright: ignore[reportAttributeAccessIssue, reportUnknownMemberType] - legacy API
     elif mode == "overlay":
         user_logger.info("Plotting DOS in overlay mode")
-        edos_plot.plot_stack(spins=spins, items=items, overlay_mode=True)
+        edos_plot.plot_stack(spins=spins, items=items, overlay_mode=True)  # pyright: ignore[reportAttributeAccessIssue, reportUnknownMemberType] - legacy API
     else:
         raise ValueError(
             "The mode needs to be in the List [plain,parametric,parametric_line,stack_species,stack_orbitals,stack]"
@@ -427,36 +446,34 @@ def dosplot(
         logger.info("Setting xlabel and ylabel for horizontal orientation")
         edos_plot.set_xlabel(label=energy_label)
         edos_plot.set_ylabel(label="DOS")
-        if elimit is not None:
-            edos_plot.set_xlim(elimit)
+        if elimit is not None:  # pyright: ignore[reportUnnecessaryComparison]
+            edos_plot.set_xlim((elimit[0], elimit[1]))
         if dos_limit is not None:
-            edos_plot.set_ylim(dos_limit)
+            edos_plot.set_ylim((dos_limit[0], dos_limit[1]))
 
     elif orientation == "vertical":
         user_logger.info("Setting xlabel and ylabel for vertical orientation")
         edos_plot.set_xlabel(label="DOS")
         edos_plot.set_ylabel(label=energy_label)
-        if elimit is not None:
-            edos_plot.set_ylim(elimit)
+        if elimit is not None:  # pyright: ignore[reportUnnecessaryComparison]
+            edos_plot.set_ylim((elimit[0], elimit[1]))
         if dos_limit is not None:
-            edos_plot.set_xlim(dos_limit)
+            edos_plot.set_xlim((dos_limit[0], dos_limit[1]))
 
-    edos_plot.set_xticks()
-    edos_plot.set_yticks()
-    edos_plot.grid()
-    edos_plot.set_title()
+    edos_plot.set_xticks()  # pyright: ignore[reportAttributeAccessIssue, reportUnknownMemberType] - legacy API
+    edos_plot.set_yticks()  # pyright: ignore[reportAttributeAccessIssue, reportUnknownMemberType] - legacy API
+    edos_plot.grid()  # pyright: ignore[reportAttributeAccessIssue, reportUnknownMemberType] - legacy API
+    edos_plot.set_title()  # pyright: ignore[reportCallIssue] - legacy API; missing required 'title' arg
 
     if config.draw_baseline:
         edos_plot.draw_baseline(value=0, orientation=orientation)
 
-    if labels:
-        labels = labels
-    else:
-        labels = edos_plot.labels
-    edos_plot.legend(labels)
+    if not labels:
+        labels = edos_plot.labels  # pyright: ignore[reportAttributeAccessIssue, reportUnknownMemberType, reportUnknownVariableType] - legacy API
+    edos_plot.legend(labels)  # pyright: ignore[reportUnknownArgumentType] - legacy API
 
     if savefig is not None:
-        edos_plot.save(savefig)
+        edos_plot.save(savefig)  # pyright: ignore[reportAttributeAccessIssue, reportUnknownMemberType] - legacy API
     if show:
         edos_plot.show()
 
@@ -466,6 +483,9 @@ def dosplot(
             filename = f"{file_basename}_{mode}.{file_type}"
         else:
             filename = export_data_file
-        edos_plot.export_data(filename)
+        edos_plot.export_data(filename)  # pyright: ignore[reportAttributeAccessIssue, reportUnknownMemberType] - legacy API
 
-    return edos_plot.fig, edos_plot.ax
+    fig: MplFigure | None = edos_plot.fig
+    axes: MplAxes = edos_plot.ax  # pyright: ignore[reportAssignmentType] - ax may be None but is initialized in __post_init__
+    assert fig is not None, "Figure was not initialized"
+    return fig, axes

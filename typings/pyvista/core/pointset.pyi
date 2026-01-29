@@ -20,6 +20,9 @@ class _PointSet:
     length: float
 
     @property
+    def centers(self) -> npt.NDArray[np.float64]: ...
+
+    @property
     def point_data(self) -> DataSetAttributes: ...
     @property
     def cell_data(self) -> DataSetAttributes: ...
@@ -110,7 +113,9 @@ class PolyData(_PointSet):
     """PyVista PolyData class for surface meshes."""
 
     faces: npt.NDArray[np.intp]
+    lines: npt.NDArray[np.intp]
     n_faces: int
+    n_lines: int
 
     @property
     def active_scalars(self) -> npt.NDArray[np.float64] | None: ...
@@ -180,8 +185,8 @@ class PolyData(_PointSet):
     ) -> PolyData: ...
     def slice(
         self,
-        normal: str | tuple[float, float, float] = ...,
-        origin: tuple[float, float, float] | None = ...,
+        normal: str | tuple[float, float, float] | npt.NDArray[np.float64] | npt.NDArray[np.floating[Incomplete]] = ...,
+        origin: tuple[float, float, float] | npt.NDArray[np.float64] | npt.NDArray[np.floating[Incomplete]] | None = ...,
         generate_triangles: bool = ...,
         contour: bool = ...,
         progress_bar: bool = ...,
@@ -295,8 +300,8 @@ class StructuredGrid(_PointSet):
     def plot(self, **kwargs: Incomplete) -> Incomplete: ...
     def slice(
         self,
-        normal: str | tuple[float, float, float] = ...,
-        origin: tuple[float, float, float] | None = ...,
+        normal: str | tuple[float, float, float] | npt.NDArray[np.float64] | npt.NDArray[np.floating[Incomplete]] = ...,
+        origin: tuple[float, float, float] | npt.NDArray[np.float64] | npt.NDArray[np.floating[Incomplete]] | None = ...,
         generate_triangles: bool = ...,
         contour: bool = ...,
         progress_bar: bool = ...,

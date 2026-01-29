@@ -1,53 +1,62 @@
+from __future__ import annotations
+
 __author__ = "Pedram Tavadze and Logan Lang"
 __maintainer__ = "Pedram Tavadze and Logan Lang"
 __email__ = "petavazohi@mail.wvu.edu, lllang@mix.wvu.edu"
 __date__ = "March 31, 2020"
 
 import inspect
+from typing import Any
 
 import matplotlib.pyplot as plt
+import numpy as np
+from matplotlib.axes import Axes
+from matplotlib.figure import Figure
 
 from pyprocar.scripts.scriptBandsplot import bandsplot
 from pyprocar.scripts.scriptDosplot import dosplot
 from pyprocar.utils import welcome
 from pyprocar.utils.defaults import settings
 
-bands_settings = {
+_bandsplot_spec = inspect.getfullargspec(bandsplot)
+bands_settings: dict[str, Any] = {
     key: value
     for key, value in zip(
-        inspect.getfullargspec(bandsplot).args,
-        inspect.getfullargspec(bandsplot).defaults,
+        _bandsplot_spec.args,
+        _bandsplot_spec.defaults or (),
     )
 }
-dos_settings = {
+_dosplot_spec = inspect.getfullargspec(dosplot)
+dos_settings: dict[str, Any] = {
     key: value
     for key, value in zip(
-        inspect.getfullargspec(dosplot).args, inspect.getfullargspec(dosplot).defaults
+        _dosplot_spec.args,
+        _dosplot_spec.defaults or (),
     )
 }
 
 
 def bandsdosplot(
-    bands_settings: dict = bands_settings,
-    dos_settings: dict = dos_settings,
-    dos_limit: list[int] = None,
-    elimit: list[int] = None,
-    k_limit=None,
+    bands_settings: dict[str, Any] = bands_settings,
+    dos_settings: dict[str, Any] = dos_settings,
+    dos_limit: list[int] | None = None,
+    elimit: list[int] | None = None,
+    k_limit: list[float] | None = None,
     grid: bool = False,
     code: str = "vasp",
-    lobster: bool = False,
-    savefig: str = None,
-    title: str = None,
+    lobster: bool = False,  # pyright: ignore[reportUnusedParameter]
+    savefig: str | None = None,
+    title: str | None = None,
     title_fontsize: float = 16,
-    discontinuities=None,
+    discontinuities: list[int] | None = None,  # pyright: ignore[reportUnusedParameter]
     draw_fermi: bool = True,
-    plot_color_bar: bool = True,
-    repair: bool = True,
+    plot_color_bar: bool = True,  # pyright: ignore[reportUnusedParameter]
+    repair: bool = True,  # pyright: ignore[reportUnusedParameter]
     show: bool = True,
     dpi: int = 300,
-    figsize=(8, 6),
-    **kwargs,
-):
+    figsize: tuple[float, float] = (8, 6),
+    **kwargs: Any,  # pyright: ignore[reportUnusedParameter]
+) -> tuple[Figure, Axes, Axes]:
     """A function to plot the band structure and the density of states in the same plot
 
     Parameters
@@ -60,7 +69,7 @@ def bandsdosplot(
         The dos window to plot, by default None
     elimit : List[int], optional
         The energy window to plot, by default None
-    k_limit : _type_, optional
+    k_limit : list[float], optional
         The kpath points to plot, by default None
     grid : bool, optional
         Boolean to plot a grid, by default False
@@ -74,8 +83,8 @@ def bandsdosplot(
         String for the title name, by default None
     title_fontsize : float, optional
         Float for the title size, by default 16
-    discontinuities : _type_, optional
-        _description_, by default None
+    discontinuities : list[int], optional
+        Discontinuities in the band structure, by default None
     draw_fermi : bool, optional
         Boolean to plot the fermi level, by default True
     plot_color_bar : bool, optional
@@ -85,7 +94,6 @@ def bandsdosplot(
     show : bool, optional
         Boolean to show the plot, by default True
     """
-
     welcome()
 
     # inital settings
@@ -101,24 +109,26 @@ def bandsdosplot(
     # plots bandsplot and dosplot
 
     plt.close("all")
-    # fig = plt.figure(figsize=figsize, clear=True, dpi=dpi)
-
-    # fig, axes = plt.subplots(1, 2, figsize=figsize, clear=True, dpi=dpi)
 
     if dos_settings["mode"] != "plain" and bands_settings["mode"] != "plain":
         bands_settings["plot_color_bar"] = False
 
     # Make the two axes share the y-axis (energy axis)
-    fig, axes = plt.subplots(1, 2, figsize=figsize, clear=True, dpi=dpi, sharey=True)
-    ebs_plot_fig, ebs_plot_ax = bandsplot(ax=axes[0], **bands_settings)
-    edos_plot_fig, edos_plot_ax = dosplot(ax=axes[1], **dos_settings)
+    fig, axes_arr = plt.subplots(
+        1, 2, figsize=figsize, clear=True, dpi=dpi, sharey=True
+    )
+    # subplots(1, 2) returns ndarray of Axes; narrow from union type
+    assert isinstance(axes_arr, np.ndarray)
+    ax_band = axes_arr[0]
+    ax_dos_ax = axes_arr[1]
+    assert isinstance(ax_band, Axes)
+    assert isinstance(ax_dos_ax, Axes)
 
-    # # combines bandsplot and dos plot
-    # ax_ebs, ax_dos = combine_axes(
-    #     ebs_plot_fig, edos_plot_fig, fig, plot_color_bar=plot_color_bar
-    # )
-    ax_ebs = axes[0]
-    ax_dos = axes[1]
+    bandsplot(ax=ax_band, **bands_settings)
+    dosplot(ax=ax_dos_ax, **dos_settings)
+
+    ax_ebs: Axes = ax_band
+    ax_dos: Axes = ax_dos_ax
     ax_dos.set_ylabel("")
 
     # axes opitions
@@ -159,7 +169,12 @@ def bandsdosplot(
     return fig, ax_ebs, ax_dos
 
 
-def combine_axes(fig_ebs, fig_dos, fig, plot_color_bar=True):
+def combine_axes(
+    fig_ebs: Figure,
+    fig_dos: Figure,
+    fig: Figure,
+    plot_color_bar: bool = True,
+) -> tuple[Axes, Axes]:
     # Changes link of axes to old to new figure. Then adds the axes to the current figure
 
     ax_ebs = fig_ebs.axes[0]
@@ -173,7 +188,7 @@ def combine_axes(fig_ebs, fig_dos, fig, plot_color_bar=True):
     fig.axes.append(ax_dos)
     fig.add_axes(ax_dos)
 
-    ax_color_bar = None
+    ax_color_bar: Axes | None = None
     if len(fig_ebs.axes) != 1 and plot_color_bar:
         ax_color_bar = fig_ebs.axes[1]
         ax_color_bar.figure = fig
@@ -186,8 +201,8 @@ def combine_axes(fig_ebs, fig_dos, fig, plot_color_bar=True):
         fig.add_axes(ax_color_bar)
 
     # Changeing location of dos plot
-    dos_position = list(fig.axes[1].get_position().bounds)
-    ebs_position = list(fig.axes[0].get_position().bounds)
+    dos_position: list[Any] = list(fig.axes[1].get_position().bounds)  # pyright: ignore[reportAttributeAccessIssue, reportUnknownArgumentType, reportUnknownMemberType]
+    ebs_position: list[Any] = list(fig.axes[0].get_position().bounds)  # pyright: ignore[reportAttributeAccessIssue, reportUnknownArgumentType, reportUnknownMemberType]
     dos_position[0] = ebs_position[0] + ebs_position[3] + 0.025
 
     fig.axes[1].set_position(dos_position)
@@ -197,12 +212,12 @@ def combine_axes(fig_ebs, fig_dos, fig, plot_color_bar=True):
     fig.axes[1].axes.set_yticklabels([])
     fig.axes[1].sharey(fig.axes[0])
 
-    fig.axes[1].axes.get_yaxis().set_visible(False)
+    fig.axes[1].axes.get_yaxis().set_visible(False)  # pyright: ignore[reportAttributeAccessIssue, reportUnknownMemberType]
 
     # Handles existing colorbars
     if ax_color_bar is not None:
-        dos_position = list(fig.axes[1].get_position().bounds)
-        color_bar_position = list(fig.axes[2].get_position().bounds)
+        dos_position = list(fig.axes[1].get_position().bounds)  # pyright: ignore[reportAttributeAccessIssue, reportUnknownArgumentType, reportUnknownMemberType]
+        color_bar_position: list[Any] = list(fig.axes[2].get_position().bounds)  # pyright: ignore[reportAttributeAccessIssue, reportUnknownArgumentType, reportUnknownMemberType]
 
         color_bar_position[0] = dos_position[0] + dos_position[3] - 0.1
         fig.axes[2].set_position(color_bar_position)
@@ -210,7 +225,11 @@ def combine_axes(fig_ebs, fig_dos, fig, plot_color_bar=True):
     return fig.axes[0], fig.axes[1]
 
 
-def parse_kwargs(kwargs, bands_settings, dos_settings):
+def parse_kwargs(
+    kwargs: dict[str, Any],
+    bands_settings: dict[str, Any],
+    dos_settings: dict[str, Any],
+) -> tuple[dict[str, Any], dict[str, Any]]:
     for key, value in kwargs.items():
         if key == "dos_file":
             dos_settings["filename"] = value
@@ -228,13 +247,6 @@ def parse_kwargs(kwargs, bands_settings, dos_settings):
             dos_settings["plot_total"] = value
         if key == "fermi":
             bands_settings["fermi"] = value
-
-        # if key is "mask":
-        #     bands_settings["mask"] = value
-        # if key is "markersize":
-        #     bands_settings["maerkersize"] = value
-        # if key is "marker":
-        #     bands_settings["marker"] = value
 
         if key == "atoms":
             bands_settings["atoms"] = value

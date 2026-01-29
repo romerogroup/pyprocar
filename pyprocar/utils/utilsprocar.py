@@ -1,7 +1,12 @@
+from __future__ import annotations
+
 import logging
 import re
+from io import TextIOWrapper
+from typing import IO, Any
 
 import numpy as np
+import numpy.typing as npt
 
 
 class UtilsProcar:
@@ -23,7 +28,10 @@ class UtilsProcar:
 
     """
 
-    def __init__(self, loglevel=logging.WARNING):
+    log: logging.Logger
+    ch: logging.Handler
+
+    def __init__(self, loglevel: int = logging.WARNING) -> None:
         self.log = logging.getLogger("UtilsProcar")
         self.log.setLevel(loglevel)
         self.ch = logging.StreamHandler()
@@ -32,40 +40,8 @@ class UtilsProcar:
         self.log.addHandler(self.ch)
         self.log.debug("UtilsProcar()")
         self.log.debug("UtilsProcar()...done")
-        return
 
-    ###############################SCRIPTS####################################################################
-
-    # #calls ProcarRepair
-    # def scriptRepair(self,infile,outfile):
-
-    #   print "Input File    : ", infile
-    #   print "Output File   : ", outfile
-
-    #   #parsing the file
-    #   handler = UtilsProcar()
-    #   handler.ProcarRepair(infile,outfile)
-
-    # calls MergeFiles
-    # inFiles should be a list of the PROCAR files that require concatenation
-    # def scriptCat(self,inFiles,outFile,gz=False):
-    #   print   "Concatenating:"
-    #   print   "Input         : ", ', '.join(inFiles)
-    #   print   "Output        : ", outFile
-    #   if gz==True:
-    #       print "out compressed: True"
-
-    #   if gz=="True" and outFile[-3:] is not '.gz':
-    #     outFile += '.gz'
-    #     print ".gz extension appended to the outFile"
-
-    #   handler = UtilsProcar()
-    #   handler.MergeFiles(inFiles,outFile, gzipOut=gz)
-    #   return
-
-    ####################################################################################################################################################
-
-    def OpenFile(self, FileName=None):
+    def OpenFile(self, FileName: str | None = None) -> TextIOWrapper[Any]:
         """
         Tries to open a File, it has suitable values for PROCAR and can
         handle gzipped files
@@ -88,7 +64,7 @@ class UtilsProcar:
         import os
 
         self.log.debug("OpenFile()")
-        self.log.debug("Filename :" + FileName)
+        self.log.debug("Filename :" + str(FileName))
 
         if FileName is None:
             FileName = "PROCAR"
@@ -107,6 +83,7 @@ class UtilsProcar:
         if os.path.isfile(FileName):
             self.log.debug("The File does exist")
             # Checking if compressed
+            inFile: TextIOWrapper[Any]
             if FileName[-2:] == "gz":
                 self.log.info("A gzipped file found")
                 inFile = gzip.open(FileName, mode="rt")
@@ -116,10 +93,9 @@ class UtilsProcar:
             return inFile
 
         # otherwise a gzipped version may exist
-        elif os.path.isfile(FileName + ".gz"):
+        if os.path.isfile(FileName + ".gz"):
             self.log.info("File not found, however a .gz version does exist and will be used")
             inFile = gzip.open(FileName + ".gz", mode="rt")
-
         else:
             self.log.debug("File not exist, neither a gzipped version")
             print(FileName)
@@ -128,7 +104,12 @@ class UtilsProcar:
         self.log.debug("OpenFile()...done")
         return inFile
 
-    def MergeFiles(self, inFiles, outFile, gzipOut=False):
+    def MergeFiles(
+        self,
+        inFiles: list[str],
+        outFile: str,
+        gzipOut: bool = False,
+    ) -> None:
         """
         Concatenate two or more PROCAR files. This methods
         takes care of the k-indexes.
@@ -151,10 +132,10 @@ class UtilsProcar:
         self.log.debug("MergeFiles()")
         self.log.debug("infiles:  ,".join(inFiles))
 
-        inFiles = [self.OpenFile(x) for x in inFiles]
-        header = [x.readline() for x in inFiles]
+        openFiles: list[TextIOWrapper[Any]] = [self.OpenFile(x) for x in inFiles]
+        header = [x.readline() for x in openFiles]
         self.log.debug("All the input headers are: \n" + "".join(header))
-        metas = [x.readline() for x in inFiles]
+        metas = [x.readline() for x in openFiles]
         self.log.debug("All the input metalines are:\n " + "".join(metas))
         # parsing metalines
 
@@ -173,59 +154,64 @@ class UtilsProcar:
         newMeta = metas[0].replace(str(kpoints[0]), str(newKpoints), 1)
         self.log.debug("New meta line:\n" + newMeta)
 
+        outFileHandle: IO[str]
         if gzipOut:
             self.log.debug("gzipped output")
-            outFile = gzip.open(outFile, mode="wt")
+            outFileHandle = gzip.open(outFile, mode="wt")
         else:
             self.log.debug("normal output")
-            outFile = open(outFile, "w")
-        outFile.write(header[0])
-        outFile.write(newMeta)
+            outFileHandle = open(outFile, "w")
+        outFileHandle.write(header[0])
+        outFileHandle.write(newMeta)
 
         # embedded function to change old k-point indexes by the correct
         # ones. The `kreplace.k` syntax is for making the variable 'static'
-        def kreplace(matchobj):
-            # self.log.debug(print matchobj.group(0))
-            kreplace.k += 1
-            kreplace.localCounter += 1
-            return matchobj.group(0).replace(str(kreplace.localCounter), str(kreplace.k))
+        k_counter = 0
+        local_counter = 0
 
-        kreplace.k = 0
-        down = []  # to handle spin-down (if found)
+        def kreplace(matchobj: re.Match[str]) -> str:
+            nonlocal k_counter, local_counter
+            # self.log.debug(print matchobj.group(0))
+            k_counter += 1
+            local_counter += 1
+            return matchobj.group(0).replace(str(local_counter), str(k_counter))
+
+        down: list[str] = []  # to handle spin-down (if found)
         self.log.debug("Going to replace K-points indexes")
-        for inFile in inFiles:
+        for inFile in openFiles:
             lines = inFile.read()
             # looking for an extra metada line, if found the file is
             # spin-polarized
-            p = re.compile(r"#[\s\w]+k-points:[\s\d]+#[\s\w]+bands:[\s\d]+#[\w\s]+ions:\s*\d+\s*")
-            lines = p.split(lines)
-            up = lines[0]
-            if len(lines) == 2:
-                down.append(lines[1])
+            p = re.compile(
+                r"#[\s\w]+k-points:[\s\d]+#[\s\w]+bands:[\s\d]+#[\w\s]+ions:\s*\d+\s*"
+            )
+            parts = p.split(lines)
+            up = parts[0]
+            if len(parts) == 2:
+                down.append(parts[1])
                 self.log.info("Spin-polarized PROCAR!")
             # closing inFile
             inFile.close()
-            kreplace.localCounter = 0
-            up = re.sub("(\s+k-point\s*\d+\s*:)", kreplace, up)
-            outFile.write(up)
+            local_counter = 0
+            up = re.sub(r"(\s+k-point\s*\d+\s*:)", kreplace, up)
+            outFileHandle.write(up)
 
         # handling the spin-down channel, if present
         if down:
             self.log.debug("writing spin down metadata")
-            outFile.write("\n")
-            outFile.write(newMeta)
-        kreplace.k = 0
+            outFileHandle.write("\n")
+            outFileHandle.write(newMeta)
+        k_counter = 0
         for group in down:
-            kreplace.localCounter = 0
-            group = re.sub("(\s+k-point\s*\d+\s*:)", kreplace, group)
-            outFile.write(group)
+            local_counter = 0
+            group = re.sub(r"(\s+k-point\s*\d+\s*:)", kreplace, group)
+            outFileHandle.write(group)
 
         self.log.debug("Closing output file")
-        outFile.close()
+        outFileHandle.close()
         self.log.debug("MergeFiles()...done")
-        return
 
-    def FermiOutcar(self, filename):
+    def FermiOutcar(self, filename: str) -> float:
         """Just finds all E-fermi fields in the outcar file and keeps the
         last one (if more than one found).
 
@@ -242,7 +228,7 @@ class UtilsProcar:
         self.log.debug("FermiOutcar(): ...Done")
         return float(match)
 
-    def RecLatOutcar(self, filename):
+    def RecLatOutcar(self, filename: str) -> npt.NDArray[np.float64]:
         """Finds and return the reciprocal lattice vectors, if more than
         one set present, it return just the last one.
 
@@ -255,18 +241,18 @@ class UtilsProcar:
 
         outcar = open(filename).read()
         # just keeping the last component
-        recLat = re.findall(r"reciprocal\s*lattice\s*vectors\s*([-.\s\d]*)", outcar)[-1]
-        self.log.debug("the match is : " + recLat)
-        recLat = recLat.split()
-        recLat = np.array(recLat, dtype=float)
+        recLatStr = re.findall(r"reciprocal\s*lattice\s*vectors\s*([-.\s\d]*)", outcar)[-1]
+        self.log.debug("the match is : " + recLatStr)
+        recLatFields = recLatStr.split()
+        recLat = np.array(recLatFields, dtype=float)
         # up to now I have, both direct and rec. lattices (3+3=6 columns)
-        recLat.shape = (3, 6)
+        recLat = recLat.reshape(3, 6)
         recLat = recLat[:, 3:]
         self.log.info("Reciprocal Lattice found :\n" + str(recLat))
         self.log.debug("RecLatOutcar(): ...Done")
         return recLat
 
-    def ProcarRepair(self, infilename, outfilename):
+    def ProcarRepair(self, infilename: str, outfilename: str) -> None:
         """It Tries to repair some stupid problems due the stupid fixed
         format of the stupid fortran.
 
@@ -297,4 +283,3 @@ class UtilsProcar:
         outfile.close()
 
         self.log.debug("ProcarRepair(): ...Done")
-        return

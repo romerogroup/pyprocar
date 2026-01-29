@@ -15,6 +15,7 @@ from pyvista.core.grid import UnstructuredGrid as UnstructuredGrid
 from pyvista.core.pointset import PointSet as PointSet
 from pyvista.core.pointset import PolyData as PolyData
 from pyvista.core.pointset import StructuredGrid as StructuredGrid
+from pyvista.plotting.plotter import ColorLike as ColorLike
 from pyvista.plotting.plotter import Plotter as Plotter
 
 class MultiBlock:
@@ -46,9 +47,19 @@ class _GlobalTheme:
 
 global_theme: _GlobalTheme
 
+def Plane(
+    center: tuple[float, float, float] = ...,
+    direction: tuple[float, float, float] = ...,
+    i_size: float = ...,
+    j_size: float = ...,
+    i_resolution: int = ...,
+    j_resolution: int = ...,
+) -> PolyData: ...
+
 __all__ = [
     "ImageData",
     "MultiBlock",
+    "Plane",
     "Plotter",
     "PointSet",
     "PolyData",

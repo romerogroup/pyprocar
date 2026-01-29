@@ -13,7 +13,7 @@ import numpy.typing as npt
 from matplotlib.axes import Axes
 from matplotlib.collections import LineCollection
 from matplotlib.colors import Colormap
-from matplotlib.colors import colorConverter  # type: ignore[attr-defined]
+from matplotlib.colors import colorConverter
 
 # Xticks type: [list[str] labels, list[int] positions]
 XTicksType = list[list[str] | list[int]]
@@ -40,8 +40,7 @@ def plot_band_weight(
     del output  # unused parameter
     a: Axes
     if axis is None:
-        _, ax = plt.subplots()
-        a = cast(Axes, ax)
+        _, a = plt.subplots()
     else:
         a = axis
     ekslist_arr: npt.NDArray[np.float64]

@@ -133,9 +133,9 @@ class Bandstructure2DConfig(BaseConfig):
     -----------------
     show_grid: bool, optional (default True)
         Whether to show grid lines.
-    grid_xtitle: str, optional (default 'k$_{x}$ ($\AA^{-1}$)')
+    grid_xtitle: str, optional (default 'k$_{x}$ ($\\AA^{-1}$)')
         X-axis grid title.
-    grid_ytitle: str, optional (default 'k$_{y}$ ($\AA^{-1}$)')
+    grid_ytitle: str, optional (default 'k$_{y}$ ($\\AA^{-1}$)')
         Y-axis grid title.
     grid_ztitle: str, optional (default 'Energy (eV)')
         Z-axis grid title.
@@ -205,7 +205,7 @@ class Bandstructure2DConfig(BaseConfig):
     # Basic Plot Settings
     background_color: str = "white"
     plotter_offscreen: bool = False
-    plotter_camera_pos: list[int] = None
+    plotter_camera_pos: list[int] | None = None
 
     # Surface Appearance
     surface_cmap: str = "jet"
@@ -245,7 +245,7 @@ class Bandstructure2DConfig(BaseConfig):
 
     # Scalar Bar Configuration
     show_scalar_bar: bool = True
-    scalar_bar_config: dict = field(
+    scalar_bar_config: dict[str, object] = field(
         default_factory=lambda: {
             "italic": False,
             "bold": False,
@@ -266,8 +266,8 @@ class Bandstructure2DConfig(BaseConfig):
 
     # Grid Configuration
     show_grid: bool = True
-    grid_xtitle: str = "k$_{x}$ ($\AA^{-1}$)"
-    grid_ytitle: str = "k$_{y}$ ($\AA^{-1}$)"
+    grid_xtitle: str = r"k$_{x}$ ($\AA^{-1}$)"
+    grid_ytitle: str = r"k$_{y}$ ($\AA^{-1}$)"
     grid_ztitle: str = "Energy (eV)"
     grid_font_size: int = 10
 
@@ -280,7 +280,7 @@ class Bandstructure2DConfig(BaseConfig):
     fermi_text_position: list[float] = field(default_factory=lambda: [0, 2, 0])
 
     # Animation Configuration
-    save_gif_config: dict = field(
+    save_gif_config: dict[str, object] = field(
         default_factory=lambda: {
             "generate_orbital_path_kwargs": {"n_points": 36},
             "open_gif_kwargs": {},
@@ -288,7 +288,7 @@ class Bandstructure2DConfig(BaseConfig):
         }
     )
 
-    save_mp4_config: dict = field(
+    save_mp4_config: dict[str, object] = field(
         default_factory=lambda: {
             "generate_orbital_path_kwargs": {"n_points": 36},
             "open_movie_kwargs": {},
@@ -296,7 +296,7 @@ class Bandstructure2DConfig(BaseConfig):
         }
     )
 
-    save_mesh_config: dict = field(
+    save_mesh_config: dict[str, object] = field(
         default_factory=lambda: {
             "save_meshio_kwargs": {},
         }
@@ -311,11 +311,7 @@ class Bandstructure2DConfig(BaseConfig):
     cross_section_slice_linewidth: float = 5.0
     cross_section_slice_show_area: bool = False
 
-    def __post_init__(self):
-        """This method is immediately called after the object is initialized.
-        It is useful to validate the data and set default values.
-        """
-        self.plot_type = PlotType.BAND_STRUCTURE_2D
+    plot_type: PlotType = PlotType.BAND_STRUCTURE_2D
 
     def as_dict(self):
         """

@@ -227,11 +227,7 @@ class DensityOfStatesConfig(BaseConfig):
     major_y_tick_params: dict[str, Any] = field(default_factory=lambda: {})
     minor_y_tick_params: dict[str, Any] = field(default_factory=lambda: {})
 
-    def __post_init__(self):
-        """This method is immediately called after the object is initialized.
-        It is useful to validate the data and set default values.
-        """
-        self.plot_type = PlotType.DENSITY_OF_STATES
+    plot_type: PlotType = PlotType.DENSITY_OF_STATES
 
     def as_dict(self):
         """

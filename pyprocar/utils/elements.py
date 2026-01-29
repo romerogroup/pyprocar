@@ -241,11 +241,9 @@ def atomic_mass(element: str | int) -> float | None:
     """
     if isinstance(element, str):
         return atomic_masses.get(element)
-    elif isinstance(element, int):
-        symbol = elements_reversed.get(element)
-        if symbol is not None:
-            return atomic_masses.get(symbol)
-        return None
+    symbol = elements_reversed.get(element)
+    if symbol is not None:
+        return atomic_masses.get(symbol)
     return None
 
 

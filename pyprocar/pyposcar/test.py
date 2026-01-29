@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-import outcarParser
+from . import outcarParser
 
 # plotbands.plot(orbitals = ["s","p"])
 

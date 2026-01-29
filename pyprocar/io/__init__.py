@@ -86,9 +86,9 @@ def get_parser(
 ) -> ParserType:
     """Handles which DFT parser to use."""
     if code in CodeParser.as_list():
-        return CodeParser[code].value(dirpath=dirpath, **kwargs)  # type: ignore[return-value]
+        return CodeParser[code].value(dirpath=dirpath, **kwargs)
     elif custom_parser is not None:
-        return custom_parser(dirpath=dirpath, **kwargs)  # type: ignore[return-value]  # pyright: ignore[reportReturnType]
+        return custom_parser(dirpath=dirpath, **kwargs)  # pyright: ignore[reportReturnType]
     else:
         msg = f"Invalid code: {code}. Valid codes are: \n"
         for c in CodeParser.as_list():

@@ -4,26 +4,28 @@ from pyprocar.io import Parser
 
 
 def bandgap(
-    procar: str = None,
-    dirname: str = None,
-    outcar: str = None,
+    _procar: str | None = None,
+    dirname: str | None = None,
+    _outcar: str | None = None,
     code: str = "vasp",
-    fermi: float = None,
-    repair: bool = True,
-):
+    fermi: float | None = None,
+    _repair: bool = True,
+) -> float | None:
     """A function to find the band gap
 
     Parameters
     ----------
-    procar : str, optional
+    _procar : str, optional
         The PROCAR filename, by default None
-    outcar : str, optional
+    dirname : str, optional
+        The directory path, by default None
+    _outcar : str, optional
         The OUTCAR filename, by default None
     code : str, optional
         The code name, by default "vasp"
     fermi : float, optional
         The fermi energy, by default None
-    repair : bool, optional
+    _repair : bool, optional
         Boolean to repair the PROCAR file, by default True
 
     Returns
@@ -31,11 +33,12 @@ def bandgap(
     float
         Returns the bandgap energy
     """
+    bandGap: float | None = None
 
-    bandGap = None
-
-    parser = Parser(code=code, dirpath=dirname)
+    parser = Parser(code=code, dirpath=dirname if dirname is not None else ".")
     ebs = parser.ebs
+    if ebs is None:
+        return None
 
     if fermi is None:
         fermi = ebs.fermi
