@@ -278,7 +278,9 @@ def fermi3D(procar, outcar, bands=-1, scale=1, mode="plain", st=False, **kwargs)
             import plotly.figure_factory as ff
             import plotly.graph_objs as go
             
-            cmap = mpl.cm.get_cmap(cmap)
+            import matplotlib as mpl
+
+            cmap = mpl.colormaps.get_cmap(cmap)
             figs = []
 
         except:

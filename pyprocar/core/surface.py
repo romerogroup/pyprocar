@@ -8,6 +8,7 @@ from shutil import which
 import pyvista
 # import trimesh
 import numpy as np
+import matplotlib
 from matplotlib import cm
 from matplotlib import colors as mpcolors
 
@@ -233,7 +234,7 @@ class Surface(pyvista.PolyData):
         if vmax is None:
             vmax = max(self.scalars)
         norm = mpcolors.Normalize(vmin=vmin, vmax=vmax)
-        cmap = cm.get_cmap(cmap)
+        cmap = matplotlib.colormaps.get_cmap(cmap)
 
         colors = np.array([cmap(norm(x)) for x in self.scalars]).reshape(-1, 4)
         self.face_colors = colors

@@ -42,6 +42,11 @@ def bandgap(
 
     bands = np.array(ebs.bands)
     subBands = np.subtract(bands, fermi)
+    # Bands are expected with shape (nkpoints, nbands, nspins). The gap is
+    # evaluated over all spin channels: VBM is the highest occupied state and
+    # CBM the lowest unoccupied state among all spins.
+    if subBands.ndim == 2:
+        subBands = subBands[..., np.newaxis]
 
     negArr = subBands[subBands < 0]
     posArr = subBands[subBands > 0]
@@ -49,9 +54,20 @@ def bandgap(
     negVal = np.amax(negArr)
     posVal = np.amin(posArr)
 
-    idx = np.where(subBands == negVal)[1][0]
+    # The system is metallic if, in any spin channel, the band holding the
+    # highest occupied state of that channel crosses the Fermi level.
+    is_metal = False
+    for ispin in range(subBands.shape[-1]):
+        spin_bands = subBands[:, :, ispin]
+        spin_neg = spin_bands[spin_bands < 0]
+        if spin_neg.size == 0:
+            continue
+        idx = np.where(spin_bands == np.amax(spin_neg))[1][0]
+        if not (np.all(spin_bands[:, idx] >= 0) or np.all(spin_bands[:, idx] <= 0)):
+            is_metal = True
+            break
 
-    if all(i >= 0 for i in subBands[:, idx]) or all(i <= 0 for i in subBands[:, idx]):
+    if not is_metal:
         possibleGap = posVal - negVal
         if bandGap is None:
             bandGap = possibleGap
@@ -59,6 +75,8 @@ def bandgap(
             bandGap = possibleGap
     else:
         bandGap = 0
+
+    bandGap = float(bandGap)
 
     print("Band Gap = %s eV " % str(bandGap))
 

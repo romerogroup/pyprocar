@@ -383,8 +383,13 @@ def fermi2D(
     user_logger.info(f"Initial projected shape: {ebs.projected.shape}")
 
     kpoints = kpoints[i_kpoints_near_z_0, :][0]
-    ebs.bands = ebs.bands[i_kpoints_near_z_0, :][0]
-    ebs.projected = ebs.projected[i_kpoints_near_z_0, :][0]
+    # Slice every per-kpoint array (kpoints, weights, bands, projected,
+    # projected_phase) so that ebs.nkpoints stays consistent with the data
+    # used downstream (e.g. in ebs.ebs_sum).
+    for prop in ebs.initial_properties:
+        original_value = getattr(ebs, prop)
+        if original_value is not None:
+            setattr(ebs, prop, original_value[i_kpoints_near_z_0, ...][0])
 
     user_logger.warning(
         f"Make sure the kmesh has the correct number of kz points"

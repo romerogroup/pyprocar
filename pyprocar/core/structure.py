@@ -66,14 +66,25 @@ class Structure:
             self.fractional_coordinates = None
         self.atoms = np.array(atoms)
         self.lattice = np.array(lattice)
-    
-        if self.atoms.shape[0] == 0:
+
+        # Partial structures are allowed (e.g. lattice-only structures built
+        # in Structure.transform), so each field is validated only when given.
+        if atoms is None and self.fractional_coordinates is None and lattice is None:
+            raise ValueError(
+                "At least one of atoms, fractional_coordinates, "
+                "cartesian_coordinates or lattice must be provided"
+            )
+        if atoms is not None and self.atoms.size == 0:
             raise ValueError("atoms must be a non-empty list")
-        if self.fractional_coordinates.shape[0] == 0:
+        if self.fractional_coordinates is not None and self.fractional_coordinates.size == 0:
             raise ValueError("fractional_coordinates must be a non-empty list")
-        if self.lattice.shape[0] == 0:
+        if lattice is not None and self.lattice.size == 0:
             raise ValueError("lattice must be a non-empty list")
-        if self.atoms.shape[0] != self.fractional_coordinates.shape[0]:
+        if (
+            atoms is not None
+            and self.fractional_coordinates is not None
+            and self.atoms.shape[0] != self.fractional_coordinates.shape[0]
+        ):
             raise ValueError("atoms and fractional_coordinates must have the same length")
 
         self._rotations = rotations

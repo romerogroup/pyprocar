@@ -648,7 +648,7 @@ class DOSPlot:
     def _setup_colorbar(self, dos_projected, dos_total_projected):
 
         vmin, vmax = self._get_color_limits(dos_projected, dos_total_projected)
-        cmap = mpl.cm.get_cmap(self.config.cmap)
+        cmap = mpl.colormaps.get_cmap(self.config.cmap)
 
         if self.config.plot_bar:
             norm = mpl.colors.Normalize(vmin=vmin, vmax=vmax)
@@ -771,7 +771,7 @@ class DOSPlot:
         return energies, dos_total, final_dos_projected
 
     def _get_bar_color(self, values):
-        cmap = mpl.cm.get_cmap(self.config.cmap)
+        cmap = mpl.colormaps.get_cmap(self.config.cmap)
         return [cmap(value) for value in values]
 
     def _set_data_to_orientation(self, energies, dos_total):

@@ -6,6 +6,7 @@ from typing import List
 import numpy as np
 import pyvista as pv
 import vtk
+import matplotlib
 from matplotlib import cm
 from matplotlib import colors as mpcolors
 from PIL import Image
@@ -264,6 +265,13 @@ class FermiDataHandler:
                 fermi_surface = surface
             else:
                 fermi_surface.merge(surface, merge_points=False, inplace=True)
+
+        if fermi_surface is None:
+            raise ValueError(
+                "No Fermi surface found: no bands of the selected spin(s) cross the "
+                "isovalue (Fermi energy + fermi_shift). Try another spin channel, "
+                "a different fermi_shift, or check the Fermi energy."
+            )
 
         fermi_surface.point_data["spin_index"] = np.array(spins_index)
         return fermi_surface
@@ -876,7 +884,7 @@ class FermiVisualizer:
         unique_band_index = np.unique(fermi_surface.point_data["band_index"])
         nsurface = len(unique_band_index)
         norm = mpcolors.Normalize(vmin=0, vmax=1)
-        cmap = cm.get_cmap(self.config.surface_cmap)
+        cmap = matplotlib.colormaps.get_cmap(self.config.surface_cmap)
         solid_color_surface = np.arange(nsurface) / nsurface
         band_colors = np.array([cmap(norm(x)) for x in solid_color_surface[:]]).reshape(
             -1, 4

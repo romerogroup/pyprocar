@@ -501,9 +501,21 @@ class Kpoints(collections.abc.Mapping):
                 self.mode = "line"
             if self.mode == "gamma" or self.mode == "monkhorst-pack":
                 kgrid = rf.readline()
-                self.kgrid = [int(x) for x in kgrid.split()]
-                shift = rf.readline()
-                self.kshift = [int(float(x)) for x in shift.split()]
+                kgrid = kgrid[: kgrid.find("!")] if "!" in kgrid else kgrid
+                kgrid_values = kgrid.split()
+                if len(kgrid_values) < 3:
+                    raise ValueError(
+                        f"Could not parse the k-point grid line in {self.filepath}: "
+                        f"expected 3 integers, got '{kgrid.strip()}'"
+                    )
+                # Some KPOINTS files contain the grid and the shift on the
+                # same line (e.g. "60 60 1 0 0 0").
+                self.kgrid = [int(x) for x in kgrid_values[:3]]
+                if len(kgrid_values) >= 6:
+                    self.kshift = [int(float(x)) for x in kgrid_values[3:6]]
+                else:
+                    shift = rf.readline()
+                    self.kshift = [int(float(x)) for x in shift.split()]
 
             elif self.mode == "line":
                 if rf.readline()[0].lower() == "c":

@@ -9,6 +9,7 @@ Created on Tue Aug 18 11:14:17 2020
 import numpy as np
 import pyvista
 from matplotlib import colors as mpcolors
+import matplotlib
 from matplotlib import cm
 from ..core import boolean_add
 from ..core import FermiSurface3D
@@ -148,7 +149,7 @@ def spin_asymmetry(procar='PROCAR',
         
     nsurface = len(surfaces)
     norm = mpcolors.Normalize(vmin=vmin, vmax=vmax)
-    cmap = cm.get_cmap(cmap)
+    cmap = matplotlib.colormaps.get_cmap(cmap)
     scalars = np.arange(nsurface+1)/nsurface
     if colors is None:
         colors = np.array([cmap(norm(x)) for x in (scalars)]).reshape(-1,4)

@@ -382,3 +382,33 @@ class TestStructure:
         assert struct.volume > 0
         assert len(struct.masses) == 1
         assert struct.density > 0
+
+
+def test_structure_lattice_only_initialization():
+    """Regression (07e8b057): a lattice-only Structure must be constructible."""
+    struct = Structure(lattice=np.eye(3))
+
+    assert np.allclose(struct.lattice, np.eye(3))
+    assert struct.fractional_coordinates is None
+    assert struct.cartesian_coordinates is None
+
+
+def test_structure_transform_supercell_regression():
+    """Regression (07e8b057): Structure.transform builds a lattice-only
+    temporary Structure; this used to raise IndexError and broke pyprocar.unfold."""
+    struct = Structure(
+        atoms=["H"], fractional_coordinates=[[0, 0, 0]], lattice=np.eye(3)
+    )
+
+    new_struct = struct.transform(np.diag([2, 2, 2]))
+
+    assert new_struct.natoms == 8
+    assert np.allclose(new_struct.lattice, 2 * np.eye(3))
+
+
+def test_structure_mismatched_atoms_and_coordinates():
+    """Validation still rejects atoms/coordinates of different lengths."""
+    with pytest.raises(ValueError):
+        Structure(
+            atoms=["H", "H"], fractional_coordinates=[[0, 0, 0]], lattice=np.eye(3)
+        )

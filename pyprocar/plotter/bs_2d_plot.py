@@ -7,6 +7,7 @@ from typing import List, Tuple
 import numpy as np
 import pyvista as pv
 import yaml
+import matplotlib
 from matplotlib import cm
 from matplotlib import colors as mpcolors
 from PIL import Image
@@ -657,7 +658,7 @@ class BandStructure2DVisualizer:
         unique_band_index = np.unique(fermi_surface.point_data["band_index"])
         nsurface = len(unique_band_index)
         norm = mpcolors.Normalize(vmin=0, vmax=1)
-        cmap = cm.get_cmap(self.config.surface_cmap)
+        cmap = matplotlib.colormaps.get_cmap(self.config.surface_cmap)
         solid_color_surface = np.arange(nsurface) / nsurface
         band_colors = np.array([cmap(norm(x)) for x in solid_color_surface[:]]).reshape(
             -1, 4

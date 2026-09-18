@@ -321,7 +321,7 @@ class FermiSurface:
             Array of RGBA colors with shape (n_bands, 4).
         """
         n_bands = bands.shape[0]
-        cmap = cm.get_cmap(cmap)
+        cmap = mpl.colormaps.get_cmap(cmap)
         norm = mpcolors.Normalize(0, 1)
         factor = 0.25 if i_spin == 1 else 0
         
@@ -487,10 +487,17 @@ class FermiSurface:
         if len(scalars) > 0:
             vmin = clim[0]
             vmax = clim[1]
-            if vmin is None and vmax is None:
-                for i_segment, segment_scalars in enumerate(scalars):
-                    vmin = min(vmin, segment_scalars.min())
-                    vmax = max(vmax, segment_scalars.max())
+            if vmin is None or vmax is None:
+                non_empty_scalars = [
+                    np.asarray(segment_scalars)
+                    for segment_scalars in scalars
+                    if np.size(segment_scalars) > 0
+                ]
+                if len(non_empty_scalars) > 0:
+                    if vmin is None:
+                        vmin = min(segment_scalars.min() for segment_scalars in non_empty_scalars)
+                    if vmax is None:
+                        vmax = max(segment_scalars.max() for segment_scalars in non_empty_scalars)
                 clim = (vmin, vmax)
                 
         if not hasattr(self, "norm") or not hasattr(self, "clim") or not hasattr(self, "cmap"):
@@ -963,6 +970,7 @@ class FermiSurface:
                       label:str = "",
                       n_ticks:int = 5,
                       cmap:str = "plasma", 
+                      norm:mpcolors.Normalize = None,
                       clim:tuple = (None, None),
                       colorbar_kwargs:dict = None):
         """Add a colorbar to the plot.
@@ -982,6 +990,7 @@ class FermiSurface:
         colorbar_kwargs : dict, optional
             Additional kwargs for matplotlib colorbar function, by default None.
         """
+        colorbar_kwargs = {} if colorbar_kwargs is None else colorbar_kwargs
         self.colorbar = self.fig.colorbar(
                         self.cm,
                         ax=self.ax, 

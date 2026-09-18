@@ -52,7 +52,8 @@ dependencies = [
     "dill",
     "variconfig",
     "huggingface_hub[hf_transfer,cli]",
-    "pyvista[jupyter]"
+    "pyvista[jupyter]",
+    "meshio"
 ]
 
 [project.optional-dependencies]
