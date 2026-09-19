@@ -485,20 +485,7 @@ class FermiSurface:
         lines = contour_data["lines"]
         scalars = contour_data["scalars"]
         if len(scalars) > 0:
-            vmin = clim[0]
-            vmax = clim[1]
-            if vmin is None or vmax is None:
-                non_empty_scalars = [
-                    np.asarray(segment_scalars)
-                    for segment_scalars in scalars
-                    if np.size(segment_scalars) > 0
-                ]
-                if len(non_empty_scalars) > 0:
-                    if vmin is None:
-                        vmin = min(segment_scalars.min() for segment_scalars in non_empty_scalars)
-                    if vmax is None:
-                        vmax = max(segment_scalars.max() for segment_scalars in non_empty_scalars)
-                clim = (vmin, vmax)
+            clim = self._resolve_clim_from_scalars(scalars, clim)
                 
         if not hasattr(self, "norm") or not hasattr(self, "clim") or not hasattr(self, "cmap"):
             self.set_scalar_mappable(norm=norm, clim=clim, cmap=cmap)
@@ -562,6 +549,13 @@ class FermiSurface:
             List of matplotlib LineCollection handles.
         """
         plot_contour_line_segments_kwargs = {}
+        
+        # When clim is not fully given, use the range of the projection data so
+        # that the norm, the line colors and the colorbar all share it.
+        all_scalars = []
+        for contour_data in bands_spin_contour_data.values():
+            all_scalars.extend(contour_data.get("scalars", []))
+        clim = self._resolve_clim_from_scalars(all_scalars, clim)
         
         if not hasattr(self, "norm") or not hasattr(self, "clim") or not hasattr(self, "cmap"):
             self.set_scalar_mappable(norm=norm, clim=clim, cmap=cmap)
@@ -997,6 +991,42 @@ class FermiSurface:
                         label=label,
                         **colorbar_kwargs)
         
+    @staticmethod
+    def _resolve_clim_from_scalars(scalars, clim:tuple = (None, None)):
+        """Fill the None entries of clim with the min/max of the given scalars.
+
+        Parameters
+        ----------
+        scalars : list of array-like
+            Scalar arrays (e.g. one per contour segment).
+        clim : tuple of float, optional
+            Color limits as (vmin, vmax). Entries that are not None are kept.
+
+        Returns
+        -------
+        tuple
+            The resolved (vmin, vmax). Entries stay None if there is no finite data.
+        """
+        vmin, vmax = clim
+        if vmin is not None and vmax is not None:
+            return (vmin, vmax)
+        finite_values = [
+            np.asarray(segment_scalars, dtype=float).ravel()
+            for segment_scalars in scalars
+            if np.size(segment_scalars) > 0
+        ]
+        if len(finite_values) == 0:
+            return (vmin, vmax)
+        values = np.concatenate(finite_values)
+        values = values[np.isfinite(values)]
+        if values.size == 0:
+            return (vmin, vmax)
+        if vmin is None:
+            vmin = float(values.min())
+        if vmax is None:
+            vmax = float(values.max())
+        return (vmin, vmax)
+
     def set_scalar_mappable(self, 
                             norm:mpcolors.Normalize = None, 
                             clim:tuple = (None, None), 

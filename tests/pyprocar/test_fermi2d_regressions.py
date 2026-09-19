@@ -12,6 +12,7 @@ import matplotlib
 matplotlib.use("Agg")
 
 import matplotlib.pyplot as plt
+from matplotlib.collections import LineCollection
 import numpy as np
 import pytest
 
@@ -63,7 +64,19 @@ def test_fermi2d_modes_with_kz_slice(synthetic_ebs_dir, mode):
         plt.close("all")
 
 
+def _line_collection_scalars(fs):
+    arrays = [
+        np.asarray(collection.get_array(), dtype=float).ravel()
+        for collection in fs.ax.collections
+        if isinstance(collection, LineCollection) and collection.get_array() is not None
+    ]
+    values = np.concatenate(arrays)
+    return values[np.isfinite(values)]
+
+
 def test_fermi2d_parametric_default_clim_colorbar(synthetic_ebs_dir):
+    """With clim=(None, None) the norm, line colors and colorbar must use the
+    range of the projection data, not the (-0.5, 0.5) fallback."""
     fs = pyprocar.fermi2D(
         code="vasp",
         dirname=str(synthetic_ebs_dir),
@@ -74,6 +87,59 @@ def test_fermi2d_parametric_default_clim_colorbar(synthetic_ebs_dir):
         show_colorbar=True,
     )
     try:
+        scalars = _line_collection_scalars(fs)
+        assert scalars.size > 0
+        # The synthetic projections lie in [0, 1], so the fallback would differ.
+        assert fs.norm.vmin == pytest.approx(scalars.min())
+        assert fs.norm.vmax == pytest.approx(scalars.max())
+        assert fs.norm.vmin >= 0.0
+
+        for collection in fs.ax.collections:
+            if isinstance(collection, LineCollection) and collection.get_array() is not None:
+                assert collection.norm.vmin == pytest.approx(scalars.min())
+                assert collection.norm.vmax == pytest.approx(scalars.max())
+
         assert fs.colorbar is not None
+        assert fs.colorbar.mappable.norm.vmin == pytest.approx(scalars.min())
+        assert fs.colorbar.mappable.norm.vmax == pytest.approx(scalars.max())
+    finally:
+        plt.close("all")
+
+
+def test_fermi2d_parametric_explicit_clim_is_respected(synthetic_ebs_dir):
+    fs = pyprocar.fermi2D(
+        code="vasp",
+        dirname=str(synthetic_ebs_dir),
+        fermi=0.0,
+        mode="parametric",
+        use_cache=True,
+        show=False,
+        show_colorbar=True,
+        clim=(0.2, 0.9),
+    )
+    try:
+        assert fs.norm.vmin == pytest.approx(0.2)
+        assert fs.norm.vmax == pytest.approx(0.9)
+        assert fs.colorbar.mappable.norm.vmin == pytest.approx(0.2)
+        assert fs.colorbar.mappable.norm.vmax == pytest.approx(0.9)
+    finally:
+        plt.close("all")
+
+
+def test_fermi2d_parametric_partial_clim(synthetic_ebs_dir):
+    """Only the missing clim entry is taken from the data."""
+    fs = pyprocar.fermi2D(
+        code="vasp",
+        dirname=str(synthetic_ebs_dir),
+        fermi=0.0,
+        mode="parametric",
+        use_cache=True,
+        show=False,
+        clim=(None, 0.9),
+    )
+    try:
+        scalars = _line_collection_scalars(fs)
+        assert fs.norm.vmin == pytest.approx(scalars.min())
+        assert fs.norm.vmax == pytest.approx(0.9)
     finally:
         plt.close("all")
