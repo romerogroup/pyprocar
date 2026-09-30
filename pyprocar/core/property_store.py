@@ -177,7 +177,7 @@ class Property:
             return tmp_value
 
         for i in range(1, order + 1):
-            print(f"Calculating gradient of order {i}")
+            logger.debug("Calculating gradient of order %d", i)
             tmp_value = self.point_set.gradient_func(self.points, tmp_value)
             if store:
                 self.gradients[i] = tmp_value

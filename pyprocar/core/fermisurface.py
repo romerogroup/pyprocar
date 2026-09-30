@@ -1072,22 +1072,18 @@ def generate_band_isosurfaces(ebs: ElectronicBandStructureMesh, isovalue: float,
 
     # Combine all surfaces into a single surface
     combined_surface = None
-    i_surface = 0
-    spin_band_index = np.empty(0, dtype=np.int32)
-    spin_index = np.empty(0, dtype=np.int32)
-    for (iband, ispin), surface in band_isosurfaces.items():
+    spin_band_index = []
+    spin_index = []
+    for i_surface, ((iband, ispin), surface) in enumerate(band_isosurfaces.items()):
         if combined_surface is None:
             combined_surface = surface
         else:
             combined_surface = combined_surface.merge(surface, merge_points=False)
 
-        surface_spin_band_index = np.full(surface.points.shape[0], i_surface, dtype=np.int32)
-        surface_spin_index = np.full(surface.points.shape[0], ispin, dtype=np.int32)
-
-        spin_band_index = np.insert(spin_band_index, 0, surface_spin_band_index, axis=0)
-        spin_index = np.insert(spin_index, 0, surface_spin_index, axis=0)
-
-        i_surface += 1
+        spin_band_index.append(np.full(surface.points.shape[0], i_surface, dtype=np.int32))
+        spin_index.append(np.full(surface.points.shape[0], ispin, dtype=np.int32))
+    spin_band_index = np.concatenate(spin_band_index)
+    spin_index = np.concatenate(spin_index)
 
     point_set = PointSet(combined_surface.points)
     point_set.add_property(name="spin_index", value=spin_index)

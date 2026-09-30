@@ -235,23 +235,14 @@ def _merge_band_surfaces(
     if not surfaces:
         return pv.PolyData(), np.empty(0), np.empty(0), {}
 
-    # Build tracking arrays
-    spin_band_index_array = np.empty(0, dtype=np.int32)
-    spin_index_array = np.empty(0, dtype=np.int32)
-
-    for surface_idx, surface in enumerate(surfaces):
-        iband, ispin = surface_band_spin_map[surface_idx]
-        n_points = surface.points.shape[0]
-
-        # spin index identifier
-        current_spin_index_array = np.full(n_points, ispin, dtype=np.int32)
-        spin_index_array = np.insert(spin_index_array, 0, current_spin_index_array, axis=0)
-
-        # spin band index identifier
-        current_spin_band_index_array = np.full(n_points, surface_idx, dtype=np.int32)
-        spin_band_index_array = np.insert(
-            spin_band_index_array, 0, current_spin_band_index_array, axis=0
-        )
+    # Same order as merge() appends points below.
+    n_points = [surface.points.shape[0] for surface in surfaces]
+    spin_index_array = np.concatenate(
+        [np.full(n, surface_band_spin_map[i][1], dtype=np.int32) for i, n in enumerate(n_points)]
+    )
+    spin_band_index_array = np.concatenate(
+        [np.full(n, i, dtype=np.int32) for i, n in enumerate(n_points)]
+    )
 
     # Build band_spin_mask
     band_spin_mask = {}
@@ -774,7 +765,7 @@ class BandStructure2D(pv.PolyData):
         if not self.ebs.is_band_property(values) or not self.band_spin_surface_map:
             return values
         per_surface = [values[:, iband, ispin, ...] for iband, ispin in self.band_spin_surface_map]
-        return np.concatenate(per_surface[::-1], axis=0)
+        return np.concatenate(per_surface, axis=0)
 
     def set_scalars(self, name: str, value: np.ndarray):
         self.set_surface_point_data(name, value)

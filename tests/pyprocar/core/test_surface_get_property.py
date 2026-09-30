@@ -9,6 +9,7 @@ from pyprocar.plotter.fs_plot import FermiPlotter
 from tests.utils import DATA_DIR
 
 MESH_DIR = DATA_DIR / "examples" / "fermi3d" / "non-spin-polarized"
+GRAPHENE_DIR = DATA_DIR / "examples" / "bands" / "2d-bands" / "graphene"
 
 
 @pytest.fixture
@@ -82,3 +83,19 @@ def test_bs2d_get_property_returns_surface_basis_property(bs2d):
 def test_bs2d_get_property_unknown_name_raises_key_error(bs2d):
     with pytest.raises(KeyError):
         bs2d.get_property("no_such_property")
+
+
+def test_bs2d_set_values_colours_each_point_with_its_own_band():
+    bs2d = BandStructure2D.from_code(code="vasp", dirpath=GRAPHENE_DIR, grid_interpolation=(20, 20))
+
+    bs2d.set_values("bands", bs2d.get_property("bands").value)
+
+    colours, heights = bs2d.point_data["bands"], bs2d.points[:, 2]
+    finite = np.isfinite(colours) & np.isfinite(heights)
+    assert finite.sum() > 100
+    assert np.corrcoef(colours[finite], heights[finite])[0, 1] > 0.999
+
+
+def test_fs_band_masks_select_each_isosurface_points(fs):
+    for key, mask in fs.band_spin_mask.items():
+        np.testing.assert_allclose(fs.points[mask], fs.band_isosurfaces[key].points)

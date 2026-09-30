@@ -240,3 +240,12 @@ def test_get_property_does_not_add_derived_entries_to_stored_data():
 
     assert list(ps.property_store) == ["source"]
     assert ps.get_property("source", atoms=[0]).value.tolist() == [1.0, 2.0]
+
+
+def test_gradient_of_a_computed_property_prints_nothing(capsys):
+    ps = _Derived()
+
+    gradient = ps.get_property(("doubled", 1))
+
+    assert gradient.tolist() == [[0.0, 0.0, 0.0], [0.0, 0.0, 0.0]]
+    assert capsys.readouterr().out == ""
