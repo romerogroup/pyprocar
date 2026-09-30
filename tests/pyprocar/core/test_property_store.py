@@ -212,3 +212,53 @@ class TestPointSet:
                 points=sin_data["x"],
                 point_data={"sin": Property(name="sin", value=sin_data["sin"][:50])},
             )
+
+
+class _Derived(PointSet):
+    def __init__(self):
+        super().__init__(points=np.zeros((2, 3)))
+        self.add_property(name="source", value=np.array([1.0, 2.0]))
+        self.calls: list[dict] = []
+
+    def compute_property(self, name, **kwargs):
+        if name != "doubled":
+            return None
+        self.calls.append(kwargs)
+        return 2 * self.get_property("source").value
+
+
+def test_get_property_caches_equivalent_arguments_once():
+    from pyprocar.core.projection import NormMode
+
+    ps = _Derived()
+    for norm_mode in ("max", "MAX", NormMode.MAX):
+        ps.get_property("doubled", norm_mode=norm_mode)
+    for atoms in ([1], (1,), [np.int64(1)], 1, np.array([1])):
+        ps.get_property("doubled", atoms=atoms)
+
+    assert len(ps.calls) == 2
+
+
+def test_get_property_keeps_none_arguments_distinct():
+    ps = _Derived()
+    ps.get_property("doubled")
+    ps.get_property("doubled", units=None)
+
+    assert ps.calls == [{}, {"units": None}]
+
+
+def test_get_property_recomputes_after_source_changes():
+    ps = _Derived()
+    assert ps.get_property("doubled").value.tolist() == [2.0, 4.0]
+
+    ps.add_property(name="source", value=np.array([5.0, 6.0]))
+
+    assert ps.get_property("doubled").value.tolist() == [10.0, 12.0]
+
+
+def test_get_property_does_not_add_derived_entries_to_stored_data():
+    ps = _Derived()
+    ps.get_property("doubled", atoms=[0])
+
+    assert list(ps.property_store) == ["source"]
+    assert ps.get_property("source", atoms=[0]).value.tolist() == [1.0, 2.0]

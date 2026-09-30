@@ -15,9 +15,9 @@ import numpy.typing as npt
 from scipy import integrate
 from scipy.interpolate import CubicSpline
 
-from pyprocar.core import projection
 from pyprocar.core.atomic_orbital_index import ProjectionSelectionResolver
 from pyprocar.core.projection import NormMode, build_property, selection_resolver
+from pyprocar.core.projection import normalize as normalize_by_mode
 from pyprocar.core.property_store import PointSet, Property
 from pyprocar.core.serializer import get_serializer
 from pyprocar.utils.func_utils import expand_grouped_params_to_dicts, keep_func_kwargs
@@ -683,7 +683,7 @@ class DensityOfStates(PointSet):
             integrals = integrate.trapezoid(values_array, x=self.energies, axis=0)[np.newaxis]
             return np.where(integrals == 0, 1.0, integrals)
 
-        normalized = projection.normalize(
+        normalized = normalize_by_mode(
             values_array,
             mode,
             {
@@ -818,7 +818,8 @@ class DensityOfStates(PointSet):
                 selection=selection,
                 norm_mode=norm_mode,
                 allowed_norm_modes=None,
-                **kwargs,
+                include_normal_label=kwargs.get("include_normal_label", False),
+                normalize_kwargs=kwargs,
             )
 
             results.append(prop)
@@ -950,7 +951,8 @@ class DensityOfStates(PointSet):
                     NormMode.MAGNETIZATION,
                     NormMode.RAW,
                 },
-                **kwargs,
+                include_normal_label=kwargs.get("include_normal_label", False),
+                normalize_kwargs=kwargs,
             )
 
             results.append(prop)
@@ -1094,7 +1096,8 @@ class DensityOfStates(PointSet):
                     NormMode.INTEGRAL,
                     NormMode.ELECTRONS,
                 },
-                **kwargs,
+                include_normal_label=kwargs.get("include_normal_label", False),
+                normalize_kwargs=kwargs,
             )
 
             results.append(prop)
@@ -1236,7 +1239,8 @@ class DensityOfStates(PointSet):
                     NormMode.MAGNETIZATION,
                     NormMode.RAW,
                 },
-                **kwargs,
+                include_normal_label=kwargs.get("include_normal_label", False),
+                normalize_kwargs=kwargs,
             )
             results.append(prop)
 
@@ -1291,7 +1295,8 @@ class DensityOfStates(PointSet):
             units=units,
             norm_mode=norm_mode,
             allowed_norm_modes={NormMode.MAX, NormMode.INTEGRAL, NormMode.ELECTRONS},
-            **kwargs,
+            include_normal_label=kwargs.get("include_normal_label", False),
+            normalize_kwargs=kwargs,
         )
 
         return prop
@@ -1346,7 +1351,8 @@ class DensityOfStates(PointSet):
             units=units,
             norm_mode=norm_mode,
             allowed_norm_modes={NormMode.MAX, NormMode.INTEGRAL, NormMode.ELECTRONS, NormMode.RAW},
-            **kwargs,
+            include_normal_label=kwargs.get("include_normal_label", False),
+            normalize_kwargs=kwargs,
         )
 
         return prop

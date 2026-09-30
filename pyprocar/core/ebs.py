@@ -23,10 +23,11 @@ import numpy.typing as npt
 import pyvista as pv
 from typing_extensions import override
 
-from pyprocar.core import kpoints, projection
+from pyprocar.core import kpoints
 from pyprocar.core.atomic_orbital_index import ProjectionSelectionResolver
 from pyprocar.core.brillouin_zone import BrillouinZone
 from pyprocar.core.projection import NormMode, build_property, selection_resolver
+from pyprocar.core.projection import normalize as normalize_by_mode
 from pyprocar.core.property_store import PointSet, Property
 from pyprocar.core.serializer import get_serializer
 from pyprocar.core.structure import Structure
@@ -647,7 +648,7 @@ class ElectronicBandStructure(PointSet):
             name=name,
             norm_mode=norm_mode,
             selection=None,
-            **metadata,
+            metadata=metadata,
         )
 
         return prop
@@ -699,7 +700,7 @@ class ElectronicBandStructure(PointSet):
             name=name,
             norm_mode=norm_mode,
             selection=None,
-            **metadata,
+            metadata=metadata,
         )
 
         return prop
@@ -789,9 +790,7 @@ class ElectronicBandStructure(PointSet):
             name=name,
             norm_mode=norm_mode,
             selection=selection,
-            atoms=atoms_list,
-            orbitals=orbitals_list,
-            spins=spins_list,
+            normalize_kwargs=dict(atoms=atoms_list, orbitals=orbitals_list, spins=spins_list),
         )
 
         return prop
@@ -833,7 +832,7 @@ class ElectronicBandStructure(PointSet):
             name=name,
             norm_mode="raw",  # Spin texture should not be normalized
             selection=None,
-            **metadata,
+            metadata=metadata,
         )
 
         return prop
@@ -921,7 +920,7 @@ class ElectronicBandStructure(PointSet):
             name=name,
             norm_mode="raw",
             selection=selection,
-            **metadata,
+            metadata=metadata,
         )
 
         return prop
@@ -1002,7 +1001,7 @@ class ElectronicBandStructure(PointSet):
                 np.abs(total) < NUMERICAL_STABILITY_FACTOR, NUMERICAL_STABILITY_FACTOR, total
             )
 
-        return projection.normalize(
+        return normalize_by_mode(
             values_array,
             mode,
             {

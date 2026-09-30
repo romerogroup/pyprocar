@@ -119,7 +119,8 @@ def build_property(
     allowed_norm_modes: set[NormMode] | None = None,
     include_normal_label: bool = False,
     point_set: PointSet | None = None,
-    **kwargs: Any,
+    normalize_kwargs: Mapping[str, Any] | None = None,
+    metadata: Mapping[str, Any] | None = None,
 ) -> Property:
     """Normalize ``values`` through ``owner`` and wrap them in a labelled Property.
 
@@ -136,12 +137,12 @@ def build_property(
         assert isinstance(owner, PointSet), "owner must be a PointSet unless point_set is given"
         point_set = owner
 
-    values = owner.normalize(mode, values, **kwargs)
+    values = owner.normalize(mode, values, **(normalize_kwargs or {}))
     normed_units = owner.normed_units(mode, units)
     data_min = np.min(values, axis=0)
     data_max = np.max(values, axis=0)
 
-    metadata: dict[str, Any] = {
+    property_metadata: dict[str, Any] = {
         "norm_mode": mode,
         "units": normed_units,
         "data_lim": (data_min, data_max),
@@ -153,16 +154,16 @@ def build_property(
         "include_normal_label": include_normal_label,
     }
     if selection is not None:
-        metadata.update(
+        property_metadata.update(
             _selection_metadata(selection, mode is not NormMode.RAW, include_normal_label)
         )
-    metadata.update({k: v for k, v in kwargs.items() if k not in ("atoms", "orbitals", "spins")})
+    property_metadata.update(metadata or {})
 
     return Property(
         name=mode.normed_name(name),
         value=values,
         point_set=point_set,
-        metadata=metadata,
+        metadata=property_metadata,
         label=label,
         units=normed_units,
     )

@@ -344,15 +344,12 @@ def test_get_property_projected_sum_matches_dos_sum(dos_spin_polarized):
 
 
 def test_get_property_projected_sum_caches_variants(dos_spin_polarized):
-    initial_keys = set(dos_spin_polarized.property_store.keys())
-    dos_spin_polarized.get_property("projected_sum", atoms=[0], orbitals=[0], spins=[0])
-    after_first = set(dos_spin_polarized.property_store.keys())
-    dos_spin_polarized.get_property("projected_sum", atoms=[1], orbitals=[1], spins=[0])
-    after_second = set(dos_spin_polarized.property_store.keys())
+    first = dos_spin_polarized.get_property("projected_sum", atoms=[0], orbitals=[0], spins=[0])
+    second = dos_spin_polarized.get_property("projected_sum", atoms=[1], orbitals=[1], spins=[0])
 
-    assert len(after_first - initial_keys) == 1
-    assert len(after_second - after_first) == 1
-    assert len(after_second - initial_keys) == 2
+    assert first is not second
+    assert dos_spin_polarized.get_property("projected_sum", atoms=[0], orbitals=[0], spins=[0]) is first
+    assert set(dos_spin_polarized.property_store) == {"total", "projected"}
 
 
 def _make_simple_structure() -> Structure:

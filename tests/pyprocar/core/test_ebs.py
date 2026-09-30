@@ -646,7 +646,7 @@ class TestElectronicBandStructurePath:
 
         # Check output
         assert velocity_property is not None
-        assert "bands_velocity" in sample_ebs_path.property_store
+        assert sample_ebs_path.get_property("bands_velocity") is velocity_property
 
         # Check that it's stored as property
         stored_velocity_property = sample_ebs_path.get_property("bands_velocity")
@@ -658,7 +658,7 @@ class TestElectronicBandStructurePath:
 
         # Check output
         assert speed_property is not None
-        assert "bands_speed" in sample_ebs_path.property_store
+        assert sample_ebs_path.get_property("bands_speed") is speed_property
 
         # Check that it's stored as property
         stored_speed_property = sample_ebs_path.get_property("bands_speed")
@@ -670,7 +670,7 @@ class TestElectronicBandStructurePath:
 
         # Check output
         assert avg_inv_mass_property is not None
-        assert "avg_inv_effective_mass" in sample_ebs_path.property_store
+        assert sample_ebs_path.get_property("avg_inv_effective_mass") is avg_inv_mass_property
 
         # Check that it's stored as property
         stored_avg_inv_mass_property = sample_ebs_path.get_property("avg_inv_effective_mass")
@@ -814,8 +814,7 @@ class TestElectronicBandStructureMesh:
 
     def test_property_gradient_derived_access(self, sample_ebs_mesh):
         """Test gradient access for properties."""
-        velocity_property = sample_ebs_mesh.get_property("bands_velocity")
-        sample_ebs_mesh.compute_gradients(2, names=["bands_velocity"])
+        sample_ebs_mesh.get_property(("bands_velocity", 2))
         velocity_property = sample_ebs_mesh.get_property("bands_velocity")
         assert velocity_property is not None
         assert velocity_property.is_vector == True
@@ -915,3 +914,16 @@ def test_get_property_recomputes_when_selection_changes():
     assert ebs.get_property("projected_sum").value.ravel().tolist() == [1.0]
     assert ebs.get_property("projected_sum", atoms=[0]).value.ravel().tolist() == [0.25]
     assert ebs.get_property("projected_sum", atoms=[1]).value.ravel().tolist() == [0.75]
+
+
+def test_get_property_recomputes_after_projections_change():
+    projected = np.array([0.25, 0.75]).reshape(1, 1, 1, 2, 1)
+    ebs = ElectronicBandStructure(
+        kpoints=np.zeros((1, 3)), bands=np.zeros((1, 1, 1)), projected=projected, orbital_names=["s"]
+    )
+    assert ebs.get_property("projected_sum", atoms=[0]).value.ravel().tolist() == [0.25]
+
+    ebs.add_property(name="projected", value=0 * projected)
+
+    assert ebs.get_property("projected_sum", atoms=[0]).value.ravel().tolist() == [0.0]
+    assert ebs.property_names == ["bands", "projected"]

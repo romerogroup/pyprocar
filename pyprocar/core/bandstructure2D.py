@@ -716,15 +716,17 @@ class BandStructure2D(pv.PolyData):
                 surface_points = self.interpolate_values(value_array)
                 prop[calc_name, grad_order] = surface_points
 
-    def compute_property(self, name: str, **kwargs):
+    def compute_property(self, name: str, **kwargs) -> Property | None:
         property = self.ebs.get_property(name, **kwargs)
+        if property is None:
+            return None
         grid_scalars = self.compute_scalar_grid(property.value)
 
         original_property = self.original_ebs.get_property(name, **kwargs)
         grid_scalars = np.clip(
             grid_scalars, original_property.value.min(), original_property.value.max()
         )
-        return grid_scalars
+        return Property(name=name, value=grid_scalars)
 
     def interpolate_values(self, values: np.ndarray):
         if values.shape[-1] != 3:

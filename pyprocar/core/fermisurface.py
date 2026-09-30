@@ -11,11 +11,11 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pyvista as pv
 
-from pyprocar.core import projection
 from pyprocar.core.atomic_orbital_index import ProjectionSelectionResolver
 from pyprocar.core.brillouin_zone import BrillouinZone
 from pyprocar.core.ebs import ElectronicBandStructureMesh
 from pyprocar.core.projection import NormMode, build_property, selection_resolver
+from pyprocar.core.projection import normalize as normalize_by_mode
 from pyprocar.core.property_store import PointSet, Property
 from pyprocar.utils.physics import *
 
@@ -280,6 +280,7 @@ class FermiSurface(pv.PolyData):
         norm_mode: str | NormMode | None = "raw",
         label: str = "Projected Sum",
         name: str = "projected_sum",
+        include_normal_label: bool = False,
         **kwargs: Any,
     ) -> Property:
         """
@@ -350,10 +351,8 @@ class FermiSurface(pv.PolyData):
             norm_mode="raw",  # We'll normalize after interpolation
         )
 
-        # Interpolate to surface
-        surface_values = self.interpolate_to_surface(ebs_property.value)
+        surface_values = self._mask_to_surfaces(self.interpolate_to_surface(ebs_property.value))
 
-        # Build property with metadata
         prop = build_property(
             self,
             values=surface_values,
@@ -361,15 +360,13 @@ class FermiSurface(pv.PolyData):
             name=name,
             norm_mode=norm_mode,
             selection=selection,
+            include_normal_label=include_normal_label,
             point_set=self.point_set,
-            **kwargs,
+            metadata=kwargs,
         )
-
-        # Cache in PointSet
-        self.point_set.add_property(prop)
-
-        # Sync to PyVista
-        self.set_values(prop.name, prop.value)
+        if include_normal_label and selection is None:
+            normed_label = NormMode.parse(norm_mode).normed_name(label)
+            prop.metadata["label"] = prop.metadata["label_plain"] = normed_label
 
         return prop
 
@@ -379,7 +376,7 @@ class FermiSurface(pv.PolyData):
         values_array: np.ndarray,
         **kwargs: Any,
     ) -> np.ndarray:
-        return projection.normalize(
+        return normalize_by_mode(
             values_array,
             mode,
             {
@@ -672,7 +669,7 @@ class FermiSurface(pv.PolyData):
         if self.ebs.is_band_property(values):
             logger.debug(f"Adding band resolved to fermi surface point_data: {name}")
             for (iband, ispin), surface_idx in self.band_spin_surface_map.items():
-                values_band_values = values[:, iband, ispin, ...]
+                values_band_values = values[:, iband, ispin, ...].copy()
                 mask = self.band_spin_mask[(iband, ispin)]
                 values_band_values[~mask] = 0
                 self.point_data[name] += values_band_values
@@ -781,14 +778,27 @@ class FermiSurface(pv.PolyData):
         return None
 
     def compute_property(self, name: str, **kwargs):
+        if name == "projected_sum":
+            return self.compute_projected_sum(**kwargs)
         if name == "fermi_velocity":
-            return self.compute_fermi_velocity(**kwargs)
+            values = self.compute_fermi_velocity(**kwargs)
         elif name == "fermi_speed":
-            return self.compute_fermi_speed(**kwargs)
+            values = self.compute_fermi_speed(**kwargs)
         else:
             property = self.ebs.get_property(name, **kwargs)
-            surface_points = self.interpolate_to_surface(property.value)
-            return surface_points
+            if property is None:
+                return None
+            values = self.interpolate_to_surface(property.value)
+        return self._mask_to_surfaces(values)
+
+    def _mask_to_surfaces(self, values: np.ndarray) -> np.ndarray:
+        """Zero band-resolved values at points that belong to another band's surface."""
+        if not self.ebs.is_band_property(values):
+            return values
+        masked = np.array(values, copy=True)
+        for (iband, ispin), mask in self.band_spin_mask.items():
+            masked[~mask, iband, ispin, ...] = 0
+        return masked
 
     def compute_fermi_speed(self, **kwargs):
         band_speed = self.ebs.get_property("bands_speed", **kwargs)
