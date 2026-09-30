@@ -137,10 +137,10 @@ class ElkParser(BaseParser):
     # Derived properties
 
     @cached_property
-    def fermi(self) -> float:
+    def fermi(self) -> float | None:
         """Fermi energy in eV."""
         if self._fermi_parser is None:
-            raise ValueError("No FERMI.OUT file found")
+            return None
         return self._fermi_parser.fermi_ev
 
     @cached_property
@@ -174,23 +174,25 @@ class ElkParser(BaseParser):
         return 0
 
     @cached_property
-    def reciprocal_lattice(self) -> np.ndarray:
+    def reciprocal_lattice(self) -> np.ndarray | None:
         """Reciprocal lattice vectors."""
         lattice = self._get_lattice()
+        if lattice is None:
+            return None
         return 2 * np.pi * np.linalg.inv(lattice).T
 
     @property
-    def reclat(self) -> np.ndarray:
+    def reclat(self) -> np.ndarray | None:
         """Alias for reciprocal_lattice (for compatibility)."""
         return self.reciprocal_lattice
 
-    def _get_lattice(self) -> np.ndarray:
+    def _get_lattice(self) -> np.ndarray | None:
         """Get lattice from geometry or elkin."""
         if self._geometry is not None:
             return self._geometry.lattice
         if self._elkin is not None:
             return self._elkin.lattice
-        raise ValueError("No lattice information available")
+        return None
 
     # Bands parser (lazy initialization)
 
@@ -311,7 +313,7 @@ class ElkParser(BaseParser):
     @cached_property
     def _ebs(self) -> ElectronicBandStructure | None:
         """Electronic band structure (cached)."""
-        if self._bands_parser is None:
+        if self._bands_parser is None or self.fermi is None:
             return None
 
         # kpath should be available when bands are available
@@ -354,7 +356,11 @@ class ElkParser(BaseParser):
     @cached_property
     def _dos(self) -> DensityOfStates | None:
         """Density of states (cached)."""
-        if self._dos_parser is None or not self._dos_parser.has_dos:
+        if (
+            self._dos_parser is None
+            or not self._dos_parser.has_dos
+            or self.fermi is None
+        ):
             return None
 
         energies = self._dos_parser.energies

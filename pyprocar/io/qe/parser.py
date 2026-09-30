@@ -21,6 +21,7 @@ from pyprocar.core import (
     get_ebs_from_data,
 )
 from pyprocar.core import kpoints as k_utils
+from pyprocar.io.base import BaseParser
 from pyprocar.io.qe.projwfc import AtomicProjXML, ProjwfcDOS, ProjwfcIn, ProjwfcOut
 from pyprocar.io.qe.pw import PwIn, PwOut, PwXML
 from pyprocar.utils.units import AU_TO_ANG, HARTREE_TO_EV
@@ -29,7 +30,7 @@ logger = logging.getLogger(__name__)
 user_logger = logging.getLogger("user")
 
 
-class QEParser:
+class QEParser(BaseParser):
     """Auto-detects Quantum ESPRESSO files in a directory and exposes
     lazy parser properties and computed objects (EBS, DOS, Structure).
 
@@ -43,7 +44,7 @@ class QEParser:
     """
 
     def __init__(self, dirpath: str | Path) -> None:
-        self._dirpath: Path = Path(dirpath)
+        super().__init__(dirpath)
         self._detected: dict[str, Path | list[Path] | None] = {
             "scf_in": None,
             "scf_out": None,
@@ -64,17 +65,15 @@ class QEParser:
 
     # -------- file detection --------
     def detect_files(self) -> None:
-        if not self._dirpath.exists():
-            user_logger.warning(f"Directory not found: {self._dirpath}")
+        if not self.dirpath.exists():
+            user_logger.warning(f"Directory not found: {self.dirpath}")
             return
 
         files: list[Path] = []
-        for root, _dirs, filenames in os.walk(self._dirpath, followlinks=True):
+        for root, _dirs, filenames in os.walk(self.dirpath, followlinks=True):
             for name in filenames:
                 with contextlib.suppress(Exception):
                     files.append(Path(root) / name)
-        # Only works for pathlib==3.13 or python==3.13
-        # files = [p for p in self._dirpath.rglob("*", recurse_symlinks=True) if p.is_file()]
 
         # XMLs
         atomic_proj_xml = [p for p in files if re.search(r"(?i)^atomic_proj\.xml$", p.name)]
@@ -136,7 +135,7 @@ class QEParser:
                 return sorted(
                     fp_list,
                     key=lambda p: (
-                        len(p.relative_to(self._dirpath).parts),
+                        len(p.relative_to(self.dirpath).parts),
                         -p.stat().st_mtime,
                     ),
                 )
@@ -197,7 +196,7 @@ class QEParser:
             return str(v)
 
         return {
-            "dirpath": str(self._dirpath),
+            "dirpath": str(self.dirpath),
             "files": {k: _p(v) for k, v in self._detected.items()},
             "parsers": {
                 "scf_in": self._detected["scf_in"] is not None,
@@ -304,7 +303,7 @@ class QEParser:
         if not fps or not isinstance(fps, list) or len(fps) == 0:
             return None
         try:
-            return ProjwfcDOS(self._dirpath)
+            return ProjwfcDOS(self.dirpath)
         except Exception:
             return None
 
@@ -831,6 +830,8 @@ class QEParser:
 
     @cached_property
     def structure(self) -> Structure | None:
+        if self.species is None and self.direct_lattice is None:
+            return None
         return Structure(
             atoms=self.species,
             lattice=self.direct_lattice,
