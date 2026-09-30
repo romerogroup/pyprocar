@@ -480,6 +480,7 @@ def calculate_scalar_differences_2(scalar_mesh, transform_matrix):
 def calculate_3d_mesh_scalar_gradients(
     scalar_array,
     reciprocal_lattice,
+    spacing=None,
 ):
     """Transforms the derivatives to cartesian coordinates
         (n,j,k,...)->(n,j,k,...,3)
@@ -490,6 +491,8 @@ def calculate_3d_mesh_scalar_gradients(
         The derivatives to transform
     reciprocal_lattice : np.ndarray
         The reciprocal lattice
+    spacing : tuple[float, float, float], optional
+        Fractional k-spacing along each axis. Defaults to 1/n, a grid spanning the full zone.
 
     Returns
     -------
@@ -514,9 +517,9 @@ def calculate_3d_mesh_scalar_gradients(
     letters = ["a", "b", "c", "d", "e", "f", "g", "h"]
     scalar_diffs = calculate_scalar_differences(scalar_array)
 
-    del_k1 = 1 / scalar_diffs.shape[0]
-    del_k2 = 1 / scalar_diffs.shape[1]
-    del_k3 = 1 / scalar_diffs.shape[2]
+    if spacing is None:
+        spacing = [1 / n for n in scalar_diffs.shape[:3]]
+    del_k1, del_k2, del_k3 = spacing
 
     scalar_diffs[..., 0] = scalar_diffs[..., 0] / del_k1
     scalar_diffs[..., 1] = scalar_diffs[..., 1] / del_k2

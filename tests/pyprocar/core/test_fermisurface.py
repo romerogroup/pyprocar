@@ -8,6 +8,8 @@ from pyprocar.core.ebs import (
 )
 from pyprocar.core.fermisurface import FermiSurface
 from pyprocar.core.property_store import PointSet
+from pyprocar.utils import math
+from pyprocar.utils.physics import HBAR_EV, METER_ANGSTROM
 from tests.utils import DATA_DIR
 
 logger = logging.getLogger("pyprocar")
@@ -452,15 +454,46 @@ class TestFermiSurfaceCache:
         assert not fs._is_cache_valid("nonexistent_property")
 
 
-def test_compute_gradients_on_fresh_surface_interpolates_band_gradients(
+def _finite_difference_gradient(ebs, band, padding):
+    """Central differences on the original periodic k-grid, in Cartesian eV*Angstrom."""
+    bands = math.array_to_mesh(ebs.bands.value[:, band, 0], ebs.n_kx, ebs.n_ky, ebs.n_kz)
+    d_frac = np.stack(
+        [
+            (np.roll(bands, -1, axis=i) - np.roll(bands, 1, axis=i)) * n / 2
+            for i, n in enumerate(bands.shape)
+        ],
+        axis=-1,
+    )
+    d_cart = d_frac @ np.linalg.inv(ebs.reciprocal_lattice).T
+    padded = np.pad(d_cart, [(padding, padding)] * 3 + [(0, 0)], mode="wrap")
+    return math.mesh_to_array(padded)
+
+
+def test_compute_gradients_on_fresh_surface_matches_finite_difference(
     fermisurface_3d_non_spin_polarized,
 ):
     fs = fermisurface_3d_non_spin_polarized
+    padding = (fs.ebs.n_kx - fs.original_ebs.n_kx) // 2
 
     fs.compute_gradients(1)
 
-    gradient = fs.point_set.get_property("bands").gradients[1] * 1e9
+    gradient = fs.point_set.get_property("bands").gradients[1] / METER_ANGSTROM
+    expected = fs.interpolate_to_surface(_finite_difference_gradient(fs.original_ebs, 16, padding))
     speed = np.linalg.norm(gradient[:, 16, 0], axis=-1)
     assert gradient.shape == (2748, 20, 1, 3)
-    assert np.allclose(gradient[0, 16, 0], [-1.608, -3.126, -0.003], atol=1e-3)
-    assert np.allclose([speed.min(), speed.mean(), speed.max()], [0.255, 3.091, 3.598], atol=1e-3)
+    assert np.allclose(gradient[:, 16, 0], expected, rtol=1e-3, atol=1e-2)
+    assert np.allclose([speed.min(), speed.max()], [1.306, 18.428], atol=1e-2)
+
+
+def test_fermi_speed_matches_finite_difference(fermisurface_3d_non_spin_polarized):
+    fs = fermisurface_3d_non_spin_polarized
+    padding = (fs.ebs.n_kx - fs.original_ebs.n_kx) // 2
+
+    fermi_speed = np.asarray(fs.get_property("fermi_speed"))[:, 16, 0]
+
+    grid_speed = np.linalg.norm(_finite_difference_gradient(fs.original_ebs, 16, padding), axis=-1)
+    expected_speed = fs.interpolate_to_surface(grid_speed) * METER_ANGSTROM / HBAR_EV
+    on_band_16 = fs.point_set.get_property("spin_band_index").value == 0
+    assert on_band_16.sum() == 1800
+    assert np.allclose(fermi_speed[on_band_16], expected_speed[on_band_16], rtol=1e-3)
+    assert np.all(fermi_speed[~on_band_16] == 0)
