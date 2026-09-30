@@ -97,13 +97,10 @@ class ElkParser(BaseParser):
             return None
         if isinstance(param, ElkFermi):
             return param
-        filepath = self.dirpath / Path(param)
-        if filepath.exists():
-            return ElkFermi(filepath)
-        # Try lowercase (original code uses "fermi.OUT")
-        filepath_lower = self.dirpath / "fermi.OUT"
-        if filepath_lower.exists():
-            return ElkFermi(filepath_lower)
+        for name in (param, "EFERMI.OUT", "fermi.OUT"):
+            filepath = self.dirpath / name
+            if filepath.exists():
+                return ElkFermi(filepath)
         return None
 
     def _init_geometry(self, param: str | ElkGeometry | None) -> ElkGeometry | None:

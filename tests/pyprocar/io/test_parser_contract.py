@@ -1,9 +1,11 @@
+import re
 from pathlib import Path
 
 import numpy as np
 import pytest
 
 from pyprocar.core import DensityOfStates, ElectronicBandStructure, KPath, Structure
+from pyprocar.core.ebs import ElectronicBandStructurePath
 from pyprocar.io import CodeParser, get_parser
 from tests.pyprocar.io.bxsf.test_parser import BXSF_STR
 from tests.pyprocar.io.elk import test_parser as elk
@@ -26,13 +28,22 @@ MEMBER_TYPES = {
 
 CODES_DIR = DATA_DIR / "codes"
 
-LEGACY_DOS = pytest.mark.xfail(
-    reason="adapter builds DOS in the legacy (nspin, nE) layout that DensityOfStates rejects",
-    strict=True,
+LEGACY_DOS_REASON = (
+    "adapter builds DOS in the legacy (nspin, nE) layout that DensityOfStates rejects"
 )
 KGRID_MODE_ENUM = pytest.mark.xfail(
     reason="ElectronicBandStructureMesh passes a KGRID_MODE enum to get_kpoints_from_kgrid, "
-    "which expects a str",
+    "which expects a str; the DOS also uses the legacy layout",
+    raises=AttributeError,
+    strict=True,
+)
+ELK_LEGACY_DOS = pytest.mark.xfail(
+    reason=LEGACY_DOS_REASON, raises=ValueError, strict=True
+)
+LOBSTER_LEGACY_DOS = pytest.mark.xfail(
+    reason=LEGACY_DOS_REASON
+    + "; LobsterParser.dos swallows the error and returns None",
+    raises=AssertionError,
     strict=True,
 )
 
@@ -60,13 +71,13 @@ CASES = [
         CODES_DIR / "qe/7.2/SrVO3/non-spin-polarized/dos",
         {"ebs", "dos", "structure", "fermi", "reciprocal_lattice"},
         id="qe-dos",
-        marks=[LEGACY_DOS, KGRID_MODE_ENUM],
+        marks=KGRID_MODE_ENUM,
     ),
     pytest.param(
         "elk",
         {
             "elk.in": elk.ELKIN_BANDS,
-            "FERMI.OUT": elk.EFERMI_OUT,
+            "EFERMI.OUT": elk.EFERMI_OUT,
             "GEOMETRY.OUT": elk.GEOMETRY_OUT,
             "BANDLINES.OUT": elk.BANDLINES_OUT,
             "BANDS.OUT": elk.BANDS_OUT,
@@ -80,13 +91,13 @@ CASES = [
         "elk",
         {
             "elk.in": elk.ELKIN_DOS,
-            "FERMI.OUT": elk.EFERMI_OUT,
+            "EFERMI.OUT": elk.EFERMI_OUT,
             "GEOMETRY.OUT": elk.GEOMETRY_OUT,
             "TDOS.OUT": elk.TDOS_OUT,
         },
         {"dos", "structure", "fermi", "reciprocal_lattice"},
         id="elk-dos",
-        marks=LEGACY_DOS,
+        marks=ELK_LEGACY_DOS,
     ),
     pytest.param(
         "siesta",
@@ -103,7 +114,7 @@ CASES = [
         },
         {"ebs", "dos"},
         id="lobster-bands",
-        marks=LEGACY_DOS,
+        marks=LOBSTER_LEGACY_DOS,
     ),
     pytest.param("bxsf", {"in.bxsf": BXSF_STR}, {"ebs"}, id="bxsf-mesh"),
     pytest.param("frmsf", {"in.frmsf": FRMSF_STR}, {"ebs"}, id="frmsf-mesh"),
@@ -146,3 +157,16 @@ def test_populated_directory_returns_core_types(
     } == expected_present
     for name, value in values.items():
         assert value is None or isinstance(value, MEMBER_TYPES[name]), name
+
+
+def test_from_code_names_the_member_the_adapter_could_not_provide(
+    tmp_path: Path,
+) -> None:
+    with pytest.raises(
+        ValueError, match=re.escape(f"The elk parser found no ebs in {tmp_path}")
+    ):
+        ElectronicBandStructurePath.from_code(code="elk", dirpath=str(tmp_path))
+    with pytest.raises(
+        ValueError, match=re.escape(f"The elk parser found no dos in {tmp_path}")
+    ):
+        DensityOfStates.from_code(code="elk", dirpath=str(tmp_path))

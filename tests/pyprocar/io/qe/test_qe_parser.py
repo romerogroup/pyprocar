@@ -364,3 +364,10 @@ def test_parser_handles_nonexistent_directory(tmp_path: Path) -> None:
     # Should not raise, just have empty detections
     summary = parser.summary()
     assert summary["parsers"]["scf_in"] is False
+
+
+def test_structure_is_none_when_lattice_is_missing(tmp_path: Path) -> None:
+    parser = QEParser(tmp_path)
+    parser.__dict__["species"] = ["Sr", "V", "O", "O", "O"]
+
+    assert parser.structure is None

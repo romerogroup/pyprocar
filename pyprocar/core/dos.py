@@ -64,6 +64,8 @@ def get_dos_from_code(
         logger.info("Parsing DOS calculation directory: %s", dirpath)
         parser = get_parser(code, dirpath)
         dos = parser.dos
+        if dos is None:
+            raise ValueError(f"The {code} parser found no dos in {dirpath}")
         if use_cache:
             dos.save(dos_filepath)
     else:

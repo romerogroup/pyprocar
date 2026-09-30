@@ -191,6 +191,8 @@ def get_ebs_from_code(
         logger.info(f"Parsing EBS calculation directory: {dirpath}")
         parser = get_parser(code, dirpath)
         ebs = parser.ebs
+        if ebs is None:
+            raise ValueError(f"The {code} parser found no ebs in {dirpath}")
         ebs.save(ebs_filepath)
     else:
         logger.info(f"Loading EBS  from picklefile: {ebs_filepath}")

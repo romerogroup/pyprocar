@@ -830,7 +830,7 @@ class QEParser(BaseParser):
 
     @cached_property
     def structure(self) -> Structure | None:
-        if self.species is None and self.direct_lattice is None:
+        if self.species is None or self.direct_lattice is None:
             return None
         return Structure(
             atoms=self.species,
