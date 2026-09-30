@@ -163,6 +163,7 @@ class DOSPlotter:
             channel_mode,
             kwargs,
             lambda _, c: channel_labels[c] if channel_labels else point_data.label,
+            share_single_channel=True,
         )
 
         cmap_s, norm_s, clim_s, scalars_show_colorbar = _resolve_scaling(

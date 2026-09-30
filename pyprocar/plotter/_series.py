@@ -112,14 +112,23 @@ def distribute_kwargs(kwargs: Mapping[str, Any], n_channels: int) -> list[dict[s
     ]
 
 
-def _take(values: np.ndarray | None, iband: int, ichannel: int) -> np.ndarray | None:
-    """One series' slice: 3D arrays by band and channel, 2D by band, else shared.
+def _check_layout(
+    name: str, values: np.ndarray | None, y_shape: tuple[int, ...], share_single_channel: bool
+) -> None:
+    if values is None or values.ndim == 1:
+        return
+    _, n_bands, n_channels = y_shape
+    bands_ok = values.shape[1] == n_bands
+    channels_ok = values.ndim == 2 or values.shape[2] in (
+        (n_channels, 1) if share_single_channel else (n_channels,)
+    )
+    if not (bands_ok and channels_ok):
+        raise ValueError(f"{name} shape {values.shape} does not match the bands layout {y_shape}")
 
-    A band or channel axis of length 1 is shared by every band or channel.
-    """
+
+def _take(values: np.ndarray | None, iband: int, ichannel: int) -> np.ndarray | None:
     if values is None or values.ndim == 1:
         return values
-    iband = iband if values.shape[1] > 1 else 0
     if values.ndim == 2:
         return values[:, iband]
     return values[:, iband, ichannel if values.shape[2] > 1 else 0]
@@ -133,11 +142,17 @@ def line_series(
     channel_mode: ChannelMode | str,
     kwargs: Mapping[str, Any],
     labels: Callable[[int, int], str | None] | None = None,
+    share_single_channel: bool = False,
 ) -> list[LineSeries]:
     """One series per (band, channel) of ``y``, shaped ``(n_points, n_bands, n_channels)``.
 
-    ``scalars`` and ``vectors`` are sliced per series by ``_take``.
+    ``scalars`` and ``vectors`` are sliced per series: 3D arrays by band and
+    channel, 2D arrays by band, 1D arrays are shared by every series. Their band
+    and channel counts must match ``y``, except that ``share_single_channel``
+    lets a single channel colour every channel.
     """
+    _check_layout("scalars", scalars, y.shape, share_single_channel)
+    _check_layout("vectors", vectors, y.shape, share_single_channel)
     flip = ChannelMode.from_string(channel_mode) is ChannelMode.FLIP
     _, n_bands, n_channels = y.shape
     per_channel = distribute_kwargs(kwargs, n_channels)

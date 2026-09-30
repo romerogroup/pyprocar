@@ -296,6 +296,20 @@ class TestBandStructurePlotterSeries:
         assert {a.get_clim() for a in artists.values()} == {(0.25, 0.75)}
         plt.close(plotter.fig)
 
+    @pytest.mark.parametrize("shape", [(3, 1, 1), (3, 1), (3, 2, 1)])
+    def test_scalars_with_fewer_bands_or_spins_raise(self, shape):
+        scalars = _literal_scalars(None)
+        scalars.to_array.return_value = np.zeros(shape)
+        plotter = BandStructurePlotter()
+
+        with pytest.raises(ValueError, match=r"scalars shape \(3, .*\) does not match"):
+            plotter.plot(
+                _make_literal_property(LITERAL_BANDS),
+                scalars_data=scalars,
+                scalars_mode="scatter",
+            )
+        plt.close(plotter.fig)
+
 
 # =============================================================================
 # Phase 3: Core plot() Method Tests
