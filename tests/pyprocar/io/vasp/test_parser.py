@@ -1,9 +1,14 @@
 from pathlib import Path
 
+import numpy as np
+
 from pyprocar.io.vasp.kpoints import Kpoints
 from pyprocar.io.vasp.outcar import Outcar
 from pyprocar.io.vasp.parser import VaspParser
 from pyprocar.io.vasp.procar import Procar
+from tests.utils import DATA_DIR
+
+BANDS_DIR = DATA_DIR / "examples" / "bands" / "non-spin-polarized"
 
 
 class TestVaspParserInitialization:
@@ -156,3 +161,23 @@ class TestVaspParserFromStr:
 
         # dirpath should resolve to current working directory (from BaseParser)
         assert parser.dirpath == Path("").resolve()
+
+
+class TestVaspParserMissingFiles:
+    def test_structure_falls_back_to_vasprun_without_poscar(self):
+        structure = VaspParser(dirpath=BANDS_DIR, poscar=None).structure
+
+        assert structure is not None
+        assert np.asarray(structure.atoms).tolist() == ["Sr", "V", "O", "O", "O"]
+        assert np.allclose(np.diag(structure.lattice), [3.84652, 3.84652, 3.84652])
+        assert np.allclose(np.asarray(structure.fractional_coordinates)[1], [0.5, 0.5, 0.5])
+
+    def test_kpath_without_outcar(self):
+        kpath = VaspParser(dirpath=BANDS_DIR, outcar=None).kpath
+
+        assert kpath is not None
+        assert kpath.n_segments == 5
+
+    def test_version_tuple_is_none_without_outcar_or_vasprun(self, tmp_path):
+        assert VaspParser(dirpath=BANDS_DIR).version_tuple == (6, 4, 3)
+        assert VaspParser(dirpath=tmp_path).version_tuple is None

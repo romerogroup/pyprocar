@@ -1,3 +1,4 @@
+import copy
 from typing import Any, Dict
 
 from pyprocar.cfg.band_structure import BandStructureConfig
@@ -80,12 +81,13 @@ class ConfigManager:
 
     @staticmethod
     def merge_configs(default_config: BaseConfig, user_config: dict[str, Any]) -> BaseConfig:
+        config = copy.deepcopy(default_config)
         for key, value in user_config.items():
-            if hasattr(default_config, key):
-                setattr(default_config, key, value)
+            if hasattr(config, key):
+                setattr(config, key, value)
             else:
-                default_config.custom_settings[key] = value
-        return default_config
+                config.custom_settings[key] = value
+        return config
 
     @staticmethod
     def merge_config(default_config: BaseConfig, attribute: str, value: Any):

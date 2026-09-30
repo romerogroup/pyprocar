@@ -44,6 +44,13 @@ def point_set_data(sin_data):
 class TestProperty:
     """Test suite for Property class."""
 
+    def test_metadata_is_not_shared_between_instances(self):
+        first = Property(name="first", value=np.zeros(2))
+        first.metadata["source"] = "first"
+
+        assert Property(name="second", value=np.zeros(2)).metadata == {}
+        assert first.metadata == {"source": "first"}
+
     def test_init_numpy_array(self):
         test_data = generate_test_inputs(n_points=100)
 

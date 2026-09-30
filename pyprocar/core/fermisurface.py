@@ -1143,15 +1143,18 @@ class FermiSurface(pv.PolyData):
         self, gradient_order: int, names: list[str] | None = None, **kwargs
     ) -> None:
         if names is None:
-            names = list(self.point_set._property_store.keys())
+            names = [
+                name for name in self.point_set.property_store if name in self.ebs.property_store
+            ]
         if gradient_order < 0:
             raise ValueError(f"Gradient order must be greater than 0. Got {gradient_order}.")
         self.ebs.compute_gradients(gradient_order=gradient_order, names=names)
 
         for prop_name, calc_name, gradient_order, value_array in self.ebs.iter_properties():
             property = self.point_set.get_property(prop_name)
-            surface_points = self.interpolate_to_surface(value_array)
-            property[calc_name, gradient_order] = surface_points
+            if property is None:
+                continue
+            property[calc_name, gradient_order] = self.interpolate_to_surface(value_array)
 
         return None
 

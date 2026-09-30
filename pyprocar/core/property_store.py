@@ -90,7 +90,7 @@ class Property:
     _point_set: weakref.ReferenceType | None = None
     units: str | None = None
     label: str | None = None
-    metadata: dict[str, Any] = {}
+    metadata: dict[str, Any]
     data_lim: tuple[float | None, float | None] | None = None
 
     def __init__(
@@ -131,8 +131,7 @@ class Property:
         if self.label is None:
             self.label = name
 
-        if metadata is not None:
-            self.metadata = metadata
+        self.metadata = metadata if metadata is not None else {}
 
         self._data_lim = data_lim
 
