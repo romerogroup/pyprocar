@@ -552,6 +552,36 @@ class TestDOSPlotterScalarsModes:
 
         plt.close(plotter.fig)
 
+    @pytest.mark.parametrize("n_channels", [2, 4])
+    def test_single_column_scalars_color_every_channel(self, n_channels):
+        point_data, scalars_data = _make_mock_property_with_scalars(
+            n_points=3, n_channels=n_channels
+        )
+        scalars_data.to_array.return_value = np.array([[0.1], [0.2], [0.3]])
+
+        plotter = DOSPlotter()
+        plotter.plot(point_data, scalars_data=scalars_data, scalars_mode="line")
+
+        arrays = [
+            c.get_array().tolist() for c in plotter.ax.collections if isinstance(c, LineCollection)
+        ]
+        assert arrays == [[0.1, 0.2, 0.3]] * n_channels
+
+        plt.close(plotter.fig)
+
+    def test_partial_clim_with_single_colorbar(self):
+        point_data, scalars_data = _make_mock_property_with_scalars(n_points=3, n_channels=2)
+
+        plotter = DOSPlotter()
+        plotter.plot(
+            point_data, scalars_data=scalars_data, scalars_mode="line", scalars_clim=(None, 1.0)
+        )
+
+        assert plotter.colorbar.norm.vmax == 1.0
+        assert len([c for c in plotter.ax.collections if isinstance(c, LineCollection)]) == 2
+
+        plt.close(plotter.fig)
+
     def test_scalars_mode_fill_creates_image(self):
         """Scalars mode 'fill' creates imshow-based fill."""
         point_data, scalars_data = _make_mock_property_with_scalars(n_channels=1)

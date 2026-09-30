@@ -113,13 +113,16 @@ def distribute_kwargs(kwargs: Mapping[str, Any], n_channels: int) -> list[dict[s
 
 
 def _take(values: np.ndarray | None, iband: int, ichannel: int) -> np.ndarray | None:
-    if values is None:
-        return None
-    if values.ndim == 3:
-        return values[:, iband, ichannel]
+    """One series' slice: 3D arrays by band and channel, 2D by band, else shared.
+
+    A band or channel axis of length 1 is shared by every band or channel.
+    """
+    if values is None or values.ndim == 1:
+        return values
+    iband = iband if values.shape[1] > 1 else 0
     if values.ndim == 2:
         return values[:, iband]
-    return values
+    return values[:, iband, ichannel if values.shape[2] > 1 else 0]
 
 
 def line_series(
@@ -133,8 +136,7 @@ def line_series(
 ) -> list[LineSeries]:
     """One series per (band, channel) of ``y``, shaped ``(n_points, n_bands, n_channels)``.
 
-    ``scalars`` and ``vectors`` are sliced per series: 3D arrays by band and
-    channel, 2D arrays by band, anything else is shared by every series.
+    ``scalars`` and ``vectors`` are sliced per series by ``_take``.
     """
     flip = ChannelMode.from_string(channel_mode) is ChannelMode.FLIP
     _, n_bands, n_channels = y.shape
