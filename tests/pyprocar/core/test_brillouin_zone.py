@@ -1,14 +1,14 @@
 """
 Test module for pyprocar.core.brillouin_zone module.
 
-This module contains unit tests for the Lines, BrillouinZone,
+This module contains unit tests for the BrillouinZone
 and BrillouinZone2D classes.
 """
 
 import numpy as np
 import pytest
 
-from pyprocar.core.brillouin_zone import BrillouinZone, BrillouinZone2D, Lines
+from pyprocar.core.brillouin_zone import BrillouinZone, BrillouinZone2D
 
 
 @pytest.fixture
@@ -64,73 +64,6 @@ def hexagonal_reciprocal_lattice():
         [0.0, 2 * a / np.sqrt(3), 0.0],
         [0.0, 0.0, c]
     ])
-
-
-@pytest.fixture
-def simple_verts():
-    """Create simple vertices for Lines testing."""
-    return np.array([
-        [0.0, 0.0, 0.0],
-        [1.0, 0.0, 0.0],
-        [1.0, 1.0, 0.0],
-        [0.0, 1.0, 0.0]
-    ])
-
-
-@pytest.fixture
-def simple_faces():
-    """Create simple faces for Lines testing (single square face)."""
-    return [[0, 1, 2, 3]]
-
-
-class TestLines:
-    """Test class for Lines object."""
-
-    def test_lines_initialization(self, simple_verts, simple_faces):
-        """Test Lines initialization with vertices and faces."""
-        lines = Lines(verts=simple_verts, faces=simple_faces)
-
-        assert np.allclose(lines.verts, simple_verts)
-        assert lines.faces == simple_faces
-
-    def test_lines_nface_property(self, simple_verts, simple_faces):
-        """Test nface property returns correct number of faces."""
-        lines = Lines(verts=simple_verts, faces=simple_faces)
-
-        assert lines.nface == 1
-
-    def test_lines_multiple_faces(self, simple_verts):
-        """Test Lines with multiple faces."""
-        faces = [[0, 1], [1, 2], [2, 3]]
-        # Type ignore: source code has incorrect type hint (ndarray vs list)
-        lines = Lines(verts=simple_verts, faces=faces)  # pyright: ignore[reportArgumentType]
-
-        assert lines.nface == 3
-
-    def test_lines_connectivity(self, simple_verts, simple_faces):
-        """Test that connectivity is computed correctly."""
-        lines = Lines(verts=simple_verts, faces=simple_faces)
-
-        # Connectivity should include edges between consecutive points
-        # plus closing edge from last to first
-        assert len(lines.connectivity) > 0
-        # Check that connectivity pairs are valid indices
-        for conn in lines.connectivity:
-            assert len(conn) == 2
-            assert all(isinstance(idx, (int, np.integer)) for idx in conn)
-
-    def test_lines_pyvista_line_initialized(self, simple_verts, simple_faces):
-        """Test that PyVista line object is initialized."""
-        lines = Lines(verts=simple_verts, faces=simple_faces)
-
-        assert lines.pyvista_line is not None
-
-    def test_lines_create_trimesh(self, simple_verts, simple_faces):
-        """Test _create_trimesh method creates trimesh object."""
-        lines = Lines(verts=simple_verts, faces=simple_faces)
-        lines._create_trimesh()
-
-        assert lines.trimesh_line is not None
 
 
 class TestBrillouinZone:
