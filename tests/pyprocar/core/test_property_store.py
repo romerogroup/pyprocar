@@ -1,3 +1,5 @@
+import pickle
+
 import numpy as np
 import pandas as pd
 import pytest
@@ -50,6 +52,15 @@ class TestProperty:
 
         assert Property(name="second", value=np.zeros(2)).metadata == {}
         assert first.metadata == {"source": "first"}
+
+    def test_unpickle_state_without_metadata(self):
+        legacy = Property(name="legacy", value=np.arange(3.0))
+        del legacy.metadata
+
+        restored = pickle.loads(pickle.dumps(legacy))
+
+        assert restored.metadata == {}
+        assert restored.value.tolist() == [0.0, 1.0, 2.0]
 
     def test_init_numpy_array(self):
         test_data = generate_test_inputs(n_points=100)
@@ -180,6 +191,12 @@ class TestProperty:
 
 class TestPointSet:
     """Test suite for PointSet class."""
+
+
+    def test_compute_gradients_with_no_names_is_a_no_op(self, point_set_data):
+        point_set_data.compute_gradients(1, names=[])
+
+        assert point_set_data.get_property("sin").gradients[1].shape == (0,)
 
     def test_init(self, sin_data):
         point_set = PointSet(

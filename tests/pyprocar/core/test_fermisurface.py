@@ -452,12 +452,15 @@ class TestFermiSurfaceCache:
         assert not fs._is_cache_valid("nonexistent_property")
 
 
-def test_compute_gradients_default_names_updates_surface_bands(fermisurface_3d_non_spin_polarized):
+def test_compute_gradients_on_fresh_surface_interpolates_band_gradients(
+    fermisurface_3d_non_spin_polarized,
+):
     fs = fermisurface_3d_non_spin_polarized
-    fs.get_property("bands")
 
     fs.compute_gradients(1)
 
-    gradient = fs.point_set.get_property("bands").gradients[1]
+    gradient = fs.point_set.get_property("bands").gradients[1] * 1e9
+    speed = np.linalg.norm(gradient[:, 16, 0], axis=-1)
     assert gradient.shape == (2748, 20, 1, 3)
-    assert np.isfinite(gradient).all()
+    assert np.allclose(gradient[0, 16, 0], [-1.608, -3.126, -0.003], atol=1e-3)
+    assert np.allclose([speed.min(), speed.mean(), speed.max()], [0.255, 3.091, 3.598], atol=1e-3)

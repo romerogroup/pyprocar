@@ -135,6 +135,11 @@ class Property:
 
         self._data_lim = data_lim
 
+    def __setstate__(self, state: dict[str, Any]) -> None:
+        # Pickles written before metadata became per-instance carry no metadata key.
+        state.setdefault("metadata", {})
+        self.__dict__.update(state)
+
     @property
     def point_set(self) -> "PointSet":
         if isinstance(self._point_set, weakref.ReferenceType):
@@ -694,7 +699,6 @@ class PointSet:
                 scalars = property.gradients[gradient_order - 1]
 
             property.gradients[gradient_order] = self.gradient_func(self._points, scalars)
-        return property.gradients[gradient_order]
 
     def iter_property_arrays(
         self, property_store: dict[str, Property] | None = None

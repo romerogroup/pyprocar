@@ -64,19 +64,20 @@ class ConfigManager:
     Methods
     -------
     merge_configs(default_config: BaseConfig, user_config: Dict[str, Any]) -> BaseConfig
-        Updates the `default_config` with settings provided by `user_config`.
+        Returns a copy of `default_config` updated with settings from `user_config`.
+        `default_config` itself is left unchanged.
 
     Parameters
     ----------
     default_config : BaseConfig
-        The default configuration object to update.
+        The default configuration object. It is not modified.
     user_config : Dict[str, Any]
         A dictionary of user-provided configuration settings.
 
     Returns
     -------
     BaseConfig
-        The updated configuration object with settings from both default and user configurations.
+        A new configuration object with settings from both default and user configurations.
     """
 
     @staticmethod
