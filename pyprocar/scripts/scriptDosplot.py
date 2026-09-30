@@ -56,8 +56,8 @@ def dosplot(
     normalize_dos_mode: str | None = None,
     fermi: float | None = None,
     fermi_shift: float = 0,
-    elimit: list[float] | None = None,
-    dos_limit: list[float] | None = None,
+    elimit: list[float | None] | None = None,
+    dos_limit: list[float | None] | None = None,
     savefig: str | None = None,
     labels: list[str] | None = None,
     ax: plt.Axes | None = None,
@@ -322,12 +322,24 @@ def dosplot(
             "`fermi` is not set! Set `fermi={value}`. The plot did not shift the energy by the Fermi energy."
         )
 
-    channels, projection_spins = resolve_spins(dos.is_non_collinear, dos.n_spin_channels, spins)
-    n_channels = len(channels)
+    selection = resolve_spins(
+        dos.is_non_collinear, dos.n_spin_channels, spins, plain=mode == "plain"
+    )
+    channels, projection_spins = selection.channels, selection.projection_spins
 
     total = take_channels(dos.total, channels)
     if normalize_dos_mode:
         total.value = np.take(dos.normalize(normalize_dos_mode, dos.total.value), channels, axis=-1)
+    if selection.joined:
+        total = Property(
+            name=total.name,
+            value=total.value.sum(axis=-1, keepdims=True),
+            units=total.units,
+            label=total.label,
+            point_set=dos,
+            metadata={**total.metadata, "label": ["Total"]},
+        )
+    n_channels = total.value.shape[-1]
 
     plotter = DOSPlotter(orientation=orientation, ax=ax)
     line_style: dict[str, Any] = {
@@ -389,16 +401,14 @@ def dosplot(
 
     plotter.set_energy_label(energy_label)
     plotter.set_dos_label("DOS")
-    energy_axis_limit, dos_axis_limit = (
-        (plotter.set_xlim, plotter.set_ylim)
-        if plotter.orientation is AxesOrientation.HORIZONTAL
-        else (plotter.set_ylim, plotter.set_xlim)
-    )
-    energy_axis_limit(as_lim(elimit))
-    dos_axis_limit(as_lim(dos_limit))
+    ax = cast(plt.Axes, plotter.ax)
+    x_axis, y_axis = (plotter.set_xlim, ax.get_xlim), (plotter.set_ylim, ax.get_ylim)
+    horizontal = plotter.orientation is AxesOrientation.HORIZONTAL
+    energy_axis, dos_axis = (x_axis, y_axis) if horizontal else (y_axis, x_axis)
+    for (set_limits, get_limits), requested in ((energy_axis, elimit), (dos_axis, dos_limit)):
+        set_limits(as_lim(requested, get_limits()))
     plotter.set_title(config.title)
 
-    ax = cast(plt.Axes, plotter.ax)
     if labels:
         plotter.legend(labels=labels)
     elif ax.get_legend_handles_labels()[1]:

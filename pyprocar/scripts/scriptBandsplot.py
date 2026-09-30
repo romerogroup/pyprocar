@@ -17,7 +17,6 @@ from pyprocar.core import ElectronicBandStructurePath, Structure
 from pyprocar.core.property_store import Property
 from pyprocar.plotter.bs_plot import BandStructurePlotter
 from pyprocar.scripts._selection import (
-    as_lim,
     orbital_indices,
     per_channel,
     projection_components,
@@ -186,11 +185,6 @@ def bandsplot(
     user_logger.info("_" * 100)
 
     plot_mode = BandStructureMode.from_str(mode)
-    joins_spin_channels = spins is not None and (
-        np.array_equal(spins, [-1, 1]) or np.array_equal(spins, [1, -1])
-    )
-    if joins_spin_channels and plot_mode != BandStructureMode.PLAIN:
-        raise ValueError("spins=[-1, 1] joins the two spin channels and only works in plain mode")
 
     ebs = cast(
         ElectronicBandStructurePath,
@@ -212,9 +206,16 @@ def bandsplot(
             "`fermi` is not set! Set `fermi={value}`. The plot did not shift the bands by the Fermi energy."
         )
 
-    if joins_spin_channels:
+    selection = resolve_spins(
+        ebs.is_non_collinear,
+        ebs.n_spin_channels,
+        spins,
+        plain=plot_mode == BandStructureMode.PLAIN,
+    )
+    channels, projection_spins = selection.channels, selection.projection_spins
+    if selection.joined:
         ebs.fix_collinear_spin()
-        spins = [0]
+        channels = projection_spins = [0]
 
     if atoms is not None and isinstance(atoms[0], str):
         species = set(atoms)
@@ -222,7 +223,6 @@ def bandsplot(
         atoms = [i for i, name in enumerate(names) if name in species]
     orbitals = orbital_indices(orbitals)
 
-    channels, projection_spins = resolve_spins(ebs.is_non_collinear, ebs.n_spin_channels, spins)
     user_clim = config.clim if "clim" in kwargs else None
 
     plotter = BandStructurePlotter(ax=ax)
@@ -239,7 +239,7 @@ def bandsplot(
         weights = ebs.compute_projected_sum(atoms=atoms, orbitals=orbitals, spins=projection_spins)
         levels: dict[str, Any] = {
             "bands": take_channels(cast(Property, ebs.get_property("bands")), channels).value,
-            "elimit": as_lim(elimit),
+            "elimit": elimit,
             "scalars": take_channels(weights, channels).value,
             "cmap": config.cmap,
             "clim": user_clim or (None, None),

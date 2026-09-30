@@ -15,7 +15,7 @@ from pyprocar.cfg.fermi_surface_3d import FermiSurface3DConfig
 from pyprocar.core import ElectronicBandStructureMesh
 from pyprocar.core.fermisurface import FermiSurface
 from pyprocar.plotter import FermiPlotter
-from pyprocar.scripts._selection import as_lim, resolve_spins
+from pyprocar.scripts._selection import as_clim, resolve_spins
 from pyprocar.utils import welcome
 from pyprocar.utils.log_utils import set_verbose_level
 
@@ -247,8 +247,8 @@ class FermiHandler:
         property_name = self._map_mode_to_property(
             mode, bands, atoms, orbitals, spins, spin_texture
         )
-        channels, projection_spins = resolve_spins(
-            self.ebs.is_non_collinear, self.ebs.n_spin_channels, spins
+        channels, projection_spins, _ = resolve_spins(
+            self.ebs.is_non_collinear, self.ebs.n_spin_channels, spins, plain=mode == "plain"
         )
         scalars_data = vectors_data = None
         if mode == "plain":
@@ -273,7 +273,7 @@ class FermiHandler:
             show_brillouin_zone=config.show_brillouin_zone,
             show_scalar_bar=(scalars_data is not None and mode != "plain") or show_colorbar,
             scalars_cmap=config.surface_cmap,
-            scalars_clim=None if mode == "plain" else as_lim(config.surface_clim),
+            scalars_clim=None if mode == "plain" else as_clim(config.surface_clim),
             add_surface_kwargs={"opacity": config.surface_opacity},
         )
 

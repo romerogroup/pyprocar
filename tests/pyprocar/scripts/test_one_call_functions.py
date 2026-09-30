@@ -497,6 +497,52 @@ class TestDosplot:
         assert len(fills) == 3
         assert min(bottom for _, bottom in fills) == 0.0
 
+    def test_joined_spin_channels_plot_the_summed_total(self, tmp_path):
+        calc = _calc(tmp_path, "dos/spin-polarized")
+        dos = DensityOfStates.from_code("vasp", calc)
+        summed = dos.total.to_array().sum(axis=1)
+
+        _, ax = pyprocar.dosplot(
+            code="vasp", dirname=calc, mode="plain", fermi=FERMI, spins=[-1, 1], show=False
+        )
+
+        labelled = [line for line in ax.lines if not line.get_label().startswith("_")]
+        assert [line.get_label() for line in labelled] == ["Total"]
+        np.testing.assert_allclose(labelled[0].get_ydata(), summed)
+        assert summed.max() == pytest.approx(58.38, abs=0.01)
+
+    def test_joined_spin_channels_reject_projection_modes(self, tmp_path):
+        calc = _calc(tmp_path, "dos/spin-polarized")
+
+        with pytest.raises(ValueError, match="plain mode"):
+            pyprocar.dosplot(
+                code="vasp",
+                dirname=calc,
+                mode="parametric",
+                fermi=FERMI,
+                atoms=[1],
+                spins=[-1, 1],
+                show=False,
+            )
+
+    def test_open_ended_limits_keep_the_data_bound(self, tmp_path):
+        calc = _calc(tmp_path, "dos/non-spin-polarized")
+        top = DensityOfStates.from_code("vasp", calc).energies.max() - FERMI
+
+        _, ax = pyprocar.dosplot(
+            code="vasp",
+            dirname=calc,
+            mode="plain",
+            fermi=FERMI,
+            elimit=[-2, None],
+            dos_limit=[0, None],
+            show=False,
+        )
+
+        assert ax.get_xlim() == (-2.0, pytest.approx(top))
+        assert ax.get_ylim()[0] == 0.0
+        assert ax.get_ylim()[1] > 0.0
+
     def test_non_collinear_rejects_several_spin_components(self, tmp_path):
         calc = _calc(tmp_path, "dos/non-colinear")
 

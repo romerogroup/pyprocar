@@ -175,6 +175,82 @@ def test_normalizing_one_spin_channel_divides_by_that_channel(dos_spin_polarized
     np.testing.assert_allclose(down[:, 0], both[:, 1])
 
 
+@pytest.mark.parametrize(
+    ("norm_mode", "denominator"), [("total", "total"), ("total_projection", "projected_total")]
+)
+def test_normalizing_a_non_collinear_component_divides_by_the_charge_total(
+    dos_non_collinear, norm_mode, denominator
+):
+    selection = {"atoms": [0, 2], "orbitals": [1, 3], "spins": [1]}
+
+    normed = dos_non_collinear.compute_projected_sum(norm_mode=norm_mode, **selection)
+    raw = dos_non_collinear.compute_projected_sum(**selection).to_array()
+
+    charge = getattr(dos_non_collinear, denominator).to_array()[:, [0]]
+    np.testing.assert_allclose(normed.to_array(), raw / charge)
+
+
+@pytest.mark.data
+@pytest.mark.parametrize(
+    ("relpath", "method", "kwargs", "expected_range"),
+    [
+        (
+            "non-colinear",
+            "compute_projected_sum",
+            {
+                "atoms": [0],
+                "orbitals": [4, 5, 6, 7, 8],
+                "spins": [1],
+                "norm_mode": "total_projection",
+            },
+            (-0.3272, 0.0428),
+        ),
+        (
+            "non-colinear",
+            "compute_projected_sum",
+            {"spins": [1], "norm_mode": "total_projection"},
+            (-0.5774, 0.5878),
+        ),
+        (
+            "non-colinear",
+            "compute_projected_sum",
+            {"spins": [1], "norm_mode": "total"},
+            (-0.5625, 0.5658),
+        ),
+        (
+            "non-colinear",
+            "compute_spin_texture",
+            {"spins": [1], "norm_mode": "total_projection"},
+            (-0.5774, 0.5878),
+        ),
+        (
+            "spin-polarized",
+            "compute_projected_sum",
+            {
+                "atoms": [0],
+                "orbitals": [4, 5, 6, 7, 8],
+                "spins": [1],
+                "norm_mode": "total_projection",
+            },
+            (0.0, 0.8378),
+        ),
+    ],
+    ids=[
+        "nc-atom-sx-total-projection",
+        "nc-sx-total-projection",
+        "nc-sx-total",
+        "nc-texture-sx",
+        "sp-down",
+    ],
+)
+def test_normalized_projection_ranges_on_real_calculations(relpath, method, kwargs, expected_range):
+    dos = DensityOfStates.from_code("vasp", DATA_DIR / "examples" / "dos" / relpath)
+
+    values = getattr(dos, method)(**kwargs).to_array()
+
+    assert (values.min(), values.max()) == pytest.approx(expected_range, abs=1e-4)
+
+
 def test_compute_projected_sum_non_collinear(dos_non_collinear):
     atoms = [0, 1]
     orbitals = [0, 2]

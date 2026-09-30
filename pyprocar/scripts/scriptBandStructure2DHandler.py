@@ -15,7 +15,7 @@ from pyprocar.cfg.band_structure_2d import Bandstructure2DConfig
 from pyprocar.cfg.base import PlotType
 from pyprocar.core import BandStructure2D, ElectronicBandStructureMesh
 from pyprocar.plotter import BS2DPlotter
-from pyprocar.scripts._selection import as_lim
+from pyprocar.scripts._selection import as_clim
 from pyprocar.utils import welcome
 from pyprocar.utils.log_utils import set_verbose_level
 
@@ -219,7 +219,7 @@ class BandStructure2DHandler:
             clip_brillouin_zone=config.clip_brillouin_zone,
             show_scalar_bar=config.show_scalar_bar and prop is not None,
             scalars_cmap=config.surface_cmap,
-            scalars_clim=as_lim(config.surface_clim),
+            scalars_clim=as_clim(config.surface_clim),
             add_surface_kwargs={"opacity": config.surface_opacity},
         )
 

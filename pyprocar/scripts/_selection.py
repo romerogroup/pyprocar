@@ -1,5 +1,7 @@
 """Channel and projection selection shared by the one-call plotting functions."""
 
+from typing import NamedTuple
+
 import numpy as np
 
 from pyprocar.core.atomic_orbital_index import PRIMARY_ORBITAL_GROUPS
@@ -15,22 +17,39 @@ def orbital_indices(orbitals):
     return [i for name in orbitals for i in ORBITAL_GROUPS[name]]
 
 
-def resolve_spins(is_non_collinear: bool, n_channels: int, spins) -> tuple[list[int], list[int]]:
-    """Return (channels to draw, spins to project) under one policy for every script.
+class SpinSelection(NamedTuple):
+    channels: list[int]
+    projection_spins: list[int]
+    joined: bool = False
+
+
+def resolve_spins(
+    is_non_collinear: bool, n_channels: int, spins, plain: bool = True
+) -> SpinSelection:
+    """Return the channels to draw and the spins to project, one policy for every script.
 
     Collinear data draws the requested spin channels (all by default) and projects
-    those same channels. Non-collinear data has one channel; ``spins`` picks one
-    spin component (0 total, 1-3 Sx, Sy, Sz) and defaults to the total.
+    those same channels. ``spins=[-1, 1]`` joins both collinear channels into one,
+    which only plain plots support. Non-collinear data has one channel; ``spins``
+    picks one spin component (0 total, 1-3 Sx, Sy, Sz) and defaults to the total.
     """
+    if spins is not None and sorted(spins) == [-1, 1]:
+        if is_non_collinear or n_channels != 2:
+            raise ValueError("spins=[-1, 1] joins two collinear spin channels")
+        if not plain:
+            raise ValueError(
+                "spins=[-1, 1] joins the two spin channels and only works in plain mode"
+            )
+        return SpinSelection([0, 1], [0, 1], joined=True)
     if not is_non_collinear:
         channels = list(range(n_channels)) if spins is None else list(spins)
-        return channels, channels
+        return SpinSelection(channels, channels)
     if spins is not None and len(spins) != 1:
         raise ValueError(
             "Non-collinear calculations take one spin component"
             + f" (0 total, 1-3 Sx, Sy, Sz); got spins={list(spins)}"
         )
-    return [0], [0] if spins is None else list(spins)
+    return SpinSelection([0], [0] if spins is None else list(spins))
 
 
 def projection_components(source, kind: str, atoms=None, orbitals=None, items=None, **kwargs):
@@ -57,9 +76,20 @@ def projection_components(source, kind: str, atoms=None, orbitals=None, items=No
     ]
 
 
-def as_lim(values) -> tuple[float, float] | None:
-    """A (low, high) pair from a user-supplied two-item sequence, or None."""
+def as_clim(values) -> tuple[float, float] | None:
+    """A (low, high) colour range from a user-supplied two-item sequence, or None."""
     return None if values is None else (float(values[0]), float(values[1]))
+
+
+def as_lim(values, current: tuple[float, float]) -> tuple[float, float] | None:
+    """Axis limits from a user-supplied pair; a None bound keeps the ``current`` one."""
+    if values is None:
+        return None
+    low, high = values
+    return (
+        float(current[0] if low is None else low),
+        float(current[1] if high is None else high),
+    )
 
 
 def signed_clim(prop: Property) -> tuple[float, float] | None:

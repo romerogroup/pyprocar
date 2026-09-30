@@ -668,15 +668,17 @@ class DensityOfStates(PointSet):
     ) -> npt.NDArray[np.float64]:
         """Normalize ``values_array`` (energies first, then spin channels) by ``mode``.
 
-        ``spins`` names the channels ``values_array`` holds, so the total
-        denominators use those same channels.
+        For collinear data ``spins`` names the channels ``values_array`` holds, so
+        the total denominators use those same channels. Non-collinear columns are
+        spin components, so their denominators keep the leading columns, and a
+        single component divides by the charge total.
 
         Spin-magnitude and magnetization modes skip denominators below ``eps`` and
         clip outliers beyond ``sigma`` standard deviations to ``fill_value``.
         """
         mode = NormMode.parse(mode)
         n_spins = np.shape(values_array)[1] if np.ndim(values_array) > 1 else None
-        channels = list(spins) if spins is not None else slice(0, n_spins)
+        channels = slice(0, n_spins) if spins is None or self.is_non_collinear else list(spins)
 
         def above_eps(prop: Property | None, what: str, magnitude) -> npt.NDArray[np.float64]:
             if prop is None:
