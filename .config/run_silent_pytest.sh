@@ -52,13 +52,9 @@ else
                 failed = stats[1]
                 passed = stats[2]
             }
-            /stopping after [0-9]+ failures/ {
-                match($0, /stopping after ([0-9]+) failures/, stop)
-                stopped = stop[1]
-            }
             END {
                 if (total && failed && passed) {
-                    printf "%s total tests. Stopped after %s failures. %s failed, %s passed.\n\n", total, stopped ? stopped : failed, failed, passed
+                    printf "%s total tests. %s failed, %s passed.\n\n", total, failed, passed
                     printf "1st failure:\n\n"
                 }
             }
