@@ -455,7 +455,10 @@ class TestFermiSurfaceCache:
 
 
 def _finite_difference_gradient(ebs, band, padding):
-    """Central differences on the original periodic k-grid, in Cartesian eV*Angstrom."""
+    """Central differences on the original periodic k-grid, in Cartesian eV*Angstrom.
+
+    Uses pyprocar's reciprocal-lattice convention (no 2*pi), like gradient_func.
+    """
     bands = math.array_to_mesh(ebs.bands.value[:, band, 0], ebs.n_kx, ebs.n_ky, ebs.n_kz)
     d_frac = np.stack(
         [

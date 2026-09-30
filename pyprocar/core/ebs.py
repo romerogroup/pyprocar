@@ -2020,7 +2020,7 @@ def edge_diff_ramp(vector, pad_width, iaxis, kwargs):
 class ElectronicBandStructureMesh(
     ElectronicBandStructure, DifferentiablePropertyInterface
 ):
-    # Set by pad(): a padded grid keeps the original spacing but spans more than one zone.
+    # Set by pad() and interpolate(): such grids span more than one zone, so 1/n is wrong.
     _kgrid_spacing: list[float] | None = None
 
     def __init__(self, kgrid_info: kpoints.KGridInfo, **kwargs):
@@ -2321,6 +2321,11 @@ class ElectronicBandStructureMesh(
             interpolated_value = math.mesh_to_array(interpolated_mesh)
             property[calc_name, gradient_order] = interpolated_value
 
+        if ebs._kgrid_spacing is not None:
+            ebs._kgrid_spacing = [
+                np.ptp(axis) / (len(axis) - 1) if np.ptp(axis) > 0 else 1 / len(axis)
+                for axis in (new_x, new_y, new_z)
+            ]
         ebs.update_points(new_kpoints)
         ebs._mesh = ebs.to_mesh()
         return ebs
