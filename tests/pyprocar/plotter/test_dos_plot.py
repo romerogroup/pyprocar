@@ -538,6 +538,20 @@ class TestDOSPlotterScalarsModes:
 
         plt.close(plotter.fig)
 
+    def test_scalars_line_colors_each_channel_by_its_own_column(self):
+        point_data, scalars_data = _make_mock_property_with_scalars(n_points=3, n_channels=2)
+        scalars_data.to_array.return_value = np.array([[0.1, 0.9], [0.2, 0.8], [0.3, 0.7]])
+
+        plotter = DOSPlotter()
+        plotter.plot(point_data, scalars_data=scalars_data, scalars_mode="line")
+
+        arrays = [
+            c.get_array().tolist() for c in plotter.ax.collections if isinstance(c, LineCollection)
+        ]
+        assert arrays == [[0.1, 0.2, 0.3], [0.9, 0.8, 0.7]]
+
+        plt.close(plotter.fig)
+
     def test_scalars_mode_fill_creates_image(self):
         """Scalars mode 'fill' creates imshow-based fill."""
         point_data, scalars_data = _make_mock_property_with_scalars(n_channels=1)

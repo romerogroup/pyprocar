@@ -483,13 +483,13 @@ class DOSPlotter:
             y = y_data[:, c].copy() if n_channels > 1 else y_data.copy()
             if channel_mode is ChannelMode.FLIP and c != 0:
                 y *= -1.0
-            scalars = (
+            channel_scalars = (
                 scalars[:, c]
                 if scalars is not None and scalars.ndim == 2
                 else (scalars if scalars is not None else None)
             )
             s_lim = s_lims[c] if s_lims is not None and len(s_lims) > c else None
-            vectors = (
+            channel_vectors = (
                 vectors[:, c]
                 if vectors is not None and vectors.ndim == 2
                 else (vectors if vectors is not None else None)
@@ -499,11 +499,11 @@ class DOSPlotter:
                 Series(
                     x=x_data,
                     y=y,
-                    scalars=scalars,
+                    scalars=channel_scalars,
                     scalars_label=s_label,
                     scalars_unit=s_unit,
                     scalars_lim=s_lim,
-                    vectors=vectors,
+                    vectors=channel_vectors,
                     vectors_label=v_label,
                     vectors_unit=v_unit,
                     vectors_lim=v_lim,
