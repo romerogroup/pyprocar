@@ -217,7 +217,7 @@ class ProjwfcDOS:
             # Spin-polarized: use dosup(E) and dosdw(E) columns
             dos_up = df["dosup(E)"].to_numpy()
             dos_down = df["dosdw(E)"].to_numpy()
-            dos_array = np.hstack((dos_up, dos_down))  # shape (n_energies, 2)
+            dos_array = np.column_stack((dos_up, dos_down))  # shape (n_energies, 2)
         else:
             # Non-spin-polarized: only one DOS column
             dos_total = df["dos(E)"].to_numpy()

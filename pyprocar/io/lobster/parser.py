@@ -314,33 +314,13 @@ class LobsterParser(BaseParser):
         if self._doscar is None:
             return None
 
+        fermi = self.fermi if self.fermi is not None else 0.0
         try:
-            total = []
-            for ispin in range(self._doscar.n_spins):
-                total.append(self._doscar.total_dos[:, ispin])
-
-            # Format projected DOS for DensityOfStates
-            projected = None
-            if self._doscar.projected_dos is not None:
-                # Convert from (nedos, n_spins, n_atoms, n_orbitals) to expected format
-                pdos = self._doscar.projected_dos
-                n_atoms = pdos.shape[2]
-                n_orbitals = pdos.shape[3]
-
-                projected = []
-                for iatom in range(n_atoms):
-                    atom_data = []
-                    for iorb in range(n_orbitals):
-                        spin_data = []
-                        for ispin in range(self._doscar.n_spins):
-                            spin_data.append(pdos[:, ispin, iatom, iorb])
-                        atom_data.append(spin_data)
-                    projected.append([atom_data])
-
             return DensityOfStates(
-                energies=self._doscar.energies,
-                total=total,
-                projected=projected,
+                energies=self._doscar.energies + fermi,
+                total=self._doscar.total_dos,
+                projected=self._doscar.projected_dos,
+                fermi=fermi,
             )
 
         except Exception as e:

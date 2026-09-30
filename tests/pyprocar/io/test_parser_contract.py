@@ -29,22 +29,16 @@ MEMBER_TYPES = {
 CODES_DIR = DATA_DIR / "codes"
 
 LEGACY_DOS_REASON = (
-    "adapter builds DOS in the legacy (nspin, nE) layout that DensityOfStates rejects"
+    "ElkDOS builds the legacy (nspin, nE) layout that DensityOfStates rejects"
 )
 KGRID_MODE_ENUM = pytest.mark.xfail(
     reason="ElectronicBandStructureMesh passes a KGRID_MODE enum to get_kpoints_from_kgrid, "
-    "which expects a str; the DOS also uses the legacy layout",
+    "which expects a str",
     raises=AttributeError,
     strict=True,
 )
 ELK_LEGACY_DOS = pytest.mark.xfail(
     reason=LEGACY_DOS_REASON, raises=ValueError, strict=True
-)
-LOBSTER_LEGACY_DOS = pytest.mark.xfail(
-    reason=LEGACY_DOS_REASON
-    + "; LobsterParser.dos swallows the error and returns None",
-    raises=AssertionError,
-    strict=True,
 )
 
 CASES = [
@@ -114,7 +108,6 @@ CASES = [
         },
         {"ebs", "dos"},
         id="lobster-bands",
-        marks=LOBSTER_LEGACY_DOS,
     ),
     pytest.param("bxsf", {"in.bxsf": BXSF_STR}, {"ebs"}, id="bxsf-mesh"),
     pytest.param("frmsf", {"in.frmsf": FRMSF_STR}, {"ebs"}, id="frmsf-mesh"),
@@ -157,6 +150,83 @@ def test_populated_directory_returns_core_types(
     } == expected_present
     for name, value in values.items():
         assert value is None or isinstance(value, MEMBER_TYPES[name]), name
+
+
+@pytest.mark.parametrize(
+    "code, relpath",
+    [
+        ("vasp", "vasp/6.4/SrVO3/non-spin-polarized/bands"),
+        ("qe", "qe/7.2/SrVO3/non-spin-polarized/bands"),
+        pytest.param(
+            "abinit",
+            "abinit/9.6/Fe/non-spin-polarized/bands",
+            marks=pytest.mark.xfail(
+                reason="AbinitParser returns bands in Hartree and fermi in eV",
+                raises=AssertionError,
+                strict=True,
+            ),
+        ),
+    ],
+)
+def test_real_ebs_bands_are_unshifted_around_fermi(code: str, relpath: str) -> None:
+    ebs = get_parser(code, CODES_DIR / relpath).ebs
+
+    assert ebs is not None and ebs.bands is not None
+    bands = ebs.bands.to_array()
+    assert bands.min() < ebs.fermi < bands.max()
+
+
+@pytest.mark.parametrize(
+    ("code", "source", "total_shape", "projected_shape", "energy_range", "fermi"),
+    [
+        pytest.param(
+            "qe",
+            CODES_DIR / "qe/7.2/SrVO3/non-spin-polarized/dos",
+            (7434, 1),
+            (7434, 1, 5, 16),
+            (-54.82, 19.51),
+            12.5491,
+            id="qe-non-spin-polarized",
+        ),
+        pytest.param(
+            "qe",
+            CODES_DIR / "qe/7.2/SrVO3/spin-polarized-colinear/dos",
+            (7433, 2),
+            (7433, 2, 5, 16),
+            (-54.808, 19.512),
+            12.5465,
+            id="qe-spin-polarized",
+        ),
+        pytest.param(
+            "lobster",
+            {"lobsterout": LOBSTEROUT_CONTENT, "DOSCAR.lobster": DOSCAR_CONTENT},
+            (5, 1),
+            None,
+            (-10.0, 10.0),
+            0.0,
+            id="lobster",
+        ),
+    ],
+)
+def test_dos_is_in_core_layout_with_unshifted_energies(
+    code: str,
+    source: Path | dict[str, str],
+    total_shape: tuple[int, ...],
+    projected_shape: tuple[int, ...] | None,
+    energy_range: tuple[float, float],
+    fermi: float,
+    tmp_path: Path,
+) -> None:
+    dos = get_parser(code, calc_dir(source, tmp_path)).dos
+
+    assert dos is not None and dos.total is not None
+    assert dos.total.to_array().shape == total_shape
+    projected = dos.projected
+    assert (
+        None if projected is None else projected.to_array().shape
+    ) == projected_shape
+    assert (dos.energies[0], dos.energies[-1]) == pytest.approx(energy_range)
+    assert dos.fermi == pytest.approx(fermi)
 
 
 def test_from_code_names_the_member_the_adapter_could_not_provide(
