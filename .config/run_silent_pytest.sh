@@ -35,7 +35,6 @@ if eval "$command" > "$tmp_file" 2>&1; then
     rm -f "$tmp_file"
     exit 0
 else
-    exit_code=$?
     printf "  ✗ running tests\n"
 
     if $verbose; then
@@ -105,5 +104,5 @@ else
     fi
 
     rm -f "$tmp_file"
-    exit 0
+    exit 1
 fi

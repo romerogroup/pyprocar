@@ -30,7 +30,6 @@ addopts = [
     # "-rf", 
 
 # "-qq",
-"--maxfail=1", 
 "--numprocesses=auto", 
 "--tb=short",
 "--xfail-tb", 
