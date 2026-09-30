@@ -67,6 +67,22 @@ class TestFermiPlotterPlot:
         assert meshes[(3, 1)].active_scalars_name == "scalars"
         np.testing.assert_array_equal(meshes[(3, 1)].point_data["scalars"], [2.0, np.nan, -1.0])
 
+    def test_band_resolved_scalars_take_each_surface_band_and_spin(self, plotter):
+        values = np.zeros((6, 4, 2))
+        values[:3, 0, 0] = [0.1, 0.2, 0.3]
+        values[3:, 3, 1] = [0.7, 0.8, 0.9]
+        values[:, 1, 0] = 5.0
+
+        meshes = plotter.plot(_fermi_surface(), scalars_data=_property(values))
+
+        assert meshes[(0, 0)].point_data["scalars"].tolist() == [0.1, 0.2, 0.3]
+        assert meshes[(3, 1)].point_data["scalars"].tolist() == [0.7, 0.8, 0.9]
+
+    def test_spins_limits_the_drawn_surfaces(self, plotter):
+        meshes = plotter.plot(_fermi_surface(), spins=[1])
+
+        assert list(meshes) == [(3, 1)]
+
     def test_scalars_resolve_by_name(self, plotter):
         fs = _fermi_surface({"projected_sum": _property(SCALARS)})
         meshes = plotter.plot(fs, scalars_data="projected_sum")

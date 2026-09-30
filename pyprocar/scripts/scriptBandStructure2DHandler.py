@@ -210,6 +210,7 @@ class BandStructure2DHandler:
             scalars_data=None if is_vector else prop,
             vectors_data=prop if is_vector else None,
             show_brillouin_zone=config.show_brillouin_zone,
+            clip_brillouin_zone=config.clip_brillouin_zone,
             show_scalar_bar=config.show_scalar_bar and prop is not None,
             scalars_cmap=config.surface_cmap,
             scalars_clim=config.surface_clim,
@@ -243,7 +244,7 @@ class BandStructure2DHandler:
         if save_2d:
             plotter.screenshot(filename=save_2d)
             plotter.close()
-            return None
+            return plotter
 
         if show and not (save_gif or save_mp4 or save_3d):
             plotter.show()
@@ -260,6 +261,7 @@ class BandStructure2DHandler:
             bs2d.save(save_3d)
 
         plotter.close()
+        return plotter
 
     def print_default_settings(self):
         """

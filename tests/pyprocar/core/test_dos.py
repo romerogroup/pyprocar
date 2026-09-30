@@ -165,6 +165,16 @@ def test_compute_projected_sum_spin_polarized(dos_spin_polarized):
     assert projected_sum.metadata["atoms"] == atoms
 
 
+@pytest.mark.parametrize("norm_mode", ["total", "total_projection"])
+def test_normalizing_one_spin_channel_divides_by_that_channel(dos_spin_polarized, norm_mode):
+    selection = {"atoms": [0, 2], "orbitals": [1, 3], "norm_mode": norm_mode}
+
+    down = dos_spin_polarized.compute_projected_sum(spins=[1], **selection).to_array()
+    both = dos_spin_polarized.compute_projected_sum(spins=[0, 1], **selection).to_array()
+
+    np.testing.assert_allclose(down[:, 0], both[:, 1])
+
+
 def test_compute_projected_sum_non_collinear(dos_non_collinear):
     atoms = [0, 1]
     orbitals = [0, 2]

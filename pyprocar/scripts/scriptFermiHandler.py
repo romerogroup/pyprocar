@@ -13,6 +13,7 @@ from pyprocar.cfg import ConfigFactory, ConfigManager, FermiSurface3DConfig, Plo
 from pyprocar.core import ElectronicBandStructureMesh
 from pyprocar.core.fermisurface import FermiSurface
 from pyprocar.plotter import FermiPlotter
+from pyprocar.scripts._selection import resolve_spins
 from pyprocar.utils import welcome
 from pyprocar.utils.log_utils import set_verbose_level
 
@@ -33,7 +34,8 @@ class FermiHandler:
         self,
         code: str,
         dirname: str = "",
-        fermi: float = None,
+        fermi: float | None = None,
+        *,
         use_cache: bool = False,
         ebs_filename: str = "ebs.pkl",
         verbose: int = 1,
@@ -240,10 +242,15 @@ class FermiHandler:
         property_name = self._map_mode_to_property(
             mode, bands, atoms, orbitals, spins, spin_texture
         )
+        channels, projection_spins = resolve_spins(
+            self.ebs.is_non_collinear, self.ebs.n_spin_channels, spins
+        )
         scalars_data = vectors_data = None
-        if property_name and mode != "plain":
+        if mode == "plain":
+            scalars_data = fermi_surface.get_property("spin_band_index")
+        elif property_name:
             prop = fermi_surface.get_property(
-                property_name, atoms=atoms, orbitals=orbitals, spins=spins
+                property_name, atoms=atoms, orbitals=orbitals, spins=projection_spins
             )
             if prop.value.shape[-1] == 3:
                 vectors_data = prop
@@ -257,10 +264,11 @@ class FermiHandler:
             fermi_surface,
             scalars_data=scalars_data,
             vectors_data=vectors_data,
+            spins=channels,
             show_brillouin_zone=config.show_brillouin_zone,
-            show_scalar_bar=scalars_data is not None or show_colorbar,
+            show_scalar_bar=(scalars_data is not None and mode != "plain") or show_colorbar,
             scalars_cmap=config.surface_cmap,
-            scalars_clim=config.surface_clim,
+            scalars_clim=None if mode == "plain" else config.surface_clim,
             add_surface_kwargs={"opacity": config.surface_opacity},
         )
 
@@ -274,7 +282,7 @@ class FermiHandler:
         # Handle saving and showing
         if save_2d:
             fsplt.savefig(filename=save_2d)
-            return None
+            return fsplt
 
         if show and (save_gif is None and save_mp4 is None and save_3d is None):
             fsplt.show()
@@ -287,6 +295,7 @@ class FermiHandler:
 
         if save_3d:
             fsplt.export_data(str(save_3d))
+        return fsplt
 
     def plot_fermi_isoslider(
         self,

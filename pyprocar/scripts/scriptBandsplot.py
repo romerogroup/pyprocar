@@ -12,12 +12,13 @@ import numpy as np
 
 from pyprocar.cfg import BandStructureConfig, ConfigFactory, ConfigManager, PlotType
 from pyprocar.core import ElectronicBandStructurePath
-from pyprocar.core.property_store import Property
 from pyprocar.plotter.bs_plot import BandStructurePlotter
 from pyprocar.scripts._selection import (
     orbital_indices,
     per_channel,
     projection_components,
+    resolve_spins,
+    signed_clim,
     take_channels,
 )
 from pyprocar.utils import welcome
@@ -181,6 +182,9 @@ def bandsplot(
     user_logger.info("_" * 100)
 
     plot_mode = BandStructureMode.from_str(mode)
+    joins_spin_channels = np.array_equal(spins, [-1, 1]) or np.array_equal(spins, [1, -1])
+    if joins_spin_channels and plot_mode != BandStructureMode.PLAIN:
+        raise ValueError("spins=[-1, 1] joins the two spin channels and only works in plain mode")
 
     ebs = ElectronicBandStructurePath.from_code(code, dirname, use_cache=use_cache)
 
@@ -199,7 +203,7 @@ def bandsplot(
             "`fermi` is not set! Set `fermi={value}`. The plot did not shift the bands by the Fermi energy."
         )
 
-    if np.array_equal(spins, [-1, 1]) or np.array_equal(spins, [1, -1]):
+    if joins_spin_channels:
         ebs.fix_collinear_spin()
         spins = [0]
 
@@ -208,17 +212,8 @@ def bandsplot(
         atoms = [i for i, name in enumerate(ebs.structure.atoms) if name in species]
     orbitals = orbital_indices(orbitals)
 
-    # Non-collinear projections carry spin components, not channels: draw channel 0
-    # and let `spins` pick the components summed into the projection.
-    if ebs.is_non_collinear:
-        channels = [0]
-    elif spins is not None:
-        channels = list(spins)
-    else:
-        channels = list(range(ebs.n_spin_channels))
-
-    def projection(prop: Property) -> Property:
-        return prop if ebs.is_non_collinear else take_channels(prop, channels)
+    channels, projection_spins = resolve_spins(ebs.is_non_collinear, ebs.n_spin_channels, spins)
+    user_clim = config.clim if "clim" in kwargs else None
 
     plotter = BandStructurePlotter(ax=ax)
     n_channels = len(channels)
@@ -231,13 +226,13 @@ def bandsplot(
         user_logger.info("Plotting bands in atomic mode")
         if ebs.n_kpoints != 1:
             raise ValueError("Atomic mode needs a single k-point calculation")
-        weights = ebs.compute_projected_sum(atoms=atoms, orbitals=orbitals, spins=spins)
+        weights = ebs.compute_projected_sum(atoms=atoms, orbitals=orbitals, spins=projection_spins)
         plotter.plot_atomic_levels(
             bands=np.take(ebs.get_property("bands").value, channels, axis=2),
             elimit=tuple(elimit) if elimit is not None else None,
-            scalars=np.take(weights.value, channels, axis=2),
+            scalars=take_channels(weights, channels).value,
             cmap=config.cmap,
-            clim=config.clim,
+            clim=user_clim or (None, None),
             **(atomic_levels_kwargs or {}),
         )
         plotter.set_colorbar_title(config.colorbar_title)
@@ -245,12 +240,12 @@ def bandsplot(
         user_logger.info(f"Plotting bands in {plot_mode.value} mode")
         kind = plot_mode.value.split("_", 1)[1] if "_" in plot_mode.value else "items"
         weights = projection_components(
-            ebs, kind, atoms=atoms, orbitals=orbitals, items=items, spins=spins
+            ebs, kind, atoms=atoms, orbitals=orbitals, items=items, spins=projection_spins
         )
         plotter.plot_overlay(
             ebs.kpath,
             np.take(ebs.bands.value, channels, axis=2),
-            weights=[projection(w).value for w in weights],
+            weights=[take_channels(w, channels).value for w in weights],
             labels=[w.label for w in weights],
             **(overlay_kwargs or {}),
         )
@@ -275,18 +270,23 @@ def bandsplot(
                 artist_kwargs: dict[str, Any] = {"collection_kwargs": ipr_kwargs}
             else:
                 user_logger.info(f"Plotting bands in {plot_mode.value} mode")
-                scalars = ebs.compute_projected_sum(atoms=atoms, orbitals=orbitals, spins=spins)
+                scalars = ebs.compute_projected_sum(
+                    atoms=atoms, orbitals=orbitals, spins=projection_spins
+                )
                 colorbar_title = config.colorbar_title
                 artist_kwargs = {
                     "collection_kwargs": parametric_kwargs,
                     "scatter_kwargs": scatter_kwargs,
                 }
+            scalars = take_channels(scalars, channels)
             plotter.plot(
                 bands,
-                scalars_data=projection(scalars),
+                scalars_data=scalars,
                 scalars_mode="scatter" if plot_mode == BandStructureMode.SACATTER else "parametric",
                 scalars_cmap=config.cmap,
-                scalars_clim=config.clim,
+                scalars_clim=user_clim
+                or signed_clim(scalars)
+                or (0.0, float(np.nanmax(scalars.value)) or 1.0),
                 **artist_kwargs,
                 **style,
             )

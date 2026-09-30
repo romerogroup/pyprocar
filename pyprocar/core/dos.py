@@ -663,15 +663,20 @@ class DensityOfStates(PointSet):
         sigma: float = 1.25,
         fill_value: float = 0.0,
         eps: float = 0.001,
+        spins: Sequence[int] | None = None,
         **kwargs,
     ) -> npt.NDArray[np.float64]:
         """Normalize ``values_array`` (energies first, then spin channels) by ``mode``.
+
+        ``spins`` names the channels ``values_array`` holds, so the total
+        denominators use those same channels.
 
         Spin-magnitude and magnetization modes skip denominators below ``eps`` and
         clip outliers beyond ``sigma`` standard deviations to ``fill_value``.
         """
         mode = NormMode.parse(mode)
         n_spins = np.shape(values_array)[1] if np.ndim(values_array) > 1 else None
+        channels = list(spins) if spins is not None else slice(0, n_spins)
 
         def above_eps(prop: Property | None, what: str, magnitude) -> npt.NDArray[np.float64]:
             if prop is None:
@@ -690,8 +695,8 @@ class DensityOfStates(PointSet):
                 NormMode.MAX: lambda: np.max(np.abs(values_array), axis=0, keepdims=True),
                 NormMode.INTEGRAL: integral,
                 NormMode.ELECTRONS: lambda: self.n_electrons,
-                NormMode.TOTAL: lambda: self.total.to_array()[:, :n_spins],
-                NormMode.TOTAL_PROJECTION: lambda: self.projected_total.to_array()[:, :n_spins],
+                NormMode.TOTAL: lambda: self.total.to_array()[:, channels],
+                NormMode.TOTAL_PROJECTION: lambda: self.projected_total.to_array()[:, channels],
                 NormMode.MAGNETIZATION: lambda: above_eps(
                     self.magnetization, "Magnetization", lambda a: a
                 ),
@@ -819,7 +824,7 @@ class DensityOfStates(PointSet):
                 norm_mode=norm_mode,
                 allowed_norm_modes=None,
                 include_normal_label=kwargs.get("include_normal_label", False),
-                normalize_kwargs=kwargs,
+                normalize_kwargs={**kwargs, "spins": selection.spins},
             )
 
             results.append(prop)
@@ -952,7 +957,7 @@ class DensityOfStates(PointSet):
                     NormMode.RAW,
                 },
                 include_normal_label=kwargs.get("include_normal_label", False),
-                normalize_kwargs=kwargs,
+                normalize_kwargs={**kwargs, "spins": selection.spins},
             )
 
             results.append(prop)
@@ -1097,7 +1102,7 @@ class DensityOfStates(PointSet):
                     NormMode.ELECTRONS,
                 },
                 include_normal_label=kwargs.get("include_normal_label", False),
-                normalize_kwargs=kwargs,
+                normalize_kwargs={**kwargs, "spins": selection.spins},
             )
 
             results.append(prop)

@@ -13,7 +13,7 @@ from pyvista.plotting.utilities.algorithms import (
 )
 
 from pyprocar.plotter._series import SurfaceSeries, surface_series
-from pyprocar.plotter._surface_plot import SurfacePlotter, normalize_to_range
+from pyprocar.plotter._surface_plot import SurfacePlotter, clip_to_zone, normalize_to_range
 
 logger = logging.getLogger(__name__)
 
@@ -89,6 +89,7 @@ class BS2DPlotter(SurfacePlotter):
         vectors_data=None,
         scalars_mode: str = "surface",
         show_brillouin_zone: bool = True,
+        clip_brillouin_zone: bool = False,
         show_scalar_bar: bool = True,
         scalars_cmap: str = "plasma",
         scalars_clim: tuple[float, float] | None = None,
@@ -116,6 +117,8 @@ class BS2DPlotter(SurfacePlotter):
             - "none": Plain surface (ignore scalars_data)
         show_brillouin_zone : bool
             Whether to display the 2D Brillouin zone boundary.
+        clip_brillouin_zone : bool
+            Whether to cut each surface to the part inside the Brillouin zone.
         show_scalar_bar : bool
             Whether to show the scalar bar (colorbar).
         scalars_cmap : str
@@ -138,10 +141,12 @@ class BS2DPlotter(SurfacePlotter):
 
         series_list = self._to_series_list(bs2d, scalars_data, vectors_data, **kwargs)
 
-        if show_brillouin_zone and hasattr(bs2d, "get_2d_brillouin_zone"):
+        bz = None
+        if (show_brillouin_zone or clip_brillouin_zone) and hasattr(bs2d, "get_2d_brillouin_zone"):
             z_coords = bs2d.points[:, 2]
             e_min, e_max = float(np.nanmin(z_coords)), float(np.nanmax(z_coords))
             bz = bs2d.get_2d_brillouin_zone(e_min=e_min, e_max=e_max)
+        if show_brillouin_zone and bz is not None:
             self.add_brillouin_zone(bz)
 
         return self._plot_series(
@@ -152,6 +157,7 @@ class BS2DPlotter(SurfacePlotter):
             scalars_clim,
             add_surface_kwargs,
             add_texture_kwargs,
+            clip_to=bz if clip_brillouin_zone else None,
         )
 
     def add_brillouin_zone(
@@ -221,12 +227,7 @@ class BS2DPlotter(SurfacePlotter):
             self.add_texture(surface, **add_texture_args)
 
     def clip_surface(self, surface: pv.PolyData, brillouin_zone: pv.PolyData):
-        for normal, center in zip(brillouin_zone.face_normals, brillouin_zone.centers):
-            surface = surface.clip(origin=center, normal=normal, inplace=False)
-            if surface.points.shape[0] == 0:
-                break
-
-        return surface
+        return clip_to_zone(surface, brillouin_zone)
 
     def add_slicer(
         self,

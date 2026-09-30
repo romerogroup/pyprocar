@@ -18,6 +18,8 @@ from pyprocar.scripts._selection import (
     orbital_indices,
     per_channel,
     projection_components,
+    resolve_spins,
+    signed_clim,
     take_channels,
 )
 from pyprocar.utils import welcome
@@ -315,14 +317,7 @@ def dosplot(
             "`fermi` is not set! Set `fermi={value}`. The plot did not shift the energy by the Fermi energy."
         )
 
-    # Non-collinear DOS carries spin components, not channels: draw the total
-    # channel and let `spins` pick the components summed into projections.
-    if dos.is_non_collinear:
-        channels = [0]
-        projection_spins = spins if spins is not None else [0]
-    else:
-        channels = list(spins) if spins is not None else list(dos.spin_channels)
-        projection_spins = channels
+    channels, projection_spins = resolve_spins(dos.is_non_collinear, dos.n_spin_channels, spins)
     n_channels = len(channels)
 
     total = take_channels(dos.total, channels)
@@ -357,7 +352,7 @@ def dosplot(
             scalars_data=scalars,
             scalars_mode="fill" if mode == "parametric" else "line",
             scalars_cmap=config.cmap,
-            scalars_clim=config.clim,
+            scalars_clim=config.clim or signed_clim(scalars),
             **(line_style if mode == "parametric_line" else {}),
         )
     elif mode != "plain":
