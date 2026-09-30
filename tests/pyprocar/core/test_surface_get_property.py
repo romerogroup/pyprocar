@@ -8,6 +8,8 @@ from pyprocar.plotter.bs_2d_plot import BS2DPlotter
 from pyprocar.plotter.fs_plot import FermiPlotter
 from tests.utils import DATA_DIR
 
+pytestmark = pytest.mark.data
+
 MESH_DIR = DATA_DIR / "examples" / "fermi3d" / "non-spin-polarized"
 GRAPHENE_DIR = DATA_DIR / "examples" / "bands" / "2d-bands" / "graphene"
 

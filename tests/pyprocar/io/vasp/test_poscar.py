@@ -229,6 +229,7 @@ class TestPoscar:
         assert len(poscar) == 5
         assert len(poscar) == poscar.n_atoms
 
+    @pytest.mark.data
     def test_poscar_real_file(self) -> None:
         """Test parsing a real POSCAR file from test data."""
         poscar_path = DATA_DIR / "examples" / "dos" / "non-spin-polarized" / "POSCAR"

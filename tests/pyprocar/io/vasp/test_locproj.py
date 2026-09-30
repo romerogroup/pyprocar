@@ -209,6 +209,7 @@ class TestLocproj:
         assert isinstance(data["radial_specs"], list)
         assert isinstance(data["projections"], np.ndarray)
 
+    @pytest.mark.data
     def test_locproj_real_file(self):
         """Test parsing a real LOCPROJ file from test data."""
         locproj_path = DATA_DIR / "examples" / "other" / "FULL3d" / "LOCPROJ"
