@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import logging
-from collections.abc import Callable, Iterable, Mapping, Sequence
+from collections.abc import Iterable, Mapping, Sequence
 from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any
@@ -17,43 +17,17 @@ from matplotlib import patches
 from matplotlib.collections import LineCollection
 
 from pyprocar.core.property_store import Property
+from pyprocar.plotter._series import (
+    ShowColorbar,
+    channel_lims,
+    line_series,
+    resolve_clim,
+)
 from pyprocar.utils.func_utils import (
     keep_func_kwargs,
 )
 
 logger = logging.getLogger(__name__)
-
-
-class ShowColorbar(Enum):
-    SINGLE = "single"
-    PER_CHANNEL = "per_channel"
-    NONE = "none"
-
-    @classmethod
-    def from_string(cls, input: str | ShowColorbar | bool | None) -> ShowColorbar:
-        if isinstance(input, ShowColorbar):
-            return input
-        elif input is None:
-            return cls.NONE
-        elif isinstance(input, bool):
-            return cls.SINGLE if input else cls.NONE
-
-        string = input.lower()
-        if string == "single":
-            return cls.SINGLE
-        elif string == "per_channel":
-            return cls.PER_CHANNEL
-        elif string == "none":
-            return cls.NONE
-        else:
-            err_msg = f"Invalid colorbar mode: {string}. Valid modes are:\n"
-            err_msg += "\n".join([f"- {mode}" for mode in cls.list_modes()])
-            raise ValueError(err_msg)
-
-    @classmethod
-    def list_modes(cls) -> list[str]:
-        """List all available colorbar modes."""
-        return [mode.value for mode in cls]
 
 
 class ScalarsMode(Enum):
@@ -102,48 +76,6 @@ class Axis(Enum):
             return cls.BOTH
         else:
             raise ValueError(f"Invalid axis: {string}")
-
-
-class ChannelMode(Enum):
-    FLIP = "flip"
-    NORMAL = "normal"
-
-    @classmethod
-    def from_string(cls, string: str | ChannelMode | None) -> ChannelMode:
-        if isinstance(string, ChannelMode):
-            return string
-        elif string is None:
-            return cls.NORMAL
-
-        string = string.lower()
-        if string == "flip":
-            return cls.FLIP
-        elif string == "normal":
-            return cls.NORMAL
-        else:
-            err_msg = f"Invalid channel mode: {string}. Valid modes are:\n"
-            err_msg += "\n".join([f"- {mode}" for mode in cls.list_modes()])
-            raise ValueError(err_msg)
-
-    @classmethod
-    def list_modes(cls) -> list[str]:
-        return [mode.value for mode in cls]
-
-
-@dataclass
-class Series:
-    x: np.ndarray
-    y: np.ndarray
-    scalars: np.ndarray
-    scalars_label: str | None
-    scalars_unit: str | None
-    scalars_lim: tuple[float | None, float | None] | None
-    vectors: np.ndarray
-    vectors_label: str | None
-    vectors_unit: str | None
-    vectors_lim: tuple[float | None, float | None] | None
-    label: str | None
-    additional_kwargs: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
@@ -218,27 +150,32 @@ class DOSPlotter:
         **kwargs,
     ):
         scalars_mode = ScalarsMode.from_string(scalars_mode)
-        channel_mode = ChannelMode.from_string(channel_mode)
 
-        series_list = self._to_series_list(
-            point_data, scalars_data, vectors_data, channel_mode, **kwargs
+        x, y = self.orient_data(point_data.points, point_data.to_array())
+        y = _as_channels(y)
+        n_channels = y.shape[2]
+        channel_labels = point_data.metadata.get("label")
+        series_list = line_series(
+            x,
+            y,
+            _as_channels(scalars_data.to_array()) if scalars_data is not None else None,
+            _as_channels(vectors_data.to_array()) if vectors_data is not None else None,
+            channel_mode,
+            kwargs,
+            lambda _, c: channel_labels[c] if channel_labels else point_data.label,
         )
 
-        # Resolve scaling for scalars
-        cmap_s, norm_s, clim_s, scalars_show_colorbar = _resolve_scaling_for_modality(
-            series_list,
-            get_values=lambda s: s.scalars,
-            get_clim=lambda s: s.scalars_lim,
+        cmap_s, norm_s, clim_s, scalars_show_colorbar = _resolve_scaling(
+            [s.scalars for s in series_list],
+            channel_lims(getattr(scalars_data, "rounded_data_lim", None), n_channels),
             show_colorbar=scalars_show_colorbar,
             cmap=scalars_cmap,
             norm=scalars_norm,
             clim=scalars_clim,
         )
-
-        cmap_v, norm_v, clim_v, vectors_show_colorbar = _resolve_scaling_for_modality(
-            series_list,
-            get_values=lambda s: s.vectors,
-            get_clim=lambda s: s.vectors_lim,
+        cmap_v, norm_v, clim_v, vectors_show_colorbar = _resolve_scaling(
+            [s.vectors for s in series_list],
+            channel_lims(getattr(vectors_data, "rounded_data_lim", None), n_channels),
             show_colorbar=vectors_show_colorbar,
             cmap=vectors_cmap,
             norm=vectors_norm,
@@ -260,7 +197,7 @@ class DOSPlotter:
                 "x": series.x,
                 "y": series.y,
                 "scalars": series.scalars,
-                "label": series.scalars_label,
+                "label": scalars_data.label if scalars_data else None,
                 "clim": clim_s[i_channel],
                 "cmap": cmap_s[i_channel],
                 "norm": norm_s[i_channel],
@@ -276,7 +213,7 @@ class DOSPlotter:
                 "x": series.x,
                 "y": series.y,
                 "vectors": series.vectors,
-                "label": series.vectors_label,
+                "label": vectors_data.label if vectors_data else None,
                 "clim": clim_v[i_channel],
                 "norm": norm_v[i_channel],
                 "cmap": cmap_v[i_channel],
@@ -285,29 +222,23 @@ class DOSPlotter:
 
             # add_scalar_args.update(series.additional_kwargs)
             if scalars_data and scalars_mode == ScalarsMode.LINE:
-                artist = self.add_scalar_line(**add_scalar_args, **series.additional_kwargs)
+                artist = self.add_scalar_line(**add_scalar_args, **series.kwargs)
             elif scalars_data and scalars_mode == ScalarsMode.FILL:
                 add_scalar_args["plot_total"] = plot_total
-                artist = self.add_scalar_fill(**add_scalar_args, **series.additional_kwargs)
+                artist = self.add_scalar_fill(**add_scalar_args, **series.kwargs)
             else:
                 add_line_args
-                artist = self.add_line(**add_line_args, **series.additional_kwargs)
+                artist = self.add_line(**add_line_args, **series.kwargs)
 
             if vectors_data:
-                self.add_vectors(**add_vectors_args, **series.additional_kwargs)
+                self.add_vectors(**add_vectors_args, **series.kwargs)
 
-        if scalars_data and scalars_show_colorbar is ShowColorbar.SINGLE:
-            lab = series_list[0].scalars_label
-            unit = series_list[0].scalars_unit
-            if unit:
-                lab = f"{lab} ({unit})"
-            self.plot_colorbar(label=lab, cmap=cmap_s[0], norm=norm_s[0])
-        elif scalars_data and scalars_show_colorbar is ShowColorbar.PER_CHANNEL:
-            for i, s in enumerate(series_list):
-                lab = s.scalars_label
-                unit = s.scalars_unit
-                if unit:
-                    lab = f"{lab} ({unit})"
+        if scalars_data and scalars_show_colorbar is not ShowColorbar.NONE:
+            lab = scalars_data.label
+            if scalars_data.units:
+                lab = f"{lab} ({scalars_data.units})"
+            n_bars = 1 if scalars_show_colorbar is ShowColorbar.SINGLE else len(series_list)
+            for i in range(n_bars):
                 self.plot_colorbar(label=lab, cmap=cmap_s[i], norm=norm_s[i])
 
         # vectors colorbar is only shown if you chose to
@@ -435,87 +366,6 @@ class DOSPlotter:
             norm=norm,
             **keep_func_kwargs(kwargs, self.ax.quiver),
         )
-
-    # ------------------------------------------------------------------
-    # Helpers
-    # ------------------------------------------------------------------
-    def _to_series_list(
-        self,
-        point_data: Property,
-        scalars_data: Property | None,
-        vectors_data: Property | None,
-        channel_mode: ChannelMode | str,
-        **kwargs,
-    ) -> list[Series]:
-        x_data, y_data = self.orient_data(point_data.points, point_data.to_array())
-
-        channel_mode = ChannelMode.from_string(channel_mode)
-        n_channels = y_data.shape[1] if y_data.ndim == 2 else 1
-
-        scalars = scalars_data.to_array() if scalars_data is not None else None
-        s_label = scalars_data.label if scalars_data else None
-        s_unit = scalars_data.units if scalars_data else None
-        s_lims = getattr(scalars_data, "rounded_data_lim", None) if scalars_data else None
-
-        vectors = vectors_data.to_array() if vectors_data is not None else None
-
-        v_label = vectors_data.label if vectors_data else None
-        v_unit = vectors_data.units if vectors_data else None
-
-        v_lims = getattr(vectors_data, "rounded_data_lim", None) if vectors_data else None
-
-        additional_kwargs = kwargs.copy()
-
-        kwargs_per_channel = []
-        for i_channel in range(n_channels):
-            channel_kwargs = {}
-            for key, value in additional_kwargs.items():
-                if n_channels > 1 and isinstance(value, list) and len(value) == 0:
-                    pass
-                elif n_channels > 1 and isinstance(value, list) and len(value) != 0:
-                    channel_kwargs[key] = value[i_channel]
-                else:
-                    channel_kwargs[key] = value
-            kwargs_per_channel.append(channel_kwargs)
-
-        series_list: list[Series] = []
-        for c in range(n_channels):
-            y = y_data[:, c].copy() if n_channels > 1 else y_data.copy()
-            if channel_mode is ChannelMode.FLIP and c != 0:
-                y *= -1.0
-            channel_scalars = (
-                scalars[:, c]
-                if scalars is not None and scalars.ndim == 2
-                else (scalars if scalars is not None else None)
-            )
-            s_lim = s_lims[c] if s_lims is not None and len(s_lims) > c else None
-            channel_vectors = (
-                vectors[:, c]
-                if vectors is not None and vectors.ndim == 2
-                else (vectors if vectors is not None else None)
-            )
-            v_lim = v_lims[c] if v_lims is not None and len(v_lims) > c else None
-            series_list.append(
-                Series(
-                    x=x_data,
-                    y=y,
-                    scalars=channel_scalars,
-                    scalars_label=s_label,
-                    scalars_unit=s_unit,
-                    scalars_lim=s_lim,
-                    vectors=channel_vectors,
-                    vectors_label=v_label,
-                    vectors_unit=v_unit,
-                    vectors_lim=v_lim,
-                    label=(
-                        point_data.metadata.get("label")[c]
-                        if point_data.metadata.get("label")
-                        else point_data.label
-                    ),
-                    additional_kwargs=kwargs_per_channel[c],
-                )
-            )
-        return series_list
 
     def plot_colorbar(
         self,
@@ -965,92 +815,34 @@ class DOSPlotter:
         return param[0]
 
 
-# def _filter_kwargs_for(func, kwargs: dict) -> dict:
-#     """Keep only kwargs that the target func can accept (unless it has **kwargs)."""
-#     sig = signature(func)
-#     if any(p.kind == Parameter.VAR_KEYWORD for p in sig.parameters.values()):
-#         return dict(kwargs)
-#     return {k: v for k, v in kwargs.items() if k in sig.parameters}
-
-# def _broadcast_sequence(val: Sequence, n: int, name: str) -> list:
-#     if len(val) == 1:
-#         return list(val) * n
-#     if len(val) == n:
-#         return list(val)
-#     raise ValueError(
-#         f"Kwarg '{name}' expects length 1 or {n}, got {len(val)}."
-#     )
-
-# def _broadcast_value(val, n: int, name: str) -> list:
-#     """Scalar → replicate; Sequence → broadcast; Strings count as scalars, not sequences."""
-#     if isinstance(val, (str, bytes)):
-#         return [val] * n
-#     if isinstance(val, Sequence):
-#         return _broadcast_sequence(val, n, name)
-#     return [val] * n
-
-# def _lookup_from_mapping(m: Mapping, idx: int, label: str | None):
-#     """Resolve a value for channel idx/label with optional 'default' fallback."""
-#     # index or "index"
-#     if idx in m: return m[idx]
-#     if str(idx) in m: return m[str(idx)]
-#     # label
-#     if label is not None and label in m: return m[label]
-#     # default
-#     if "default" in m: return m["default"]
-#     return None
-
-# def _build_per_channel_kwargs(
-#     *,
-#     target_func,
-#     n_channels: int,
-#     base_kwargs: dict,
-#     channel_labels: list[str] | None = None,
-# ) -> list[dict]:
-#     """
-#     Returns a list of kwargs dicts, one for each channel, following the contract above.
-#     - Supports a reserved kwarg 'channel_kwargs' that is a list[dict] with highest precedence.
-#     """
-#     base_kwargs = dict(base_kwargs)  # shallow copy
-#     # 1) Pull explicit per-channel dicts (highest precedence)
-#     explicit = base_kwargs.pop("channel_kwargs", None)
-#     if explicit is not None:
-#         if not isinstance(explicit, Sequence) or len(explicit) != n_channels:
-#             raise ValueError("channel_kwargs must be a list of length n_channels.")
-#     # 2) Keep only kwargs accepted by target_func
-#     allowed = _filter_kwargs_for(target_func, base_kwargs)
-
-#     per = [dict() for _ in range(n_channels)]
-#     labels = channel_labels or [None] * n_channels
-
-#     for name, val in allowed.items():
-#         if isinstance(val, Mapping):
-#             # Mapping: resolve per-index/label/default
-#             for i in range(n_channels):
-#                 resolved = _lookup_from_mapping(val, i, labels[i])
-#                 if resolved is not None:
-#                     per[i][name] = resolved
-#         else:
-#             # Scalar or Sequence
-#             vals = _broadcast_value(val, n_channels, name)
-#             for i in range(n_channels):
-#                 per[i][name] = vals[i]
-
-#     # 3) Apply explicit channel kwargs last (override everything)
-#     if explicit is not None:
-#         for i in range(n_channels):
-#             per[i].update(explicit[i])
-
-#     return per
+def _as_channels(values: np.ndarray) -> np.ndarray:
+    """Lay DOS data out as (n_points, 1 band, n_channels) for ``line_series``."""
+    return values.reshape(values.shape[0], 1, -1)
 
 
-def _finite_minmax(a: np.ndarray) -> tuple[float, float]:
-    m = np.isfinite(a)
-    if not m.any():
-        return (0.0, 1.0)
-    vmin = float(np.nanmin(a[m]))
-    vmax = float(np.nanmax(a[m]))
-    return (vmin, vmin + 1.0) if np.isclose(vmin, vmax) else (vmin, vmax)
+def _resolve_scaling(
+    values: list[np.ndarray | None],
+    lims: list[tuple[float, float] | None],
+    *,
+    show_colorbar: ShowColorbar | str | None,
+    cmap: str | mcolors.Colormap | None,
+    norm: str | mcolors.Normalize | None,
+    clim: tuple[float | None, float | None] | None,
+):
+    """Per-series (cmap, norm, clim) plus the parsed colorbar mode.
+
+    A single colorbar shares the user's clim (default 0 to 1) across series;
+    otherwise each channel resolves its own limits.
+    """
+    show_colorbar = ShowColorbar.from_string(show_colorbar)
+    n = len(values)
+    if show_colorbar is ShowColorbar.SINGLE:
+        shared = _ensure_norm(norm, clim or (0.0, 1.0))
+        return [_ensure_cmap(cmap)] * n, [shared] * n, [clim] * n, show_colorbar
+    per_clim = [resolve_clim(clim, [lims[i]], [values[i]]) for i in range(n)]
+    per_norm = [_ensure_norm(norm, c) for c in per_clim]
+    per_cmap = [_ensure_cmap(cmap) if cmap is not None else None] * n
+    return per_cmap, per_norm, per_clim, show_colorbar
 
 
 def _ensure_cmap(cmap):
@@ -1059,74 +851,7 @@ def _ensure_cmap(cmap):
     return plt.get_cmap(cmap) if isinstance(cmap, str) else cmap
 
 
-def _ensure_norm(norm, *, clim=None, values=None):
+def _ensure_norm(norm, clim):
     if isinstance(norm, mcolors.Normalize):
         return norm
-    # extend here if you want to support string norms like "log", "symlog", etc.
-    if clim is None:
-        clim = _finite_minmax(values if values is not None else np.array([0.0, 1.0]))
     return mcolors.Normalize(*clim, clip=True)
-
-
-def _resolve_scaling_for_modality(
-    series_list: list[Series],
-    *,
-    get_values: Callable,  # e.g. lambda s: s.scalars or lambda s: s.vectors
-    get_clim: Callable,  # e.g. lambda s: s.scalars_clim or lambda s: s.vectors_clim
-    show_colorbar: ShowColorbar | str | None = None,  # ShowColorbar.SINGLE | PER_CHANNEL | NONE
-    cmap: str | mcolors.Colormap | None = None,
-    norm: str | mcolors.Normalize | None = None,
-    clim: tuple[float | None, float | None] | None = None,
-):
-    show_colorbar = (
-        ShowColorbar.from_string(show_colorbar) if show_colorbar is not None else ShowColorbar.NONE
-    )
-    N = len(series_list)
-    per_cmap = [None] * N
-    per_norm = [None] * N
-    per_clim = [None] * N
-
-    if show_colorbar is ShowColorbar.SINGLE:
-        all_vals = []
-        gclim = (0, 0)
-        for s in series_list:
-            v = get_values(s)
-            if v is not None:
-                all_vals.append(v)
-
-            modeality_clim = get_clim(s)
-            if clim is not None:
-                c = clim
-            elif modeality_clim is not None:
-                c = modeality_clim
-            else:
-                c = _finite_minmax(v) if v is not None else (0.0, 1.0)
-
-            gclim = (min(gclim[0], c[0]), max(gclim[1], c[1]))
-
-        all_vals = np.concatenate(all_vals) if len(all_vals) else np.array([0.0, 1.0])
-
-        gclim = clim
-        gnorm = _ensure_norm(norm, clim=gclim)
-        gcmap = _ensure_cmap(cmap)
-        for i in range(N):
-            per_cmap[i] = gcmap
-            per_norm[i] = gnorm
-            per_clim[i] = gclim
-    else:  # PER_CHANNEL or NONE
-        for i, s in enumerate(series_list):
-            vals = get_values(s)
-
-            modeality_clim = get_clim(s)
-            if clim is not None:
-                c = clim
-            elif modeality_clim is not None:
-                c = modeality_clim
-            else:
-                c = _finite_minmax(vals) if vals is not None else (0.0, 1.0)
-
-            per_clim[i] = c
-            per_norm[i] = _ensure_norm(norm, clim=c, values=vals)
-            per_cmap[i] = _ensure_cmap(cmap) if cmap is not None else None
-
-    return per_cmap, per_norm, per_clim, show_colorbar
