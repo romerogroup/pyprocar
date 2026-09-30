@@ -663,11 +663,11 @@ class ElectronicBandStructure(PointSet):
         else:
             mesh_points = self.kpoints
         mesh = pv.PointSet(mesh_points)
+        self._mesh = mesh
         if scalars is not None:
             self.set_mesh_scalar(*scalars)
         if vectors is not None:
             self.set_mesh_vector(*vectors)
-        self._mesh = mesh
         return mesh
 
     def set_mesh_scalar(self, name: str, scalar: np.ndarray):
@@ -1707,11 +1707,11 @@ class ElectronicBandStructurePath(
         else:
             mesh_points = self.kpoints
         mesh = pv.PointSet(mesh_points)
+        self._mesh = mesh
         if scalars is not None:
             self.set_mesh_scalar(*scalars)
         if vectors is not None:
             self.set_mesh_vector(*vectors)
-        self._mesh = mesh
         return mesh
 
     def gradient_func(
