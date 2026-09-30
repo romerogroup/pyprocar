@@ -2,11 +2,9 @@ from enum import Enum
 from pathlib import Path
 from typing import Union
 
-# from pyprocar.io import abinit, dftbplus, elk, lobster, qe, siesta, vasp
 from pyprocar.io.abinit import AbinitParser
 from pyprocar.io.base import BaseParser
 from pyprocar.io.bxsf import BxsfParser
-from pyprocar.io.dftbplus import DFTBParser
 from pyprocar.io.elk import ElkParser
 from pyprocar.io.frmsf import FrmsfParser
 from pyprocar.io.lobster import LobsterParser
@@ -25,7 +23,6 @@ class CodeParser(Enum):
     siesta = SiestaParser
     vasp = VaspParser
     elk = ElkParser
-    dftbplus = DFTBParser
 
     @classmethod
     def as_list(cls):
