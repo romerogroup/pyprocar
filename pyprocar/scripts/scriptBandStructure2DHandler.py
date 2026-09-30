@@ -5,12 +5,13 @@ __date__ = "March 31, 2020"
 
 import logging
 import sys
+from typing import cast
 
 import numpy as np
 import pyvista as pv
 
-from pyprocar.cfg import ConfigFactory, ConfigManager, PlotType
-from pyprocar.core import BandStructure2D
+from pyprocar.cfg import Bandstructure2DConfig, ConfigFactory, ConfigManager, PlotType
+from pyprocar.core import BandStructure2D, ElectronicBandStructureMesh
 from pyprocar.plotter import BS2DPlotter
 from pyprocar.utils import welcome
 from pyprocar.utils.log_utils import set_verbose_level
@@ -82,6 +83,9 @@ class BandStructure2DHandler:
         self.dirname = dirname
         self.fermi = fermi
         self.fermi_shift = fermi_shift
+        self.ebs = ElectronicBandStructureMesh.from_code(code=code, dirpath=dirname)
+        if fermi is not None:
+            self.ebs.shift_bands(fermi_shift - fermi, inplace=True)
 
         # Set up energy labels based on Fermi level
         if fermi is not None:
@@ -162,7 +166,7 @@ class BandStructure2DHandler:
             Additional keyword arguments for configuration
         """
         config = ConfigManager.merge_configs(self.default_config, kwargs)
-        config = ConfigManager.merge_config(config, "mode", mode)
+        config = cast(Bandstructure2DConfig, ConfigManager.merge_config(config, "mode", mode))
 
         user_logger.info("_" * 100)
         user_logger.info(self.notification_message)
@@ -173,42 +177,44 @@ class BandStructure2DHandler:
         if self.fermi_message:
             user_logger.info(self.fermi_message)
 
-        # Create BandStructure2D using modernized factory
-        bs2d = BandStructure2D.from_code(
-            code=self.code,
-            dirpath=self.dirname,
+        if bands is not None:
+            ebs = self.ebs.reduce_bands_by_index(bands, inplace=False)
+        else:
+            near = self.fermi_level if self.fermi_level is not None else self.ebs.fermi
+            ebs = self.ebs.reduce_bands_near_energy(near, inplace=False)
+        bs2d = BandStructure2D.from_ebs(
+            ebs,
             normal=normal,
             origin=origin,
             grid_interpolation=grid_interpolation,
-            reduce_bands_near_fermi=True,
-            bands=bands,
+            as_cartesian=False,
             scale_factor=k_plane_scale,
         )
 
-        # Compute requested property
-        if property_name is not None:
+        if spin_texture or mode == "spin_texture":
+            property_name = "projected_sum_spin_texture"
+        elif mode == "parametric":
+            property_name = "projected_sum"
+        if property_name == "projected_sum":
+            prop = bs2d.get_property(property_name, atoms=atoms, orbitals=orbitals, spins=spins)
+        elif property_name == "projected_sum_spin_texture":
+            prop = bs2d.get_property(property_name, atoms=atoms, orbitals=orbitals)
+        elif property_name is not None:
             prop = bs2d.get_property(property_name)
-            bs2d.set_values(property_name, prop.value)
+        else:
+            prop = None
+        is_vector = prop is not None and prop.value.shape[-1] == 3
 
-        # Create plotter
-        plotter = BS2DPlotter(bs2d, **kwargs)
-        plotter.off_screen = render_offscreen
-
-        # Add Brillouin zone if configured
-        if config.show_brillouin_zone:
-            bz = bs2d.get_2d_brillouin_zone(e_min=-2, e_max=2, scale_factor=k_plane_scale)
-            plotter.add_brillouin_zone(bz)
-
-        # Clip to Brillouin zone if configured
-        if config.clip_brillouin_zone and hasattr(plotter, "brillouin_zone"):
-            bs2d = plotter.clip_surface(bs2d, plotter.brillouin_zone)
-
-        # Add surface to plotter
-        plotter.add_surface(bs2d)
-
-        # Add scalar bar if needed
-        if (mode != "plain" or spin_texture) and config.show_scalar_bar:
-            plotter.add_scalar_bar()
+        plotter = BS2DPlotter(bs2d, off_screen=render_offscreen)
+        plotter.plot(
+            scalars_data=None if is_vector else prop,
+            vectors_data=prop if is_vector else None,
+            show_brillouin_zone=config.show_brillouin_zone,
+            show_scalar_bar=config.show_scalar_bar and prop is not None,
+            scalars_cmap=config.surface_cmap,
+            scalars_clim=config.surface_clim,
+            add_surface_kwargs={"opacity": config.surface_opacity},
+        )
 
         # Add grid if configured
         if config.show_grid:
@@ -218,17 +224,16 @@ class BandStructure2DHandler:
         if config.show_axes:
             plotter.add_axes()
 
-        # Add Fermi plane if available
-        if self.fermi_level is not None:
+        if self.fermi_level is not None and config.add_fermi_plane:
             plotter.add_mesh(
                 pv.Plane(
                     center=(0, 0, self.fermi_level),
                     direction=(0, 0, 1),
-                    i_size=10,
-                    j_size=10,
+                    i_size=config.fermi_plane_size,
+                    j_size=config.fermi_plane_size,
                 ),
-                color="red",
-                opacity=0.5,
+                color=config.fermi_plane_color,
+                opacity=config.fermi_plane_opacity,
                 name="fermi_plane",
             )
 

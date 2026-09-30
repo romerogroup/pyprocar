@@ -26,7 +26,7 @@ class Fermi2DMode(Enum):
 def fermi2D(
     code: str,
     dirname: str,
-    mode: Fermi2DMode = Fermi2DMode.plain,
+    mode: Fermi2DMode | str = Fermi2DMode.plain,
     fermi: float = None,
     band_indices: list[list] = None,
     spins: list[int] = None,
@@ -41,7 +41,6 @@ def fermi2D(
     plot_line_kwargs: dict = None,
     plot_arrows: bool = True,
     plot_arrows_kwargs: dict = None,
-    show_colorbar_kwargs: dict = None,
     use_cache: bool = False,
     verbose: int = 1,
     padding: int = 10,
@@ -201,6 +200,7 @@ def fermi2D(
     ...         spin_projection='z', plot_arrows=True)
     """
 
+    mode = Fermi2DMode(mode)
     user_logger.info("If you want more detailed logs, set verbose to 2 or more")
     user_logger.info("_" * 100)
 
@@ -247,19 +247,19 @@ def fermi2D(
     logger.info(f"Created Fermi surface: {fs}")
 
     # Calculate slice properties based on mode and spin texture
-    if mode in [Fermi2DMode.plain.value, Fermi2DMode.plain_bands.value]:
+    if mode in [Fermi2DMode.plain, Fermi2DMode.plain_bands]:
         property_name = None
-    elif mode == Fermi2DMode.parametric.value:
+    elif mode == Fermi2DMode.parametric:
         property_name = "projected_sum"
         prop = fs.get_property(property_name, atoms=atoms, orbitals=orbitals, spins=spins)
         fs.set_values(property_name, prop.value)
 
-    elif mode == Fermi2DMode.spin_texture.value and fs.ebs.is_non_collinear:
+    elif mode == Fermi2DMode.spin_texture and fs.ebs.is_non_collinear:
         property_name = "projected_sum_spin_texture"
         prop = fs.get_property(property_name, atoms=atoms, orbitals=orbitals)
         fs.set_values(property_name, prop.value)
 
-    elif mode == Fermi2DMode.spin_texture.value and not fs.ebs.is_non_collinear:
+    elif mode == Fermi2DMode.spin_texture and not fs.ebs.is_non_collinear:
         raise ValueError("Spin texture is only available for non-collinear calculations")
 
     else:
@@ -278,29 +278,16 @@ def fermi2D(
 
     user_logger.info(f"Creating 2D slice at k_z = {k_z_plane}")
 
-    plot_arrows_kwargs = {} if plot_arrows_kwargs is None else plot_arrows_kwargs
-    plot_line_kwargs = {} if plot_line_kwargs is None else plot_line_kwargs
-
-    # Plot the slice
-    if mode == Fermi2DMode.plain.value or property_name is None:
-        fsplt.plot(plot_arrows=plot_arrows, **plot_line_kwargs)
-    else:
-        plot_arrows_kwargs = {} if plot_arrows_kwargs is None else plot_arrows_kwargs
-        fsplt.plot(
-            scalars_name=property_name,
-            vectors_name=property_name if mode == Fermi2DMode.spin_texture.value else None,
-            plot_arrows=plot_arrows,
-            plot_arrows_kwargs=plot_arrows_kwargs,
-            **plot_line_kwargs,
-        )
-
-        # Show colorbar for parametric modes
-        if show_colorbar:
-            show_colorbar_kwargs = {} if show_colorbar_kwargs is None else show_colorbar_kwargs
-            fsplt.show_colorbar(**show_colorbar_kwargs)
-
+    fsplt.plot(
+        scalars_name=property_name,
+        vectors_name=property_name if mode == Fermi2DMode.spin_texture else None,
+        scalars_show_colorbar="single" if show_colorbar and property_name else "none",
+        plot_arrows=plot_arrows,
+        line_kwargs=plot_line_kwargs,
+        quiver_kwargs=plot_arrows_kwargs,
+    )
     if savefig:
-        fsplt.fig.savefig(savefig)
+        fsplt.savefig(savefig)
         user_logger.info(f"Plot saved to {savefig}")
     elif show:
         fsplt.show()

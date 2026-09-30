@@ -39,6 +39,7 @@ class BS2DPlotter(SurfacePlotter):
     def __init__(self, bandstructure2d, **kwargs):
         super().__init__(**kwargs)
         self.bs2d = bandstructure2d
+        self._brillouin_zone: pv.PolyData | None = None
 
     def _to_series_list(
         self,
@@ -139,7 +140,7 @@ class BS2DPlotter(SurfacePlotter):
 
         if show_brillouin_zone and hasattr(bs2d, "get_2d_brillouin_zone"):
             z_coords = bs2d.points[:, 2]
-            e_min, e_max = float(z_coords.min()), float(z_coords.max())
+            e_min, e_max = float(np.nanmin(z_coords)), float(np.nanmax(z_coords))
             bz = bs2d.get_2d_brillouin_zone(e_min=e_min, e_max=e_max)
             self.add_brillouin_zone(bz)
 
@@ -161,7 +162,7 @@ class BS2DPlotter(SurfacePlotter):
         color: ColorLike = "black",
         opacity: float = 1.0,
     ):
-        self.brillouin_zone = brillouin_zone
+        self._brillouin_zone = brillouin_zone
         super().add_brillouin_zone(brillouin_zone, style, line_width, color, opacity)
 
     def add_surface(
@@ -208,7 +209,7 @@ class BS2DPlotter(SurfacePlotter):
         add_mesh_args["scalars"] = add_mesh_args.get("scalars")
 
         if clip_surface:
-            surface = self.clip_surface(surface, self.brillouin_zone)
+            surface = self.clip_surface(surface, self._brillouin_zone)
 
         self.add_mesh(surface, **add_mesh_args)
 
