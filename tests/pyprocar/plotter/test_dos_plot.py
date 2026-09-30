@@ -192,6 +192,10 @@ def mock_axes():
 # ------------------------------------------------------------------
 
 
+def _data_lines(ax):
+    return [line for line in ax.lines if not line.get_label().startswith("_")]
+
+
 def test_plot_line_uses_metadata_labels_per_channel():
     dos = _make_dos(n_spins=2)
     projected_sum = dos.compute_projected_sum(atoms=[0], spins=[0, 1])
@@ -200,7 +204,7 @@ def test_plot_line_uses_metadata_labels_per_channel():
     plotter.plot(projected_sum)
 
     expected_labels = projected_sum.metadata["label"]
-    actual_labels = [line.get_label() for line in plotter.ax.lines]
+    actual_labels = [line.get_label() for line in _data_lines(plotter.ax)]
 
     assert actual_labels == expected_labels
     plt.close(plotter.fig)
@@ -213,7 +217,7 @@ def test_plot_line_creates_line_for_each_channel():
     plotter = DOSPlotter()
     plotter.plot(projected_sum)
 
-    assert len(plotter.ax.lines) == projected_sum.to_array().shape[1]
+    assert len(_data_lines(plotter.ax)) == projected_sum.to_array().shape[1]
     plt.close(plotter.fig)
 
 
