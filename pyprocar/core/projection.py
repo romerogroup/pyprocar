@@ -124,9 +124,9 @@ def build_property(
 ) -> Property:
     """Normalize ``values`` through ``owner`` and wrap them in a labelled Property.
 
-    ``kwargs`` reach ``owner.normalize`` and then land in the metadata, except the
-    ``atoms``/``orbitals``/``spins`` selection keys, which the metadata takes from
-    ``selection``. The Property belongs to ``point_set``, defaulting to ``owner``.
+    ``normalize_kwargs`` go only to ``owner.normalize``; ``metadata`` entries are
+    merged last into the Property metadata. The Property belongs to ``point_set``,
+    defaulting to ``owner``.
     """
     mode = NormMode.parse(norm_mode)
     if allowed_norm_modes is not None and mode not in allowed_norm_modes:

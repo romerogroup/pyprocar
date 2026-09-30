@@ -340,16 +340,6 @@ def test_get_property_projected_sum_matches_dos_sum(dos_spin_polarized):
     assert property_value.shape == manual.shape
 
     assert np.allclose(property_value, manual)
-    assert dos_spin_polarized.get_property("projected_sum", **selection) is prop
-
-
-def test_get_property_projected_sum_caches_variants(dos_spin_polarized):
-    first = dos_spin_polarized.get_property("projected_sum", atoms=[0], orbitals=[0], spins=[0])
-    second = dos_spin_polarized.get_property("projected_sum", atoms=[1], orbitals=[1], spins=[0])
-
-    assert first is not second
-    assert dos_spin_polarized.get_property("projected_sum", atoms=[0], orbitals=[0], spins=[0]) is first
-    assert set(dos_spin_polarized.property_store) == {"total", "projected"}
 
 
 def _make_simple_structure() -> Structure:
@@ -515,3 +505,23 @@ def test_get_property_recomputes_when_norm_mode_changes():
 
     assert raw.value.ravel().tolist() == [1.0, 4.0]
     assert normed.value.ravel().tolist() == [0.25, 1.0]
+
+
+def test_get_property_matches_compute_on_a_mutated_deepcopy():
+    import copy
+
+    dos = DensityOfStates(
+        energies=[0.0, 1.0],
+        total=[[1.0], [2.0]],
+        projected=np.array([1.0, 4.0]).reshape(2, 1, 1, 1),
+        orbital_names=["s"],
+    )
+    dos.get_property("projected_sum", atoms=[0])
+
+    clone = copy.deepcopy(dos)
+    clone.get_property("projected").value[...] *= 3
+
+    via_get = clone.get_property("projected_sum", atoms=[0]).value
+    assert via_get.ravel().tolist() == [3.0, 12.0]
+    np.testing.assert_array_equal(via_get, clone.compute_projected_sum(atoms=[0]).value)
+    assert dos.get_property("projected_sum", atoms=[0]).value.ravel().tolist() == [1.0, 4.0]

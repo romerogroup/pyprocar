@@ -4,6 +4,7 @@ import pytest
 from pyprocar.core.bandstructure2D import BandStructure2D
 from pyprocar.core.fermisurface import FermiSurface
 from pyprocar.core.property_store import Property
+from pyprocar.plotter.bs_2d_plot import BS2DPlotter
 from pyprocar.plotter.fs_plot import FermiPlotter
 from tests.utils import DATA_DIR
 
@@ -68,12 +69,14 @@ def test_fs_get_property_unknown_name_raises_key_error(fs):
         fs.get_property("no_such_property")
 
 
-def test_bs2d_get_property_returns_property(bs2d):
-    prop = bs2d.get_property("bands")
+def test_bs2d_get_property_returns_surface_basis_property(bs2d):
+    prop = bs2d.get_property("bands_speed")
 
     assert isinstance(prop, Property)
-    assert prop.value.shape[0] == bs2d.n_grid_points
-    assert bs2d.get_property("bands") is prop
+    assert prop.value.shape == (bs2d.n_points,)
+    series = BS2DPlotter(bs2d, off_screen=True)._to_series_list(bs2d, scalars_data="bands_speed")
+    for s, mask in zip(series, bs2d.band_spin_mask.values(), strict=True):
+        np.testing.assert_array_equal(s.scalars, prop.value[mask])
 
 
 def test_bs2d_get_property_unknown_name_raises_key_error(bs2d):

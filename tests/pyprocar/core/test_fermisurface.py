@@ -263,7 +263,6 @@ class TestFermiSurface:
         for name in ("bands", "fermi_speed", "fermi_velocity", "avg_inv_effective_mass"):
             prop = fs.get_property(name)
             assert prop.shape[0] == fs.n_points
-            assert fs.get_property(name) is prop
 
         assert fs.active_scalars_name == active_before
 

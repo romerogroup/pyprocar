@@ -370,9 +370,6 @@ class Property:
         value: npt.NDArray[np.float64] | dict[int, npt.NDArray[np.float64]] | str,
     ) -> None:
         calc_name, gradient_order = self._extract_key(key)
-        owner = self.point_set
-        if owner is not None and owner.property_store.get(self.name) is self:
-            owner._derived_properties.clear()
         if gradient_order == 0:
             self.__dict__[calc_name] = value
         elif gradient_order > 0 and isinstance(value, np.ndarray):
@@ -627,48 +624,40 @@ class PointSet:
     def compute_property(self, name: str, **kwargs) -> Property | npt.ArrayLike | None:
         return None
 
-    @property
-    def _derived_properties(self) -> dict[tuple[str, tuple[tuple[str, Any], ...]], Property]:
-        return self.__dict__.setdefault("_derived", {})
-
     def get_property(
         self,
         key=None,
         compute: Callable[..., Property | npt.ArrayLike | None] | None = None,
         **kwargs,
     ) -> Property | None:
-        """Return a stored property, or compute and memoise a derived one.
+        """Return stored data for a stored name, otherwise compute the property.
 
-        A bare name returns stored data first. Otherwise the result of ``compute``
-        (default ``self.compute_property``) is memoised under the name plus the
-        canonicalised ``kwargs``, apart from stored data, and dropped whenever stored
-        data or points change. When ``compute`` returns None, stored data is returned
-        and ``kwargs`` are ignored.
+        Names that are not stored go to ``compute`` (default ``self.compute_property``)
+        with ``kwargs`` on every call. Results are never cached, so they always
+        reflect the current data.
         """
         prop_name, (calc_name, gradient_order) = self._extract_key(key)
-        cache_key = (prop_name, tuple(sorted((k, _canonical(k, v)) for k, v in kwargs.items())))
-        property = None if kwargs else self._point_data.get(prop_name)
-        if property is None:
-            property = self._derived_properties.get(cache_key)
-        if property is None:
+        property = self._point_data.get(prop_name, None)
+        stored = property is not None
+        if not stored:
             computed = (compute or self.compute_property)(prop_name, **kwargs)
             if computed is None:
-                property = self._point_data.get(prop_name)
-            else:
-                if not isinstance(computed, Property):
-                    computed = Property(name=prop_name, value=computed, point_set=self)
-                property = self._derived_properties[cache_key] = computed
-        if property is None:
-            return None
+                return None
+            property = (
+                computed
+                if isinstance(computed, Property)
+                else Property(name=prop_name, value=computed, point_set=self)
+            )
         if calc_name is None:
             return property
         value = getattr(property, calc_name)
         if isinstance(value, dict) and gradient_order > 0:
             gradient = value.get(gradient_order, None)
             if gradient is None or gradient.shape[0] == 0:
-                for order in range(1, gradient_order + 1):
-                    source = property.value if order == 1 else value[order - 1]
-                    value[order] = self.gradient_func(self._points, source)
+                if stored:
+                    self.compute_gradients(gradient_order, names=[prop_name])
+                else:
+                    property.gradient(gradient_order, store=True)
                 gradient = value[gradient_order]
             return gradient
         else:
@@ -688,7 +677,6 @@ class PointSet:
             else:
                 property._bind_owner(self)
             self._point_data[property.name] = property
-            self._derived_properties.clear()
             return None
 
         if name is None or value is None:
@@ -710,18 +698,14 @@ class PointSet:
         else:
             property._bind_owner(self)
         self._point_data[name] = property
-        self._derived_properties.clear()
 
     def update_points(self, points: npt.ArrayLike) -> None:
         self._points = np.array(points)
-        self._derived_properties.clear()
 
     def transform_points(self, transform_matrix: npt.NDArray[np.float64]) -> None:
         self._points = self._points @ transform_matrix
-        self._derived_properties.clear()
 
     def remove_property(self, name: str) -> Property | None:
-        self._derived_properties.clear()
         return self._point_data.pop(name, None)
 
     def compute_gradients(self, gradient_order: int, names: list[str] | None = None) -> None:
@@ -805,37 +789,6 @@ class PointSet:
             raise ValueError(error_message)
 
         return prop_name, (calc_name, gradient_order)
-
-
-_INDEX_ARGUMENTS = frozenset({"atoms", "orbitals", "spins", "bands"})
-
-
-def _canonical(arg: str, value: Any) -> Any:
-    """Hashable form of a ``get_property`` argument; equivalent selections compare equal."""
-    if isinstance(value, Enum):
-        value = value.value
-    if isinstance(value, np.ndarray):
-        value = value.tolist()
-    if isinstance(value, np.generic):
-        value = value.item()
-    if arg == "norm_mode" and isinstance(value, str):
-        return value.lower()
-    if arg in _INDEX_ARGUMENTS:
-        if isinstance(value, int):
-            return (value,)
-        if isinstance(value, (list, tuple)) and all(
-            isinstance(v, (int, np.integer)) for v in value
-        ):
-            return tuple(sorted({int(v) for v in value}))
-    if isinstance(value, dict):
-        return tuple(sorted((repr(k), _canonical(arg, v)) for k, v in value.items()))
-    if isinstance(value, (list, tuple)):
-        return tuple(_canonical(arg, v) for v in value)
-    try:
-        hash(value)
-    except TypeError:
-        return repr(value)
-    return value
 
 
 def parse_frac(latex_expr: str):

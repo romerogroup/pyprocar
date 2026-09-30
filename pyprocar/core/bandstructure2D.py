@@ -726,7 +726,9 @@ class BandStructure2D(pv.PolyData):
         grid_scalars = np.clip(
             grid_scalars, original_property.value.min(), original_property.value.max()
         )
-        return Property(name=name, value=grid_scalars)
+        return Property(
+            name=name, value=self._to_surface_basis(grid_scalars), point_set=self.point_set
+        )
 
     def interpolate_values(self, values: np.ndarray):
         if values.shape[-1] != 3:
@@ -765,20 +767,14 @@ class BandStructure2D(pv.PolyData):
 
     def set_surface_point_data(self, name: str, values: np.ndarray) -> None:
         """Set point data on the surface, handling band-resolved data."""
-        if self.ebs.is_band_property(values):
-            logger.debug(f"Adding band resolved to surface point_data: {name}")
-            point_data_array: np.ndarray | None = None
-            for (iband, ispin), _ in self.band_spin_surface_map.items():
-                values_band_values = values[:, iband, ispin, ...]
-                if point_data_array is None:
-                    point_data_array = values_band_values
-                else:
-                    point_data_array = np.insert(point_data_array, 0, values_band_values, axis=0)
-            if point_data_array is not None:
-                self.point_data[name] = point_data_array
-        else:
-            logger.debug(f"Adding scalar to surface point_data: {name}")
-            self.point_data[name] = values
+        self.point_data[name] = self._to_surface_basis(values)
+
+    def _to_surface_basis(self, values: np.ndarray) -> np.ndarray:
+        """Stack band-resolved grid values into the combined surface's point order."""
+        if not self.ebs.is_band_property(values) or not self.band_spin_surface_map:
+            return values
+        per_surface = [values[:, iband, ispin, ...] for iband, ispin in self.band_spin_surface_map]
+        return np.concatenate(per_surface[::-1], axis=0)
 
     def set_scalars(self, name: str, value: np.ndarray):
         self.set_surface_point_data(name, value)

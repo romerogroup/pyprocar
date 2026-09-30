@@ -646,7 +646,6 @@ class TestElectronicBandStructurePath:
 
         # Check output
         assert velocity_property is not None
-        assert sample_ebs_path.get_property("bands_velocity") is velocity_property
 
         # Check that it's stored as property
         stored_velocity_property = sample_ebs_path.get_property("bands_velocity")
@@ -658,7 +657,6 @@ class TestElectronicBandStructurePath:
 
         # Check output
         assert speed_property is not None
-        assert sample_ebs_path.get_property("bands_speed") is speed_property
 
         # Check that it's stored as property
         stored_speed_property = sample_ebs_path.get_property("bands_speed")
@@ -670,7 +668,6 @@ class TestElectronicBandStructurePath:
 
         # Check output
         assert avg_inv_mass_property is not None
-        assert sample_ebs_path.get_property("avg_inv_effective_mass") is avg_inv_mass_property
 
         # Check that it's stored as property
         stored_avg_inv_mass_property = sample_ebs_path.get_property("avg_inv_effective_mass")
@@ -814,8 +811,8 @@ class TestElectronicBandStructureMesh:
 
     def test_property_gradient_derived_access(self, sample_ebs_mesh):
         """Test gradient access for properties."""
-        sample_ebs_mesh.get_property(("bands_velocity", 2))
         velocity_property = sample_ebs_mesh.get_property("bands_velocity")
+        velocity_property.gradient(2, store=True)
         assert velocity_property is not None
         assert velocity_property.is_vector == True
         assert velocity_property.gradients[1] is not None
@@ -927,3 +924,32 @@ def test_get_property_recomputes_after_projections_change():
 
     assert ebs.get_property("projected_sum", atoms=[0]).value.ravel().tolist() == [0.0]
     assert ebs.property_names == ["bands", "projected"]
+
+
+def _three_band_ebs():
+    projected = np.array([[0.1, 0.9], [0.2, 0.8], [0.3, 0.7]]).reshape(1, 3, 1, 2, 1)
+    return ElectronicBandStructure(
+        kpoints=np.zeros((1, 3)), bands=np.zeros((1, 3, 1)), projected=projected, orbital_names=["s"]
+    )
+
+
+def test_get_property_matches_compute_on_a_reduced_copy():
+    ebs = _three_band_ebs()
+    ebs.get_property("projected_sum", atoms=[0])
+
+    reduced = ebs.reduce_bands_by_index([0], inplace=False)
+
+    via_get = reduced.get_property("projected_sum", atoms=[0]).value
+    assert via_get.ravel().tolist() == [0.1]
+    np.testing.assert_array_equal(via_get, reduced.compute_projected_sum(atoms=[0]).value)
+
+
+def test_get_property_matches_compute_after_value_mutation():
+    ebs = _three_band_ebs()
+    ebs.get_property("projected_sum", atoms=[0])
+
+    ebs.get_property("projected").value[...] *= 2
+
+    via_get = ebs.get_property("projected_sum", atoms=[0]).value
+    assert via_get.ravel().tolist() == [0.2, 0.4, 0.6]
+    np.testing.assert_array_equal(via_get, ebs.compute_projected_sum(atoms=[0]).value)

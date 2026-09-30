@@ -218,33 +218,11 @@ class _Derived(PointSet):
     def __init__(self):
         super().__init__(points=np.zeros((2, 3)))
         self.add_property(name="source", value=np.array([1.0, 2.0]))
-        self.calls: list[dict] = []
 
     def compute_property(self, name, **kwargs):
         if name != "doubled":
             return None
-        self.calls.append(kwargs)
         return 2 * self.get_property("source").value
-
-
-def test_get_property_caches_equivalent_arguments_once():
-    from pyprocar.core.projection import NormMode
-
-    ps = _Derived()
-    for norm_mode in ("max", "MAX", NormMode.MAX):
-        ps.get_property("doubled", norm_mode=norm_mode)
-    for atoms in ([1], (1,), [np.int64(1)], 1, np.array([1])):
-        ps.get_property("doubled", atoms=atoms)
-
-    assert len(ps.calls) == 2
-
-
-def test_get_property_keeps_none_arguments_distinct():
-    ps = _Derived()
-    ps.get_property("doubled")
-    ps.get_property("doubled", units=None)
-
-    assert ps.calls == [{}, {"units": None}]
 
 
 def test_get_property_recomputes_after_source_changes():
