@@ -28,19 +28,12 @@ MEMBER_TYPES = {
 
 CODES_DIR = DATA_DIR / "codes"
 
-LEGACY_DOS_REASON = (
-    "ElkDOS builds the legacy (nspin, nE) layout that DensityOfStates rejects"
-)
 KGRID_MODE_ENUM = pytest.mark.xfail(
     reason="ElectronicBandStructureMesh passes a KGRID_MODE enum to get_kpoints_from_kgrid, "
     "which expects a str",
     raises=AttributeError,
     strict=True,
 )
-ELK_LEGACY_DOS = pytest.mark.xfail(
-    reason=LEGACY_DOS_REASON, raises=ValueError, strict=True
-)
-
 CASES = [
     pytest.param(
         "vasp",
@@ -91,7 +84,6 @@ CASES = [
         },
         {"dos", "structure", "fermi", "reciprocal_lattice"},
         id="elk-dos",
-        marks=ELK_LEGACY_DOS,
     ),
     pytest.param(
         "siesta",

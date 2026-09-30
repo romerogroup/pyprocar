@@ -9,7 +9,7 @@ from pyprocar.core import DensityOfStates, Structure
 from pyprocar.core.ebs import ElectronicBandStructure
 from pyprocar.core.kpoints import KPath
 from pyprocar.io.elk import ElkParser
-from tests.utils import BaseTest
+from tests.utils import DATA_DIR, BaseTest
 
 logger = logging.getLogger(__name__)
 
@@ -291,3 +291,36 @@ class TestElkParserDOS(BaseTest):
         """Test that dos is None for bands calculation (no TDOS.OUT)."""
         parser = ElkParser(bands_calc_dir)
         assert parser.dos is None
+
+
+ELK_DOS_DIR = DATA_DIR / "codes" / "elk" / "6.3" / "SrVO3"
+
+
+@pytest.mark.parametrize(
+    ("mag", "fermi", "dos_at_fermi"),
+    [
+        ("non-spin-polarized", 9.10040, [1.42933]),
+        ("spin-polarized-colinear", 9.19282, [0.71666, 0.82630]),
+    ],
+)
+def test_real_dos_is_in_core_layout_in_ev(
+    mag: str, fermi: float, dos_at_fermi: list[float]
+) -> None:
+    dos = ElkParser(ELK_DOS_DIR / mag / "dos").dos
+
+    assert dos is not None and dos.projected is not None
+    nspin = len(dos_at_fermi)
+    total = dos.total.to_array()
+    assert total.shape == (500, nspin)
+    assert dos.projected.to_array().shape == (500, nspin, 5, 16)
+    assert dos.fermi == pytest.approx(fermi, abs=1e-4)
+    assert (dos.energies[0], dos.energies[-1]) == pytest.approx(
+        (fermi - 13.60569, fermi + 13.55127), abs=1e-4
+    )
+    ifermi = int(np.argmin(np.abs(dos.energies - fermi)))
+    assert total[ifermi] == pytest.approx(dos_at_fermi, abs=1e-4)
+    occupied = dos.energies <= fermi
+    electrons = total[occupied].sum() * (dos.energies[1] - dos.energies[0])
+    assert electrons == pytest.approx(18.8, abs=0.2)
+    muffin_tin_sum = dos.projected.to_array().sum(axis=(2, 3))
+    assert (muffin_tin_sum <= total + 1e-9).all()
