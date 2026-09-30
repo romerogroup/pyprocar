@@ -127,14 +127,3 @@ class TestFrmsfParserCustomFilepath:
 
         parser = FrmsfParser(tmp_path, filepath="custom.frmsf")
         assert parser.ebs is not None
-
-
-class TestFrmsfParserIntegration:
-    """Integration tests via Parser factory."""
-
-    def test_parser_factory(self, frmsf_dir: Path) -> None:
-        """Test FrmSrf is accessible via Parser(code='frmsf', ...)."""
-        from pyprocar.io import Parser
-
-        parser = Parser(code="frmsf", dirpath=frmsf_dir)
-        assert parser.ebs is not None

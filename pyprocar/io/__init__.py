@@ -1,6 +1,5 @@
 from enum import Enum
 from pathlib import Path
-from typing import Union
 
 from pyprocar.io.abinit import AbinitParser
 from pyprocar.io.base import BaseParser
@@ -29,11 +28,12 @@ class CodeParser(Enum):
         return [code.name for code in cls]
 
 
-def get_parser(code: str, dirpath: str | Path, custom_parser: BaseParser = None, **kwargs):
-    """Handles which DFT parser to use"""
-
-    is_lobster_calc = code.split("_")[0] == "lobster"
-
+def get_parser(
+    code: str,
+    dirpath: str | Path,
+    custom_parser: type[BaseParser] | None = None,
+    **kwargs,
+) -> BaseParser:
     if code in CodeParser.as_list():
         parser = CodeParser[code].value(dirpath=dirpath, **kwargs)
     elif custom_parser is not None:
@@ -45,44 +45,3 @@ def get_parser(code: str, dirpath: str | Path, custom_parser: BaseParser = None,
         raise ValueError(msg)
 
     return parser
-
-
-class Parser(BaseParser):
-    """
-    The parser class will be the main object to be used through out the code.
-    This class will handle getting the main inputs (ebs,dos,structure,kpath,reciprocal_lattice) from the various dft parsers.
-    The bands must not be shifted so that the fermi energy 0.0
-    """
-
-    def __init__(self, code: str, dirpath: str | Path, **kwargs):
-        super().__init__(dirpath=dirpath)
-        self.code = code
-        self.parser = get_parser(code, self.dirpath, **kwargs)
-
-    @property
-    def version(self):
-        return self.parser.version
-
-    @property
-    def version_tuple(self):
-        return self.parser.version_tuple
-
-    @property
-    def ebs(self):
-        return self.parser.ebs
-
-    @property
-    def dos(self):
-        return self.parser.dos
-
-    @property
-    def structure(self):
-        return self.parser.structure
-
-    @property
-    def kpath(self):
-        return self.parser.kpath
-
-    @property
-    def reciprocal_lattice(self):
-        return self.parser.reciprocal_lattice

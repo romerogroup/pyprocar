@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from pyprocar.cfg import ConfigFactory, ConfigManager, PlotType
-from pyprocar.io import Parser
+from pyprocar.io import get_parser
 from pyprocar.utils import data_utils, welcome
 
 user_logger = logging.getLogger("user")
@@ -313,7 +313,7 @@ def dosplot(
     if not os.path.exists(dos_pkl_filepath):
         logger.info(f"Parsing DOS from {dirname}")
 
-        parser = Parser(code=code, dirpath=dirname)
+        parser = get_parser(code, dirname)
         dos = parser.dos
         structure = parser.structure
 

@@ -56,13 +56,13 @@ def get_dos_from_code(
         Name of the cache file to use when ``use_cache`` is ``True``.
     """
 
-    from pyprocar.io import Parser
+    from pyprocar.io import get_parser
 
     dos_filepath = Path(dirpath) / filename
 
     if not use_cache or not dos_filepath.exists():
         logger.info("Parsing DOS calculation directory: %s", dirpath)
-        parser = Parser(code=code, dirpath=dirpath)
+        parser = get_parser(code, dirpath)
         dos = parser.dos
         if use_cache:
             dos.save(dos_filepath)
