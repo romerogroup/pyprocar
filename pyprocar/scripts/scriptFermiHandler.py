@@ -9,11 +9,13 @@ from typing import cast
 
 import numpy as np
 
-from pyprocar.cfg import ConfigFactory, ConfigManager, FermiSurface3DConfig, PlotType
+from pyprocar.cfg import ConfigFactory, ConfigManager
+from pyprocar.cfg.base import PlotType
+from pyprocar.cfg.fermi_surface_3d import FermiSurface3DConfig
 from pyprocar.core import ElectronicBandStructureMesh
 from pyprocar.core.fermisurface import FermiSurface
 from pyprocar.plotter import FermiPlotter
-from pyprocar.scripts._selection import resolve_spins
+from pyprocar.scripts._selection import as_lim, resolve_spins
 from pyprocar.utils import welcome
 from pyprocar.utils.log_utils import set_verbose_level
 
@@ -70,12 +72,15 @@ class FermiHandler:
 
         self.code = code
         self.dirname = dirname
-        self.ebs = ElectronicBandStructureMesh.from_code(
-            code, dirname, use_cache=use_cache, ebs_filename=ebs_filename
+        self.ebs: ElectronicBandStructureMesh = cast(
+            ElectronicBandStructureMesh,
+            ElectronicBandStructureMesh.from_code(
+                code, dirname, use_cache=use_cache, ebs_filename=ebs_filename
+            ),
         )
 
         if fermi is None:
-            self.e_fermi = self.ebs.fermi
+            self.e_fermi: float = self.ebs.fermi
             user_logger.warning(
                 f"Fermi Energy not set! Set `fermi={self.e_fermi}`."
                 "By default, using fermi energy found in the current directory."
@@ -268,7 +273,7 @@ class FermiHandler:
             show_brillouin_zone=config.show_brillouin_zone,
             show_scalar_bar=(scalars_data is not None and mode != "plain") or show_colorbar,
             scalars_cmap=config.surface_cmap,
-            scalars_clim=None if mode == "plain" else config.surface_clim,
+            scalars_clim=None if mode == "plain" else as_lim(config.surface_clim),
             add_surface_kwargs={"opacity": config.surface_opacity},
         )
 

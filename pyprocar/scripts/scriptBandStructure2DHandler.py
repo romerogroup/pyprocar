@@ -10,9 +10,12 @@ from typing import cast
 import numpy as np
 import pyvista as pv
 
-from pyprocar.cfg import Bandstructure2DConfig, ConfigFactory, ConfigManager, PlotType
+from pyprocar.cfg import ConfigFactory, ConfigManager
+from pyprocar.cfg.band_structure_2d import Bandstructure2DConfig
+from pyprocar.cfg.base import PlotType
 from pyprocar.core import BandStructure2D, ElectronicBandStructureMesh
 from pyprocar.plotter import BS2DPlotter
+from pyprocar.scripts._selection import as_lim
 from pyprocar.utils import welcome
 from pyprocar.utils.log_utils import set_verbose_level
 
@@ -83,7 +86,10 @@ class BandStructure2DHandler:
         self.dirname = dirname
         self.fermi = fermi
         self.fermi_shift = fermi_shift
-        self.ebs = ElectronicBandStructureMesh.from_code(code=code, dirpath=dirname)
+        self.ebs: ElectronicBandStructureMesh = cast(
+            ElectronicBandStructureMesh,
+            ElectronicBandStructureMesh.from_code(code=code, dirpath=dirname),
+        )
         if fermi is not None:
             self.ebs.shift_bands(fermi_shift - fermi, inplace=True)
 
@@ -213,7 +219,7 @@ class BandStructure2DHandler:
             clip_brillouin_zone=config.clip_brillouin_zone,
             show_scalar_bar=config.show_scalar_bar and prop is not None,
             scalars_cmap=config.surface_cmap,
-            scalars_clim=config.surface_clim,
+            scalars_clim=as_lim(config.surface_clim),
             add_surface_kwargs={"opacity": config.surface_opacity},
         )
 

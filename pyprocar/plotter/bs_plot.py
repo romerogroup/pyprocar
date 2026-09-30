@@ -5,6 +5,7 @@ __date__ = "March 31, 2020"
 
 import json
 import logging
+from collections.abc import Sequence
 from dataclasses import asdict, dataclass, field
 from typing import Any
 
@@ -14,6 +15,7 @@ import matplotlib.patches as mpatches
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+from matplotlib.axes import Axes
 from matplotlib.collections import LineCollection, PathCollection
 from matplotlib.lines import Line2D
 from matplotlib.ticker import MultipleLocator
@@ -58,15 +60,16 @@ class BandStructurePlotter:
         Existing axes to draw on. If None, a new figure/axes are created.
     """
 
-    def __init__(self, figsize=(8, 6), dpi=100, ax=None):
+    def __init__(self, figsize=(8, 6), dpi=100, ax: Axes | None = None):
         self.figsize = figsize
         self.dpi = dpi
 
-        self.ax = ax
-        if self.ax is None:
-            self.fig, self.ax = plt.subplots(figsize=figsize, dpi=dpi)
+        if ax is None:
+            self.fig, ax = plt.subplots(figsize=figsize, dpi=dpi)
         else:
             self.fig = ax.get_figure()
+        self.ax: Axes = ax
+        self.kpath: KPath | None = None
 
         self.data_store = {}
         self.values_dict = {}
@@ -200,7 +203,9 @@ class BandStructurePlotter:
 
         # Add colorbar if requested
         if scalars_mode != "none" and scalars_show_colorbar == "single" and clim is not None:
-            assert cmap is not None  # cmap is set when scalars_mode != "none" and scalars_data exists
+            assert (
+                cmap is not None
+            )  # cmap is set when scalars_mode != "none" and scalars_data exists
             self._add_colorbar(cmap, clim, scalars_data.label if scalars_data else None)
 
         # Draw vertical lines at high-symmetry points
@@ -753,7 +758,10 @@ class BandStructurePlotter:
         self.ax.set_ylim(ylim, **kwargs)
 
     def set_xticks(
-        self, tick_positions: list[int] = None, tick_names: list[str] = None, color: str = "black"
+        self,
+        tick_positions: list[int] | None = None,
+        tick_names: list[str] | None = None,
+        color: str = "black",
     ):
         """Set high-symmetry tick marks and labels using the current k-path.
 
@@ -788,7 +796,12 @@ class BandStructurePlotter:
         if tick_names is not None:
             self.ax.set_xticklabels(tick_names)
 
-    def set_yticks(self, major: float = None, minor: float = None, interval: list[float] = None):
+    def set_yticks(
+        self,
+        major: float | None = None,
+        minor: float | None = None,
+        interval: Sequence[float] | None = None,
+    ):
         """Set y-axis tick locators using heuristics if not provided.
 
         Parameters

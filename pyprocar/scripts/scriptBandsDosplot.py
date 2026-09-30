@@ -5,10 +5,11 @@ __date__ = "March 31, 2020"
 
 import matplotlib.pyplot as plt
 
+from pyprocar.cfg.base import PlotType
+from pyprocar.cfg.dos import DensityOfStatesConfig
 from pyprocar.scripts.scriptBandsplot import bandsplot
 from pyprocar.scripts.scriptDosplot import dosplot
 from pyprocar.utils import welcome
-from pyprocar.utils.defaults import settings
 
 
 def bandsdosplot(
@@ -82,12 +83,13 @@ def bandsdosplot(
         ax_ebs.grid()
         ax_dos.grid()
     if draw_fermi:
+        fermi_style = DensityOfStatesConfig(plot_type=PlotType.DENSITY_OF_STATES)
         for ax in (ax_ebs, ax_dos):
             ax.axhline(
                 y=0,
-                color=settings.dos.fermi_color,
-                linestyle=settings.dos.fermi_linestyle,
-                linewidth=settings.dos.fermi_linewidth,
+                color=fermi_style.fermi_color,
+                linestyle=fermi_style.fermi_linestyle,
+                linewidth=fermi_style.fermi_linewidth,
             )
 
     if title is not None:

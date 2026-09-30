@@ -1,4 +1,4 @@
-_author__ = "Pedram Tavadze and Logan Lang"
+__author__ = "Pedram Tavadze and Logan Lang"
 __maintainer__ = "Pedram Tavadze and Logan Lang"
 __email__ = "petavazohi@mail.wvu.edu, lllang@mix.wvu.edu"
 __date__ = "March 31, 2020"
@@ -10,10 +10,14 @@ from typing import Any, cast
 import matplotlib.pyplot as plt
 import numpy as np
 
-from pyprocar.cfg import BandStructureConfig, ConfigFactory, ConfigManager, PlotType
-from pyprocar.core import ElectronicBandStructurePath
+from pyprocar.cfg import ConfigFactory, ConfigManager
+from pyprocar.cfg.band_structure import BandStructureConfig
+from pyprocar.cfg.base import PlotType
+from pyprocar.core import ElectronicBandStructurePath, Structure
+from pyprocar.core.property_store import Property
 from pyprocar.plotter.bs_plot import BandStructurePlotter
 from pyprocar.scripts._selection import (
+    as_lim,
     orbital_indices,
     per_channel,
     projection_components,
@@ -21,7 +25,7 @@ from pyprocar.scripts._selection import (
     signed_clim,
     take_channels,
 )
-from pyprocar.utils import welcome
+from pyprocar.utils.splash import welcome
 
 user_logger = logging.getLogger("user")
 logger = logging.getLogger(__name__)
@@ -85,7 +89,7 @@ def bandsplot(
     spins: list[int] | None = None,
     atoms: list[int] | None = None,
     orbitals: list[int] | None = None,
-    items: dict | None = None,
+    items: dict | list[dict] | None = None,
     fermi: float | None = None,
     fermi_shift: float = 0,
     kticks=None,
@@ -182,11 +186,16 @@ def bandsplot(
     user_logger.info("_" * 100)
 
     plot_mode = BandStructureMode.from_str(mode)
-    joins_spin_channels = np.array_equal(spins, [-1, 1]) or np.array_equal(spins, [1, -1])
+    joins_spin_channels = spins is not None and (
+        np.array_equal(spins, [-1, 1]) or np.array_equal(spins, [1, -1])
+    )
     if joins_spin_channels and plot_mode != BandStructureMode.PLAIN:
         raise ValueError("spins=[-1, 1] joins the two spin channels and only works in plain mode")
 
-    ebs = ElectronicBandStructurePath.from_code(code, dirname, use_cache=use_cache)
+    ebs = cast(
+        ElectronicBandStructurePath,
+        ElectronicBandStructurePath.from_code(code, dirname, use_cache=use_cache),
+    )
 
     codes_with_scf_fermi = ["qe", "elk"]
     if code in codes_with_scf_fermi and fermi is None:
@@ -209,7 +218,8 @@ def bandsplot(
 
     if atoms is not None and isinstance(atoms[0], str):
         species = set(atoms)
-        atoms = [i for i, name in enumerate(ebs.structure.atoms) if name in species]
+        names = np.asarray(cast(Structure, ebs.structure).atoms)
+        atoms = [i for i, name in enumerate(names) if name in species]
     orbitals = orbital_indices(orbitals)
 
     channels, projection_spins = resolve_spins(ebs.is_non_collinear, ebs.n_spin_channels, spins)
@@ -227,14 +237,15 @@ def bandsplot(
         if ebs.n_kpoints != 1:
             raise ValueError("Atomic mode needs a single k-point calculation")
         weights = ebs.compute_projected_sum(atoms=atoms, orbitals=orbitals, spins=projection_spins)
-        plotter.plot_atomic_levels(
-            bands=np.take(ebs.get_property("bands").value, channels, axis=2),
-            elimit=tuple(elimit) if elimit is not None else None,
-            scalars=take_channels(weights, channels).value,
-            cmap=config.cmap,
-            clim=user_clim or (None, None),
+        levels: dict[str, Any] = {
+            "bands": take_channels(cast(Property, ebs.get_property("bands")), channels).value,
+            "elimit": as_lim(elimit),
+            "scalars": take_channels(weights, channels).value,
+            "cmap": config.cmap,
+            "clim": user_clim or (None, None),
             **(atomic_levels_kwargs or {}),
-        )
+        }
+        plotter.plot_atomic_levels(**levels)
         plotter.set_colorbar_title(config.colorbar_title)
     elif plot_mode in BandStructureMode.get_overlay_modes():
         user_logger.info(f"Plotting bands in {plot_mode.value} mode")
@@ -244,13 +255,13 @@ def bandsplot(
         )
         plotter.plot_overlay(
             ebs.kpath,
-            np.take(ebs.bands.value, channels, axis=2),
+            take_channels(cast(Property, ebs.bands), channels).value,
             weights=[take_channels(w, channels).value for w in weights],
-            labels=[w.label for w in weights],
+            labels=[str(w.label) for w in weights],
             **(overlay_kwargs or {}),
         )
     else:
-        bands = take_channels(ebs.bands, channels)
+        bands = take_channels(cast(Property, ebs.bands), channels)
         if plot_mode == BandStructureMode.PLAIN:
             user_logger.info("Plotting bands in plain mode")
             line_style: dict[str, Any] = {

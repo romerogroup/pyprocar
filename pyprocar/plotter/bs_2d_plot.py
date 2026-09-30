@@ -214,7 +214,7 @@ class BS2DPlotter(SurfacePlotter):
             add_mesh_args["scalars"] = scalars
         add_mesh_args["scalars"] = add_mesh_args.get("scalars")
 
-        if clip_surface:
+        if clip_surface and self._brillouin_zone is not None:
             surface = self.clip_surface(surface, self._brillouin_zone)
 
         self.add_mesh(surface, **add_mesh_args)

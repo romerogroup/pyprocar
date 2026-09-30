@@ -10,11 +10,14 @@ from typing import Any, cast
 import matplotlib.pyplot as plt
 import numpy as np
 
-from pyprocar.cfg import ConfigFactory, ConfigManager, DensityOfStatesConfig, PlotType
+from pyprocar.cfg import ConfigFactory, ConfigManager
+from pyprocar.cfg.base import PlotType
+from pyprocar.cfg.dos import DensityOfStatesConfig
 from pyprocar.core import DensityOfStates
 from pyprocar.core.property_store import Property
 from pyprocar.plotter.dos_plot import AxesOrientation, DOSPlotter
 from pyprocar.scripts._selection import (
+    as_lim,
     orbital_indices,
     per_channel,
     projection_components,
@@ -22,8 +25,8 @@ from pyprocar.scripts._selection import (
     signed_clim,
     take_channels,
 )
-from pyprocar.utils import welcome
 from pyprocar.utils.log_utils import set_verbose_level
+from pyprocar.utils.splash import welcome
 
 user_logger = logging.getLogger("user")
 logger = logging.getLogger(__name__)
@@ -300,6 +303,8 @@ def dosplot(
     if mode not in DOS_MODES:
         raise ValueError(f"The mode needs to be one of {DOS_MODES}, got {mode!r}")
 
+    if dirname is None:
+        raise ValueError("dirname is required")
     dos = DensityOfStates.from_code(code, dirname, use_cache=use_cache)
 
     codes_with_scf_fermi = ["qe", "elk"]
@@ -371,7 +376,8 @@ def dosplot(
             _stack(plotter, components, colors)
         else:
             for component, color in zip(components, itertools.cycle(colors)):
-                plotter.plot(component, **{**line_style, "color": color})
+                component_style: dict[str, Any] = {**line_style, "color": color}
+                plotter.plot(component, **component_style)
 
     if fermi is not None:
         plotter.draw_fermi(
@@ -388,13 +394,14 @@ def dosplot(
         if plotter.orientation is AxesOrientation.HORIZONTAL
         else (plotter.set_ylim, plotter.set_xlim)
     )
-    energy_axis_limit(tuple(elimit) if elimit is not None else None)
-    dos_axis_limit(tuple(dos_limit) if dos_limit is not None else None)
+    energy_axis_limit(as_lim(elimit))
+    dos_axis_limit(as_lim(dos_limit))
     plotter.set_title(config.title)
 
+    ax = cast(plt.Axes, plotter.ax)
     if labels:
         plotter.legend(labels=labels)
-    elif plotter.ax.get_legend_handles_labels()[1]:
+    elif ax.get_legend_handles_labels()[1]:
         plotter.legend()
 
     if savefig is not None:
@@ -402,15 +409,17 @@ def dosplot(
     if show:
         plotter.show()
 
-    return plotter.fig, plotter.ax
+    return plotter.fig, ax
 
 
 def _stack(plotter: DOSPlotter, components, colors) -> None:
     """Fill each component on top of the previous ones; later channels stack downwards."""
     energies = components[0].points
-    baseline = np.zeros(components[0].to_array().shape)
+    n_energies, n_channels = components[0].to_array().shape
+    signs = np.r_[1.0, -np.ones(n_channels - 1)]
+    baseline = np.zeros((n_energies, n_channels))
     for component, color in zip(components, itertools.cycle(colors)):
-        values = component.to_array() * np.r_[1.0, -np.ones(baseline.shape[1] - 1)]
+        values = component.to_array() * signs
         top = baseline + values
         for channel in range(values.shape[1]):
             plotter.fill_between(

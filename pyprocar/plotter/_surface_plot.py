@@ -2,7 +2,7 @@
 
 import logging
 import os
-from typing import Any
+from typing import Any, cast
 
 import numpy as np
 import pyvista as pv
@@ -22,7 +22,7 @@ def find_nearest(array, value):
 def clip_to_zone(surface: pv.PolyData, zone: pv.PolyData) -> pv.PolyData:
     """Cut ``surface`` down to the part inside every face plane of ``zone``."""
     for normal, center in zip(zone.face_normals, zone.centers, strict=True):
-        surface = surface.clip(origin=center, normal=normal, inplace=False)
+        surface = cast(pv.PolyData, surface.clip(origin=center, normal=normal, inplace=False))
         if surface.points.shape[0] == 0:
             break
     return surface
@@ -108,8 +108,9 @@ class SurfacePlotter(pv.Plotter):
             prefix = f"band_{series.band_index}_spin_{series.spin_index}"
             self.values_dict[f"{prefix}_points"] = mesh.points
             if series.scalars is not None:
-                self.values_dict[f"{prefix}_scalars"] = mesh.point_data.get(
-                    "scalars", series.scalars
+                rendered = mesh.point_data.get("scalars")
+                self.values_dict[f"{prefix}_scalars"] = (
+                    series.scalars if rendered is None else np.asarray(rendered)
                 )
             if series.vectors is not None:
                 self.values_dict[f"{prefix}_vectors"] = mesh.point_data["vectors"]

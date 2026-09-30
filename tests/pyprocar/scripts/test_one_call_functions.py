@@ -1,6 +1,7 @@
-"""Smoke tests for the one-call plotting functions, called the way the example notebooks call them."""
+"""Smoke tests for the one-call plotting functions, called the way the notebooks call them."""
 
 import shutil
+from typing import Any, cast
 
 import matplotlib
 
@@ -18,9 +19,12 @@ from pyprocar.core import (
     ElectronicBandStructurePath,
     FermiSurface,
 )
+from pyprocar.core.property_store import Property
 from tests.utils import DATA_DIR
 
 FERMI = 5.3017
+V_ATOM = [1]
+D_ORBITALS = [4, 5, 6, 7, 8]
 TICK_NAMES = [r"$\Gamma$", "M", r"$\Gamma$", "R", "X"]
 
 
@@ -31,6 +35,16 @@ def _calc(tmp_path, relpath):
     dst = tmp_path / "calc"
     shutil.copytree(src, dst, ignore=shutil.ignore_patterns("*.pkl", "CHG*", "WAVECAR", "*.pdf"))
     return dst
+
+
+def _legend_texts(ax):
+    legend = ax.get_legend()
+    assert legend is not None
+    return [t.get_text() for t in legend.get_texts()]
+
+
+def _projection(source, **selection) -> Property:
+    return cast(Property, source.compute_projected_sum(**selection))
 
 
 def _line_collections(ax):
@@ -53,17 +67,18 @@ def _lines_of_length(ax, n):
 
 
 @pytest.fixture(autouse=True)
-def _close_figures():
+def close_figures():
     yield
     plt.close("all")
 
 
+@pytest.mark.data
 class TestBandsplot:
     def test_plain_draws_one_line_per_band_with_kpath_ticks(self, tmp_path):
         calc = _calc(tmp_path, "bands/non-spin-polarized")
         out = tmp_path / "bands.png"
 
-        fig, ax = pyprocar.bandsplot(
+        _, ax = pyprocar.bandsplot(
             code="vasp",
             dirname=calc,
             mode="plain",
@@ -101,7 +116,7 @@ class TestBandsplot:
     def test_parametric_single_spin_channel(self, tmp_path):
         calc = _calc(tmp_path, "bands/spin-polarized")
 
-        fig, ax = pyprocar.bandsplot(
+        _, ax = pyprocar.bandsplot(
             code="vasp",
             dirname=calc,
             mode="parametric",
@@ -119,7 +134,7 @@ class TestBandsplot:
     def test_scatter_draws_one_collection_per_band(self, tmp_path):
         calc = _calc(tmp_path, "bands/non-spin-polarized")
 
-        fig, ax = pyprocar.bandsplot(
+        _, ax = pyprocar.bandsplot(
             code="vasp",
             dirname=calc,
             mode="scatter",
@@ -135,7 +150,7 @@ class TestBandsplot:
     def test_overlay_species_labels_each_species(self, tmp_path):
         calc = _calc(tmp_path, "bands/non-spin-polarized")
 
-        fig, ax = pyprocar.bandsplot(
+        _, ax = pyprocar.bandsplot(
             code="vasp",
             dirname=calc,
             mode="overlay_species",
@@ -145,12 +160,12 @@ class TestBandsplot:
             show=False,
         )
 
-        assert [t.get_text() for t in ax.get_legend().get_texts()] == ["O", "Sr", "V"]
+        assert _legend_texts(ax) == ["O", "Sr", "V"]
 
     def test_overlay_orbitals_labels_each_orbital_group(self, tmp_path):
         calc = _calc(tmp_path, "bands/non-spin-polarized")
 
-        fig, ax = pyprocar.bandsplot(
+        _, ax = pyprocar.bandsplot(
             code="vasp",
             dirname=calc,
             mode="overlay_orbitals",
@@ -160,12 +175,12 @@ class TestBandsplot:
             show=False,
         )
 
-        assert [t.get_text() for t in ax.get_legend().get_texts()] == ["s", "p", "d"]
+        assert _legend_texts(ax) == ["s", "p", "d"]
 
     def test_overlay_items_labels_each_species(self, tmp_path):
         calc = _calc(tmp_path, "bands/non-spin-polarized")
 
-        fig, ax = pyprocar.bandsplot(
+        _, ax = pyprocar.bandsplot(
             code="vasp",
             dirname=calc,
             mode="overlay",
@@ -175,12 +190,12 @@ class TestBandsplot:
             show=False,
         )
 
-        assert [t.get_text() for t in ax.get_legend().get_texts()] == ["O", "V"]
+        assert _legend_texts(ax) == ["O", "V"]
 
     def test_non_collinear_parametric_colors_one_channel_by_spin_component(self, tmp_path):
         calc = _calc(tmp_path, "bands/non-colinear")
 
-        fig, ax = pyprocar.bandsplot(
+        _, ax = pyprocar.bandsplot(
             code="vasp",
             dirname=calc,
             mode="parametric",
@@ -214,7 +229,7 @@ class TestBandsplot:
     def test_atomic_levels_draw_one_segment_per_level(self, tmp_path):
         calc = _calc(tmp_path, "bands/atomic_levels/hBN-CNCN")
 
-        fig, ax = pyprocar.bandsplot(
+        _, ax = pyprocar.bandsplot(
             code="vasp",
             dirname=calc,
             mode="atomic",
@@ -230,11 +245,10 @@ class TestBandsplot:
 
     def test_plain_shifts_bands_by_fermi_once(self, tmp_path):
         calc = _calc(tmp_path, "bands/non-spin-polarized")
-        bands = ElectronicBandStructurePath.from_code("vasp", calc).bands.value
+        ebs = ElectronicBandStructurePath.from_code("vasp", calc)
+        bands = cast(Property, ebs.bands).value
 
-        fig, ax = pyprocar.bandsplot(
-            code="vasp", dirname=calc, mode="plain", fermi=FERMI, show=False
-        )
+        _, ax = pyprocar.bandsplot(code="vasp", dirname=calc, mode="plain", fermi=FERMI, show=False)
 
         plotted = np.concatenate([line.get_ydata() for line in _lines_of_length(ax, 200)])
         assert plotted.min() == pytest.approx(bands.min() - FERMI)
@@ -245,7 +259,7 @@ class TestBandsplot:
         ebs = ElectronicBandStructurePath.from_code("vasp", calc)
         expected = ebs.compute_projected_sum(atoms=[1], orbitals=[4, 5, 6, 7, 8]).value
 
-        fig, ax = pyprocar.bandsplot(
+        _, ax = pyprocar.bandsplot(
             code="vasp",
             dirname=calc,
             mode="parametric",
@@ -265,7 +279,7 @@ class TestBandsplot:
         calc = _calc(tmp_path, "bands/non-colinear")
         total = ElectronicBandStructurePath.from_code("vasp", calc).compute_projected_sum(spins=[0])
 
-        fig, ax = pyprocar.bandsplot(
+        _, ax = pyprocar.bandsplot(
             code="vasp", dirname=calc, mode="parametric", fermi=FERMI, show=False
         )
 
@@ -276,7 +290,7 @@ class TestBandsplot:
     def test_signed_spin_component_is_not_clipped(self, tmp_path):
         calc = _calc(tmp_path, "bands/non-colinear")
 
-        fig, ax = pyprocar.bandsplot(
+        _, ax = pyprocar.bandsplot(
             code="vasp", dirname=calc, mode="parametric", fermi=FERMI, spins=[1], show=False
         )
 
@@ -297,7 +311,7 @@ class TestBandsplot:
         calc = _calc(tmp_path, "bands/non-colinear")
         ipr = ElectronicBandStructurePath.from_code("vasp", calc).compute_ebs_ipr().value
 
-        fig, ax = pyprocar.bandsplot(code="vasp", dirname=calc, mode="ipr", fermi=FERMI, show=False)
+        _, ax = pyprocar.bandsplot(code="vasp", dirname=calc, mode="ipr", fermi=FERMI, show=False)
 
         collections = _line_collections(ax)
         assert len(collections) == 50
@@ -319,7 +333,7 @@ class TestBandsplot:
     def test_overlay_items_accepts_a_list_of_mappings(self, tmp_path):
         calc = _calc(tmp_path, "bands/non-spin-polarized")
 
-        fig, ax = pyprocar.bandsplot(
+        _, ax = pyprocar.bandsplot(
             code="vasp",
             dirname=calc,
             mode="overlay",
@@ -328,7 +342,7 @@ class TestBandsplot:
             show=False,
         )
 
-        assert [t.get_text() for t in ax.get_legend().get_texts()] == ["V", "O"]
+        assert _legend_texts(ax) == ["V", "O"]
 
     def test_draws_onto_a_given_axes(self, tmp_path):
         calc = _calc(tmp_path, "bands/non-spin-polarized")
@@ -343,6 +357,7 @@ class TestBandsplot:
         assert len(_lines_of_length(ax, 200)) == 20
 
 
+@pytest.mark.data
 class TestDosplot:
     def test_plain_draws_total_dos_and_keeps_user_files(self, tmp_path):
         calc = _calc(tmp_path, "dos/non-spin-polarized")
@@ -350,7 +365,7 @@ class TestDosplot:
         sentinel.write_bytes(b"user file")
         out = tmp_path / "dos.png"
 
-        fig, ax = pyprocar.dosplot(
+        _, ax = pyprocar.dosplot(
             code="vasp",
             dirname=calc,
             mode="plain",
@@ -389,7 +404,7 @@ class TestDosplot:
     def test_stack_species_fills_one_band_per_species(self, tmp_path):
         calc = _calc(tmp_path, "dos/non-spin-polarized")
 
-        fig, ax = pyprocar.dosplot(
+        _, ax = pyprocar.dosplot(
             code="vasp",
             dirname=calc,
             mode="stack_species",
@@ -399,7 +414,7 @@ class TestDosplot:
             show=False,
         )
 
-        assert [t.get_text() for t in ax.get_legend().get_texts()] == [
+        assert _legend_texts(ax) == [
             "Total",
             r"$\mathrm{O}_{2-4}-(p)[\uparrow]$",
             r"$\mathrm{Sr}_{0}-(p)[\uparrow]$",
@@ -411,11 +426,10 @@ class TestDosplot:
         calc = _calc(tmp_path, "dos/non-spin-polarized")
         dos = DensityOfStates.from_code("vasp", calc)
         o_p, sr_p = (
-            dos.compute_projected_sum(species=[s], orbitals=[1, 2, 3]).value[:, 0]
-            for s in ("O", "Sr")
+            _projection(dos, species=[s], orbitals=[1, 2, 3]).value[:, 0] for s in ("O", "Sr")
         )
 
-        fig, ax = pyprocar.dosplot(
+        _, ax = pyprocar.dosplot(
             code="vasp",
             dirname=calc,
             mode="stack_species",
@@ -430,11 +444,11 @@ class TestDosplot:
 
     def test_stack_draws_spin_down_below_zero(self, tmp_path):
         calc = _calc(tmp_path, "dos/spin-polarized")
-        o_p = DensityOfStates.from_code("vasp", calc).compute_projected_sum(
-            species=["O"], orbitals=[1, 2, 3]
+        o_p = _projection(
+            DensityOfStates.from_code("vasp", calc), species=["O"], orbitals=[1, 2, 3]
         )
 
-        fig, ax = pyprocar.dosplot(
+        _, ax = pyprocar.dosplot(
             code="vasp",
             dirname=calc,
             mode="stack_species",
@@ -449,11 +463,15 @@ class TestDosplot:
 
     def test_parametric_spin_down_colors_equal_its_projection_fraction(self, tmp_path):
         calc = _calc(tmp_path, "dos/spin-polarized")
-        both = DensityOfStates.from_code("vasp", calc).compute_projected_sum(
-            atoms=[1], orbitals=[4, 5, 6, 7, 8], spins=[0, 1], norm_mode="total_projection"
+        both = _projection(
+            DensityOfStates.from_code("vasp", calc),
+            atoms=[1],
+            orbitals=[4, 5, 6, 7, 8],
+            spins=[0, 1],
+            norm_mode="total_projection",
         )
 
-        fig, ax = pyprocar.dosplot(
+        _, ax = pyprocar.dosplot(
             code="vasp",
             dirname=calc,
             mode="parametric",
@@ -471,7 +489,7 @@ class TestDosplot:
     def test_non_collinear_stack_sums_the_total_component(self, tmp_path):
         calc = _calc(tmp_path, "dos/non-colinear")
 
-        fig, ax = pyprocar.dosplot(
+        _, ax = pyprocar.dosplot(
             code="vasp", dirname=calc, mode="stack_species", fermi=FERMI, show=False
         )
 
@@ -490,7 +508,7 @@ class TestDosplot:
     def test_vertical_overlay_orbitals(self, tmp_path):
         calc = _calc(tmp_path, "dos/non-spin-polarized")
 
-        fig, ax = pyprocar.dosplot(
+        _, ax = pyprocar.dosplot(
             code="vasp",
             dirname=calc,
             mode="overlay_orbitals",
@@ -502,7 +520,7 @@ class TestDosplot:
         )
 
         assert ax.get_ylim() == (-4.0, 4.0)
-        assert [t.get_text() for t in ax.get_legend().get_texts()] == [
+        assert _legend_texts(ax) == [
             "Total",
             r"$\mathrm{V}_{1}-(s)[\uparrow]$",
             r"$\mathrm{V}_{1}-(p)[\uparrow]$",
@@ -512,7 +530,7 @@ class TestDosplot:
     def test_spin_channels_can_share_one_axes(self, tmp_path):
         calc = _calc(tmp_path, "dos/spin-polarized")
 
-        fig, ax = pyprocar.dosplot(
+        _, ax = pyprocar.dosplot(
             code="vasp", dirname=calc, mode="plain", fermi=FERMI, spins=[0], show=False
         )
         pyprocar.dosplot(
@@ -523,12 +541,13 @@ class TestDosplot:
         assert labels == [r"$Total - \uparrow$", r"$Total - \downarrow$"]
 
 
+@pytest.mark.data
 class TestFermi2D:
     def test_plain_draws_contours(self, tmp_path):
         calc = _calc(tmp_path, "fermi2d/non-spin-polarized")
         out = tmp_path / "fermi2d.png"
 
-        fig, ax = pyprocar.fermi2D(
+        _, ax = pyprocar.fermi2D(
             code="vasp",
             dirname=calc,
             mode="plain",
@@ -564,39 +583,48 @@ class TestFermi2D:
         assert segments[0].get_array() is not None
 
 
-class TestFermiHandler:
-    ATOMS, ORBITALS = [1], [4, 5, 6, 7, 8]
+class TestFermiHandlerSignature:
+    def test_options_after_fermi_are_keyword_only(self, tmp_path):
+        with pytest.raises(TypeError):
+            positional: list[Any] = ["vasp", tmp_path, FERMI, True]
+            pyprocar.FermiHandler(*positional)
 
+
+@pytest.mark.data
+class TestFermiHandler:
     def test_parametric_colors_each_surface_by_its_own_band(self, tmp_path):
         calc = _calc(tmp_path, "fermi3d/non-spin-polarized")
-        ebs = ElectronicBandStructureMesh.from_code("vasp", calc)
+        ebs = cast(ElectronicBandStructureMesh, ElectronicBandStructureMesh.from_code("vasp", calc))
         fs = FermiSurface.from_ebs(ebs, isovalue=FERMI)
         projection = fs.get_property(
-            "projected_sum", atoms=self.ATOMS, orbitals=self.ORBITALS, spins=[0]
+            "projected_sum", atoms=V_ATOM, orbitals=D_ORBITALS, spins=[0]
         ).value
         handler = pyprocar.FermiHandler(code="vasp", dirname=calc, fermi=FERMI, verbose=0)
         shutil.rmtree(calc)
 
         plotter = handler.plot_fermi_surface(
             mode="parametric",
-            atoms=self.ATOMS,
-            orbitals=self.ORBITALS,
+            atoms=V_ATOM,
+            orbitals=D_ORBITALS,
             spins=[0],
             show=False,
             off_screen=True,
         )
 
+        assert plotter is not None
         assert len(fs.band_spin_mask) == 3
         for (iband, ispin), mask in fs.band_spin_mask.items():
             colors = plotter.values_dict[f"band_{iband}_spin_{ispin}_scalars"]
             np.testing.assert_allclose(colors, projection[mask, iband, ispin])
-            assert 0.79 < colors.min() and colors.max() < 0.85
+            assert colors.min() > 0.79
+            assert colors.max() < 0.85
 
     def test_fermi_speed_colors_each_surface(self, tmp_path):
         calc = _calc(tmp_path, "fermi3d/non-spin-polarized")
         handler = pyprocar.FermiHandler(code="vasp", dirname=calc, fermi=FERMI, verbose=0)
 
         plotter = handler.plot_fermi_surface(mode="fermi_speed", show=False, off_screen=True)
+        assert plotter is not None
 
         scalars = [v for k, v in plotter.values_dict.items() if k.endswith("_scalars")]
         assert len(scalars) == 3
@@ -608,6 +636,7 @@ class TestFermiHandler:
 
         spin_up = handler.plot_fermi_surface(mode="plain", spins=[0], show=False, off_screen=True)
         spin_down = handler.plot_fermi_surface(mode="plain", spins=[1], show=False, off_screen=True)
+        assert spin_up is not None and spin_down is not None
 
         up = {k: v for k, v in spin_up.values_dict.items() if k.endswith("_scalars")}
         down = [k for k in spin_down.values_dict if k.endswith("_scalars")]
@@ -625,18 +654,15 @@ class TestFermiHandler:
 
         assert out.stat().st_size > 0
 
-    def test_options_after_fermi_are_keyword_only(self, tmp_path):
-        with pytest.raises(TypeError):
-            pyprocar.FermiHandler("vasp", tmp_path, FERMI, True)
 
-
+@pytest.mark.data
 class TestBandsdosplot:
     def test_bands_and_dos_share_the_energy_axis(self, tmp_path):
         bands_calc = _calc(tmp_path / "b", "bands/non-spin-polarized")
         dos_calc = _calc(tmp_path / "d", "dos/non-spin-polarized")
         out = tmp_path / "bandsdos.png"
 
-        fig, ax_bands, ax_dos = pyprocar.bandsdosplot(
+        _, ax_bands, ax_dos = pyprocar.bandsdosplot(
             bands_settings={"mode": "plain", "dirname": bands_calc, "fermi": FERMI},
             dos_settings={"mode": "plain", "dirname": dos_calc, "fermi": FERMI},
             elimit=[-4, 4],
@@ -661,6 +687,7 @@ class TestBandsdosplot:
         assert dos_settings == {"mode": "plain", "dirname": dos_calc, "fermi": FERMI}
 
 
+@pytest.mark.data
 class TestBandStructure2DHandler:
     @pytest.fixture
     def handler(self, tmp_path):
@@ -692,7 +719,8 @@ class TestBandStructure2DHandler:
         for values in scalars:
             finite = values[np.isfinite(values)]
             assert values.ndim == 1
-            assert 0.0 <= finite.min() and finite.max() <= 1.0
+            assert finite.min() >= 0.0
+            assert finite.max() <= 1.0
 
     def test_surfaces_are_clipped_to_the_brillouin_zone(self, handler):
         clipped = handler.plot_band_structure(mode="plain", show=False, render_offscreen=True)

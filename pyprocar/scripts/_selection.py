@@ -27,8 +27,8 @@ def resolve_spins(is_non_collinear: bool, n_channels: int, spins) -> tuple[list[
         return channels, channels
     if spins is not None and len(spins) != 1:
         raise ValueError(
-            "Non-collinear calculations take one spin component "
-            f"(0 total, 1-3 Sx, Sy, Sz); got spins={list(spins)}"
+            "Non-collinear calculations take one spin component"
+            + f" (0 total, 1-3 Sx, Sy, Sz); got spins={list(spins)}"
         )
     return [0], [0] if spins is None else list(spins)
 
@@ -55,6 +55,11 @@ def projection_components(source, kind: str, atoms=None, orbitals=None, items=No
         source.compute_projected_sum(label=label, **selection, **kwargs)
         for label, selection in selections
     ]
+
+
+def as_lim(values) -> tuple[float, float] | None:
+    """A (low, high) pair from a user-supplied two-item sequence, or None."""
+    return None if values is None else (float(values[0]), float(values[1]))
 
 
 def signed_clim(prop: Property) -> tuple[float, float] | None:

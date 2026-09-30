@@ -506,7 +506,7 @@ class DOSPlotter:
         self,
         energies: Iterable[float],
         values: Iterable[float],
-        baseline: float | None = 0.0,
+        baseline: float | np.ndarray | None = 0.0,
         **kwargs,
     ):
         # energies = np.asarray(list(energies), dtype=np.float64)
