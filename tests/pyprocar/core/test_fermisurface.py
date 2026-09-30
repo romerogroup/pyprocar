@@ -423,7 +423,7 @@ def test_fermi_speed_matches_finite_difference(fermisurface_3d_non_spin_polarize
     fs = fermisurface_3d_non_spin_polarized
     padding = (fs.ebs.n_kx - fs.original_ebs.n_kx) // 2
 
-    fermi_speed = np.asarray(fs.get_property("fermi_speed"))[:, 16, 0]
+    fermi_speed = fs.get_property("fermi_speed").value[:, 16, 0]
 
     grid_speed = np.linalg.norm(_finite_difference_gradient(fs.original_ebs, 16, padding), axis=-1)
     expected_speed = fs.interpolate_to_surface(grid_speed) * METER_ANGSTROM / HBAR_EV

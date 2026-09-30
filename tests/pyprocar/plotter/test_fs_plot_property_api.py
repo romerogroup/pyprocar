@@ -27,7 +27,7 @@ def _fermi_surface(props=None):
     return SimpleNamespace(
         band_isosurfaces={(0, 0): _triangle(0.0), (3, 1): _triangle(1.0)},
         band_spin_mask={(0, 0): mask_a, (3, 1): ~mask_a},
-        point_set=SimpleNamespace(get_property=lambda name: (props or {})[name]),
+        get_property=lambda name: (props or {})[name],
         brillouin_zone=pv.Cube(),
     )
 
