@@ -120,6 +120,17 @@ class TestFermiPlotterPlot:
         assert plotter.values_dict["band_0_spin_0_scalars"].tolist() == [0.5, 1.0, 1.5]
 
 
+class TestFermiPlotterAddTexture:
+    def test_accepts_fermi_surface_keyword(self, plotter):
+        surface = _triangle(0.0)
+        surface.point_data["v"] = VECTORS[:3]
+        surface.set_active_vectors("v")
+
+        arrows = plotter.add_texture(fermi_surface=surface)
+
+        assert arrows.bounds[5] == pytest.approx(0.01)
+
+
 class TestFermiPlotterExport:
     @pytest.mark.parametrize("ext", [".vtk", ".vtp", ".ply", ".stl"])
     def test_mesh_formats_merge_plotted_surfaces(self, plotter, tmp_path, ext):

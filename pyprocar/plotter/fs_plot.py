@@ -200,6 +200,9 @@ class FermiPlotter(SurfacePlotter):
 
             self.add_texture(fermi_surface, **add_texture_args)
 
+    def add_texture(self, fermi_surface: pv.PolyData, *args, **kwargs):
+        return super().add_texture(fermi_surface, *args, **kwargs)
+
     def add_isoslider(
         self,
         e_surfaces,
