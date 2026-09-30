@@ -253,6 +253,8 @@ class ElectronicBandStructure(PointSet):
          Boolean to determine if the fermi energy is shifted, defaults to False
     """
 
+    _mesh: pv.PolyData | pv.StructuredGrid | pv.PointSet | None = None
+
     def __init__(
         self,
         kpoints: kpoints.KPOINTS_DTYPE | None = None,
@@ -669,10 +671,12 @@ class ElectronicBandStructure(PointSet):
         return mesh
 
     def set_mesh_scalar(self, name: str, scalar: np.ndarray):
+        assert self._mesh is not None, "call to_mesh first"
         self._mesh.point_data[name] = scalar
         self._mesh.set_active_scalars(name)
 
     def set_mesh_vector(self, name: str, vector: np.ndarray):
+        assert self._mesh is not None, "call to_mesh first"
         self._mesh.point_data[name] = vector
         self._mesh.set_active_vectors(name)
 
