@@ -251,11 +251,13 @@ def fermi2D(
         property_name = None
     elif mode == Fermi2DMode.parametric.value:
         property_name = "projected_sum"
-        fs.get_property(property_name, atoms=atoms, orbitals=orbitals, spins=spins)
+        prop = fs.get_property(property_name, atoms=atoms, orbitals=orbitals, spins=spins)
+        fs.set_values(property_name, prop.value)
 
     elif mode == Fermi2DMode.spin_texture.value and fs.ebs.is_non_collinear:
         property_name = "projected_sum_spin_texture"
-        fs.get_property(property_name, atoms=atoms, orbitals=orbitals)
+        prop = fs.get_property(property_name, atoms=atoms, orbitals=orbitals)
+        fs.set_values(property_name, prop.value)
 
     elif mode == Fermi2DMode.spin_texture.value and not fs.ebs.is_non_collinear:
         raise ValueError("Spin texture is only available for non-collinear calculations")

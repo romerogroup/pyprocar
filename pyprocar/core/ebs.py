@@ -14,7 +14,7 @@ import itertools
 import logging
 from abc import ABC, abstractmethod
 from collections.abc import Iterable, Mapping, Sequence
-from enum import Enum
+from functools import cached_property
 from pathlib import Path
 from typing import Any
 
@@ -23,22 +23,15 @@ import numpy.typing as npt
 import pyvista as pv
 from typing_extensions import override
 
-from pyprocar.core import kpoints
-from pyprocar.core.atomic_orbital_index import (
-    AtomIndexer,
-    OrbitalIndexer,
-    ProjectionLabelBuilder,
-    ProjectionSelectionResolver,
-    ProjectionSelectionResult,
-    SpinIndexer,
-)
+from pyprocar.core import kpoints, projection
+from pyprocar.core.atomic_orbital_index import ProjectionSelectionResolver
 from pyprocar.core.brillouin_zone import BrillouinZone
+from pyprocar.core.projection import NormMode, build_property, selection_resolver
 from pyprocar.core.property_store import PointSet, Property
 from pyprocar.core.serializer import get_serializer
 from pyprocar.core.structure import Structure
 from pyprocar.utils import math, np_utils, physics
 from pyprocar.utils.info import orbital_names
-from pyprocar.utils.math import np_round_to_half
 from pyprocar.utils.unfolder import Unfolder
 
 pv.global_theme.allow_empty_mesh = True
@@ -55,86 +48,16 @@ PROJECTED_PHASE_DTYPE = np.ndarray[tuple[int, int, int, int, int], np.dtype[np_u
 WEIGHTS_DTYPE = np.ndarray[tuple[int, int], np.dtype[np_utils.FLOAT_DTYPE]]
 
 
-class EBSNormMode(Enum):
-    """Normalization modes for ElectronicBandStructure projections.
-
-    Unlike DOS, band energies should NOT be normalized. These modes
-    apply only to projection weights (projected, projected_sum, etc.).
-    """
-
-    RAW = "raw"
-    MAX = "max"
-    TOTAL = "total"
-    TOTAL_PROJECTION = "total_projection"
-
-    @classmethod
-    def from_input(cls, input: str | EBSNormMode | None) -> EBSNormMode:
-        if isinstance(input, EBSNormMode):
-            return input
-        if input is None:
-            return cls.RAW
-        if not isinstance(input, str):
-            raise ValueError(f"Invalid normalization mode: {input}")
-
-        lower_input = input.lower()
-        mode_map = {
-            "raw": cls.RAW,
-            "max": cls.MAX,
-            "total": cls.TOTAL,
-            "total_projection": cls.TOTAL_PROJECTION,
-        }
-
-        if lower_input in mode_map:
-            return mode_map[lower_input]
-
-        valid_modes = ", ".join(mode_map.keys())
-        raise ValueError(f"Invalid normalization mode: {input}. Valid modes: {valid_modes}")
-
-    @classmethod
-    def list_modes(cls) -> list[str]:
-        return [mode.value for mode in cls]
-
-    @classmethod
-    def get_mode_prefix(cls, mode: EBSNormMode) -> str:
-        mode = cls.from_input(mode)
-        prefixes = {
-            cls.RAW: "",
-            cls.MAX: "Max-Normed",
-            cls.TOTAL: "Total-Normed",
-            cls.TOTAL_PROJECTION: "Total-Projection-Normed",
-        }
-        return prefixes.get(mode, "")
-
-    @classmethod
-    def get_normed_name(cls, mode: EBSNormMode, name: str) -> str:
-        mode = cls.from_input(mode)
-        prefix = cls.get_mode_prefix(mode)
-        if prefix:
-            return f"{prefix} {name}"
-        return name
-
-    @classmethod
-    def get_normed_units(cls, mode: EBSNormMode) -> str:
-        """Return units after normalization.
-
-        Projection weights are dimensionless, so normalization
-        always results in dimensionless output.
-        """
-        mode = cls.from_input(mode)
-        if mode is cls.RAW:
-            return ""  # dimensionless weights
-        return "$1$"  # normalized to dimensionless
-
-    @classmethod
-    def get_mode_footnote(cls, mode: EBSNormMode) -> str:
-        mode = cls.from_input(mode)
-        footnotes = {
-            cls.RAW: "",
-            cls.MAX: "Normalized by maximum projection weight",
-            cls.TOTAL: "Normalized by total projection",
-            cls.TOTAL_PROJECTION: "Normalized by total projected weight",
-        }
-        return footnotes.get(mode, "")
+_COMPUTE_METHODS = {
+    "ebs_ipr": "compute_ebs_ipr",
+    "ebs_ipr_atom": "compute_ebs_ipr_atom",
+    "spin_texture": "compute_spin_texture",
+    "projected_sum": "compute_projected_sum",
+    "projected_sum_spin_texture": "compute_projected_sum_spin_texture",
+    "bands_velocity": "compute_band_velocity",
+    "bands_speed": "compute_band_speed",
+    "avg_inv_effective_mass": "compute_avg_inv_effective_mass",
+}
 
 
 def get_ebs_from_data(
@@ -288,10 +211,6 @@ class ElectronicBandStructure(PointSet):
         self._reciprocal_lattice = reciprocal_lattice
         self._shifted_to_fermi = shifted_to_fermi
         self._structure = structure
-
-        # Projection selection infrastructure (lazy initialized)
-        self._projection_label_builder: ProjectionLabelBuilder | None = None
-        self._projection_selection_resolver: ProjectionSelectionResolver | None = None
 
         logger.info("___ElectronicBandStructure initialization complete___")
 
@@ -642,17 +561,7 @@ class ElectronicBandStructure(PointSet):
 
     @override
     def get_property(self, key=None, **kwargs):
-        prop_name, (calc_name, gradient_order) = self._extract_key(key)
-        if prop_name not in self.property_store:
-            computed = self.compute_property(prop_name, **kwargs)
-            if computed is not None:
-                # compute_property now returns Property objects
-                if isinstance(computed, Property):
-                    self.property_store[prop_name] = computed
-                else:
-                    # Fallback for any methods still returning arrays
-                    self.add_property(name=prop_name, value=computed)
-        return super().get_property(key)
+        return super().get_property(key, **kwargs)
 
     def to_mesh(
         self,
@@ -683,20 +592,12 @@ class ElectronicBandStructure(PointSet):
         self._mesh.set_active_vectors(name)
 
     def compute_property(self, name: str, **kwargs):
-        if name == "ebs_ipr":
-            return self.compute_ebs_ipr(**kwargs)
-        elif name == "ebs_ipr_atom":
-            return self.compute_ebs_ipr_atom(**kwargs)
-        elif name == "spin_texture":
-            return self.compute_spin_texture(**kwargs)
-        elif name == "projected_sum":
-            return self.compute_projected_sum(**kwargs)
-        elif name == "projected_sum_spin_texture":
-            return self.compute_projected_sum_spin_texture(**kwargs)
+        compute = getattr(self, _COMPUTE_METHODS.get(name, ""), None)
+        return None if compute is None else compute(**kwargs)
 
     def compute_ebs_ipr(
         self,
-        norm_mode: str | EBSNormMode | None = "raw",
+        norm_mode: str | NormMode | None = "raw",
         label: str = "IPR",
         name: str = "ebs_ipr",
         **kwargs,
@@ -707,7 +608,7 @@ class ElectronicBandStructure(PointSet):
 
         Parameters
         ----------
-        norm_mode : str | EBSNormMode | None
+        norm_mode : str | NormMode | None
             Normalization mode
         label : str
             Property label
@@ -734,12 +635,13 @@ class ElectronicBandStructure(PointSet):
         values = num / den
 
         # Build property with metadata
-        metadata = {
+        metadata: dict[str, Any] = {
             "description": "Inverse Participation Ratio",
             "formula": "IPR = sum(|c_i|^4) / (sum(|c_i|^2))^2",
         }
 
-        prop = self._build_property(
+        prop = build_property(
+            self,
             values=values,
             label=label,
             name=name,
@@ -752,7 +654,7 @@ class ElectronicBandStructure(PointSet):
 
     def compute_ebs_ipr_atom(
         self,
-        norm_mode: str | EBSNormMode | None = "raw",
+        norm_mode: str | NormMode | None = "raw",
         label: str = "Partial IPR",
         name: str = "ebs_ipr_atom",
         **kwargs,
@@ -763,7 +665,7 @@ class ElectronicBandStructure(PointSet):
 
         Parameters
         ----------
-        norm_mode : str | EBSNormMode | None
+        norm_mode : str | NormMode | None
             Normalization mode
         label : str
             Property label
@@ -785,12 +687,13 @@ class ElectronicBandStructure(PointSet):
 
         values = num / den[..., np.newaxis]
 
-        metadata = {
+        metadata: dict[str, Any] = {
             "description": "Atom-resolved partial Inverse Participation Ratio",
             "formula": "pIPR_j = |c_j|^4 / (sum(|c_i|^2))^2",
         }
 
-        prop = self._build_property(
+        prop = build_property(
+            self,
             values=values,
             label=label,
             name=name,
@@ -813,7 +716,7 @@ class ElectronicBandStructure(PointSet):
         atoms_orbital_map: Sequence[Mapping[Iterable[int] | int, Iterable[int]]]
         | Mapping[Iterable[int] | int, Iterable[int]]
         | None = None,
-        norm_mode: str | EBSNormMode | None = "raw",
+        norm_mode: str | NormMode | None = "raw",
         label: str = "Projected Sum",
         name: str = "projected_sum",
     ) -> Property:
@@ -833,7 +736,7 @@ class ElectronicBandStructure(PointSet):
             Species to orbital mapping
         atoms_orbital_map : Mapping | None
             Atoms to orbital mapping
-        norm_mode : str | EBSNormMode | None
+        norm_mode : str | NormMode | None
             Normalization mode
         label : str
             Property label
@@ -858,7 +761,7 @@ class ElectronicBandStructure(PointSet):
 
         if has_selection:
             # Resolve selection
-            selection = self._resolve_projection_selection(
+            selection = self._selection_resolver.resolve(
                 atoms=atoms,
                 orbitals=orbitals,
                 spins=spins,
@@ -879,7 +782,8 @@ class ElectronicBandStructure(PointSet):
         )
 
         # Build property with metadata
-        prop = self._build_property(
+        prop = build_property(
+            self,
             values=values,
             label=label,
             name=name,
@@ -917,12 +821,13 @@ class ElectronicBandStructure(PointSet):
         values = self.projected[:, :, 1:, :, :]
         values = np.moveaxis(values, 2, -1)
 
-        metadata = {
+        metadata: dict[str, Any] = {
             "description": "Spin texture components (Sx, Sy, Sz)",
             "is_non_collinear": True,
         }
 
-        prop = self._build_property(
+        prop = build_property(
+            self,
             values=values,
             label=label,
             name=name,
@@ -979,7 +884,7 @@ class ElectronicBandStructure(PointSet):
 
         if has_selection:
             # Resolve selection
-            selection = self._resolve_projection_selection(
+            selection = self._selection_resolver.resolve(
                 atoms=atoms,
                 orbitals=orbitals,
                 spins=None,  # All spin components needed for texture
@@ -1004,12 +909,13 @@ class ElectronicBandStructure(PointSet):
         temp_shape.insert(2, 1)
         values = values.reshape(temp_shape, order=kwargs.pop("order", "F"))
 
-        metadata = {
+        metadata: dict[str, Any] = {
             "description": "Projected spin texture components (Sx, Sy, Sz)",
             "is_non_collinear": True,
         }
 
-        prop = self._build_property(
+        prop = build_property(
+            self,
             values=values,
             label=label,
             name=name,
@@ -1072,336 +978,48 @@ class ElectronicBandStructure(PointSet):
 
     def normalize(
         self,
-        mode: str | EBSNormMode | None,
-        values_array: np.ndarray,
-        **kwargs,
-    ) -> np.ndarray:
-        """Normalize projection values according to the specified mode.
-
-        Parameters
-        ----------
-        mode : str | EBSNormMode | None
-            Normalization mode
-        values_array : np.ndarray
-            Array to normalize, shape (n_kpoints, n_bands, n_spins)
-
-        Returns
-        -------
-        np.ndarray
-            Normalized array with same shape as input
-        """
-        mode = EBSNormMode.from_input(mode)
-
-        if mode is EBSNormMode.RAW:
-            return values_array
-        elif mode is EBSNormMode.MAX:
-            return self.normalize_max(values_array, **kwargs)
-        elif mode is EBSNormMode.TOTAL:
-            return self.normalize_total(values_array, **kwargs)
-        elif mode is EBSNormMode.TOTAL_PROJECTION:
-            return self.normalize_total_projection(values_array, **kwargs)
-        else:
-            raise ValueError(f"Unknown normalization mode: {mode}")
-
-    def normalize_max(
-        self,
-        values_array: np.ndarray,
-        **kwargs,
-    ) -> np.ndarray:
-        """Normalize by maximum value across all k-points and bands."""
-        max_val = np.max(np.abs(values_array))
-        if max_val < NUMERICAL_STABILITY_FACTOR:
-            return values_array
-        return values_array / max_val
-
-    def normalize_total(
-        self,
-        values_array: np.ndarray,
-        **kwargs,
-    ) -> np.ndarray:
-        """Normalize by total projection at each k-point/band."""
-        total = self.ebs_sum()  # Sum over all atoms/orbitals
-        total = np.where(
-            np.abs(total) < NUMERICAL_STABILITY_FACTOR,
-            NUMERICAL_STABILITY_FACTOR,
-            total,
-        )
-        return values_array / total
-
-    def normalize_total_projection(
-        self,
+        mode: str | NormMode | None,
         values_array: np.ndarray,
         atoms: list[int] | None = None,
         orbitals: list[int] | None = None,
         spins: list[int] | None = None,
         **kwargs,
     ) -> np.ndarray:
-        """Normalize by total projection with same selection."""
-        total = self.ebs_sum(atoms=atoms, orbitals=orbitals, spins=spins)
-        total = np.where(
-            np.abs(total) < NUMERICAL_STABILITY_FACTOR,
-            NUMERICAL_STABILITY_FACTOR,
-            total,
-        )
-        return values_array / total
+        """Normalize projection weights of shape (n_kpoints, n_bands, n_spins).
 
-    def _get_projection_label_builder(self) -> ProjectionLabelBuilder:
-        """Lazily initialize and return the projection label builder."""
-        if self._projection_label_builder is None:
-            atom_indexer = None
-            if self._structure is not None:
-                atom_indexer = AtomIndexer.from_structure(self._structure)
-            spin_indexer = SpinIndexer.from_projection_names(self.spin_projection_names)
-            self._projection_label_builder = ProjectionLabelBuilder(
-                atom_indexer=atom_indexer,
-                orbital_indexer=OrbitalIndexer(),
-                spin_indexer=spin_indexer,
-            )
-        return self._projection_label_builder
-
-    def _get_projection_selection_resolver(self) -> ProjectionSelectionResolver:
-        """Lazily initialize and return the projection selection resolver."""
-        if self._projection_selection_resolver is None:
-            label_builder = self._get_projection_label_builder()
-            self._projection_selection_resolver = ProjectionSelectionResolver(
-                label_builder=label_builder,
-                orbital_names=self._orbital_names,
-                is_non_colinear=self.is_non_collinear,
-            )
-        return self._projection_selection_resolver
-
-    def _resolve_projection_selection(
-        self,
-        *,
-        atoms: Sequence[int] | int | None = None,
-        orbitals: Sequence[int] | int | None = None,
-        spins: Sequence[int] | int | None = None,
-        species: Sequence[str] | str | None = None,
-        species_orbital_map: Sequence[Mapping[str, Iterable[int]]]
-        | Mapping[str, Iterable[int]]
-        | None = None,
-        atoms_orbital_map: Sequence[Mapping[Iterable[int] | int, Iterable[int]]]
-        | Mapping[Iterable[int] | int, Iterable[int]]
-        | None = None,
-    ) -> ProjectionSelectionResult:
-        """Resolve projection selection parameters to canonical form with labels.
-
-        Parameters
-        ----------
-        atoms : Sequence[int] | int | None
-            Atom indices to select
-        orbitals : Sequence[int] | int | None
-            Orbital indices to select
-        spins : Sequence[int] | int | None
-            Spin channel indices to select
-        species : Sequence[str] | str | None
-            Species names to select (resolved to atom indices)
-        species_orbital_map : Mapping | None
-            Mapping of species to orbital indices, e.g., {"Fe": [4,5,6], "O": [0,1,2]}
-        atoms_orbital_map : Mapping | None
-            Mapping of atom indices to orbital indices
-
-        Returns
-        -------
-        ProjectionSelectionResult
-            Resolved selection with atoms, orbitals, spins, species, and labels
+        ``max`` divides by the largest weight, ``total`` by the sum over every
+        projection and ``total_projection`` by the sum over the given selection.
+        Denominators below ``NUMERICAL_STABILITY_FACTOR`` are clamped to it.
         """
-        resolver = self._get_projection_selection_resolver()
-        return resolver.resolve(
-            atoms=atoms,
-            orbitals=orbitals,
-            spins=spins,
-            species=species,
-            species_orbital_map=species_orbital_map,
-            atoms_orbital_map=atoms_orbital_map,
+
+        def max_weight() -> float:
+            max_val = np.max(np.abs(values_array))
+            return max_val if max_val >= NUMERICAL_STABILITY_FACTOR else 1.0
+
+        def clamped_sum(**selection) -> np.ndarray:
+            total = self.ebs_sum(**selection)
+            return np.where(
+                np.abs(total) < NUMERICAL_STABILITY_FACTOR, NUMERICAL_STABILITY_FACTOR, total
+            )
+
+        return projection.normalize(
+            values_array,
+            mode,
+            {
+                NormMode.MAX: max_weight,
+                NormMode.TOTAL: clamped_sum,
+                NormMode.TOTAL_PROJECTION: lambda: clamped_sum(
+                    atoms=atoms, orbitals=orbitals, spins=spins
+                ),
+            },
         )
 
-    @staticmethod
-    def _format_selection_label(
-        selection: ProjectionSelectionResult,
-        *,
-        normalize: bool,
-        include_normal_label: bool = False,
-    ) -> tuple[list[str], list[str]]:
-        """Format selection labels with optional normalization suffix.
+    def normed_units(self, mode: NormMode, units: str | None) -> str:
+        return "" if mode is NormMode.RAW else "$1$"
 
-        Parameters
-        ----------
-        selection : ProjectionSelectionResult
-            Resolved selection with labels
-        normalize : bool
-            Whether normalization is applied
-        include_normal_label : bool
-            Whether to append [fraction]/[raw] suffix
-
-        Returns
-        -------
-        tuple[list[str], list[str]]
-            (plain_labels, latex_labels) for each spin component
-        """
-        mode_plain = "fraction" if normalize else "raw"
-        mode_latex = "\\mathrm{fraction}" if normalize else "\\mathrm{raw}"
-
-        prefix_plain = selection.labels.prefix_plain
-        prefix_latex = selection.labels.prefix_latex
-
-        spin_components = selection.labels.spin_components
-        spin_components_latex = selection.labels.spin_components_latex
-
-        if not spin_components:
-            spin_components = ("",)
-            spin_components_latex = ("",)
-
-        labels_plain: list[str] = []
-        labels_latex: list[str] = []
-
-        normal_suffix_plain = f" [{mode_plain}]" if include_normal_label else ""
-        normal_suffix_latex = f" [{mode_latex}]" if include_normal_label else ""
-
-        for component_plain, component_latex in zip(spin_components, spin_components_latex):
-            body_plain = prefix_plain
-            if component_plain:
-                body_plain = f"{body_plain}[{component_plain}]" if body_plain else component_plain
-            body_plain = body_plain or "all"
-            labels_plain.append(f"{body_plain}{normal_suffix_plain}")
-
-            body_latex = prefix_latex
-            if component_latex:
-                body_latex = (
-                    f"{body_latex}[{component_latex}]" if body_latex else f"[{component_latex}]"
-                )
-            body_latex = body_latex or "\\mathrm{all}"
-            labels_latex.append(f"${body_latex}{normal_suffix_latex}$")
-
-        return labels_plain, labels_latex
-
-    def _build_property(
-        self,
-        values: np.ndarray,
-        label: str,
-        name: str,
-        norm_mode: str | EBSNormMode | None = None,
-        selection: ProjectionSelectionResult | None = None,
-        include_normal_label: bool = False,
-        allowed_norm_modes: set[EBSNormMode] | None = None,
-        **kwargs,
-    ) -> Property:
-        """Build a Property object with rich metadata.
-
-        Parameters
-        ----------
-        values : np.ndarray
-            The property values, shape (n_kpoints, n_bands, n_spins)
-        label : str
-            Human-readable label for the property
-        name : str
-            Property name for storage/retrieval
-        norm_mode : str | EBSNormMode | None
-            Normalization mode to apply
-        selection : ProjectionSelectionResult | None
-            Projection selection result with labels
-        include_normal_label : bool
-            Whether to include normalization info in labels
-        allowed_norm_modes : set[EBSNormMode] | None
-            Restrict allowed normalization modes
-        **kwargs
-            Additional metadata fields
-
-        Returns
-        -------
-        Property
-            Property object with full metadata
-        """
-        # Resolve and validate normalization mode
-        norm_mode = EBSNormMode.from_input(norm_mode)
-        if allowed_norm_modes is not None:
-            if norm_mode not in allowed_norm_modes:
-                valid_modes = ", ".join(m.value for m in allowed_norm_modes)
-                raise ValueError(
-                    f"Invalid normalization mode: {norm_mode.value}. "
-                    f"Valid modes: {valid_modes}"
-                )
-
-        # Get transformed name and units
-        normed_name = EBSNormMode.get_normed_name(norm_mode, name)
-        normed_units = EBSNormMode.get_normed_units(norm_mode)
-        footnote = EBSNormMode.get_mode_footnote(norm_mode)
-
-        # Normalize values
-        values = self.normalize(mode=norm_mode, values_array=values, **kwargs)
-
-        # Compute data limits
-        data_min = np.min(values, axis=0)
-        data_max = np.max(values, axis=0)
-        data_lim = (data_min, data_max)
-        rounded_data_lim = (np_round_to_half(data_min), np_round_to_half(data_max))
-
-        # Build base metadata
-        metadata: dict[str, Any] = {
-            "norm_mode": norm_mode,
-            "units": normed_units,
-            "data_lim": data_lim,
-            "rounded_data_lim": rounded_data_lim,
-            "footnote": footnote,
-            "scalar_label": label,
-            "label": label,
-            "label_plain": label,
-            "include_normal_label": include_normal_label,
-        }
-
-        # Add selection metadata if available
-        if selection is not None:
-            label_plain_list, label_latex_list = self._format_selection_label(
-                selection=selection,
-                normalize=norm_mode is not EBSNormMode.RAW,
-                include_normal_label=include_normal_label,
-            )
-            metadata.update(
-                {
-                    "atoms": list(selection.atoms) if len(selection.atoms) > 0 else None,
-                    "orbitals": list(selection.orbitals)
-                    if selection.orbitals is not None
-                    else None,
-                    "spins": list(selection.spins) if selection.spins is not None else None,
-                    "species": list(selection.species) if len(selection.species) > 0 else None,
-                    "atom_label": selection.labels.atom,
-                    "atom_label_latex": selection.labels.atom_latex,
-                    "orbital_label": selection.labels.orbital,
-                    "orbital_label_latex": selection.labels.orbital_latex,
-                    "spin_label": selection.labels.spin,
-                    "spin_label_latex": selection.labels.spin_latex,
-                    "species_label": selection.labels.species,
-                    "species_label_latex": selection.labels.species_latex,
-                    "label_prefix": selection.labels.prefix_plain,
-                    "label_prefix_latex": selection.labels.prefix_latex,
-                    "spin_component_labels": list(selection.labels.spin_components),
-                    "spin_component_labels_latex": list(selection.labels.spin_components_latex),
-                    "label_combined": selection.labels.combined,
-                    "label_combined_latex": selection.labels.combined_latex,
-                    "label": label_latex_list,
-                    "label_plain": label_plain_list,
-                }
-            )
-
-        # Add any additional kwargs to metadata
-        if kwargs:
-            # Filter out kwargs that were used for normalization
-            extra_metadata = {
-                k: v for k, v in kwargs.items() if k not in ("atoms", "orbitals", "spins")
-            }
-            metadata.update(extra_metadata)
-
-        # Build Property
-        prop = Property(
-            name=normed_name,
-            value=values,
-            point_set=self,
-            metadata=metadata,
-            label=label,
-            units=normed_units,
-        )
-
-        return prop
+    @cached_property
+    def _selection_resolver(self) -> ProjectionSelectionResolver:
+        return selection_resolver(self)
 
     def iter_properties(self):
         for prop_name, calc_name, gradient_order, value_array in self.iter_property_arrays():
@@ -1740,16 +1358,6 @@ class ElectronicBandStructurePath(
         gradients = gradients * physics.METER_ANGSTROM
         return gradients
 
-    def compute_property(self, name: str, **kwargs):
-        if name == "bands_velocity":
-            return self.compute_band_velocity(**kwargs)
-        elif name == "bands_speed":
-            return self.compute_band_speed(**kwargs)
-        elif name == "avg_inv_effective_mass":
-            return self.compute_avg_inv_effective_mass(**kwargs)
-        else:
-            return super().compute_property(name, **kwargs)
-
     # ------------------------------------------------------------------
     # Overlay weight builders
     # ------------------------------------------------------------------
@@ -1757,7 +1365,7 @@ class ElectronicBandStructurePath(
         self,
         spins: Sequence[int] | int | None = None,
         orbitals: Sequence[int] | int | None = None,
-        norm_mode: str | EBSNormMode | None = "raw",
+        norm_mode: str | NormMode | None = "raw",
     ) -> list[Property]:
         """Build per-species overlay weights for plot overlays.
 
@@ -1770,7 +1378,7 @@ class ElectronicBandStructurePath(
             Spin channels to include
         orbitals : Sequence[int] | int | None
             Orbital indices to include
-        norm_mode : str | EBSNormMode | None
+        norm_mode : str | NormMode | None
             Normalization mode
 
         Returns
@@ -1810,7 +1418,7 @@ class ElectronicBandStructurePath(
         self,
         atoms: Sequence[int] | int | None = None,
         spins: Sequence[int] | int | None = None,
-        norm_mode: str | EBSNormMode | None = "raw",
+        norm_mode: str | NormMode | None = "raw",
     ) -> list[Property]:
         """Build per-orbital-group overlay weights for plot overlays.
 
@@ -1823,7 +1431,7 @@ class ElectronicBandStructurePath(
             Atom indices to include
         spins : Sequence[int] | int | None
             Spin channels to include
-        norm_mode : str | EBSNormMode | None
+        norm_mode : str | NormMode | None
             Normalization mode
 
         Returns
@@ -1860,7 +1468,7 @@ class ElectronicBandStructurePath(
         self,
         items: dict | list[dict],
         spins: Sequence[int] | int | None = None,
-        norm_mode: str | EBSNormMode | None = "raw",
+        norm_mode: str | NormMode | None = "raw",
     ) -> list[Property]:
         """Build overlay weights from species-orbital mappings.
 
@@ -1871,7 +1479,7 @@ class ElectronicBandStructurePath(
             or a list of such mappings
         spins : Sequence[int] | int | None
             Spin channels to include
-        norm_mode : str | EBSNormMode | None
+        norm_mode : str | NormMode | None
             Normalization mode
 
         Returns
@@ -2183,16 +1791,6 @@ class ElectronicBandStructureMesh(
         logger.debug(f"Nkx: {self.n_kx}, Nky: {self.n_ky}, Nkz: {self.n_kz}")
         logger.debug(f"Property mesh shape: {property_mesh.shape}")
         return property_mesh
-
-    def compute_property(self, name: str, **kwargs):
-        if name == "bands_velocity":
-            return self.compute_band_velocity(**kwargs)
-        elif name == "bands_speed":
-            return self.compute_band_speed(**kwargs)
-        elif name == "avg_inv_effective_mass":
-            return self.compute_avg_inv_effective_mass(**kwargs)
-        else:
-            return super().compute_property(name, **kwargs)
 
     def pad(self, padding=10, order="F", inplace=True):
         logger.info(f"Padding kpoints by {padding} in all directions")

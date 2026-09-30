@@ -389,42 +389,6 @@ class TestBandStructure2DProperties:
 
 
 # -----------------------------------------------------------------------------
-# Cache invalidation tests
-# -----------------------------------------------------------------------------
-
-
-class TestBandStructure2DCache:
-    """Tests for BandStructure2D caching system."""
-
-    def test_cache_invalidation_marks_properties_stale(self, bandstructure2d_3d):
-        """Test that cache invalidation works."""
-        bs2d = bandstructure2d_3d
-
-        # Mark something as cached
-        bs2d._mark_cached("test_prop")
-        assert bs2d._is_cache_valid("test_prop")
-
-        # Invalidate cache
-        bs2d._invalidate_cache()
-        assert not bs2d._is_cache_valid("test_prop")
-
-    def test_cache_version_increments(self, bandstructure2d_3d):
-        """Test that cache version increments on invalidation."""
-        bs2d = bandstructure2d_3d
-
-        initial_version = bs2d._ebs_cache_version
-        bs2d._invalidate_cache()
-
-        assert bs2d._ebs_cache_version == initial_version + 1
-
-    def test_uncached_property_invalid(self, bandstructure2d_3d):
-        """Test that uncached properties are detected as invalid."""
-        bs2d = bandstructure2d_3d
-
-        assert not bs2d._is_cache_valid("nonexistent_property")
-
-
-# -----------------------------------------------------------------------------
 # Serialization tests
 # -----------------------------------------------------------------------------
 

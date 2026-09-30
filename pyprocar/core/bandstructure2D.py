@@ -482,10 +482,6 @@ class BandStructure2D(pv.PolyData):
         self._ebs = ebs
         self._plane_info = plane_info
 
-        # Cache invalidation tracking
-        self._ebs_cache_version: int = 0
-        self._cached_properties: dict[str, int] = {}
-
         # Validate required properties
         if "spin_band_index" not in point_set.property_store.keys():
             raise ValueError("spin_band_index not found in point_set.property_store")
@@ -512,25 +508,6 @@ class BandStructure2D(pv.PolyData):
         self.transform_to_frac[:3, :3] = np.linalg.inv(self._ebs.reciprocal_lattice.T)
 
         logger.info("___BandStructure2D initialization complete___")
-
-    # -------------------------------------------------------------------------
-    # Cache invalidation methods
-    # -------------------------------------------------------------------------
-
-    def _invalidate_cache(self) -> None:
-        """Invalidate all cached interpolated properties."""
-        self._ebs_cache_version += 1
-        logger.debug(f"Cache invalidated, new version: {self._ebs_cache_version}")
-
-    def _is_cache_valid(self, property_name: str) -> bool:
-        """Check if cached property is still valid."""
-        if property_name not in self._cached_properties:
-            return False
-        return self._cached_properties[property_name] == self._ebs_cache_version
-
-    def _mark_cached(self, property_name: str) -> None:
-        """Mark property as cached at current version."""
-        self._cached_properties[property_name] = self._ebs_cache_version
 
     @classmethod
     def from_ebs(
@@ -717,26 +694,11 @@ class BandStructure2D(pv.PolyData):
     # Core methods
     # -------------------------------------------------------------------------
 
-    def get_property(self, key: str, **kwargs) -> np.ndarray:
-        """Get property values, computing if necessary.
-
-        Uses cache invalidation to track property staleness.
-        """
-        prop_name, _ = self.ebs._extract_key(key)
-
-        # Check if property exists and cache is valid
-        if prop_name in self.point_set.property_store and self._is_cache_valid(prop_name):
-            prop = self.point_set.get_property(prop_name)
-            property_value = prop.value if prop is not None else self.compute_property(prop_name, **kwargs)
-        else:
-            # Compute and cache the property
-            property_value = self.compute_property(prop_name, **kwargs)
-            prop = Property(name=prop_name, value=property_value)
-            self.point_set.add_property(prop)
-            self._mark_cached(prop_name)
-
-        self.set_values(prop_name, property_value)
-        return property_value
+    def get_property(self, key, **kwargs) -> Property:
+        prop = self.point_set.get_property(key, compute=self.compute_property, **kwargs)
+        if prop is None:
+            raise KeyError(key)
+        return prop
 
     def compute_gradients(
         self, gradient_order: int, names: list[str] | None = None
@@ -1099,8 +1061,6 @@ class BandStructure2D(pv.PolyData):
         bs2d._original_ebs = ebs
         bs2d._ebs = ebs
         bs2d._plane_info = plane_info
-        bs2d._ebs_cache_version = 0
-        bs2d._cached_properties = {}
 
         # Initialize transformation matrices if EBS is provided
         if ebs is not None and ebs.reciprocal_lattice is not None:

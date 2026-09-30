@@ -67,11 +67,11 @@ class BS2DPlotter(SurfacePlotter):
         """
         # Resolve scalars from name or Property
         if isinstance(scalars_data, str):
-            scalars_data = bandstructure2d.point_set.get_property(scalars_data)
+            scalars_data = bandstructure2d.get_property(scalars_data)
 
         # Resolve vectors from name or Property
         if isinstance(vectors_data, str):
-            vectors_data = bandstructure2d.point_set.get_property(vectors_data)
+            vectors_data = bandstructure2d.get_property(vectors_data)
 
         return surface_series(
             bandstructure2d.band_surfaces,

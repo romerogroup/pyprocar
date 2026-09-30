@@ -902,3 +902,16 @@ def test_padded_then_interpolated_gradient_matches_finite_difference(ebs):
     assert n == 82
     assert np.isclose(spacing, 0.023617, atol=1e-6)
     assert np.allclose(gradient[interior], expected[interior], rtol=1e-6, atol=1e-6)
+
+
+def test_get_property_recomputes_when_selection_changes():
+    ebs = ElectronicBandStructure(
+        kpoints=np.zeros((1, 3)),
+        bands=np.zeros((1, 1, 1)),
+        projected=np.array([0.25, 0.75]).reshape(1, 1, 1, 2, 1),
+        orbital_names=["s"],
+    )
+
+    assert ebs.get_property("projected_sum").value.ravel().tolist() == [1.0]
+    assert ebs.get_property("projected_sum", atoms=[0]).value.ravel().tolist() == [0.25]
+    assert ebs.get_property("projected_sum", atoms=[1]).value.ravel().tolist() == [0.75]

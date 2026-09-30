@@ -621,9 +621,44 @@ class PointSet:
     ) -> None:
         self._gradient_func = gradient_func
 
-    def get_property(self, key=None) -> Property | None:
+    def compute_property(self, name: str, **kwargs) -> Property | npt.ArrayLike | None:
+        return None
+
+    def get_property(
+        self,
+        key=None,
+        compute: Callable[..., Property | npt.ArrayLike | None] | None = None,
+        **kwargs,
+    ) -> Property | None:
+        """Return a stored property, computing and caching derived ones on demand.
+
+        A derived property is cached under its name plus ``kwargs``, so a call with
+        different arguments recomputes instead of returning a stale value. Stored
+        data that ``compute`` (default ``self.compute_property``) does not know
+        ignores ``kwargs``.
+        """
         prop_name, (calc_name, gradient_order) = self._extract_key(key)
-        property = self._point_data.get(prop_name, None)
+        cache_key = "|".join(
+            [
+                prop_name,
+                *(
+                    f"{k}={np.asarray(v).tolist() if isinstance(v, np.ndarray) else v!r}"
+                    for k, v in sorted(kwargs.items())
+                    if v is not None
+                ),
+            ]
+        )
+        if cache_key not in self._point_data:
+            computed = (compute or self.compute_property)(prop_name, **kwargs)
+            if computed is None:
+                cache_key = prop_name
+            elif isinstance(computed, Property):
+                self._point_data[cache_key] = computed
+            else:
+                self._point_data[cache_key] = Property(
+                    name=prop_name, value=computed, point_set=self
+                )
+        property = self._point_data.get(cache_key, None)
         if property is None:
             return None
         if calc_name is None:
@@ -632,7 +667,7 @@ class PointSet:
         if isinstance(value, dict) and gradient_order > 0:
             gradient = value.get(gradient_order, None)
             if gradient is None or gradient.shape[0] == 0:
-                self.compute_gradients(gradient_order, names=[prop_name])
+                self.compute_gradients(gradient_order, names=[cache_key])
                 gradient = value[gradient_order]
             return gradient
         else:
