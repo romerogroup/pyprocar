@@ -10,7 +10,10 @@ class BaseParser:
 
     Each member returns ``None`` when the calculation directory lacks the data
     or the adapter does not support it; unsupported data never raises.
-    Energies (EBS bands, DOS energies) are absolute, not shifted by ``fermi``.
+    Energies (EBS bands, DOS energies) are not shifted by the Fermi energy the
+    object carries: subtracting ``ebs.fermi`` or ``dos.fermi`` puts E_F at zero.
+    When a code writes Fermi-relative energies and the Fermi energy is unknown
+    (Lobster without a ``structure_parser``), the object carries ``fermi=0.0``.
     """
 
     def __init__(self, dirpath: str | Path):

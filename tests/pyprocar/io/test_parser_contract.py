@@ -198,6 +198,15 @@ def test_real_ebs_bands_are_unshifted_around_fermi(code: str, relpath: str) -> N
             id="qe-spin-polarized",
         ),
         pytest.param(
+            "qe",
+            CODES_DIR / "qe/7.2/SrVO3/non-colinear/dos",
+            (7435, 1),
+            (7435, 1, 5, 32),
+            (-54.824, 19.516),
+            12.5462,
+            id="qe-non-colinear",
+        ),
+        pytest.param(
             "lobster",
             {"lobsterout": LOBSTEROUT_CONTENT, "DOSCAR.lobster": DOSCAR_CONTENT},
             (5, 1),

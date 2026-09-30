@@ -2,9 +2,14 @@
 
 from pathlib import Path
 
+import numpy as np
 import pytest
 
+from pyprocar.io import get_parser
 from pyprocar.io.qe.parser import QEParser
+from tests.utils import DATA_DIR
+
+QE_CODES_DIR = DATA_DIR / "codes" / "qe" / "7.2" / "SrVO3"
 
 # =============================================================================
 # Inline String Fixtures
@@ -371,3 +376,24 @@ def test_structure_is_none_when_lattice_is_missing(tmp_path: Path) -> None:
     parser.__dict__["species"] = ["Sr", "V", "O", "O", "O"]
 
     assert parser.structure is None
+
+
+@pytest.mark.parametrize(
+    ("mag", "pdos_columns"),
+    [
+        ("non-spin-polarized", [2]),
+        ("spin-polarized-colinear", [3, 4]),
+        ("non-colinear", [2]),
+    ],
+)
+def test_projected_dos_sums_to_the_pdos_tot_column(
+    mag: str, pdos_columns: list[int]
+) -> None:
+    calc_dir = QE_CODES_DIR / mag / "dos"
+    pdos_tot = np.loadtxt(calc_dir / "SrVO3.k.pdos_tot")
+
+    dos = get_parser("qe", calc_dir).dos
+
+    assert dos is not None and dos.projected is not None
+    summed = dos.projected.to_array().sum(axis=(2, 3))
+    np.testing.assert_allclose(summed, pdos_tot[:, pdos_columns], rtol=1e-2, atol=1e-2)
