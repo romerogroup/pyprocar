@@ -37,12 +37,12 @@ run)
   name="$2" fixture="$3" driver="$4"
   [ -d "$fixture" ] || { echo "missing fixture $fixture; run: verify.sh fetch $fixture" >&2; exit 2; }
   run="$RUNS/$(date +%Y%m%d-%H%M%S)-$name"
-  mkdir -p "$run/evidence" "$run/work"
+  mkdir -p "$run/evidence" "$run/work/tmp"
   cp -r "$fixture" "$run/work/calc"
   cp "$driver" "$run/evidence/driver.py"
   touch "$run/.start"
   set +e
-  CALC="$run/work/calc" EVIDENCE="$run/evidence" REPO="$REPO" MPLBACKEND=Agg PYVISTA_OFF_SCREEN=true \
+  TMPDIR="$run/work/tmp" CALC="$run/work/calc" EVIDENCE="$run/evidence" REPO="$REPO" MPLBACKEND=Agg PYVISTA_OFF_SCREEN=true \
     PYTHONPATH="$REPO/.claude/skills/verify-pyprocar/scripts/lib${PYTHONPATH:+:$PYTHONPATH}" \
     pixi run --frozen -q -e default python "$run/evidence/driver.py" >"$run/evidence/run.log" 2>&1
   code=$?
