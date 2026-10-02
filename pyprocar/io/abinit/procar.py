@@ -78,14 +78,13 @@ class AbinitProcar(Mapping[str, Any]):
         # Spin-polarized: first half is spin-up, second half (reversed) is spin-down
         spinup_filepaths = filepaths[: len(filepaths) // 2]
         spindown_filepaths = filepaths[len(filepaths) // 2 :][::-1]
-        header2 = spinup_filepaths[0].read_text().splitlines(keepends=True)[1]
-        return (
-            "".join(fp.read_text() for fp in spinup_filepaths)
-            + "\n"
-            + header2
-            + "\n"
-            + "".join(fp.read_text() for fp in spindown_filepaths)
-        )
+        with spinup_filepaths[0].open() as first:
+            first.readline()
+            header2 = first.readline()
+        parts = [fp.read_text() for fp in spinup_filepaths]
+        parts += ["\n", header2, "\n"]
+        parts += [fp.read_text() for fp in spindown_filepaths]
+        return "".join(parts)
 
     # Mapping protocol implementation
     def __contains__(self, key: object) -> bool:

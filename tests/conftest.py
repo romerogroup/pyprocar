@@ -1,3 +1,16 @@
+"""Keep data/ read-only and reserve it for tests marked ``data``.
+
+An audit hook watches every test. Writing, renaming, removing, creating or
+truncating a path under data/ raises, so the write never happens. An unmarked
+test that reads data/ raises too. Library code may swallow that RuntimeError
+in an ``except Exception``, so each violation is also recorded and fails the
+test phase it happened in.
+
+Paths are resolved with realpath, so a symlinked alias of data/ counts. Not
+caught: writes from subprocesses, opens relative to a ``dir_fd``, and
+metadata changes such as chmod or utime.
+"""
+
 import os
 import sys
 
@@ -5,7 +18,9 @@ import pytest
 
 from tests.utils import DATA_DIR
 
-_DATA_PREFIXES = (str(DATA_DIR) + os.sep, str(DATA_DIR.resolve()) + os.sep)
+pytest_plugins = ["pytester"]
+
+_DATA_PREFIX = os.path.realpath(DATA_DIR) + os.sep
 _WRITE_FLAGS = os.O_WRONLY | os.O_RDWR | os.O_CREAT | os.O_APPEND | os.O_TRUNC
 _MUTATING_EVENTS = {
     "os.remove",
@@ -17,13 +32,14 @@ _MUTATING_EVENTS = {
     "shutil.rmtree",
 }
 _current_test: tuple[str, bool] | None = None
+_violations: list[str] = []
 
 
 def _data_path(path: object) -> str | None:
     if not isinstance(path, str | bytes | os.PathLike):
         return None
-    full = os.path.abspath(os.fsdecode(path)) + os.sep
-    return full if full.startswith(_DATA_PREFIXES) else None
+    full = os.path.realpath(os.fsdecode(path)) + os.sep
+    return full if full.startswith(_DATA_PREFIX) else None
 
 
 def _is_write(event: str, args: tuple[object, ...]) -> bool:
@@ -36,6 +52,11 @@ def _is_write(event: str, args: tuple[object, ...]) -> bool:
     return event in _MUTATING_EVENTS
 
 
+def _violate(message: str) -> None:
+    _violations.append(message)
+    raise RuntimeError(message)
+
+
 def _guard_data_dir(event: str, args: tuple[object, ...]) -> None:
     if _current_test is None or not args:
         return
@@ -43,13 +64,13 @@ def _guard_data_dir(event: str, args: tuple[object, ...]) -> None:
     if _is_write(event, args):
         for path in args[:2]:
             if full := _data_path(path):
-                raise RuntimeError(f"{nodeid} writes {full}; data/ is read-only, write to tmp_path")
+                _violate(f"{nodeid} writes {full}; data/ is read-only, write to tmp_path")
     elif (
         not marked
         and event in {"open", "os.listdir", "os.scandir"}
         and (full := _data_path(args[0]))
     ):
-        raise RuntimeError(f"{nodeid} reads {full}; mark it with pytest.mark.data")
+        _violate(f"{nodeid} reads {full}; mark it with pytest.mark.data")
 
 
 sys.addaudithook(_guard_data_dir)
@@ -63,7 +84,18 @@ def pytest_configure(config: pytest.Config) -> None:
 def pytest_runtest_protocol(item: pytest.Item):
     global _current_test
     _current_test = (item.nodeid, item.get_closest_marker("data") is not None)
+    _violations.clear()
     try:
         return (yield)
     finally:
         _current_test = None
+
+
+@pytest.hookimpl(wrapper=True)
+def pytest_runtest_makereport():
+    report: pytest.TestReport = yield
+    if _violations and report.passed:
+        report.outcome = "failed"
+        report.longrepr = "\n".join(_violations)
+    _violations.clear()
+    return report
