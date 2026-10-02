@@ -1,6 +1,7 @@
 import logging
 import tempfile
 from pathlib import Path
+from types import SimpleNamespace
 
 import numpy as np
 import pytest
@@ -21,6 +22,13 @@ from tests.utils import DATA_DIR
 logger = logging.getLogger("pyprocar")
 logger.setLevel(logging.DEBUG)
 user_logger = logging.getLogger("user")
+
+
+def _parser_returning(ebs: ElectronicBandStructure | None):
+    def get_parser(*_: object) -> SimpleNamespace:
+        return SimpleNamespace(ebs=ebs)
+
+    return get_parser
 
 
 @pytest.fixture
@@ -464,6 +472,22 @@ class TestElectronicBandStructure:
             # Load
             loaded_ebs = ElectronicBandStructure.load(filepath)
             assert loaded_ebs == sample_ebs
+
+    def test_from_code_writes_nothing_by_default(self, sample_ebs, tmp_path, monkeypatch):
+        monkeypatch.setattr("pyprocar.io.get_parser", _parser_returning(sample_ebs))
+
+        ebs = ElectronicBandStructure.from_code("vasp", tmp_path)
+
+        assert ebs == sample_ebs
+        assert sorted(p.name for p in tmp_path.iterdir()) == []
+
+    def test_from_code_use_cache_reloads_pickle(self, sample_ebs, tmp_path, monkeypatch):
+        monkeypatch.setattr("pyprocar.io.get_parser", _parser_returning(sample_ebs))
+        ElectronicBandStructure.from_code("vasp", tmp_path, use_cache=True)
+        assert sorted(p.name for p in tmp_path.iterdir()) == ["ebs.pkl"]
+
+        monkeypatch.setattr("pyprocar.io.get_parser", _parser_returning(None))
+        assert ElectronicBandStructure.from_code("vasp", tmp_path, use_cache=True) == sample_ebs
 
 
 @pytest.fixture
