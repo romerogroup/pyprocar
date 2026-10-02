@@ -1046,6 +1046,9 @@ def generate_band_isosurfaces(ebs: ElectronicBandStructureMesh, isovalue: float,
     bands_mesh = padded_ebs.get_property_mesh("bands", order="F")
     # Get dimensions from bands_mesh
     _, _, _, nbands, nspins = bands_mesh.shape
+    # Non-collinear energies repeat across the 4 spin components; they are one channel.
+    if ebs.is_non_collinear:
+        nspins = 1
 
     band_isosurfaces = {}
     for ispin in range(nspins):
