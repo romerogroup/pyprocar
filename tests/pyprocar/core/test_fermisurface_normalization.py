@@ -46,3 +46,13 @@ def test_projected_sum_normalizes_over_plotted_points(sphere_surface, norm_mode,
     assert values.shape == (fs.n_points, 2, 1)
     np.testing.assert_allclose(values[:, 0, 0], on_surface)
     np.testing.assert_array_equal(values[:, 1, 0], 0.0)
+
+
+def test_projected_sum_integral_normalizes_by_surface_area_integral(sphere_surface):
+    fs = sphere_surface
+
+    values = fs.get_property("projected_sum", atoms=[0], norm_mode="integral").value
+
+    sphere_area = 4 * np.pi * 0.1
+    np.testing.assert_allclose(values[:, 0, 0], 1 / sphere_area, rtol=0.05)
+    np.testing.assert_array_equal(values[:, 1, 0], 0.0)
