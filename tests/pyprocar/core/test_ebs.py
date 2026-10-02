@@ -1015,8 +1015,7 @@ HEXAGONAL_PATH_CARTESIAN = [
 ]
 
 
-@pytest.fixture
-def hexagonal_ebs_path():
+def make_hexagonal_ebs_path(kpath_has_lattice: bool) -> ElectronicBandStructurePath:
     reciprocal_lattice = np.array([[0.25, 0.0, 0.0], [0.125, 0.2165, 0.0], [0.0, 0.0, 0.1]])
     frac = np.column_stack([np.zeros(5), np.linspace(0, 0.5, 5), np.zeros(5)])
     return ElectronicBandStructurePath(
@@ -1027,13 +1026,27 @@ def hexagonal_ebs_path():
             kpoints=frac,
             n_grids=[5],
             segment_names=[("G", "M")],
-            reciprocal_lattice=reciprocal_lattice,
+            reciprocal_lattice=reciprocal_lattice if kpath_has_lattice else None,
         ),
     )
 
 
-def test_path_to_mesh_points_are_cartesian(hexagonal_ebs_path):
-    assert np.allclose(hexagonal_ebs_path.to_mesh().points, HEXAGONAL_PATH_CARTESIAN)
+@pytest.fixture
+def hexagonal_ebs_path():
+    return make_hexagonal_ebs_path(kpath_has_lattice=True)
+
+
+@pytest.mark.parametrize("kpath_has_lattice", [True, False])
+def test_path_to_mesh_points_are_cartesian(kpath_has_lattice: bool):
+    path = make_hexagonal_ebs_path(kpath_has_lattice)
+    assert np.allclose(np.asarray(path.to_mesh().points), HEXAGONAL_PATH_CARTESIAN)
+
+
+def test_path_to_mesh_follows_updated_points(hexagonal_ebs_path):
+    hexagonal_ebs_path.update_points(np.array(HEXAGONAL_PATH_CARTESIAN)[::-1])
+    assert np.allclose(
+        np.asarray(hexagonal_ebs_path.to_mesh().points), HEXAGONAL_PATH_CARTESIAN[::-1]
+    )
 
 
 def test_path_plot_draws_cartesian_kpoints(hexagonal_ebs_path, monkeypatch):
@@ -1049,6 +1062,7 @@ def test_path_plot_draws_cartesian_kpoints(hexagonal_ebs_path, monkeypatch):
     hexagonal_ebs_path.plot()
 
     assert len(shown) == 2
+    assert np.allclose(hexagonal_ebs_path.kpoints, HEXAGONAL_PATH_CARTESIAN)
     for plotter in shown:
         path_mesh = next(m for m in plotter.meshes if m.n_points == 5)
-        assert np.allclose(path_mesh.points, HEXAGONAL_PATH_CARTESIAN)
+        assert np.allclose(np.asarray(path_mesh.points), HEXAGONAL_PATH_CARTESIAN)

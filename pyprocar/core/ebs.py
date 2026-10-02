@@ -1250,7 +1250,7 @@ class ElectronicBandStructurePath(
 
     @property
     def kpoints_cartesian(self):
-        return self.kpath.kpoints_cartesian
+        return self.kpoints
 
     @property
     def kpath(self):
