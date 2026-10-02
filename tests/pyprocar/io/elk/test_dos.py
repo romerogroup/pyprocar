@@ -36,8 +36,8 @@ TDOS_SPIN = """ -0.5000000000       0.000000000
  -0.5000000000       0.000000000
  -0.4500000000       0.000000000
  -0.4000000000       0.000000000
- -0.3500000000       0.080000000
- -0.3000000000       0.400000000
+ -0.3500000000      -0.080000000
+ -0.3000000000      -0.400000000
 """
 
 # Example PDOS file content (projected DOS per atom)
@@ -153,27 +153,23 @@ class TestElkDOSTotal(BaseTest):
         """Test total DOS shape for non-spin-polarized."""
         dos = ElkDOS.from_str(tdos_content=TDOS_NON_SPIN)
         assert dos.total is not None
-        # Shape: (nspin, nenergies)
-        assert dos.total.shape == (1, 10)
+        assert dos.total.shape == (10, 1)
 
     def test_total_shape_spin(self):
         """Test total DOS shape for spin-polarized."""
         dos = ElkDOS.from_str(tdos_content=TDOS_SPIN)
         assert dos.total is not None
-        # Shape: (nspin, nenergies)
-        assert dos.total.shape == (2, 5)
+        assert dos.total.shape == (5, 2)
 
     def test_total_values_non_spin(self):
-        """Test total DOS values for non-spin-polarized."""
+        """Test total DOS values for non-spin-polarized, converted to states/eV."""
         dos = ElkDOS.from_str(tdos_content=TDOS_NON_SPIN)
-        # Check a specific value
-        assert dos.total[0, 3] == pytest.approx(0.1)  # -0.35 Hartree
+        assert dos.total[3, 0] == pytest.approx(0.1 / HARTREE_TO_EV)
 
-    def test_spin_down_negative(self):
-        """Test that spin-down DOS is negated (convention)."""
+    def test_spin_down_positive(self):
+        """Elk writes spin down negative; the core layout carries it positive."""
         dos = ElkDOS.from_str(tdos_content=TDOS_SPIN)
-        # Spin down should be negative
-        assert dos.total[1, 3] == pytest.approx(-0.08)  # Negated
+        assert dos.total[3, 1] == pytest.approx(0.08 / HARTREE_TO_EV)
 
 
 class TestElkDOSProjected(BaseTest):
@@ -190,10 +186,5 @@ class TestElkDOSProjected(BaseTest):
     def test_projected_shape(self, dos_dir_spin):
         """Test projected DOS shape."""
         dos = ElkDOS(dirpath=dos_dir_spin)
-        if dos.projected is not None:
-            # Shape: (natoms, nprincipals, norbitals, nspin, nenergies)
-            assert dos.projected.shape[0] == 2  # natoms
-            assert dos.projected.shape[1] == 1  # nprincipals
-            assert dos.projected.shape[2] == 16  # N_ORBITALS
-            assert dos.projected.shape[3] == 2  # nspin
-            assert dos.projected.shape[4] == 5  # nenergies
+        assert dos.projected is not None
+        assert dos.projected.shape == (5, 2, 2, 16)

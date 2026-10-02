@@ -699,51 +699,6 @@ class QEParser(BaseParser):
         )
 
     @cached_property
-    def projected_dos(self) -> np.ndarray | None:
-        if self.projwfc_dos is None or self.projwfc_out is None:
-            return None
-
-        n_energies = self.projwfc_dos.n_energies
-        n_spin_channels = self.projwfc_dos.n_spin_channels
-        n_orbitals = self.projwfc_out.n_orbitals
-        n_atoms = self.projwfc_dos.n_atoms
-
-        # Reshaping to match what pyprocar expects
-        n_principals = 1
-        projected_dos = (
-            self.projwfc_dos.projected_dos
-        )  # with shape (n_energies, n_spin_channels, n_atoms, n_orbitals)
-        projected_dos = np.moveaxis(
-            projected_dos, 1, -1
-        )  # shape (n_energies, n_orbitals, n_atoms, n_spin_channels)
-        projected_dos = np.moveaxis(
-            projected_dos, 0, -1
-        )  # shape (n_atoms, n_orbitals, n_spin_channels, n_energies)
-        projected_dos = projected_dos.reshape(
-            n_atoms, n_principals, n_orbitals, n_spin_channels, n_energies
-        )
-        logger.debug(f"projected_dos: {projected_dos.shape}")
-        return projected_dos
-
-    @cached_property
-    def total_dos(self) -> np.ndarray | None:
-        if self.projwfc_dos is None:
-            return None
-        total_dos = self.projwfc_dos.total_dos
-        if total_dos is None:
-            return None
-        n_spin_channels = self.projwfc_dos.n_spin_channels
-        n_energies = self.projwfc_dos.n_energies
-        logger.debug(f"total_dos: {total_dos.shape}")
-        return total_dos.reshape((n_spin_channels, n_energies), order="C")
-
-    @cached_property
-    def energies(self) -> np.ndarray | None:
-        if self.projwfc_dos is None or self.fermi is None:
-            return None
-        return self.projwfc_dos.bands[0] - self.fermi
-
-    @cached_property
     def is_dos_calculation(self) -> bool:
         logger.info("Checking if DOS calculation")
         if self.projwfc_in is None:
@@ -761,19 +716,15 @@ class QEParser(BaseParser):
         if not self.is_dos_calculation:
             return None
 
-        if self.energies is None or self.total_dos is None:
+        total_dos = self.projwfc_dos.total_dos
+        if self.fermi is None or total_dos is None:
             return None
 
-        logger.debug(f"energies: {self.energies.shape}")
-        logger.debug(f"total_dos: {self.total_dos.shape}")
-        logger.debug(f"fermi: {self.fermi}")
-
-        fermi = self.fermi if self.fermi is not None else 0.0
         return DensityOfStates(
-            energies=self.energies,
-            total=self.total_dos,
-            fermi=fermi,
-            projected=self.projected_dos,
+            energies=self.projwfc_dos.bands[0],
+            total=total_dos,
+            fermi=self.fermi,
+            projected=self.projwfc_dos.projected_dos,
         )
 
     @cached_property

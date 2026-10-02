@@ -217,7 +217,7 @@ class ProjwfcDOS:
             # Spin-polarized: use dosup(E) and dosdw(E) columns
             dos_up = df["dosup(E)"].to_numpy()
             dos_down = df["dosdw(E)"].to_numpy()
-            dos_array = np.hstack((dos_up, dos_down))  # shape (n_energies, 2)
+            dos_array = np.column_stack((dos_up, dos_down))  # shape (n_energies, 2)
         else:
             # Non-spin-polarized: only one DOS column
             dos_total = df["dos(E)"].to_numpy()
@@ -317,8 +317,8 @@ class ProjwfcDOS:
             scalar_values = df_values[:, 1:]
 
             new_df_values[:, 0] = ref_energies
-            for i in range(1, scalar_values.shape[1]):
-                new_df_values[:, i] = np.interp(ref_energies, energies, scalar_values[:, i])
+            for i in range(scalar_values.shape[1]):
+                new_df_values[:, i + 1] = np.interp(ref_energies, energies, scalar_values[:, i])
 
             dfs[ifile] = pd.DataFrame(new_df_values, columns=df_other.columns)
         return dfs
@@ -359,7 +359,7 @@ class ProjwfcDOS:
                     m_values = np.linspace(-j, j, int(2 * j + 1))
                     for mi, m in enumerate(m_values):
                         target_idx = ORBITAL_ORDERING.get_soc_index(orbital_l, j, m)
-                        dos_array[:, 0, ai, target_idx] = pdos_m[:, mi]
+                        dos_array[:, 0, ai, target_idx] += pdos_m[:, mi]
 
                 else:
                     # Collinear case
@@ -367,13 +367,13 @@ class ProjwfcDOS:
 
                     if f["orbital"] in ("s", "p", "d", "f"):
                         # Multiple m-components in one file
-                        n_pdos_cols = df.shape[1] - 2
-                        if self.is_spin_polarized and self.n_spin_channels == 2:
-                            n_m = n_pdos_cols // 2
-                        else:
-                            n_m = n_pdos_cols
+                        spin_polarized = self.is_spin_polarized and self.n_spin_channels == 2
+                        # Columns are E, then one ldos per spin channel, then the m-resolved pdos.
+                        first_pdos_col = 3 if spin_polarized else 2
+                        n_pdos_cols = df.shape[1] - first_pdos_col
+                        n_m = n_pdos_cols // 2 if spin_polarized else n_pdos_cols
 
-                        pdos_m = df.iloc[:, 2:].to_numpy()
+                        pdos_m = df.iloc[:, first_pdos_col:].to_numpy()
                         orb_names_for_l = ORBITAL_ORDERING.azimuthal_order[
                             list(ORBITAL_ORDERING.l_orbital_map.keys())[orbital_l]
                         ]
@@ -389,21 +389,21 @@ class ProjwfcDOS:
 
                         for mi, orb_name in enumerate(orb_names_for_l):
                             target_idx = ORBITAL_ORDERING.az_to_flat_index[orb_name]
-                            if self.is_spin_polarized and self.n_spin_channels == 2:
-                                dos_array[:, 0, ai, target_idx] = pdos_m[:, mi * 2]  # spin-up
-                                dos_array[:, 1, ai, target_idx] = pdos_m[:, mi * 2 + 1]  # spin-down
+                            if spin_polarized:
+                                dos_array[:, 0, ai, target_idx] += pdos_m[:, mi * 2]  # spin-up
+                                dos_array[:, 1, ai, target_idx] += pdos_m[:, mi * 2 + 1]  # spin-down
                             else:
-                                dos_array[:, 0, ai, target_idx] = pdos_m[:, mi]
+                                dos_array[:, 0, ai, target_idx] += pdos_m[:, mi]
 
                     else:
                         # Single m-component per file
                         m_idx = ORBITAL_ORDERING.az_to_flat_index[f["orbital"]]
                         target_idx = m_idx
                         if self.is_spin_polarized and self.n_spin_channels == 2:
-                            dos_array[:, 0, ai, target_idx] = df.iloc[:, -2].to_numpy()
-                            dos_array[:, 1, ai, target_idx] = df.iloc[:, -1].to_numpy()
+                            dos_array[:, 0, ai, target_idx] += df.iloc[:, -2].to_numpy()
+                            dos_array[:, 1, ai, target_idx] += df.iloc[:, -1].to_numpy()
                         else:
-                            dos_array[:, 0, ai, target_idx] = df.iloc[:, -1].to_numpy()
+                            dos_array[:, 0, ai, target_idx] += df.iloc[:, -1].to_numpy()
 
         return dos_array
 

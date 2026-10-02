@@ -18,7 +18,9 @@ def parse_dos_block(
 
     Returns (energies, dos) arrays or (None, None) if block is empty.
     """
-    data = np.array([x.split() for x in dos_block.splitlines() if x.strip()]).astype(float)
+    data = np.array([x.split() for x in dos_block.splitlines() if x.strip()]).astype(
+        float
+    )
     if len(data) == 0:
         return None, None
     return data[:, 0], data[:, 1]
@@ -128,24 +130,18 @@ class ElkDOS:
 
     @cached_property
     def total(self) -> npt.NDArray[np.float64] | None:
-        """Total DOS as (nspin, nenergies) array."""
+        """Total DOS in states/eV as (nenergies, nspin), spin down positive."""
         tdos_list = self._tdos_parsed[0]
         if not tdos_list:
             return None
+        return self._to_core_units(np.column_stack(tdos_list))
 
-        energies = self.energies
-        if energies is None:
-            return None
-
-        total = np.zeros((self.nspin, len(energies)))
-        for ispin, dos in enumerate(tdos_list):
-            total[ispin, :] = dos
-
-        # Convention: spin down is negative
+    def _to_core_units(self, dos: npt.NDArray[np.float64]) -> npt.NDArray[np.float64]:
+        """Convert states/Hartree to states/eV; Elk writes spin down (axis 1) negative."""
+        dos = dos / HARTREE_TO_EV
         if self.nspin == 2:
-            total[1, :] = -1 * total[1, :]
-
-        return total
+            dos[:, 1] *= -1
+        return dos
 
     @cached_property
     def _pdos_parsed(self) -> dict[tuple[str, str], dict[int, npt.NDArray[np.float64]]]:
@@ -154,7 +150,7 @@ class ElkDOS:
 
         for (spc, atm), content in self.pdos_strs.items():
             result[(spc, atm)] = {}
-            blocks = re.split(r"\n\s*\n", content)[:-1]  # Last is empty
+            blocks = [b for b in re.split(r"\n\s*\n", content) if b.strip()]
 
             for i, block in enumerate(blocks):
                 _, dos = parse_dos_block(block)
@@ -170,30 +166,18 @@ class ElkDOS:
 
     @cached_property
     def projected(self) -> npt.NDArray[np.float64] | None:
-        """Projected DOS as (natoms, nprincipals, norbitals, nspin, nenergies) array."""
+        """Projected DOS in states/eV as (nenergies, nspin, natoms, norbitals).
+
+        Each PDOS file holds one block per (spin, lm), spin outermost.
+        """
         if not self._pdos_parsed or self.energies is None:
             return None
 
-        n_principals = 1
         projected = np.zeros(
-            (
-                self.natoms,
-                n_principals,
-                self.N_ORBITALS,
-                self.nspin,
-                len(self.energies),
-            )
+            (len(self.energies), self.nspin, self.natoms, self.N_ORBITALS)
         )
-
-        # Need to iterate in sorted order to match atom indices
-        sorted_keys = sorted(self._pdos_parsed.keys())
-
-        for iatom, (spc, atm) in enumerate(sorted_keys):
-            pdos_data = self._pdos_parsed[(spc, atm)]
-            for iorbital in range(self.N_ORBITALS):
-                for ispin in range(self.nspin):
-                    orbital_idx = iorbital + ispin * self.N_ORBITALS
-                    if orbital_idx in pdos_data:
-                        projected[iatom, 0, iorbital, ispin, :] = pdos_data[orbital_idx]
-
-        return projected
+        for iatom, key in enumerate(sorted(self._pdos_parsed)):
+            for block_index, dos in self._pdos_parsed[key].items():
+                ispin, iorbital = divmod(block_index, self.N_ORBITALS)
+                projected[:, ispin, iatom, iorbital] = dos
+        return self._to_core_units(projected)
