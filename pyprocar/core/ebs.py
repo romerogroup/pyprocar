@@ -731,7 +731,8 @@ class ElectronicBandStructure(PointSet):
         orbitals : Sequence[int] | int | None
             Orbital indices to sum over
         spins : Sequence[int] | int | None
-            Spin channels to sum over
+            Spin channels to sum over. A non-collinear calculation defaults to
+            the total (component 0).
         species : Sequence[str] | str | None
             Species names (resolved to atom indices)
         species_orbital_map : Mapping | None
@@ -774,6 +775,8 @@ class ElectronicBandStructure(PointSet):
             atoms_list = list(selection.atoms) if selection.atoms else None
             orbitals_list = list(selection.orbitals) if selection.orbitals else None
             spins_list = list(selection.spins) if selection.spins else None
+        if spins_list is None and self.is_non_collinear:
+            spins_list = [0]
 
         # Compute sum using resolved indices
         values = self.ebs_sum(
