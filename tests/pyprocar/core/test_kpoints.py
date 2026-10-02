@@ -442,14 +442,14 @@ class TestNormalizeKpointName:
 class TestKPathSegmentNamesSetter:
     def test_renaming_updates_names_map_and_ticks(self, simple_kpath_kpoints, simple_segment_names):
         kpath = KPath(kpoints=simple_kpath_kpoints, segment_names=simple_segment_names)
-        assert kpath.tick_names == ["Γ", "M", "Γ"]
+        assert kpath.tick_names == ["Γ", "X", "M", "Γ"]
 
         kpath.segment_names = [("gamma", "A"), ("A", "B"), ("B", "gamma")]
 
         assert kpath.segment_names == [("Γ", "A"), ("A", "B"), ("B", "Γ")]
         assert kpath.special_kpoint_names == ["Γ", "A", "B"]
         assert list(kpath.special_kpoint_map) == ["Γ", "A", "B"]
-        assert kpath.tick_names == ["Γ", "B", "Γ"]
+        assert kpath.tick_names == ["Γ", "A", "B", "Γ"]
 
 
 class TestKPathInitialization:
@@ -859,22 +859,28 @@ class TestKPathDiscontinuities:
     def test_tick_names_with_discontinuity(
         self, discontinuous_kpath_kpoints, discontinuous_segment_names
     ):
-        """Test that tick names are generated for discontinuous paths."""
         kpath = KPath(
             kpoints=discontinuous_kpath_kpoints,
             segment_names=discontinuous_segment_names,
         )
 
-        tick_names = kpath.tick_names
+        assert kpath.tick_positions == [0, 4, 9]
+        assert kpath.tick_names == ["Γ", "X|M", "R"]
 
-        # Verify tick names are generated (at least start and end points)
-        assert len(tick_names) >= 2, f"Should have at least 2 tick names, got: {tick_names}"
-        # Verify we have the expected special point names
-        tick_str = " ".join(tick_names)
-        # Should contain gamma (or its normalized form) and some other points
-        assert any(
-            name in tick_str for name in ["Γ", "$\\Gamma$", "X", "M", "R"]
-        ), f"Tick names should include special k-points: {tick_names}"
+    def test_ticks_at_continuous_and_discontinuous_boundaries(self):
+        kpath = KPath(
+            segment_names=[("Γ", "X"), ("X", "M"), ("M", "X"), ("U", "Γ")],
+            special_kpoint_map={
+                "Γ": np.array([0.0, 0.0, 0.0]),
+                "X": np.array([0.5, 0.0, 0.5]),
+                "M": np.array([0.5, 0.5, 0.5]),
+                "U": np.array([0.625, 0.25, 0.625]),
+            },
+            n_grids=[9, 9, 9, 9],
+        )
+
+        assert kpath.tick_positions == [0, 8, 17, 26, 35]
+        assert kpath.tick_names == ["Γ", "X", "M", "X|U", "Γ"]
 
     def test_continuous_segments_grouping(
         self, simple_kpath_kpoints, simple_segment_names

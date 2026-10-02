@@ -569,14 +569,14 @@ class TestElectronicBandStructurePath:
         assert kpath is not None
         assert len(kpath.segment_names) == 6  # Γ, X, L, Γ
         assert kpath.n_segments == 6
-        assert len(kpath.tick_positions) == 5
-        assert len(kpath.tick_names) == 5
-        assert len(kpath.tick_names_latex) == 5
+        assert len(kpath.tick_positions) == 7
+        assert len(kpath.tick_names) == 7
+        assert len(kpath.tick_names_latex) == 7
         assert len(kpath.special_kpoint_names) == 4
 
         # Check that tick names contain expected symbols
-        tick_names = ["$\\Gamma$", "N", "$\\Gamma$", "P|H", "N"]
-        tick_names_latex = ["$$\\Gamma$$", "N", "$$\\Gamma$$", "P|H", "N"]
+        tick_names = ["$\\Gamma$", "H", "N", "$\\Gamma$", "P", "H|P", "N"]
+        tick_names_latex = ["$$\\Gamma$$", "H", "N", "$$\\Gamma$$", "P", "H|P", "N"]
         assert tick_names == kpath.tick_names
         assert tick_names_latex == kpath.tick_names_latex
 
