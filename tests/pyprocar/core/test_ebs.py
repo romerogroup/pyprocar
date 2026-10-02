@@ -708,16 +708,11 @@ class TestElectronicBandStructurePath:
         assert ebs_path is not None
         assert isinstance(ebs_path, ElectronicBandStructurePath)
 
-    def test_bands_property(self, sample_ebs_path):
-        """Test bands_property returns Property with kpath metadata."""
-        bands_prop = sample_ebs_path.bands_property
+    def test_bands_carries_kpath_metadata(self, sample_ebs_path):
+        bands_prop = sample_ebs_path.bands
 
-        # Check that it returns a Property
-        assert bands_prop is not None
         assert isinstance(bands_prop, Property)
-
-        # Check bands data matches
-        assert np.array_equal(bands_prop.value, sample_ebs_path.bands.to_array())
+        assert np.array_equal(bands_prop.value, sample_ebs_path.get_property("bands").value)
 
         # Check kpath metadata exists
         assert "kpath" in bands_prop.metadata
