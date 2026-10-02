@@ -8,6 +8,8 @@ from typing import Self
 import numpy as np
 import numpy.typing as npt
 
+from pyprocar.utils.units import AU_TO_ANG
+
 
 def bool_fortran(string: str) -> bool:
     """Convert Fortran boolean string to Python bool."""
@@ -101,7 +103,7 @@ class ElkIn:
 
     @cached_property
     def lattice(self) -> npt.NDArray[np.float64]:
-        """Lattice vectors as 3x3 array (rows are vectors)."""
+        """Lattice vectors in Angstrom as 3x3 array (rows are vectors); Elk writes Bohr."""
         raw_lattice = re.findall(r"avec\s*\n(.*\n.*\n.*)", self.file_str)
         if not raw_lattice:
             raise ValueError("No lattice vectors found in elk.in")
@@ -116,7 +118,7 @@ class ElkIn:
             scale = float(scale_match[0])
             lattice *= scale
 
-        return lattice
+        return lattice * AU_TO_ANG
 
     @cached_property
     def atoms(self) -> list[str]:
