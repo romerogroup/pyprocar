@@ -41,6 +41,7 @@ def fermi2D(
     plot_line_kwargs: dict = None,
     plot_arrows: bool = True,
     plot_arrows_kwargs: dict = None,
+    cmap: str = "plasma",
     use_cache: bool = False,
     verbose: int = 1,
     padding: int = 10,
@@ -50,154 +51,93 @@ def fermi2D(
 ):
     """Plot the 2D Fermi surface in a constant k_z plane.
 
-    This function generates 2D Fermi surface plots by slicing the 3D Fermi surface
-    at a specified k_z plane. It supports multiple visualization modes including
-    plain contours, parametric coloring, and spin texture analysis.
+    Slices the 3D Fermi surface at ``k_z = k_z_plane`` and draws the contour lines,
+    optionally colored by an atomic/orbital/spin projection or decorated with
+    spin-texture arrows.
 
     Parameters
     ----------
     code : str
-        The DFT code used for the calculation. Options include 'vasp', 'qe', 'elk',
-        'abinit', 'siesta', 'lobster', etc.
+        The DFT code used for the calculation, such as 'vasp', 'qe', 'elk',
+        'abinit', 'siesta' or 'lobster'.
     dirname : str
-        The directory path containing the DFT calculation files.
-    mode : str, optional
-        The plotting mode. Options are 'plain', 'plain_bands', 'parametric', or
-        'spin_texture', by default 'plain'
-    use_cache : bool, optional
-        Whether to use cached EBS data if available, by default False
-    spin_projection : SpinProjection or str, optional
-        The spin projection component for spin texture mode. Options include
-        'x', 'y', 'z', 'x^2', 'y^2', 'z^2', by default 'z^2'
+        The directory containing the DFT calculation files.
+    mode : Fermi2DMode or str, optional
+        'plain', 'plain_bands', 'parametric' or 'spin_texture', by default 'plain'.
+        'spin_texture' needs a non-collinear calculation.
     fermi : float, optional
-        The Fermi energy in eV. If None, the Fermi energy from the calculation
-        will be used, by default None
-    fermi_shift : float, optional
-        The fermi energy shift, by default 0.0
-    band_indices : List[List]
-        A list of list that contains band indices for a given spin (Not implemented in new version)
-    band_colors : List[List]
-        A list of list that contains colors for the band index
-        corresponding the band_indices for a given spin (Not implemented in new version)
-    spins : List[int], optional
-        List of spin indices to include. For non-collinear calculations,
-        use [0], by default None (all spins)
-    atoms : List[int], optional
-        List of atom indices for atomic projections, by default None (all atoms)
-    orbitals : List[int], optional
-        List of orbital indices for orbital projections, by default None (all orbitals)
+        The Fermi energy in eV. If None, the Fermi energy of the calculation is used.
+    band_indices : list[list], optional
+        Not implemented in the new version; the value is only logged.
+    spins : list[int], optional
+        Spin indices to project onto in 'parametric' mode. For a non-collinear
+        calculation, 0 is the total and 1, 2, 3 are Sx, Sy, Sz.
+    atoms : list[int], optional
+        Atom indices to project onto, by default all atoms.
+    orbitals : list[int], optional
+        Orbital indices to project onto, by default all orbitals.
     energy : float, optional
-        The energy level (relative to Fermi) at which to generate the iso-surface.
-        When None, uses 0 (Fermi energy), by default None
+        The iso-energy relative to the Fermi energy, in eV, by default 0.0.
     k_z_plane : float, optional
-        The k_z coordinate of the plane to slice for the 2D surface, by default 0.0
-    k_z_plane_tol : float, optional
-        Tolerance for selecting k-points near the k_z plane, by default 0.01
-    rot_symm : int, optional
-        Rotational symmetry factor to apply around the z-axis, by default 1
-    translate : List[int], optional
-        Translation vector [x, y, z] to apply to k-points, by default [0, 0, 0]
-    rotation : List[int], optional
-        Rotation parameters [angle, x, y, z] where angle is in degrees and
-        [x, y, z] is the rotation axis, by default [0, 0, 0, 1]
-    point_density : int, optional
-        Density of points for spin texture interpolation, by default 10
-    interpolation : int, optional
-        Number of interpolation points for generating smooth contours, by default 300
-    linecollection_kwargs : dict, optional
-        Additional keyword arguments for matplotlib LineCollection, by default None
-    linestyles : tuple[str, str], optional
-        Line styles for different spin channels, by default ('solid', 'dashed')
-    colors : tuple[str, str], optional
-        Colors for different spin channels, by default None
-    linewidths : tuple[float, float], optional
-        Line widths for different spin channels, by default (0.2, 0.2)
-    alphas : tuple[float, float], optional
-        Alpha values (transparency) for different spin channels, by default (1.0, 1.0)
-    plot_scatter : bool, optional
-        Whether to plot scatter points in spin texture mode, by default True
-    plot_scatter_kwargs : dict, optional
-        Additional keyword arguments for scatter plot, by default None
-    plot_contours : bool, optional
-        Whether to plot contour lines, by default True
-    plot_contours_kwargs : dict, optional
-        Additional keyword arguments for contour plots, by default None
-    plot_arrows : bool, optional
-        Whether to plot spin direction arrows in spin texture mode, by default True
-    plot_arrows_kwargs : dict, optional
-        Additional keyword arguments for arrow plots, by default None
-    arrow_scale : float or None, optional
-        Scaling factor for arrow size in spin texture mode, by default 1.0
-    show_colorbar : bool, optional
-        Whether to display the colorbar, by default True
-    cmap : str, optional
-        Colormap name for the plot, by default 'plasma'
-    norm : matplotlib.colors.Normalize, optional
-        Normalization for the colormap, by default None
-    clim : tuple, optional
-        Color limits (vmin, vmax) for the colormap, by default (None, None)
-    colorbar_kwargs : dict, optional
-        Additional keyword arguments for colorbar creation, by default None
-    colorbar_tick_kwargs : dict, optional
-        Additional keyword arguments for colorbar tick formatting, by default None
-    colorbar_tick_params_kwargs : dict, optional
-        Additional keyword arguments for colorbar tick parameters, by default None
-    colorbar_label_kwargs : dict, optional
-        Additional keyword arguments for colorbar label formatting, by default None
-    add_legend : bool, optional
-        Whether to add a legend to the plot, by default False
+        The k_z coordinate of the slicing plane, by default 0.0.
     show : bool, optional
-        Whether to display the plot immediately, by default True
+        Whether to show the figure when ``savefig`` is not given, by default True.
     savefig : str, optional
-        The filename to save the plot as., by default None
-    spin_texture : bool, optional
-        Boolean value to determine if spin arrows are plotted, by default False
-    exportplt : bool, optional
-        Boolean value where to return the matplotlib.pyplot state plt, by default False
-    print_plot_opts: bool, optional
-        Boolean to print the plotting options
-    use_cache: bool, optional
-        Boolean to use cache for EBS
-    verbose: int, optional
-        Verbosity level
-    padding: int, optional
-        Amount of padding for the Fermi surface calculation, by default 10
-    extend_zone_directions: List[Union[List[int], tuple]], optional
-        Directions to extend the surface to neighboring Brillouin zones, by default None
-    plot_arrows: bool, optional
-        Whether to plot arrow vectors on the 2D slice, by default False
-    arrow_factor: float, optional
-        Scaling factor for arrow sizes, by default 1.0
-    cmap: str, optional
-        Colormap for the plot, by default "plasma"
+        The filename to save the figure to, by default None.
+    extend_zone_directions : list[list[int] | tuple], optional
+        Directions to extend the surface into neighboring Brillouin zones.
+    show_colorbar : bool, optional
+        Whether to draw a colorbar in 'parametric' and 'spin_texture' modes,
+        by default True.
+    plot_line_kwargs : dict, optional
+        Keyword arguments for the matplotlib LineCollection, such as
+        ``{"colors": "purple", "linewidths": 2.0, "linestyles": "dashed"}``.
+    plot_arrows : bool, optional
+        Whether to draw spin arrows in 'spin_texture' mode, by default True.
+    plot_arrows_kwargs : dict, optional
+        Keyword arguments for the matplotlib quiver, such as ``{"scale": 2.0}``.
+    cmap : str, optional
+        The colormap for the projection colors and arrows, by default 'plasma'.
+    use_cache : bool, optional
+        Whether to load a cached EBS if one exists, by default False.
+    verbose : int, optional
+        Verbosity level, by default 1.
+    padding : int, optional
+        Padding of the k-mesh for the Fermi surface calculation, by default 10.
+    figsize : tuple[float, float], optional
+        Figure size in inches, by default (8, 6).
+    dpi : int, optional
+        Figure resolution, by default 100.
+    ax : matplotlib.axes.Axes, optional
+        Existing axes to draw on.
 
     Returns
     -------
-    matplotlib.pyplot or FermiSlicePlotter
-        Returns the matplotlib.pyplot state plt or the FermiSlicePlotter object
+    tuple[matplotlib.figure.Figure, matplotlib.axes.Axes]
+        The figure and axes of the plot.
 
     Raises
     ------
-    RuntimeError
-        If the translate option is invalid (not length 1 or 3)
     ValueError
-        If an invalid mode is specified
+        If the mode is unknown, or 'spin_texture' is requested for a calculation
+        that is not non-collinear.
 
     Examples
     --------
-    Basic usage with VASP calculation:
-
     >>> fermi2D(code='vasp', dirname='calculation_dir')
 
-    Plot with parametric coloring for specific atoms and orbitals:
+    Color the contours by the d-orbital character of atom 1:
 
     >>> fermi2D(code='vasp', dirname='calculation_dir', mode='parametric',
-    ...         atoms=[0, 1], orbitals=[0, 1, 2])
+    ...         atoms=[1], orbitals=[4, 5, 6, 7, 8], cmap='viridis')
 
-    Generate spin texture plot:
+    Color a non-collinear Fermi surface by Sx:
 
-    >>> fermi2D(code='vasp', dirname='calculation_dir', mode='spin_texture',
-    ...         spin_projection='z', plot_arrows=True)
+    >>> fermi2D(code='vasp', dirname='calculation_dir', mode='parametric', spins=[1])
+
+    Draw the spin texture:
+
+    >>> fermi2D(code='vasp', dirname='calculation_dir', mode='spin_texture')
     """
 
     mode = Fermi2DMode(mode)
@@ -222,13 +162,7 @@ def fermi2D(
     user_logger.info("_" * 100)
 
     modes_txt = " , ".join([mode.value for mode in Fermi2DMode])
-    message = f"""
-            There are additional plot options that are defined in a configuration file. 
-            You can change these configurations by passing the keyword argument to the function
-            To print a list of plot options set print_plot_opts=True
-
-            Here is a list modes : {modes_txt}"""
-    user_logger.info(message)
+    user_logger.info(f"Here is a list modes : {modes_txt}")
 
     user_logger.info("_" * 100)
 
@@ -281,6 +215,8 @@ def fermi2D(
     fsplt.plot(
         scalars_name=property_name,
         vectors_name=property_name if mode == Fermi2DMode.spin_texture else None,
+        scalars_cmap=cmap,
+        vectors_cmap=cmap,
         scalars_show_colorbar="single" if show_colorbar and property_name else "none",
         plot_arrows=plot_arrows,
         line_kwargs=plot_line_kwargs,
