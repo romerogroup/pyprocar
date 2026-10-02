@@ -381,7 +381,7 @@ class FermiSurface(pv.PolyData):
             mode,
             {
                 NormMode.MAX: lambda: np.max(np.abs(values_array)) or 1.0,
-                NormMode.TOTAL: lambda: np.sum(np.abs(values_array)) or 1.0,
+                NormMode.TOTAL: lambda: self.interpolate_to_surface(self.ebs.ebs_sum()),
                 NormMode.INTEGRAL: lambda: self._surface_integral(values_array) or 1.0,
             },
         )
@@ -792,12 +792,12 @@ class FermiSurface(pv.PolyData):
         return self._mask_to_surfaces(values)
 
     def _mask_to_surfaces(self, values: np.ndarray) -> np.ndarray:
-        """Zero band-resolved values at points that belong to another band's surface."""
+        """Keep band-resolved values only at the points of their own (band, spin) surface."""
         if not self.ebs.is_band_property(values):
             return values
-        masked = np.array(values, copy=True)
+        masked = np.zeros_like(values)
         for (iband, ispin), mask in self.band_spin_mask.items():
-            masked[~mask, iband, ispin, ...] = 0
+            masked[mask, iband, ispin, ...] = values[mask, iband, ispin, ...]
         return masked
 
     def compute_fermi_speed(self, **kwargs):
