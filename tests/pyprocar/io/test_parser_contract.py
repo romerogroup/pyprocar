@@ -94,8 +94,8 @@ CASES = [
         {"ebs", "dos"},
         id="lobster-bands",
     ),
-    pytest.param("bxsf", {"in.bxsf": BXSF_STR}, {"ebs"}, id="bxsf-mesh"),
-    pytest.param("frmsf", {"in.frmsf": FRMSF_STR}, {"ebs"}, id="frmsf-mesh"),
+    pytest.param("bxsf", {"in.bxsf": BXSF_STR}, {"ebs", "reciprocal_lattice"}, id="bxsf-mesh"),
+    pytest.param("frmsf", {"in.frmsf": FRMSF_STR}, {"ebs", "reciprocal_lattice"}, id="frmsf-mesh"),
 ]
 
 

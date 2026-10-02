@@ -1,7 +1,9 @@
 import logging
 
+import numpy as np
 import pytest
 
+from pyprocar.io.abinit import AbinitOutput
 from tests.pyprocar.io.abinit import ABINIT_DATA_DIR, CALC_TYPES
 from tests.utils import BaseTest
 
@@ -111,3 +113,9 @@ class TestAbinitOutputStructure(BaseTest):
 
         output = AbinitOutput(output_filepath)
         assert len(output.atoms) > 0
+
+
+def test_reclat_is_inverse_transpose_of_lattice_in_inverse_angstrom(output_filepath):
+    output = AbinitOutput(output_filepath)
+
+    assert np.allclose(output.reclat, np.linalg.inv(output.lattice).T, rtol=1e-5)

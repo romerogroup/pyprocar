@@ -2,6 +2,7 @@
 
 from pathlib import Path
 
+import numpy as np
 import pytest
 
 from pyprocar.core.ebs import ElectronicBandStructureMesh
@@ -119,3 +120,20 @@ class TestBxsfParserCustomFilepath:
 
         parser = BxsfParser(tmp_path, filepaths="custom.bxsf")
         assert parser.ebs is not None
+
+
+def test_reciprocal_lattice_drops_the_two_pi_of_a_wannier90_bxsf() -> None:
+    """Wannier90 writes b = 2*pi*inv(A).T in 1/Angstrom; here a = 4 Angstrom."""
+    b = 2 * np.pi / 4
+    vectors = f"    {b} 0.0 0.0\n    0.0 {b} 0.0\n    0.0 0.0 {b}\n"
+    wannier90_bxsf = BXSF_STR.replace(
+        "    1.0 0.0 0.0\n    0.0 1.0 0.0\n    0.0 0.0 1.0\n", vectors
+    )
+    parser = BxsfParser.from_str(wannier90_bxsf)
+    ebs = parser.ebs
+    assert ebs is not None
+    parser_lattice, ebs_lattice = parser.reciprocal_lattice, ebs.reciprocal_lattice
+
+    assert parser_lattice is not None and ebs_lattice is not None
+    assert np.allclose(parser_lattice, np.eye(3) * 0.25)
+    assert np.allclose(ebs_lattice, np.eye(3) * 0.25)
