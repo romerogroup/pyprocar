@@ -439,6 +439,19 @@ class TestNormalizeKpointName:
 # =============================================================================
 
 
+class TestKPathSegmentNamesSetter:
+    def test_renaming_updates_names_map_and_ticks(self, simple_kpath_kpoints, simple_segment_names):
+        kpath = KPath(kpoints=simple_kpath_kpoints, segment_names=simple_segment_names)
+        assert kpath.tick_names == ["Γ", "M", "Γ"]
+
+        kpath.segment_names = [("gamma", "A"), ("A", "B"), ("B", "gamma")]
+
+        assert kpath.segment_names == [("Γ", "A"), ("A", "B"), ("B", "Γ")]
+        assert kpath.special_kpoint_names == ["Γ", "A", "B"]
+        assert list(kpath.special_kpoint_map) == ["Γ", "A", "B"]
+        assert kpath.tick_names == ["Γ", "B", "Γ"]
+
+
 class TestKPathInitialization:
     """Test class for KPath initialization."""
 

@@ -14,6 +14,8 @@ from pyprocar.core.ebs import (
 )
 from pyprocar.core.kpoints import KGRID_MODE, KGridInfo
 from pyprocar.core.property_store import Property
+from pyprocar.utils import math
+from pyprocar.utils.physics import METER_ANGSTROM
 from tests.utils import DATA_DIR
 
 logger = logging.getLogger("pyprocar")
@@ -880,3 +882,23 @@ class TestElectronicBandStructureMesh:
 
     #     assert hessians is not None
     #     assert hessians.shape == (64, 3, 1, 3, 3)  # Last 3x3 is hessian
+
+
+
+def test_padded_then_interpolated_gradient_matches_finite_difference(ebs):
+    """Finite differences use pyprocar's reciprocal-lattice convention (no 2*pi)."""
+    ebs.remove_property("projected")
+    grid = ebs.pad(padding=10, inplace=False).interpolate(2, inplace=False)
+    n = grid.n_kx
+    spacing = np.ptp(grid.kpoints[:, 0]) / (n - 1)
+
+    grid.compute_gradients(1, names=["bands"])
+
+    gradient = grid.property_store["bands"].gradients[1][:, 16, 0] / METER_ANGSTROM
+    bands = math.array_to_mesh(grid.bands.value[:, 16, 0], n, grid.n_ky, grid.n_kz)
+    d_frac = np.stack(np.gradient(bands, spacing), axis=-1)
+    expected = np.asarray(math.mesh_to_array(d_frac @ np.linalg.inv(grid.reciprocal_lattice).T))
+    interior = np.asarray(math.mesh_to_array(np.pad(np.ones((n - 2,) * 3, dtype=bool), 1)))
+    assert n == 82
+    assert np.isclose(spacing, 0.023617, atol=1e-6)
+    assert np.allclose(gradient[interior], expected[interior], rtol=1e-6, atol=1e-6)

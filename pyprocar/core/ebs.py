@@ -2020,6 +2020,9 @@ def edge_diff_ramp(vector, pad_width, iaxis, kwargs):
 class ElectronicBandStructureMesh(
     ElectronicBandStructure, DifferentiablePropertyInterface
 ):
+    # Set by pad() and interpolate(): such grids span more than one zone, so 1/n is wrong.
+    _kgrid_spacing: list[float] | None = None
+
     def __init__(self, kgrid_info: kpoints.KGridInfo, **kwargs):
         super(ElectronicBandStructureMesh, self).__init__(**kwargs)
 
@@ -2225,6 +2228,7 @@ class ElectronicBandStructureMesh(
             property[calc_name, gradient_order] = padded_array
 
         new_kpoints = math.mesh_to_array(padded_kpoints_mesh, order=order)
+        ebs._kgrid_spacing = ebs.kgrid_spacing
         ebs.update_points(new_kpoints)
         ebs._mesh = ebs.to_mesh()
         return ebs
@@ -2317,6 +2321,11 @@ class ElectronicBandStructureMesh(
             interpolated_value = math.mesh_to_array(interpolated_mesh)
             property[calc_name, gradient_order] = interpolated_value
 
+        if ebs._kgrid_spacing is not None:
+            ebs._kgrid_spacing = [
+                np.ptp(axis) / (len(axis) - 1) if np.ptp(axis) > 0 else 1 / len(axis)
+                for axis in (new_x, new_y, new_z)
+            ]
         ebs.update_points(new_kpoints)
         ebs._mesh = ebs.to_mesh()
         return ebs
@@ -2414,6 +2423,12 @@ class ElectronicBandStructureMesh(
             slice.set_active_vectors(vector_name)
         return slice
 
+    @property
+    def kgrid_spacing(self) -> list[float]:
+        if self._kgrid_spacing is not None:
+            return self._kgrid_spacing
+        return [1 / self.n_kx, 1 / self.n_ky, 1 / self.n_kz]
+
     def gradient_func(self, points, values, **kwargs):
         val_mesh = math.array_to_mesh(
             array=values,
@@ -2422,7 +2437,9 @@ class ElectronicBandStructureMesh(
             nkz=self.n_kz,
             **kwargs,
         )
-        gradients_mesh = math.calculate_3d_mesh_scalar_gradients(val_mesh, self.reciprocal_lattice)
+        gradients_mesh = math.calculate_3d_mesh_scalar_gradients(
+            val_mesh, self.reciprocal_lattice, spacing=self.kgrid_spacing
+        )
         gradients_mesh *= physics.METER_ANGSTROM
 
         gradients = math.mesh_to_array(mesh=gradients_mesh, **kwargs)

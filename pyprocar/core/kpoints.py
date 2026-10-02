@@ -343,8 +343,9 @@ class KPath:
             raise ValueError(
                 f"Number of segment names must match number of segments. Got {len(segment_names)} names for {self.n_segments} segments"
             )
-        self._segment_names = segment_names
-        self._special_kpoints = self.get_special_kpoints()
+        self._segment_names = self._normalize_kpoint_names(segment_names)
+        self._special_kpoint_names = self.get_special_kpoint_names(self._segment_names)
+        self._tick_name_map = None
 
     @property
     def special_kpoint_names(self):

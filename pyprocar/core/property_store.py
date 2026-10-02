@@ -90,7 +90,7 @@ class Property:
     _point_set: weakref.ReferenceType | None = None
     units: str | None = None
     label: str | None = None
-    metadata: dict[str, Any] = {}
+    metadata: dict[str, Any]
     data_lim: tuple[float | None, float | None] | None = None
 
     def __init__(
@@ -131,10 +131,14 @@ class Property:
         if self.label is None:
             self.label = name
 
-        if metadata is not None:
-            self.metadata = metadata
+        self.metadata = metadata if metadata is not None else {}
 
         self._data_lim = data_lim
+
+    def __setstate__(self, state: dict[str, Any]) -> None:
+        # Pickles written before metadata became per-instance carry no metadata key.
+        state.setdefault("metadata", {})
+        self.__dict__.update(state)
 
     @property
     def point_set(self) -> "PointSet":
@@ -695,7 +699,6 @@ class PointSet:
                 scalars = property.gradients[gradient_order - 1]
 
             property.gradients[gradient_order] = self.gradient_func(self._points, scalars)
-        return property.gradients[gradient_order]
 
     def iter_property_arrays(
         self, property_store: dict[str, Property] | None = None

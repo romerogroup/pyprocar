@@ -178,7 +178,9 @@ class VaspParser(BaseParser):
         return version
 
     @cached_property
-    def version_tuple(self) -> tuple[int, int, int]:
+    def version_tuple(self) -> tuple[int, ...] | None:
+        if self.version is None:
+            return None
         return tuple(int(x) for x in self.version.split("."))
 
     @cached_property
@@ -201,7 +203,7 @@ class VaspParser(BaseParser):
             kpoints=kpoints,
             segment_names=self.kpoints.knames,
             n_grids=self.kpoints.ngrids,
-            reciprocal_lattice=self.outcar.reciprocal_lattice,
+            reciprocal_lattice=self.outcar.reciprocal_lattice if self.outcar else None,
         )
 
     @property
@@ -324,8 +326,6 @@ class VaspParser(BaseParser):
             atoms = self.vasprun.atoms
             fractional_coordinates = self.vasprun.initial_structure.positions
             lattice = self.vasprun.initial_structure.crystal.basis
-
-            return self.vasprun
         else:
             logger.warning(
                 "Issue with poscar file. Either it was not found or there is an issue with the parser"

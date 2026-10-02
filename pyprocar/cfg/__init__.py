@@ -1,3 +1,4 @@
+import copy
 from typing import Any, Dict
 
 from pyprocar.cfg.band_structure import BandStructureConfig
@@ -63,29 +64,31 @@ class ConfigManager:
     Methods
     -------
     merge_configs(default_config: BaseConfig, user_config: Dict[str, Any]) -> BaseConfig
-        Updates the `default_config` with settings provided by `user_config`.
+        Returns a copy of `default_config` updated with settings from `user_config`.
+        `default_config` itself is left unchanged.
 
     Parameters
     ----------
     default_config : BaseConfig
-        The default configuration object to update.
+        The default configuration object. It is not modified.
     user_config : Dict[str, Any]
         A dictionary of user-provided configuration settings.
 
     Returns
     -------
     BaseConfig
-        The updated configuration object with settings from both default and user configurations.
+        A new configuration object with settings from both default and user configurations.
     """
 
     @staticmethod
     def merge_configs(default_config: BaseConfig, user_config: dict[str, Any]) -> BaseConfig:
+        config = copy.deepcopy(default_config)
         for key, value in user_config.items():
-            if hasattr(default_config, key):
-                setattr(default_config, key, value)
+            if hasattr(config, key):
+                setattr(config, key, value)
             else:
-                default_config.custom_settings[key] = value
-        return default_config
+                config.custom_settings[key] = value
+        return config
 
     @staticmethod
     def merge_config(default_config: BaseConfig, attribute: str, value: Any):

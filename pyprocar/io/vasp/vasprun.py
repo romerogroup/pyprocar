@@ -952,6 +952,12 @@ class VaspXML(Mapping[str, Any]):
         return None
 
     @cached_property
+    def atoms(self) -> list[str]:
+        names = self.root.xpath("//atominfo/array[@name='atoms']/set/rc/c[1]/text()")
+        assert isinstance(names, Iterable)
+        return [str(name).strip() for name in names]
+
+    @cached_property
     def initial_structure(self) -> StructureInfo | None:
         """Parse initial structure from vasprun.xml"""
         tag_list = self.root.xpath("//calculation/structure")
