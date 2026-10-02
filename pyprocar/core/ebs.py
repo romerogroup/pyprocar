@@ -174,7 +174,8 @@ class ElectronicBandStructure(PointSet):
     orbital_names : list, optional
         The names of the orbitals. Defaults to None
     reciprocal_lattice : np.ndarray, optional
-        The reciprocal lattice vector matrix. Will have the shape (3, 3), defaults to None
+        The reciprocal lattice vectors as rows, shape (3, 3), in 1/Angstrom without the 2*pi
+        factor (a_i . b_j = delta_ij). Defaults to None
     shifted_to_fermi : bool, optional
          Boolean to determine if the fermi energy is shifted, defaults to False
     """
@@ -1340,7 +1341,7 @@ class ElectronicBandStructurePath(
 
         gradients = np.zeros(values.shape)
         for k_indices in continuous_segments:
-            kpath_segment = points[k_indices]
+            kpath_segment = 2 * np.pi * points[k_indices]
             delta_k = np.gradient(kpath_segment, axis=0)
             delta_k = np.linalg.norm(delta_k, axis=1)
 
@@ -2039,7 +2040,8 @@ class ElectronicBandStructureMesh(
         gradients_mesh = math.calculate_3d_mesh_scalar_gradients(
             val_mesh, self.reciprocal_lattice, spacing=self.kgrid_spacing
         )
-        gradients_mesh *= physics.METER_ANGSTROM
+        # reciprocal_lattice has no 2*pi, so this gives dE/d(k/2pi); the 2*pi makes it dE/dk.
+        gradients_mesh *= physics.METER_ANGSTROM / (2 * np.pi)
 
         gradients = math.mesh_to_array(mesh=gradients_mesh, **kwargs)
 

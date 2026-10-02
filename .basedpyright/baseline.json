@@ -20178,16 +20178,6 @@
                 }
             }
         ],
-        "./tests/pyprocar/io/test_parser_contract.py": [
-            {
-                "code": "reportImplicitStringConcatenation",
-                "range": {
-                    "startColumn": 11,
-                    "endColumn": 25,
-                    "lineCount": 2
-                }
-            }
-        ],
         "./tests/pyprocar/io/vasp/test_outcar.py": [
             {
                 "code": "reportPrivateLocalImportUsage",

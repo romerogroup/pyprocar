@@ -4,6 +4,8 @@ import numpy as np
 
 from pyprocar.utils import np_utils
 
+# Band gradients reach these constants in eV*m with angular k (k = 2*pi*f.b). reciprocal_lattice
+# stores b without the 2*pi, so gradient code must restore it before dividing by hbar.
 HBAR_EV = 6.582119 * 10 ** (-16)  # eV*s
 HBAR_J = 1.0545718 * 10 ** (-34)  # eV*s
 METER_ANGSTROM = 10 ** (-10)  # m /A

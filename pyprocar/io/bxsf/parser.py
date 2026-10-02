@@ -4,6 +4,8 @@ import logging
 from functools import cached_property
 from pathlib import Path
 
+import numpy as np
+
 from pyprocar.core.ebs import ElectronicBandStructure, get_ebs_from_data
 from pyprocar.core.kpoints import KGRID_MODE, KGridInfo
 from pyprocar.io.base import BaseParser
@@ -67,6 +69,16 @@ class BxsfParser(BaseParser):
             kshift=(0.0, 0.0, 0.0),
         )
 
+    @cached_property
+    def reciprocal_lattice(self) -> np.ndarray | None:
+        """Reciprocal lattice in 1/Angstrom without the 2*pi factor.
+
+        BXSF files store b with the 2*pi, in 1/Angstrom (the XCrySDen and Wannier90 convention).
+        """
+        if not self._extractors:
+            return None
+        return self._extractors[0].reciprocal_lattice / (2 * np.pi)
+
     @property
     def ebs(self) -> ElectronicBandStructure | None:
         """Electronic band structure (mesh-based)."""
@@ -81,7 +93,7 @@ class BxsfParser(BaseParser):
                 bands=ext.bands,
                 projected=None,
                 fermi=ext.fermi_energy,
-                reciprocal_lattice=ext.reciprocal_lattice,
+                reciprocal_lattice=self.reciprocal_lattice,
                 kgrid_info=self.kgrid_info,
             )
         except Exception as e:

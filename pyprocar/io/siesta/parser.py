@@ -114,7 +114,7 @@ class SiestaParser(BaseParser):
             return None
         try:
             direct = self._fdf.lattice_vectors
-            return 2 * np.pi * np.linalg.inv(direct).T
+            return np.linalg.inv(direct).T
         except Exception as e:
             logger.warning(f"Error computing reciprocal lattice: {e}")
             return None

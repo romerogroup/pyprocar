@@ -2,6 +2,7 @@
 
 from pathlib import Path
 
+import numpy as np
 import pytest
 
 from pyprocar.core.ebs import ElectronicBandStructureMesh
@@ -127,3 +128,10 @@ class TestFrmsfParserCustomFilepath:
 
         parser = FrmsfParser(tmp_path, filepath="custom.frmsf")
         assert parser.ebs is not None
+
+
+def test_reciprocal_lattice_is_taken_as_written() -> None:
+    parser = FrmsfParser.from_str(FRMSF_STR)
+
+    assert parser.reciprocal_lattice is not None
+    assert np.allclose(parser.reciprocal_lattice, np.eye(3))

@@ -11,6 +11,7 @@ import numpy as np
 
 from pyprocar.core import Structure
 from pyprocar.utils import elements
+from pyprocar.utils.units import AU_TO_ANG
 
 logger = logging.getLogger(__name__)
 
@@ -88,7 +89,7 @@ class AbinitOutput(Mapping[str, Any]):
 
     @cached_property
     def reclat(self) -> np.ndarray:
-        """Reciprocal lattice vectors."""
+        """Reciprocal lattice vectors in 1/Angstrom, without the 2*pi (Abinit prints Bohr^-1)."""
         lattice_block = re.findall(r"G\([1,2,3]\)=\s*([0-9.\s-]*)", self.file_str)
         if len(lattice_block) < 3:
             return np.array([])
@@ -96,7 +97,7 @@ class AbinitOutput(Mapping[str, Any]):
         return np.array(
             [lattice_block[i].split() for i in range(len(lattice_block))],
             dtype=float,
-        )
+        ) / AU_TO_ANG
 
     @cached_property
     def coordinates(self) -> np.ndarray:

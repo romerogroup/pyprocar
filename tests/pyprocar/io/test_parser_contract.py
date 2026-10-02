@@ -28,12 +28,6 @@ MEMBER_TYPES = {
 
 CODES_DIR = DATA_DIR / "codes"
 
-KGRID_MODE_ENUM = pytest.mark.xfail(
-    reason="ElectronicBandStructureMesh passes a KGRID_MODE enum to get_kpoints_from_kgrid, "
-    "which expects a str",
-    raises=AttributeError,
-    strict=True,
-)
 CASES = [
     pytest.param(
         "vasp",
@@ -58,7 +52,6 @@ CASES = [
         CODES_DIR / "qe/7.2/SrVO3/non-spin-polarized/dos",
         {"ebs", "dos", "structure", "fermi", "reciprocal_lattice"},
         id="qe-dos",
-        marks=KGRID_MODE_ENUM,
     ),
     pytest.param(
         "elk",
@@ -101,8 +94,8 @@ CASES = [
         {"ebs", "dos"},
         id="lobster-bands",
     ),
-    pytest.param("bxsf", {"in.bxsf": BXSF_STR}, {"ebs"}, id="bxsf-mesh"),
-    pytest.param("frmsf", {"in.frmsf": FRMSF_STR}, {"ebs"}, id="frmsf-mesh"),
+    pytest.param("bxsf", {"in.bxsf": BXSF_STR}, {"ebs", "reciprocal_lattice"}, id="bxsf-mesh"),
+    pytest.param("frmsf", {"in.frmsf": FRMSF_STR}, {"ebs", "reciprocal_lattice"}, id="frmsf-mesh"),
 ]
 
 

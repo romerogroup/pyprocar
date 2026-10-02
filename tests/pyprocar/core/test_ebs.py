@@ -15,7 +15,7 @@ from pyprocar.core.ebs import (
 from pyprocar.core.kpoints import KGRID_MODE, KGridInfo
 from pyprocar.core.property_store import Property
 from pyprocar.utils import math
-from pyprocar.utils.physics import METER_ANGSTROM
+from pyprocar.utils.physics import EV_TO_J, FREE_ELECTRON_MASS, HBAR_J, METER_ANGSTROM
 from tests.utils import DATA_DIR
 
 logger = logging.getLogger("pyprocar")
@@ -884,7 +884,6 @@ class TestElectronicBandStructureMesh:
 
 @pytest.mark.data
 def test_padded_then_interpolated_gradient_matches_finite_difference(ebs):
-    """Finite differences use pyprocar's reciprocal-lattice convention (no 2*pi)."""
     ebs.remove_property("projected")
     grid = ebs.pad(padding=10, inplace=False).interpolate(2, inplace=False)
     n = grid.n_kx
@@ -895,7 +894,8 @@ def test_padded_then_interpolated_gradient_matches_finite_difference(ebs):
     gradient = grid.property_store["bands"].gradients[1][:, 16, 0] / METER_ANGSTROM
     bands = math.array_to_mesh(grid.bands.value[:, 16, 0], n, grid.n_ky, grid.n_kz)
     d_frac = np.stack(np.gradient(bands, spacing), axis=-1)
-    expected = np.asarray(math.mesh_to_array(d_frac @ np.linalg.inv(grid.reciprocal_lattice).T))
+    angular_lattice = 2 * np.pi * grid.reciprocal_lattice
+    expected = np.asarray(math.mesh_to_array(d_frac @ np.linalg.inv(angular_lattice).T))
     interior = np.asarray(math.mesh_to_array(np.pad(np.ones((n - 2,) * 3, dtype=bool), 1)))
     assert n == 82
     assert np.isclose(spacing, 0.023617, atol=1e-6)
@@ -955,3 +955,51 @@ def test_get_property_matches_compute_after_value_mutation():
     via_get = ebs.get_property("projected_sum", atoms=[0]).value
     assert via_get.ravel().tolist() == [0.2, 0.4, 0.6]
     np.testing.assert_array_equal(via_get, ebs.compute_projected_sum(atoms=[0]).value)
+
+
+def test_free_electron_band_has_analytic_velocity_and_unit_mass():
+    """E = hbar^2 k^2 / 2 m_e on a cubic grid, with k = 2*pi * f . reciprocal_lattice."""
+    a, n = 4.0, 20
+    reciprocal_lattice = np.eye(3) / a
+    frac = kpoints.generate_gamma_centered_kpoints((n, n, n))
+    k_per_meter = 2 * np.pi * frac @ reciprocal_lattice / METER_ANGSTROM
+    energy = HBAR_J**2 * np.sum(k_per_meter**2, axis=1) / (2 * FREE_ELECTRON_MASS) / EV_TO_J
+    ebs = ElectronicBandStructureMesh(
+        kgrid_info=KGridInfo(kgrid=(n, n, n), kgrid_mode=KGRID_MODE.GAMMA, kshift=(0, 0, 0)),
+        kpoints=frac,
+        bands=energy.reshape(-1, 1, 1),
+        reciprocal_lattice=reciprocal_lattice,
+    )
+
+    velocity = ebs.compute_band_velocity()[:, 0, 0]
+    inv_mass = ebs.compute_avg_inv_effective_mass()[:, 0, 0]
+    at = {tuple(np.round(k, 4)): i for i, k in enumerate(ebs.kpoints)}
+    assert np.allclose(velocity[at[(0.25, 0.0, 0.0)]], [454587.68, 0, 0], rtol=1e-3, atol=1.0)
+    assert np.allclose(
+        velocity[at[(0.0, -0.1, 0.2)]], [0, -181835.07, 363670.14], rtol=1e-3, atol=1.0
+    )
+    assert np.isclose(inv_mass[at[(0.0, 0.0, 0.0)]], 1.0, rtol=1e-9)
+    assert np.isclose(inv_mass[at[(0.15, 0.05, -0.2)]], 1.0, rtol=1e-9)
+
+
+def test_free_electron_band_along_a_path_has_analytic_speed():
+    a = 4.0
+    reciprocal_lattice = np.eye(3) / a
+    frac = np.column_stack([np.linspace(0, 0.5, 51), np.zeros(51), np.zeros(51)])
+    k_per_meter = 2 * np.pi * frac[:, 0] / a / METER_ANGSTROM
+    energy = HBAR_J**2 * k_per_meter**2 / (2 * FREE_ELECTRON_MASS) / EV_TO_J
+    ebs = ElectronicBandStructurePath(
+        kpoints=frac,
+        bands=energy.reshape(-1, 1, 1),
+        reciprocal_lattice=reciprocal_lattice,
+        kpath=kpoints.KPath(
+            kpoints=frac,
+            n_grids=[51],
+            segment_names=[("G", "X")],
+            reciprocal_lattice=reciprocal_lattice,
+        ),
+    )
+
+    velocity = ebs.compute_band_velocity()[:, 0, 0]
+    assert np.isclose(velocity[25], 454587.68, rtol=1e-3)
+    assert np.isclose(velocity[50], 909175.36, rtol=1e-3)

@@ -363,7 +363,8 @@ class Structure:
         Returns
         -------
         np.ndarray
-            The reciprocal lattice matrix corresponding the the crystal lattice
+            Reciprocal lattice vectors as rows, in 1/Angstrom without the 2*pi factor
+            (a_i . b_j = delta_ij).
         """
         reciprocal_lattice = np.zeros_like(self.lattice)
 

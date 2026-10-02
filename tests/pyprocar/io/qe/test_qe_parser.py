@@ -5,6 +5,7 @@ from pathlib import Path
 import numpy as np
 import pytest
 
+from pyprocar.core.kpoints import KGRID_MODE, KGridInfo, get_kpoints_from_kgrid
 from pyprocar.io import get_parser
 from pyprocar.io.qe.parser import QEParser
 from tests.utils import DATA_DIR
@@ -398,3 +399,39 @@ def test_projected_dos_sums_to_the_pdos_tot_column(
     assert dos is not None and dos.projected is not None
     summed = dos.projected.to_array().sum(axis=(2, 3))
     np.testing.assert_allclose(summed, pdos_tot[:, pdos_columns], rtol=1e-2, atol=1e-2)
+
+
+def test_reciprocal_lattice_has_no_two_pi_and_kpoints_stay_fractional(dos_parser: QEParser) -> None:
+    reciprocal_lattice, alat = dos_parser.reciprocal_lattice, dos_parser.alat
+    kpoints = dos_parser.kpoints
+    assert reciprocal_lattice is not None and alat is not None and kpoints is not None
+    assert np.allclose(reciprocal_lattice * alat, np.eye(3))
+    assert np.allclose(
+        kpoints,
+        [
+            [0.0, 0.0, 0.0],
+            [0.25, 0.0, 0.0],
+            [0.5, 0.0, 0.0],
+            [0.25, 0.25, 0.0],
+            [0.5, 0.25, 0.0],
+            [0.5, 0.5, 0.0],
+            [0.25, 0.25, 0.25],
+            [0.5, 0.25, 0.25],
+            [0.5, 0.5, 0.25],
+            [0.5, 0.5, 0.5],
+        ],
+    )
+
+
+def test_shifted_automatic_grid_is_gamma_centred_with_half_step_shift(tmp_path: Path) -> None:
+    (tmp_path / "nscf.in").write_text(SCF_IN.replace("4 4 4 0 0 0", "4 4 4 1 1 1"))
+    kgrid_info = QEParser(dirpath=tmp_path).kgrid_info
+
+    assert kgrid_info is not None
+    assert kgrid_info == KGridInfo(
+        kgrid=(4, 4, 4), kgrid_mode=KGRID_MODE.GAMMA, kshift=(0.5, 0.5, 0.5)
+    )
+    kpoints = get_kpoints_from_kgrid(
+        kgrid_info.kgrid, kshift=kgrid_info.kshift, mode=kgrid_info.kgrid_mode
+    )
+    assert sorted(set(np.round(kpoints[:, 0], 6))) == [-0.375, -0.125, 0.125, 0.375]

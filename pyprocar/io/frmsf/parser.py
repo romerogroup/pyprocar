@@ -74,6 +74,18 @@ class FrmsfParser(BaseParser):
             kshift=(0.0, 0.0, 0.0),
         )
 
+    @cached_property
+    def reciprocal_lattice(self) -> np.ndarray | None:
+        """Reciprocal lattice exactly as written in the file.
+
+        The FermiSurfer format leaves the unit of b undefined, so pyprocar assumes the file
+        follows its own convention (1/Angstrom, no 2*pi). Files that include the 2*pi give
+        velocities 2*pi too small.
+        """
+        if self._frmsf is None:
+            return None
+        return self._frmsf.reciprocal_lattice
+
     @property
     def ebs(self) -> ElectronicBandStructure | None:
         """Electronic band structure (mesh-based)."""
@@ -92,7 +104,7 @@ class FrmsfParser(BaseParser):
                 bands=bands,
                 projected=None,  # FrmSrf projections need format investigation
                 fermi=0.0,  # FrmSrf doesn't provide Fermi energy
-                reciprocal_lattice=self._frmsf.reciprocal_lattice,
+                reciprocal_lattice=self.reciprocal_lattice,
                 kgrid_info=self.kgrid_info,
             )
         except Exception as e:

@@ -45,4 +45,5 @@ class BaseParser:
 
     @property
     def reciprocal_lattice(self) -> np.ndarray | None:
+        """Reciprocal lattice vectors as rows, in 1/Angstrom without the 2*pi factor."""
         return None

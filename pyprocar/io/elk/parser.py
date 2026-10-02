@@ -176,7 +176,7 @@ class ElkParser(BaseParser):
         lattice = self._get_lattice()
         if lattice is None:
             return None
-        return 2 * np.pi * np.linalg.inv(lattice).T
+        return np.linalg.inv(lattice).T
 
     @property
     def reclat(self) -> np.ndarray | None:

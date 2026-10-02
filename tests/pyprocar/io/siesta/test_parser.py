@@ -2,6 +2,7 @@
 
 from pathlib import Path
 
+import numpy as np
 import pytest
 
 from pyprocar.io.siesta import FDF, Bands, SiestaParser
@@ -83,7 +84,7 @@ class TestSiestaParser:
         parser = SiestaParser(siesta_dir)
         recip = parser.reciprocal_lattice
         assert recip is not None
-        assert recip.shape == (3, 3)
+        assert np.allclose(recip, np.eye(3) / 5.43)
 
     def test_kpath(self, siesta_dir: Path) -> None:
         parser = SiestaParser(siesta_dir)
