@@ -1037,8 +1037,12 @@ def test_path_to_mesh_points_are_cartesian(hexagonal_ebs_path):
 
 
 def test_path_plot_draws_cartesian_kpoints(hexagonal_ebs_path, monkeypatch):
-    shown = []
-    monkeypatch.setattr(pv.Plotter, "show", lambda self, *a, **k: shown.append(self))
+    shown: list[pv.Plotter] = []
+
+    def record_show(self: pv.Plotter, *_args: object, **_kwargs: object) -> None:
+        shown.append(self)
+
+    monkeypatch.setattr(pv.Plotter, "show", record_show)
     monkeypatch.setattr(pv, "OFF_SCREEN", True)
 
     hexagonal_ebs_path.plot()
