@@ -710,7 +710,7 @@ def _documented_fermi2d_calls():
     for location, source in sources:
         for node in ast.walk(ast.parse(source)):
             if isinstance(node, ast.Call) and ast.unparse(node.func) == "pyprocar.fermi2D":
-                yield location, [kw.arg for kw in node.keywords]
+                yield location, [kw.arg for kw in node.keywords if kw.arg]
 
 
 class TestFermi2DDocumentedCalls:
