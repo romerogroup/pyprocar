@@ -1,26 +1,30 @@
 import numpy as np
 import pytest
 
+from pyprocar.core.bandstructure2D import BandStructure2D
 from pyprocar.core.ebs import ElectronicBandStructureMesh
 from pyprocar.core.fermisurface import FermiSurface
 from pyprocar.core.kpoints import KGRID_MODE, KGridInfo
 
 
 @pytest.fixture(scope="module")
-def noncollinear_surface() -> FermiSurface:
+def noncollinear_ebs() -> ElectronicBandStructureMesh:
     """A sphere around Gamma laid out as the VASP parser loads a non-collinear run.
 
     The energies repeat across 4 spin channels, and the projections hold the
     total (0.4) and the Sx, Sy, Sz components (0.1, 0.2, 0.3) on atom 0.
+    Band 1 lies far above the Fermi level with total 0.9 and no spin.
     """
     n = 10
     frac = np.arange(n) / n
     kpoints = np.stack(np.meshgrid(frac, frac, frac, indexing="ij"), axis=-1).reshape(-1, 3)
     centred = (kpoints + 0.5) % 1.0 - 0.5
-    bands = np.repeat(np.sum(centred**2, axis=1)[:, np.newaxis, np.newaxis], 4, axis=2)
-    projected = np.zeros((len(kpoints), 1, 4, 2, 1))
+    energies = np.stack([np.sum(centred**2, axis=1), np.full(len(kpoints), 5.0)], axis=1)
+    bands = np.repeat(energies[..., np.newaxis], 4, axis=2)
+    projected = np.zeros((len(kpoints), 2, 4, 2, 1))
     projected[:, 0, :, 0, 0] = [0.4, 0.1, 0.2, 0.3]
-    ebs = ElectronicBandStructureMesh(
+    projected[:, 1, 0, 0, 0] = 0.9
+    return ElectronicBandStructureMesh(
         kgrid_info=KGridInfo(kgrid=(n, n, n), kgrid_mode=KGRID_MODE.GAMMA, kshift=(0.0, 0.0, 0.0)),
         kpoints=kpoints,
         bands=bands,
@@ -29,7 +33,11 @@ def noncollinear_surface() -> FermiSurface:
         reciprocal_lattice=np.eye(3),
         orbital_names=["s"],
     )
-    return FermiSurface.from_ebs(ebs)
+
+
+@pytest.fixture(scope="module")
+def noncollinear_surface(noncollinear_ebs) -> FermiSurface:
+    return FermiSurface.from_ebs(noncollinear_ebs)
 
 
 def test_noncollinear_surface_has_one_spin_channel(noncollinear_surface):
@@ -41,7 +49,7 @@ def test_noncollinear_projected_sum_takes_the_total_component(noncollinear_surfa
 
     values = fs.get_property("projected_sum", atoms=[0], spins=[0]).value
 
-    assert values.shape == (fs.n_points, 1, 1)
+    assert values.shape == (fs.n_points, 2, 1)
     np.testing.assert_allclose(values[:, 0, 0], 0.4)
 
 
@@ -50,5 +58,30 @@ def test_noncollinear_projected_spin_texture_holds_sx_sy_sz(noncollinear_surface
 
     values = fs.get_property("projected_sum_spin_texture", atoms=[0]).value
 
-    assert values.shape == (fs.n_points, 1, 1, 3)
+    assert values.shape == (fs.n_points, 2, 1, 3)
     np.testing.assert_allclose(values[:, 0, 0, :], np.tile([0.1, 0.2, 0.3], (fs.n_points, 1)))
+
+
+def test_noncollinear_ebs_projected_sum_defaults_to_the_total(noncollinear_ebs):
+    values = noncollinear_ebs.compute_projected_sum(atoms=[0]).value
+
+    assert values.shape == (noncollinear_ebs.n_kpoints, 2, 1)
+    np.testing.assert_allclose(values[:, 0, 0], 0.4)
+    np.testing.assert_allclose(values[:, 1, 0], 0.9)
+
+
+def test_noncollinear_surface_projected_sum_defaults_to_the_total(noncollinear_ebs):
+    fs = FermiSurface.from_ebs(noncollinear_ebs)
+
+    values = fs.get_property("projected_sum", atoms=[0]).value
+
+    np.testing.assert_allclose(values[:, 0, 0], 0.4)
+
+
+def test_noncollinear_band_structure_2d_has_one_spin_channel(noncollinear_ebs):
+    bs2d = BandStructure2D.from_ebs(noncollinear_ebs, grid_interpolation=(10, 10), padding=2)
+
+    values = bs2d.get_property("projected_sum", atoms=[0], spins=[0]).value
+
+    assert list(bs2d.band_spin_surface_map) == [(0, 0), (1, 0)]
+    np.testing.assert_allclose(np.unique(values.round(6)), [0.4, 0.9])
