@@ -27,7 +27,7 @@ def _bandstructure2d(props=None):
     return SimpleNamespace(
         band_surfaces={(1, 0): _triangle(-1.0), (2, 0): _triangle(2.0)},
         band_spin_mask={(1, 0): mask_a, (2, 0): ~mask_a},
-        point_set=SimpleNamespace(get_property=lambda name: (props or {})[name]),
+        get_property=lambda name: (props or {})[name],
     )
 
 

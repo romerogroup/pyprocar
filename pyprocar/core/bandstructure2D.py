@@ -235,23 +235,14 @@ def _merge_band_surfaces(
     if not surfaces:
         return pv.PolyData(), np.empty(0), np.empty(0), {}
 
-    # Build tracking arrays
-    spin_band_index_array = np.empty(0, dtype=np.int32)
-    spin_index_array = np.empty(0, dtype=np.int32)
-
-    for surface_idx, surface in enumerate(surfaces):
-        iband, ispin = surface_band_spin_map[surface_idx]
-        n_points = surface.points.shape[0]
-
-        # spin index identifier
-        current_spin_index_array = np.full(n_points, ispin, dtype=np.int32)
-        spin_index_array = np.insert(spin_index_array, 0, current_spin_index_array, axis=0)
-
-        # spin band index identifier
-        current_spin_band_index_array = np.full(n_points, surface_idx, dtype=np.int32)
-        spin_band_index_array = np.insert(
-            spin_band_index_array, 0, current_spin_band_index_array, axis=0
-        )
+    # Same order as merge() appends points below.
+    n_points = [surface.points.shape[0] for surface in surfaces]
+    spin_index_array = np.concatenate(
+        [np.full(n, surface_band_spin_map[i][1], dtype=np.int32) for i, n in enumerate(n_points)]
+    )
+    spin_band_index_array = np.concatenate(
+        [np.full(n, i, dtype=np.int32) for i, n in enumerate(n_points)]
+    )
 
     # Build band_spin_mask
     band_spin_mask = {}
@@ -482,10 +473,6 @@ class BandStructure2D(pv.PolyData):
         self._ebs = ebs
         self._plane_info = plane_info
 
-        # Cache invalidation tracking
-        self._ebs_cache_version: int = 0
-        self._cached_properties: dict[str, int] = {}
-
         # Validate required properties
         if "spin_band_index" not in point_set.property_store.keys():
             raise ValueError("spin_band_index not found in point_set.property_store")
@@ -512,25 +499,6 @@ class BandStructure2D(pv.PolyData):
         self.transform_to_frac[:3, :3] = np.linalg.inv(self._ebs.reciprocal_lattice.T)
 
         logger.info("___BandStructure2D initialization complete___")
-
-    # -------------------------------------------------------------------------
-    # Cache invalidation methods
-    # -------------------------------------------------------------------------
-
-    def _invalidate_cache(self) -> None:
-        """Invalidate all cached interpolated properties."""
-        self._ebs_cache_version += 1
-        logger.debug(f"Cache invalidated, new version: {self._ebs_cache_version}")
-
-    def _is_cache_valid(self, property_name: str) -> bool:
-        """Check if cached property is still valid."""
-        if property_name not in self._cached_properties:
-            return False
-        return self._cached_properties[property_name] == self._ebs_cache_version
-
-    def _mark_cached(self, property_name: str) -> None:
-        """Mark property as cached at current version."""
-        self._cached_properties[property_name] = self._ebs_cache_version
 
     @classmethod
     def from_ebs(
@@ -717,26 +685,11 @@ class BandStructure2D(pv.PolyData):
     # Core methods
     # -------------------------------------------------------------------------
 
-    def get_property(self, key: str, **kwargs) -> np.ndarray:
-        """Get property values, computing if necessary.
-
-        Uses cache invalidation to track property staleness.
-        """
-        prop_name, _ = self.ebs._extract_key(key)
-
-        # Check if property exists and cache is valid
-        if prop_name in self.point_set.property_store and self._is_cache_valid(prop_name):
-            prop = self.point_set.get_property(prop_name)
-            property_value = prop.value if prop is not None else self.compute_property(prop_name, **kwargs)
-        else:
-            # Compute and cache the property
-            property_value = self.compute_property(prop_name, **kwargs)
-            prop = Property(name=prop_name, value=property_value)
-            self.point_set.add_property(prop)
-            self._mark_cached(prop_name)
-
-        self.set_values(prop_name, property_value)
-        return property_value
+    def get_property(self, key, **kwargs) -> Property:
+        prop = self.point_set.get_property(key, compute=self.compute_property, **kwargs)
+        if prop is None:
+            raise KeyError(key)
+        return prop
 
     def compute_gradients(
         self, gradient_order: int, names: list[str] | None = None
@@ -754,15 +707,19 @@ class BandStructure2D(pv.PolyData):
                 surface_points = self.interpolate_values(value_array)
                 prop[calc_name, grad_order] = surface_points
 
-    def compute_property(self, name: str, **kwargs):
+    def compute_property(self, name: str, **kwargs) -> Property | None:
         property = self.ebs.get_property(name, **kwargs)
+        if property is None:
+            return None
         grid_scalars = self.compute_scalar_grid(property.value)
 
         original_property = self.original_ebs.get_property(name, **kwargs)
         grid_scalars = np.clip(
             grid_scalars, original_property.value.min(), original_property.value.max()
         )
-        return grid_scalars
+        return Property(
+            name=name, value=self._to_surface_basis(grid_scalars), point_set=self.point_set
+        )
 
     def interpolate_values(self, values: np.ndarray):
         if values.shape[-1] != 3:
@@ -801,20 +758,14 @@ class BandStructure2D(pv.PolyData):
 
     def set_surface_point_data(self, name: str, values: np.ndarray) -> None:
         """Set point data on the surface, handling band-resolved data."""
-        if self.ebs.is_band_property(values):
-            logger.debug(f"Adding band resolved to surface point_data: {name}")
-            point_data_array: np.ndarray | None = None
-            for (iband, ispin), _ in self.band_spin_surface_map.items():
-                values_band_values = values[:, iband, ispin, ...]
-                if point_data_array is None:
-                    point_data_array = values_band_values
-                else:
-                    point_data_array = np.insert(point_data_array, 0, values_band_values, axis=0)
-            if point_data_array is not None:
-                self.point_data[name] = point_data_array
-        else:
-            logger.debug(f"Adding scalar to surface point_data: {name}")
-            self.point_data[name] = values
+        self.point_data[name] = self._to_surface_basis(values)
+
+    def _to_surface_basis(self, values: np.ndarray) -> np.ndarray:
+        """Stack band-resolved grid values into the combined surface's point order."""
+        if not self.ebs.is_band_property(values) or not self.band_spin_surface_map:
+            return values
+        per_surface = [values[:, iband, ispin, ...] for iband, ispin in self.band_spin_surface_map]
+        return np.concatenate(per_surface, axis=0)
 
     def set_scalars(self, name: str, value: np.ndarray):
         self.set_surface_point_data(name, value)
@@ -1099,8 +1050,6 @@ class BandStructure2D(pv.PolyData):
         bs2d._original_ebs = ebs
         bs2d._ebs = ebs
         bs2d._plane_info = plane_info
-        bs2d._ebs_cache_version = 0
-        bs2d._cached_properties = {}
 
         # Initialize transformation matrices if EBS is provided
         if ebs is not None and ebs.reciprocal_lattice is not None:

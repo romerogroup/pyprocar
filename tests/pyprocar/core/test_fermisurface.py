@@ -258,28 +258,18 @@ class TestFermiSurface:
 
     def test_get_property(self, fermisurface_3d_non_spin_polarized):
         fs = fermisurface_3d_non_spin_polarized
-        property = fs.get_property("bands")
+        active_before = fs.active_scalars_name
 
-        assert property.shape[0] == fs.n_points
-        assert "bands" in fs.point_data
+        for name in ("bands", "fermi_speed", "fermi_velocity", "avg_inv_effective_mass"):
+            prop = fs.get_property(name)
+            assert prop.shape[0] == fs.n_points
 
-        property = fs.get_property("fermi_speed")
-        assert property.shape[0] == fs.n_points
-        assert "fermi_speed" in fs.point_data
-        assert fs.point_data["fermi_speed"].shape[0] == fs.n_points
-        assert len(fs.point_data["fermi_speed"].shape) == 1
+        assert fs.active_scalars_name == active_before
 
-        property = fs.get_property("fermi_velocity")
-        assert property.shape[0] == fs.n_points
-        assert "fermi_velocity" in fs.point_data
-        assert fs.point_data["fermi_velocity"].shape[0] == fs.n_points
-        assert fs.point_data["fermi_velocity"].shape[1] == 3
-
-        property = fs.get_property("avg_inv_effective_mass")
-        assert property.shape[0] == fs.n_points
-        assert "avg_inv_effective_mass" in fs.point_data
-        assert fs.point_data["avg_inv_effective_mass"].shape[0] == fs.n_points
-        assert len(fs.point_data["avg_inv_effective_mass"].shape) == 1
+        fs.set_values("fermi_speed", fs.get_property("fermi_speed").value)
+        assert fs.point_data["fermi_speed"].shape == (fs.n_points,)
+        fs.set_values("fermi_velocity", fs.get_property("fermi_velocity").value)
+        assert fs.point_data["fermi_velocity"].shape == (fs.n_points, 3)
 
     def test_extend_surface(self, fermisurface_3d_non_spin_polarized):
         fs = fermisurface_3d_non_spin_polarized
@@ -347,34 +337,6 @@ class TestFermiSurfaceNormalization:
 
         assert np.isclose(np.sum(result), 1.0)
 
-    def test_fsnormmode_from_input(self):
-        """Test FSNormMode.from_input conversion."""
-        from pyprocar.core.fermisurface import FSNormMode
-
-        assert FSNormMode.from_input("raw") == FSNormMode.RAW
-        assert FSNormMode.from_input("max") == FSNormMode.MAX
-        assert FSNormMode.from_input("MAX") == FSNormMode.MAX  # Case insensitive
-        assert FSNormMode.from_input(None) == FSNormMode.RAW
-        assert FSNormMode.from_input(FSNormMode.TOTAL) == FSNormMode.TOTAL
-
-    def test_fsnormmode_list_modes(self):
-        """Test FSNormMode.list_modes returns all modes."""
-        from pyprocar.core.fermisurface import FSNormMode
-
-        modes = FSNormMode.list_modes()
-        assert "raw" in modes
-        assert "max" in modes
-        assert "total" in modes
-        assert "integral" in modes
-        assert len(modes) == 4
-
-    def test_fsnormmode_invalid_input(self):
-        """Test FSNormMode.from_input raises error on invalid input."""
-        from pyprocar.core.fermisurface import FSNormMode
-
-        with pytest.raises(ValueError):
-            FSNormMode.from_input("invalid_mode")
-
 
 class TestFermiSurfaceSerialization:
     """Tests for FermiSurface save/load functionality."""
@@ -423,37 +385,6 @@ class TestFermiSurfaceSerialization:
         assert set(fs2.band_isosurfaces.keys()) == original_keys
 
 
-class TestFermiSurfaceCache:
-    """Tests for FermiSurface caching system."""
-
-    def test_cache_invalidation(self, fermisurface_3d_non_spin_polarized):
-        """Test that cache invalidation works."""
-        fs = fermisurface_3d_non_spin_polarized
-
-        # Mark something as cached
-        fs._mark_cached("test_prop")
-        assert fs._is_cache_valid("test_prop")
-
-        # Invalidate
-        fs._invalidate_cache()
-        assert not fs._is_cache_valid("test_prop")
-
-    def test_cache_version_increments(self, fermisurface_3d_non_spin_polarized):
-        """Test that cache version increments on invalidation."""
-        fs = fermisurface_3d_non_spin_polarized
-
-        initial_version = fs._ebs_cache_version
-        fs._invalidate_cache()
-
-        assert fs._ebs_cache_version == initial_version + 1
-
-    def test_uncached_property_invalid(self, fermisurface_3d_non_spin_polarized):
-        """Test that uncached properties are detected as invalid."""
-        fs = fermisurface_3d_non_spin_polarized
-
-        assert not fs._is_cache_valid("nonexistent_property")
-
-
 def _finite_difference_gradient(ebs, band, padding):
     """Central differences on the original periodic k-grid, in Cartesian eV*Angstrom.
 
@@ -492,7 +423,7 @@ def test_fermi_speed_matches_finite_difference(fermisurface_3d_non_spin_polarize
     fs = fermisurface_3d_non_spin_polarized
     padding = (fs.ebs.n_kx - fs.original_ebs.n_kx) // 2
 
-    fermi_speed = np.asarray(fs.get_property("fermi_speed"))[:, 16, 0]
+    fermi_speed = fs.get_property("fermi_speed").value[:, 16, 0]
 
     grid_speed = np.linalg.norm(_finite_difference_gradient(fs.original_ebs, 16, padding), axis=-1)
     expected_speed = fs.interpolate_to_surface(grid_speed) * METER_ANGSTROM / HBAR_EV

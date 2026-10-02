@@ -177,7 +177,7 @@ class Property:
             return tmp_value
 
         for i in range(1, order + 1):
-            print(f"Calculating gradient of order {i}")
+            logger.debug("Calculating gradient of order %d", i)
             tmp_value = self.point_set.gradient_func(self.points, tmp_value)
             if store:
                 self.gradients[i] = tmp_value
@@ -621,18 +621,43 @@ class PointSet:
     ) -> None:
         self._gradient_func = gradient_func
 
-    def get_property(self, key=None) -> Property | None:
+    def compute_property(self, name: str, **kwargs) -> Property | npt.ArrayLike | None:
+        return None
+
+    def get_property(
+        self,
+        key=None,
+        compute: Callable[..., Property | npt.ArrayLike | None] | None = None,
+        **kwargs,
+    ) -> Property | None:
+        """Return stored data for a stored name, otherwise compute the property.
+
+        Names that are not stored go to ``compute`` (default ``self.compute_property``)
+        with ``kwargs`` on every call. Results are never cached, so they always
+        reflect the current data.
+        """
         prop_name, (calc_name, gradient_order) = self._extract_key(key)
         property = self._point_data.get(prop_name, None)
-        if property is None:
-            return None
+        stored = property is not None
+        if not stored:
+            computed = (compute or self.compute_property)(prop_name, **kwargs)
+            if computed is None:
+                return None
+            property = (
+                computed
+                if isinstance(computed, Property)
+                else Property(name=prop_name, value=computed, point_set=self)
+            )
         if calc_name is None:
             return property
         value = getattr(property, calc_name)
         if isinstance(value, dict) and gradient_order > 0:
             gradient = value.get(gradient_order, None)
             if gradient is None or gradient.shape[0] == 0:
-                self.compute_gradients(gradient_order, names=[prop_name])
+                if stored:
+                    self.compute_gradients(gradient_order, names=[prop_name])
+                else:
+                    property.gradient(gradient_order, store=True)
                 gradient = value[gradient_order]
             return gradient
         else:

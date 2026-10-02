@@ -187,7 +187,8 @@ class BandStructure2DHandler:
 
         # Compute requested property
         if property_name is not None:
-            bs2d.get_property(property_name)
+            prop = bs2d.get_property(property_name)
+            bs2d.set_values(property_name, prop.value)
 
         # Create plotter
         plotter = BS2DPlotter(bs2d, **kwargs)

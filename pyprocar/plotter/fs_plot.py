@@ -61,11 +61,11 @@ class FermiPlotter(SurfacePlotter):
         """
         # Resolve scalars from name or Property
         if isinstance(scalars_data, str):
-            scalars_data = fermi_surface.point_set.get_property(scalars_data)
+            scalars_data = fermi_surface.get_property(scalars_data)
 
         # Resolve vectors from name or Property
         if isinstance(vectors_data, str):
-            vectors_data = fermi_surface.point_set.get_property(vectors_data)
+            vectors_data = fermi_surface.get_property(vectors_data)
 
         return surface_series(
             fermi_surface.band_isosurfaces,

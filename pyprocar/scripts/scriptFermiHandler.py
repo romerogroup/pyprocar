@@ -245,7 +245,10 @@ class FermiHandler:
             mode, bands, atoms, orbitals, spins, spin_texture
         )
         if property_name and mode != "plain":
-            fermi_surface.get_property(property_name, atoms=atoms, orbitals=orbitals, spins=spins)
+            prop = fermi_surface.get_property(
+                property_name, atoms=atoms, orbitals=orbitals, spins=spins
+            )
+            fermi_surface.set_values(property_name, prop.value)
 
         # Create plotter and add components
         fsplt = FermiPlotter(
@@ -372,7 +375,8 @@ class FermiHandler:
 
             # Compute property if needed
             if property_name:
-                fs.get_property(property_name, atoms=atoms, orbitals=orbitals, spins=spins)
+                prop = fs.get_property(property_name, atoms=atoms, orbitals=orbitals, spins=spins)
+                fs.set_values(property_name, prop.value)
 
             fermi_surfaces.append(fs)
 
@@ -480,7 +484,8 @@ class FermiHandler:
 
             # Compute property if needed
             if property_name:
-                fs.get_property(property_name, atoms=atoms, orbitals=orbitals, spins=spins)
+                prop = fs.get_property(property_name, atoms=atoms, orbitals=orbitals, spins=spins)
+                fs.set_values(property_name, prop.value)
 
             fermi_surfaces.append(fs)
 
@@ -581,7 +586,10 @@ class FermiHandler:
             mode, bands, atoms, orbitals, spins, spin_texture
         )
         if property_name:
-            fermi_surface.get_property(property_name, atoms=atoms, orbitals=orbitals, spins=spins)
+            prop = fermi_surface.get_property(
+                property_name, atoms=atoms, orbitals=orbitals, spins=spins
+            )
+            fermi_surface.set_values(property_name, prop.value)
 
         # Create plotter and add slicer
         fsplt = FermiPlotter(
@@ -698,7 +706,10 @@ class FermiHandler:
             mode, bands, atoms, orbitals, spins, spin_texture
         )
         if property_name:
-            fermi_surface.get_property(property_name, atoms=atoms, orbitals=orbitals, spins=spins)
+            prop = fermi_surface.get_property(
+                property_name, atoms=atoms, orbitals=orbitals, spins=spins
+            )
+            fermi_surface.set_values(property_name, prop.value)
 
         user_logger.info(f"Generated Fermi surface with {fermi_surface.n_points} points")
 

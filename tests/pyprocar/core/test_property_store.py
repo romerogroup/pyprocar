@@ -212,3 +212,40 @@ class TestPointSet:
                 points=sin_data["x"],
                 point_data={"sin": Property(name="sin", value=sin_data["sin"][:50])},
             )
+
+
+class _Derived(PointSet):
+    def __init__(self):
+        super().__init__(points=np.zeros((2, 3)))
+        self.add_property(name="source", value=np.array([1.0, 2.0]))
+
+    def compute_property(self, name, **kwargs):
+        if name != "doubled":
+            return None
+        return 2 * self.get_property("source").value
+
+
+def test_get_property_recomputes_after_source_changes():
+    ps = _Derived()
+    assert ps.get_property("doubled").value.tolist() == [2.0, 4.0]
+
+    ps.add_property(name="source", value=np.array([5.0, 6.0]))
+
+    assert ps.get_property("doubled").value.tolist() == [10.0, 12.0]
+
+
+def test_get_property_does_not_add_derived_entries_to_stored_data():
+    ps = _Derived()
+    ps.get_property("doubled", atoms=[0])
+
+    assert list(ps.property_store) == ["source"]
+    assert ps.get_property("source", atoms=[0]).value.tolist() == [1.0, 2.0]
+
+
+def test_gradient_of_a_computed_property_prints_nothing(capsys):
+    ps = _Derived()
+
+    gradient = ps.get_property(("doubled", 1))
+
+    assert gradient.tolist() == [[0.0, 0.0, 0.0], [0.0, 0.0, 0.0]]
+    assert capsys.readouterr().out == ""
