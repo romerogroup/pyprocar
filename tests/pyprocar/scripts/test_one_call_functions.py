@@ -1,5 +1,9 @@
 """Smoke tests for the one-call plotting functions, called the way the notebooks call them."""
 
+import ast
+import inspect
+import json
+import re
 import shutil
 from typing import Any, cast
 
@@ -20,7 +24,7 @@ from pyprocar.core import (
     FermiSurface,
 )
 from pyprocar.core.property_store import Property
-from tests.utils import DATA_DIR
+from tests.utils import DATA_DIR, ROOT_DIR
 
 FERMI = 5.3017
 V_ATOM = [1]
@@ -627,6 +631,43 @@ class TestFermi2D:
         assert len(fig.axes) == 2
         segments = [c for c in ax.collections if isinstance(c, LineCollection)]
         assert segments[0].get_array() is not None
+
+
+def _documented_fermi2d_calls():
+    """Yield (location, keyword names) for every pyprocar.fermi2D call in the notebooks and docs."""
+    sources = []
+    for notebook in sorted((ROOT_DIR / "examples").rglob("*.ipynb")):
+        cells = json.loads(notebook.read_text(encoding="utf-8"))["cells"]
+        sources += [
+            (f"{notebook.name}#cell{i}", "".join(cell["source"]))
+            for i, cell in enumerate(cells)
+            if cell["cell_type"] == "code"
+        ]
+    for page in sorted((ROOT_DIR / "docs").rglob("*.rst")):
+        text = page.read_text(encoding="utf-8")
+        sources += [
+            (f"{page.name}#{i}", match.group(0))
+            for i, match in enumerate(re.finditer(r"pyprocar\.fermi2D\(.*?\)", text, re.DOTALL))
+        ]
+    for location, source in sources:
+        for node in ast.walk(ast.parse(source)):
+            if isinstance(node, ast.Call) and ast.unparse(node.func) == "pyprocar.fermi2D":
+                yield location, [kw.arg for kw in node.keywords]
+
+
+class TestFermi2DDocumentedCalls:
+    def test_every_documented_keyword_is_accepted(self):
+        accepted = set(inspect.signature(pyprocar.fermi2D).parameters)
+        calls = list(_documented_fermi2d_calls())
+
+        rejected = {
+            location: sorted(set(keywords) - accepted)
+            for location, keywords in calls
+            if set(keywords) - accepted
+        }
+
+        assert rejected == {}
+        assert len(calls) == 26
 
 
 class TestFermiHandlerSignature:
