@@ -5,6 +5,8 @@ import pytest
 from tests.pyprocar.io.abinit import ABINIT_DATA_DIR, CALC_TYPES
 from tests.utils import BaseTest
 
+pytestmark = pytest.mark.data
+
 logger = logging.getLogger(__name__)
 
 

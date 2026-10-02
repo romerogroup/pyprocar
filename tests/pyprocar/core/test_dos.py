@@ -109,6 +109,7 @@ def non_spin_polarized_dir():
 # ------------------------------------------------------------------
 
 
+@pytest.mark.data
 def test_from_code(non_spin_polarized_dir):
     dos = DensityOfStates.from_code(code="vasp", dirpath=non_spin_polarized_dir)
     assert dos.energies.shape[0] > 0, f"Energies empty ({dos.energies.shape})"

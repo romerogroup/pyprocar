@@ -21,6 +21,8 @@ from pyprocar.core.ebs import ElectronicBandStructureMesh
 from pyprocar.core.property_store import PointSet, Property
 from tests.utils import DATA_DIR
 
+pytestmark = pytest.mark.data
+
 logger = logging.getLogger("pyprocar")
 logger.setLevel(logging.DEBUG)
 

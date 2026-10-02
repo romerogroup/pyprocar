@@ -303,6 +303,7 @@ ELK_DOS_DIR = DATA_DIR / "codes" / "elk" / "6.3" / "SrVO3"
         ("spin-polarized-colinear", 9.19282, [0.71666, 0.82630]),
     ],
 )
+@pytest.mark.data
 def test_real_dos_is_in_core_layout_in_ev(
     mag: str, fermi: float, dos_at_fermi: list[float]
 ) -> None:

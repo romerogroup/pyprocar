@@ -12,6 +12,8 @@ from pyprocar.utils import math
 from pyprocar.utils.physics import HBAR_EV, METER_ANGSTROM
 from tests.utils import DATA_DIR
 
+pytestmark = pytest.mark.data
+
 logger = logging.getLogger("pyprocar")
 logger.setLevel(logging.DEBUG)
 user_logger = logging.getLogger("user")

@@ -1,6 +1,7 @@
 from pathlib import Path
 
 import numpy as np
+import pytest
 
 from pyprocar.io.vasp.kpoints import Kpoints
 from pyprocar.io.vasp.outcar import Outcar
@@ -45,6 +46,7 @@ class TestVaspParserInitialization:
         assert parser.vasprun is None
         assert parser.doscar is None
 
+    @pytest.mark.data
     def test_init_with_file_paths(self):
         """Test initialization with file paths."""
         test_data_dir = Path(__file__).parents[4] / "data" / "io" / "vasp"
@@ -63,6 +65,7 @@ class TestVaspParserInitialization:
         assert isinstance(parser.kpoints, Kpoints)
         assert parser.poscar is None
 
+    @pytest.mark.data
     def test_init_with_mixed_types(self):
         """Test initialization with mix of paths and objects."""
         test_data_dir = Path(__file__).parents[4] / "data" / "io" / "vasp"
@@ -101,6 +104,7 @@ class TestVaspParserInitialization:
 class TestVaspParserFromStr:
     """Test VaspParser.from_str class method."""
 
+    @pytest.mark.data
     def test_from_str_with_outcar(self):
         """Test from_str with OUTCAR content."""
         test_data_dir = Path(__file__).parents[4] / "data" / "io" / "vasp"
@@ -118,6 +122,7 @@ class TestVaspParserFromStr:
         assert parser.outcar.filepath is None  # No filepath when created from string
         assert parser.procar is None
 
+    @pytest.mark.data
     def test_from_str_with_multiple_files(self):
         """Test from_str with multiple file contents."""
         test_data_dir = Path(__file__).parents[4] / "data" / "io" / "vasp"
@@ -150,6 +155,7 @@ class TestVaspParserFromStr:
         assert parser.vasprun is None
         assert parser.doscar is None
 
+    @pytest.mark.data
     def test_from_str_dirpath_is_empty(self):
         """Test that from_str sets dirpath to empty string (which resolves to cwd)."""
         test_data_dir = Path(__file__).parents[4] / "data" / "io" / "vasp"
@@ -163,6 +169,7 @@ class TestVaspParserFromStr:
         assert parser.dirpath == Path("").resolve()
 
 
+@pytest.mark.data
 class TestVaspParserMissingFiles:
     def test_structure_falls_back_to_vasprun_without_poscar(self):
         structure = VaspParser(dirpath=BANDS_DIR, poscar=None).structure

@@ -718,6 +718,7 @@ class TestElectronicBandStructurePath:
     #     assert ebs_path.kpath is not None
     #     assert ebs_path.kpath == sample_kpath
 
+    @pytest.mark.data
     def test_from_code_classmethod(self, path_calc_dir):
         """Test creating ElectronicBandStructurePath from code."""
         ebs_path = ElectronicBandStructurePath.from_code(code="vasp", dirpath=path_calc_dir)
@@ -881,6 +882,7 @@ class TestElectronicBandStructureMesh:
 
 
 
+@pytest.mark.data
 def test_padded_then_interpolated_gradient_matches_finite_difference(ebs):
     """Finite differences use pyprocar's reciprocal-lattice convention (no 2*pi)."""
     ebs.remove_property("projected")

@@ -322,6 +322,7 @@ class TestUnfolder:
             assert weights.shape == simple_eigenvectors.shape[:2]
 
 
+@pytest.mark.data
 class TestProcarUnfolder:
     """Test class for ProcarUnfolder with real data."""
 
@@ -404,6 +405,7 @@ class TestProcarUnfolder:
         assert np.allclose(norms, 1.0, atol=1e-6)
 
 
+@pytest.mark.data
 class TestProcarUnfolderPlot:
     """Test class for ProcarUnfolder.plot() method."""
 

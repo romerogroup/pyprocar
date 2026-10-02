@@ -129,6 +129,7 @@ def test_empty_directory_reports_every_member_as_none(
     )
 
 
+@pytest.mark.data
 @pytest.mark.parametrize(("code", "source", "expected_present"), CASES)
 def test_populated_directory_returns_core_types(
     code: str, source: Path | dict[str, str], expected_present: set[str], tmp_path: Path
@@ -160,6 +161,7 @@ def test_populated_directory_returns_core_types(
         ),
     ],
 )
+@pytest.mark.data
 def test_real_ebs_bands_are_unshifted_around_fermi(code: str, relpath: str) -> None:
     ebs = get_parser(code, CODES_DIR / relpath).ebs
 
@@ -209,6 +211,7 @@ def test_real_ebs_bands_are_unshifted_around_fermi(code: str, relpath: str) -> N
         ),
     ],
 )
+@pytest.mark.data
 def test_dos_is_in_core_layout_with_unshifted_energies(
     code: str,
     source: Path | dict[str, str],

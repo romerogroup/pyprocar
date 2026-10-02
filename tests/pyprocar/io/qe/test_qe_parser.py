@@ -386,6 +386,7 @@ def test_structure_is_none_when_lattice_is_missing(tmp_path: Path) -> None:
         ("non-colinear", [2]),
     ],
 )
+@pytest.mark.data
 def test_projected_dos_sums_to_the_pdos_tot_column(
     mag: str, pdos_columns: list[int]
 ) -> None:
