@@ -16,7 +16,7 @@ from matplotlib.colors import Normalize
 from matplotlib.figure import Figure
 
 from pyprocar.core.property_store import Property
-from pyprocar.plotter.dos_plot import ShowColorbar
+from pyprocar.plotter._series import ShowColorbar
 
 if TYPE_CHECKING:
     from matplotlib.quiver import Quiver

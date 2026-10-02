@@ -19,6 +19,7 @@ from matplotlib.lines import Line2D
 from matplotlib.ticker import MultipleLocator
 
 from pyprocar.core import KPath
+from pyprocar.plotter._series import LineSeries, channel_lims, line_series, resolve_clim
 
 logger = logging.getLogger(__name__)
 
@@ -42,30 +43,6 @@ class PlainBandStyle:
 
     def to_dict(self):
         return {k: str(v) for k, v in asdict(self).items()}
-
-
-@dataclass
-class BandSeries:
-    """Container for a single band's plotting data.
-
-    Similar to DOSPlotter's Series, but for band structure data.
-    Each BandSeries represents one (band, spin) combination.
-    """
-
-    x: np.ndarray  # k-path distances
-    y: np.ndarray  # band energies
-    scalars: np.ndarray | None  # optional scalar coloring data
-    scalars_label: str | None
-    scalars_unit: str | None
-    scalars_lim: tuple[float, float] | None
-    vectors: np.ndarray | None  # optional vector data (spin texture)
-    vectors_label: str | None
-    vectors_unit: str | None
-    vectors_lim: tuple[float, float] | None
-    label: str | None  # legend label
-    band_index: int  # which band this is
-    spin_index: int  # which spin channel
-    additional_kwargs: dict[str, Any] = field(default_factory=dict)
 
 
 class BandStructurePlotter:
@@ -103,186 +80,6 @@ class BandStructurePlotter:
         self._tick_names: list[str] = []
         self._k_distances: np.ndarray | None = None
         self.colorbar = None
-
-    def _to_series_list(
-        self,
-        point_data,
-        scalars_data,
-        vectors_data,
-        channel_mode: str = "normal",
-        **kwargs,
-    ) -> list[BandSeries]:
-        """Convert Property objects to list of BandSeries for plotting.
-
-        Args:
-            point_data: Property containing bands with kpath metadata
-            scalars_data: Optional Property for scalar coloring
-            vectors_data: Optional Property for vector arrows
-            channel_mode: "normal" or "flip" for spin channel handling
-            **kwargs: Additional kwargs to distribute to series
-
-        Returns:
-            List of BandSeries, one per (band, spin) combination
-        """
-        # Extract kpath metadata
-        kpath_meta = point_data.metadata.get("kpath", {})
-        x_data = kpath_meta.get("k_distances")
-        if x_data is None:
-            raise ValueError("point_data must have kpath metadata with k_distances")
-
-        # Extract bands array: shape (n_kpoints, n_bands, n_spins)
-        bands = point_data.to_array()
-        if bands.ndim == 2:
-            bands = bands[:, :, np.newaxis]  # Add spin dimension if missing
-        n_kpoints, n_bands, n_spins = bands.shape
-
-        # Extract scalars if provided
-        scalars = scalars_data.to_array() if scalars_data is not None else None
-        s_label = scalars_data.label if scalars_data else None
-        s_unit = scalars_data.units if scalars_data else None
-        s_lims_raw = getattr(scalars_data, "rounded_data_lim", None) if scalars_data else None
-
-        # Compute global scalar limits per spin channel
-        # Property.data_lim returns shape (n_spins, n_bands * 2) for 3D data
-        # where first n_bands values are mins and last n_bands are maxs.
-        # For 2D data (like DOS), shape is (n_spins, 2) with [:, 0]=min, [:, 1]=max.
-        s_lims_per_spin: list[tuple[float, float] | None] = [None] * n_spins
-        if s_lims_raw is not None:
-            s_lims_arr = np.asarray(s_lims_raw)
-            if s_lims_arr.ndim == 2 and s_lims_arr.shape[1] > 2:
-                # Shape: (n_spins, n_bands * 2) -> compute global (min, max) per spin
-                # First half are mins, second half are maxs
-                half = s_lims_arr.shape[1] // 2
-                for ispin in range(min(n_spins, s_lims_arr.shape[0])):
-                    mins_per_band = s_lims_arr[ispin, :half]
-                    maxs_per_band = s_lims_arr[ispin, half:]
-                    global_min = float(np.min(mins_per_band))
-                    global_max = float(np.max(maxs_per_band))
-                    s_lims_per_spin[ispin] = (global_min, global_max)
-            elif s_lims_arr.ndim == 2 and s_lims_arr.shape[1] == 2:
-                # Shape: (n_spins, 2) -> use directly (min, max per spin)
-                for ispin in range(min(n_spins, s_lims_arr.shape[0])):
-                    s_lims_per_spin[ispin] = (float(s_lims_arr[ispin, 0]), float(s_lims_arr[ispin, 1]))
-
-        # Extract vectors if provided
-        vectors = vectors_data.to_array() if vectors_data is not None else None
-        v_label = vectors_data.label if vectors_data else None
-        v_unit = vectors_data.units if vectors_data else None
-        v_lims_raw = getattr(vectors_data, "rounded_data_lim", None) if vectors_data else None
-
-        # Compute global vector limits per spin channel (same logic as scalars)
-        v_lims_per_spin: list[tuple[float, float] | None] = [None] * n_spins
-        if v_lims_raw is not None:
-            v_lims_arr = np.asarray(v_lims_raw)
-            if v_lims_arr.ndim == 2 and v_lims_arr.shape[1] > 2:
-                # Shape: (n_spins, n_bands * 2) -> compute global (min, max) per spin
-                half = v_lims_arr.shape[1] // 2
-                for ispin in range(min(n_spins, v_lims_arr.shape[0])):
-                    mins_per_band = v_lims_arr[ispin, :half]
-                    maxs_per_band = v_lims_arr[ispin, half:]
-                    global_min = float(np.min(mins_per_band))
-                    global_max = float(np.max(maxs_per_band))
-                    v_lims_per_spin[ispin] = (global_min, global_max)
-            elif v_lims_arr.ndim == 2 and v_lims_arr.shape[1] == 2:
-                # Shape: (n_spins, 2) -> use directly
-                for ispin in range(min(n_spins, v_lims_arr.shape[0])):
-                    v_lims_per_spin[ispin] = (float(v_lims_arr[ispin, 0]), float(v_lims_arr[ispin, 1]))
-
-        # Build kwargs per channel
-        kwargs_per_channel = self._distribute_kwargs(kwargs, n_spins)
-
-        # Build series list
-        series_list: list[BandSeries] = []
-        for iband in range(n_bands):
-            for ispin in range(n_spins):
-                y = bands[:, iband, ispin].copy()
-
-                # Apply channel mode (flip second spin)
-                if channel_mode == "flip" and ispin != 0:
-                    y *= -1.0
-
-                # Extract scalar slice for this band/spin
-                s = None
-                if scalars is not None:
-                    if scalars.ndim == 3:
-                        s = scalars[:, iband, ispin]
-                    elif scalars.ndim == 2:
-                        s = scalars[:, iband]
-                    else:
-                        s = scalars
-
-                # Use pre-computed global limit for this spin channel
-                s_lim = s_lims_per_spin[ispin]
-
-                # Extract vector slice for this band/spin
-                v = None
-                if vectors is not None:
-                    if vectors.ndim == 3:
-                        v = vectors[:, iband, ispin]
-                    elif vectors.ndim == 2:
-                        v = vectors[:, iband]
-                    else:
-                        v = vectors
-
-                # Use pre-computed global limit for this spin channel
-                v_lim = v_lims_per_spin[ispin]
-
-                # Build label
-                label = self._build_series_label(point_data, iband, ispin, n_bands, n_spins)
-
-                series_list.append(
-                    BandSeries(
-                        x=x_data,
-                        y=y,
-                        scalars=s,
-                        scalars_label=s_label,
-                        scalars_unit=s_unit,
-                        scalars_lim=s_lim,
-                        vectors=v,
-                        vectors_label=v_label,
-                        vectors_unit=v_unit,
-                        vectors_lim=v_lim,
-                        label=label,
-                        band_index=iband,
-                        spin_index=ispin,
-                        additional_kwargs=kwargs_per_channel[ispin],
-                    )
-                )
-
-        return series_list
-
-    def _distribute_kwargs(self, kwargs: dict, n_channels: int) -> list[dict]:
-        """Distribute kwargs to channels, handling list values."""
-        kwargs_per_channel = []
-        for i_channel in range(n_channels):
-            channel_kwargs = {}
-            for key, value in kwargs.items():
-                if isinstance(value, list) and len(value) == n_channels:
-                    channel_kwargs[key] = value[i_channel]
-                else:
-                    channel_kwargs[key] = value
-            kwargs_per_channel.append(channel_kwargs)
-        return kwargs_per_channel
-
-    def _build_series_label(
-        self,
-        point_data,
-        iband: int,
-        ispin: int,
-        n_bands: int,
-        n_spins: int,
-    ) -> str | None:
-        """Build label for a single band series."""
-        # Check for per-channel labels in metadata
-        labels = point_data.metadata.get("label")
-        if labels and isinstance(labels, list) and len(labels) > ispin:
-            return labels[ispin]
-
-        # Default labeling
-        if n_spins > 1:
-            spin_label = "↑" if ispin == 0 else "↓"
-            return f"Band {iband} {spin_label}"
-        return None  # Don't label single-spin bands by default
 
     def plot(
         self,
@@ -348,26 +145,28 @@ class BandStructurePlotter:
         self._tick_names = kpath_meta.get("tick_names", [])
         self._k_distances = kpath_meta.get("k_distances")
 
-        # Convert Property objects to series list
-        series_list = self._to_series_list(
-            point_data, scalars_data, vectors_data, channel_mode, **kwargs
+        if self._k_distances is None:
+            raise ValueError("point_data must have kpath metadata with k_distances")
+        bands = point_data.to_array()
+        if bands.ndim == 2:
+            bands = bands[:, :, np.newaxis]
+        n_spins = bands.shape[2]
+
+        series_list = line_series(
+            self._k_distances,
+            bands,
+            scalars_data.to_array() if scalars_data is not None else None,
+            vectors_data.to_array() if vectors_data is not None else None,
+            channel_mode,
+            kwargs,
         )
 
-        # Resolve color scaling across all series
         if scalars_data is not None and scalars_mode != "none":
-            # Get global clim from series (uses rounded_data_lim via _to_series_list)
-            if scalars_clim is not None:
-                clim = scalars_clim
-            else:
-                # Compute global clim from all series scalars_lim (already rounded)
-                all_lims = [s.scalars_lim for s in series_list if s.scalars_lim is not None]
-                if all_lims:
-                    clim = (
-                        min(lim[0] for lim in all_lims),
-                        max(lim[1] for lim in all_lims),
-                    )
-                else:
-                    clim = self._resolve_clim(series_list, scalars_clim)
+            clim = resolve_clim(
+                scalars_clim,
+                channel_lims(getattr(scalars_data, "rounded_data_lim", None), n_spins),
+                [s.scalars for s in series_list],
+            )
             cmap = scalars_cmap
         else:
             clim = None
@@ -397,9 +196,7 @@ class BandStructurePlotter:
 
             artists[key] = artist
 
-        # Store x data for axis methods
-        if self._k_distances is not None:
-            self.x = self._k_distances
+        self.x = self._k_distances
 
         # Add colorbar if requested
         if scalars_mode != "none" and scalars_show_colorbar == "single" and clim is not None:
@@ -409,18 +206,11 @@ class BandStructurePlotter:
         # Draw vertical lines at high-symmetry points
         self._draw_high_symmetry_lines()
 
-        # Record exportable data
-        bands = point_data.to_array()
-        if bands.ndim == 2:
-            bands = bands[:, :, np.newaxis]
-        n_spin_channels = bands.shape[-1]
-        n_bands = bands.shape[1]
-        for ispin in range(n_spin_channels):
-            for iband in range(n_bands):
+        for ispin in range(n_spins):
+            for iband in range(bands.shape[1]):
                 key_str = f"bands__band-{iband}_spinChannel-{ispin}"
                 self.values_dict[key_str] = bands[:, iband, ispin]
-        if self._k_distances is not None:
-            self._record_kpath_metadata_exports()
+        self._record_kpath_metadata_exports()
 
         # Configure axes (following dos_plot.py:325-334 pattern)
         self.set_xlim()
@@ -432,42 +222,21 @@ class BandStructurePlotter:
 
         return artists
 
-    def _resolve_clim(
-        self,
-        series_list: list[BandSeries],
-        user_clim: tuple[float, float] | None,
-    ) -> tuple[float, float]:
-        """Resolve color limits from series data or user override."""
-        if user_clim is not None:
-            return user_clim
-
-        # Compute global min/max from all series scalars
-        all_scalars = [s.scalars for s in series_list if s.scalars is not None]
-        if not all_scalars:
-            return (0.0, 1.0)
-
-        combined = np.concatenate([s.ravel() for s in all_scalars])
-        finite = combined[np.isfinite(combined)]
-        if len(finite) == 0:
-            return (0.0, 1.0)
-
-        return (float(finite.min()), float(finite.max()))
-
-    def _add_line(self, series: BandSeries, line_kwargs: dict) -> Line2D:
+    def _add_line(self, series: LineSeries, line_kwargs: dict) -> Line2D:
         """Add a simple line plot for one band."""
-        merged_kwargs = {**series.additional_kwargs, **line_kwargs}
+        merged_kwargs = {**series.kwargs, **line_kwargs}
         lines = self.ax.plot(series.x, series.y, **merged_kwargs)
         return lines[0]
 
     def _add_scatter(
         self,
-        series: BandSeries,
+        series: LineSeries,
         cmap: str,
         clim: tuple[float, float],
         scatter_kwargs: dict,
     ) -> PathCollection:
         """Add scatter plot with scalar coloring for one band."""
-        merged_kwargs = {**series.additional_kwargs, **scatter_kwargs}
+        merged_kwargs = {**series.kwargs, **scatter_kwargs}
         merged_kwargs.setdefault("s", 10)  # default marker size
 
         scatter = self.ax.scatter(
@@ -483,7 +252,7 @@ class BandStructurePlotter:
 
     def _add_line_collection(
         self,
-        series: BandSeries,
+        series: LineSeries,
         cmap: str,
         clim: tuple[float, float],
         collection_kwargs: dict,
@@ -499,7 +268,7 @@ class BandStructurePlotter:
         else:
             segment_scalars = None
 
-        merged_kwargs = {**series.additional_kwargs, **collection_kwargs}
+        merged_kwargs = {**series.kwargs, **collection_kwargs}
         merged_kwargs.setdefault("linewidth", 2.0)
 
         lc = LineCollection(

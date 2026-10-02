@@ -24,7 +24,7 @@ import pytest
 from matplotlib.collections import LineCollection, PathCollection
 from matplotlib.lines import Line2D
 
-from pyprocar.plotter.bs_plot import BandSeries, BandStructurePlotter
+from pyprocar.plotter.bs_plot import BandStructurePlotter
 
 # =============================================================================
 # Mock Fixtures and Factories
@@ -152,147 +152,162 @@ class TestBandStructurePlotterInitialization:
 
 
 # =============================================================================
-# Phase 2: _to_series_list Tests
+# Phase 2: Per-series data through plot()
 # =============================================================================
 
 
-class TestBandStructurePlotterToSeriesList:
-    """Tests for the _to_series_list method."""
+def _make_literal_property(bands: np.ndarray) -> Mock:
+    """Property over three k-points with literal band energies."""
+    mock = Mock()
+    mock.to_array.return_value = bands
+    mock.label = "Energy"
+    mock.units = "eV"
+    mock.metadata = {
+        "kpath": {
+            "k_distances": np.array([0.0, 0.5, 1.0]),
+            "tick_positions": [0, 2],
+            "tick_names": ["G", "X"],
+        }
+    }
+    return mock
 
-    def test_to_series_list_basic(self, mock_property_single_spin):
-        """Test basic series list creation."""
+
+# bands[k, band, spin]
+LITERAL_BANDS = np.array(
+    [
+        [[-1.0, -1.5], [2.0, 2.5]],
+        [[-0.5, -1.0], [2.5, 3.0]],
+        [[-1.0, -1.5], [3.0, 3.5]],
+    ]
+)
+
+
+def _literal_scalars(rounded_data_lim) -> Mock:
+    mock = Mock()
+    mock.to_array.return_value = np.array(
+        [
+            [[0.1, 0.2], [0.6, 0.7]],
+            [[0.3, 0.4], [0.8, 0.9]],
+            [[0.5, 0.0], [1.25, 0.25]],
+        ]
+    )
+    mock.label = "Projection"
+    mock.units = ""
+    mock.metadata = {}
+    mock.rounded_data_lim = rounded_data_lim
+    return mock
+
+
+class TestBandStructurePlotterSeries:
+    """Per-(band, spin) data reaches the artists."""
+
+    def test_one_line_per_band_and_spin_with_its_energies(self):
         plotter = BandStructurePlotter()
-        series_list = plotter._to_series_list(
-            mock_property_single_spin, None, None, "normal"
+        artists = plotter.plot(_make_literal_property(LITERAL_BANDS))
+
+        assert sorted(artists) == [(0, 0), (0, 1), (1, 0), (1, 1)]
+        np.testing.assert_array_equal(artists[(1, 1)].get_ydata(), [2.5, 3.0, 3.5])
+        np.testing.assert_array_equal(artists[(0, 1)].get_xdata(), [0.0, 0.5, 1.0])
+        plt.close(plotter.fig)
+
+    def test_flip_negates_second_spin_only(self):
+        plotter = BandStructurePlotter()
+        artists = plotter.plot(_make_literal_property(LITERAL_BANDS), channel_mode="flip")
+
+        np.testing.assert_array_equal(artists[(0, 0)].get_ydata(), [-1.0, -0.5, -1.0])
+        np.testing.assert_array_equal(artists[(0, 1)].get_ydata(), [1.5, 1.0, 1.5])
+        plt.close(plotter.fig)
+
+    def test_invalid_channel_mode_raises(self):
+        plotter = BandStructurePlotter()
+        with pytest.raises(ValueError, match="Invalid channel mode"):
+            plotter.plot(_make_literal_property(LITERAL_BANDS), channel_mode="sideways")
+        plt.close(plotter.fig)
+
+    def test_list_kwarg_matching_spin_count_splits_per_spin(self):
+        plotter = BandStructurePlotter()
+        artists = plotter.plot(
+            _make_literal_property(LITERAL_BANDS), color=["red", "blue"], linewidth=2.0
         )
 
-        n_bands = mock_property_single_spin.to_array().shape[1]
-        n_spins = mock_property_single_spin.to_array().shape[2]
-
-        # Should have n_bands * n_spins series
-        assert len(series_list) == n_bands * n_spins
-
-        # Check that each series has correct band_index and spin_index
-        for i, series in enumerate(series_list):
-            assert isinstance(series, BandSeries)
-            assert series.band_index == i // n_spins
-            assert series.spin_index == i % n_spins
-            assert series.scalars is None
-            assert series.vectors is None
-
+        assert [artists[k].get_color() for k in sorted(artists)] == [
+            "red",
+            "blue",
+            "red",
+            "blue",
+        ]
+        assert {a.get_linewidth() for a in artists.values()} == {2.0}
         plt.close(plotter.fig)
 
-    def test_to_series_list_with_scalars(
-        self, mock_property_single_spin, mock_scalars_single_spin
-    ):
-        """Test series list with scalar data."""
+    def test_2d_bands_are_one_spin(self):
         plotter = BandStructurePlotter()
-        series_list = plotter._to_series_list(
-            mock_property_single_spin, mock_scalars_single_spin, None, "normal"
+        artists = plotter.plot(_make_literal_property(LITERAL_BANDS[:, :, 0]))
+
+        assert sorted(artists) == [(0, 0), (1, 0)]
+        np.testing.assert_array_equal(artists[(1, 0)].get_ydata(), [2.0, 2.5, 3.0])
+        plt.close(plotter.fig)
+
+    def test_scatter_colors_each_series_by_its_own_scalars(self):
+        plotter = BandStructurePlotter()
+        artists = plotter.plot(
+            _make_literal_property(LITERAL_BANDS),
+            scalars_data=_literal_scalars(None),
+            scalars_mode="scatter",
         )
 
-        # Check that scalars are properly sliced
-        for series in series_list:
-            assert series.scalars is not None
-            assert series.scalars.shape == (50,)  # n_kpoints
-            assert series.scalars_label == "Projection"
-
+        np.testing.assert_array_equal(artists[(1, 0)].get_array(), [0.6, 0.8, 1.25])
+        np.testing.assert_array_equal(artists[(0, 1)].get_array(), [0.2, 0.4, 0.0])
         plt.close(plotter.fig)
 
-    def test_to_series_list_two_spins(self, mock_property_two_spins):
-        """Test series list with two spin channels."""
+    def test_clim_spans_per_band_limits_of_every_spin(self):
+        # rows are spins; each holds the band minima then the band maxima
+        lims = np.array([[0.1, 0.5, 0.4, 0.9], [0.0, 0.2, 0.3, 1.5]])
         plotter = BandStructurePlotter()
-        series_list = plotter._to_series_list(
-            mock_property_two_spins, None, None, "normal"
+        artists = plotter.plot(
+            _make_literal_property(LITERAL_BANDS),
+            scalars_data=_literal_scalars(lims),
+            scalars_mode="parametric",
         )
 
-        n_bands = mock_property_two_spins.to_array().shape[1]
-        n_spins = mock_property_two_spins.to_array().shape[2]
-
-        # Should have n_bands * n_spins series
-        assert len(series_list) == n_bands * n_spins
-
-        # Check spin labels are assigned (uses arrow symbols)
-        for series in series_list:
-            if series.spin_index == 0:
-                assert "↑" in series.label or "Band" in series.label
-            else:
-                assert "↓" in series.label or "Band" in series.label
-
+        assert {a.get_clim() for a in artists.values()} == {(0.0, 1.5)}
+        assert plotter.colorbar.mappable.get_clim() == (0.0, 1.5)
         plt.close(plotter.fig)
 
-    def test_to_series_list_flip_channel_mode(self, mock_property_two_spins):
-        """Test that flip channel mode negates second spin channel."""
+    def test_clim_falls_back_to_scalar_range_without_limits(self):
         plotter = BandStructurePlotter()
-
-        # Get series with normal mode
-        series_normal = plotter._to_series_list(
-            mock_property_two_spins, None, None, "normal"
+        artists = plotter.plot(
+            _make_literal_property(LITERAL_BANDS),
+            scalars_data=_literal_scalars(None),
+            scalars_mode="scatter",
         )
 
-        # Get series with flip mode
-        series_flipped = plotter._to_series_list(
-            mock_property_two_spins, None, None, "flip"
+        assert {a.get_clim() for a in artists.values()} == {(0.0, 1.25)}
+        plt.close(plotter.fig)
+
+    def test_user_clim_overrides_limits(self):
+        plotter = BandStructurePlotter()
+        artists = plotter.plot(
+            _make_literal_property(LITERAL_BANDS),
+            scalars_data=_literal_scalars(np.array([[0.1, 0.9], [0.0, 1.5]])),
+            scalars_mode="scatter",
+            scalars_clim=(0.25, 0.75),
         )
 
-        # First spin should be identical
-        for sn, sf in zip(series_normal, series_flipped):
-            if sn.spin_index == 0:
-                assert np.allclose(sn.y, sf.y)
-            else:
-                # Second spin should be negated
-                assert np.allclose(sn.y, -sf.y)
-
+        assert {a.get_clim() for a in artists.values()} == {(0.25, 0.75)}
         plt.close(plotter.fig)
 
-    def test_to_series_list_missing_kpath_raises(self):
-        """Test that missing kpath metadata raises error."""
-        mock = Mock()
-        mock.to_array.return_value = np.random.rand(50, 5, 1)
-        mock.metadata = {}  # No kpath
-
-        plotter = BandStructurePlotter()
-        with pytest.raises(ValueError, match="kpath metadata"):
-            plotter._to_series_list(mock, None, None, "normal")
-
-        plt.close(plotter.fig)
-
-    def test_distribute_kwargs(self):
-        """Test kwargs distribution to channels."""
+    @pytest.mark.parametrize("shape", [(3, 1, 1), (3, 1), (3, 2, 1)])
+    def test_scalars_with_fewer_bands_or_spins_raise(self, shape):
+        scalars = _literal_scalars(None)
+        scalars.to_array.return_value = np.zeros(shape)
         plotter = BandStructurePlotter()
 
-        # Test with list that matches channel count
-        kwargs = {"color": ["red", "blue"], "linewidth": 2.0}
-        result = plotter._distribute_kwargs(kwargs, 2)
-
-        assert len(result) == 2
-        assert result[0]["color"] == "red"
-        assert result[1]["color"] == "blue"
-        assert result[0]["linewidth"] == 2.0
-        assert result[1]["linewidth"] == 2.0
-
-        plt.close(plotter.fig)
-
-    def test_build_series_label_single_spin(self, mock_property_single_spin):
-        """Test label building for single spin."""
-        plotter = BandStructurePlotter()
-        label = plotter._build_series_label(mock_property_single_spin, 0, 0, 5, 1)
-
-        # Single spin should not have labels by default
-        assert label is None
-
-        plt.close(plotter.fig)
-
-    def test_build_series_label_two_spins(self, mock_property_two_spins):
-        """Test label building for two spins."""
-        plotter = BandStructurePlotter()
-        label_up = plotter._build_series_label(mock_property_two_spins, 0, 0, 5, 2)
-        label_down = plotter._build_series_label(mock_property_two_spins, 0, 1, 5, 2)
-
-        # Two spins should have spin labels
-        assert label_up is not None
-        assert label_down is not None
-
+        with pytest.raises(ValueError, match=r"scalars shape \(3, .*\) does not match"):
+            plotter.plot(
+                _make_literal_property(LITERAL_BANDS),
+                scalars_data=scalars,
+                scalars_mode="scatter",
+            )
         plt.close(plotter.fig)
 
 
@@ -439,32 +454,6 @@ class TestBandStructurePlotterScalarsModes:
 
         lc = list(plotter.ax.collections)[0]
         assert lc.get_cmap().name == "coolwarm"
-        plt.close(plotter.fig)
-
-    def test_resolve_clim_uses_user_value(self, mock_property_single_spin):
-        """Test that _resolve_clim returns user-provided clim."""
-        plotter = BandStructurePlotter()
-        series_list = plotter._to_series_list(
-            mock_property_single_spin, None, None, "normal"
-        )
-
-        clim = plotter._resolve_clim(series_list, (0.1, 0.9))
-        assert clim == (0.1, 0.9)
-        plt.close(plotter.fig)
-
-    def test_resolve_clim_auto_from_data(
-        self, mock_property_single_spin, mock_scalars_single_spin
-    ):
-        """Test that _resolve_clim computes limits from data when not provided."""
-        plotter = BandStructurePlotter()
-        series_list = plotter._to_series_list(
-            mock_property_single_spin, mock_scalars_single_spin, None, "normal"
-        )
-
-        clim = plotter._resolve_clim(series_list, None)
-        # Should compute from actual scalars data
-        assert clim[0] >= 0.0
-        assert clim[1] <= 1.0
         plt.close(plotter.fig)
 
 
