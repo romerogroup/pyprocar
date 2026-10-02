@@ -91,14 +91,14 @@ class BxsfParser(BaseParser):
                 if alat is None:
                     user_logger.warning(
                         "QE fs.x BXSF stores b in units of 2*pi/alat and no QE output with "
-                        "alat was found beside it; b is left in units of 1/alat."
+                        + "alat was found beside it; b is left in units of 1/alat."
                     )
                     return b
                 return b / alat
             case BxsfWriter.UNKNOWN:
                 user_logger.warning(
                     "BXSF writer not recognised; assuming b includes the 2*pi in 1/Angstrom "
-                    "(the XCrySDen and Wannier90 convention)."
+                    + "(the XCrySDen and Wannier90 convention)."
                 )
                 return b / (2 * np.pi)
 
