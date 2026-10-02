@@ -304,7 +304,11 @@ class FermiSurface(pv.PolyData):
         atoms_orbital_map : Mapping[int | Iterable[int], Iterable[int]] | None
             Map atoms to specific orbitals
         norm_mode : str | NormMode | None
-            Normalization mode: 'raw', 'max', 'total', 'integral'
+            Normalization mode: 'raw', 'max', 'total', 'integral'. 'max' and
+            'integral' each use one denominator across every plotted band and
+            spin: the largest value, or the area integral over all plotted
+            surfaces. DOS 'integral' instead divides each spin channel by its own
+            integral over energy.
         label : str
             Display label for the property
         name : str
@@ -391,9 +395,16 @@ class FermiSurface(pv.PolyData):
 
         Each triangle gives a third of its area to each of its vertices.
         """
-        triangle_areas = self.compute_cell_sizes(length=False, volume=False)["Area"]
+        if self.n_cells == 0:
+            return 0.0
+        if not self.is_all_triangles:
+            raise ValueError("norm_mode='integral' needs a Fermi surface made of triangles")
+        triangles = np.asarray(self.regular_faces)
+        corners = np.asarray(self.points, dtype=np.float64)[triangles]
+        normals = np.cross(corners[:, 1] - corners[:, 0], corners[:, 2] - corners[:, 0])
+        triangle_areas = 0.5 * np.linalg.norm(normals, axis=1)
         vertex_areas = np.zeros(self.n_points)
-        np.add.at(vertex_areas, self.regular_faces, triangle_areas[:, np.newaxis] / 3)
+        np.add.at(vertex_areas, triangles, triangle_areas[:, np.newaxis] / 3)
         return float(np.tensordot(vertex_areas, values_array, axes=(0, 0)).sum())
 
     def normed_units(self, mode: NormMode, units: str | None) -> None:
