@@ -98,15 +98,3 @@ class FrmsfParser(BaseParser):
         except Exception as e:
             user_logger.warning(f"Error creating EBS from FrmSrf: {e}")
             return None
-
-    @property
-    def kpath(self):
-        return None
-
-    @property
-    def structure(self):
-        return None
-
-    @property
-    def dos(self):
-        return None

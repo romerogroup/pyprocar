@@ -119,14 +119,3 @@ class TestBxsfParserCustomFilepath:
 
         parser = BxsfParser(tmp_path, filepaths="custom.bxsf")
         assert parser.ebs is not None
-
-
-class TestBxsfParserIntegration:
-    """Integration tests via Parser factory."""
-
-    def test_parser_factory(self, bxsf_dir: Path) -> None:
-        """Test BXSF is accessible via Parser(code='bxsf', ...)."""
-        from pyprocar.io import Parser
-
-        parser = Parser(code="bxsf", dirpath=bxsf_dir)
-        assert parser.ebs is not None

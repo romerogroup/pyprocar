@@ -183,14 +183,16 @@ def get_ebs_from_data(
 def get_ebs_from_code(
     code: str, dirpath: str, use_cache: bool = False, ebs_filename: str = "ebs.pkl", **kwargs
 ):
-    from pyprocar.io import Parser
+    from pyprocar.io import get_parser
 
     ebs_filepath = Path(dirpath) / ebs_filename
 
     if not use_cache or not ebs_filepath.exists():
         logger.info(f"Parsing EBS calculation directory: {dirpath}")
-        parser = Parser(code=code, dirpath=dirpath)
+        parser = get_parser(code, dirpath)
         ebs = parser.ebs
+        if ebs is None:
+            raise ValueError(f"The {code} parser found no ebs in {dirpath}")
         ebs.save(ebs_filepath)
     else:
         logger.info(f"Loading EBS  from picklefile: {ebs_filepath}")

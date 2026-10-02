@@ -22,10 +22,7 @@ for calc_test_case in ALL_TEST_CASES:
     mag_type = calc_test_case.mag_type
     calc_type = calc_test_case.calc_type
 
-    parser = io.Parser(
-        code=calc_test_case.code,
-        dirpath=calc_test_case.path,
-    )
+    parser = io.get_parser(calc_test_case.code, calc_test_case.path)
 
     if calc_type in DOS_CALC_TYPES:
         if parser.dos:

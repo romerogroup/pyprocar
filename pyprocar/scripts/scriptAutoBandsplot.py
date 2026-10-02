@@ -3,7 +3,7 @@
 import numpy as np
 
 from pyprocar.core import ElectronicBandStructure
-from pyprocar.io import Parser
+from pyprocar.io import get_parser
 from pyprocar.pyposcar.clusters import Clusters
 from pyprocar.pyposcar.defects import FindDefect
 from pyprocar.pyposcar.poscar import Poscar
@@ -17,7 +17,7 @@ except:
 
 class AutoBandsPlot:
     def __init__(self, code="vasp", dirname=".", fermi: int = None, use_cache=False):
-        self.parser = Parser(code=code, dirpath=dirname)
+        self.parser = get_parser(code, dirname)
         self.code = code
         self.ebs = ElectronicBandStructure.from_code(code, dirname, use_cache=use_cache)
 

@@ -10,14 +10,14 @@ known as the KPath class. This class takes knames, kticks, special_kpoints, and 
 Accessing Kpath Information
 +++++++++++++++++++++++++++++++++++++
 
-The KPath object (referred to as "kpath") can be accessed through the main io.Parser class 
+The KPath object (referred to as "kpath") can be accessed through the parser that io.get_parser returns 
 or the ElectronicBandStructure:
 
 .. code-block:: python
 
     import pyprocar
 
-    parser = pyprocar.io.Parser(code = 'vasp', dir=path_to_calculation)
+    parser = pyprocar.io.get_parser('vasp', path_to_calculation)
 
     kpath = parser.kpath
 
