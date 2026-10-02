@@ -2,49 +2,9 @@ import logging
 
 import numpy as np
 import pyvista as pv
-import trimesh
 from scipy.spatial import Voronoi
 
 logger = logging.getLogger(__name__)
-
-
-class Lines:
-    def __init__(self, verts: np.ndarray = None, faces: np.ndarray = None):
-        self.verts = verts
-        self.faces = faces
-
-        self.pyvista_line = pv.PolyData()
-        self.trimesh_line = None
-        self.connectivity = []
-
-        self._get_connectivity()
-
-    @property
-    def nface(self):
-        return len(self.faces)
-
-    def _get_connectivity(self):
-        for iface in range(len(self.faces)):
-            self.connectivity.append(
-                [self.faces[iface][0], self.faces[iface][-1]]
-            )  # to connect the 1st and last point
-            for ipoint in range(len(self.faces[iface]) - 1):
-                point_1 = self.faces[iface][ipoint]
-                point_2 = self.faces[iface][ipoint + 1]
-                self.connectivity.append([point_1, point_2])
-
-    # def _create_pyvista(self):
-    #     cell = []
-    #     for iline in self.connectivity:
-    #         cell.append([2, iline[0], iline[1]])
-    #     self.pyvista_line.lines = cell
-
-    def _create_trimesh(self):
-        entities = []
-        for iline in self.connectivity:
-            entities.append(trimesh.path.entities.Line(iline))
-
-        self.trimesh_line = trimesh.path.Path3D(entities=entities, vertices=self.verts)
 
 
 class BrillouinZone(pv.PolyData):

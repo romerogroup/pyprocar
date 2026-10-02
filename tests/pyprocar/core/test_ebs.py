@@ -236,6 +236,16 @@ class TestElectronicBandStructure:
         assert sample_ebs.fermi == 0.0
         assert len(sample_ebs.orbital_names) == 3
 
+    def test_to_mesh_attaches_scalars_and_vectors(self, sample_ebs):
+        scalars = np.arange(8, dtype=float)
+        vectors = np.tile([1.0, 0.0, 0.0], (8, 1))
+        mesh = sample_ebs.to_mesh(scalars=("energy", scalars), vectors=("velocity", vectors))
+
+        assert mesh.active_scalars_name == "energy"
+        assert mesh.point_data["energy"].tolist() == [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0]
+        assert mesh.active_vectors_name == "velocity"
+        assert mesh.point_data["velocity"][3].tolist() == [1.0, 0.0, 0.0]
+
     def test_properties_access(self, sample_ebs):
         """Test property access methods."""
         assert sample_ebs.kpoints is not None
@@ -543,6 +553,13 @@ class TestElectronicBandStructurePath:
         assert sample_ebs_path.n_orbitals == 3
         assert sample_ebs_path.fermi == 0.0
         assert len(sample_ebs_path.orbital_names) == 3
+
+    def test_to_mesh_attaches_scalars(self, sample_ebs_path):
+        scalars = np.arange(300, dtype=float)
+        mesh = sample_ebs_path.to_mesh(scalars=("energy", scalars))
+
+        assert mesh.active_scalars_name == "energy"
+        assert mesh.point_data["energy"][:3].tolist() == [0.0, 1.0, 2.0]
 
     def test_kpath_properties(self, sample_ebs_path):
         """Test kpoints.KPath-related properties."""

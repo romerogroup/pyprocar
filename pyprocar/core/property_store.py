@@ -670,14 +670,6 @@ class PointSet:
             property._bind_owner(self)
         self._point_data[name] = property
 
-    def update_property(
-        self,
-        property: Property | None = None,
-        name: str | None = None,
-        value: npt.ArrayLike | None = None,
-    ) -> None:
-        self.add_property(property=property, name=name, value=value)
-
     def update_points(self, points: npt.ArrayLike) -> None:
         self._points = np.array(points)
 

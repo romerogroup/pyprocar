@@ -12,7 +12,6 @@ from __future__ import annotations
 import copy
 import itertools
 import logging
-import re
 from abc import ABC, abstractmethod
 from collections.abc import Iterable, Mapping, Sequence
 from enum import Enum
@@ -229,39 +228,7 @@ class DifferentiablePropertyInterface(ABC):
         return physics.calculate_avg_inv_effective_mass(bands_hessian)
 
 
-class PyvistaInterface(ABC):
-    _mesh: pv.PolyData | pv.StructuredGrid | pv.PointSet
-
-    def mesh(self):
-        if self._mesh is None:
-            self.to_mesh()
-        return self._mesh
-
-    def mesh_as_cart(self):
-        self._mesh.points = self.kpoints_cartesian
-
-    def mesh_as_frac(self):
-        self._mesh.points = self.kpoints
-
-    @abstractmethod
-    def to_mesh(
-        self,
-        active_scalar: tuple[str, np.ndarray] | None = None,
-        active_vector: tuple[str, np.ndarray] | None = None,
-        **kwargs,
-    ):
-        raise NotImplementedError
-
-    def set_mesh_scalar(self, name: str, scalar: np.ndarray):
-        self._mesh.point_data[name] = scalar
-        self._mesh.set_active_scalars(name)
-
-    def set_mesh_vector(self, name: str, vector: np.ndarray):
-        self._mesh.point_data[name] = vector
-        self._mesh.set_active_vectors(name)
-
-
-class ElectronicBandStructure(PointSet, PyvistaInterface):
+class ElectronicBandStructure(PointSet):
     """This object stores electronic band structure informomration.
 
     Parameters
@@ -285,6 +252,8 @@ class ElectronicBandStructure(PointSet, PyvistaInterface):
     shifted_to_fermi : bool, optional
          Boolean to determine if the fermi energy is shifted, defaults to False
     """
+
+    _mesh: pv.PolyData | pv.StructuredGrid | pv.PointSet | None = None
 
     def __init__(
         self,
@@ -669,13 +638,6 @@ class ElectronicBandStructure(PointSet, PyvistaInterface):
         projected_sum_spin_texture = self.compute_projected_sum_spin_texture()
         return projected_sum_spin_texture
 
-    def to_mesh(self, as_cartesian: bool = True):
-        if as_cartesian:
-            point_set = pv.PointSet(self.kpoints_cartesian)
-        else:
-            point_set = pv.PointSet(self.kpoints)
-        return point_set
-
     @override
     def get_property(self, key=None, **kwargs):
         prop_name, (calc_name, gradient_order) = self._extract_key(key)
@@ -701,12 +663,22 @@ class ElectronicBandStructure(PointSet, PyvistaInterface):
         else:
             mesh_points = self.kpoints
         mesh = pv.PointSet(mesh_points)
+        self._mesh = mesh
         if scalars is not None:
             self.set_mesh_scalar(*scalars)
         if vectors is not None:
             self.set_mesh_vector(*vectors)
-        self._mesh = mesh
         return mesh
+
+    def set_mesh_scalar(self, name: str, scalar: np.ndarray):
+        assert self._mesh is not None, "call to_mesh first"
+        self._mesh.point_data[name] = scalar
+        self._mesh.set_active_scalars(name)
+
+    def set_mesh_vector(self, name: str, vector: np.ndarray):
+        assert self._mesh is not None, "call to_mesh first"
+        self._mesh.point_data[name] = vector
+        self._mesh.set_active_vectors(name)
 
     def compute_property(self, name: str, **kwargs):
         if name == "ebs_ipr":
@@ -1626,75 +1598,9 @@ class ElectronicBandStructure(PointSet, PyvistaInterface):
     ):
         return get_ebs_from_code(code, dirpath, use_cache, ebs_filename)
 
-    @staticmethod
-    def get_atomic_orbital_label(atoms: list[int], orbitals: list[int]):
-        atom_label = ElectronicBandStructure.get_atom_label(atoms)
-        orbital_label = ElectronicBandStructure.get_orbital_label(orbitals)
-        return f"{atom_label}|{orbital_label}"
-
-    @staticmethod
-    def get_orbital_label(orbitals: list[int]):
-        orbitals_label = ",".join([str(orbital) for orbital in orbitals])
-        return f"orbitals-({orbitals_label})"
-
-    @staticmethod
-    def get_atom_label(atoms: list[int]):
-        atoms_label = ",".join([str(atom) for atom in atoms])
-        return f"atoms-({atoms_label})"
-
-    @staticmethod
-    def get_band_label(bands: list[int] | int, spins: list[int] | int):
-        if isinstance(bands, int):
-            bands = [bands]
-        if isinstance(spins, int):
-            spins = [spins]
-
-        bands_label = ",".join([str(band) for band in bands])
-        spins_label = ",".join([str(spin) for spin in spins])
-        return f"(bands|spins)-({bands_label}|{spins_label})"
-
-    @staticmethod
-    def extract_band_index(label: str):
-        raw_text = re.findall(r"\(bands\|spins\)-\((.*)\)", label)
-        bands, spins = raw_text[0].split("|")
-        bands = [int(band) for band in bands.split(",")]
-        spins = [int(spin) for spin in spins.split(",")]
-
-        if len(bands) == 1:
-            bands = bands[0]
-        if len(spins) == 1:
-            spins = spins[0]
-
-        return bands, spins
-
-    @staticmethod
-    def extract_property_label(label: str):
-        property_name = label.split("__")[0]
-        return property_name
-
-    @staticmethod
-    def get_spin_projection_label(spin_projections: list[int]):
-        spin_projection_names_label = ",".join(
-            [str(spin_projection_name) for spin_projection_name in spin_projections]
-        )
-        return f"spin_projections-({spin_projection_names_label})"
-
-    @staticmethod
-    def get_band_property_label(property_name, band_index: int, spin_index: int):
-        band_label = ElectronicBandStructure.get_band_label(band_index, spin_index)
-        return f"{property_name}__{band_label}"
-
-    @staticmethod
-    def get_property_gradient_label(property_name: str):
-        return f"{property_name}_gradient"
-
-    @staticmethod
-    def get_property_hessian_label(property_name: str):
-        return f"{property_name}_hessian"
-
 
 class ElectronicBandStructurePath(
-    ElectronicBandStructure, DifferentiablePropertyInterface, PyvistaInterface
+    ElectronicBandStructure, DifferentiablePropertyInterface
 ):
     def __init__(self, kpath: kpoints.KPath, **kwargs):
         super().__init__(**kwargs)
@@ -1801,11 +1707,11 @@ class ElectronicBandStructurePath(
         else:
             mesh_points = self.kpoints
         mesh = pv.PointSet(mesh_points)
+        self._mesh = mesh
         if scalars is not None:
             self.set_mesh_scalar(*scalars)
         if vectors is not None:
             self.set_mesh_vector(*vectors)
-        self._mesh = mesh
         return mesh
 
     def gradient_func(
@@ -2112,7 +2018,7 @@ def edge_diff_ramp(vector, pad_width, iaxis, kwargs):
 
 
 class ElectronicBandStructureMesh(
-    ElectronicBandStructure, DifferentiablePropertyInterface, PyvistaInterface
+    ElectronicBandStructure, DifferentiablePropertyInterface
 ):
     def __init__(self, kgrid_info: kpoints.KGridInfo, **kwargs):
         super(ElectronicBandStructureMesh, self).__init__(**kwargs)
