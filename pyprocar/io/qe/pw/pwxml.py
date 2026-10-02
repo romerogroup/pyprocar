@@ -393,10 +393,6 @@ class PwXML:
                 bands[ikpoint, :, 0] = raw_bands[ikpoint, :]
                 occupations[ikpoint, :, 0] = raw_occupations[ikpoint, :]
 
-        if self.alat is not None and self.reciprocal_lattice is not None:
-            kpoints = kpoints * (2 * np.pi / self.alat)
-            # Converting back to crystal basis
-            kpoints = np.around(kpoints.dot(np.linalg.inv(self.reciprocal_lattice)), decimals=8)
         # print(bands[:,:,0].shape)
         # print(bands[:,self.n_bands:,1].shape)
         # print(np.allclose(bands[...,0], bands[...,1]))
