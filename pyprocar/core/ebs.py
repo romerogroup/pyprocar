@@ -731,8 +731,7 @@ class ElectronicBandStructure(PointSet):
         orbitals : Sequence[int] | int | None
             Orbital indices to sum over
         spins : Sequence[int] | int | None
-            Spin channels to sum over. A non-collinear calculation defaults to
-            the total (component 0).
+            Spin channels to sum over
         species : Sequence[str] | str | None
             Species names (resolved to atom indices)
         species_orbital_map : Mapping | None
@@ -775,8 +774,6 @@ class ElectronicBandStructure(PointSet):
             atoms_list = list(selection.atoms) if selection.atoms else None
             orbitals_list = list(selection.orbitals) if selection.orbitals else None
             spins_list = list(selection.spins) if selection.spins else None
-        if spins_list is None and self.is_non_collinear:
-            spins_list = [0]
 
         # Compute sum using resolved indices
         values = self.ebs_sum(
@@ -933,7 +930,7 @@ class ElectronicBandStructure(PointSet):
         self,
         atoms: list[int] = None,
         orbitals: list[int] = None,
-        spins: list[int] = None,
+        spins: Sequence[int] | None = None,
         sum_noncolinear: bool = True,
     ):
         """_summary_
@@ -944,8 +941,9 @@ class ElectronicBandStructure(PointSet):
             list of atoms to be summed over, by default None
         orbitals : list[int], optional
             list of orbitals to be summed over, by default None
-        spins : list[int], optional
-            list of spins to be summed over, by default None
+        spins : Sequence[int], optional
+            spins to be summed over. By default every collinear channel, or only
+            the total (component 0) of a non-collinear calculation.
         sum_noncolinear : bool, optional
             Determines if the projection should be summed in a non-colinear calculation, by default True
 
@@ -958,7 +956,7 @@ class ElectronicBandStructure(PointSet):
         if atoms is None:
             atoms = np.arange(self.n_atoms, dtype=int)
         if spins is None:
-            spins = np.arange(self.n_spins, dtype=int)
+            spins = [0] if self.is_non_collinear else list(range(self.n_spins))
         if orbitals is None:
             orbitals = np.arange(self.n_orbitals, dtype=int)
         # sum over orbitals
