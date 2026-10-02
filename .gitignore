@@ -181,8 +181,10 @@ detailedCommitMessageTemporaryFile.txt
 
 .pixi/
 
-.claude/
+.claude/*
 hack/
 skills/
+!.claude/skills/
+!.claude/skills/**/lib/
 thoughts/
 examples/**/results/
