@@ -25,7 +25,7 @@ from tests.utils import DATA_DIR
 FERMI = 5.3017
 V_ATOM = [1]
 D_ORBITALS = [4, 5, 6, 7, 8]
-TICK_NAMES = [r"$\Gamma$", "M", r"$\Gamma$", "R", "X"]
+TICK_NAMES = [r"$\Gamma$", "X", "M", r"$\Gamma$", "R", "X"]
 
 
 def _calc(tmp_path, relpath):
