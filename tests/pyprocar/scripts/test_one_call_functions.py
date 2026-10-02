@@ -646,9 +646,11 @@ class TestFermi2D:
         )
 
         (lines,) = _line_collections(ax)
-        assert lines.get_colors().tolist() == [[0.5019607843137255, 0.0, 0.5019607843137255, 1.0]]
-        assert lines.get_linewidths().tolist() == [2.0]
-        assert lines.get_linestyles() == [(0.0, [7.4, 3.2])]
+        assert np.asarray(lines.get_edgecolor()).tolist() == [
+            [0.5019607843137255, 0.0, 0.5019607843137255, 1.0]
+        ]
+        assert np.asarray(lines.get_linewidth()).tolist() == [2.0]
+        assert lines.get_linestyle() == [(0.0, [7.4, 3.2])]
 
     def test_parametric_spin_channel_uses_cmap(self, tmp_path):
         calc = _calc(tmp_path, "fermi2d/spin-polarized")
