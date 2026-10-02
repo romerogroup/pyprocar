@@ -81,6 +81,7 @@ class FermiPlotter(SurfacePlotter):
         scalars_data=None,
         vectors_data=None,
         scalars_mode: str = "surface",
+        spins: list[int] | None = None,
         show_brillouin_zone: bool = True,
         show_scalar_bar: bool = True,
         scalars_cmap: str = "plasma",
@@ -107,6 +108,8 @@ class FermiPlotter(SurfacePlotter):
             How to render scalar data:
             - "surface": Color surface by scalar values
             - "none": Plain surface (ignore scalars_data)
+        spins : list of int, optional
+            Draw only the surfaces of these spin channels. None draws every surface.
         show_brillouin_zone : bool
             Whether to display the Brillouin zone boundary.
         show_scalar_bar : bool
@@ -128,6 +131,8 @@ class FermiPlotter(SurfacePlotter):
             Dict mapping (band_index, spin_index) to rendered meshes.
         """
         series_list = self._to_series_list(fermi_surface, scalars_data, vectors_data, **kwargs)
+        if spins is not None:
+            series_list = [s for s in series_list if s.spin_index in spins]
 
         if show_brillouin_zone:
             self.add_brillouin_zone(fermi_surface.brillouin_zone)

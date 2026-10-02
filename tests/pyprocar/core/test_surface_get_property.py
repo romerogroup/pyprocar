@@ -57,7 +57,8 @@ def test_fs_compute_projected_sum_does_not_leak_into_by_name_lookups(fs):
     np.testing.assert_allclose(fs.get_property("projected_sum").value, full)
     series = FermiPlotter(off_screen=True)._to_series_list(fs, scalars_data="projected_sum")
     (iband, ispin), mask = next(iter(fs.band_spin_mask.items()))
-    np.testing.assert_allclose(series[0].scalars, full[mask])
+    assert series[0].scalars is not None
+    np.testing.assert_allclose(series[0].scalars, full[mask, iband, ispin])
 
 
 def test_fs_include_normal_label_prefixes_label_without_selection(fs):

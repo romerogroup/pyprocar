@@ -3,42 +3,66 @@ __maintainer__ = "Pedram Tavadze and Logan Lang"
 __email__ = "petavazohi@mail.wvu.edu, lllang@mix.wvu.edu"
 __date__ = "March 31, 2020"
 
+import itertools
 import logging
-import os
+from typing import Any, cast
 
 import matplotlib.pyplot as plt
 import numpy as np
 
-from pyprocar.cfg import ConfigFactory, ConfigManager, PlotType
-from pyprocar.io import get_parser
-from pyprocar.utils import data_utils, welcome
+from pyprocar.cfg import ConfigFactory, ConfigManager
+from pyprocar.cfg.base import PlotType
+from pyprocar.cfg.dos import DensityOfStatesConfig
+from pyprocar.core import DensityOfStates
+from pyprocar.core.property_store import Property
+from pyprocar.plotter.dos_plot import AxesOrientation, DOSPlotter
+from pyprocar.scripts._selection import (
+    as_lim,
+    orbital_indices,
+    per_channel,
+    projection_components,
+    resolve_spins,
+    signed_clim,
+    take_channels,
+)
+from pyprocar.utils.log_utils import set_verbose_level
+from pyprocar.utils.splash import welcome
 
 user_logger = logging.getLogger("user")
 logger = logging.getLogger(__name__)
 
+PARAMETRIC_MODES = ("parametric", "parametric_line")
+DOS_MODES = (
+    "plain",
+    *PARAMETRIC_MODES,
+    "stack",
+    "stack_species",
+    "stack_orbitals",
+    "overlay",
+    "overlay_species",
+    "overlay_orbitals",
+)
+
 
 def dosplot(
     code: str = "vasp",
-    dirname: str = None,
+    dirname: str | None = None,
     mode: str = "plain",
     orientation: str = "horizontal",
-    spins: list[int] = None,
-    atoms: list[int] = None,
-    orbitals: list[int] = None,
-    items: dict = {},
-    normalize_dos_mode: str = None,
-    fermi: float = None,
+    spins: list[int] | None = None,
+    atoms: list[int] | None = None,
+    orbitals: list[int] | None = None,
+    items: dict | None = None,
+    normalize_dos_mode: str | None = None,
+    fermi: float | None = None,
     fermi_shift: float = 0,
-    elimit: list[float] = None,
-    dos_limit: list[float] = None,
-    savefig: str = None,
-    labels: list[str] = None,
-    projection_mask=None,
-    ax: plt.Axes = None,
+    elimit: list[float | None] | None = None,
+    dos_limit: list[float | None] | None = None,
+    savefig: str | None = None,
+    labels: list[str] | None = None,
+    ax: plt.Axes | None = None,
     show: bool = True,
     print_plot_opts: bool = False,
-    export_data_file: str = None,
-    export_append_mode: bool = True,
     use_cache: bool = False,
     verbose: int = 1,
     **kwargs,
@@ -236,14 +260,6 @@ def dosplot(
 
         e.g. ``plt_show=True``
 
-    export_data_file : str, optional
-        The file name to export the data to. If not provided the
-        data will not be exported.
-
-    export_append_mode : bool, optional
-        Boolean to append the mode to the file name. If not provided the
-        data will be overwritten.
-
     print_plot_opts: bool, optional
         Boolean to print the plotting options
 
@@ -269,75 +285,36 @@ def dosplot(
         >>> fig.show()
 
     """
-
+    set_verbose_level(verbose)
     user_logger.info("If you want more detailed logs, set verbose to 2 or more")
     user_logger.info("_" * 100)
 
     welcome()
     default_config = ConfigFactory.create_config(PlotType.DENSITY_OF_STATES)
-    config = ConfigManager.merge_configs(default_config, kwargs)
+    config = cast(DensityOfStatesConfig, ConfigManager.merge_configs(default_config, kwargs))
 
     user_logger.info("_" * 100)
-    modes_txt = " , ".join(config.modes)
-    message = f"""
-            There are additional plot options that are defined in a configuration file. 
-            You can change these configurations by passing the keyword argument to the function
-            To print a list of plot options set print_plot_opts=True
-
-            Here is a list modes : {modes_txt}"""
-    user_logger.info(message)
     if print_plot_opts:
         for key, value in default_config.as_dict().items():
             user_logger.info(f"{key} : {value}")
-
     user_logger.info("_" * 100)
 
-    if orientation[0].lower() == "h":
-        orientation = "horizontal"
-    elif orientation[0].lower() == "v":
-        orientation = "vertical"
+    orbitals = orbital_indices(orbitals)
+    if mode not in DOS_MODES:
+        raise ValueError(f"The mode needs to be one of {DOS_MODES}, got {mode!r}")
 
-    # Creating pickle files for cache parsed data
-    dos_pkl_filepath = os.path.join(dirname, "dos.pkl")
-    structure_pkl_filepath = os.path.join(dirname, "structure.pkl")
+    if dirname is None:
+        raise ValueError("dirname is required")
+    dos = DensityOfStates.from_code(code, dirname, use_cache=use_cache)
 
-    if not use_cache:
-        if os.path.exists(dos_pkl_filepath):
-            logger.info(f"Removing existing DOS file: {dos_pkl_filepath}")
-            os.remove(dos_pkl_filepath)
-        if os.path.exists(structure_pkl_filepath):
-            logger.info(f"Removing existing structure file: {structure_pkl_filepath}")
-            os.remove(structure_pkl_filepath)
-
-    # Parsing DOS and Structure from directory
-    if not os.path.exists(dos_pkl_filepath):
-        logger.info(f"Parsing DOS from {dirname}")
-
-        parser = get_parser(code, dirname)
-        dos = parser.dos
-        structure = parser.structure
-
-        data_utils.save_pickle(dos, dos_pkl_filepath)
-        data_utils.save_pickle(structure, structure_pkl_filepath)
-    else:
-        logger.info(f"Loading DOS and Structure from cached Pickle files in {dirname}")
-
-        dos = data_utils.load_pickle(dos_pkl_filepath)
-        structure = data_utils.load_pickle(structure_pkl_filepath)
-
-    # Setting and shifting Fermi energy
     codes_with_scf_fermi = ["qe", "elk"]
     if code in codes_with_scf_fermi and fermi is None:
         logger.info(f"No fermi given, using the found fermi energy: {dos.fermi}")
-
         fermi = dos.fermi
 
     if fermi is not None:
         logger.info(f"Shifting Fermi energy to zero: {fermi}")
-
-        dos.energies -= fermi
-        dos.energies += fermi_shift
-        fermi_level = fermi_shift
+        dos.update_points(dos.energies - fermi + fermi_shift)
         energy_label = r"Energy - E$_F$ (eV)"
     else:
         energy_label = r"Energy (eV)"
@@ -345,127 +322,122 @@ def dosplot(
             "`fermi` is not set! Set `fermi={value}`. The plot did not shift the energy by the Fermi energy."
         )
 
-    # Normalizing DOS
+    selection = resolve_spins(
+        dos.is_non_collinear, dos.n_spin_channels, spins, plain=mode == "plain"
+    )
+    channels, projection_spins = selection.channels, selection.projection_spins
+
+    total = take_channels(dos.total, channels)
     if normalize_dos_mode:
-        dos.normalize_dos(mode=normalize_dos_mode)
-
-    # Setting energy limits
-    if elimit is None:
-        elimit = [dos.energies.min(), dos.energies.max()]
-
-    # Creating DOSPlot object
-    edos_plot = DOSPlot(dos=dos, structure=structure, ax=ax, orientation=orientation, config=config)
-
-    if atoms is None:
-        atoms = list(np.arange(edos_plot.structure.natoms, dtype=int))
-    if spins is None:
-        spins = list(np.arange(len(edos_plot.dos.total)))
-    if orbitals is None:
-        orbitals = list(np.arange(len(edos_plot.dos.projected[0][0]), dtype=int))
-
-    logger.debug(f"atoms for projections: {atoms}")
-    logger.debug(f"spins for projections: {spins}")
-    logger.debug(f"orbitals for projections: {orbitals}")
-
-    # Plotting DOS in different modes
-    if mode == "plain":
-        user_logger.info("Plotting DOS in plain mode")
-        values_dict = edos_plot.plot_dos(spins=spins)
-
-    elif mode in ["parametric", "parametric_line"]:
-        if mode == "parametric":
-            user_logger.info("Plotting DOS in parametric mode")
-            edos_plot.plot_parametric(
-                atoms=atoms,
-                orbitals=orbitals,
-                spins=spins,
-            )
-        elif mode == "parametric_line":
-            user_logger.info("Plotting DOS in parametric line mode")
-            edos_plot.plot_parametric_line(
-                atoms=atoms,
-                orbitals=orbitals,
-                spins=spins,
-            )
-
-    elif mode == "stack_species":
-        user_logger.info("Plotting DOS in stack species mode")
-        edos_plot.plot_stack_species(
-            spins=spins,
-            orbitals=orbitals,
+        total.value = np.take(dos.normalize(normalize_dos_mode, dos.total.value), channels, axis=-1)
+    if selection.joined:
+        total = Property(
+            name=total.name,
+            value=total.value.sum(axis=-1, keepdims=True),
+            units=total.units,
+            label=total.label,
+            point_set=dos,
+            metadata={**total.metadata, "label": ["Total"]},
         )
-    elif mode == "stack_orbitals":
-        user_logger.info("Plotting DOS in stack orbitals mode")
-        edos_plot.plot_stack_orbitals(
-            spins=spins,
+    n_channels = total.value.shape[-1]
+
+    plotter = DOSPlotter(orientation=orientation, ax=ax)
+    line_style: dict[str, Any] = {
+        "color": per_channel(config.spin_colors if n_channels > 1 else config.color, n_channels),
+        "linestyle": per_channel(config.linestyle, n_channels),
+        "linewidth": per_channel(config.linewidth, n_channels),
+    }
+
+    if mode == "plain" or (mode not in PARAMETRIC_MODES and config.plot_total):
+        user_logger.info(f"Plotting DOS total for {mode} mode")
+        plotter.plot(total, **line_style)
+
+    if mode in PARAMETRIC_MODES:
+        user_logger.info(f"Plotting DOS in {mode} mode")
+        scalars = cast(
+            Property,
+            dos.compute_projected_sum(
+                atoms=atoms,
+                orbitals=orbitals,
+                spins=projection_spins,
+                norm_mode="total_projection",
+                label=config.colorbar_title,
+            ),
+        )
+        plotter.plot(
+            total,
+            scalars_data=scalars,
+            scalars_mode="fill" if mode == "parametric" else "line",
+            scalars_cmap=config.cmap,
+            scalars_clim=config.clim or signed_clim(scalars),
+            **(line_style if mode == "parametric_line" else {}),
+        )
+    elif mode != "plain":
+        user_logger.info(f"Plotting DOS in {mode} mode")
+        components = projection_components(
+            dos,
+            mode.split("_", 1)[1] if "_" in mode else "items",
             atoms=atoms,
-        )
-    elif mode == "stack":
-        user_logger.info("Plotting DOS in stack mode")
-        edos_plot.plot_stack(
-            spins=spins,
+            orbitals=orbitals,
             items=items,
+            spins=projection_spins,
+            norm_mode=normalize_dos_mode or "raw",
         )
-    elif mode == "overlay_species":
-        user_logger.info("Plotting DOS in overlay species mode")
-        edos_plot.plot_stack_species(spins=spins, orbitals=orbitals, overlay_mode=True)
-    elif mode == "overlay_orbitals":
-        user_logger.info("Plotting DOS in overlay orbitals mode")
-        edos_plot.plot_stack_orbitals(spins=spins, atoms=atoms, overlay_mode=True)
-    elif mode == "overlay":
-        user_logger.info("Plotting DOS in overlay mode")
-        edos_plot.plot_stack(spins=spins, items=items, overlay_mode=True)
-    else:
-        raise ValueError(
-            "The mode needs to be in the List [plain,parametric,parametric_line,stack_species,stack_orbitals,stack]"
-        )
+        colors = config.colors
+        if mode.startswith("stack"):
+            _stack(plotter, components, colors)
+        else:
+            for component, color in zip(components, itertools.cycle(colors)):
+                component_style: dict[str, Any] = {**line_style, "color": color}
+                plotter.plot(component, **component_style)
 
     if fermi is not None:
-        edos_plot.draw_fermi(fermi_level, orientation=orientation)
+        plotter.draw_fermi(
+            fermi_shift,
+            color=config.fermi_color,
+            linestyle=config.fermi_linestyle,
+            linewidth=config.fermi_linewidth,
+        )
 
-    if orientation == "horizontal":
-        logger.info("Setting xlabel and ylabel for horizontal orientation")
-        edos_plot.set_xlabel(label=energy_label)
-        edos_plot.set_ylabel(label="DOS")
-        if elimit is not None:
-            edos_plot.set_xlim(elimit)
-        if dos_limit is not None:
-            edos_plot.set_ylim(dos_limit)
-
-    elif orientation == "vertical":
-        user_logger.info("Setting xlabel and ylabel for vertical orientation")
-        edos_plot.set_xlabel(label="DOS")
-        edos_plot.set_ylabel(label=energy_label)
-        if elimit is not None:
-            edos_plot.set_ylim(elimit)
-        if dos_limit is not None:
-            edos_plot.set_xlim(dos_limit)
-
-    edos_plot.set_xticks()
-    edos_plot.set_yticks()
-    edos_plot.grid()
-    edos_plot.set_title()
-
-    if config.draw_baseline:
-        edos_plot.draw_baseline(value=0, orientation=orientation)
+    plotter.set_energy_label(energy_label)
+    plotter.set_dos_label("DOS")
+    ax = cast(plt.Axes, plotter.ax)
+    x_axis, y_axis = (plotter.set_xlim, ax.get_xlim), (plotter.set_ylim, ax.get_ylim)
+    horizontal = plotter.orientation is AxesOrientation.HORIZONTAL
+    energy_axis, dos_axis = (x_axis, y_axis) if horizontal else (y_axis, x_axis)
+    for (set_limits, get_limits), requested in ((energy_axis, elimit), (dos_axis, dos_limit)):
+        set_limits(as_lim(requested, get_limits()))
+    plotter.set_title(config.title)
 
     if labels:
-        labels = labels
-    else:
-        labels = edos_plot.labels
-    edos_plot.legend(labels)
+        plotter.legend(labels=labels)
+    elif ax.get_legend_handles_labels()[1]:
+        plotter.legend()
 
     if savefig is not None:
-        edos_plot.save(savefig)
+        plotter.fig.savefig(savefig, dpi=config.dpi, bbox_inches="tight")
     if show:
-        edos_plot.show()
+        plotter.show()
 
-    if export_data_file is not None:
-        if export_append_mode:
-            file_basename, file_type = export_data_file.split(".")
-            filename = f"{file_basename}_{mode}.{file_type}"
-        else:
-            filename = export_data_file
-        edos_plot.export_data(filename)
+    return plotter.fig, ax
 
-    return edos_plot.fig, edos_plot.ax
+
+def _stack(plotter: DOSPlotter, components, colors) -> None:
+    """Fill each component on top of the previous ones; later channels stack downwards."""
+    energies = components[0].points
+    n_energies, n_channels = components[0].to_array().shape
+    signs = np.r_[1.0, -np.ones(n_channels - 1)]
+    baseline = np.zeros((n_energies, n_channels))
+    for component, color in zip(components, itertools.cycle(colors)):
+        values = component.to_array() * signs
+        top = baseline + values
+        for channel in range(values.shape[1]):
+            plotter.fill_between(
+                energies,
+                top[:, channel],
+                baseline[:, channel],
+                color=color,
+                alpha=0.7,
+                label=component.metadata.get("label", [component.label])[channel],
+            )
+        baseline = top

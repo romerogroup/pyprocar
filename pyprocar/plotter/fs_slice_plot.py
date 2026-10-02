@@ -410,16 +410,14 @@ class FermiSlicePlotter:
             vec_mag = np.linalg.norm(series.vectors, axis=-1)
             vectors_clim = (float(vec_mag.min()), float(vec_mag.max()))
 
-        # Plot scalars
-        if series.scalars is not None:
-            if scalars_mode == "lines":
-                artists["scalars"] = self._add_lines(
-                    series, scalars_cmap, scalars_clim, line_kwargs or {}
-                )
-            elif scalars_mode == "scatter":
-                artists["scalars"] = self._add_scatter(
-                    series, scalars_cmap, scalars_clim, scatter_kwargs or {}
-                )
+        if scalars_mode == "lines":
+            artists["scalars"] = self._add_lines(
+                series, scalars_cmap, scalars_clim, line_kwargs or {}
+            )
+        elif scalars_mode == "scatter" and series.scalars is not None:
+            artists["scalars"] = self._add_scatter(
+                series, scalars_cmap, scalars_clim, scatter_kwargs or {}
+            )
 
         # Plot vectors
         if plot_arrows and series.vectors is not None:

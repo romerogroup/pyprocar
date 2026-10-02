@@ -122,7 +122,9 @@ def test_bsplot_multi_method_call(ebs: ElectronicBandStructurePath):
     bands_velocity = ebs.get_property("bands_velocity")
 
     p = BandStructurePlotter()
-    p.plot_scatter(ebs.kpath, ebs.bands, scalars=projection_weights.to_array(), s=2)
+    p.plot(
+        ebs.bands, scalars_data=projection_weights, scalars_mode="scatter", scatter_kwargs={"s": 2}
+    )
     p.plot_quiver(ebs.kpath, ebs.bands, vectors=bands_velocity.to_array())
     save_plot("test_bsplot_multi_method_call")
 

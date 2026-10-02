@@ -2,7 +2,7 @@
 
 import logging
 import os
-from typing import Any
+from typing import Any, cast
 
 import numpy as np
 import pyvista as pv
@@ -17,6 +17,15 @@ def find_nearest(array, value):
     array = np.asarray(array)
     idx = (np.abs(array - value)).argmin()
     return idx
+
+
+def clip_to_zone(surface: pv.PolyData, zone: pv.PolyData) -> pv.PolyData:
+    """Cut ``surface`` down to the part inside every face plane of ``zone``."""
+    for normal, center in zip(zone.face_normals, zone.centers, strict=True):
+        surface = cast(pv.PolyData, surface.clip(origin=center, normal=normal, inplace=False))
+        if surface.points.shape[0] == 0:
+            break
+    return surface
 
 
 def normalize_to_range(scalars, clim=(0, 1)):
@@ -49,6 +58,7 @@ class SurfacePlotter(pv.Plotter):
         scalars_clim: tuple[float, float] | None,
         add_surface_kwargs: dict | None,
         add_texture_kwargs: dict | None,
+        clip_to: pv.PolyData | None = None,
     ) -> dict[tuple[int, int], pv.PolyData]:
         has_scalars = any(s.scalars is not None for s in series_list)
         if scalars_clim is None and has_scalars and scalars_mode != "none":
@@ -66,6 +76,9 @@ class SurfacePlotter(pv.Plotter):
             if series.vectors is not None:
                 mesh.point_data["vectors"] = series.vectors
                 mesh.set_active_vectors("vectors")
+
+            if clip_to is not None:
+                mesh = clip_to_zone(mesh, clip_to)
 
             mesh_kwargs: dict[str, Any] = {
                 "cmap": scalars_cmap,
@@ -93,11 +106,14 @@ class SurfacePlotter(pv.Plotter):
             meshes[key] = mesh
 
             prefix = f"band_{series.band_index}_spin_{series.spin_index}"
-            self.values_dict[f"{prefix}_points"] = series.mesh.points
+            self.values_dict[f"{prefix}_points"] = mesh.points
             if series.scalars is not None:
-                self.values_dict[f"{prefix}_scalars"] = series.scalars
+                rendered = mesh.point_data.get("scalars")
+                self.values_dict[f"{prefix}_scalars"] = (
+                    series.scalars if rendered is None else np.asarray(rendered)
+                )
             if series.vectors is not None:
-                self.values_dict[f"{prefix}_vectors"] = series.vectors
+                self.values_dict[f"{prefix}_vectors"] = mesh.point_data["vectors"]
 
         return meshes
 

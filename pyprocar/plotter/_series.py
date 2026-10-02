@@ -184,14 +184,19 @@ def surface_series(
     vectors_data,
     kwargs: Mapping[str, Any],
 ) -> list[SurfaceSeries]:
-    """One series per (band, spin) surface, selecting each surface's points by mask."""
+    """One series per (band, spin) surface, selecting each surface's points by mask.
+
+    Band-resolved values, shaped ``(n_points, n_bands, n_spins)`` for scalars or
+    ``(n_points, n_bands, n_spins, 3)`` for vectors, also select the surface's own
+    band and spin.
+    """
     scalars = scalars_data.to_array() if scalars_data is not None else None
     vectors = vectors_data.to_array() if vectors_data is not None else None
     return [
         SurfaceSeries(
             mesh=surface,
-            scalars=scalars[masks[key]] if scalars is not None else None,
-            vectors=vectors[masks[key]] if vectors is not None else None,
+            scalars=_surface_values(scalars, masks[key], key, band_resolved_ndim=3),
+            vectors=_surface_values(vectors, masks[key], key, band_resolved_ndim=4),
             scalars_label=scalars_data.label if scalars_data else None,
             band_index=key[0],
             spin_index=key[1],
@@ -199,6 +204,19 @@ def surface_series(
         )
         for key, surface in surfaces.items()
     ]
+
+
+def _surface_values(
+    values: np.ndarray | None,
+    mask: np.ndarray,
+    key: tuple[int, int],
+    band_resolved_ndim: int,
+) -> np.ndarray | None:
+    if values is None:
+        return None
+    if values.ndim == band_resolved_ndim:
+        return values[mask, key[0], key[1]]
+    return values[mask]
 
 
 def channel_lims(data_lim, n_channels: int) -> list[Lim | None]:

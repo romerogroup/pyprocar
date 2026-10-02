@@ -82,6 +82,26 @@ class TestBS2DPlotterPlot:
         ]
 
 
+class TestBS2DPlotterBrillouinZone:
+    def test_default_plot_draws_the_zone_spanning_the_finite_band_energies(self):
+        requested = {}
+
+        def zone(e_min, e_max):
+            requested.update(e_min=e_min, e_max=e_max)
+            return pv.Box(bounds=(-1.0, 1.0, -1.0, 1.0, e_min, e_max))
+
+        bs2d = _bandstructure2d()
+        bs2d.points = np.array([[0.0, 0.0, -1.0], [0.0, 0.0, np.nan], [0.0, 0.0, 2.0]])
+        bs2d.get_2d_brillouin_zone = zone
+        plotter = BS2DPlotter(bs2d, off_screen=True)
+
+        meshes = plotter.plot()
+
+        assert requested == {"e_min": -1.0, "e_max": 2.0}
+        assert len(plotter.actors) == len(meshes) + 1
+        plotter.close()
+
+
 class TestBS2DPlotterExport:
     def test_vtk_merges_plotted_surfaces(self, plotter, tmp_path):
         plotter.plot()

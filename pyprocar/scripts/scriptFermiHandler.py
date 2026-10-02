@@ -5,13 +5,19 @@ __date__ = "March 31, 2020"
 
 import logging
 import sys
+from typing import cast
 
 import numpy as np
 
-from pyprocar.cfg import ConfigFactory, ConfigManager, PlotType
+from pyprocar.cfg import ConfigFactory, ConfigManager
+from pyprocar.cfg.base import PlotType
+from pyprocar.cfg.fermi_surface_3d import FermiSurface3DConfig
+from pyprocar.core import ElectronicBandStructureMesh
 from pyprocar.core.fermisurface import FermiSurface
 from pyprocar.plotter import FermiPlotter
+from pyprocar.scripts._selection import as_clim, resolve_spins
 from pyprocar.utils import welcome
+from pyprocar.utils.log_utils import set_verbose_level
 
 user_logger = logging.getLogger("user")
 logger = logging.getLogger(__name__)
@@ -30,8 +36,8 @@ class FermiHandler:
         self,
         code: str,
         dirname: str = "",
-        fermi: float = None,
-        ebs_interpolation_factor=1,
+        fermi: float | None = None,
+        *,
         use_cache: bool = False,
         ebs_filename: str = "ebs.pkl",
         verbose: int = 1,
@@ -57,22 +63,24 @@ class FermiHandler:
             Boolean to use cached Pickle files, by default True
         """
 
+        set_verbose_level(verbose)
         welcome()
 
         user_logger.info("_" * 100)
 
         self.default_config = ConfigFactory.create_config(PlotType.FERMI_SURFACE_3D)
 
-        # Store parameters for creating FermiSurface objects
         self.code = code
         self.dirname = dirname
-        self.ebs_interpolation_factor = ebs_interpolation_factor
-
-        # Create a sample FermiSurface to get default fermi energy
-        sample_fs = FermiSurface.from_code(code, dirname)
+        self.ebs: ElectronicBandStructureMesh = cast(
+            ElectronicBandStructureMesh,
+            ElectronicBandStructureMesh.from_code(
+                code, dirname, use_cache=use_cache, ebs_filename=ebs_filename
+            ),
+        )
 
         if fermi is None:
-            self.e_fermi = sample_fs.fermi
+            self.e_fermi: float = self.ebs.fermi
             user_logger.warning(
                 f"Fermi Energy not set! Set `fermi={self.e_fermi}`."
                 "By default, using fermi energy found in the current directory."
@@ -164,12 +172,8 @@ class FermiHandler:
         """
         if fermi is None:
             fermi = self.e_fermi
-
-        fermi_surface = FermiSurface.from_code(
-            self.code, self.dirname, fermi=fermi, fermi_shift=fermi_shift
-        )
-
-        return fermi_surface
+        ebs = self.ebs if bands is None else self.ebs.reduce_bands_by_index(bands, inplace=False)
+        return FermiSurface.from_ebs(ebs, isovalue=fermi, isovalue_shift=fermi_shift)
 
     def plot_fermi_surface(
         self,
@@ -221,7 +225,7 @@ class FermiHandler:
             Boolean to print the plotting options
         """
         config = ConfigManager.merge_configs(self.default_config, kwargs)
-        config = ConfigManager.merge_config(config, "mode", mode)
+        config = cast(FermiSurface3DConfig, ConfigManager.merge_config(config, "mode", mode))
 
         user_logger.info("_" * 100)
         user_logger.info(self.notification_message)
@@ -240,38 +244,38 @@ class FermiHandler:
             )
             return None
 
-        # Determine and compute property based on mode
         property_name = self._map_mode_to_property(
             mode, bands, atoms, orbitals, spins, spin_texture
         )
-        if property_name and mode != "plain":
+        channels, projection_spins, _ = resolve_spins(
+            self.ebs.is_non_collinear, self.ebs.n_spin_channels, spins, plain=mode == "plain"
+        )
+        scalars_data = vectors_data = None
+        if mode == "plain":
+            scalars_data = fermi_surface.get_property("spin_band_index")
+        elif property_name:
             prop = fermi_surface.get_property(
-                property_name, atoms=atoms, orbitals=orbitals, spins=spins
+                property_name, atoms=atoms, orbitals=orbitals, spins=projection_spins
             )
-            fermi_surface.set_values(property_name, prop.value)
+            if prop.value.shape[-1] == 3:
+                vectors_data = prop
+            else:
+                scalars_data = prop
 
-        # Create plotter and add components
         fsplt = FermiPlotter(
             **{k: v for k, v in kwargs.items() if k in ["off_screen", "window_size", "theme"]}
         )
-
-        if config.show_brillouin_zone:
-            fsplt.add_brillouin_zone(fermi_surface.brillouin_zone)
-
-        # Add the surface with appropriate settings
-        add_active_vectors = spin_texture or property_name == "fermi_velocity"
-        fsplt.add_surface(
+        fsplt.plot(
             fermi_surface,
-            show_scalar_bar=(property_name is not None or show_colorbar),
-            scalars=property_name if mode == "plain" else None,
-            add_active_vectors=add_active_vectors,
-            cmap=config.surface_cmap,
-            clim=config.surface_clim,
-            opacity=config.surface_opacity,
+            scalars_data=scalars_data,
+            vectors_data=vectors_data,
+            spins=channels,
+            show_brillouin_zone=config.show_brillouin_zone,
+            show_scalar_bar=(scalars_data is not None and mode != "plain") or show_colorbar,
+            scalars_cmap=config.surface_cmap,
+            scalars_clim=None if mode == "plain" else as_clim(config.surface_clim),
+            add_surface_kwargs={"opacity": config.surface_opacity},
         )
-
-        if not (property_name is not None or show_colorbar) or mode == "plain":
-            fsplt.remove_scalar_bar()
 
         if config.show_axes:
             fsplt.add_axes(
@@ -283,7 +287,7 @@ class FermiHandler:
         # Handle saving and showing
         if save_2d:
             fsplt.savefig(filename=save_2d)
-            return None
+            return fsplt
 
         if show and (save_gif is None and save_mp4 is None and save_3d is None):
             fsplt.show()
@@ -295,7 +299,8 @@ class FermiHandler:
             user_logger.warning("MP4 saving not yet implemented in new API")
 
         if save_3d:
-            user_logger.warning("3D mesh saving not yet implemented in new API")
+            fsplt.export_data(str(save_3d))
+        return fsplt
 
     def plot_fermi_isoslider(
         self,
