@@ -1,4 +1,5 @@
-# Bands along a k-path: object API (plain/parametric/scatter/quiver/overlay/flip) and legacy bandsplot/bandsdosplot.
+# Bands along a k-path: object API (plain/parametric/scatter/quiver/overlay/flip)
+# and legacy bandsplot/bandsdosplot.
 # Fixture: data/examples/bands/non-spin-polarized
 import shutil
 
@@ -16,8 +17,13 @@ w = ebs.compute_projected_sum(atoms=[1], orbitals=[4, 5, 6, 7, 8])
 
 def facts():
     ax = plt.gcf().axes[0]
-    return {"n_lines": len(ax.lines), "n_coll": len(ax.collections), "n_axes": len(plt.gcf().axes),
-            "ylim": [round(v, 2) for v in ax.get_ylim()], "xticks": [t.get_text() for t in ax.get_xticklabels()]}
+    return {
+        "n_lines": len(ax.lines),
+        "n_coll": len(ax.collections),
+        "n_axes": len(plt.gcf().axes),
+        "ylim": [round(v, 2) for v in ax.get_ylim()],
+        "xticks": [t.get_text() for t in ax.get_xticklabels()],
+    }
 
 
 @step("obj_plain")
@@ -54,7 +60,9 @@ def _():
 @step("obj_overlay_species")
 def _():
     props = ebs.build_overlay_species_weights(orbitals=[4, 5, 6, 7, 8])
-    P().plot_overlay(ebs.kpath, ebs.bands, [p.to_array() for p in props], labels=[p.label for p in props])
+    P().plot_overlay(
+        ebs.kpath, ebs.bands, [p.to_array() for p in props], labels=[p.label for p in props]
+    )
     return {**facts(), "png": png("obj_overlay_species")}
 
 
@@ -73,8 +81,16 @@ for mode, kw in {
 
     @step(f"legacy_bandsplot_{mode}")
     def _(mode=mode, kw=kw):
-        fig, ax = pyprocar.bandsplot(code="vasp", dirname=CALC, mode=mode, fermi=5.3017, elimit=[-5, 5],
-                                     show=False, savefig=EV / f"legacy_{mode}.png", **kw)
+        fig, ax = pyprocar.bandsplot(
+            code="vasp",
+            dirname=CALC,
+            mode=mode,
+            fermi=5.3017,
+            elimit=[-5, 5],
+            show=False,
+            savefig=EV / f"legacy_{mode}.png",
+            **kw,
+        )
         return {"n_lines": len(ax.lines), "n_coll": len(ax.collections)}
 
 
@@ -82,9 +98,13 @@ for mode, kw in {
 def _():
     dos_dir = CALC.parent / "dos_calc"
     shutil.copytree(REPO / "data/examples/dos/non-spin-polarized", dos_dir, dirs_exist_ok=True)
-    pyprocar.bandsdosplot(bands_settings=dict(mode="plain", dirname=str(CALC), fermi=5.3017),
-                          dos_settings=dict(mode="plain", dirname=str(dos_dir), fermi=5.3017),
-                          code="vasp", show=False, savefig=str(EV / "legacy_bandsdosplot.png"))
+    pyprocar.bandsdosplot(
+        bands_settings=dict(mode="plain", dirname=str(CALC), fermi=5.3017),
+        dos_settings=dict(mode="plain", dirname=str(dos_dir), fermi=5.3017),
+        code="vasp",
+        show=False,
+        savefig=str(EV / "legacy_bandsdosplot.png"),
+    )
 
 
 finish()

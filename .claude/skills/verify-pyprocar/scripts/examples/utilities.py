@@ -12,7 +12,8 @@ os.chdir(CALC)
 
 
 def head(path, n=4):
-    return [l.rstrip() for l in open(path).readlines()[:n]]
+    with open(path) as f:
+        return [line.rstrip() for line in f.readlines()[:n]]
 
 
 @step("bandgap")
@@ -24,15 +25,19 @@ def _():
 @step("kpath")
 def _():
     pyprocar.kpath(infile="POSCAR", outfile="KPOINTS_pyprocar", grid_size=40)
-    lines = open("KPOINTS_pyprocar").read().split("\n")
+    with open("KPOINTS_pyprocar") as f:
+        lines = f.read().split("\n")
     return {"head": lines[:4], "n_lines": len(lines)}
 
 
 @step("filter_bands")
 def _():
     pyprocar.filter(inFile="PROCAR", outFile="PROCAR_bands_1_5", bands=[1, 5])
-    return {"in_bytes": os.path.getsize("PROCAR"), "out_bytes": os.path.getsize("PROCAR_bands_1_5"),
-            "head": head("PROCAR_bands_1_5", 2)}
+    return {
+        "in_bytes": os.path.getsize("PROCAR"),
+        "out_bytes": os.path.getsize("PROCAR_bands_1_5"),
+        "head": head("PROCAR_bands_1_5", 2),
+    }
 
 
 @step("repair")

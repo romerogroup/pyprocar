@@ -3,6 +3,7 @@
 Each @step runs isolated: a crash is recorded in summary.json (error + innermost frame)
 and the next step still runs. finish() prints the summary and exits 1 if any step failed.
 """
+
 import json
 import os
 import sys
