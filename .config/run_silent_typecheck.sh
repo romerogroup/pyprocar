@@ -92,5 +92,5 @@ else
     fi
 
     rm -f "$tmp_file"
-    exit 0
+    exit 1
 fi
