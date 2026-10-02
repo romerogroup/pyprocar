@@ -2,7 +2,7 @@ name: Trigger on Draft Release Creation
 
 on:
   release:
-    types: [created]  # Trigger when a release is created
+    types: [created] # Trigger when a release is created
 
 jobs:
   handle-draft-release:
@@ -25,7 +25,7 @@ jobs:
           echo "Release body: ${{ github.event.release.body }}"
 
       - name: Update draft release body
-        if: ${{ github.event.release.draft }}  # Only run if it's a draft release
+        if: ${{ github.event.release.draft }} # Only run if it's a draft release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |

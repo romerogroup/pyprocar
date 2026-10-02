@@ -1,6 +1,5 @@
 from dataclasses import asdict, dataclass, field
-from enum import Enum, auto
-from typing import Any, Dict, List, Optional, Tuple
+from enum import Enum
 
 from pyprocar.cfg.base import BaseConfig, PlotType
 
@@ -201,23 +200,23 @@ class FermiSurface3DConfig(BaseConfig):
     property_name: str = None
     background_color: str = "white"
     plotter_offscreen: bool = False
-    plotter_camera_pos: List[int] = field(default_factory=lambda: [1, 1, 1])
+    plotter_camera_pos: list[int] = field(default_factory=lambda: [1, 1, 1])
 
     # Surface Appearance
     surface_cmap: str = "jet"  # Colormap for the surface
-    surface_color: Optional[str] = None  # Specific color for the surface
+    surface_color: str | None = None  # Specific color for the surface
     surface_opacity: float = 1.0
-    surface_clim: Optional[List[float]] = None
-    surface_bands_colors: List[str] = field(default_factory=list)
+    surface_clim: list[float] | None = None
+    surface_bands_colors: list[str] = field(default_factory=list)
 
     # Spin Settings
-    spin_colors: Optional[Tuple[str]] = (None, None)
+    spin_colors: tuple[str] | None = (None, None)
     arrow_size: int = 3  # Size of arrows for spin texture
     texture_cmap: str = "jet"
-    texture_color: Optional[str] = None
+    texture_color: str | None = None
     texture_size: float = 0.05
     texture_scale: bool = False
-    texture_clim: Optional[List[float]] = None
+    texture_clim: list[float] | None = None
     texture_opacity: float = 1.0
 
     # Brillouin Zone Styling
@@ -253,8 +252,8 @@ class FermiSurface3DConfig(BaseConfig):
 
     # Advanced Configurations
     fermi_tolerance: float = 0.1
-    extended_zone_directions: Optional[List[List[int]]] = None
-    supercell: List[int] = field(default_factory=lambda: [1, 1, 1])
+    extended_zone_directions: list[list[int]] | None = None
+    supercell: list[int] = field(default_factory=lambda: [1, 1, 1])
     projection_accuracy: str = "high"
     interpolation_factor: int = 1
     max_distance: float = 0.3

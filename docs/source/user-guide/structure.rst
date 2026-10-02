@@ -12,13 +12,13 @@ fractional_coordinates, lattice, rotations as arguments.
 Accessing Structure Information
 +++++++++++++++++++++++++++++++++++++
 
-The Structure object (referred to as "structure") can be accessed through the main io.Parser class:
+The Structure object (referred to as "structure") can be accessed through the parser that io.get_parser returns:
 
 .. code-block:: python
 
     import pyprocar
 
-    parser = pyprocar.io.Parser(code = 'vasp', dir=path_to_calculation)
+    parser = pyprocar.io.get_parser('vasp', path_to_calculation)
 
     structure = parser.structure
 

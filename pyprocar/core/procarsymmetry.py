@@ -1,9 +1,7 @@
-import sys
-import re
 import logging
 
 import numpy as np
-import matplotlib.pyplot as plt
+
 
 class ProcarSymmetry:
     def __init__(
@@ -19,9 +17,7 @@ class ProcarSymmetry:
         self.log = logging.getLogger("ProcarSymmetry")
         self.log.setLevel(loglevel)
         self.ch = logging.StreamHandler()
-        self.ch.setFormatter(
-            logging.Formatter("%(name)s::%(levelname)s: " "%(message)s")
-        )
+        self.ch.setFormatter(logging.Formatter("%(name)s::%(levelname)s: %(message)s"))
         self.ch.setLevel(logging.DEBUG)
         self.log.addHandler(self.ch)
         self.log.debug("ProcarSymmetry.__init__: ...")
@@ -55,8 +51,8 @@ class ProcarSymmetry:
 
     def _q_mult(self, q1, q2):
         """
-    Multiplication of quaternions, it doesn't fit in any other place
-    """
+        Multiplication of quaternions, it doesn't fit in any other place
+        """
         w1, x1, y1, z1 = q1
         w2, x2, y2, z2 = q2
         w = w1 * w2 - x1 * x2 - y1 * y2 - z1 * z2
@@ -67,23 +63,23 @@ class ProcarSymmetry:
 
     def general_rotation(self, angle, rotAxis=[0, 0, 1], store=True):
         """Apply a rotation defined by an angle and an axis.
-    
-    Returning value: (Kpoints, sx,sy,sz), the rotated Kpoints and spin
-                     vectors (if not the case, they will be empty
-                     arrays).
 
-    Arguments
-    angle: the rotation angle, must be in degrees!
+        Returning value: (Kpoints, sx,sy,sz), the rotated Kpoints and spin
+                         vectors (if not the case, they will be empty
+                         arrays).
 
-    rotAxis : a fixed Axis when applying the symmetry, usually it is
-    from Gamma to another point). It doesn't need to be normalized. 
-    The RotAxis can be:
-       [x,y,z] : a cartesian vector in k-space.
-       'x': [1,0,0], a rotation in the yz plane. 
-       'y': [0,1,0], a rotation in the zx plane.
-       'z': [0,0,1], a rotation in the xy plane
+        Arguments
+        angle: the rotation angle, must be in degrees!
 
-    """
+        rotAxis : a fixed Axis when applying the symmetry, usually it is
+        from Gamma to another point). It doesn't need to be normalized.
+        The RotAxis can be:
+           [x,y,z] : a cartesian vector in k-space.
+           'x': [1,0,0], a rotation in the yz plane.
+           'y': [0,1,0], a rotation in the zx plane.
+           'z': [0,0,1], a rotation in the xy plane
+
+        """
         if rotAxis == "x" or rotAxis == "X":
             rotAxis = [1, 0, 0]
         if rotAxis == "y" or rotAxis == "Y":
@@ -106,9 +102,7 @@ class ProcarSymmetry:
         # converting self.kpoints into quaternions
         w = np.zeros((len(self.kpoints), 1))
         qvectors = np.column_stack((w, self.kpoints)).transpose()
-        self.log.debug(
-            "Kpoints-> quaternions (transposed):\n" + str(qvectors.transpose())
-        )
+        self.log.debug("Kpoints-> quaternions (transposed):\n" + str(qvectors.transpose()))
         qvectors = self._q_mult(qRot, qvectors)
         qvectors = self._q_mult(qvectors, qRotI).transpose()
         kpoints = qvectors[:, 1:]
@@ -139,23 +133,19 @@ class ProcarSymmetry:
 
     def rot_symmetry_z(self, order):
         """Applies the given rotational crystal symmetry to the current
-    system. ie: to unfold the irreductible BZ to the full BZ.
+        system. ie: to unfold the irreductible BZ to the full BZ.
 
-    Only rotations along z-axis are performed, you can use
-    self.GeneralRotation first. 
+        Only rotations along z-axis are performed, you can use
+        self.GeneralRotation first.
 
-    The user is responsible of provide a useful input. The method
-    doesn't check the physics.
+        The user is responsible of provide a useful input. The method
+        doesn't check the physics.
 
-    """
+        """
         self.log.debug("RotSymmetryZ:...")
-        rotations = [
-            self.general_rotation(360 * i / order, store=False) for i in range(order)
-        ]
+        rotations = [self.general_rotation(360 * i / order, store=False) for i in range(order)]
         rotations = list(zip(*rotations))
-        self.log.debug(
-            "self.kpoints.shape (before concat.): " + str(self.kpoints.shape)
-        )
+        self.log.debug("self.kpoints.shape (before concat.): " + str(self.kpoints.shape))
         self.kpoints = np.concatenate(rotations[0], axis=0)
         self.log.debug("self.kpoints.shape (after concat.): " + str(self.kpoints.shape))
         self.sx = np.concatenate(rotations[1], axis=0)
@@ -172,9 +162,9 @@ class ProcarSymmetry:
 
     def mirror_x(self):
         """Applies the given rotational crystal symmetry to the current
-    system. ie: to unfold the irreductible BZ to the full BZ.
+        system. ie: to unfold the irreductible BZ to the full BZ.
 
-    """
+        """
         self.log.debug("Mirror:...")
         newK = self.kpoints * np.array([1, -1, 1])
         self.kpoints = np.concatenate((self.kpoints, newK), axis=0)
@@ -199,10 +189,10 @@ class ProcarSymmetry:
 
     def translate(self, newOrigin):
         """Centers the Kpoints at newOrigin, newOrigin is either and index (of
-   some Kpoint) or the cartesian coordinates of one point in the
-   reciprocal space.
+        some Kpoint) or the cartesian coordinates of one point in the
+        reciprocal space.
 
-    """
+        """
         self.log.debug("Translate():  ...")
         if len(newOrigin) == 1:
             newOrigin = int(newOrigin[0])

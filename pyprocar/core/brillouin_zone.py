@@ -1,55 +1,10 @@
 import logging
-from typing import List
 
 import numpy as np
 import pyvista as pv
-import trimesh
 from scipy.spatial import Voronoi
 
 logger = logging.getLogger(__name__)
-
-
-class Lines:
-    def __init__(self, verts: np.ndarray = None, faces: np.ndarray = None):
-
-        self.verts = verts
-        self.faces = faces
-
-        self.pyvista_line = pv.PolyData()
-        self.trimesh_line = None
-        self.connectivity = []
-
-        self._get_connectivity()
-
-    @property
-    def nface(self):
-        return len(self.faces)
-
-    def _get_connectivity(self):
-        for iface in range(len(self.faces)):
-            self.connectivity.append(
-                [self.faces[iface][0], self.faces[iface][-1]]
-            )  # to connect the 1st and last point
-            for ipoint in range(len(self.faces[iface]) - 1):
-                point_1 = self.faces[ipoint]
-                point_2 = self.faces[ipoint + 1]
-                self.connectivity.append([point_1, point_2])
-
-    # def _create_pyvista(self):
-    #     cell = []
-    #     for iline in self.connectivity:
-    #         cell.append([2, iline[0], iline[1]])
-    #     self.pyvista_line.lines = cell
-
-    def _create_trimesh(self):
-
-        entries = []
-        for iline in self.connectivity:
-            entries.append(trimesh.path.entries.Line(iline))
-
-            self.trimesh_line = trimesh.path.path.Path(
-                entries=entries, vertices=self.verts
-            )
 
 
 class BrillouinZone(pv.PolyData):
@@ -66,9 +21,7 @@ class BrillouinZone(pv.PolyData):
 
     """
 
-    def __init__(
-        self, reciprocal_lattice: np.ndarray, transformation_matrix: List[int] = None
-    ):
+    def __init__(self, reciprocal_lattice: np.ndarray, transformation_matrix: list[int] = None):
         logger.info("___Initializing BrillouinZone object___")
 
         self.reciprocal = reciprocal_lattice
@@ -117,7 +70,6 @@ class BrillouinZone(pv.PolyData):
                 num_verts = verts_in_face
                 face = [num_verts]
             else:
-
                 if count == num_verts:
                     count = 0
                     new_faces.append(face)
@@ -146,11 +98,7 @@ class BrillouinZone(pv.PolyData):
         for i in range(-1, 2):
             for j in range(-1, 2):
                 for k in range(-1, 2):
-                    vec = (
-                        i * self.reciprocal[0]
-                        + j * self.reciprocal[1]
-                        + k * self.reciprocal[2]
-                    )
+                    vec = i * self.reciprocal[0] + j * self.reciprocal[1] + k * self.reciprocal[2]
                     kpoints.append(vec)
         # print(kpoints, self.reciprocal)
         brill = Voronoi(np.array(kpoints))
@@ -204,23 +152,23 @@ class BrillouinZone2D(pv.PolyData):
         self,
         e_min,
         e_max,
-        reciprocal_lattice: np.ndarray,
-        transformation_matrix: List[int] = None,
+        axis: int = 2,
+        reciprocal_lattice: np.ndarray = None,
+        transformation_matrix: list[int] = None,
     ):
-
         self.reciprocal = reciprocal_lattice
 
         verts, faces = self.wigner_seitz()
 
-        min_val = verts[:, 2].min()
-        max_val = verts[:, 2].max()
+        min_val = verts[:, axis].min()
+        max_val = verts[:, axis].max()
 
         for vert in verts:
-            vert_z = vert[2]
+            vert_z = vert[axis]
             if np.isclose(vert_z, min_val, atol=1e-2):
-                vert[2] = e_min
+                vert[axis] = e_min
             if np.isclose(vert_z, max_val, atol=1e-2):
-                vert[2] = e_max
+                vert[axis] = e_max
 
         new_faces = []
         for iface in faces:
@@ -260,7 +208,6 @@ class BrillouinZone2D(pv.PolyData):
                 num_verts = verts_in_face
                 face = [num_verts]
             else:
-
                 if count == num_verts:
                     count = 0
                     new_faces.append(face)
@@ -288,11 +235,7 @@ class BrillouinZone2D(pv.PolyData):
         for i in range(-1, 2):
             for j in range(-1, 2):
                 for k in range(-1, 2):
-                    vec = (
-                        i * self.reciprocal[0]
-                        + j * self.reciprocal[1]
-                        + k * self.reciprocal[2]
-                    )
+                    vec = i * self.reciprocal[0] + j * self.reciprocal[1] + k * self.reciprocal[2]
                     kpoints.append(vec)
         # print(kpoints, self.reciprocal)
         brill = Voronoi(np.array(kpoints))

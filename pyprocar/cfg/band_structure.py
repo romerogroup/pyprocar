@@ -1,6 +1,5 @@
 from dataclasses import asdict, dataclass, field
-from enum import Enum, auto
-from typing import Any, Dict, List, Optional, Tuple
+from enum import Enum
 
 from pyprocar.cfg.base import BaseConfig, PlotType
 
@@ -22,12 +21,13 @@ class BandStructureMode(Enum):
     OVERLAY : str
         Represents the band structure in an overlay plot, where the colors are the selected projections
     OVERLAY_SPECIES : str
-        Represents the band structure in an overlay plot, where the colors are 
+        Represents the band structure in an overlay plot, where the colors are
         the different projection of the species.
     OVERLAY_ORBITALS : str
-        Represents the band structure in an overlay plot, where  the colors are 
+        Represents the band structure in an overlay plot, where  the colors are
         the different projection of the orbitals.
     """
+
     PLAIN = "plain"
     PARAMETRIC = "parametric"
     SACATTER = "scatter"
@@ -118,8 +118,8 @@ class BandStructureConfig(BaseConfig):
         The size of the figure (width, height) in inches.
     dpi : str, optional
         The resolution in dots per inch. If 'figure', use the figure's dpi value.
-    
-    
+
+
     colorbar_tick_params : Dict[str, any], optional
         The colorbar tick parameters, by default None
     colorbar_label_params : Dict[str, any], optional
@@ -144,7 +144,7 @@ class BandStructureConfig(BaseConfig):
         The major value for the multiple locator, by default None
     multiple_locator_y_minor_value : float, optional
         The minor value for the multiple locator, by default None
-    
+
 
     Methods
     -------
@@ -161,82 +161,82 @@ class BandStructureConfig(BaseConfig):
 
     >>> custom_config = BandStructureConfig(cmap='magma', linestyle=('dotted', 'dashed'))
     """
-    modes: List[str] = field(default_factory=lambda: [mode.value for mode in BandStructureMode])
+
+    modes: list[str] = field(default_factory=lambda: [mode.value for mode in BandStructureMode])
     # Basic Plot Settings
-    color: str = 'black'
-    spin_colors: Tuple[str] = field(default_factory=lambda: ('blue', 'red'))
+    color: str = "black"
+    spin_colors: tuple[str] = field(default_factory=lambda: ("blue", "red"))
 
     # Colorbar Configuration
-    colorbar_title: str = 'Atomic Orbital Projections'
+    colorbar_title: str = "Atomic Orbital Projections"
     colorbar_title_size: int = 15
     colorbar_title_padding: int = 20
     colorbar_tick_labelsize: int = 10
 
     # Plot Appearance
-    cmap: str = 'jet'
-    clim: Optional[Tuple[float, float]] = (0.0, 1.0)
-    fermi_color: str = 'blue'
-    fermi_linestyle: str = 'dotted'
+    cmap: str = "jet"
+    clim: tuple[float, float] | None = (0.0, 1.0)
+    fermi_color: str = "blue"
+    fermi_linestyle: str = "dotted"
     fermi_linewidth: float = 1
     grid: bool = False
-    grid_axis: str = 'both'
-    grid_color: str = 'grey'
-    grid_linestyle: str = 'solid'
+    grid_axis: str = "both"
+    grid_color: str = "grey"
+    grid_linestyle: str = "solid"
     grid_linewidth: float = 1
-    grid_which: str = 'major'
-    label: Tuple[str] = field(default_factory=lambda: (r'$\uparrow$', r'$\downarrow$'))
+    grid_which: str = "major"
+    label: tuple[str] = field(default_factory=lambda: (r"$\uparrow$", r"$\downarrow$"))
     legend: bool = True
-    linestyle: Tuple[str] = field(default_factory=lambda: ('solid', 'dashed'))
-    linewidth: Tuple[float] = field(default_factory=lambda: (1.0, 1.0))
-    marker: Tuple[str] = field(default_factory=lambda: ('o', 'v', '^', 'D'))
-    markersize: Tuple[float] = field(default_factory=lambda: (0.2, 0.2))
-    opacity: Tuple[float] = field(default_factory=lambda: (1.0, 1.0))
+    linestyle: tuple[str] = field(default_factory=lambda: ("solid", "dashed"))
+    linewidth: tuple[float] = field(default_factory=lambda: (1.0, 1.0))
+    marker: tuple[str] = field(default_factory=lambda: ("o", "v", "^", "D"))
+    markersize: tuple[float] = field(default_factory=lambda: (0.2, 0.2))
+    opacity: tuple[float] = field(default_factory=lambda: (1.0, 1.0))
     plot_color_bar: bool = True
-    savefig: Optional[str] = None
-    title: Optional[str] = None
+    savefig: str | None = None
+    title: str | None = None
     weighted_color: bool = True
     weighted_width: bool = False
-    figure_size: Tuple[int] = field(default_factory=lambda: (9, 6))
+    figure_size: tuple[int] = field(default_factory=lambda: (9, 6))
     dpi: int = 300
 
+    colorbar_tick_params: dict[str, any] = field(default_factory=lambda: {})
+    colorbar_label_params: dict[str, any] = field(default_factory=lambda: {})
 
-    colorbar_tick_params: Dict[str, any] = field(default_factory=lambda: {})
-    colorbar_label_params: Dict[str, any] = field(default_factory=lambda: {})
-    
-    x_label: str = 'K vector'
-    x_label_params: Dict[str, any] = field(default_factory=lambda: {})
-    y_label_params: Dict[str, any] = field(default_factory=lambda: {})
-    title_params: Dict[str, any] = field(default_factory=lambda: {})
+    x_label: str = "K vector"
+    x_label_params: dict[str, any] = field(default_factory=lambda: {})
+    y_label_params: dict[str, any] = field(default_factory=lambda: {})
+    title_params: dict[str, any] = field(default_factory=lambda: {})
     # Tick Parameters
-    major_y_tick_params: Dict[str, any] = field(default_factory=lambda: {
-        "which": "major",
-        "axis": "y",
-        "direction": "inout",
-        "width": 1,
-        "length": 5,
-        "labelright": False,
-        "right": True,
-        "left": True
-    })
-    minor_y_tick_params: Dict[str, any] = field(default_factory=lambda: {
-        "which": "minor",
-        "axis": "y",
-        "direction": "in",
-        "left": True,
-        "right": True
-    })
-    major_x_tick_params: Dict[str, any] = field(default_factory=lambda: {
-        "which": "major",
-        "axis": "x",
-        "direction": "in"
-        })
+    major_y_tick_params: dict[str, any] = field(
+        default_factory=lambda: {
+            "which": "major",
+            "axis": "y",
+            "direction": "inout",
+            "width": 1,
+            "length": 5,
+            "labelright": False,
+            "right": True,
+            "left": True,
+        }
+    )
+    minor_y_tick_params: dict[str, any] = field(
+        default_factory=lambda: {
+            "which": "minor",
+            "axis": "y",
+            "direction": "in",
+            "left": True,
+            "right": True,
+        }
+    )
+    major_x_tick_params: dict[str, any] = field(
+        default_factory=lambda: {"which": "major", "axis": "x", "direction": "in"}
+    )
     major_y_locator = None
     minor_y_locator = None
 
-    multiple_locator_y_major_value:float = None
-    multiple_locator_y_minor_value:float = None
-
-    
+    multiple_locator_y_major_value: float = None
+    multiple_locator_y_minor_value: float = None
 
     def __post_init__(self):
         """This method is immediately called after the object is initialized.

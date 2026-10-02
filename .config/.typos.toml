@@ -1,0 +1,18 @@
+[files]
+extend-exclude = [
+  ".git/",
+  ".pixi/",
+  "**/*.snap",
+  "tests/data/mapping_files/*",
+  "examples/**/**.ipynb",
+  "docs/src/monokai_colors.py",
+
+]
+ignore-hidden = false
+
+[default.extend-identifiers]
+_placehold = "_placehold"
+intoto = "intoto"
+plt-setp = "plt.setp"
+pn = "pn"
+solvePnPRansac = "solvePnPRansac"

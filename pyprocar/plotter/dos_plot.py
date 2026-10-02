@@ -1,1166 +1,858 @@
-__author__ = "Pedram Tavadze and Logan Lang"
-__maintainer__ = "Pedram Tavadze and Logan Lang"
-__email__ = "petavazohi@mail.wvu.edu, lllang@mix.wvu.edu"
-__date__ = "March 31, 2020"
+"""Shared utilities for density of states plotting backends."""
 
-import json
+from __future__ import annotations
+
 import logging
-import os
-from typing import List
+from collections.abc import Iterable, Mapping, Sequence
+from dataclasses import dataclass, field
+from enum import Enum
+from typing import Any
 
-import matplotlib as mpl
-import matplotlib.patches as mpatches
-import matplotlib.pylab as plt
+import matplotlib.cm as cm
+import matplotlib.colors as mcolors
+import matplotlib.pyplot as plt
+import matplotlib.ticker as ticker
 import numpy as np
-import pandas as pd
-import yaml
+from matplotlib import patches
 from matplotlib.collections import LineCollection
-from matplotlib.ticker import AutoMinorLocator, FormatStrFormatter, MultipleLocator
 
-from pyprocar.core import DensityOfStates, Structure
-
-np.seterr(divide="ignore", invalid="ignore")
+from pyprocar.core.property_store import Property
+from pyprocar.plotter._series import (
+    ShowColorbar,
+    channel_lims,
+    line_series,
+    resolve_clim,
+)
+from pyprocar.utils.func_utils import (
+    keep_func_kwargs,
+)
 
 logger = logging.getLogger(__name__)
 
 
-class DOSPlot:
-    """
-    Class to plot an electronic band structure.
+class ScalarsMode(Enum):
+    LINE = "line"
+    FILL = "fill"
 
-    Parameters
-    ----------
-    dos : DensityOfStates
-        An density of states pyprocar.core.DensityOfStates.
-    structure : Structure
-        An density of states pyprocar.core.Structure.
-
-    ax : mpl.axes.Axes, optional
-        A matplotlib Axes object. If provided the plot will be located at that ax.
-        The default is None.
-
-    Returns
-    -------
-    None.
-
-    """
-
-    def __init__(
-        self,
-        dos: DensityOfStates = None,
-        structure: Structure = None,
-        ax: mpl.axes.Axes = None,
-        orientation: str = "horizontal",
-        config=None,
-    ):
-
-        self.config = config
-
-        self.dos = dos
-        self.structure = structure
-        self.handles = []
-        self.labels = []
-        self.orientation = orientation
-        self.values_dict = {}
-
-        if ax is None:
-            self.fig = plt.figure(
-                figsize=tuple(self.config.figure_size),
-            )
-            self.ax = self.fig.add_subplot(111)
+    @classmethod
+    def from_string(cls, string: str) -> ScalarsMode:
+        if string == "line":
+            return cls.LINE
+        elif string == "fill":
+            return cls.FILL
         else:
-            self.fig = plt.gcf()
-            self.ax = ax
+            raise ValueError(f"Invalid scalars mode: {string}")
 
-        if self.orientation not in ["horizontal", "vertical"]:
-            raise ValueError(
-                f"The orientation must be either horizontal or vertical, not {self.orientation}"
-            )
 
-        return None
+class AxesOrientation(Enum):
+    HORIZONTAL = "horizontal"
+    VERTICAL = "vertical"
 
-    def plot_dos(self, spins: List[int] = None):
-        values_dict = {}
-        spin_projections, spin_channels = self._get_spins_projections_and_channels(
-            spins
-        )
-        energies = self.dos.energies
-        dos_total = self.dos.total
-
-        self._set_plot_limits(spin_channels)
-        for ispin, spin_channel in enumerate(spin_channels):
-
-            # flip the sign of the total dos if there are 2 spin channels
-            dos_total_spin = dos_total[spin_channel, :] * (-1 if ispin > 0 else 1)
-            self._plot_total_dos(energies, dos_total_spin, spin_channel)
-            values_dict["energies"] = energies
-            values_dict["dosTotalSpin-" + str(spin_channel)] = dos_total_spin
-
-        self.values_dict = values_dict
-        return values_dict
-
-    def plot_parametric(
-        self,
-        atoms: List[int] = None,
-        orbitals: List[int] = None,
-        spins: List[int] = None,
-        principal_q_numbers: List[int] = [-1],
-    ):
-        values_dict = {}
-        spin_projections, spin_channels = self._get_spins_projections_and_channels(
-            spins
-        )
-        dos_total, dos_total_projected, dos_projected = self._calculate_parametric_dos(
-            atoms, orbitals, spin_projections, principal_q_numbers
-        )
-
-        orbital_string = ":".join([str(orbital) for orbital in orbitals])
-        atom_string = ":".join([str(atom) for atom in atoms])
-        spin_string = ":".join(
-            [str(spin_projection) for spin_projection in spin_projections]
-        )
-
-        self._setup_colorbar(dos_projected, dos_total_projected)
-        self._set_plot_limits(spin_channels)
-
-        for ispin, spin_channel in enumerate(spin_channels):
-            energies, dos_spin_total, normalized_dos_spin_projected = (
-                self._prepare_parametric_spin_data(
-                    spin_channel, ispin, dos_total, dos_projected, dos_total_projected
-                )
-            )
-
-            self._plot_spin_data_parametric(
-                energies, dos_spin_total, normalized_dos_spin_projected
-            )
-
-            if self.config.plot_total:
-                self._plot_total_dos(energies, dos_spin_total, spin_channel)
-
-            values_dict["energies"] = energies
-            values_dict["dosTotalSpin-" + str(spin_channel)] = dos_spin_total
-            values_dict[
-                "spinChannel-"
-                + str(spin_channel)
-                + f"_orbitals-{orbital_string}"
-                + f"_atoms-{atom_string}"
-                + f"_spinProjection-{spin_string}"
-            ] = normalized_dos_spin_projected
-
-        self.values_dict = values_dict
-        return values_dict
-
-    def plot_parametric_line(
-        self,
-        atoms: List[int] = None,
-        orbitals: List[int] = None,
-        spins: List[int] = None,
-        principal_q_numbers: List[int] = [-1],
-    ):
-        values_dict = {}
-        spin_projections, spin_channels = self._get_spins_projections_and_channels(
-            spins
-        )
-        dos_total, dos_total_projected, dos_projected = self._calculate_parametric_dos(
-            atoms, orbitals, spin_projections, principal_q_numbers
-        )
-
-        orbital_string = ":".join([str(orbital) for orbital in orbitals])
-        atom_string = ":".join([str(atom) for atom in atoms])
-        spin_string = ":".join(
-            [str(spin_projection) for spin_projection in spin_projections]
-        )
-
-        self._setup_colorbar(dos_projected, dos_total_projected)
-        self._set_plot_limits(spin_channels)
-
-        for ispin, spin_channel in enumerate(spin_channels):
-
-            energies, dos_spin_total, normalized_dos_spin_projected = (
-                self._prepare_parametric_spin_data(
-                    spin_channel, ispin, dos_total, dos_projected, dos_total_projected
-                )
-            )
-
-            self._plot_spin_data_parametric_line(
-                energies, dos_spin_total, normalized_dos_spin_projected, spin_channel
-            )
-
-            values_dict["energies"] = energies
-            values_dict["dosTotalSpin-" + str(spin_channel)] = dos_spin_total
-            values_dict[
-                "spinChannel-"
-                + str(spin_channel)
-                + f"_orbitals-{orbital_string}"
-                + f"_atoms-{atom_string}"
-                + f"_spinProjection-{spin_string}"
-            ] = normalized_dos_spin_projected
-
-        self.values_dict = values_dict
-        return values_dict
-
-    def plot_stack_species(
-        self,
-        principal_q_numbers: List[int] = [-1],
-        orbitals: List[int] = None,
-        spins: List[int] = None,
-        overlay_mode: bool = False,
-    ):
-        values_dict = {}
-        spin_projections, spin_channels = self._get_spins_projections_and_channels(
-            spins
-        )
-
-        orbital_label = self._get_stack_species_labels(orbitals)
-
-        self._set_plot_limits(spin_channels)
-        bottom_value = 0
-        for specie in range(len(self.structure.species)):
-            idx = np.array(self.structure.atoms) == self.structure.species[specie]
-            atoms = list(np.where(idx)[0])
-
-            orbital_string = ":".join([str(orbital) for orbital in orbitals])
-            atom_string = ":".join([str(atom) for atom in atoms])
-            spin_string = ":".join(
-                [str(spin_projection) for spin_projection in spin_projections]
-            )
-
-            dos_total, dos_total_projected, dos_projected = (
-                self._calculate_parametric_dos(
-                    atoms, orbitals, spin_projections, principal_q_numbers
-                )
-            )
-
-            color = self.config.colors[specie]
-
-            for ispin, spin_channel in enumerate(spin_channels):
-                energies, dos_spin_total, scaled_dos_spin_projected = (
-                    self._prepare_parametric_spin_data(
-                        spin_channel,
-                        ispin,
-                        dos_total,
-                        dos_projected,
-                        dos_total_projected,
-                        scale=True,
-                    )
-                )
-
-                if overlay_mode:
-                    handle = self._plot_spin_overlay(
-                        energies, scaled_dos_spin_projected, spin_channel, color
-                    )
-                else:
-                    top_value, handle = self._plot_spin_stack(
-                        energies, scaled_dos_spin_projected, bottom_value, color
-                    )
-                    bottom_value += top_value
-
-                label = self.structure.species[specie] + orbital_label
-
-                values_dict["energies"] = energies
-                values_dict["dosTotalSpin-" + str(spin_channel)] = dos_spin_total
-                values_dict[
-                    "spinChannel-"
-                    + str(spin_channel)
-                    + f"_orbitals-{orbital_string}"
-                    + f"_atoms-{atom_string}"
-                    + f"_spinProjection-{spin_string}"
-                ] = scaled_dos_spin_projected
-
-            handle = mpatches.Patch(color=color, label=label)
-            self.handles.append(handle)
-            self.labels.append(label)
-
-        if self.config.plot_total:
-            total_values_dict = self.plot_dos(spin_channels)
-
-        self.values_dict = values_dict
-        return values_dict
-
-    def plot_stack_orbitals(
-        self,
-        principal_q_numbers: List[int] = [-1],
-        atoms: List[int] = None,
-        spins: List[int] = None,
-        overlay_mode: bool = False,
-    ):
-        values_dict = {}
-        spin_projections, spin_channels = self._get_spins_projections_and_channels(
-            spins
-        )
-
-        atom_names, orb_names, orb_l = self._get_stack_orbitals_labels(atoms)
-
-        self._set_plot_limits(spin_channels)
-        bottom_value = 0
-        for iorb in range(len(orb_l)):
-
-            orbital_string = ":".join([str(orbital) for orbital in orb_l[iorb]])
-            atom_string = ":".join([str(atom) for atom in atoms])
-            spin_string = ":".join(
-                [str(spin_projection) for spin_projection in spin_projections]
-            )
-
-            dos_total, dos_total_projected, dos_projected = (
-                self._calculate_parametric_dos(
-                    atoms=atoms,
-                    orbitals=orb_l[iorb],
-                    spin_projections=spin_projections,
-                    principal_q_numbers=principal_q_numbers,
-                )
-            )
-
-            color = self.config.colors[iorb]
-            for ispin, spin_channel in enumerate(spin_channels):
-                energies, dos_spin_total, scaled_dos_spin_projected = (
-                    self._prepare_parametric_spin_data(
-                        spin_channel,
-                        ispin,
-                        dos_total,
-                        dos_projected,
-                        dos_total_projected,
-                        scale=True,
-                    )
-                )
-
-                if overlay_mode:
-                    handle = self._plot_spin_overlay(
-                        energies, scaled_dos_spin_projected, spin_channel, color
-                    )
-                else:
-                    top_value, handle = self._plot_spin_stack(
-                        energies, scaled_dos_spin_projected, bottom_value, color
-                    )
-                    bottom_value += top_value
-
-                label = atom_names + orb_names[iorb]  # + self.config.spin_labels[ispin]
-
-                values_dict["energies"] = energies
-                values_dict["dosTotalSpin-" + str(spin_channel)] = dos_spin_total
-                values_dict[
-                    "spinChannel-"
-                    + str(spin_channel)
-                    + f"_orbitals-{orbital_string}"
-                    + f"_atoms-{atom_string}"
-                    + f"_spinProjection-{spin_string}"
-                ] = scaled_dos_spin_projected
-
-            handle = mpatches.Patch(color=color, label=label)
-            self.handles.append(handle)
-            self.labels.append(label)
-
-        if self.config.plot_total:
-            total_values_dict = self.plot_dos(spin_channels)
-
-        self.values_dict = values_dict
-        return values_dict
-
-    def plot_stack(
-        self,
-        items: dict = None,
-        principal_q_numbers: List[int] = [-1],
-        spins: List[int] = None,
-        overlay_mode: bool = False,
-    ):
-        values_dict = {}
-        if len(items) is None:
-            print(
-                """Please provide the stacking items in which you want
-                to plot, example : {'Sr':[1,2,3],'O':[4,5,6,7,8]}
-                will plot the stacked plots of p orbitals of Sr and
-                d orbitals of Oxygen."""
-            )
-        spin_projections, spin_channels = self._get_spins_projections_and_channels(
-            spins
-        )
-        self._set_plot_limits(spin_channels)
-        # Defining color per specie
-        counter = 0
-        colors_dict = {}
-        for specie in items:
-            colors_dict[specie] = self.config.colors[counter]
-            counter += 1
-
-        bottom_value = 0
-        for specie in items:
-            idx = np.array(self.structure.atoms) == specie
-            atoms = list(np.where(idx)[0])
-            orbitals = items[specie]
-            orbital_label = self._get_stack_labels(orbitals)
-
-            orbital_string = ":".join([str(orbital) for orbital in orbitals])
-            atom_string = ":".join([str(atom) for atom in atoms])
-            spin_string = ":".join(
-                [str(spin_projection) for spin_projection in spin_projections]
-            )
-
-            dos_total, dos_total_projected, dos_projected = (
-                self._calculate_parametric_dos(
-                    atoms=atoms,
-                    orbitals=orbitals,
-                    spin_projections=spin_projections,
-                    principal_q_numbers=principal_q_numbers,
-                )
-            )
-
-            color = colors_dict[specie]
-            for ispin, spin_channel in enumerate(spin_channels):
-                energies, dos_spin_total, scaled_dos_spin_projected = (
-                    self._prepare_parametric_spin_data(
-                        spin_channel,
-                        ispin,
-                        dos_total,
-                        dos_projected,
-                        dos_total_projected,
-                        scale=True,
-                    )
-                )
-
-                if overlay_mode:
-                    handle = self._plot_spin_overlay(
-                        energies, scaled_dos_spin_projected, spin_channel, color
-                    )
-                else:
-                    top_value, handle = self._plot_spin_stack(
-                        energies, scaled_dos_spin_projected, bottom_value, color
-                    )
-                    bottom_value += top_value
-
-                label = specie + orbital_label
-                values_dict["energies"] = energies
-                values_dict["dosTotalSpin-" + str(spin_channel)] = dos_spin_total
-                values_dict[
-                    "spinChannel-"
-                    + str(spin_channel)
-                    + f"_orbitals-{orbital_string}"
-                    + f"_atoms-{atom_string}"
-                    + f"_spinProjection-{spin_string}"
-                ] = scaled_dos_spin_projected
-
-            handle = mpatches.Patch(color=color, label=label)
-            self.handles.append(handle)
-            self.labels.append(label)
-
-        if self.config.plot_total:
-            total_values_dict = self.plot_dos(spin_channels)
-
-        self.values_dict = values_dict
-
-        return values_dict
-
-    def _calculate_parametric_dos(
-        self, atoms, orbitals, spin_projections, principal_q_numbers
-    ):
-        dos_total = np.array(self.dos.total)
-        dos_total_projected = self.dos.dos_sum()
-        dos_projected = self.dos.dos_sum(
-            atoms=atoms,
-            principal_q_numbers=principal_q_numbers,
-            orbitals=orbitals,
-            spins=spin_projections,
-        )
-        return dos_total, dos_total_projected, dos_projected
-
-    def _get_spins_projections_and_channels(self, spins):
-        """
-        This function determines the spin channels and projections from the spins keywrod argument.
-
-        Parameters
-        ----------
-        spins : list of int, optional
-            A list of spins, by default None
-
-        Returns
-        -------
-        spin_projections : list of int
-            A list of spin projections
-        spin_channels : list of int
-            A list of spin channels
-        """
-
-        if self.dos.is_non_collinear:
-            spin_projections = spins if spins else [0, 1, 2]
-            spin_channels = [0]
+    @classmethod
+    def from_string(cls, string: str | AxesOrientation) -> AxesOrientation:
+        if isinstance(string, AxesOrientation):
+            return string
+        lower_string = string.lower()
+        if lower_string[0] == "h":
+            return cls.HORIZONTAL
+        elif lower_string[0] == "v":
+            return cls.VERTICAL
         else:
-            spin_channel_list = range(self.dos.n_spins)
-            spin_projections = spins if spins else spin_channel_list
-            spin_channels = spins if spins else spin_channel_list
+            raise ValueError(f"Invalid axes orientation: {string}")
 
-        return spin_projections, spin_channels
 
-    def _get_stack_species_labels(self, orbitals):
-        # This condition will depend on which orbital basis is being used.
-        if (
-            self.dos.is_non_collinear
-            and len(self.dos.projected[0][0]) == 2 + 2 + 4 + 4 + 6
-        ):
-            spins = [0]
-            if orbitals:
-                print("The plot only considers orbitals", orbitals)
-                label = "-"
-                if sum([x in orbitals for x in [0, 1]]) == 2:
-                    label += "s-j=0.5"
-                if sum([x in orbitals for x in [2, 3]]) == 2:
-                    label += "p-j=0.5"
-                if sum([x in orbitals for x in [4, 5, 6, 7]]) == 4:
-                    label += "p-j=1.5"
-                if sum([x in orbitals for x in [8, 9, 10, 11]]) == 4:
-                    label += "d-j=1.5"
-                if sum([x in orbitals for x in [12, 13, 14, 15, 16, 17]]) == 6:
-                    label += "d-j=2.5"
+class Axis(Enum):
+    X = "x"
+    Y = "y"
+    BOTH = "both"
+
+    @classmethod
+    def from_string(cls, string: str) -> Axis:
+        if string == "x":
+            return cls.X
+        elif string == "y":
+            return cls.Y
+        elif string == "both":
+            return cls.BOTH
+        else:
+            raise ValueError(f"Invalid axis: {string}")
+
+
+@dataclass
+class DOSPlotter:
+    """Lightweight wrapper around a matplotlib axis for DOS plots."""
+
+    orientation: str = AxesOrientation.HORIZONTAL
+    figsize: tuple[int, int] = (6, 4)
+    dpi: int = 100
+    ax: plt.Axes | None = None
+    dos_lim: tuple[float, float] = None
+    energy_lim: tuple[float, float] = None
+    _handles: list[Any] = field(default_factory=list)
+
+    def __post_init__(self):
+        if self.ax is None:
+            self._fig, self.ax = plt.subplots(figsize=self.figsize, dpi=self.dpi)
+        else:
+            self.ax = self.ax
+            self._fig = self.ax.get_figure()
+
+        self.orientation = AxesOrientation.from_string(self.orientation)
+
+    @property
+    def fig(self) -> plt.Figure:
+        return self._fig
+
+    @property
+    def colorbar(self) -> cm.ScalarMappable:
+        if not hasattr(self, "_cb"):
+            return None
+        return self._cb
+
+    @property
+    def colorbar_axes(self) -> plt.Axes:
+        return self.colorbar.ax
+
+    @property
+    def colorbar_orientation(self) -> str | None:
+        if not hasattr(self, "_cb_orientation"):
+            return None
+        self._cb_orientation = AxesOrientation.from_string(self._cb_orientation)
+        return self._cb_orientation
+
+    @property
+    def colorbar_location(self) -> str | None:
+        if not hasattr(self, "_cb_location"):
+            return None
+        return self._cb_location
+
+    # ------------------------------------------------------------------
+    # High level orchestration
+    # ------------------------------------------------------------------
+
+    def plot(
+        self,
+        point_data: Property,
+        scalars_data: Property | None = None,
+        vectors_data: Property | None = None,
+        scalars_mode: str = "line",
+        channel_mode: str = "flip",
+        plot_total: bool = True,
+        vectors_cmap: str | mcolors.Colormap = "plasma",
+        vectors_norm: str | mcolors.Normalize = None,
+        vectors_clim: tuple[float | None, float | None] | None = None,
+        vectors_show_colorbar: ShowColorbar | str = ShowColorbar.NONE,
+        scalars_cmap: str | mcolors.Colormap = "plasma",
+        scalars_norm: str | mcolors.Normalize = None,
+        scalars_clim: tuple[float | None, float | None] | None = None,
+        scalars_show_colorbar: ShowColorbar | str = ShowColorbar.SINGLE,
+        plot_kwargs: list[dict[str, Any]] | None = None,
+        **kwargs,
+    ):
+        scalars_mode = ScalarsMode.from_string(scalars_mode)
+
+        x, y = self.orient_data(point_data.points, point_data.to_array())
+        y = _as_channels(y)
+        n_channels = y.shape[2]
+        channel_labels = point_data.metadata.get("label")
+        series_list = line_series(
+            x,
+            y,
+            _as_channels(scalars_data.to_array()) if scalars_data is not None else None,
+            _as_channels(vectors_data.to_array()) if vectors_data is not None else None,
+            channel_mode,
+            kwargs,
+            lambda _, c: channel_labels[c] if channel_labels else point_data.label,
+            share_single_channel=True,
+        )
+
+        cmap_s, norm_s, clim_s, scalars_show_colorbar = _resolve_scaling(
+            [s.scalars for s in series_list],
+            channel_lims(getattr(scalars_data, "rounded_data_lim", None), n_channels),
+            show_colorbar=scalars_show_colorbar,
+            cmap=scalars_cmap,
+            norm=scalars_norm,
+            clim=scalars_clim,
+        )
+        cmap_v, norm_v, clim_v, vectors_show_colorbar = _resolve_scaling(
+            [s.vectors for s in series_list],
+            channel_lims(getattr(vectors_data, "rounded_data_lim", None), n_channels),
+            show_colorbar=vectors_show_colorbar,
+            cmap=vectors_cmap,
+            norm=vectors_norm,
+            clim=vectors_clim,
+        )
+
+        xlim = (0, 0)
+        ylim = (0, 0)
+        for i_channel, series in enumerate(series_list):
+            xlim = (min(xlim[0], series.x.min()), max(xlim[1], series.x.max()))
+            ylim = (min(ylim[0], series.y.min()), max(ylim[1], series.y.max()))
+
+            if plot_kwargs is not None:
+                plot_kwargs_channel = plot_kwargs[i_channel]
             else:
-                if len(self.dos.projected[0][0]) == 2 + 2 + 4 + 4 + 6:
-                    label = "-spd-j=0.5,1.5,2.5"
-                else:
-                    label = "-"
-        else:
-            if orbitals:
-                print("The plot only considers orbitals", orbitals)
-                label = "-"
-                if sum([x in orbitals for x in [0]]) == 1:
-                    label += "s"
-                if sum([x in orbitals for x in [1, 2, 3]]) == 3:
-                    label += "p"
-                if sum([x in orbitals for x in [4, 5, 6, 7, 8]]) == 5:
-                    label += "d"
-                if sum([x in orbitals for x in [9, 10, 11, 12, 13, 14, 15]]) == 7:
-                    label += "f"
+                plot_kwargs_channel = {}
+
+            add_scalar_args = {
+                "x": series.x,
+                "y": series.y,
+                "scalars": series.scalars,
+                "label": scalars_data.label if scalars_data else None,
+                "clim": clim_s[i_channel],
+                "cmap": cmap_s[i_channel],
+                "norm": norm_s[i_channel],
+            }
+            add_scalar_args.update(plot_kwargs_channel)
+            add_line_args = {
+                "x": series.x,
+                "y": series.y,
+                "label": series.label,
+            }
+            add_line_args.update(plot_kwargs_channel)
+            add_vectors_args = {
+                "x": series.x,
+                "y": series.y,
+                "vectors": series.vectors,
+                "label": vectors_data.label if vectors_data else None,
+                "clim": clim_v[i_channel],
+                "norm": norm_v[i_channel],
+                "cmap": cmap_v[i_channel],
+            }
+            add_vectors_args.update(plot_kwargs_channel)
+
+            # add_scalar_args.update(series.additional_kwargs)
+            if scalars_data and scalars_mode == ScalarsMode.LINE:
+                artist = self.add_scalar_line(**add_scalar_args, **series.kwargs)
+            elif scalars_data and scalars_mode == ScalarsMode.FILL:
+                add_scalar_args["plot_total"] = plot_total
+                artist = self.add_scalar_fill(**add_scalar_args, **series.kwargs)
             else:
-                if len(self.dos.projected[0][0]) == 1 + 3 + 5:
-                    label = "-spd"
-                elif len(self.dos.projected[0][0]) == 1 + 3 + 5 + 7:
-                    label = "-spdf"
-                else:
-                    label = "-"
-        return label
+                add_line_args
+                artist = self.add_line(**add_line_args, **series.kwargs)
 
-    def _get_stack_orbitals_labels(self, atoms):
-        atom_names = ""
-        if atoms:
-            print(
-                "The plot only considers atoms",
-                np.array(self.structure.atoms)[atoms],
-            )
-            atom_names = ""
-            for ispc in np.unique(np.array(self.structure.atoms)[atoms]):
-                atom_names += ispc + "-"
-        all_atoms = ""
-        for ispc in np.unique(np.array(self.structure.atoms)):
-            all_atoms += ispc + "-"
-        if atom_names == all_atoms:
-            atom_names = ""
+            if vectors_data:
+                self.add_vectors(**add_vectors_args, **series.kwargs)
 
-        if (
-            self.dos.is_non_collinear
-            and len(self.dos.projected[0][0]) == 2 + 2 + 4 + 4 + 6
-        ):
-            orb_names = ["s-j=0.5", "p-j=0.5", "p-j=1.5", "d-j=1.5", "d-j=2.5"]
-            orb_l = [
-                [0, 1],
-                [2, 3],
-                [4, 5, 6, 7],
-                [8, 9, 10, 11],
-                [12, 13, 14, 15, 16, 17],
-            ]
-        elif len(self.dos.projected[0][0]) == 1 + 3 + 5:
-            orb_names = ["s", "p", "d"]
-            orb_l = [[0], [1, 2, 3], [4, 5, 6, 7, 8]]
-        elif len(self.dos.projected[0][0]) == 1 + 3 + 5 + 7:
-            orb_names = ["s", "p", "d", "f"]
-            orb_l = [[0], [1, 2, 3], [4, 5, 6, 7, 8], [9, 10, 11, 12, 13, 14, 15]]
+        if scalars_data and scalars_show_colorbar is not ShowColorbar.NONE:
+            lab = scalars_data.label
+            if scalars_data.units:
+                lab = f"{lab} ({scalars_data.units})"
+            n_bars = 1 if scalars_show_colorbar is ShowColorbar.SINGLE else len(series_list)
+            for i in range(n_bars):
+                self.plot_colorbar(label=lab, cmap=cmap_s[i], norm=norm_s[i])
 
-        return atom_names, orb_names, orb_l
+        # vectors colorbar is only shown if you chose to
+        # if vectors_data and vectors_show_colorbar is not ShowColorbar.NONE:
+        #     # If color_src is SCALARS and scal_show already drew a colorbar, you may want to skip here.
+        #     if not (VectorColorSource.SCALARS and scalars_show_colorbar is not ShowColorbar.NONE):
+        #         # Draw per policy
+        #         vlabel = series_list[0].vectors_label if vectors_show_colorbar is ShowColorbar.SINGLE else None
+        #         if vectors_show_colorbar is ShowColorbar.SINGLE:
+        #             self.plot_colorbar(label=vlabel or "", cmap=cmap_v[0], norm=norm_v[0])
+        #         else:
+        #             for i, s in enumerate(series_list):
+        #                 self.plot_colorbar(label=s.vectors_label or "", cmap=cmap_v[i], norm=norm_v[i])
 
-    def _get_stack_labels(self, orbitals):
-        if (
-            self.dos.is_non_collinear
-            and len(self.dos.projected[0][0]) == 2 + 2 + 4 + 4 + 6
-        ):
-            if len(self.dos.projected[0][0]) == 2 + 2 + 4 + 4 + 6:
-                all_orbitals = "-spd-j=0.5,1.5,2.5"
-            else:
-                all_orbitals = "-"
-        else:
-            if len(self.dos.projected[0][0]) == (1 + 3 + 5):
-                all_orbitals = "spd"
-            elif len(self.dos.projected[0][0]) == (1 + 3 + 5 + 7):
-                all_orbitals = "spdf"
-            else:
-                all_orbitals = ""
+        self.set_energy_label(point_data.points_label, unit_label=point_data.points_units)
+        self.set_energy_tick_params()
 
-        label = "-"
-        # For coupled basis
-        if len(self.dos.projected[0][0]) == 2 + 2 + 4 + 4 + 6:
-            if sum([x in orbitals for x in [0, 1]]) == 2:
-                label += "s-j=0.5"
-            if sum([x in orbitals for x in [2, 3]]) == 2:
-                label += "p-j=0.5"
-            if sum([x in orbitals for x in [4, 5, 6, 7]]) == 4:
-                label += "p-j=1.5"
-            if sum([x in orbitals for x in [8, 9, 10, 11]]) == 4:
-                label += "d-j=1.5"
-            if sum([x in orbitals for x in [12, 13, 14, 15, 16, 17]]) == 6:
-                label += "d-j=2.5"
-            if label == "-" + all_orbitals:
-                label = ""
-        # For uncoupled basis
-        else:
-            if sum([x in orbitals for x in [0]]) == 1:
-                label += "s"
-            if sum([x in orbitals for x in [1, 2, 3]]) == 3:
-                label += "p"
-            if sum([x in orbitals for x in [4, 5, 6, 7, 8]]) == 5:
-                label += "d"
-            if sum([x in orbitals for x in [9, 10, 11, 12, 13, 14, 15]]) == 7:
-                label += "f"
-            if label == "-" + all_orbitals:
-                label = ""
-        return label
-
-    def _setup_colorbar(self, dos_projected, dos_total_projected):
-
-        vmin, vmax = self._get_color_limits(dos_projected, dos_total_projected)
-        cmap = mpl.cm.get_cmap(self.config.cmap)
-
-        if self.config.plot_bar:
-            norm = mpl.colors.Normalize(vmin=vmin, vmax=vmax)
-            cb = self.fig.colorbar(
-                mpl.cm.ScalarMappable(norm=norm, cmap=cmap), ax=self.ax
-            )
-            cb.ax.tick_params(labelsize=self.config.colorbar_tick_labelsize)
-            cb.set_label(
-                self.config.colorbar_title,
-                size=self.config.colorbar_title_size,
-                rotation=270,
-                labelpad=self.config.colorbar_title_padding,
-            )
-
-    def _get_color_limits(self, dos_projected, dos_total_projected):
-        if self.config.clim:
-            self.clim = self.config.clim
-        else:
-            self.clim = [0, 0]
-            self.clim[0] = dos_projected.min() / dos_total_projected.max()
-            self.clim[1] = dos_projected.max() / dos_total_projected.max()
-        return self.clim
-
-    def _set_plot_limits(self, spin_channels):
-        total_max = 0
-        for ispin in range(len(spin_channels)):
-            tmp_max = self.dos.total[ispin].max()
-            if tmp_max > total_max:
-                total_max = tmp_max
-
-        if self.orientation == "horizontal":
-            x_label = self.config.x_label
-            y_label = self.config.y_label
-            xlim = [self.dos.energies.min(), self.dos.energies.max()]
-            ylim = (
-                [-self.dos.total.max(), total_max]
-                if len(spin_channels) == 2
-                else [0, total_max]
-            )
-        elif self.orientation == "vertical":
-            x_label = self.config.y_label
-            y_label = self.config.x_label
-            xlim = (
-                [-self.dos.total.max(), total_max]
-                if len(spin_channels) == 2
-                else [0, total_max]
-            )
-            ylim = [self.dos.energies.min(), self.dos.energies.max()]
-
-        self.set_xlabel(x_label)
-        self.set_ylabel(y_label)
-        self.set_xlim(xlim)
+        self.set_energy_label(point_data.points_label, unit_label=point_data.points_units)
+        self.set_dos_label(point_data.label, unit_label=point_data.units)
         self.set_ylim(ylim)
+        self.set_xlim(xlim)
+        self.set_dos_tick_params()
 
-    def _prepare_parametric_spin_data(
+        self.draw_baseline(value=0.0)
+
+    def add_line(self, x: np.ndarray, y: np.ndarray, label: str | None = None, **kwargs):
+        handle = self.ax.plot(x, y, label=label, **keep_func_kwargs(kwargs, self.ax.plot))
+        return handle
+
+    def add_scalar_line(
         self,
-        spin_channel,
-        ispin,
-        dos_total,
-        dos_projected,
-        dos_total_projected,
-        scale=False,
+        x: np.ndarray,
+        y: np.ndarray,
+        scalars: np.ndarray,
+        label: str | None = None,
+        clim: tuple[float | None, float | None] | None = None,
+        cmap: str | mcolors.Colormap = "plasma",
+        norm: mcolors.Normalize | str | None = None,
+        linewidth: float = 1.5,
+        linestyle: str = "-",
+        alpha: float = 1.0,
+        **kwargs,
     ):
-        """
-        Prepares the data for the parametric plot.
-
-        Parameters
-        ----------
-        spin_channel : int
-            The spin channel being plotted
-        ispin : int
-            The index of the spin channel being plotted
-        dos_total : np.ndarray
-            The total density of states
-        dos_projected : np.ndarray
-            The projected density of states
-        dos_total_projected : np.ndarray
-            The projected total density of states
-        scale : bool, optional
-            Boolean to scale the projected density of states
-
-        Returns
-        -------
-        x : np.ndarray
-            The x values
-        y_total : np.ndarray
-            The total y values
-        y_projected : np.ndarray
-            The projected y values
-
-        """
-        energies = self.dos.energies
-        dos_total = dos_total[spin_channel, :]
-        dos_projected = dos_projected[spin_channel, :]
-        dos_total_projected = dos_total_projected[spin_channel, :]
-        normalized_dos_projected = dos_projected / dos_total_projected
-
-        normalized_dos_projected = np.nan_to_num(normalized_dos_projected, 0)
-
-        if ispin > 0 and len(self.dos.total) > 1:
-            dos_total *= -1
-            dos_projected *= -1
-            dos_total_projected *= -1
-
-        if scale:
-            scaled_dos_projected = normalized_dos_projected * dos_total
-            final_dos_projected = scaled_dos_projected
-            threshold = max(abs(dos_total)) + 1
-            final_dos_projected[np.abs(final_dos_projected) > threshold] = 0
-        else:
-            final_dos_projected = normalized_dos_projected
-
-        return energies, dos_total, final_dos_projected
-
-    def _get_bar_color(self, values):
-        cmap = mpl.cm.get_cmap(self.config.cmap)
-        return [cmap(value) for value in values]
-
-    def _set_data_to_orientation(self, energies, dos_total):
-        if self.orientation == "horizontal":
-            data = {
-                "x": energies,
-                "y": dos_total,
-                "energies": energies,
-                "dos_value": dos_total,
-                "xlim": [energies.min(), energies.max()],
-                "ylim": [dos_total.min(), dos_total.max()],
-                "xlabel": self.config.x_label,
-                "ylabel": self.config.y_label,
-                "fill_func": self.ax.fill_between,
-            }
-        elif self.orientation == "vertical":
-            data = {
-                "x": dos_total,
-                "y": energies,
-                "energies": energies,
-                "dos_value": dos_total,
-                "xlim": [dos_total.min(), dos_total.max()],
-                "ylim": [energies.min(), energies.max()],
-                "xlabel": self.config.y_label,
-                "ylabel": self.config.x_label,
-                "fill_func": self.ax.fill_betweenx,
-            }
-        return data
-
-    def _plot_total_dos(self, energies, dos_total_spin, spin_channel):
-        """
-        Plots the total DOS.
-
-        Parameters
-        ----------
-        spin_channel : int
-            The spin channel being plotted
-        spins_index : int
-            The index of the spin channels being plotted. If spin index is 1,
-            then the spins dos is inverted on the axis.
-
-        Returns
-        -------
-        None
-            None
-        """
-
-        data = self._set_data_to_orientation(energies, dos_total_spin)
-
-        self.ax.plot(
-            data["x"],
-            data["y"],
-            color=self.config.color,
-            alpha=self.config.opacity[spin_channel],
-            linestyle=self.config.linestyle[spin_channel],
-            label=self.config.spin_labels[spin_channel],
-            linewidth=self.config.linewidth[spin_channel],
-        )
-
-    def _plot_spin_data_parametric(self, energies, dos_total, normalized_dos_projected):
-        bar_color = self._get_bar_color(normalized_dos_projected)
-        data = self._set_data_to_orientation(energies, dos_total)
-
-        self._plot_fill_between(
-            x=data["energies"],
-            y=data["dos_value"],
-            fill_func=data["fill_func"],
-            bar_color=bar_color,
-        )
-
-    def _plot_spin_data_parametric_line(
-        self, energies, dos_total_spin, normalized_dos_spin_projected, spin_channel
-    ):
-
-        data = self._set_data_to_orientation(energies, dos_total_spin)
-        points = np.array([data["x"], data["y"]]).T.reshape(-1, 1, 2)
-
-        # generates line segments. This is the reason for the offset of the points
+        points = np.column_stack([x, y]).reshape(-1, 1, 2)
         segments = np.concatenate([points[:-1], points[1:]], axis=1)
 
-        norm = mpl.colors.Normalize(vmin=self.clim[0], vmax=self.clim[1])
-        lc = LineCollection(segments, cmap=plt.get_cmap(self.config.cmap), norm=norm)
-        lc.set_array(normalized_dos_spin_projected)
-        lc.set_linewidth(self.config.linewidth[spin_channel])
-        lc.set_linestyle(self.config.linestyle[spin_channel])
-
+        lc = LineCollection(
+            segments,
+            array=scalars,
+            label=label,
+            clim=clim,
+            cmap=cmap,
+            norm=norm,
+            linewidth=linewidth,
+            linestyle=linestyle,
+            alpha=alpha,
+            **keep_func_kwargs(kwargs, LineCollection),
+        )
         handle = self.ax.add_collection(lc)
-        self.handles.append(handle)
-
-    def _plot_fill_between(
-        self, x, y, fill_func, bottom_value=0, bar_color=None, color=None
-    ):
-        if color:
-            final_color = color
-            handle = fill_func(x, y + bottom_value, bottom_value, color=final_color)
-        if bar_color:
-            for i in range(len(x) - 1):
-                handle = fill_func(
-                    [x[i], x[i + 1]], [y[i], y[i + 1]], color=bar_color[i]
-                )
         return handle
 
-    def _plot_spin_stack(
-        self, energies, scaled_projected_dos, bottom_value=0, color=None
+    def add_scalar_fill(
+        self,
+        x: np.ndarray,
+        y: np.ndarray,
+        scalars: np.ndarray,
+        label: str | None = None,
+        clim: tuple[float | None, float | None] | None = None,
+        cmap: str | mcolors.Colormap = "plasma",
+        norm: mcolors.Normalize | str | None = None,
+        baseline: float | None = 0.0,
+        **kwargs,
     ):
+        im = self.fill_between_image(
+            x,
+            y,
+            scalars,
+            orientation=self.orientation,
+            baseline=baseline,
+            label=label,
+            cmap=cmap,
+            norm=norm,
+            clim=clim,
+            **kwargs,
+        )
+        return im
 
-        data = self._set_data_to_orientation(energies, scaled_projected_dos)
-        handle = self._plot_fill_between(
-            x=data["energies"],
-            y=data["dos_value"],
-            fill_func=data["fill_func"],
-            bottom_value=bottom_value,
+    def add_vectors(
+        self,
+        x: np.ndarray,
+        y: np.ndarray,
+        vectors: np.ndarray,
+        label: str | None = None,
+        skip: int = 1,
+        angles: str = "uv",
+        scale: float = 100.0,
+        scale_units: str = "inches",
+        units: str = "inches",
+        color=None,
+        clim: tuple[float | None, float | None] | None = None,
+        norm: mcolors.Normalize | str | None = None,
+        cmap: str | mcolors.Colormap = "plasma",
+        **kwargs,
+    ):
+        u = vectors  # Arrow x-component
+        v = np.zeros_like(vectors)  # Arrow y-component
+        vector_norms = vectors
+
+        quiver_args = []
+        quiver_args.append(x[::skip])
+        quiver_args.append(y[::skip])
+        quiver_args.append(u[::skip])
+        quiver_args.append(v[::skip])
+        if color is None:
+            quiver_args.append(vector_norms[::skip])
+
+        qv = self.ax.quiver(
+            *quiver_args,
+            angles=angles,
+            scale=scale,
+            scale_units=scale_units,
+            units=units,
             color=color,
+            cmap=cmap,
+            norm=norm,
+            **keep_func_kwargs(kwargs, self.ax.quiver),
         )
 
-        bottom_value = data["dos_value"]
-        return bottom_value, handle
+    def plot_colorbar(
+        self,
+        label: str,
+        cmap: str | mcolors.Colormap = "plasma",
+        norm: mcolors.Normalize | str | None = None,
+        pad: float = 0.02,
+        shrink: float = 0.8,
+        orientation: str = "vertical",
+        location: str = "right",
+        set_colorbar_label_kwargs: dict | None = None,
+        set_colorbar_tick_params_kwargs: dict | None = None,
+        **kwargs,
+    ) -> None:
+        sm = cm.ScalarMappable(norm=norm, cmap=cmap)
 
-    def _plot_spin_overlay(
-        self, energies, scaled_projected_dos, spin_channel, color=None
-    ):
-
-        data = self._set_data_to_orientation(energies, scaled_projected_dos)
-
-        (handle,) = self.ax.plot(
-            data["x"],
-            data["y"],
-            color=color,
-            alpha=self.config.opacity[spin_channel],
-            linestyle=self.config.linestyle[spin_channel],
-            label=self.config.spin_labels[spin_channel],
-            linewidth=self.config.linewidth[spin_channel],
+        kwargs.update(
+            {
+                "pad": pad,
+                "shrink": shrink,
+                "orientation": orientation,
+                "location": location,
+            }
         )
 
-        return handle
+        self._cb_orientation = orientation
+        self._cb_location = location
+        self._cb = self.fig.colorbar(sm, ax=self.ax, **kwargs)
 
-    def set_xticks(
-        self, tick_positions: List[int] = None, tick_names: List[str] = None
-    ):
-        """A method to set the xticks of the plot
+        set_colorbar_label_kwargs = (
+            set_colorbar_label_kwargs if set_colorbar_label_kwargs is not None else {}
+        )
 
-        Parameters
-        ----------
-        tick_positions : List[int], optional
-            A list of tick positions, by default None
-        tick_names : List[str], optional
-            A list of tick names, by default None
+        self.set_colorbar_label(label, **set_colorbar_label_kwargs)
 
-        """
+        set_colorbar_tick_params_kwargs = (
+            set_colorbar_tick_params_kwargs if set_colorbar_tick_params_kwargs is not None else {}
+        )
+        self.set_colorbar_tick_params(**set_colorbar_tick_params_kwargs)
 
-        if tick_positions is not None:
-            self.ax.set_xticks(tick_positions)
-        if tick_names is not None:
-            self.ax.set_xticklabels(tick_names)
-        if self.config.major_x_tick_params:
-            self.ax.tick_params(**self.config.major_x_tick_params)
-        if self.config.minor_x_tick_params:
-            self.ax.tick_params(**self.config.minor_x_tick_params)
-        return None
-
-    def set_yticks(
-        self, tick_positions: List[int] = None, tick_names: List[str] = None
-    ):
-        """A method to set the yticks of the plot
-
-        Parameters
-        ----------
-        tick_positions : List[int], optional
-            A list of tick positions, by default None
-        tick_names : List[str], optional
-            A list of tick names, by default None
-
-        """
-        if tick_positions is not None:
-            self.ax.set_xticks(tick_positions)
-        if tick_names is not None:
-            self.ax.set_xticklabels(tick_names)
-
-        if self.config.major_y_tick_params:
-            self.ax.tick_params(**self.config.major_y_tick_params)
-        if self.config.minor_y_tick_params:
-            self.ax.tick_params(**self.config.minor_y_tick_params)
-        return None
-
-    def set_xlim(self, interval: List[int] = None):
-        """A method to set the xlim of the plot
-
-        Parameters
-        ----------
-        interval : List[int], optional
-            The x interval, by default None
-        """
-        if interval is not None:
-            self.ax.set_xlim(interval)
-        return None
-
-    def set_ylim(self, interval: List[int] = None):
-        """A method to set the ylim of the plot
-
-        Parameters
-        ----------
-        interval : List[int], optional
-            The y interval, by default None
-        """
-        if interval is not None:
-            self.ax.set_ylim(interval)
-
-        return None
-
-    def set_xlabel(self, label: str):
-        """A method to set the x label
-
-        Parameters
-        ----------
-        label : str
-            The x label name
-
-        Returns
-        -------
-        None
-            None
-        """
-        if self.config.x_label:
-            self.ax.set_xlabel(self.config.x_label, **self.config.x_label_params)
+    def set_colorbar_label(self, label: str, rotation=270, labelpad=12, **kwargs):
+        self._validate_colorbar()
+        if self.colorbar_orientation is AxesOrientation.VERTICAL:
+            self.colorbar_axes.set_ylabel(label, rotation=rotation, labelpad=labelpad, **kwargs)
         else:
-            self.ax.set_xlabel(label, **self.config.x_label_params)
-        return None
+            self.colorbar_axes.set_xlabel(label, rotation=rotation, labelpad=labelpad, **kwargs)
 
-    def set_ylabel(self, label: str):
-        """A method to set the y label
-
-        Parameters
-        ----------
-        label : str
-            The y label name
-
-        Returns
-        -------
-        None
-            None
-        """
-        if self.config.y_label:
-            self.ax.set_ylabel(self.config.y_label, **self.config.y_label_params)
+    def set_colorbar_tick_params(self, **kwargs):
+        self._validate_colorbar()
+        if self.colorbar_orientation is AxesOrientation.VERTICAL:
+            self.colorbar_axes.tick_params(axis="y", **kwargs)
         else:
-            self.ax.set_ylabel(label, **self.config.y_label_params)
+            self.colorbar_axes.tick_params(axis="x", **kwargs)
 
-    def legend(self, labels: List[str] = None):
-        """A method to include the legend
+    def set_colorbar_ticklabels(
+        self,
+        n_ticks: int = 5,
+        clim: tuple[float, float] = None,
+        labels: Sequence[str] = None,
+        **kwargs,
+    ):
+        self._validate_colorbar()
+        if (clim is None and labels is None) or (clim is not None and labels is not None):
+            raise ValueError("Either clim or labels must be provided")
+        elif clim is not None and labels is None:
+            labels = [f"{x:.2f}" for x in np.linspace(clim[0], clim[1], n_ticks)]
 
-        Parameters
-        ----------
-        label : str
-            The labels for the legend
+        if self.colorbar_orientation is AxesOrientation.VERTICAL:
+            self.colorbar_axes.set_yticklabels(labels, **kwargs)
+        else:
+            self.colorbar_axes.set_xticklabels(labels, **kwargs)
 
-        Returns
-        -------
-        None
-            None
-        """
-        if labels == None:
-            labels = self.labels
-        if self.config.legend and len(labels) != 0:
-            if len(self.handles) != len(labels):
-                raise ValueError(
-                    f"The number of labels and handles should be the same, currently there are {len(self.handles)} handles and {len(labels)} labels"
-                )
-            self.ax.legend(self.handles, labels, **self.config.legend_params)
-        return None
+    def set_colorbar_ticks(
+        self,
+        ticks: Sequence[float] | ticker.Locator | None = None,
+        labels: Sequence[str] = None,
+        n_ticks: int = 5,
+        **kwargs,
+    ):
+        self._validate_ticks(ticks, labels)
 
-    def draw_fermi(self, value, orientation: str = "horizontal"):
-        """A method to draw the fermi surface
+        if self.colorbar_orientation is AxesOrientation.VERTICAL:
+            self.colorbar_axes.set_yticks(ticks, labels, **kwargs)
+        else:
+            self.colorbar_axes.set_xticks(ticks, labels, **kwargs)
 
-        Parameters
-        ----------
-        orientation : str, optional
-            Boolean to plot vertical or horizontal, by default 'horizontal'
-        color : str, optional
-            A color , by default "blue"
-        linestyle : str, optional
-            THe line style, by default "dotted"
-        linewidth : float, optional
-            The linewidth, by default 1
+    def get_colorbar_ticks(self):
+        if self.colorbar_orientation is AxesOrientation.VERTICAL:
+            return self.colorbar_axes.get_yticks()
+        else:
+            return self.colorbar_axes.get_xticks()
 
-        Returns
-        -------
-        None
-            None
-        """
-        if orientation == "horizontal":
-            self.ax.axvline(
-                x=value,
-                color=self.config.fermi_color,
-                linestyle=self.config.fermi_linestyle,
-                linewidth=self.config.fermi_linewidth,
+    def get_colorbar_lim(self):
+        if self.colorbar_orientation is AxesOrientation.VERTICAL:
+            return self.colorbar_axes.get_ylim()
+        else:
+            return self.colorbar_axes.get_xlim()
+
+    def get_colorbar_ticklabels(self):
+        if self.colorbar_orientation is AxesOrientation.VERTICAL:
+            return self.colorbar_axes.get_yticklabels()
+        else:
+            return self.colorbar_axes.get_xticklabels()
+
+    def _validate_ticks(self, ticks: Sequence[float] | ticker.Locator, labels: Sequence[str]):
+        if isinstance(ticks, ticker.Locator):
+            ticks = ticks.get_ticks()
+        if isinstance(labels, ticker.Locator):
+            labels = labels.get_ticklabels()
+        if len(ticks) != len(labels):
+            raise ValueError(
+                f"Ticks and labels must have the same length: {len(ticks)} != {len(labels)}"
             )
-        elif orientation == "vertical":
-            self.ax.axhline(
-                y=value,
-                color=self.config.fermi_color,
-                linestyle=self.config.fermi_linestyle,
-                linewidth=self.config.fermi_linewidth,
+
+    def _validate_colorbar(self):
+        if not hasattr(self, "colorbar"):
+            raise ValueError(
+                "There is no colorbar for this plotter. call colorbar() or plot() with show_colorbar=True"
             )
-        return None
 
-    def draw_baseline(self, value, orientation: str = "horizontal"):
-        """A method to draw the baseline
+    # ------------------------------------------------------------------
+    # Orientation utilities
+    # ------------------------------------------------------------------
 
-        Parameters
-        ----------
-        value : float
-            The value of the baseline
-        """
-        if orientation == "horizontal":
-            self.ax.axhline(y=value, **self.config.baseline_params)
-        elif orientation == "vertical":
-            self.ax.axvline(x=value, **self.config.baseline_params)
-        return None
+    def orient_data(
+        self, energies: np.ndarray, values: np.ndarray
+    ) -> tuple[np.ndarray, np.ndarray]:
+        energies = np.asarray(energies, dtype=np.float64).reshape(-1)
+        values = np.asarray(values, dtype=np.float64)
 
-    def grid(self):
-        """A method to include a grid on the plot.
+        logger.debug(f"Plot orientation: {self.orientation}")
+        if self.orientation is AxesOrientation.HORIZONTAL:
+            return energies, values
+        return values, energies
 
-        Returns
-        -------
-        None
-            None
-        """
-        if self.config.grid:
-            self.ax.grid(
-                self.config.grid,
-                which=self.config.grid_which,
-                color=self.config.grid_color,
-                linestyle=self.config.grid_linestyle,
-                linewidth=self.config.grid_linewidth,
+    def fill_between(
+        self,
+        energies: Iterable[float],
+        values: Iterable[float],
+        baseline: float | np.ndarray | None = 0.0,
+        **kwargs,
+    ):
+        # energies = np.asarray(list(energies), dtype=np.float64)
+        # values = np.asarray(list(values), dtype=np.float64)
+        # values = values.squeeze()
+
+        if self.orientation is AxesOrientation.HORIZONTAL:
+            return self.ax.fill_between(energies, values, baseline, **kwargs)
+        return self.ax.fill_betweenx(energies, baseline, values, **kwargs)
+
+    def fill_between_image(
+        self,
+        x: np.ndarray,
+        y: np.ndarray,
+        values: np.ndarray,
+        orientation: AxesOrientation = AxesOrientation.HORIZONTAL,
+        baseline: float | None = 0.0,
+        origin="lower",
+        aspect="auto",
+        interpolation="bilinear",
+        zorder=0,
+        cmap: str | mcolors.Colormap = "plasma",
+        norm: mcolors.Normalize | str | None = None,
+        clim: tuple[float | None, float | None] | None = None,
+        label: str | None = None,
+        plot_total: bool = True,
+        **kwargs,
+    ):
+        if baseline is None:
+            # match Matplotlib's default semantics: fill to 0 if not given
+            baseline_arr = np.zeros_like(values)
+        else:
+            baseline_arr = (
+                np.asarray(baseline, dtype=float) if np.ndim(baseline) else float(baseline)
             )
-        return None
+            if np.ndim(baseline_arr) == 0:
+                baseline_arr = np.full_like(values, baseline_arr)
 
-    def show(self):
-        """A method to show the plot
+        y = y.squeeze()
+        x = x.squeeze()
+        baseline_arr = baseline_arr.squeeze()
 
-        Returns
-        -------
-        None
-            None
-        """
+        if orientation is AxesOrientation.HORIZONTAL:
+            x_shift = x
+            y_shift = y + baseline_arr
+            img = values[np.newaxis, :]  # shape (1, N)
+
+            x_poly_coords = np.r_[x_shift, x_shift[::-1]]
+            y_poly_coords = np.r_[y_shift, baseline_arr[::-1]]
+        else:
+            img = values[:, np.newaxis]  # shape (1, N)
+
+            x_shift = x + baseline_arr
+            y_shift = y
+
+            x_poly_coords = np.r_[x_shift, baseline_arr[::-1]]
+            y_poly_coords = np.r_[y_shift, y_shift[::-1]]
+
+        ylo = np.nanmin(np.c_[y_shift, baseline_arr])
+        yhi = np.nanmax(np.c_[y_shift, baseline_arr])
+        xlo = np.nanmin(np.c_[x_shift, baseline_arr])
+        xhi = np.nanmax(np.c_[x_shift, baseline_arr])
+
+        im = self.ax.imshow(
+            img,
+            extent=[xlo, xhi, ylo, yhi],
+            origin=origin,
+            aspect=aspect,
+            interpolation=interpolation,
+            zorder=zorder,
+            cmap=cmap,
+            norm=norm,
+            clim=clim,
+            **keep_func_kwargs(kwargs, self.ax.imshow),
+        )
+
+        # clip polygon under/over the curve (y between v and b)
+        x_poly_coords = np.r_[x_shift, baseline_arr[::-1]]
+        y_poly_coords = np.r_[y_shift, baseline_arr[::-1]]
+        poly_xy = np.column_stack([x_poly_coords, y_poly_coords])
+
+        patch = patches.Polygon(poly_xy, closed=True, facecolor="none", edgecolor="none")
+        self.ax.add_patch(patch)
+        im.set_clip_path(patch)
+
+        return im
+
+    # ------------------------------------------------------------------
+    # Axis utilities
+    # ------------------------------------------------------------------
+
+    def set_dos_label(self, label: str = "DOS", unit_label: str = None):
+        if unit_label is not None:
+            label = f"{label} ({unit_label})"
+        if self.orientation is AxesOrientation.HORIZONTAL:
+            self.set_ylabel(label)
+        else:
+            self.set_xlabel(label)
+
+    def set_dos_lim(self, lim: tuple[float, float] = None, point_data: Property | None = None):
+        if point_data is not None:
+            lim = self._infer_point_dat_lim(point_data)
+
+        if self.dos_lim is not None:
+            self.dos_lim = (min(self.dos_lim[0], lim[0]), max(self.dos_lim[1], lim[1]))
+        else:
+            self.dos_lim = lim
+
+        if self.orientation is AxesOrientation.HORIZONTAL:
+            self.set_ylim(self.dos_lim)
+        else:
+            self.set_xlim(self.dos_lim)
+
+    def set_dos_ticklabel(self, labels: Sequence[str] = None, positions: Sequence[float] = None):
+        if self.orientation is AxesOrientation.HORIZONTAL:
+            self.set_yticklabel(labels, positions)
+        else:
+            self.set_xticklabel(labels, positions)
+
+    def set_dos_tick_params(self, which: str = "major", **kwargs):
+        if self.orientation is AxesOrientation.HORIZONTAL:
+            self.set_ytick_params(which=which, **kwargs)
+        else:
+            self.set_xtick_params(which=which, **kwargs)
+
+    def set_energy_label(self, label: str = "Energy", unit_label: str = None):
+        if unit_label is not None:
+            label = f"{label} ({unit_label})"
+        if self.orientation is AxesOrientation.HORIZONTAL:
+            self.set_xlabel(label)
+        else:
+            self.set_ylabel(label)
+
+    def set_energy_lim(self, lim: tuple[float, float] = None, point_data: Property | None = None):
+        if point_data is not None:
+            lim = self._infer_points_lim(point_data)
+
+        if self.energy_lim is not None:
+            self.energy_lim = (min(self.energy_lim[0], lim[0]), max(self.energy_lim[1], lim[1]))
+        else:
+            self.energy_lim = lim
+
+        if self.orientation is AxesOrientation.HORIZONTAL:
+            self.set_xlim(self.energy_lim)
+        else:
+            self.set_ylim(self.energy_lim)
+
+    def set_energy_ticklabel(self, labels: Sequence[str] = None, positions: Sequence[float] = None):
+        if self.orientation is AxesOrientation.HORIZONTAL:
+            self.set_xticklabel(labels, positions)
+        else:
+            self.set_yticklabel(labels, positions)
+
+    def set_energy_tick_params(self, which: str = "major", **kwargs):
+        if self.orientation is AxesOrientation.HORIZONTAL:
+            self.set_xtick_params(which=which, **kwargs)
+        else:
+            self.set_ytick_params(which=which, **kwargs)
+
+    def _infer_points_lim(self, point_data: Property) -> tuple[float, float]:
+        point_data_array = point_data.points
+        return point_data_array.min(), point_data_array.max()
+
+    def _infer_point_dat_lim(self, point_data: Property) -> tuple[float, float]:
+        point_data_array = point_data.to_array()
+        return point_data_array.min(), point_data_array.max()
+
+    # ------------------------------------------------------------------
+    # Drawing helpers
+    # ------------------------------------------------------------------
+    def draw_baseline(
+        self, value: float, color="black", linewidth=0.8, linestyle="--", **kwargs
+    ) -> None:
+        all_kwargs = dict(color=color, linewidth=linewidth, linestyle=linestyle, **kwargs)
+        if self.orientation is AxesOrientation.HORIZONTAL:
+            self.ax.axhline(value, **all_kwargs)
+        else:
+            self.ax.axvline(value, **all_kwargs)
+
+    def draw_fermi(
+        self, value: float, color="tab:red", linewidth=1.0, linestyle="--", **kwargs
+    ) -> None:
+        all_kwargs = dict(color=color, linewidth=linewidth, linestyle=linestyle, **kwargs)
+        if self.orientation is AxesOrientation.HORIZONTAL:
+            self.ax.axvline(value, **all_kwargs)
+        else:
+            self.ax.axhline(value, **all_kwargs)
+
+    def tight_layout(self):
+        plt.tight_layout()
+
+    def show(self, tight_layout: bool = True):
+        if tight_layout:
+            plt.tight_layout()
         plt.show()
-        return None
 
-    def save(self, filename: str = "dos.pdf"):
-        """A method to save the plot
+    # ------------------------------------------------------------------
+    # Public axis utilities
+    # ------------------------------------------------------------------
+    def set_title(self, title: str | None, **kwargs) -> None:
+        if title is not None:
+            self.ax.set_title(title, **kwargs)
 
-        Parameters
-        ----------
-        filename : str, optional
-            The filename, by default 'dos.pdf'
+    def set_xlim(self, limits: tuple[float, float] | None, **kwargs) -> None:
+        if limits is None:
+            return
+        self.ax.set_xlim(limits, **kwargs)
 
-        Returns
-        -------
-        None
-            None
-        """
+    def set_ylim(self, limits: tuple[float, float] | None, **kwargs) -> None:
+        if limits is None:
+            return
+        self.ax.set_ylim(limits, **kwargs)
 
-        plt.savefig(filename, dpi=self.config.dpi, bbox_inches="tight")
-        plt.clf()
-        return None
+    def set_xlabel(self, label: str | None, **kwargs) -> None:
+        label_to_use = label if label is not None else ""
+        self.ax.set_xlabel(label_to_use, **kwargs)
 
-    def update_config(self, config_dict):
-        for key, value in config_dict.items():
-            self.config[key]["value"] = value
+    def set_ylabel(self, label: str | None, **kwargs) -> None:
+        label_to_use = label if label is not None else ""
+        self.ax.set_ylabel(label_to_use, **kwargs)
 
-    def export_data(self, filename):
-        """
-        This method will export the data to a csv file
+    def set_xticklabel(
+        self,
+        labels: Sequence[str] | None,
+        positions: Sequence[float] | None = None,
+        **kwargs,
+    ) -> None:
+        if positions is not None:
+            self.ax.set_xticks(positions)
+        if labels is not None:
+            self.ax.set_xticklabels(labels, **kwargs)
 
-        Parameters
-        ----------
-        filename : str
-            The file name to export the data to
+    def set_yticklabel(
+        self,
+        labels: Sequence[str] | None,
+        positions: Sequence[float] | None = None,
+        **kwargs,
+    ) -> None:
+        if positions is not None:
+            self.ax.set_yticks(positions)
+        if labels is not None:
+            self.ax.set_yticklabels(labels, **kwargs)
 
-        Returns
-        -------
-        None
-            None
-        """
-        possible_file_types = ["csv", "txt", "json", "dat"]
-        file_type = filename.split(".")[-1]
-        if file_type not in possible_file_types:
-            raise ValueError(f"The file type must be {possible_file_types}")
-        if self.values_dict is None:
-            raise ValueError("The data has not been plotted yet")
+    def set_tick_params(self, axis: str = "both", which: str = "major", **kwargs) -> None:
+        self.ax.tick_params(axis=axis, **kwargs)
 
-        column_names = list(self.values_dict.keys())
-        sorted_column_names = [None] * len(column_names)
-        index = 0
-        for column_name in column_names:
-            if "energies" in column_name.split("_")[0]:
-                sorted_column_names[index] = column_name
-                index += 1
+    def set_xtick_params(self, which: str = "major", **kwargs) -> None:
+        self.set_tick_params(axis="x", which=which, **kwargs)
 
-        for column_name in column_names:
-            if "dosTotalSpin" in column_name.split("_")[0]:
-                sorted_column_names[index] = column_name
-                index += 1
-        for ispin in range(2):
-            for column_name in column_names:
+    def set_ytick_params(self, which: str = "major", **kwargs) -> None:
+        self.set_tick_params(axis="y", which=which, **kwargs)
 
-                if "spinChannel-0" in column_name.split("_")[0] and ispin == 0:
-                    sorted_column_names[index] = column_name
-                    index += 1
-                if "spinChannel-1" in column_name.split("_")[0] and ispin == 1:
-                    sorted_column_names[index] = column_name
-                    index += 1
+    def set_footnote(
+        self,
+        footnote: str | None,
+        xy: tuple[float, float] = (0.0, -0.22),
+        fontsize: str = "small",
+        color: str = "0.4",
+        textcoords: str = "offset points",
+        xytext: tuple[float, float] = (0, 0.0),
+        ha: str = "left",
+        va: str = "bottom",
+        annotation_clip: bool = False,
+        xycoords: tuple[str, str] = ("axes fraction", "axes fraction"),
+        **kwargs,
+    ) -> None:
+        footnote = f"footnote: {footnote}"
+        if footnote is not None:
+            self.ax.annotate(
+                footnote,
+                xy=xy,
+                xycoords=xycoords,
+                xytext=xytext,
+                textcoords=textcoords,
+                ha=ha,
+                va=va,
+                fontsize=fontsize,
+                color=color,
+                annotation_clip=annotation_clip,
+                **kwargs,
+            )
 
-        column_names.sort()
-        if file_type == "csv":
-            df = pd.DataFrame(self.values_dict)
-            df.to_csv(filename, columns=sorted_column_names, index=False)
-        elif file_type == "txt":
-            df = pd.DataFrame(self.values_dict)
-            df.to_csv(filename, columns=sorted_column_names, sep="\t", index=False)
-        elif file_type == "json":
-            with open(filename, "w") as outfile:
-                for key, value in self.values_dict.items():
-                    self.values_dict[key] = value.tolist()
-                json.dump(self.values_dict, outfile)
-        elif file_type == "dat":
-            df = pd.DataFrame(self.values_dict)
-            df.to_csv(filename, columns=sorted_column_names, sep=" ", index=False)
+    def legend(
+        self,
+        handles: Sequence[Any] | None = None,
+        labels: Sequence[str] | None = None,
+        **kwargs,
+    ) -> None:
+        if handles is not None or labels is not None:
+            self.ax.legend(handles, labels, **kwargs)
+        else:
+            self.ax.legend(**kwargs)
+
+    # ------------------------------------------------------------------
+    # Data capture helpers
+    # ------------------------------------------------------------------
+    def store_arrays(self, mapping: Mapping[str, np.ndarray]) -> None:
+        self._values.update({key: np.asarray(value) for key, value in mapping.items()})
+
+    @property
+    def values_dict(self) -> dict[str, np.ndarray]:
+        return dict(self._values)
+
+    def _resolve_channel_param(self, param: Iterable[Any] | None) -> Sequence[Any]:
+        if len(param) > 1:
+            return param
+        return param[0]
+
+
+def _as_channels(values: np.ndarray) -> np.ndarray:
+    """Lay DOS data out as (n_points, 1 band, n_channels) for ``line_series``."""
+    return values.reshape(values.shape[0], 1, -1)
+
+
+def _resolve_scaling(
+    values: list[np.ndarray | None],
+    lims: list[tuple[float, float] | None],
+    *,
+    show_colorbar: ShowColorbar | str | None,
+    cmap: str | mcolors.Colormap | None,
+    norm: str | mcolors.Normalize | None,
+    clim: tuple[float | None, float | None] | None,
+):
+    """Per-series (cmap, norm, clim) plus the parsed colorbar mode.
+
+    A single colorbar shares the user's clim (default 0 to 1) across series;
+    otherwise each channel resolves its own limits.
+    """
+    show_colorbar = ShowColorbar.from_string(show_colorbar)
+    n = len(values)
+    if show_colorbar is ShowColorbar.SINGLE:
+        shared = _ensure_norm(norm, clim or (0.0, 1.0))
+        return [_ensure_cmap(cmap)] * n, [shared] * n, [clim] * n, show_colorbar
+    per_clim = [resolve_clim(clim, [lims[i]], [values[i]]) for i in range(n)]
+    per_norm = [_ensure_norm(norm, c) for c in per_clim]
+    per_cmap = [_ensure_cmap(cmap) if cmap is not None else None] * n
+    return per_cmap, per_norm, per_clim, show_colorbar
+
+
+def _ensure_cmap(cmap):
+    if cmap is None:
+        return plt.get_cmap("plasma")
+    return plt.get_cmap(cmap) if isinstance(cmap, str) else cmap
+
+
+def _ensure_norm(norm, clim):
+    if isinstance(norm, mcolors.Normalize):
+        return norm
+    return mcolors.Normalize(*clim, clip=True)

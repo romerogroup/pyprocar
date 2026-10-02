@@ -1,42 +1,36 @@
 #!/usr/bin/env python
 
-import matplotlib.pyplot as plt
 import numpy as np
 
-from .. import io
-from ..pyposcar.clusters import Clusters
-from ..pyposcar.defects import FindDefect
-from ..pyposcar.generalUtils import remove_flat_points
-from ..pyposcar.poscar import Poscar
-from ..scripts.scriptBandsplot import bandsplot
+from pyprocar.core import ElectronicBandStructure
+from pyprocar.io import get_parser
+from pyprocar.pyposcar.clusters import Clusters
+from pyprocar.pyposcar.defects import FindDefect
+from pyprocar.pyposcar.poscar import Poscar
+from pyprocar.scripts.scriptBandsplot import bandsplot
 
 try:
-    from sklearn.neighbors.kde import KernelDensity
+    pass
 except:
-    from sklearn.neighbors import KernelDensity
-
-from scipy.signal import argrelextrema
+    pass
 
 
 class AutoBandsPlot:
-    def __init__(self, code="vasp", dirname=".", fermi: int = None):
-
-        self.parser = io.Parser(code="vasp", dirpath=dirname)
+    def __init__(self, code="vasp", dirname=".", fermi: int = None, use_cache=False):
+        self.parser = get_parser(code, dirname)
         self.code = code
-        self.ebs = self.parser.ebs
+        self.ebs = ElectronicBandStructure.from_code(code, dirname, use_cache=use_cache)
 
         codes_with_scf_fermi = ["qe", "elk"]
         if code in codes_with_scf_fermi and fermi is None:
-            logger.info(
-                f"No fermi given, using the found fermi energy: {self.ebs.efermi}"
-            )
-            fermi = self.ebs.efermi
+            logger.info(f"No fermi given, using the found fermi energy: {self.ebs.fermi}")
+            fermi = self.ebs.fermi
         elif fermi is None:
             fermi = 0
         self.fermi = fermi
 
         self.dirname = dirname
-        self.structure = self.parser.structure
+        self.structure = self.ebs.structure
         self.kpath = self.ebs.kpath
         self.ispin = self.ebs.bands.shape[-1]
         self.bands_up = self.ebs.bands[:, :, 0] - fermi
@@ -44,9 +38,10 @@ class AutoBandsPlot:
         if self.ispin == 2:
             self.bands_down = self.ebs.bands[:, :, 1] - fermi
 
-        self.IPR = self.ebs.ebs_ipr()
-        self.pIPR = self.ebs.ebs_ipr_atom()
-
+        self.IPR = self.ebs.ebs_ipr
+        self.pIPR = self.ebs.ebs_ipr_atom
+        print(self.pIPR.shape)
+        print(self.IPR.shape)
         #
         # Setting the energy window for plotting
         #
@@ -239,9 +234,7 @@ class AutoBandsPlot:
         # print('clusters', c.clusters)
         return c.clusters
 
-    def find_defect_states(
-        self, defects=None, factor=0.70, IPR_threshold=None, k_threshold=0.25
-    ):
+    def find_defect_states(self, defects=None, factor=0.70, IPR_threshold=None, k_threshold=0.25):
         """Find those localized states which correlate with any given defect.
 
         Returns
@@ -269,7 +262,7 @@ class AutoBandsPlot:
             Ndefect = len(defect)
             Nratio = Ndefect / Natoms
             # spin up first
-            pipr = self.pIPR[:, :, :, 0]
+            pipr = self.pIPR[:, :, 0, :]
             ipr = self.IPR[:, :, 0]
             bands = self.bands_up
             pipr = np.sum(pipr[:, :, defect], axis=-1)
@@ -346,9 +339,7 @@ class AutoBandsPlot:
             if self.ispin == 2:
                 states_down = self.defect_states[i][0]
                 if len(states_down) > 0:
-                    f.write(
-                        "Spin 1, defect " + str(i) + " " + str(self.defects[i]) + " \n"
-                    )
+                    f.write("Spin 1, defect " + str(i) + " " + str(self.defects[i]) + " \n")
                     if verbosity:
                         f.write("[kpoint index, band_index]\n")
                         f.write(str(states_down) + "\n\n")
@@ -361,9 +352,7 @@ class AutoBandsPlot:
         for i in range(len(self.clusters)):
             states_up = self.cluster_states[i][0]
             if len(states_up) > 0:
-                f.write(
-                    "Spin 0, cluster " + str(i) + " " + str(self.clusters[i]) + " \n"
-                )
+                f.write("Spin 0, cluster " + str(i) + " " + str(self.clusters[i]) + " \n")
                 if verbosity:
                     f.write("[kpoint index, band_index]\n")
                     f.write(str(states_up) + "\n\n")
@@ -373,13 +362,7 @@ class AutoBandsPlot:
             if self.ispin == 2:
                 states_down = self.cluster_states[i][0]
                 if len(states_down) > 0:
-                    f.write(
-                        "Spin 1, cluster "
-                        + str(i)
-                        + " "
-                        + str(self.clusters[i])
-                        + " \n"
-                    )
+                    f.write("Spin 1, cluster " + str(i) + " " + str(self.clusters[i]) + " \n")
                     if verbosity:
                         f.write("[kpoint index, band_index]\n")
                         f.write(str(states_down) + "\n\n")
@@ -468,5 +451,5 @@ class AutoBandsPlot:
             )
 
 
-def autobandsplot(code="vasp", dirname=".", fermi: int = None):
-    a = AutoBandsPlot(code=code, dirname=dirname, fermi=fermi)
+def autobandsplot(code="vasp", dirname=".", fermi: int = None, use_cache=False):
+    a = AutoBandsPlot(code=code, dirname=dirname, fermi=fermi, use_cache=use_cache)

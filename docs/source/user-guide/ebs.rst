@@ -12,13 +12,13 @@ labels, reciprocal_lattice, and shifted_to_efermi.
 Accessing Electronic Band Structure
 +++++++++++++++++++++++++++++++++++++
 
-The ElectronicBandStructure object (referred to as "ebs") can be accessed through the main io.Parser class:
+The ElectronicBandStructure object (referred to as "ebs") can be accessed through the parser that io.get_parser returns:
 
 .. code-block:: python
 
     import pyprocar
 
-    parser = pyprocar.io.Parser(code = 'vasp', dir=path_to_calculation)
+    parser = pyprocar.io.get_parser('vasp', path_to_calculation)
     ebs = parser.ebs
 
 Using the ebs object, you can access various information related to the electronic band structure:

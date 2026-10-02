@@ -1,0 +1,53 @@
+{
+  "name": "Ubuntu 24.04",
+  "build": {
+    "dockerfile": "Dockerfile"
+  },
+  "mounts": [
+    "source=${localEnv:USERPROFILE}\\.ssh,target=/home/developer/.ssh,type=bind,consistency=cached",
+
+    // Mount .pixi cache to host for faster package management
+    "source=pixi-cache,target=/workspaces/${localWorkspaceFolderBasename}/.pixi,type=volume"
+
+  ],
+  "workspaceMount": "source=${localWorkspaceFolder},target=/workspaces/${localWorkspaceFolderBasename},type=bind,consistency=delegated",
+  "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
+
+  "forwardPorts": [6080],
+  "settings": {
+    "terminal.integrated.defaultProfile.linux": "bash"
+  },
+  "postCreateCommand": "pixi install -e dev",
+
+
+
+  "features": {
+      "desktop-lite": {}
+  },
+  "portsAttributes": {
+      "6080": {
+      "label": "desktop"
+      }
+  },
+
+
+  "customizations": {
+    "vscode": {
+      "extensions": [
+          "ms-azuretools.vscode-docker",
+          "ms-vscode.remote-containers",
+          "GitHub.vscode-pull-request-github",
+          "detachhead.basedpyright",
+          "ms-python.python",
+          "tamasfe.even-better-toml",
+          "charliermarsh.ruff",
+          "jjjermiah.pixi-vscode",
+          "formulahendry.auto-close-tag",
+          "shd101wyy.markdown-preview-enhanced",
+          "pkief.material-icon-theme",
+          "mechatroner.rainbow-csv",
+          "tomoki1207.pdf"
+      ]
+    }
+  }
+}

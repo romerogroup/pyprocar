@@ -3,11 +3,11 @@ name: Create Draft Release
 on:
   push:
     tags:
-      - 'v*'  # Trigger this workflow on any tag push starting with 'v'
+      - "v*" # Trigger this workflow on any tag push starting with 'v'
 
   create:
     tags:
-      - 'v*'  # Trigger this workflow on tag creation starting with 'v'
+      - "v*" # Trigger this workflow on tag creation starting with 'v'
 
 jobs:
   create-release:

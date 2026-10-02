@@ -1,10 +1,9 @@
-
-import os
 import subprocess
-import sys
+
 import requests
 
-def get_releases_data(repo_name=None,github_token=None, verbose=False):
+
+def get_releases_data(repo_name=None, github_token=None, verbose=False):
     headers = {
         "Authorization": f"token {github_token}",
         "Accept": "application/vnd.github.v3+json",
@@ -29,23 +28,21 @@ def get_releases_data(repo_name=None,github_token=None, verbose=False):
 
     return release_data
 
+
 def run_git_command(command):
     try:
-        result = subprocess.run(['git'] + command.split(), 
-                                check=True, 
-                                capture_output=True, 
-                                text=True)
+        result = subprocess.run(
+            ["git"] + command.split(), check=True, capture_output=True, text=True
+        )
         return result.stdout
     except subprocess.CalledProcessError as e:
         # print(f"An error occurred: {e}")
         return e.stderr
-    
+
+
 def bash_command(command):
     try:
-        result = subprocess.run(command.split(), 
-                                check=True, 
-                                capture_output=True, 
-                                text=True)
+        result = subprocess.run(command.split(), check=True, capture_output=True, text=True)
         return result.stdout
     except subprocess.CalledProcessError as e:
         # print(f"An error occurred: {e}")

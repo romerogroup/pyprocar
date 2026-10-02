@@ -1,34 +1,32 @@
-
-add_axes_labels:  
+add_axes_labels:
   description: Boolean to add axes labels
   value: true
-add_legend:  
+add_legend:
   description: Boolean to add legend
   value: false
 plot_color_bar:
   description: Boolean to plot the color bar
   value: false
 
-
-cmap:  
+cmap:
   description: The colormap used for the plot.
   value: magma
 
 clim:
-    description: The color scale for the color bar
-    value: 
+  description: The color scale for the color bar
+  value:
     -
     -
 color:
   description: The colors for the spin plot lines.
   value:
-  - blue
-  - red
+    - blue
+    - red
 linestyle:
   description: The linestyles for the spin plot lines.
   value:
-  - solid
-  - dashed
+    - solid
+    - dashed
 linewidth:
   description: The linewidth of the fermi surface
   value: 0.2

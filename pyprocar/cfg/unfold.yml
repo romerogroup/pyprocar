@@ -1,17 +1,17 @@
 spin_colors:
   description: The colors for the plot lines.
   value:
-  - blue
-  - red
+    - blue
+    - red
 color:
   description: The colors for the plot lines.
-  value: '#eeeeee'
+  value: "#eeeeee"
 cmap:
   description: The colormap used for the plot.
   value: jet
 clim:
-    description: The color scale for the color bar
-    value:
+  description: The color scale for the color bar
+  value:
     -
     -
 fermi_color:
@@ -44,38 +44,38 @@ grid_which:
 label:
   description: The labels for the plot lines.
   value:
-  - $\uparrow$
-  - $\downarrow$
+    - $\uparrow$
+    - $\downarrow$
 legend:
   description: If true, a legend will be shown on the plot.
   value: true
 linestyle:
   description: The linestyles for the plot lines.
   value:
-  - solid
-  - dashed
+    - solid
+    - dashed
 linewidth:
   description: The linewidths for the plot lines.
   value:
-  - 1.0
-  - 1.0
+    - 1.0
+    - 1.0
 marker:
   description: The marker styles for the plot points.
   value:
-  - o
-  - v
-  - ^
-  - D
+    - o
+    - v
+    - ^
+    - D
 markersize:
   description: The size of the markers for the plot points.
   value:
-  - 0.2
-  - 0.2
+    - 0.2
+    - 0.2
 opacity:
   description: The opacities for the plot lines.
   value:
-  - 0.3
-  - 0.3
+    - 0.3
+    - 0.3
 plot_color_bar:
   description: If true, a color bar will be shown on the plot.
   value: true
@@ -94,11 +94,11 @@ weighted_width:
 figure_size:
   description: The size of the figure (width, height) in inches.
   value:
-  - 9
-  - 6
+    - 9
+    - 6
 dpi:
   description: The resolution in dots per inch. If 'figure', use the figure's dpi value.
-  value: 'figure'
+  value: "figure"
 
 major_x_tick_params:
   direction: in

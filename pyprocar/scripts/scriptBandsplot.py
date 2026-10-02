@@ -1,53 +1,113 @@
-_author__ = "Pedram Tavadze and Logan Lang"
+__author__ = "Pedram Tavadze and Logan Lang"
 __maintainer__ = "Pedram Tavadze and Logan Lang"
 __email__ = "petavazohi@mail.wvu.edu, lllang@mix.wvu.edu"
 __date__ = "March 31, 2020"
 
 import logging
-import os
-from typing import List
+from enum import Enum
+from typing import Any, cast
 
 import matplotlib.pyplot as plt
 import numpy as np
 
-from pyprocar import io
-from pyprocar.cfg import ConfigFactory, ConfigManager, PlotType
-from pyprocar.plotter import EBSPlot
-from pyprocar.utils import data_utils, welcome
-from pyprocar.utils.info import orbital_names
-from pyprocar.utils.log_utils import set_verbose_level
+from pyprocar.cfg import ConfigFactory, ConfigManager
+from pyprocar.cfg.band_structure import BandStructureConfig
+from pyprocar.cfg.base import PlotType
+from pyprocar.core import ElectronicBandStructurePath, Structure
+from pyprocar.core.property_store import Property
+from pyprocar.plotter.bs_plot import BandStructurePlotter
+from pyprocar.scripts._selection import (
+    orbital_indices,
+    per_channel,
+    projection_components,
+    resolve_spins,
+    signed_clim,
+    take_channels,
+)
+from pyprocar.utils.splash import welcome
 
 user_logger = logging.getLogger("user")
 logger = logging.getLogger(__name__)
+
+
+class BandStructureMode(Enum):
+    """
+    An enumeration for defining the modes of Band Structure representations.
+
+    Attributes
+    ----------
+    PLAIN : str
+        Represents the band structure in a simple, where the colors are the different bands.
+    PARAMETRIC : str
+        Represents the band structure in a parametric form, summing over the projections.
+    SACATTER : str
+        Represents the band structure in a scatter plot, where the colors are the different bands.
+    ATOMIC : str
+        Represents the band structure in an atomic level plot, plots singlr kpoint bands.
+    OVERLAY : str
+        Represents the band structure in an overlay plot, where the colors are the selected projections
+    OVERLAY_SPECIES : str
+        Represents the band structure in an overlay plot, where the colors are
+        the different projection of the species.
+    OVERLAY_ORBITALS : str
+        Represents the band structure in an overlay plot, where  the colors are
+        the different projection of the orbitals.
+    """
+
+    PLAIN = "plain"
+    PARAMETRIC = "parametric"
+    SACATTER = "scatter"
+    ATOMIC = "atomic"
+    OVERLAY = "overlay"
+    OVERLAY_SPECIES = "overlay_species"
+    OVERLAY_ORBITALS = "overlay_orbitals"
+    IPR = "ipr"
+
+    @classmethod
+    def from_str(cls, mode: str):
+        try:
+            return cls(mode.lower())
+        except ValueError:
+            raise ValueError(
+                f"Invalid mode: {mode}. The modes available are: {cls.to_list()}"
+            ) from None
+
+    @classmethod
+    def to_list(cls):
+        return [mode.value for mode in cls]
+
+    @classmethod
+    def get_overlay_modes(cls):
+        return [cls.OVERLAY, cls.OVERLAY_SPECIES, cls.OVERLAY_ORBITALS]
 
 
 def bandsplot(
     code: str,
     dirname: str,
     mode: str = "plain",
-    spins: List[int] = None,
-    atoms: List[int] = None,
-    orbitals: List[int] = None,
-    items: dict = {},
-    fermi: float = None,
+    spins: list[int] | None = None,
+    atoms: list[int] | None = None,
+    orbitals: list[int] | None = None,
+    items: dict | list[dict] | None = None,
+    fermi: float | None = None,
     fermi_shift: float = 0,
-    interpolation_factor: int = 1,
-    interpolation_type: str = "cubic",
-    projection_mask: np.ndarray = None,
     kticks=None,
     knames=None,
-    kdirect: bool = True,
-    elimit: List[float] = None,
-    ax: plt.Axes = None,
+    elimit: list[float] | None = None,
+    ax: plt.Axes | None = None,
     show: bool = True,
-    savefig: str = None,
+    savefig: str | None = None,
     print_plot_opts: bool = False,
-    export_data_file: str = None,
+    export_data_file: str | None = None,
     export_append_mode: bool = True,
-    ktick_limit: List[float] = None,
-    x_limit: List[float] = None,
-    use_cache: bool = True,
-    verbose: int = 1,
+    x_limit: list[float] | None = None,
+    plot_kwargs: dict | None = None,
+    scatter_kwargs: dict | None = None,
+    parametric_kwargs: dict | None = None,
+    atomic_levels_kwargs: dict | None = None,
+    overlay_kwargs: dict | None = None,
+    ipr_kwargs: dict | None = None,
+    use_cache: bool = False,
     quiet_welcome: bool = False,
     **kwargs,
 ):
@@ -68,18 +128,12 @@ def bandsplot(
     orbitals : List[int], optional
         A list of orbitals, by default None
     items : dict, optional
-        A dictionary where the keys are the atoms and the values a list of orbitals, by default {}
+        A dictionary where the keys are the atoms and the values a list of orbitals, by default None
     fermi : float, optional
         Float for the fermi energy, by default None. By default the fermi energy will be shifted by the fermi value that is found in the directory.
         For band structure calculations, due to convergence issues, this fermi energy might not be accurate. If so add the fermi energy from the self-consistent calculation.
     fermi_shift : float, optional
         Float to shift the fermi energy, by default 0.
-    interpolation_factor : int, optional
-        The interpolation_factor, by default 1
-    interpolation_type : str, optional
-        The interpolation type, by default "cubic"
-    projection_mask : np.ndarray, optional
-        A custom projection mask, by default None
     kticks : _type_, optional
         A list of kticks, by default None
     knames : _type_, optional
@@ -98,92 +152,53 @@ def bandsplot(
     export_append_mode : bool, optional
         Boolean to append the mode to the file name. If not provided the
         data will be overwritten.
+    x_limit : List[float], optional
+        The k-distance window to plot, by default None
+    plot_kwargs, scatter_kwargs, parametric_kwargs : dict, optional
+        Extra matplotlib keyword arguments for the plain, scatter and parametric modes.
+    atomic_levels_kwargs, overlay_kwargs, ipr_kwargs : dict, optional
+        Extra matplotlib keyword arguments for the atomic, overlay and ipr modes.
     print_plot_opts: bool, optional
         Boolean to print the plotting options
     quiet_welcome: bool, optional
         Boolean to not print the welcome message
     use_cache: bool, optional
         Boolean to use cache for EBS
-    verbose: int, optional
-        Verbosity level
+
     """
 
-    set_verbose_level(verbose)
+    if quiet_welcome:
+        user_logger.setLevel(logging.ERROR)
 
-    user_logger.info(f"If you want more detailed logs, set verbose to 2 or more")
+    user_logger.info("If you want more detailed logs, set verbose to 2 or more")
     user_logger.info("_" * 100)
 
-    if not quiet_welcome:
-        welcome()
+    welcome()
 
     default_config = ConfigFactory.create_config(PlotType.BAND_STRUCTURE)
-    config = ConfigManager.merge_configs(default_config, kwargs)
+    config = cast(BandStructureConfig, ConfigManager.merge_configs(default_config, kwargs))
 
     user_logger.info("_" * 100)
-    modes_txt = " , ".join(config.modes)
-    message = f"""
-            There are additional plot options that are defined in the configuration file. 
-            You can change these configurations by passing the keyword argument to the function.
-            To print a list of all plot options set `print_plot_opts=True`
-
-            Here is a list modes : {modes_txt}
-            """
-    if not quiet_welcome:
-        user_logger.info(message)
-
     if print_plot_opts:
         for key, value in default_config.as_dict().items():
             user_logger.info(f"{key} : {value}")
-
     user_logger.info("_" * 100)
 
-    ebs_pkl_filepath = os.path.join(dirname, "ebs.pkl")
-    structure_pkl_filepath = os.path.join(dirname, "structure.pkl")
-    kpath_pkl_filepath = os.path.join(dirname, "kpath.pkl")
+    plot_mode = BandStructureMode.from_str(mode)
 
-    if not use_cache:
-        user_logger.warning(f"Not using cache, removing existing cache files")
-        if os.path.exists(structure_pkl_filepath):
-            logger.info(f"Removing existing structure file: {structure_pkl_filepath}")
-            os.remove(structure_pkl_filepath)
-        if os.path.exists(kpath_pkl_filepath):
-            logger.info(f"Removing existing kpath file: {kpath_pkl_filepath}")
-            os.remove(kpath_pkl_filepath)
-        if os.path.exists(ebs_pkl_filepath):
-            logger.info(f"Removing existing EBS file: {ebs_pkl_filepath}")
-            os.remove(ebs_pkl_filepath)
-
-    if not os.path.exists(ebs_pkl_filepath):
-        logger.info(f"Parsing EBS from {dirname}")
-
-        parser = io.Parser(code=code, dirpath=dirname)
-        ebs = parser.ebs
-        structure = parser.structure
-        kpath = ebs.kpath
-
-        data_utils.save_pickle(ebs, ebs_pkl_filepath)
-        data_utils.save_pickle(structure, structure_pkl_filepath)
-    else:
-        logger.info(
-            f"Loading EBS, Structure, and Kpath from cached Pickle files in {dirname}"
-        )
-
-        ebs = data_utils.load_pickle(ebs_pkl_filepath)
-        structure = data_utils.load_pickle(structure_pkl_filepath)
-        kpath = ebs.kpath
+    ebs = cast(
+        ElectronicBandStructurePath,
+        ElectronicBandStructurePath.from_code(code, dirname, use_cache=use_cache),
+    )
 
     codes_with_scf_fermi = ["qe", "elk"]
     if code in codes_with_scf_fermi and fermi is None:
-        logger.info(f"No fermi given, using the found fermi energy: {ebs.efermi}")
-
-        fermi = ebs.efermi
+        logger.info(f"No fermi given, using the found fermi energy: {ebs.fermi}")
+        fermi = ebs.fermi
 
     if fermi is not None:
         logger.info(f"Shifting Fermi energy to zero: {fermi}")
-
-        ebs.bands -= fermi
-        ebs.bands += fermi_shift
-        fermi_level = fermi_shift
+        ebs.shift_bands(fermi_shift - fermi, inplace=True)
         y_label = r"E - E$_F$ (eV)"
     else:
         y_label = r"E (eV)"
@@ -191,242 +206,138 @@ def bandsplot(
             "`fermi` is not set! Set `fermi={value}`. The plot did not shift the bands by the Fermi energy."
         )
 
-    # fixing the spin, to plot two channels into one (down is negative)
-    if np.array_equal(spins, [-1, 1]) or np.array_equal(spins, [1, -1]):
-        if ebs.fix_collinear_spin():
-            spins = [0]
+    selection = resolve_spins(
+        ebs.is_non_collinear,
+        ebs.n_spin_channels,
+        spins,
+        plain=plot_mode == BandStructureMode.PLAIN,
+    )
+    channels, projection_spins = selection.channels, selection.projection_spins
+    if selection.joined:
+        ebs.fix_collinear_spin()
+        channels = projection_spins = [0]
 
-    ebs_plot = EBSPlot(ebs, kpath, ax, spins, kdirect=kdirect, config=config)
+    if atoms is not None and isinstance(atoms[0], str):
+        species = set(atoms)
+        names = np.asarray(cast(Structure, ebs.structure).atoms)
+        atoms = [i for i, name in enumerate(names) if name in species]
+    orbitals = orbital_indices(orbitals)
 
-    projection_labels = []
-    labels = []
-    if mode == "plain":
-        user_logger.info("Plotting bands in plain mode")
-        ebs_plot.plot_bands()
+    user_clim = config.clim if "clim" in kwargs else None
 
-    elif mode == "ipr":
-        user_logger.info("Plotting bands in IPR mode")
-        weights = ebs_plot.ebs.ebs_ipr()
-        if config.weighted_color:
-            color_weights = weights
-        else:
-            color_weights = None
-        if config.weighted_width:
-            width_weights = weights
-        else:
-            width_weights = None
-        color_mask = projection_mask
-        width_mask = projection_mask
+    plotter = BandStructurePlotter(ax=ax)
+    n_channels = len(channels)
+    style: dict[str, Any] = {
+        "linestyle": per_channel(config.linestyle, n_channels),
+        "alpha": per_channel(config.opacity, n_channels),
+    }
 
-        ebs_plot.plot_parameteric(
-            color_weights=color_weights,
-            width_weights=width_weights,
-            color_mask=color_mask,
-            width_mask=width_mask,
-            spins=spins,
-            elimit=elimit,
+    if plot_mode == BandStructureMode.ATOMIC:
+        user_logger.info("Plotting bands in atomic mode")
+        if ebs.n_kpoints != 1:
+            raise ValueError("Atomic mode needs a single k-point calculation")
+        weights = ebs.compute_projected_sum(atoms=atoms, orbitals=orbitals, spins=projection_spins)
+        levels: dict[str, Any] = {
+            "bands": take_channels(cast(Property, ebs.get_property("bands")), channels).value,
+            "elimit": elimit,
+            "scalars": take_channels(weights, channels).value,
+            "cmap": config.cmap,
+            "clim": user_clim or (None, None),
+            **(atomic_levels_kwargs or {}),
+        }
+        plotter.plot_atomic_levels(**levels)
+        plotter.set_colorbar_title(config.colorbar_title)
+    elif plot_mode in BandStructureMode.get_overlay_modes():
+        user_logger.info(f"Plotting bands in {plot_mode.value} mode")
+        kind = plot_mode.value.split("_", 1)[1] if "_" in plot_mode.value else "items"
+        weights = projection_components(
+            ebs, kind, atoms=atoms, orbitals=orbitals, items=items, spins=projection_spins
         )
-        ebs_plot.set_colorbar_title(title="Inverse Participation Ratio")
-
-    elif mode in ["overlay", "overlay_species", "overlay_orbitals"]:
-        weights = []
-        if mode == "overlay_species":
-            if orbitals is None:
-                orbitals = list(np.arange(len(ebs_plot.ebs.projected[0][0]), dtype=int))
-
-            user_logger.info("Plotting bands in overlay species mode")
-            for ispc in structure.species:
-                labels.append(ispc)
-                atoms = np.where(structure.atoms == ispc)[0]
-
-                projection_label = f"atom-{ispc}_orbitals-" + ",".join(
-                    str(x) for x in orbitals
-                )
-                projection_labels.append(projection_label)
-                w = ebs_plot.ebs.ebs_sum(
-                    atoms=atoms,
-                    principal_q_numbers=[-1],
-                    orbitals=orbitals,
-                    spins=spins,
-                )
-                weights.append(w)
-        if mode == "overlay_orbitals":
-            user_logger.info("Plotting bands in overlay orbitals mode")
-            for iorb, orb in enumerate(["s", "p", "d", "f"]):
-                if orb == "f" and not ebs_plot.ebs.norbitals > 9:
-                    continue
-                orbitals = orbital_names[orb]
-                labels.append(orb)
-
-                atom_label = ""
-                if atoms:
-                    atom_labels = ",".join(str(x) for x in atoms)
-                    atom_label = f"atom-{atom_labels}_"
-                projection_label = f"{atom_label}orbitals-{orb}"
-                projection_labels.append(projection_label)
-                w = ebs_plot.ebs.ebs_sum(
-                    atoms=atoms,
-                    principal_q_numbers=[-1],
-                    orbitals=orbitals,
-                    spins=spins,
-                )
-
-                weights.append(w)
-
-        elif mode == "overlay":
-            user_logger.info("Plotting bands in overlay mode")
-            if isinstance(items, dict):
-                items = [items]
-
-            if isinstance(items, list):
-                for it in items:
-                    for ispc in it:
-                        atoms = np.where(structure.atoms == ispc)[0]
-                        if isinstance(it[ispc][0], str):
-                            orbitals = []
-                            for iorb in it[ispc]:
-                                orbitals = np.append(
-                                    orbitals, orbital_names[iorb]
-                                ).astype(int)
-                            labels.append(ispc + "-" + "".join(it[ispc]))
-                        else:
-                            orbitals = it[ispc]
-                            labels.append(
-                                ispc + "-" + "_".join(str(x) for x in it[ispc])
-                            )
-
-                        atom_labels = ",".join(str(x) for x in atoms)
-                        orbital_labels = ",".join(str(x) for x in orbitals)
-                        projection_label = (
-                            f"atoms-{atom_labels}_orbitals-{orbital_labels}"
-                        )
-                        projection_labels.append(projection_label)
-                        w = ebs_plot.ebs.ebs_sum(
-                            atoms=atoms,
-                            principal_q_numbers=[-1],
-                            orbitals=orbitals,
-                            spins=spins,
-                        )
-                        weights.append(w)
-        ebs_plot.plot_parameteric_overlay(
-            spins=spins, weights=weights, labels=projection_labels
+        plotter.plot_overlay(
+            ebs.kpath,
+            take_channels(cast(Property, ebs.bands), channels).value,
+            weights=[take_channels(w, channels).value for w in weights],
+            labels=[str(w.label) for w in weights],
+            **(overlay_kwargs or {}),
         )
     else:
-
-        if atoms is not None and isinstance(atoms[0], str):
-            atoms_str = atoms
-            atoms = []
-            for iatom in np.unique(atoms_str):
-                atoms = np.append(atoms, np.where(structure.atoms == iatom)[0]).astype(
-                    np.int
+        bands = take_channels(cast(Property, ebs.bands), channels)
+        if plot_mode == BandStructureMode.PLAIN:
+            user_logger.info("Plotting bands in plain mode")
+            line_style: dict[str, Any] = {
+                "color": per_channel(
+                    config.spin_colors if n_channels > 1 else config.color, n_channels
+                ),
+                "linewidth": per_channel(config.linewidth, n_channels),
+                **style,
+                **(plot_kwargs or {}),
+            }
+            plotter.plot(bands, **line_style)
+        else:
+            if plot_mode == BandStructureMode.IPR:
+                user_logger.info("Plotting bands in IPR mode")
+                scalars = ebs.compute_ebs_ipr()
+                colorbar_title = "Inverse Participation Ratio"
+                artist_kwargs: dict[str, Any] = {"collection_kwargs": ipr_kwargs}
+            else:
+                user_logger.info(f"Plotting bands in {plot_mode.value} mode")
+                scalars = ebs.compute_projected_sum(
+                    atoms=atoms, orbitals=orbitals, spins=projection_spins
                 )
-
-        if orbitals is not None and isinstance(orbitals[0], str):
-            orbital_str = orbitals
-
-            orbitals = []
-            for iorb in orbital_str:
-                orbitals = np.append(orbitals, orbital_names[iorb]).astype(np.int)
-
-        projection_labels = []
-        projection_label = ""
-        atoms_labels = ""
-        if atoms:
-            atoms_labels = ",".join(str(x) for x in atoms)
-            projection_label += f"atoms-{atoms_labels}"
-        orbital_labels = ""
-        if orbitals:
-            orbital_labels = ",".join(str(x) for x in orbitals)
-            if len(projection_label) != 0:
-                projection_label += "_"
-        projection_label += f"orbitals-{orbital_labels}"
-        projection_labels.append(projection_label)
-
-        weights = ebs_plot.ebs.ebs_sum(
-            atoms=atoms, principal_q_numbers=[-1], orbitals=orbitals, spins=spins
-        )
-        if config.weighted_color:
-            color_weights = weights
-        else:
-            color_weights = None
-        if config.weighted_width:
-            width_weights = weights
-        else:
-            width_weights = None
-        color_mask = projection_mask
-        width_mask = projection_mask
-        if mode == "parametric":
-            user_logger.info("Plotting bands in parametric mode")
-            ebs_plot.plot_parameteric(
-                color_weights=color_weights,
-                width_weights=width_weights,
-                color_mask=color_mask,
-                width_mask=width_mask,
-                spins=spins,
-                labels=projection_labels,
+                colorbar_title = config.colorbar_title
+                artist_kwargs = {
+                    "collection_kwargs": parametric_kwargs,
+                    "scatter_kwargs": scatter_kwargs,
+                }
+            scalars = take_channels(scalars, channels)
+            plotter.plot(
+                bands,
+                scalars_data=scalars,
+                scalars_mode="scatter" if plot_mode == BandStructureMode.SACATTER else "parametric",
+                scalars_cmap=config.cmap,
+                scalars_clim=user_clim
+                or signed_clim(scalars)
+                or (0.0, float(np.nanmax(scalars.value)) or 1.0),
+                **artist_kwargs,
+                **style,
             )
-            ebs_plot.set_colorbar_title()
-        elif mode == "scatter":
-            user_logger.info("Plotting bands in scatter mode")
-            ebs_plot.plot_scatter(
-                color_weights=color_weights,
-                width_weights=width_weights,
-                color_mask=color_mask,
-                width_mask=width_mask,
-                spins=spins,
-                labels=projection_labels,
-            )
-            ebs_plot.set_colorbar_title()
-        elif mode == "atomic":
-            user_logger.info("Plotting bands in atomic mode")
-            if ebs.kpoints.shape[0] != 1:
-                raise Exception("Must use a single kpoint")
-            if color_weights is not None:
-                color_weights = np.vstack((color_weights, color_weights))
-            ebs_plot.plot_atomic_levels(
-                color_weights=color_weights,
-                width_weights=width_weights,
-                color_mask=color_mask,
-                width_mask=width_mask,
-                spins=spins,
-                elimit=elimit,
-                labels=projection_labels,
-            )
+            plotter.set_colorbar_label(colorbar_title)
 
-            ebs_plot.set_xlabel(label=config.x_label)
-            ebs_plot.set_colorbar_title()
-
-        else:
-            user_logger.warning(
-                f"Selected mode {mode} not valid. Please check the spelling"
-            )
-
-    ebs_plot.set_xticks(kticks, knames)
-    ebs_plot.set_yticks(interval=elimit)
-    ebs_plot.set_xlim(interval=x_limit, ktick_interval=ktick_limit)
-    ebs_plot.set_ylim(elimit)
-    ebs_plot.set_ylabel(label=y_label)
-    ebs_plot.set_xlabel(label=config.x_label)
+    if kticks is not None or knames is not None:
+        plotter.set_xticks(kticks, knames)
+    plotter.set_yticks(interval=elimit)
+    if x_limit is not None:
+        plotter.set_xlim(x_limit)
+    if elimit is not None:
+        plotter.set_ylim(elimit)
+    plotter.set_ylabel(label=y_label)
+    plotter.set_xlabel(label=config.x_label)
 
     if fermi is not None:
-        ebs_plot.draw_fermi(fermi_level=fermi_level)
+        plotter.draw_fermi(
+            fermi_level=fermi_shift,
+            color=config.fermi_color,
+            linestyle=config.fermi_linestyle,
+            linewidth=config.fermi_linewidth,
+        )
 
-    ebs_plot.set_title()
-    ebs_plot.grid()
-
-    ebs_plot.legend(labels)
+    if config.title is not None:
+        plotter.set_title(config.title)
+    else:
+        plotter.set_title()
+    plotter.grid()
 
     if savefig is not None:
-        ebs_plot.save(savefig)
+        plotter.save(savefig)
     if show:
-        ebs_plot.show()
+        plotter.show()
 
     if export_data_file is not None:
         if export_append_mode:
             file_basename, file_type = export_data_file.split(".")
-            filename = f"{file_basename}_{mode}.{file_type}"
+            filename = f"{file_basename}_{plot_mode.value}.{file_type}"
         else:
             filename = export_data_file
-        ebs_plot.export_data(filename)
+        plotter.export_data(filename)
 
-    return ebs_plot.fig, ebs_plot.ax
+    return plotter.fig, plotter.ax

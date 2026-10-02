@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-
-
 elements = {
     "H": 1,
     "He": 2,
@@ -242,7 +239,7 @@ def atomic_mass(element):
         atomic mass.
     """
     # if type(element) is str:
-    if isinstance(element,str):
+    if isinstance(element, str):
         return atomic_masses[element]
     elif type(element) is int:
         return atomic_masses[elements_reversed[element]]

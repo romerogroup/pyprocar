@@ -1,7 +1,5 @@
 import logging
 import logging.config
-import os
-from datetime import datetime
 
 
 def set_verbose_level(verbose: int):
@@ -36,9 +34,7 @@ class UserFriendlyFormatter(logging.Formatter):
         if record.levelno >= logging.ERROR:
             self._style._fmt = f"{self.RED}{self.BOLD}ERROR: %(message)s{self.RESET}"
         elif record.levelno >= logging.WARNING:
-            self._style._fmt = (
-                f"{self.YELLOW}{self.BOLD}WARNING: %(message)s{self.RESET}"
-            )
+            self._style._fmt = f"{self.YELLOW}{self.BOLD}WARNING: %(message)s{self.RESET}"
 
         return super().format(record)
 
@@ -76,10 +72,10 @@ logging_config = {
     "loggers": {
         "pyprocar": {
             "level": "INFO",
-            "handlers": ["console", "file"],
+            "handlers": ["file"],
             "propagate": False,
         },
-        "user": {"level": "DEBUG", "handlers": ["user_console"], "propagate": False},
+        "user": {"level": "ERROR", "handlers": ["user_console"], "propagate": False},
         "tests": {"level": "DEBUG", "handlers": ["console"], "propagate": False},
     },
 }

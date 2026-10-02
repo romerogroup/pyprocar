@@ -1,7 +1,7 @@
-
-from typing import Dict, Any
-from enum import Enum, auto
 from dataclasses import dataclass, field
+from enum import Enum
+from typing import Any
+
 
 class PlotType(Enum):
     """
@@ -21,12 +21,13 @@ class PlotType(Enum):
     These identifiers are used to select the appropriate plotting configuration
     and behavior within the application.
     """
-    FERMI_SURFACE_3D = 'fermi_surface_3d'
-    FERMI_SURFACE_2D = 'fermi_surface_2d'
-    BAND_STRUCTURE = 'band_structure'
-    BAND_STRUCTURE_2D = 'band_structure_2d'
-    DENSITY_OF_STATES = 'density_of_states'
-    UNFOLD = 'unfold'
+
+    FERMI_SURFACE_3D = "fermi_surface_3d"
+    FERMI_SURFACE_2D = "fermi_surface_2d"
+    BAND_STRUCTURE = "band_structure"
+    BAND_STRUCTURE_2D = "band_structure_2d"
+    DENSITY_OF_STATES = "density_of_states"
+    UNFOLD = "unfold"
 
 
 @dataclass
@@ -56,5 +57,6 @@ class BaseConfig:
     >>> print(config.plot_type)
     PlotType.FERMI_SURFACE_3D
     """
+
     plot_type: PlotType
-    custom_settings: Dict[str, Any] = field(default_factory=dict)
+    custom_settings: dict[str, Any] = field(default_factory=dict)

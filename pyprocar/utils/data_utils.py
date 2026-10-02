@@ -4,7 +4,6 @@ dill.settings["recurse"] = True
 
 import json
 import shutil
-import textwrap
 
 import numpy as np
 import pandas as pd
@@ -138,9 +137,7 @@ class CompactJSONEncoder(json.JSONEncoder):
                     yield from self.iterencode(item)
                     self._current_indent_level = old_indent
 
-                if (
-                    not first
-                ):  # Only add closing bracket indentation if list wasn't empty
+                if not first:  # Only add closing bracket indentation if list wasn't empty
                     yield f"\n{self._parent_indent_str()}]"
                 else:
                     yield "]"
@@ -189,9 +186,7 @@ class CompactJSONEncoder(json.JSONEncoder):
         return (
             isinstance(o, (list, tuple))
             and len(o) > 0
-            and all(
-                isinstance(el, (list, tuple)) and self._is_simple_list(el) for el in o
-            )
+            and all(isinstance(el, (list, tuple)) and self._is_simple_list(el) for el in o)
         )
 
     def _encode_2d_array(self, o):

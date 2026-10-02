@@ -1,10 +1,7 @@
 from dataclasses import asdict, dataclass, field
-from typing import Dict, Any, List, Optional,Tuple
-from enum import Enum, auto
+from enum import Enum
 
-from pyprocar.cfg.base import PlotType, BaseConfig
-
-from pyprocar.utils.plot_utils import DEFAULT_COLORS, wes_anderson_palettes, create_colormap
+from pyprocar.cfg.base import BaseConfig, PlotType
 
 
 class FermiSurface2DMode(Enum):
@@ -18,10 +15,12 @@ class FermiSurface2DMode(Enum):
     HEATMAP : str
         Represents the Fermi surface in a heatmap, indicating electron density.
     """
+
     PLAIN = "plain"
     PLAIN_BANDS = "plain_bands"
     PARAMETRIC = "parametric"
     SPIN_TEXTURE = "spin_texture"
+
 
 class FermiSurface2DProperty(Enum):
     """
@@ -36,6 +35,7 @@ class FermiSurface2DProperty(Enum):
     HARMONIC_AVERAGE_EFFECTIVE_MASS : str
         Displays the harmonic average of the effective mass of electrons, reflecting the electron mobility.
     """
+
     FERMI_SPEED = "fermi_speed"
     FERMI_VELOCITY = "fermi_velocity"
     HARMONIC_AVERAGE_EFFECTIVE_MASS = "harmonic_effective_mass"
@@ -98,32 +98,28 @@ class FermiSurface2DConfig(BaseConfig):
 
     >>> custom_config = FermiSurface2DConfig(cmap='magma', arrow_size=5)
     """
-    modes: List[str] = field(default_factory=lambda: [mode.value for mode in FermiSurface2DMode])
+
+    modes: list[str] = field(default_factory=lambda: [mode.value for mode in FermiSurface2DMode])
     # Basic Plot Settings
     add_axes_labels: bool = True
-    add_legend: bool = False
     plot_color_bar: bool = False
 
     # Plot Appearance
     cmap: str = "jet"
-    clim: Optional[Tuple[float, float]] = field(default_factory=lambda: (None, None))
-    color: List[str] = field(default_factory=lambda: ['blue', 'red'])
-    linestyle: List[str] = field(default_factory=lambda: ['solid', 'dashed'])
+    clim: tuple[float, float] | None = field(default_factory=lambda: (None, None))
+    color: list[str] = field(default_factory=lambda: ["blue", "red"])
+    linestyle: list[str] = field(default_factory=lambda: ["solid", "dashed"])
     linewidth: float = 0.2
     no_arrow: bool = False
-    arrow_color: Optional[str] = None
+    arrow_color: str | None = None
     arrow_density: int = 10
     arrow_size: int = 3
-    spin_projection: str = 'z^2'
-    marker: str = '.'
-    dpi: str = 'figure'
-
-    # Axes and Labels
-    x_label: str = '$k_{x}$ ($\AA^{-1}$)'
-    y_label: str = '$k_{y}$ ($\AA^{-1}$)'
+    spin_projection: str = "z^2"
+    marker: str = "."
+    dpi: str = "figure"
 
     def __post_init__(self):
-        """This method is immediately called after the object is initialized. 
+        """This method is immediately called after the object is initialized.
         It is useful to validate the data and set default values.
         """
         self.plot_type = PlotType.FERMI_SURFACE_2D

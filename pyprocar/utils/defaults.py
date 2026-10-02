@@ -1,24 +1,21 @@
-# -*- coding: utf-8 -*-
-
 import configparser
 import inspect
 import os
 from abc import ABCMeta
-from collections.abc import Mapping
 
-equivalents = {'cmap': 'color_map',
-               'cmaps': 'color_map',
-               'ylim': 'elimit',
-               'ylimit': 'elimit',
-               'efermi': 'fermi',
-               'mask': 'projection_mask',
-               'marker_size': 'markersize',
-               'colors':'color',
-               'opacities':'opacity',
-               'linewidths':'linewidth',
-               'labels':'label'
-               }
-
+equivalents = {
+    "cmap": "color_map",
+    "cmaps": "color_map",
+    "ylim": "elimit",
+    "ylimit": "elimit",
+    "efermi": "fermi",
+    "mask": "projection_mask",
+    "marker_size": "markersize",
+    "colors": "color",
+    "opacities": "opacity",
+    "linewidths": "linewidth",
+    "labels": "label",
+}
 
 
 class Settings:
@@ -35,17 +32,17 @@ class Settings:
 
         else:
             for item in config:
-                if ',' in config[item]:
-                    attr = config[item].split(',')
+                if "," in config[item]:
+                    attr = config[item].split(",")
                     attr = [type_convert(x) for x in attr]
                 else:
-                    attr = type_convert(config[item])     
+                    attr = type_convert(config[item])
                 self.__setattr__(item, attr)
         self.check_equivalents(config)
 
     def modify(self, changes):
         """Maybe needs modification to specify section to change"""
-        changes = {item: changes[item] for item in changes }
+        changes = {item: changes[item] for item in changes}
         for item in changes:
             if item in self.config:
                 self.__setattr__(item, changes[item])
@@ -63,7 +60,7 @@ class Settings:
 
     def __setattr__(self, item, value):
         super().__setattr__(item, value)
-        if item != 'config':
+        if item != "config":
             if isinstance(value, Settings):
                 self.config[item] = value.config
             else:
@@ -79,25 +76,24 @@ class Settings:
         return self.config.__iter__()
 
     def __len__(self):
-        
         return self.config.__len__()
+
 
 def type_convert(inp):
     inp = inp.strip()
     try:
         ret = float(inp)
     except BaseException:
-
-        if inp == 'True':
+        if inp == "True":
             ret = True
-        elif inp == 'False':
+        elif inp == "False":
             ret = False
         elif "$" in inp:
-            ret = r"{}".format(inp)
+            ret = rf"{inp}"
         else:
             ret = inp
     return ret
 
 
 base_path = os.sep.join(inspect.getfile(Settings).split(os.sep)[:-1])
-settings = Settings(filename= base_path + os.sep + 'default_settings.ini')
+settings = Settings(filename=base_path + os.sep + "default_settings.ini")

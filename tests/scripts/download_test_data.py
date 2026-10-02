@@ -1,4 +1,4 @@
-from utils import DATA_DIR, TEST_DIR
+from utils import TEST_DIR
 
 from pyprocar.utils.download_examples import download_test_data
 

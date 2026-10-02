@@ -1,0 +1,113 @@
+exclude = [
+  ".bzr",
+  ".direnv",
+  ".eggs",
+  ".git",
+  ".git-rewrite",
+  ".hg",
+  ".ipynb_checkpoints",
+  ".mypy_cache",
+  ".nox",
+  ".pants.d",
+  ".pyenv",
+  ".pytest_cache",
+  ".pytype",
+  ".ruff_cache",
+  ".svn",
+  ".tox",
+  ".venv",
+  ".vscode",
+  "__pypackages__",
+  "_build",
+  "buck-out",
+  "build",
+  "dist",
+  "node_modules",
+  "site-packages",
+  "venv",
+  ".pixi",
+  "docs/research_notes",
+  "examples/sandbox",
+  "examples/agent_sandbox",
+  "hack/",
+  ".claude/",
+  ".pixi/",
+  "src/**/*.py"
+]
+
+
+include = ["tests/**/*.py"]
+# Same as Black.
+indent-width = 4
+line-length = 100
+
+fix-only = false
+output-format = "concise"
+[lint]
+select = ["ALL"]
+ignore = [
+    "COM812",  # missing-trailing-comma
+    "CPY001",  # Missing copyright notice at top of file
+    "D100",    # Missing docstring in public module
+    "D104",    # Missing docstring in public package
+    "D203",    # blank line required before class docstring
+    "D211",    # no-blank-line-before-class
+    "D213",    # multi-line-summary-second-line
+    "EM101",   # raw-string-in-exception
+
+    "S101",  # checks if asserts are used in the code
+    "E501",  # line too long
+    "ANN",
+
+    # flake8-fixme
+    "FIX001",  # line FIXME
+    "FIX002",  # line-contains-todo
+    "FIX003",  # line contains XXX
+    "FIX004",  # line contains HACK
+    "SLF001",  # Private member accessed: `_main_loop`
+
+
+    "ISC001",  # Conflicts with formatter ruff
+    "PLR0904", # Too many public methods (... > 20)
+    "TD002",   # Missing author in TODO `# TODO(<author_name>): ...`
+    "TD003",   # missing-todo-link
+    "TRY003",  # raise-vanilla-args
+]
+
+
+fixable = ["ALL"]
+extend-safe-fixes = []
+unfixable = []
+
+# Allow unused variables when underscore-prefixed.
+dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
+
+[lint.pydocstyle]
+convention = "numpy"
+
+[lint.per-file-ignores]
+".github/scripts/*.py" = ["E501"]
+"examples/**" = ["E501"]
+# Test fixtures are utility functions that naturally have many parameters
+"tests/fixtures/**" = [
+    "PLR0913",  # Too many arguments in function definition
+    "PLR0915",  # Too many statements
+    "C901",     # Function is too complex
+    "FBT001",   # Boolean-typed positional argument
+    "FBT002",   # Boolean default positional argument
+    "PLR2004",  # Magic value used in comparison
+    "SIM108",   # Use ternary operator
+]
+# Test files commonly use magic values for assertions and Path.open is fine
+"tests/**/*.py" = [
+    "PLR2004",  # Magic value used in comparison (expected values in assertions)
+    "PTH123",   # open() is acceptable in tests
+]
+
+[format]
+docstring-code-format = false
+docstring-code-line-length = "dynamic"
+indent-style = "space"
+line-ending = "auto"
+quote-style = "double"
+skip-magic-trailing-comma = false

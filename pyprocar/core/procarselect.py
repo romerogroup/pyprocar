@@ -1,39 +1,30 @@
 import logging
-import re
-import sys
 
-import matplotlib.pyplot as plt
-import numpy as np
-
-from pyprocar.utils.utilsprocar import UtilsProcar
 
 class ProcarSelect:
     """
-  Reduces the dimensionality of the data making it uselful to
-  plot bands.
+    Reduces the dimensionality of the data making it uselful to
+    plot bands.
 
-  The main data to manipulate is the projected electronic structure.
-  Its shape original is:
+    The main data to manipulate is the projected electronic structure.
+    Its shape original is:
 
-  spd[kpoint][band][ispin][atom][orbital].
+    spd[kpoint][band][ispin][atom][orbital].
 
-  The selection of components should be done in order, says, first
-  "ispin", then "atom", and at last "orbital".
+    The selection of components should be done in order, says, first
+    "ispin", then "atom", and at last "orbital".
 
-  Note: once any selection has been performed, the data itself
-  changes. Say, if you want compare atom [0] and [1,2], you need two
-  instances of this class.
+    Note: once any selection has been performed, the data itself
+    changes. Say, if you want compare atom [0] and [1,2], you need two
+    instances of this class.
 
 
-  Example to compare the bandstructure of two set of atoms
-  >>>
+    Example to compare the bandstructure of two set of atoms
+    >>>
 
-  """
+    """
 
-    def __init__(
-        self, ProcarData=None, deepCopy=True, loglevel=logging.WARNING, mode=None
-    ):
-
+    def __init__(self, ProcarData=None, deepCopy=True, loglevel=logging.WARNING, mode=None):
         self.spd = None
         self.bands = None
         self.kpoints = None
@@ -44,9 +35,7 @@ class ProcarSelect:
         self.log = logging.getLogger("ProcarSelect")
         self.log.setLevel(loglevel)
         self.ch = logging.StreamHandler()
-        self.ch.setFormatter(
-            logging.Formatter("%(name)s::%(levelname)s:" " %(message)s")
-        )
+        self.ch.setFormatter(logging.Formatter("%(name)s::%(levelname)s: %(message)s"))
         self.ch.setLevel(logging.DEBUG)
         self.log.addHandler(self.ch)
         # At last, one message to the logger.
@@ -58,16 +47,16 @@ class ProcarSelect:
 
     def setData(self, ProcarData, deepCopy=True):
         """
-    The data from ProcarData is deepCopy-ed by default (ie: their
-    elements are not modified by this class.
+        The data from ProcarData is deepCopy-ed by default (ie: their
+        elements are not modified by this class.
 
-    Args:
+        Args:
 
-    -ProcarData: is a ProcarParser instance (or anything with similar
-     functionality, duck typing)
+        -ProcarData: is a ProcarParser instance (or anything with similar
+         functionality, duck typing)
 
-    -deepCopy=True: If false a shallow copy will be made (saves memory).
-    """
+        -deepCopy=True: If false a shallow copy will be made (saves memory).
+        """
         self.log.debug("setData: ...")
         if deepCopy is True:
             self.spd = ProcarData.spd.copy()
@@ -91,19 +80,19 @@ class ProcarSelect:
 
     def selectIspin(self, value=None, separate=False):
         """
-    value is a list with the values of Ispin to select.
+        value is a list with the values of Ispin to select.
 
-    UPDATE:
-        if separate == true, then spin = 0 corresponds to spin up
-        and spin = 1 corresponds to spin down. If not, they give
-        spin density and spin magnetization, respectively.
+        UPDATE:
+            if separate == true, then spin = 0 corresponds to spin up
+            and spin = 1 corresponds to spin down. If not, they give
+            spin density and spin magnetization, respectively.
 
-    Example:
-    >>> foo = ProcarParser()
-    >>> foo.readFile("PROCAR")
-    >>> bar = ProcarSelect(foo)
-    >>> bar.selectIspin([0]) #just the density
-    """
+        Example:
+        >>> foo = ProcarParser()
+        >>> foo.readFile("PROCAR")
+        >>> bar = ProcarSelect(foo)
+        >>> bar.selectIspin([0]) #just the density
+        """
         # all kpoint, all bands, VALUE spin, all the rest
         self.log.debug("selectIspin: ...")
         self.log.debug("old spd shape =" + str(self.spd.shape))
@@ -111,13 +100,9 @@ class ProcarSelect:
         dimen = len(self.spd.shape)
         if dimen != 5:
             self.log.error(
-                "The array is " + str(dimen) + " dimensional, expecting a"
-                " 5 dimensional array."
+                "The array is " + str(dimen) + " dimensional, expecting a 5 dimensional array."
             )
-            self.log.error(
-                "You should call selectIspin->selecAtom->selectOrbitals, "
-                "in this order."
-            )
+            self.log.error("You should call selectIspin->selecAtom->selectOrbitals, in this order.")
             raise RuntimeError("Wrong dimensionality of the array")
         self.log.debug("ispin value = " + str(value))
 
@@ -150,20 +135,20 @@ class ProcarSelect:
 
     def selectAtoms(self, value=None, fortran=False):
         """
-    value is a list with the values of Atoms to select. The optional
-    `fortran` argument indicates whether a c-like 0-based indexing
-    (`=False`, default) or a fortran-like 1-based (`=True`) is
-    provided in `value`.
+        value is a list with the values of Atoms to select. The optional
+        `fortran` argument indicates whether a c-like 0-based indexing
+        (`=False`, default) or a fortran-like 1-based (`=True`) is
+        provided in `value`.
 
-    Example:
-    >>> foo = ProcarParser()
-    >>> foo.readFile("PROCAR")
-    >>> bar = ProcarSelect(foo)
-    >>> bar.selectIspin([...])
-    >>> bar.selectAtoms([0,1,2]) #atom0+atom1+atom2
+        Example:
+        >>> foo = ProcarParser()
+        >>> foo.readFile("PROCAR")
+        >>> bar = ProcarSelect(foo)
+        >>> bar.selectIspin([...])
+        >>> bar.selectAtoms([0,1,2]) #atom0+atom1+atom2
 
-    Note: this method should be called after select.Ispin
-    """
+        Note: this method should be called after select.Ispin
+        """
         self.log.debug("selectAtoms: ...")
 
         # taking care about stupid fortran indexing
@@ -177,13 +162,9 @@ class ProcarSelect:
         dimen = len(self.spd.shape)
         if dimen != 4:
             self.log.error(
-                "The array is " + str(dimen) + " dimensional, expecting a"
-                " 4 dimensional array."
+                "The array is " + str(dimen) + " dimensional, expecting a 4 dimensional array."
             )
-            self.log.error(
-                "You should call selectIspin->selecAtom->selectOrbitals, "
-                "in this order."
-            )
+            self.log.error("You should call selectIspin->selecAtom->selectOrbitals, in this order.")
             raise RuntimeError("Wrong dimensionality of the array")
         self.spd = self.spd[:, :, value]
         self.spd = self.spd.sum(axis=2)
@@ -195,22 +176,22 @@ class ProcarSelect:
 
     def selectOrbital(self, value):
         """
-    value is a list with the values of orbital to select.
+        value is a list with the values of orbital to select.
 
-    Example:
-    >>> foo = ProcarParser()
-    >>> foo.readFile("PROCAR")
-    >>> bar = ProcarSelect(foo)
-    >>> bar.selectIspin([...])
-    >>> bar.selectAtoms([...])
-    >>> bar.selectOrbital([-1]) #the last (`tot`) field
+        Example:
+        >>> foo = ProcarParser()
+        >>> foo.readFile("PROCAR")
+        >>> bar = ProcarSelect(foo)
+        >>> bar.selectIspin([...])
+        >>> bar.selectAtoms([...])
+        >>> bar.selectOrbital([-1]) #the last (`tot`) field
 
-    to select "p" orbitals just change the argument in the last line
-    to [2,3,4] or as needed
+        to select "p" orbitals just change the argument in the last line
+        to [2,3,4] or as needed
 
-    Note: this method should be called after `select.Ispin` and
-    `select.Atoms`
-    """
+        Note: this method should be called after `select.Ispin` and
+        `select.Atoms`
+        """
         self.log.debug("selectOrbital: ...")
         self.log.debug("Changing the orbital `values` to have a 0-based indexes")
         # Mind: the first orbital field is the atoms number, which is not
@@ -232,13 +213,9 @@ class ProcarSelect:
         dimen = len(self.spd.shape)
         if dimen != 3:
             self.log.error(
-                "The array is " + str(dimen) + " dimensional, expecting a"
-                " 3 dimensional array."
+                "The array is " + str(dimen) + " dimensional, expecting a 3 dimensional array."
             )
-            self.log.error(
-                "You should call selectIspin->selecAtom->selectOrbitals, "
-                "in this order."
-            )
+            self.log.error("You should call selectIspin->selecAtom->selectOrbitals, in this order.")
             raise RuntimeError("Wrong dimensionality of the array")
 
         self.spd = self.spd.sum(axis=2)

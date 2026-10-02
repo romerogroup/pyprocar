@@ -7,11 +7,11 @@ import logging
 from pathlib import Path
 
 import numpy as np
+import pyvista as pv
 import spglib
 from scipy.spatial import ConvexHull
 
 from pyprocar.core.serializer import get_serializer
-from pyprocar.core.surface import Surface
 from pyprocar.utils import elements
 
 # TODO add __str__ method
@@ -49,47 +49,111 @@ class Structure:
         lattice=None,
         rotations=None,
     ):
+        # Validate that we have at least some data
+        if atoms is None and lattice is None and fractional_coordinates is None and cartesian_coordinates is None:
+            raise ValueError("Structure requires at least atoms or lattice to be provided")
 
+        # Handle atoms - convert to array and validate
+        if atoms is not None:
+            self.atoms = np.array(atoms)
+            if self.atoms.ndim == 0 or self.atoms.shape[0] == 0:
+                raise ValueError("atoms must be a non-empty list")
+        else:
+            self.atoms = None
+
+        # Handle lattice - convert to array if provided
+        if lattice is not None:
+            self.lattice = np.array(lattice)
+            if self.lattice.ndim < 2 or self.lattice.shape[0] == 0:
+                raise ValueError("lattice must be a non-empty 2D array")
+        else:
+            self.lattice = None
+
+        # Handle coordinates
         if fractional_coordinates is not None:
-            self.fractional_coordinates = np.array(fractional_coordinates)
-            self.cartesian_coordinates = np.dot(fractional_coordinates, lattice)
+            fractional_coordinates = np.array(fractional_coordinates)
+            if fractional_coordinates.ndim < 2 or fractional_coordinates.shape[0] == 0:
+                raise ValueError("fractional_coordinates must be a non-empty 2D array")
+            self.fractional_coordinates = fractional_coordinates
+            if self.lattice is not None:
+                self.cartesian_coordinates = np.dot(fractional_coordinates, self.lattice)
+            else:
+                self.cartesian_coordinates = None
         elif cartesian_coordinates is not None:
+            cartesian_coordinates = np.array(cartesian_coordinates)
+            if cartesian_coordinates.ndim < 2 or cartesian_coordinates.shape[0] == 0:
+                raise ValueError("cartesian_coordinates must be a non-empty 2D array")
             self.cartesian_coordinates = cartesian_coordinates
-            self.fractional_coordinates = np.dot(
-                cartesian_coordinates, np.linalg.inv(lattice)
-            )
+            if self.lattice is not None:
+                self.fractional_coordinates = np.dot(cartesian_coordinates, np.linalg.inv(self.lattice))
+            else:
+                self.fractional_coordinates = None
         else:
             self.cartesian_coordinates = None
             self.fractional_coordinates = None
-        self.atoms = np.array(atoms)
-        self.lattice = np.array(lattice)
 
-        if (
-            self.lattice is not None
+        # Validate consistency between atoms and coordinates
+        if self.atoms is not None and self.fractional_coordinates is not None:
+            if self.atoms.shape[0] != self.fractional_coordinates.shape[0]:
+                raise ValueError("atoms and fractional_coordinates must have the same length")
+
+        # Initialize private attributes for lazy-loaded properties
+        self._wyckoff_positions = None
+        self._group = None
+
+        # Handle rotations
+        self._rotations = rotations
+        if self._rotations is None:
+            self._rotations = np.empty(shape=(0, 3, 3))
+
+    @property
+    def has_complete_data(self):
+        """
+        Check if the structure has complete data for calculations.
+
+        Returns
+        -------
+        bool
+            True if atoms, lattice, and coordinates are all set, False otherwise.
+        """
+        return (
+            self.atoms is not None
+            and self.lattice is not None
             and self.fractional_coordinates is not None
-            and atoms is not None
-        ):
-            self.has_complete_data = True
-        else:
-            self.has_complete_data = False
-        self.wyckoff_positions = None
-        self.group = None
+            and len(self.atoms) > 0
+        )
 
-        if self.has_complete_data:
-            self.get_wyckoff_positions()
+    def __repr__(self):
+        """Unambiguous representation with essential details for debugging."""
+        return (
+            f"Structure(natoms={self.natoms}, "
+            f"species={list(self.species)}, "
+            f"volume={self.volume * 1e30:.3f} A^3, "
+            f"angles=({self.alpha:.2f}, {self.beta:.2f}, {self.gamma:.2f}), "
+            f"spacegroup='{self.get_space_group_international() if self.has_complete_data else 'N/A'}')"
+        )
 
-        self.rotations = rotations
+    def __str__(self):
+        """Human-readable summary of the structure."""
+        header = f"Structure with {self.natoms} atoms and {self.nspecies} species"
+        species_line = f"Species: {', '.join(self.species)}"
+        volume_line = f"Volume: {self.volume * 1e30:.3f} A^3"
+        angle_line = f"Angles (α, β, γ): {self.alpha:.2f}°, {self.beta:.2f}°, {self.gamma:.2f}°"
 
-        return None
+        # Only show first few fractional coords for readability
+        frac_preview = "\n".join(
+            f"  {atom}: {coord}" for atom, coord in zip(self.atoms, self.fractional_coordinates)
+        )
+
+        return "\n".join(
+            [header, species_line, volume_line, angle_line, "Fractional coordinates:", frac_preview]
+        )
 
     def __eq__(self, other):
         atoms_equal = all(self.atoms == other.atoms)
 
         fractional_coordinates_equal = True
-        if (
-            self.fractional_coordinates is not None
-            and other.fractional_coordinates is not None
-        ):
+        if self.fractional_coordinates is not None and other.fractional_coordinates is not None:
             fractional_coordinates_equal = np.allclose(
                 self.fractional_coordinates, other.fractional_coordinates
             )
@@ -100,6 +164,22 @@ class Structure:
 
         structure_equal = atoms_equal and fractional_coordinates_equal and lattice_equal
         return structure_equal
+
+    @property
+    def rotations(self):
+        return self._rotations
+
+    @property
+    def wyckoff_positions(self):
+        if self._wyckoff_positions is None:
+            self.get_wyckoff_positions()
+        return self._wyckoff_positions
+
+    @property
+    def group(self):
+        if self._group is None:
+            self.get_wyckoff_positions()
+        return self._group
 
     @property
     def volume(self):
@@ -191,9 +271,7 @@ class Structure:
 
         """
         return np.rad2deg(
-            np.arccos(
-                np.dot(self.lattice[1, :], self.lattice[2, :]) / (self.b * self.c)
-            )
+            np.arccos(np.dot(self.lattice[1, :], self.lattice[2, :]) / (self.b * self.c))
         )
 
     @property
@@ -208,9 +286,7 @@ class Structure:
 
         """
         return np.rad2deg(
-            np.arccos(
-                np.dot(self.lattice[0, :], self.lattice[2, :]) / (self.a * self.c)
-            )
+            np.arccos(np.dot(self.lattice[0, :], self.lattice[2, :]) / (self.a * self.c))
         )
 
     @property
@@ -225,9 +301,7 @@ class Structure:
 
         """
         return np.rad2deg(
-            np.arccos(
-                np.dot(self.lattice[0, :], self.lattice[1, :]) / (self.a * self.b)
-            )
+            np.arccos(np.dot(self.lattice[0, :], self.lattice[1, :]) / (self.a * self.b))
         )
 
     @property
@@ -289,7 +363,8 @@ class Structure:
         Returns
         -------
         np.ndarray
-            The reciprocal lattice matrix corresponding the the crystal lattice
+            Reciprocal lattice vectors as rows, in 1/Angstrom without the 2*pi factor
+            (a_i . b_j = delta_ij).
         """
         reciprocal_lattice = np.zeros_like(self.lattice)
 
@@ -362,10 +437,22 @@ class Structure:
         np.ndarray
             The wyckoff positions
         """
+        if self.lattice is None or self.fractional_coordinates is None or self.atoms is None:
+            raise ValueError(
+                "Lattice, fractional coordinates, and atoms must be set to get wyckoff positions"
+            )
+
         wyckoff_positions = np.empty(shape=(self.natoms), dtype="<U4")
-        wyckoffs_temp = np.array(
-            spglib.get_symmetry_dataset(self._spglib_cell, symprec).wyckoffs
-        )
+
+        spglib_dataset = spglib.get_symmetry_dataset(self._spglib_cell, symprec)
+
+        if hasattr(spglib_dataset, "wyckoffs"):
+            wyckoffs_temp = np.array(spglib_dataset.wyckoffs)
+        elif isinstance(spglib_dataset, dict):
+            wyckoffs_temp = np.array(spglib_dataset["wyckoffs"])
+        else:
+            return None
+
         group = np.zeros(shape=(self.natoms), dtype=int)
         counter = 0
         for iwyckoff in np.unique(wyckoffs_temp):
@@ -378,8 +465,8 @@ class Structure:
                     wyckoff_positions[i] = str(multiplicity) + iwyckoff
                     group[i] = counter
                 counter += 1
-        self.wyckoff_positions = wyckoff_positions
-        self.group = group
+        self._wyckoff_positions = wyckoff_positions
+        self._group = group
         return wyckoff_positions
 
     def _get_lattice_corners(self, lattice):
@@ -400,12 +487,7 @@ class Structure:
         for x in range(2):
             for y in range(2):
                 for z in range(2):
-                    new_point = (
-                        origin
-                        + lattice[0, :] * x
-                        + lattice[1, :] * y
-                        + lattice[2, :] * z
-                    )
+                    new_point = origin + lattice[0, :] * x + lattice[1, :] * y + lattice[2, :] * z
                     edges.append(new_point)
         return np.array(edges)
 
@@ -435,10 +517,11 @@ class Structure:
         """
         A method to plot the the convex hull
         """
-        surface = Surface(
-            verts=self.cell_convex_hull.points, faces=self.cell_convex_hull.simplices
-        )
-        surface.pyvista_obj.plot()
+        hull = self.cell_convex_hull
+        # Convert simplices to pyvista face format (prepend count to each face)
+        faces = np.hstack([[3] + list(face) for face in hull.simplices])
+        surface = pv.PolyData(hull.points, faces)
+        surface.plot()
         return None
 
     def get_spglib_symmetry_dataset(self, symprec=1e-5):
@@ -456,9 +539,7 @@ class Structure:
         """
         return spglib.get_symmetry_dataset(self._spglib_cell, symprec)
 
-    def transform(
-        self, transformation_matrix=np.array([[1, 0, 0], [0, 1, 0], [0, 0, 1]])
-    ):
+    def transform(self, transformation_matrix=np.array([[1, 0, 0], [0, 1, 0], [0, 0, 1]])):
         """Transform the crystla lattice by a transformation matrix
 
         Parameters
@@ -482,7 +563,7 @@ class Structure:
             return None
         scale = int(scale)
         new_lattice = np.dot(self.lattice, transformation_matrix)
-        temp_structure = Structure(lattice=new_lattice)
+        temp_structure = Structure(atoms=["X"], fractional_coordinates=[[0, 0, 0]], lattice=new_lattice)
         new_atoms = []
         new_fractional = []
         for iatom, atom_coord in enumerate(self.cartesian_coordinates):
@@ -500,9 +581,7 @@ class Structure:
                         if temp_structure.is_point_inside(p):
                             new_atoms_cartesian.append(p)
             new_atoms_cartesian = np.array(new_atoms_cartesian)
-            new_atoms_fractional = np.dot(
-                new_atoms_cartesian, np.linalg.inv(new_lattice)
-            )
+            new_atoms_fractional = np.dot(new_atoms_cartesian, np.linalg.inv(new_lattice))
             new_atoms_fractional[new_atoms_fractional >= 1] -= 1
             new_atoms_fractional = np.unique(new_atoms_fractional, axis=0)
             new_fractional.append(new_atoms_fractional)

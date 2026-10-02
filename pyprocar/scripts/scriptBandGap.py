@@ -1,6 +1,6 @@
 import numpy as np
 
-from .. import io
+from pyprocar.io import get_parser
 
 
 def bandgap(
@@ -34,11 +34,11 @@ def bandgap(
 
     bandGap = None
 
-    parser = io.Parser(code=code, dirpath=dirname)
+    parser = get_parser(code, dirname)
     ebs = parser.ebs
 
     if fermi is None:
-        fermi = ebs.efermi
+        fermi = ebs.fermi
 
     bands = np.array(ebs.bands)
     subBands = np.subtract(bands, fermi)
@@ -53,9 +53,7 @@ def bandgap(
 
     if all(i >= 0 for i in subBands[:, idx]) or all(i <= 0 for i in subBands[:, idx]):
         possibleGap = posVal - negVal
-        if bandGap is None:
-            bandGap = possibleGap
-        elif possibleGap < bandGap:
+        if bandGap is None or possibleGap < bandGap:
             bandGap = possibleGap
     else:
         bandGap = 0
