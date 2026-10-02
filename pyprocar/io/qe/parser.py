@@ -453,10 +453,11 @@ class QEParser(BaseParser):
         if sk1 is None or sk2 is None or sk3 is None:
             return None
 
+        # pw.x K_POINTS automatic puts points at (i + sk/2)/nk, a Gamma-centred grid.
         return k_utils.KGridInfo(
             kgrid=(nk1, nk2, nk3),
-            kgrid_mode=k_utils.KGRID_MODE.MONKHORST,
-            kshift=(float(sk1), float(sk2), float(sk3)),
+            kgrid_mode=k_utils.KGRID_MODE.GAMMA,
+            kshift=(sk1 / 2, sk2 / 2, sk3 / 2),
         )
 
     @cached_property

@@ -82,8 +82,10 @@ def monkhorst_pack_kpoints(
 def get_kpoints_from_kgrid(
     kgrid: tuple[int, int, int],
     kshift: tuple[float, float, float] = (0.0, 0.0, 0.0),
-    mode: str = "monkhorst",
+    mode: str | KGRID_MODE = "monkhorst",
 ):
+    if isinstance(mode, KGRID_MODE):
+        mode = mode.value
     if mode.lower()[0] == "m":
         return monkhorst_pack_kpoints(kgrid, kshift)
     elif mode.lower()[0] == "g":
