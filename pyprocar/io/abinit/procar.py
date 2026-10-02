@@ -53,66 +53,39 @@ class AbinitProcar(Mapping[str, Any]):
         if self._infilepaths is None and self._dirpath is not None:
             self._infilepaths = sorted(self._dirpath.glob("PROCAR_*"))
 
-        # Merge and parse
-        self._procar_filepath: Path | None = None
         self._vasp_procar: Procar | None = None
-        
-        if self._dirpath is not None:
-            self._procar_filepath = self._dirpath / "PROCAR"
-            if self._infilepaths:
-                self._merge_parallel()
-            if self._procar_filepath.exists():
-                self._vasp_procar = Procar(filepath=self._procar_filepath)
+        if self._infilepaths:
+            self._vasp_procar = Procar.from_str(self._merge_parallel(self._infilepaths))
+        elif self._dirpath is not None and (self._dirpath / "PROCAR").exists():
+            self._vasp_procar = Procar(filepath=self._dirpath / "PROCAR")
 
     @property
     def vasp_procar(self) -> Procar | None:
         """Access to the underlying VASP Procar parser after merge."""
         return self._vasp_procar
 
-    def _merge_parallel(self) -> None:
+    def _merge_parallel(self, infilepaths: list[Path]) -> str:
         """Merge PROCAR files from parallel Abinit runs."""
-        if self._infilepaths is None or self._procar_filepath is None:
-            return
-            
         if self._nspin is None:
             raise ValueError("nspin must be provided for merging PROCAR files")
 
-        filepaths = sorted(self._infilepaths)
+        filepaths = sorted(infilepaths)
         logger.info(f"Merging {len(filepaths)} parallel PROCAR files...")
 
         if self._nspin != 2:
-            # Non-spin-polarized: simple concatenation
-            with open(self._procar_filepath, "w") as outfile:
-                for filepath in filepaths:
-                    with open(filepath) as infile:
-                        for line in infile:
-                            outfile.write(line)
-        else:
-            # Spin-polarized: first half is spin-up, second half (reversed) is spin-down
-            spinup_filepaths = filepaths[: len(filepaths) // 2]
-            spindown_filepaths = filepaths[len(filepaths) // 2 :]
+            return "".join(fp.read_text() for fp in filepaths)
 
-            # Read header from first file
-            with open(spinup_filepaths[0]) as fp:
-                _ = fp.readline()  # header1 (not used)
-                header2 = fp.readline()
-
-            # Reverse spin-down files
-            spindown_filepaths.reverse()
-
-            # Write merged PROCAR
-            with open(self._procar_filepath, "w") as outfile:
-                for spinup_filepath in spinup_filepaths:
-                    with open(spinup_filepath) as infile:
-                        for line in infile:
-                            outfile.write(line)
-                outfile.write("\n")
-                outfile.write(header2)
-                outfile.write("\n")
-                for spindown_filepath in spindown_filepaths:
-                    with open(spindown_filepath) as infile:
-                        for line in infile:
-                            outfile.write(line)
+        # Spin-polarized: first half is spin-up, second half (reversed) is spin-down
+        spinup_filepaths = filepaths[: len(filepaths) // 2]
+        spindown_filepaths = filepaths[len(filepaths) // 2 :][::-1]
+        header2 = spinup_filepaths[0].read_text().splitlines(keepends=True)[1]
+        return (
+            "".join(fp.read_text() for fp in spinup_filepaths)
+            + "\n"
+            + header2
+            + "\n"
+            + "".join(fp.read_text() for fp in spindown_filepaths)
+        )
 
     # Mapping protocol implementation
     def __contains__(self, key: object) -> bool:

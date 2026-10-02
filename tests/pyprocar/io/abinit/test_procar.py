@@ -36,14 +36,14 @@ class TestAbinitProcarInit(BaseTest):
 
 
 class TestAbinitProcarMerge(BaseTest):
-    def test_merge_creates_procar_file(self, bands_dirpath):
+    def test_merge_leaves_directory_unchanged(self, bands_dirpath):
         from pyprocar.io.abinit import AbinitOutput, AbinitProcar
 
+        before = sorted((p.name, p.stat().st_mtime_ns) for p in bands_dirpath.iterdir())
         output = AbinitOutput(bands_dirpath / "abinit.out")
         procar = AbinitProcar(dirpath=bands_dirpath, abinit_output=output)
-        
-        merged_file = bands_dirpath / "PROCAR"
-        assert merged_file.exists()
+
+        assert sorted((p.name, p.stat().st_mtime_ns) for p in bands_dirpath.iterdir()) == before
 
     def test_vasp_procar_is_parsed(self, bands_dirpath):
         from pyprocar.io.abinit import AbinitOutput, AbinitProcar
