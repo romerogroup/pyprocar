@@ -549,4 +549,6 @@ def test_pw_xml_fallback_matches_atomic_proj_kpoints_on_srvo3(tmp_path: Path) ->
     assert primary.kpoints is not None and fallback.kpoints is not None
     assert np.allclose(fallback.kpoints[:2], [[0.0, 0.0, 0.0], [0.0, 0.0, 0.0625]])
     assert np.allclose(fallback.kpoints, primary.kpoints)
-    assert np.allclose(fallback.reciprocal_lattice, primary.reciprocal_lattice)
+    fallback_lattice, primary_lattice = fallback.reciprocal_lattice, primary.reciprocal_lattice
+    assert fallback_lattice is not None and primary_lattice is not None
+    assert np.allclose(fallback_lattice, primary_lattice)

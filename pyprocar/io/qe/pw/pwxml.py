@@ -393,10 +393,6 @@ class PwXML:
                 bands[ikpoint, :, 0] = raw_bands[ikpoint, :]
                 occupations[ikpoint, :, 0] = raw_occupations[ikpoint, :]
 
-        # print(bands[:,:,0].shape)
-        # print(bands[:,self.n_bands:,1].shape)
-        # print(np.allclose(bands[...,0], bands[...,1]))
-
         ks_energies_dict: dict[str, np.ndarray] = {
             "bands": bands,
             "occupations": occupations,
