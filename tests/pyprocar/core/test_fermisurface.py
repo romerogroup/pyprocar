@@ -388,10 +388,7 @@ class TestFermiSurfaceSerialization:
 
 
 def _finite_difference_gradient(ebs, band, padding):
-    """Central differences on the original periodic k-grid, in Cartesian eV*Angstrom.
-
-    Uses pyprocar's reciprocal-lattice convention (no 2*pi), like gradient_func.
-    """
+    """Central differences on the original periodic k-grid, dE/dk in eV*Angstrom with angular k."""
     bands = math.array_to_mesh(ebs.bands.value[:, band, 0], ebs.n_kx, ebs.n_ky, ebs.n_kz)
     d_frac = np.stack(
         [
@@ -400,7 +397,7 @@ def _finite_difference_gradient(ebs, band, padding):
         ],
         axis=-1,
     )
-    d_cart = d_frac @ np.linalg.inv(ebs.reciprocal_lattice).T
+    d_cart = d_frac @ np.linalg.inv(2 * np.pi * ebs.reciprocal_lattice).T
     padded = np.pad(d_cart, [(padding, padding)] * 3 + [(0, 0)], mode="wrap")
     return math.mesh_to_array(padded)
 
@@ -418,7 +415,7 @@ def test_compute_gradients_on_fresh_surface_matches_finite_difference(
     speed = np.linalg.norm(gradient[:, 16, 0], axis=-1)
     assert gradient.shape == (2748, 20, 1, 3)
     assert np.allclose(gradient[:, 16, 0], expected, rtol=1e-3, atol=1e-2)
-    assert np.allclose([speed.min(), speed.max()], [1.306, 18.428], atol=1e-2)
+    assert np.allclose([speed.min(), speed.max()], [0.2078, 2.9329], atol=1e-3)
 
 
 def test_fermi_speed_matches_finite_difference(fermisurface_3d_non_spin_polarized):
@@ -432,4 +429,5 @@ def test_fermi_speed_matches_finite_difference(fermisurface_3d_non_spin_polarize
     on_band_16 = fs.point_set.get_property("spin_band_index").value == 0
     assert on_band_16.sum() == 1800
     assert np.allclose(fermi_speed[on_band_16], expected_speed[on_band_16], rtol=1e-3)
+    assert np.isclose(np.median(fermi_speed[on_band_16]), 4.419e5, rtol=1e-3)
     assert np.all(fermi_speed[~on_band_16] == 0)

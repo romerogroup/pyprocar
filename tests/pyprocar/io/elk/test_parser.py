@@ -325,3 +325,13 @@ def test_real_dos_is_in_core_layout_in_ev(
     assert electrons == pytest.approx(18.8, abs=0.2)
     muffin_tin_sum = dos.projected.to_array().sum(axis=(2, 3))
     assert (muffin_tin_sum <= total + 1e-9).all()
+
+
+def test_reciprocal_lattice_has_no_two_pi_and_kpath_stays_fractional(bands_calc_dir):
+    parser = ElkParser(bands_calc_dir)
+    reciprocal_lattice, kpath = parser.reciprocal_lattice, parser.kpath
+    assert reciprocal_lattice is not None and kpath is not None
+    assert np.allclose(reciprocal_lattice, np.eye(3) * 0.137762, atol=1e-6)
+    assert np.allclose(
+        kpath.kpoints[:4], [[0, 0, 0], [0.0625, 0, 0], [0.125, 0, 0], [0.1875, 0, 0]]
+    )

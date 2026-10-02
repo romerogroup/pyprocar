@@ -385,10 +385,8 @@ class QEParser(BaseParser):
             user_logger.warning("Cannot compute kpoints without alat and reciprocal_lattice")
             return None
 
-        scaled_kpoints_cart = kpoints_cart * (2 * np.pi / self.alat)
-
         kpoints = np.around(
-            scaled_kpoints_cart.dot(np.linalg.inv(self.reciprocal_lattice)), decimals=8
+            (kpoints_cart / self.alat).dot(np.linalg.inv(self.reciprocal_lattice)), decimals=8
         )
 
         return kpoints
@@ -558,7 +556,8 @@ class QEParser(BaseParser):
             logger.warning("Cannot compute reciprocal lattice without alat")
             return None
 
-        return (2 * np.pi / self.alat) * reciprocal_lattice
+        # pw.x writes b in units of 2*pi/alat; pyprocar stores b without the 2*pi.
+        return reciprocal_lattice / self.alat
 
     @cached_property
     def fermi(self) -> float | None:

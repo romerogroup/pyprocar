@@ -398,3 +398,25 @@ def test_projected_dos_sums_to_the_pdos_tot_column(
     assert dos is not None and dos.projected is not None
     summed = dos.projected.to_array().sum(axis=(2, 3))
     np.testing.assert_allclose(summed, pdos_tot[:, pdos_columns], rtol=1e-2, atol=1e-2)
+
+
+def test_reciprocal_lattice_has_no_two_pi_and_kpoints_stay_fractional(dos_parser: QEParser) -> None:
+    reciprocal_lattice, alat = dos_parser.reciprocal_lattice, dos_parser.alat
+    kpoints = dos_parser.kpoints
+    assert reciprocal_lattice is not None and alat is not None and kpoints is not None
+    assert np.allclose(reciprocal_lattice * alat, np.eye(3))
+    assert np.allclose(
+        kpoints,
+        [
+            [0.0, 0.0, 0.0],
+            [0.25, 0.0, 0.0],
+            [0.5, 0.0, 0.0],
+            [0.25, 0.25, 0.0],
+            [0.5, 0.25, 0.0],
+            [0.5, 0.5, 0.0],
+            [0.25, 0.25, 0.25],
+            [0.5, 0.25, 0.25],
+            [0.5, 0.5, 0.25],
+            [0.5, 0.5, 0.5],
+        ],
+    )
