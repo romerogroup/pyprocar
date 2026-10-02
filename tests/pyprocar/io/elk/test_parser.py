@@ -340,9 +340,11 @@ def test_lattice_is_angstrom_and_reciprocal_lattice_is_inverse_angstrom_without_
         parser.kpath,
     )
     assert structure is not None and reciprocal_lattice is not None and kpath is not None
-    assert np.allclose(structure.lattice, np.eye(3) * 3.841244, atol=1e-6)
+    lattice = structure.lattice
+    assert lattice is not None
+    assert np.allclose(lattice, np.eye(3) * 3.841244, atol=1e-6)
     assert np.allclose(reciprocal_lattice, np.eye(3) * 0.260332, atol=1e-6)
-    assert np.allclose(reciprocal_lattice, np.linalg.inv(structure.lattice).T)
+    assert np.allclose(reciprocal_lattice, np.linalg.inv(lattice).T)
     assert np.allclose(
         kpath.kpoints[:4], [[0, 0, 0], [0.0625, 0, 0], [0.125, 0, 0], [0.1875, 0, 0]]
     )
