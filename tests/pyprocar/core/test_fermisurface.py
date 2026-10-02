@@ -330,14 +330,37 @@ class TestFermiSurfaceNormalization:
         assert np.max(np.abs(result)) == 1.0
         assert result[-1] == 1.0  # Max value normalized to 1
 
-    def test_normalize_total(self, fermisurface_3d_non_spin_polarized):
-        """Test total normalization produces values that sum to 1."""
+    def test_projected_sum_total_is_per_point_fraction(self, fermisurface_3d_non_spin_polarized):
         fs = fermisurface_3d_non_spin_polarized
-        values = np.array([1.0, 2.0, 3.0, 4.0, 5.0])
+        v_d = dict(atoms=[1], orbitals=[4, 5, 6, 7, 8])
 
-        result = fs.normalize("total", values)
+        total = fs.get_property("projected_sum", **v_d, norm_mode="total").value
+        selected = fs.get_property("projected_sum", **v_d, norm_mode="raw").value
+        everything = fs.get_property("projected_sum", norm_mode="raw").value
 
-        assert np.isclose(np.sum(result), 1.0)
+        assert sorted(fs.band_spin_mask) == [(16, 0), (17, 0), (18, 0)]
+        on_surface = []
+        for (iband, ispin), mask in fs.band_spin_mask.items():
+            expected = selected[mask, iband, ispin] / everything[mask, iband, ispin]
+            np.testing.assert_allclose(total[mask, iband, ispin], expected)
+            on_surface.append(total[mask, iband, ispin])
+        on_surface = np.concatenate(on_surface)
+        assert on_surface.min() == pytest.approx(0.8438, abs=1e-4)
+        assert on_surface.max() == pytest.approx(0.8862, abs=1e-4)
+
+    def test_projected_sum_max_reaches_one_on_a_surface(self, fermisurface_3d_non_spin_polarized):
+        fs = fermisurface_3d_non_spin_polarized
+
+        values = fs.get_property(
+            "projected_sum", atoms=[1], orbitals=[4, 5, 6, 7, 8], norm_mode="max"
+        ).value
+
+        on_surface = np.concatenate(
+            [values[mask, iband, ispin] for (iband, ispin), mask in fs.band_spin_mask.items()]
+        )
+        assert on_surface.max() == 1.0
+        assert on_surface.min() == pytest.approx(0.9449, abs=1e-4)
+        assert np.count_nonzero(values) == on_surface.size
 
 
 class TestFermiSurfaceSerialization:
