@@ -809,3 +809,44 @@ class TestProcar:
             assert procar.projected_phase[1, 1, 0, 3, 3] == np.complex128(0.134, 0.215)
         else:
             assert procar.projected_phase is None
+
+
+SINGLE_ION_PROCAR = """PROCAR lm decomposed
+# of k-points:  2         # of bands:   2         # of ions:    1
+
+ k-point     1 :    0.00000000 0.00000000 0.00000000     weight = 0.50000000
+
+band     1 # energy   -0.74763103 # occ.  2.00000000
+ 
+ion      s     py     pz     px    dxy    dyz    dz2    dxz  x2-y2    tot
+    1  0.573  0.000  0.000  0.000  0.000  0.000  0.000  0.000  0.000  0.573
+ 
+band     2 # energy    4.09031337 # occ.  2.00000000
+ 
+ion      s     py     pz     px    dxy    dyz    dz2    dxz  x2-y2    tot
+    1  0.000  0.000  0.000  0.000  0.154  0.231  0.000  0.077  0.463  0.926
+ 
+
+ k-point     2 :    0.50000000 0.00000000 0.00000000     weight = 0.50000000
+
+band     1 # energy   -0.54763103 # occ.  2.00000000
+ 
+ion      s     py     pz     px    dxy    dyz    dz2    dxz  x2-y2    tot
+    1  0.500  0.000  0.000  0.000  0.000  0.000  0.000  0.000  0.000  0.500
+ 
+band     2 # energy    4.29031337 # occ.  2.00000000
+ 
+ion      s     py     pz     px    dxy    dyz    dz2    dxz  x2-y2    tot
+    1  0.000  0.100  0.000  0.000  0.154  0.231  0.000  0.077  0.463  1.026
+ 
+"""
+
+
+def test_single_ion_procar_has_no_tot_row():
+    procar = vasp.Procar(file_str=SINGLE_ION_PROCAR)
+
+    projected = procar.projected
+    assert projected is not None
+    assert projected.shape == (2, 2, 1, 1, 9)
+    assert projected[0, 0, 0, 0, 0] == 0.573
+    assert projected[1, 1, 0, 0].tolist() == [0.0, 0.1, 0.0, 0.0, 0.154, 0.231, 0.0, 0.077, 0.463]

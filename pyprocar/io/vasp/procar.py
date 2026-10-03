@@ -295,9 +295,9 @@ class Procar(Mapping[str, Any]):
                 + "They are unknow (if you did 'filter' them it is OK)."
             )
 
-        # Vasp format different for 1 atom
-        n_spd_rows = self.n_atoms + 1
-        n_projection_rows = self.n_atoms + 1
+        # VASP writes no "tot" row when there is only one ion
+        n_projection_rows = self.n_atoms + 1 if self.n_atoms > 1 else 1
+        n_spd_rows = n_projection_rows
         if self.is_non_colinear:
             n_spd_rows *= 4
 
