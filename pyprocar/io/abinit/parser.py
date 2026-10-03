@@ -20,6 +20,7 @@ from pyprocar.io.abinit.kpoints import AbinitKpoints
 from pyprocar.io.abinit.output import AbinitOutput
 from pyprocar.io.abinit.procar import AbinitProcar
 from pyprocar.io.base import BaseParser
+from pyprocar.utils.units import HARTREE_TO_EV
 
 logger = logging.getLogger(__name__)
 user_logger = logging.getLogger("user")
@@ -218,7 +219,7 @@ class AbinitParser(BaseParser):
         
         return get_ebs_from_data(
             kpoints=procar.kpoints,
-            bands=procar.bands,
+            bands=procar.bands * HARTREE_TO_EV,
             projected=procar._spd2projected(procar.spd),
             fermi=self.abinit_output.fermi,
             projected_phase=projected_phase,
