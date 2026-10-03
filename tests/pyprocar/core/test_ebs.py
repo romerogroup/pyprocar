@@ -1003,3 +1003,66 @@ def test_free_electron_band_along_a_path_has_analytic_speed():
     velocity = ebs.compute_band_velocity()[:, 0, 0]
     assert np.isclose(velocity[25], 454587.68, rtol=1e-3)
     assert np.isclose(velocity[50], 909175.36, rtol=1e-3)
+
+
+
+HEXAGONAL_PATH_CARTESIAN = [
+    [0.0, 0.0, 0.0],
+    [0.015625, 0.0270625, 0.0],
+    [0.03125, 0.054125, 0.0],
+    [0.046875, 0.0811875, 0.0],
+    [0.0625, 0.10825, 0.0],
+]
+
+
+def make_hexagonal_ebs_path(kpath_has_lattice: bool) -> ElectronicBandStructurePath:
+    reciprocal_lattice = np.array([[0.25, 0.0, 0.0], [0.125, 0.2165, 0.0], [0.0, 0.0, 0.1]])
+    frac = np.column_stack([np.zeros(5), np.linspace(0, 0.5, 5), np.zeros(5)])
+    return ElectronicBandStructurePath(
+        kpoints=frac,
+        bands=np.zeros((5, 1, 1)),
+        reciprocal_lattice=reciprocal_lattice,
+        kpath=kpoints.KPath(
+            kpoints=frac,
+            n_grids=[5],
+            segment_names=[("G", "M")],
+            reciprocal_lattice=reciprocal_lattice if kpath_has_lattice else None,
+        ),
+    )
+
+
+@pytest.fixture
+def hexagonal_ebs_path():
+    return make_hexagonal_ebs_path(kpath_has_lattice=True)
+
+
+@pytest.mark.parametrize("kpath_has_lattice", [True, False])
+def test_path_to_mesh_points_are_cartesian(kpath_has_lattice: bool):
+    path = make_hexagonal_ebs_path(kpath_has_lattice)
+    assert np.allclose(np.asarray(path.to_mesh().points), HEXAGONAL_PATH_CARTESIAN)
+
+
+def test_path_to_mesh_follows_updated_points(hexagonal_ebs_path):
+    hexagonal_ebs_path.update_points(np.array(HEXAGONAL_PATH_CARTESIAN)[::-1])
+    assert np.allclose(
+        np.asarray(hexagonal_ebs_path.to_mesh().points), HEXAGONAL_PATH_CARTESIAN[::-1]
+    )
+
+
+def test_path_plot_draws_cartesian_kpoints(hexagonal_ebs_path, monkeypatch):
+    shown: list[pv.Plotter] = []
+
+    def record_show(self: pv.Plotter, *_args: object, **_kwargs: object) -> None:
+        shown.append(self)
+
+    monkeypatch.setattr(pv.Plotter, "show", record_show)
+    monkeypatch.setattr(pv, "OFF_SCREEN", True)
+
+    hexagonal_ebs_path.plot()
+    hexagonal_ebs_path.plot()
+
+    assert len(shown) == 2
+    assert np.allclose(hexagonal_ebs_path.kpoints, HEXAGONAL_PATH_CARTESIAN)
+    for plotter in shown:
+        path_mesh = next(m for m in plotter.meshes if m.n_points == 5)
+        assert np.allclose(np.asarray(path_mesh.points), HEXAGONAL_PATH_CARTESIAN)

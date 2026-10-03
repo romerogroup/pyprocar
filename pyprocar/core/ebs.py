@@ -1250,6 +1250,10 @@ class ElectronicBandStructurePath(
         self.transform_points(np.linalg.inv(self.reciprocal_lattice))
 
     @property
+    def kpoints_cartesian(self):
+        return self.kpoints
+
+    @property
     def kpath(self):
         return self._kpath
 
@@ -1571,7 +1575,6 @@ class ElectronicBandStructurePath(
         Plots the band structure.
 
         """
-        self.as_cart()
         add_point_labels_args = add_point_labels_args or {}
         bz_add_mesh_args = bz_add_mesh_args or {}
 
@@ -1579,7 +1582,7 @@ class ElectronicBandStructurePath(
         special_kpoint_positions = self.kpath.get_special_kpoints(as_segments=False, cartesian=True)
 
         p = pv.Plotter()
-        p.add_mesh(self, **kwargs)
+        p.add_mesh(self.to_mesh(), **kwargs)
         p.add_point_labels(special_kpoint_positions, special_kpoint_names, **add_point_labels_args)
 
         bz_add_mesh_args["style"] = bz_add_mesh_args.get("style", "wireframe")
