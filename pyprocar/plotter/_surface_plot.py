@@ -198,7 +198,7 @@ class SurfacePlotter(pv.Plotter):
         vector_norms = [
             np.linalg.norm(s.vectors, axis=-1) for s in series_list if s.vectors is not None
         ]
-        longest = max((float(n.max()) for n in vector_norms if n.size), default=0.0)
+        longest = finite_range(vector_norms)[1]
 
         meshes: dict[tuple[int, int], pv.PolyData] = {}
         for i, series in enumerate(series_list):
@@ -211,10 +211,12 @@ class SurfacePlotter(pv.Plotter):
 
             if series.vectors is not None:
                 mesh.point_data["vectors"] = series.vectors
-                mesh.set_active_vectors("vectors")
 
             if clip_to is not None:
                 mesh = clip_to_zone(mesh, clip_to)
+
+            if series.vectors is not None and "vectors" in mesh.point_data:
+                mesh.set_active_vectors("vectors")
 
             mesh_kwargs: dict[str, Any] = {
                 "cmap": scalars_cmap,
@@ -293,6 +295,15 @@ class SurfacePlotter(pv.Plotter):
         active_vectors = surface.active_vectors
         if active_vectors is None:
             return None
+        finite = np.isfinite(active_vectors).all(axis=1) & np.isfinite(surface.points).all(axis=1)
+        if not finite.any():
+            return None
+        source = surface
+        if not finite.all():
+            source = pv.PolyData(surface.points[finite])
+            for name in surface.point_data:
+                source.point_data[name] = surface.point_data[name][finite]
+            source.set_active_vectors(surface.active_vectors_name)
 
         if add_mesh_args is None:
             add_mesh_args = {}
@@ -312,7 +323,7 @@ class SurfacePlotter(pv.Plotter):
         glyph_args["orient"] = glyph_args.get("orient", vectors)
 
         if longest is None:
-            longest = float(np.linalg.norm(active_vectors, axis=1).max())
+            longest = float(np.linalg.norm(active_vectors[finite], axis=1).max())
         if length is None:
             length = self.glyph_scale
         factor = length / longest * factor
@@ -323,7 +334,7 @@ class SurfacePlotter(pv.Plotter):
         # glyph(scale=<name>) makes that array the active scalars of the mesh it runs on.
         scalars_name = surface.point_data.active_scalars_name
         vectors_name = surface.point_data.active_vectors_name
-        arrows = surface.glyph(**glyph_args)
+        arrows = source.glyph(**glyph_args)
         surface.point_data.active_scalars_name = scalars_name
         surface.point_data.active_vectors_name = vectors_name
         self.add_mesh(arrows, **add_mesh_args)
