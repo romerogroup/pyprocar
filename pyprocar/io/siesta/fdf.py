@@ -3,6 +3,7 @@
 import logging
 import re
 from collections.abc import Iterator, Mapping
+from dataclasses import dataclass, field
 from functools import cached_property
 from pathlib import Path
 from typing import Any, override
@@ -35,45 +36,73 @@ def _token_rows(text: str) -> list[list[str]]:
     return [row for row in rows if row]
 
 
-def _parse_fdf(
-    text: str, directory: Path | None
-) -> tuple[dict[str, list[str]], dict[str, list[list[str]]]]:
+@dataclass
+class _ParsedFDF:
+    """FDF content keyed by normalized label.
+
+    ``errors`` holds the message for each block that could not be read, so
+    only a request for that block fails. ``redirects`` names the files that
+    ``%block Name < file`` lines point to.
+    """
+
+    labels: dict[str, list[str]] = field(default_factory=dict)
+    blocks: dict[str, list[list[str]]] = field(default_factory=dict)
+    errors: dict[str, str] = field(default_factory=dict)
+    redirects: list[str] = field(default_factory=list)
+
+
+def _parse_fdf(text: str, directory: Path | None) -> _ParsedFDF:
     """Split FDF text into labels and blocks, keyed by normalized label.
 
     Each label maps to the tokens after it, and each block to its token rows.
     The first occurrence of a label or block wins. ``%block Name < file``
-    reads the block rows from ``file``, relative to ``directory``.
+    reads the block rows from ``file``, relative to ``directory``. An
+    unterminated block is recorded as an error, and its lines are read as
+    labels again.
     """
-    labels: dict[str, list[str]] = {}
-    blocks: dict[str, list[list[str]]] = {}
+    parsed = _ParsedFDF()
     open_block: tuple[str, str] | None = None
     rows: list[list[str]] = []
+
+    def drop_open_block() -> None:
+        assert open_block is not None
+        parsed.errors.setdefault(open_block[0], f"%block {open_block[1]} has no %endblock")
+        for row in rows:
+            parsed.labels.setdefault(normalize_label(row[0]), row[1:])
+
     for tokens in _token_rows(text):
         keyword = tokens[0].lower()
         if open_block is not None:
-            closes = keyword == "%endblock" and (
+            if keyword == "%endblock" and (
                 len(tokens) == 1 or normalize_label(tokens[1]) == open_block[0]
-            )
-            if closes:
-                blocks.setdefault(open_block[0], rows)
+            ):
+                parsed.blocks.setdefault(open_block[0], rows)
                 open_block = None
-            elif keyword in ("%block", "%endblock"):
-                raise ValueError(f"%block {open_block[1]} has no %endblock")
-            else:
+                continue
+            if keyword not in ("%block", "%endblock"):
                 rows.append(tokens)
-        elif keyword == "%block" and len(tokens) > 3 and tokens[2] == "<":
+                continue
+            drop_open_block()
+            open_block = None
+            if keyword == "%endblock":
+                continue
+        if keyword == "%block" and len(tokens) > 3 and tokens[2] == "<":
+            name, target = normalize_label(tokens[1]), tokens[3]
+            parsed.redirects.append(target)
             if directory is None:
-                raise ValueError(f"%block {tokens[1]} < {tokens[3]} needs the fdf file path")
-            redirected = _token_rows((directory / tokens[3]).read_text())
-            blocks.setdefault(normalize_label(tokens[1]), redirected)
+                parsed.errors.setdefault(name, f"%block {tokens[1]} < {target} needs a file path")
+            elif not (directory / target).is_file():
+                parsed.errors.setdefault(name, f"%block {tokens[1]} < {target}: file not found")
+            else:
+                parsed.blocks.setdefault(name, _token_rows((directory / target).read_text()))
         elif keyword == "%block" and len(tokens) > 1:
             open_block = (normalize_label(tokens[1]), tokens[1])
             rows = []
         else:
-            labels.setdefault(normalize_label(tokens[0]), tokens[1:])
+            parsed.labels.setdefault(normalize_label(tokens[0]), tokens[1:])
     if open_block is not None:
-        raise ValueError(f"%block {open_block[1]} has no %endblock")
-    return labels, blocks
+        drop_open_block()
+    return parsed
 
 
 class FDF(Mapping[str, Any]):
@@ -109,17 +138,28 @@ class FDF(Mapping[str, Any]):
         return self._file_str
 
     @cached_property
-    def _parsed(self) -> tuple[dict[str, list[str]], dict[str, list[list[str]]]]:
+    def _parsed(self) -> _ParsedFDF:
         directory = None if self.filepath is None else self.filepath.parent
         return _parse_fdf(self.file_str, directory)
 
     def label(self, name: str) -> list[str] | None:
         """Tokens after an FDF label, or None when the label is absent."""
-        return self._parsed[0].get(normalize_label(name))
+        return self._parsed.labels.get(normalize_label(name))
 
     def block(self, name: str) -> list[list[str]] | None:
-        """Token rows of an FDF block, or None when the block is absent."""
-        return self._parsed[1].get(normalize_label(name))
+        """Token rows of an FDF block, or None when the block is absent.
+
+        Raises ValueError when the block is present but could not be read.
+        """
+        key = normalize_label(name)
+        if key in self._parsed.errors:
+            raise ValueError(self._parsed.errors[key])
+        return self._parsed.blocks.get(key)
+
+    @property
+    def redirect_targets(self) -> list[str]:
+        """Files named by ``%block Name < file`` lines."""
+        return self._parsed.redirects
 
     @cached_property
     def system_label(self) -> str:

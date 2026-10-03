@@ -54,15 +54,28 @@ class SiestaParser(BaseParser):
         """Initialize FDF extractor from path or instance."""
         if param is None:
             # Auto-detect .fdf file
-            fdf_files = list(self.dirpath.glob("*.fdf"))
-            if not fdf_files:
+            candidates = [FDF(path) for path in sorted(self.dirpath.glob("*.fdf"))]
+            # A file another fdf reads with %block Name < file is not a main input.
+            targets = {target for fdf in candidates for target in fdf.redirect_targets}
+            candidates = [
+                fdf for fdf in candidates if fdf.filepath and fdf.filepath.name not in targets
+            ]
+            if not candidates:
                 user_logger.warning(f"No .fdf file found in {self.dirpath}")
                 return None
-            if len(fdf_files) > 1:
+            # Prefer the input whose SystemLabel names a .bands file here.
+            with_bands = [
+                fdf
+                for fdf in candidates
+                if (label := fdf.label("SystemLabel"))
+                and (self.dirpath / f"{label[0]}.bands").exists()
+            ]
+            chosen = (with_bands or candidates)[0]
+            if len(candidates) > 1:
                 user_logger.warning(
-                    f"Multiple .fdf files found in {self.dirpath}, using {fdf_files[0].name}"
+                    f"Multiple .fdf files found in {self.dirpath}, using {chosen.filepath}"
                 )
-            return FDF(fdf_files[0])
+            return chosen
 
         if isinstance(param, FDF):
             return param
