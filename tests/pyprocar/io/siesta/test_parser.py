@@ -305,7 +305,7 @@ def test_auto_detect_skips_included_and_label_redirected_fdf(
     end = FDF_STR.index("%endblock LatticeVectors") + len("%endblock LatticeVectors")
     (tmp_path / "lattice.fdf").write_text(
         "LatticeConstant 2.0 Ang\n"
-        "%block LatticeVectors\n1 0 0\n0 1 0\n0 0 1\n%endblock LatticeVectors\n"
+        + "%block LatticeVectors\n1 0 0\n0 1 0\n0 0 1\n%endblock LatticeVectors\n"
     )
     (tmp_path / "silicon.fdf").write_text(FDF_STR[:start] + directive + FDF_STR[end:])
     (tmp_path / "silicon.bands").write_text(BANDS_STR)
