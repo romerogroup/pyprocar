@@ -193,7 +193,12 @@ class SurfacePlotter(pv.Plotter):
         glyph_args["factor"] = factor
         glyph_args["indices"] = glyph_args.get("indices")
 
+        # glyph(scale=<name>) makes that array the active scalars of the mesh it runs on.
+        scalars_name = surface.point_data.active_scalars_name
+        vectors_name = surface.point_data.active_vectors_name
         arrows = surface.glyph(**glyph_args)
+        surface.point_data.active_scalars_name = scalars_name
+        surface.point_data.active_vectors_name = vectors_name
         self.add_mesh(arrows, **add_mesh_args)
         return arrows
 
