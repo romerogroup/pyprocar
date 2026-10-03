@@ -72,6 +72,11 @@ class ElkBands:
             high_symmetry_points=high_symmetry_points,
         )
 
+    @property
+    def bands_filepath(self) -> Path | None:
+        """The BAND.OUT or BAND_Sss_Aaaaa.OUT file the energies come from."""
+        return self._bands_filepath
+
     @cached_property
     def bands_str(self) -> str:
         """Lazily load BAND.OUT content."""

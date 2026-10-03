@@ -235,7 +235,9 @@ class ElkParser(BaseParser):
         if not self.is_bands_calculation or self._elkin is None:
             return None
 
-        if self._bands_parser is None:
+        if self._bands_parser is None or self._bands_parser.bands_filepath is None:
+            return None
+        if not self._bands_parser.bands_filepath.name.startswith("BAND_S"):
             return None
 
         # Find all BAND_S*_A*.OUT files
