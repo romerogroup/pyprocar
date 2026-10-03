@@ -29,29 +29,50 @@ def normalize_label(label: str) -> str:
     return re.sub(r"[._-]", "", label).lower()
 
 
-def _parse_fdf(text: str) -> tuple[dict[str, list[str]], dict[str, list[list[str]]]]:
+def _token_rows(text: str) -> list[list[str]]:
+    """Non-empty lines split into tokens; '#', '!' and ';' start comments."""
+    rows = [re.split(r"[#!;]", line, maxsplit=1)[0].split() for line in text.splitlines()]
+    return [row for row in rows if row]
+
+
+def _parse_fdf(
+    text: str, directory: Path | None
+) -> tuple[dict[str, list[str]], dict[str, list[list[str]]]]:
     """Split FDF text into labels and blocks, keyed by normalized label.
 
     Each label maps to the tokens after it, and each block to its token rows.
-    '#', '!' and ';' start comments. The first occurrence of a label wins.
+    The first occurrence of a label or block wins. ``%block Name < file``
+    reads the block rows from ``file``, relative to ``directory``.
     """
     labels: dict[str, list[str]] = {}
     blocks: dict[str, list[list[str]]] = {}
-    block_name: str | None = None
-    for raw_line in text.splitlines():
-        tokens = re.split(r"[#!;]", raw_line, maxsplit=1)[0].split()
-        if not tokens:
-            continue
+    open_block: tuple[str, str] | None = None
+    rows: list[list[str]] = []
+    for tokens in _token_rows(text):
         keyword = tokens[0].lower()
-        if keyword == "%block" and len(tokens) > 1:
-            block_name = normalize_label(tokens[1])
-            blocks.setdefault(block_name, [])
-        elif keyword == "%endblock":
-            block_name = None
-        elif block_name is not None:
-            blocks[block_name].append(tokens)
+        if open_block is not None:
+            closes = keyword == "%endblock" and (
+                len(tokens) == 1 or normalize_label(tokens[1]) == open_block[0]
+            )
+            if closes:
+                blocks.setdefault(open_block[0], rows)
+                open_block = None
+            elif keyword in ("%block", "%endblock"):
+                raise ValueError(f"%block {open_block[1]} has no %endblock")
+            else:
+                rows.append(tokens)
+        elif keyword == "%block" and len(tokens) > 3 and tokens[2] == "<":
+            if directory is None:
+                raise ValueError(f"%block {tokens[1]} < {tokens[3]} needs the fdf file path")
+            redirected = _token_rows((directory / tokens[3]).read_text())
+            blocks.setdefault(normalize_label(tokens[1]), redirected)
+        elif keyword == "%block" and len(tokens) > 1:
+            open_block = (normalize_label(tokens[1]), tokens[1])
+            rows = []
         else:
             labels.setdefault(normalize_label(tokens[0]), tokens[1:])
+    if open_block is not None:
+        raise ValueError(f"%block {open_block[1]} has no %endblock")
     return labels, blocks
 
 
@@ -89,7 +110,8 @@ class FDF(Mapping[str, Any]):
 
     @cached_property
     def _parsed(self) -> tuple[dict[str, list[str]], dict[str, list[list[str]]]]:
-        return _parse_fdf(self.file_str)
+        directory = None if self.filepath is None else self.filepath.parent
+        return _parse_fdf(self.file_str, directory)
 
     def label(self, name: str) -> list[str] | None:
         """Tokens after an FDF label, or None when the label is absent."""
@@ -200,10 +222,10 @@ class FDF(Mapping[str, Any]):
             {
                 "npoints": int(row[0]),
                 "kpoint": [float(row[1]), float(row[2]), float(row[3])],
-                "label": row[4],
+                "label": row[4] if len(row) > 4 else "",
             }
             for row in rows
-            if len(row) >= 5
+            if len(row) >= 4
         ]
 
     # Mapping interface

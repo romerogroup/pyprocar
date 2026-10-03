@@ -180,6 +180,8 @@ class SiestaParser(BaseParser):
                 segment_names=segment_names,
                 reciprocal_lattice=reciprocal_lattice,
                 segment_end_indices=np.cumsum(n_grids).tolist(),
+                # Siesta measures every step along BandLines, a one-point row included.
+                discontinuity_threshold=np.inf,
             )
         except Exception as e:
             user_logger.warning(f"Error creating kpath: {e}")
