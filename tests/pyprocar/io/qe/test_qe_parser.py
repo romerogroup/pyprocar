@@ -5,7 +5,7 @@ from pathlib import Path
 import numpy as np
 import pytest
 
-from pyprocar.core.ebs import ElectronicBandStructure
+from pyprocar.core.ebs import ElectronicBandStructure, ElectronicBandStructureMesh
 from pyprocar.core.kpoints import KGRID_MODE, KGridInfo, get_kpoints_from_kgrid
 from pyprocar.io import get_parser
 from pyprocar.io.qe.parser import QEParser
@@ -657,3 +657,42 @@ def test_bands_run_without_a_band_path_is_a_plain_ebs_of_the_computed_kpoints(
     assert parser.kpath is None and parser.kgrid_info is None
     assert type(ebs) is ElectronicBandStructure
     assert np.allclose(ebs.kpoints, TETRAGONAL_FRACTIONAL_KPOINTS)
+
+
+def test_mixed_directory_follows_the_run_that_wrote_the_xml(tmp_path: Path) -> None:
+    card = "3\n0 0 0 10 !G\n0.5 0 0 10 !X\n0 0 0.5 1 !Z\n"
+    calc_dir = _tetragonal_bands_dir(tmp_path, "crystal_b", card, TETRAGONAL_CARTESIAN_KPOINTS)
+    xml = (calc_dir / "test.xml").read_text()
+    (calc_dir / "test.xml").write_text(
+        xml.replace(
+            "  <output>",
+            "  <input><control_variables><calculation>nscf</calculation>"
+            + "</control_variables></input>\n  <output>",
+        ).replace(
+            "<nbnd>1</nbnd>",
+            '<nbnd>1</nbnd>\n      <starting_k_points><monkhorst_pack nk1="4" nk2="4" nk3="2"'
+            + ' k1="0" k2="0" k3="0"/></starting_k_points>',
+        )
+    )
+    parser = QEParser(calc_dir)
+
+    assert parser.kpath is None
+    assert parser.kgrid_info == KGridInfo(
+        kgrid=(4, 4, 2), kgrid_mode=KGRID_MODE.GAMMA, kshift=(0.0, 0.0, 0.0)
+    )
+
+
+@pytest.mark.data
+def test_dos_directory_with_a_bands_input_still_gives_the_full_mesh(tmp_path: Path) -> None:
+    dos_dir = QE_CODES_DIR / "non-spin-polarized" / "dos"
+    for path in dos_dir.rglob("*"):
+        if path.is_file() and "pdos_" not in path.name and path.suffix != ".pkl":
+            target = tmp_path / path.relative_to(dos_dir)
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_bytes(path.read_bytes())
+    bands_in = QE_CODES_DIR / "non-spin-polarized" / "bands" / "bands.in"
+    (tmp_path / "bands.in").write_bytes(bands_in.read_bytes())
+    ebs = QEParser(tmp_path).ebs
+
+    assert type(ebs) is ElectronicBandStructureMesh
+    assert ebs.kpoints.shape == (4096, 3)
