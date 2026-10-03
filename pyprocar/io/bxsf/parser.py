@@ -10,7 +10,8 @@ from pyprocar.core.ebs import ElectronicBandStructure, get_ebs_from_data
 from pyprocar.core.kpoints import KGRID_MODE, KGridInfo
 from pyprocar.io.base import BaseParser
 from pyprocar.io.bxsf.bxsf import Bxsf, BxsfWriter
-from pyprocar.io.qe import QEParser
+from pyprocar.io.qe.pw import PwOut
+from pyprocar.utils.units import AU_TO_ANG
 
 logger = logging.getLogger(__name__)
 user_logger = logging.getLogger("user")
@@ -23,17 +24,20 @@ class BxsfParser(BaseParser):
     ----------
     dirpath : str | Path
         Directory containing BXSF file(s).
-    filepaths : str | Path | list[Path]
-        Path(s) to .bxsf file(s). Multiple files for spin-polarized data.
+    filepaths : str | Path | list[Path] | None
+        Path(s) to .bxsf file(s). Multiple files for spin-polarized data. ``None`` reads
+        ``in.bxsf``, or else the first ``*.bxsf`` or ABINIT ``*_BXSF`` file in ``dirpath``.
     """
 
     def __init__(
         self,
         dirpath: str | Path,
-        filepaths: str | Path | list[Path] = Path("in.bxsf"),
+        filepaths: str | Path | list[Path] | None = None,
     ):
         super().__init__(dirpath)
-        self._filepaths = self._normalize_filepaths(filepaths)
+        self._filepaths = (
+            self._find_bxsf_files() if filepaths is None else self._normalize_filepaths(filepaths)
+        )
         self._extractors: list[Bxsf] = []
 
         for filepath in self._filepaths:
@@ -42,6 +46,23 @@ class BxsfParser(BaseParser):
                 self._extractors.append(Bxsf(full_path))
             else:
                 user_logger.warning(f"BXSF file not found: {full_path}")
+
+    def _find_bxsf_files(self) -> list[Path]:
+        if (self.dirpath / "in.bxsf").exists():
+            return [Path("in.bxsf")]
+        found = sorted(
+            Path(p.name)
+            for p in self.dirpath.glob("*")
+            if p.is_file() and p.name.lower().endswith((".bxsf", "_bxsf"))
+        )
+        if not found:
+            user_logger.warning(f"No in.bxsf, *.bxsf or *_BXSF file found in {self.dirpath}")
+        elif len(found) > 1:
+            user_logger.warning(
+                f"Found several BXSF files in {self.dirpath}: {[str(p) for p in found]}; "
+                + f"reading {found[0]}. Pass filepaths to choose another."
+            )
+        return found[:1]
 
     def _normalize_filepaths(self, filepaths: str | Path | list[Path]) -> list[Path]:
         """Normalize filepaths to list of Path objects."""
@@ -87,7 +108,7 @@ class BxsfParser(BaseParser):
             case BxsfWriter.ABINIT:
                 return b
             case BxsfWriter.QE_FS:
-                alat = QEParser(ext.filepath.parent).alat if ext.filepath else None
+                alat = _pw_alat_angstrom_beside(ext.filepath) if ext.filepath else None
                 if alat is None:
                     user_logger.warning(
                         "QE fs.x BXSF stores b in units of 2*pi/alat and no QE output with "
@@ -122,3 +143,12 @@ class BxsfParser(BaseParser):
         except Exception as e:
             user_logger.warning(f"Error creating EBS from BXSF: {e}")
             return None
+
+
+def _pw_alat_angstrom_beside(filepath: Path) -> float | None:
+    for candidate in sorted(filepath.parent.iterdir()):
+        if candidate.suffix.lower() in {".out", ".log"} and PwOut.is_file_of_type(candidate):
+            alat = PwOut(candidate).alat
+            if alat is not None:
+                return alat * AU_TO_ANG
+    return None

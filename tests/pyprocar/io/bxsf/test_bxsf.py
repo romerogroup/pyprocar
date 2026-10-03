@@ -82,10 +82,7 @@ class TestBxsfExtractor:
     def test_bands_shape(self) -> None:
         """Test bands array shape: (n_kpoints, n_bands, n_spins)."""
         bxsf = Bxsf.from_str(BXSF_STR_MINIMAL)
-        # 2x2x2 = 8 k-points, 1 band, 2 spins (pre-allocated)
-        assert bxsf.bands.shape[0] == 8  # n_kpoints
-        assert bxsf.bands.shape[1] == 1  # n_bands
-        assert bxsf.bands.shape[2] == 2  # n_spins
+        assert bxsf.bands.shape == (8, 1, 1)
 
     def test_kpoints_shape(self) -> None:
         """Test k-points array shape: (n_kpoints, 3)."""
