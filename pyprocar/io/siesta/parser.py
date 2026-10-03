@@ -54,15 +54,28 @@ class SiestaParser(BaseParser):
         """Initialize FDF extractor from path or instance."""
         if param is None:
             # Auto-detect .fdf file
-            fdf_files = list(self.dirpath.glob("*.fdf"))
-            if not fdf_files:
+            candidates = [FDF(path) for path in sorted(self.dirpath.glob("*.fdf"))]
+            # A file another fdf reads with %block Name < file is not a main input.
+            targets = {target for fdf in candidates for target in fdf.redirect_targets}
+            candidates = [
+                fdf for fdf in candidates if fdf.filepath and fdf.filepath.name not in targets
+            ]
+            if not candidates:
                 user_logger.warning(f"No .fdf file found in {self.dirpath}")
                 return None
-            if len(fdf_files) > 1:
+            # Prefer the input whose SystemLabel names a .bands file here.
+            with_bands = [
+                fdf
+                for fdf in candidates
+                if (label := fdf.label("SystemLabel"))
+                and (self.dirpath / f"{label[0]}.bands").exists()
+            ]
+            chosen = (with_bands or candidates)[0]
+            if len(candidates) > 1:
                 user_logger.warning(
-                    f"Multiple .fdf files found in {self.dirpath}, using {fdf_files[0].name}"
+                    f"Multiple .fdf files found in {self.dirpath}, using {chosen.filepath}"
                 )
-            return FDF(fdf_files[0])
+            return chosen
 
         if isinstance(param, FDF):
             return param
@@ -126,20 +139,11 @@ class SiestaParser(BaseParser):
             return None
 
         try:
-            coord_format = self._fdf.atomic_coords_format.lower()
-
-            if coord_format == "fractional":
-                return Structure(
-                    atoms=self._fdf.atoms,
-                    lattice=self._fdf.lattice_vectors,
-                    fractional_coordinates=self._fdf.atomic_positions,
-                )
-            else:
-                return Structure(
-                    atoms=self._fdf.atoms,
-                    lattice=self._fdf.lattice_vectors,
-                    cartesian_coordinates=self._fdf.atomic_positions,
-                )
+            return Structure(
+                atoms=self._fdf.atoms,
+                lattice=self._fdf.lattice_vectors,
+                cartesian_coordinates=self._fdf.cartesian_positions,
+            )
         except Exception as e:
             user_logger.warning(f"Error creating structure: {e}")
             return None
@@ -166,31 +170,31 @@ class SiestaParser(BaseParser):
             else:
                 raise ValueError(f"Unsupported BandLinesScale: {self._fdf.band_lines_scale}")
 
-            # Build segment names as list of tuples (start_name, end_name)
+            # Each BandLines row after the first adds npoints k-points, ending on
+            # its own point, so 1/20/20 gives 41 k-points with ticks at 0, 20, 40.
+            points = [np.array(line["kpoint"]) @ to_fractional for line in band_lines]
+            kpoints = [points[0][np.newaxis]]
             segment_names: list[tuple[str, str]] = []
-            # Build special kpoint map: name -> coordinates (use normalized names)
-            special_kpoint_map: dict[str, np.ndarray] = {}
-            # Build n_grids: number of points per segment
             n_grids: list[int] = []
-
-            for i in range(len(band_lines) - 1):
-                # Normalize labels to match KPath's internal normalization
-                start_name = normalize_kpoint_name(band_lines[i]["label"])
-                end_name = normalize_kpoint_name(band_lines[i + 1]["label"])
-                segment_names.append((start_name, end_name))
-
-                # Add to special kpoint map with normalized names
-                special_kpoint_map[start_name] = np.array(band_lines[i]["kpoint"]) @ to_fractional
-                special_kpoint_map[end_name] = np.array(band_lines[i + 1]["kpoint"]) @ to_fractional
-
-                # n_grids for this segment
-                n_grids.append(band_lines[i + 1]["npoints"])
+            for i, line in enumerate(band_lines[1:], start=1):
+                steps = np.linspace(0, 1, line["npoints"] + 1)[1:, np.newaxis]
+                kpoints.append(points[i - 1] + steps * (points[i] - points[i - 1]))
+                segment_names.append(
+                    (
+                        normalize_kpoint_name(band_lines[i - 1]["label"]),
+                        normalize_kpoint_name(line["label"]),
+                    )
+                )
+                n_grids.append(line["npoints"])
 
             return KPath(
+                kpoints=np.vstack(kpoints),
                 n_grids=n_grids,
                 segment_names=segment_names,
-                special_kpoint_map=special_kpoint_map,
                 reciprocal_lattice=reciprocal_lattice,
+                segment_end_indices=np.cumsum(n_grids).tolist(),
+                # Siesta measures every step along BandLines, a one-point row included.
+                discontinuity_threshold=np.inf,
             )
         except Exception as e:
             user_logger.warning(f"Error creating kpath: {e}")

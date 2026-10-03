@@ -31,11 +31,11 @@ AtomicCoordinatesFormat Fractional
 
 %block BandLines
   1  0.5  0.5  0.5  L
-  2  0.0  0.0  0.0  G
+  1  0.0  0.0  0.0  G
 %endblock BandLines
 """
 
-# Bands file with 2 k-points, 3 bands, 1 spin (matching the 2 grid points in BandLines)
+# Bands file with 2 k-points, 3 bands, 1 spin (BandLines: L, then 1 point to G)
 BANDS_STR = """
 -5.5000
 0.0000 1.0000
@@ -151,3 +151,136 @@ class TestSiestaParserMissingFiles:
         assert parser._fdf is not None
         assert parser._bands is None
         assert parser.fermi is None
+
+
+FCC_FDF_STR = """
+SystemLabel fcc
+LatticeConstant 5.43 Ang
+%block LatticeVectors
+  0.5  0.5  0.0
+  0.0  0.5  0.5
+  0.5  0.0  0.5
+%endblock LatticeVectors
+%block ChemicalSpeciesLabel
+  1  14  Si
+%endblock ChemicalSpeciesLabel
+{format_line}
+%block AtomicCoordinatesAndAtomicSpecies
+  0.5  0.0  0.0  1
+%endblock AtomicCoordinatesAndAtomicSpecies
+%block BandLines
+  1  0.000  0.000  0.000  G
+ 20  0.500  0.000  0.500  X
+ 20  0.500  0.250  0.750  W
+%endblock BandLines
+BandLinesScale ReciprocalLatticeVectors
+"""
+
+
+@pytest.mark.parametrize(
+    ("format_line", "cartesian"),
+    [
+        ("AtomicCoordinatesFormat Fractional", [1.3575, 1.3575, 0.0]),
+        ("AtomicCoordinatesFormat ScaledByLatticeVectors", [1.3575, 1.3575, 0.0]),
+        ("AtomicCoordinatesFormat ScaledCartesian", [2.715, 0.0, 0.0]),
+        ("AtomicCoordinatesFormat Ang", [0.5, 0.0, 0.0]),
+        ("AtomicCoordinatesFormat NotScaledCartesianAng", [0.5, 0.0, 0.0]),
+        ("AtomicCoordinatesFormat Bohr", [0.26458860533560, 0.0, 0.0]),
+        ("AtomicCoordinatesFormat NotScaledCartesianBohr", [0.26458860533560, 0.0, 0.0]),
+        ("", [0.26458860533560, 0.0, 0.0]),
+    ],
+)
+def test_structure_reads_each_atomic_coordinates_format(
+    tmp_path: Path, format_line: str, cartesian: list[float]
+) -> None:
+    (tmp_path / "fcc.fdf").write_text(FCC_FDF_STR.format(format_line=format_line))
+
+    structure = SiestaParser(tmp_path).structure
+
+    assert structure is not None
+    assert structure.cartesian_coordinates is not None
+    assert np.allclose(structure.cartesian_coordinates, [cartesian])
+
+
+def test_kpath_has_siestas_band_line_point_count(tmp_path: Path) -> None:
+    (tmp_path / "fcc.fdf").write_text(FCC_FDF_STR.format(format_line=""))
+
+    kpath = SiestaParser(tmp_path).kpath
+
+    assert kpath is not None
+    assert kpath.n_kpoints == 41
+    assert list(zip(kpath.tick_positions, kpath.tick_names, strict=True)) == [
+        (0, "Γ"),
+        (20, "X"),
+        (40, "W"),
+    ]
+
+
+# si.fdf of a Siesta 5.4.2 run: simple cubic, a = 2.6 Ang, a one-point M-R row.
+SIESTA_542_FDF = """
+System-Label   si
+%block chemical_species_label
+ 1 14 Si
+%endblock chemical_species_label
+LATTICE_CONSTANT 2.6 Ang
+%block lattice-vectors
+  1.0 0.0 0.0
+  0.0 1.0 0.0
+  0.0 0.0 1.0
+%endblock lattice-vectors
+atomic.coordinates.format NotScaledCartesianBohr
+%block AtomicCoordinatesAndAtomicSpecies
+  0.10 0.20 0.30 1
+%endblock AtomicCoordinatesAndAtomicSpecies
+%block BandLines
+  1  0.0 0.0 0.0  \\Gamma
+ 20  1.0 0.0 0.0  X
+ 20  1.0 1.0 0.0  M
+  1  1.0 1.0 1.0  R
+ 10  0.0 0.0 0.0  \\Gamma
+%endblock BandLines
+"""
+# Tick x values that run wrote to si.bands, in 1/Bohr with the 2 pi factor.
+SIESTA_542_TICK_X = [0.0, 0.639407, 1.278815, 1.918222, 3.025708]
+
+
+def test_kpath_matches_siesta_542_ticks_with_a_one_point_row(tmp_path: Path) -> None:
+    (tmp_path / "si.fdf").write_text(SIESTA_542_FDF)
+
+    kpath = SiestaParser(tmp_path).kpath
+
+    assert kpath is not None
+    assert kpath.n_kpoints == 52
+    assert kpath.tick_positions == [0, 20, 40, 41, 51]
+    assert kpath.tick_names == ["$\\Gamma$", "X", "M", "R", "$\\Gamma$"]
+    tick_x = np.asarray(kpath.k_distances)[kpath.tick_positions]
+    siesta_x = np.array(SIESTA_542_TICK_X) / (2 * np.pi * 0.52917721067121)
+    assert tick_x == pytest.approx(siesta_x, abs=1e-6)
+
+
+def test_bands_and_fermi_survive_a_bad_unrelated_block(siesta_dir: Path) -> None:
+    (siesta_dir / "silicon.fdf").write_text(FDF_STR + "%block Unrelated\n 1 2 3\n")
+
+    parser = SiestaParser(siesta_dir)
+
+    assert parser._bands is not None
+    assert parser.fermi == -5.5
+    assert parser.structure is not None
+
+
+def test_auto_detect_skips_an_fdf_another_fdf_redirects_to(tmp_path: Path) -> None:
+    # Layout of a Siesta 5.4.2 run: si.fdf reads its lattice from lv.fdf.
+    start = SIESTA_542_FDF.index("%block lattice-vectors")
+    end = SIESTA_542_FDF.index("%endblock lattice-vectors") + len("%endblock lattice-vectors")
+    main = SIESTA_542_FDF[:start] + "%block LatticeVectors < lv.fdf" + SIESTA_542_FDF[end:]
+    (tmp_path / "lv.fdf").write_text("  1.0 0.0 0.0\n  0.0 1.1 0.0\n  0.0 0.0 1.2\n")
+    (tmp_path / "si.fdf").write_text(main)
+
+    parser = SiestaParser(tmp_path)
+
+    assert parser._fdf is not None
+    assert parser._fdf.filepath == tmp_path / "si.fdf"
+    structure = parser.structure
+    assert structure is not None
+    assert structure.lattice is not None
+    assert np.allclose(np.diag(structure.lattice), [2.6, 2.86, 3.12])
