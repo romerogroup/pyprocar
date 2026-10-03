@@ -325,13 +325,19 @@ class DensityOfStates(PointSet):
 
     @property
     def atoms(self) -> npt.NDArray[np.int_]:
-        return self.structure.atoms
+        atoms = self._require_structure().atoms
+        if atoms is None:
+            raise ValueError("The structure of this density of states has no atoms")
+        return atoms
 
     @property
     def species(self) -> list[str]:
+        return list(self._require_structure().species)
+
+    def _require_structure(self) -> Structure:
         if self.structure is None:
             raise ValueError("This density of states has no structure")
-        return list(self.structure.species)
+        return self.structure
 
     @property
     def orbitals(self) -> list[str]:

@@ -557,6 +557,16 @@ def test_get_species_atom_map_none(dos):
     ), f"Specie atom groups do not match ({specie_atom_groups})"
 
 
+@pytest.mark.parametrize("call", ["atoms", "species", "get_species_atom_map"])
+def test_species_lookups_without_structure_raise_value_error(rng, call):
+    dos = _make_random_dos(rng)
+
+    with pytest.raises(ValueError, match="This density of states has no structure"):
+        attr = getattr(dos, call)
+        if callable(attr):
+            attr()
+
+
 def test_get_species_atom_map_list(dos):
     specie_atom_groups = dos.get_species_atom_map(species=["Sr", "O"])
 
