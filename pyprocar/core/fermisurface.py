@@ -154,29 +154,7 @@ class FermiSurface(pv.PolyData):
 
     @property
     def grid(self):
-        x_coords = self.ebs.kpoints[:, 0]
-        y_coords = self.ebs.kpoints[:, 1]
-        z_coords = self.ebs.kpoints[:, 2]
-
-        nx = self.ebs.n_kx
-        ny = self.ebs.n_ky
-        nz = self.ebs.n_kz
-
-        padded_x_min = x_coords.min()
-        padded_y_min = y_coords.min()
-        padded_z_min = z_coords.min()
-
-        # Must be the points on non-padded grid
-        x_spacing = 1 / self.original_ebs.n_kx
-        y_spacing = 1 / self.original_ebs.n_ky
-        z_spacing = 1 / self.original_ebs.n_kz
-
-        padded_grid = pv.ImageData(
-            dimensions=(nx, ny, nz),
-            spacing=(x_spacing, y_spacing, z_spacing),
-            origin=(padded_x_min, padded_y_min, padded_z_min),
-        )
-        return padded_grid
+        return padded_image_grid(self.ebs)
 
     @property
     def transform_matrix_to_cart(self):
@@ -987,6 +965,20 @@ class FermiSurface(pv.PolyData):
         return interpolated_surface
 
 
+def padded_image_grid(padded_ebs: ElectronicBandStructureMesh) -> pv.ImageData:
+    """Image grid whose points are the padded k-points, in fractional coordinates.
+
+    The spacing comes from the k-points themselves, so a single-point axis that
+    ``expand_single_dimension`` widened by a fill offset keeps that offset.
+    """
+    coords = padded_ebs.kpoints
+    dims = (padded_ebs.n_kx, padded_ebs.n_ky, padded_ebs.n_kz)
+    spacing = tuple(
+        float(np.ptp(coords[:, axis])) / (n - 1) if n > 1 else 1.0 for axis, n in enumerate(dims)
+    )
+    return pv.ImageData(dimensions=dims, spacing=spacing, origin=tuple(coords.min(axis=0)))
+
+
 def generate_band_isosurfaces(ebs: ElectronicBandStructureMesh, isovalue: float, padding: int = 10):
     """
     Generate isosurfaces for all bands and spins that cross the Fermi level.
@@ -1016,28 +1008,7 @@ def generate_band_isosurfaces(ebs: ElectronicBandStructureMesh, isovalue: float,
     transform_matrix_to_cart = np.eye(4)
     transform_matrix_to_cart[:3, :3] = ebs.reciprocal_lattice
 
-    x_coords = padded_ebs.kpoints[:, 0]
-    y_coords = padded_ebs.kpoints[:, 1]
-    z_coords = padded_ebs.kpoints[:, 2]
-
-    nx = padded_ebs.n_kx
-    ny = padded_ebs.n_ky
-    nz = padded_ebs.n_kz
-
-    padded_x_min = x_coords.min()
-    padded_y_min = y_coords.min()
-    padded_z_min = z_coords.min()
-
-    # Must be the points on non-padded grid
-    x_spacing = 1 / ebs.n_kx
-    y_spacing = 1 / ebs.n_ky
-    z_spacing = 1 / ebs.n_kz
-
-    grid = pv.ImageData(
-        dimensions=(nx, ny, nz),
-        spacing=(x_spacing, y_spacing, z_spacing),
-        origin=(padded_x_min, padded_y_min, padded_z_min),
-    )
+    grid = padded_image_grid(padded_ebs)
     brillouin_zone = BrillouinZone(
         ebs.reciprocal_lattice, transformation_matrix=np.array([1, 1, 1])
     )
