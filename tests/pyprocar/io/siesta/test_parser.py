@@ -214,3 +214,45 @@ def test_kpath_has_siestas_band_line_point_count(tmp_path: Path) -> None:
         (20, "X"),
         (40, "W"),
     ]
+
+
+# si.fdf of a Siesta 5.4.2 run: simple cubic, a = 2.6 Ang, a one-point M-R row.
+SIESTA_542_FDF = """
+System-Label   si
+%block chemical_species_label
+ 1 14 Si
+%endblock chemical_species_label
+LATTICE_CONSTANT 2.6 Ang
+%block lattice-vectors
+  1.0 0.0 0.0
+  0.0 1.0 0.0
+  0.0 0.0 1.0
+%endblock lattice-vectors
+atomic.coordinates.format NotScaledCartesianBohr
+%block AtomicCoordinatesAndAtomicSpecies
+  0.10 0.20 0.30 1
+%endblock AtomicCoordinatesAndAtomicSpecies
+%block BandLines
+  1  0.0 0.0 0.0  \\Gamma
+ 20  1.0 0.0 0.0  X
+ 20  1.0 1.0 0.0  M
+  1  1.0 1.0 1.0  R
+ 10  0.0 0.0 0.0  \\Gamma
+%endblock BandLines
+"""
+# Tick x values that run wrote to si.bands, in 1/Bohr with the 2 pi factor.
+SIESTA_542_TICK_X = [0.0, 0.639407, 1.278815, 1.918222, 3.025708]
+
+
+def test_kpath_matches_siesta_542_ticks_with_a_one_point_row(tmp_path: Path) -> None:
+    (tmp_path / "si.fdf").write_text(SIESTA_542_FDF)
+
+    kpath = SiestaParser(tmp_path).kpath
+
+    assert kpath is not None
+    assert kpath.n_kpoints == 52
+    assert kpath.tick_positions == [0, 20, 40, 41, 51]
+    assert kpath.tick_names == ["$\\Gamma$", "X", "M", "R", "$\\Gamma$"]
+    tick_x = np.asarray(kpath.k_distances)[kpath.tick_positions]
+    siesta_x = np.array(SIESTA_542_TICK_X) / (2 * np.pi * 0.52917721067121)
+    assert tick_x == pytest.approx(siesta_x, abs=1e-6)

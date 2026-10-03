@@ -127,3 +127,46 @@ def test_lattice_constant_reads_documented_length_units(value: str, angstrom: fl
     fdf = FDF.from_str(FDF_STR.replace("5.43 Ang", value))
 
     assert fdf.lattice_constant == pytest.approx(angstrom)
+
+
+def test_first_of_a_repeated_block_wins() -> None:
+    extra = (
+        "%block BandLines\n 1 0.0 0.0 0.0 G\n 10 0.5 0.5 0.0 M\n%endblock BandLines\n"
+        "%block AtomicCoordinatesAndAtomicSpecies\n 0.5 0.5 0.5 1\n"
+        "%endblock AtomicCoordinatesAndAtomicSpecies\n"
+    )
+    fdf = FDF.from_str(FDF_STR + extra)
+
+    assert fdf.band_lines is not None
+    assert [line["label"] for line in fdf.band_lines] == ["L", "G", "X"]
+    assert fdf.atoms == ["Si", "Si"]
+
+
+def test_block_redirect_reads_the_named_file(tmp_path) -> None:
+    (tmp_path / "lv.fdf").write_text("0.0 0.5 0.5\n0.5 0.0 0.5\n0.5 0.5 0.0\n")
+    lattice_block = FDF_STR[FDF_STR.index("%block LatticeVectors") :].split(
+        "%endblock LatticeVectors"
+    )[0] + "%endblock LatticeVectors"
+    (tmp_path / "si.fdf").write_text(
+        FDF_STR.replace(lattice_block, "%block LatticeVectors < lv.fdf")
+    )
+
+    fdf = FDF(tmp_path / "si.fdf")
+
+    assert fdf.lattice_constant == pytest.approx(5.43)
+    assert np.allclose(fdf.lattice_vectors[0], [0.0, 2.715, 2.715])
+    assert fdf.atomic_coords_format == "Fractional"
+
+
+def test_unterminated_block_raises() -> None:
+    fdf = FDF.from_str(FDF_STR.replace("%endblock LatticeVectors", ""))
+
+    with pytest.raises(ValueError, match="%block LatticeVectors has no %endblock"):
+        _ = fdf.lattice_constant
+
+
+def test_band_lines_accept_rows_without_a_label() -> None:
+    fdf = FDF.from_str(FDF_STR.replace(" 20  0.000  0.000  0.000  G", " 20  0.000  0.000  0.000"))
+
+    assert fdf.band_lines is not None
+    assert [line["label"] for line in fdf.band_lines] == ["L", "", "X"]
