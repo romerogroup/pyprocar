@@ -356,3 +356,22 @@ def test_band_values_accept_fortran_d_exponents(tmp_path: Path) -> None:
     bands = _bands(BxsfParser(tmp_path, filepaths="wannier90.bxsf").ebs)
 
     assert bands[:, 0, 0] == pytest.approx([-1.5, 0.75, -0.75, 1.5, -1.25, 1.0, -0.5, 1.75])
+
+
+def test_fs_x_pair_names_with_another_writer_are_refused(tmp_path: Path) -> None:
+    (tmp_path / "Al_fsup.bxsf").write_text(_qe_fs([_energies(3.0, 0.5)], first_band=2))
+    (tmp_path / "Al_fsdw.bxsf").write_text(_wannier90([_energies(3.0, 0.5)]))
+
+    with pytest.raises(ValueError, match="do not form a QE fs.x spin pair"):
+        BxsfParser(tmp_path, filepaths=[Path("Al_fsup.bxsf"), Path("Al_fsdw.bxsf")])
+
+
+def test_fs_x_pair_on_different_grids_is_refused(tmp_path: Path) -> None:
+    (tmp_path / "Al_fsup.bxsf").write_text(_qe_fs([_energies(3.0, 0.5)], first_band=2))
+    other_grid = _qe_fs([_energies(3.0, 0.5)[:18]], first_band=2)
+    (tmp_path / "Al_fsdw.bxsf").write_text(
+        other_grid.replace("    3    3    3\n", "    3    3    2\n")
+    )
+
+    with pytest.raises(ValueError, match="do not form a QE fs.x spin pair"):
+        BxsfParser(tmp_path, filepaths=[Path("Al_fsup.bxsf"), Path("Al_fsdw.bxsf")])
