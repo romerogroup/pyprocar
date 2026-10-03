@@ -18,6 +18,17 @@ env:
   BASE: ${{ github.event_name == 'pull_request' && 'HEAD^1' || github.event.before }}
 
 jobs:
+  lock:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: prefix-dev/setup-pixi@v0.10.2
+        with:
+          pixi-version: v0.81.0
+          run-install: false
+      - name: pixi.lock matches pixi.toml (run `pixi lock` and commit the result if this fails)
+        run: pixi lock --check --dry-run
+
   lint:
     # One-time exemption: merging dos-rewrite into dev (#237) adds ~245 files the gate would treat as all-new.
     # Pinned to dev's pre-merge tip, so it expires as soon as dev moves.
