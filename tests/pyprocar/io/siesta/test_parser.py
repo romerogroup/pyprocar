@@ -293,3 +293,34 @@ def test_auto_detect_skips_an_fdf_another_fdf_redirects_to(
     assert structure is not None
     assert structure.lattice is not None
     assert np.allclose(np.diag(structure.lattice), [2.6, 2.86, 3.12])
+
+
+@pytest.mark.parametrize(
+    "directive", ["%include lattice.fdf", "LatticeConstant LatticeVectors < lattice.fdf"]
+)
+def test_auto_detect_skips_included_and_label_redirected_fdf(
+    tmp_path: Path, directive: str, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    start = FDF_STR.index("LatticeConstant")
+    end = FDF_STR.index("%endblock LatticeVectors") + len("%endblock LatticeVectors")
+    (tmp_path / "lattice.fdf").write_text(
+        "LatticeConstant 2.0 Ang\n"
+        "%block LatticeVectors\n1 0 0\n0 1 0\n0 0 1\n%endblock LatticeVectors\n"
+    )
+    (tmp_path / "silicon.fdf").write_text(FDF_STR[:start] + directive + FDF_STR[end:])
+    (tmp_path / "silicon.bands").write_text(BANDS_STR)
+    unordered_glob = Path.glob
+
+    def sorted_glob(self: Path, pattern: str) -> list[Path]:
+        return sorted(unordered_glob(self, pattern))
+
+    monkeypatch.setattr(Path, "glob", sorted_glob)
+
+    parser = SiestaParser(tmp_path)
+
+    assert parser._fdf is not None
+    assert parser._fdf.filepath == tmp_path / "silicon.fdf"
+    structure = parser.structure
+    assert structure is not None
+    assert structure.lattice is not None
+    assert np.allclose(np.diag(structure.lattice), [2.0, 2.0, 2.0])
