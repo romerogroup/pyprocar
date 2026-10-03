@@ -727,7 +727,7 @@ class TestFermi2DDocumentedCalls:
         }
 
         assert rejected == {}
-        assert len(calls) == 26
+        assert len(calls) == 27
 
 
 class TestFermiHandlerSignature:
