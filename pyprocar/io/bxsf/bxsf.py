@@ -47,13 +47,16 @@ class _BandGrid:
     origin: np.ndarray
     reciprocal_lattice: np.ndarray
     values_with_boundary: np.ndarray
+    band_labels: tuple[int, ...]
 
 
 def _parse_band_grid(file_str: str) -> _BandGrid:
     match = re.search(r"BEGIN_BLOCK_BANDGRID_3D(.*?)END_BANDGRID_3D", file_str, re.DOTALL)
     if match is None:
         raise ValueError("No BEGIN_BLOCK_BANDGRID_3D ... END_BANDGRID_3D block in BXSF file")
-    header, *band_texts = re.split(r"^\s*BAND:\s*\d+\s*$", match.group(1), flags=re.MULTILINE)
+    header, *labelled_texts = re.split(r"^\s*BAND:\s*(\d+)\s*$", match.group(1), flags=re.MULTILINE)
+    band_labels = tuple(int(label) for label in labelled_texts[0::2])
+    band_texts = labelled_texts[1::2]
 
     lines = [line.strip() for line in header.splitlines()]
     lines = [line for line in lines if line and not line.startswith("#")]
@@ -68,7 +71,10 @@ def _parse_band_grid(file_str: str) -> _BandGrid:
             f"BXSF header declares {n_bands} bands but has {len(band_texts)} BAND blocks"
         )
     n_points = n1 * n2 * n3
-    blocks = [np.array(text.split(), dtype=float) for text in band_texts]
+    fortran_exponent = str.maketrans("dD", "eE")
+    blocks = [
+        np.array(text.translate(fortran_exponent).split(), dtype=float) for text in band_texts
+    ]
     for i, block in enumerate(blocks, start=1):
         if block.size != n_points:
             raise ValueError(f"BXSF BAND block {i} has {block.size} values, expected {n_points}")
@@ -78,6 +84,7 @@ def _parse_band_grid(file_str: str) -> _BandGrid:
         origin=np.array(origin_line.split(), dtype=float),
         reciprocal_lattice=np.array([line.split() for line in vector_lines], dtype=float),
         values_with_boundary=np.array(blocks).reshape(n_bands, n_points),
+        band_labels=band_labels,
     )
 
 
@@ -168,6 +175,11 @@ class Bxsf(Mapping[str, Any]):
         """Grid dimensions excluding redundant boundary (actual k-grid)."""
         n1, n2, n3 = self._band_grid.nkfs_dim
         return (n1 - 1, n2 - 1, n3 - 1)
+
+    @cached_property
+    def band_labels(self) -> tuple[int, ...]:
+        """The ``BAND:`` label of each block, in file order."""
+        return self._band_grid.band_labels
 
     @cached_property
     def n_bands(self) -> int:

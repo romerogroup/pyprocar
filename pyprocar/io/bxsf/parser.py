@@ -25,8 +25,10 @@ class BxsfParser(BaseParser):
     dirpath : str | Path
         Directory containing BXSF file(s).
     filepaths : str | Path | list[Path] | None
-        Path(s) to .bxsf file(s). Multiple files for spin-polarized data. ``None`` reads
-        ``in.bxsf``, or else the first ``*.bxsf`` or ABINIT ``*_BXSF`` file in ``dirpath``.
+        Path(s) to .bxsf file(s). Two files are read as spin up and spin down. ``None``
+        reads ``in.bxsf``, else the QE ``fs.x`` pair ``<prefix>_fsup.bxsf`` and
+        ``<prefix>_fsdw.bxsf``, else the first ``*.bxsf`` or ABINIT ``*_BXSF`` file in
+        ``dirpath``.
     """
 
     def __init__(
@@ -55,6 +57,9 @@ class BxsfParser(BaseParser):
             for p in self.dirpath.glob("*")
             if p.is_file() and p.name.lower().endswith((".bxsf", "_bxsf"))
         )
+        spin_pair = _qe_fs_spin_pair(found)
+        if spin_pair is not None:
+            return spin_pair
         if not found:
             user_logger.warning(f"No in.bxsf, *.bxsf or *_BXSF file found in {self.dirpath}")
         elif len(found) > 1:
@@ -134,7 +139,7 @@ class BxsfParser(BaseParser):
             ext = self._extractors[0]
             return get_ebs_from_data(
                 kpoints=ext.kpoints,
-                bands=ext.bands,
+                bands=self._bands(),
                 projected=None,
                 fermi=ext.fermi_energy,
                 reciprocal_lattice=self.reciprocal_lattice,
@@ -143,6 +148,28 @@ class BxsfParser(BaseParser):
         except Exception as e:
             user_logger.warning(f"Error creating EBS from BXSF: {e}")
             return None
+
+    def _bands(self) -> np.ndarray:
+        if len(self._extractors) == 1:
+            return self._extractors[0].bands
+        up, down = self._extractors
+        if up.band_labels != down.band_labels or up.nk_dim != down.nk_dim:
+            raise ValueError(
+                f"The spin-up file holds bands {list(up.band_labels)} on grid {up.nk_dim} and "
+                + f"the spin-down file holds bands {list(down.band_labels)} on grid "
+                + f"{down.nk_dim}, so they cannot form one spin-polarized band structure. "
+                + "fs.x picks the bands that cross the Fermi level in each spin separately; "
+                + "rerun it with a larger deltaE, or pass one file in filepaths."
+            )
+        return np.concatenate([up.bands, down.bands], axis=2)
+
+
+def _qe_fs_spin_pair(found: list[Path]) -> list[Path] | None:
+    names = {p.name for p in found}
+    for p in found:
+        if p.name.endswith("up.bxsf") and p.name[: -len("up.bxsf")] + "dw.bxsf" in names:
+            return [p, p.with_name(p.name[: -len("up.bxsf")] + "dw.bxsf")]
+    return None
 
 
 def _pw_alat_angstrom_beside(filepath: Path) -> float | None:
