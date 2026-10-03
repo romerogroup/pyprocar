@@ -24,10 +24,10 @@ BANDLINES_OUT = """   0.000000000      -4.832432739
 
 """
 
-# Minimal BANDS.OUT content for testing (non-spin-polarized)
+# Minimal BAND.OUT content for testing (non-spin-polarized)
 # Format: x-position, energy (Hartree), projections...
 # This represents 5 k-points and 2 bands
-BANDS_OUT_NON_SPIN = """   0.000000000      -2.401220419        0.000002    0.000000
+BAND_OUT_NON_SPIN = """   0.000000000      -2.401220419        0.000002    0.000000
   0.1081979588      -2.401219876        0.000002    0.000000
   0.2163959177      -2.401222821        0.000001    0.000000
   0.3245938765      -2.401223004        0.000000    0.000000
@@ -41,9 +41,9 @@ BANDS_OUT_NON_SPIN = """   0.000000000      -2.401220419        0.000002    0.00
 
 """
 
-# Minimal BANDS.OUT content for spin-polarized case
+# Minimal BAND.OUT content for spin-polarized case
 # With nspin=2, raw_nbands is doubled, then split into spin channels
-BANDS_OUT_SPIN = """   0.000000000      -2.401220419        0.000002    0.000000
+BAND_OUT_SPIN = """   0.000000000      -2.401220419        0.000002    0.000000
   0.1081979588      -2.401219876        0.000002    0.000000
   0.2163959177      -2.401222821        0.000001    0.000000
   0.3245938765      -2.401223004        0.000000    0.000000
@@ -80,8 +80,8 @@ HIGH_SYM_POINTS = np.array([
 @pytest.fixture
 def bands_files_non_spin(tmp_path):
     """Create temporary band files for non-spin-polarized case."""
-    bands_file = tmp_path / "BANDS.OUT"
-    bands_file.write_text(BANDS_OUT_NON_SPIN)
+    bands_file = tmp_path / "BAND.OUT"
+    bands_file.write_text(BAND_OUT_NON_SPIN)
     bandlines_file = tmp_path / "BANDLINES.OUT"
     bandlines_file.write_text(BANDLINES_OUT)
     return bands_file, bandlines_file
@@ -90,8 +90,8 @@ def bands_files_non_spin(tmp_path):
 @pytest.fixture
 def bands_files_spin(tmp_path):
     """Create temporary band files for spin-polarized case."""
-    bands_file = tmp_path / "BANDS.OUT"
-    bands_file.write_text(BANDS_OUT_SPIN)
+    bands_file = tmp_path / "BAND.OUT"
+    bands_file.write_text(BAND_OUT_SPIN)
     bandlines_file = tmp_path / "BANDLINES.OUT"
     bandlines_file.write_text(BANDLINES_OUT)
     return bands_file, bandlines_file
@@ -113,7 +113,7 @@ class TestElkBandsInit(BaseTest):
     def test_bands_from_str(self):
         """Test loading ElkBands from string content."""
         bands = ElkBands.from_str(
-            bands_content=BANDS_OUT_NON_SPIN,
+            bands_content=BAND_OUT_NON_SPIN,
             bandlines_content=BANDLINES_OUT,
             nkpoints=5,
             nspin=1,
@@ -126,7 +126,7 @@ class TestElkBandsDimensions(BaseTest):
     def test_nkpoints(self):
         """Test number of k-points."""
         bands = ElkBands.from_str(
-            bands_content=BANDS_OUT_NON_SPIN,
+            bands_content=BAND_OUT_NON_SPIN,
             bandlines_content=BANDLINES_OUT,
             nkpoints=5,
             nspin=1,
@@ -137,7 +137,7 @@ class TestElkBandsDimensions(BaseTest):
     def test_nspin_non_polarized(self):
         """Test nspin for non-spin-polarized."""
         bands = ElkBands.from_str(
-            bands_content=BANDS_OUT_NON_SPIN,
+            bands_content=BAND_OUT_NON_SPIN,
             bandlines_content=BANDLINES_OUT,
             nkpoints=5,
             nspin=1,
@@ -148,7 +148,7 @@ class TestElkBandsDimensions(BaseTest):
     def test_nspin_polarized(self):
         """Test nspin for spin-polarized."""
         bands = ElkBands.from_str(
-            bands_content=BANDS_OUT_SPIN,
+            bands_content=BAND_OUT_SPIN,
             bandlines_content=BANDLINES_OUT,
             nkpoints=5,
             nspin=2,
@@ -159,7 +159,7 @@ class TestElkBandsDimensions(BaseTest):
     def test_nbands_non_spin(self):
         """Test number of bands for non-spin-polarized."""
         bands = ElkBands.from_str(
-            bands_content=BANDS_OUT_NON_SPIN,
+            bands_content=BAND_OUT_NON_SPIN,
             bandlines_content=BANDLINES_OUT,
             nkpoints=5,
             nspin=1,
@@ -170,7 +170,7 @@ class TestElkBandsDimensions(BaseTest):
     def test_nbands_spin_polarized(self):
         """Test number of bands for spin-polarized (half of raw)."""
         bands = ElkBands.from_str(
-            bands_content=BANDS_OUT_SPIN,
+            bands_content=BAND_OUT_SPIN,
             bandlines_content=BANDLINES_OUT,
             nkpoints=5,
             nspin=2,
@@ -183,7 +183,7 @@ class TestElkBandsKpoints(BaseTest):
     def test_kpoints_shape_no_high_sym(self):
         """Test k-points array shape when no high-symmetry points provided."""
         bands = ElkBands.from_str(
-            bands_content=BANDS_OUT_NON_SPIN,
+            bands_content=BAND_OUT_NON_SPIN,
             bandlines_content=BANDLINES_OUT,
             nkpoints=5,
             nspin=1,
@@ -196,7 +196,7 @@ class TestElkBandsKpoints(BaseTest):
     def test_kticks(self):
         """Test high-symmetry k-point indices."""
         bands = ElkBands.from_str(
-            bands_content=BANDS_OUT_NON_SPIN,
+            bands_content=BAND_OUT_NON_SPIN,
             bandlines_content=BANDLINES_OUT,
             nkpoints=5,
             nspin=1,
@@ -209,20 +209,21 @@ class TestElkBandsKpoints(BaseTest):
     def test_ngrids(self):
         """Test number of points per segment."""
         bands = ElkBands.from_str(
-            bands_content=BANDS_OUT_NON_SPIN,
+            bands_content=BAND_OUT_NON_SPIN,
             bandlines_content=BANDLINES_OUT,
             nkpoints=5,
             nspin=1,
             high_symmetry_points=HIGH_SYM_POINTS,
         )
-        assert isinstance(bands.ngrids, np.ndarray)
+        assert bands.kticks == [0, 4, 4]
+        assert bands.ngrids.tolist() == [5, 1]
 
 
 class TestElkBandsEnergies(BaseTest):
     def test_bands_hartree_shape(self):
         """Test bands_hartree array shape."""
         bands = ElkBands.from_str(
-            bands_content=BANDS_OUT_NON_SPIN,
+            bands_content=BAND_OUT_NON_SPIN,
             bandlines_content=BANDLINES_OUT,
             nkpoints=5,
             nspin=1,
@@ -234,7 +235,7 @@ class TestElkBandsEnergies(BaseTest):
     def test_bands_shape_non_spin(self):
         """Test bands array shape for non-spin-polarized."""
         bands = ElkBands.from_str(
-            bands_content=BANDS_OUT_NON_SPIN,
+            bands_content=BAND_OUT_NON_SPIN,
             bandlines_content=BANDLINES_OUT,
             nkpoints=5,
             nspin=1,
@@ -246,7 +247,7 @@ class TestElkBandsEnergies(BaseTest):
     def test_bands_shape_spin_polarized(self):
         """Test bands array shape for spin-polarized."""
         bands = ElkBands.from_str(
-            bands_content=BANDS_OUT_SPIN,
+            bands_content=BAND_OUT_SPIN,
             bandlines_content=BANDLINES_OUT,
             nkpoints=5,
             nspin=2,
@@ -258,7 +259,7 @@ class TestElkBandsEnergies(BaseTest):
     def test_bands_in_ev(self):
         """Test bands are converted to eV."""
         bands = ElkBands.from_str(
-            bands_content=BANDS_OUT_NON_SPIN,
+            bands_content=BAND_OUT_NON_SPIN,
             bandlines_content=BANDLINES_OUT,
             nkpoints=5,
             nspin=1,
@@ -271,7 +272,7 @@ class TestElkBandsEnergies(BaseTest):
     def test_bands_hartree_values(self):
         """Test raw Hartree values are correctly parsed."""
         bands = ElkBands.from_str(
-            bands_content=BANDS_OUT_NON_SPIN,
+            bands_content=BAND_OUT_NON_SPIN,
             bandlines_content=BANDLINES_OUT,
             nkpoints=5,
             nspin=1,

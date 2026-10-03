@@ -40,7 +40,7 @@ plot1d
   3 10
    0.0  0.0  0.0 : G
    0.5  0.0  0.0 : X
-   0.5  0.5  0.0 : M
+   0.5  0.0625  0.0 : A
 """
 
 # Minimal elk.in for DOS calculation (no plot1d)
@@ -99,8 +99,8 @@ BANDLINES_OUT = """   0.000000000      -4.832432739
 
 """
 
-# Minimal BANDS.OUT - 10 k-points, 2 bands
-BANDS_OUT = """   0.000000000      -2.401220419        0.000002    0.000000
+# Minimal BAND.OUT - 10 k-points, 2 bands
+BAND_OUT = """   0.000000000      -2.401220419        0.000002    0.000000
   0.0540989794      -2.401219000        0.000002    0.000000
   0.1081979588      -2.401218000        0.000002    0.000000
   0.1622969382      -2.401217000        0.000001    0.000000
@@ -190,7 +190,6 @@ def bands_calc_dir(tmp_path):
     (tmp_path / "FERMI.OUT").write_text(EFERMI_OUT)  # Parser expects FERMI.OUT
     (tmp_path / "GEOMETRY.OUT").write_text(GEOMETRY_OUT)
     (tmp_path / "BANDLINES.OUT").write_text(BANDLINES_OUT)
-    (tmp_path / "BANDS.OUT").write_text(BANDS_OUT)
     (tmp_path / "BAND_S01_A0001.OUT").write_text(BAND_S01_A0001)
     (tmp_path / "BAND_S02_A0001.OUT").write_text(BAND_S02_A0001)
     return tmp_path
@@ -475,3 +474,176 @@ def test_ebs_kpoints_are_fractional_and_kdirect_is_gone(bands_calc_dir):
     assert np.allclose(
         ebs.kpoints_cartesian[:2], [[0, 0, 0], [0.0625 * 0.260332, 0, 0]], atol=1e-7
     )
+
+
+@pytest.fixture
+def user_warnings(caplog: pytest.LogCaptureFixture):
+    user_logger = logging.getLogger("user")
+    user_logger.addHandler(caplog.handler)
+    with caplog.at_level(logging.WARNING, logger="user"):
+        yield caplog
+    user_logger.removeHandler(caplog.handler)
+
+
+@pytest.mark.parametrize(
+    ("task", "files"),
+    [
+        ("22", {"BAND_S01_A0001.OUT": BAND_S01_A0001, "BAND_S02_A0001.OUT": BAND_S02_A0001}),
+        ("20", {"BAND.OUT": BAND_OUT}),
+    ],
+    ids=["task22-BAND_S", "task20-BAND.OUT"],
+)
+def test_bands_come_from_the_files_elk_writes(tmp_path, task, files):
+    (tmp_path / "elk.in").write_text(ELKIN_BANDS.replace("  22\n", f"  {task}\n"))
+    (tmp_path / "FERMI.OUT").write_text(EFERMI_OUT)
+    (tmp_path / "BANDLINES.OUT").write_text(BANDLINES_OUT)
+    for name, content in files.items():
+        (tmp_path / name).write_text(content)
+    ebs = ElkParser(tmp_path).ebs
+
+    assert isinstance(ebs, ElectronicBandStructurePath) and ebs.bands is not None
+    bands = ebs.bands.to_array()
+    assert bands.shape == (11, 2, 1)
+    assert bands[0, :, 0] == pytest.approx([-56.582434, -30.753990], abs=1e-5)
+
+
+@pytest.mark.data
+@pytest.mark.parametrize(
+    ("mag", "shape", "first_band_at_gamma"),
+    [
+        ("non-spin-polarized", (54, 41, 1), [-56.582434]),
+        ("spin-polarized-colinear", (44, 71, 2), [-55.780498, -56.116906]),
+    ],
+)
+def test_real_elk_bands_read_band_s_files(mag, shape, first_band_at_gamma):
+    ebs = ElkParser(ELK_DOS_DIR / mag / "bands").ebs
+
+    assert isinstance(ebs, ElectronicBandStructurePath) and ebs.bands is not None
+    bands = ebs.bands.to_array()
+    assert bands.shape == shape
+    assert bands[0, 0, :] == pytest.approx(first_band_at_gamma, abs=1e-5)
+    assert ebs.kpath.tick_names == ["Γ", "X", "M", "Γ", "R", "X"]
+    kpoints = np.asarray(ebs.kpath.kpoints)
+    assert np.allclose(
+        kpoints[ebs.kpath.tick_positions],
+        [[0, 0, 0], [0.5, 0, 0], [0.5, 0.5, 0], [0, 0, 0], [0.5, 0.5, 0.5], [0.5, 0, 0]],
+    )
+
+
+def test_repeated_block_keeps_the_last_copy_like_elk(tmp_path):
+    (tmp_path / "elk.in").write_text(
+        "avec\n1 0 0\n0 1 0\n0 0 1\n\navec\n2 0 0\n0 2 0\n0 0 2\n\n"
+        + "atoms\n1\n'Si.in'\n1\n0 0 0\n"
+    )
+    structure = ElkParser(tmp_path).structure
+
+    assert structure is not None and structure.lattice is not None
+    assert np.allclose(structure.lattice, np.eye(3) * 1.058354, atol=1e-6)
+
+
+def test_inline_comments_on_keyword_lines_are_ignored(tmp_path):
+    (tmp_path / "elk.in").write_text(
+        ELKIN_BANDS.replace("scale\n", "scale : global\n")
+        .replace("plot1d\n", "plot1d : path\n")
+        .replace("tasks\n", "tasks : run\n")
+        + "\nspinpol : collinear\n  .true.\n"
+    )
+    parser = ElkParser(tmp_path)
+
+    assert parser.nspin == 2
+    assert parser.is_bands_calculation
+    assert parser.elkin is not None
+    assert parser.elkin.nkpoints == 10
+    assert parser.elkin.high_symmetry_points.tolist() == [[0, 0, 0], [0.5, 0, 0], [0.5, 0.0625, 0]]
+
+
+def test_missing_plot1d_uses_the_elk_default_path_and_warns(tmp_path, user_warnings):
+    (tmp_path / "elk.in").write_text(ELKIN_BANDS.split("plot1d")[0])
+    elkin = ElkParser(tmp_path).elkin
+
+    assert elkin is not None
+    assert elkin.nkpoints == 200
+    assert elkin.high_symmetry_points.tolist() == [[0, 0, 0], [1, 1, 1]]
+    assert "plot1d" in user_warnings.text
+
+
+def test_structure_from_elk_in_warns_that_geometry_out_is_missing(tmp_path, user_warnings):
+    (tmp_path / "elk.in").write_text(ELKIN_BANDS)
+    assert ElkParser(tmp_path).structure is not None
+
+    assert "GEOMETRY.OUT" in user_warnings.text
+
+
+def test_band_path_repeats_each_inner_vertex_so_kpath_finds_every_segment(bands_calc_dir):
+    ebs = ElkParser(bands_calc_dir).ebs
+
+    assert isinstance(ebs, ElectronicBandStructurePath) and ebs.bands is not None
+    kpoints = np.asarray(ebs.kpath.kpoints)
+    assert len(kpoints) == 11 and ebs.bands.to_array().shape == (11, 2, 1)
+    assert np.allclose(
+        kpoints[[0, 8, 9, 10]], [[0, 0, 0], [0.5, 0, 0], [0.5, 0, 0], [0.5, 0.0625, 0]]
+    )
+
+
+def _band_dir(tmp_path, task, files):
+    (tmp_path / "elk.in").write_text(ELKIN_BANDS.replace("  22\n", f"  {task}\n"))
+    (tmp_path / "FERMI.OUT").write_text(EFERMI_OUT)
+    (tmp_path / "BANDLINES.OUT").write_text(BANDLINES_OUT)
+    for name, content in files.items():
+        (tmp_path / name).write_text(content)
+    return tmp_path
+
+
+def test_band_file_follows_the_elk_in_task_and_warns_about_the_other(tmp_path, user_warnings):
+    stale = BAND_OUT.replace("-2.401220419", "-9.000000000")
+    calc_dir = _band_dir(
+        tmp_path,
+        "22",
+        {
+            "BAND.OUT": stale,
+            "BAND_S01_A0001.OUT": BAND_S01_A0001,
+            "BAND_S02_A0001.OUT": BAND_S02_A0001,
+        },
+    )
+    ebs = ElkParser(calc_dir).ebs
+
+    assert isinstance(ebs, ElectronicBandStructurePath) and ebs.bands is not None
+    assert ebs.bands.to_array()[0, 0, 0] == pytest.approx(-56.582434, abs=1e-5)
+    assert "BAND.OUT" in user_warnings.text
+
+
+def test_band_character_tasks_23_and_24_warn_that_they_are_unsupported(tmp_path, user_warnings):
+    calc_dir = _band_dir(tmp_path, "23", {"BAND_S01_A0001.OUT": BAND_S01_A0001})
+
+    assert ElkParser(calc_dir).ebs is None
+    assert "23" in user_warnings.text
+
+
+def test_vertex_labels_keep_latex_that_kpath_does_not_alias(tmp_path):
+    calc_dir = _band_dir(
+        tmp_path, "22", {"BAND_S01_A0001.OUT": BAND_S01_A0001, "BAND_S02_A0001.OUT": BAND_S02_A0001}
+    )
+    (calc_dir / "elk.in").write_text(
+        (calc_dir / "elk.in").read_text().replace(": G", ": \\Gamma").replace(": A", ": \\Sigma_1")
+    )
+    ebs = ElkParser(calc_dir).ebs
+
+    assert isinstance(ebs, ElectronicBandStructurePath)
+    assert ebs.kpath.tick_names == ["Γ", "X", "$\\Sigma_1$"]
+
+
+def test_task_20_bands_carry_no_projections_from_stale_band_s_files(tmp_path):
+    calc_dir = _band_dir(
+        tmp_path,
+        "20",
+        {
+            "BAND.OUT": BAND_OUT,
+            "BAND_S01_A0001.OUT": BAND_S01_A0001,
+            "BAND_S02_A0001.OUT": BAND_S02_A0001,
+        },
+    )
+    ebs = ElkParser(calc_dir).ebs
+
+    assert isinstance(ebs, ElectronicBandStructurePath) and ebs.bands is not None
+    assert ebs.bands.to_array().shape == (11, 2, 1)
+    assert ebs.projected is None

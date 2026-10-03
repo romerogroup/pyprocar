@@ -397,8 +397,8 @@ class QEParser(BaseParser):
             logger.info("No kpath found for DOS calculation")
             return None
 
-        if self.bands_in is None:
-            logger.info("No bands.in file found, therefore not parsing kpath")
+        if self.bands_in is None or not self.is_bands_run:
+            logger.info("The parsed k-points do not come from a bands run")
             return None
 
         kpoints_card = self.bands_in.kpoints_card
@@ -421,7 +421,7 @@ class QEParser(BaseParser):
 
         kticks = find_high_symmetry_ticks(self._raw_kpoints, high_sym_points)
         self._kticks = kticks
-        new_kpoints = insert_continuous_points(self._raw_kpoints, kticks)
+        new_kpoints = k_utils.insert_continuous_points(self._raw_kpoints, kticks)
         new_kpoints = np.array(new_kpoints)
 
         # Convert list[list[str]] to list[tuple[str, str]]
@@ -447,14 +447,42 @@ class QEParser(BaseParser):
         return kpoints
 
     @cached_property
+    def is_bands_run(self) -> bool:
+        """Whether the parsed k-points come from a calculation='bands' run.
+
+        The xml names the run that wrote it. A later pw.x run in the same
+        directory overwrites the xml but not the projwfc output, so the xml
+        decides only when its k-point count matches the projwfc k-points;
+        otherwise the presence of a bands input decides.
+        """
+        projwfc_kpoints = None
+        if self.atomic_proj_xml is not None:
+            projwfc_kpoints = self.atomic_proj_xml.kpoints
+        elif self.projwfc_out is not None:
+            projwfc_kpoints = self.projwfc_out.kpoints
+        for xml in (self.pw_xml, self.data_file_schema_xml):
+            if xml is None or xml.calculation is None:
+                continue
+            xml_kpoints = xml.kpoints
+            same_run = (
+                projwfc_kpoints is None
+                or xml_kpoints is None
+                or len(xml_kpoints) == len(projwfc_kpoints)
+            )
+            if same_run:
+                return xml.calculation == "bands"
+        return self.bands_in is not None
+
+    @cached_property
     def kgrid_info(self) -> k_utils.KGridInfo | None:
-        if self.kpath is not None:
+        # A bands run computes the k-points it lists, never the scf grid.
+        if self.is_bands_run:
             return None
 
         nk1, nk2, nk3 = self.nk1, self.nk2, self.nk3
         sk1, sk2, sk3 = self.sk1, self.sk2, self.sk3
 
-        if nk1 is None or nk2 is None or nk3 is None:
+        if not (nk1 and nk2 and nk3):
             return None
         if sk1 is None or sk2 is None or sk3 is None:
             return None
@@ -602,7 +630,7 @@ class QEParser(BaseParser):
             return None
 
         if self.kpath is not None:
-            bands = insert_continuous_points(bands, self.kticks)
+            bands = k_utils.insert_continuous_points(bands, self.kticks)
         logger.debug(f"Bands: {bands.shape}")
 
         return bands
@@ -653,7 +681,7 @@ class QEParser(BaseParser):
             pyprocar_projections_phase[..., i_atom, i_orbital] += projections[..., i_state]
 
         if self.kpath is not None:
-            pyprocar_projections_phase = insert_continuous_points(
+            pyprocar_projections_phase = k_utils.insert_continuous_points(
                 pyprocar_projections_phase, self.kticks
             )
         logger.debug(f"Spd Phase: {pyprocar_projections_phase.shape}")
@@ -669,7 +697,7 @@ class QEParser(BaseParser):
 
         n_kpoints = self.spd_phase.shape[0]
         if self.kpath is not None and n_kpoints != self.kpath.n_kpoints:
-            spd = insert_continuous_points(spd, self.kticks)
+            spd = k_utils.insert_continuous_points(spd, self.kticks)
         logger.debug(f"Spd: {spd.shape}")
         return spd
 
@@ -839,35 +867,3 @@ def find_high_symmetry_ticks(raw_kpoints, high_sym_points, atol=1e-4):
             raise ValueError(f"No match found for high_sym_point {j}: {high_sym_points[j]}")
 
     return kticks
-
-
-def insert_continuous_points(arr: np.ndarray, tick_indices: list[int] | np.ndarray) -> np.ndarray:
-    """
-    Insert duplicates at tick indices to enforce VASP-style repeated kpoints.
-
-    Parameters
-    ----------
-    arr : np.ndarray
-        Array with shape (nk, ...), where axis=0 corresponds to kpoints.
-    tick_indices : array-like
-        Indices of tick points (end of each segment).
-        Continuous ticks will be duplicated.
-
-    Returns
-    -------
-    np.ndarray
-        New array with duplicated rows at continuous tick points.
-    """
-    tick_indices_arr = np.asarray(tick_indices)
-
-    # Continuous ticks are all except the very first one
-    continuous_ticks = tick_indices_arr[1:-1]
-
-    # Values to duplicate
-    rows_to_insert = arr[continuous_ticks]
-
-    # Insert them back at the right positions
-    # np.insert shifts indices automatically, so we need to offset
-    out = np.insert(arr, continuous_ticks + 1, rows_to_insert, axis=0)
-
-    return out

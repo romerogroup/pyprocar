@@ -60,7 +60,6 @@ CASES = [
             "EFERMI.OUT": elk.EFERMI_OUT,
             "GEOMETRY.OUT": elk.GEOMETRY_OUT,
             "BANDLINES.OUT": elk.BANDLINES_OUT,
-            "BANDS.OUT": elk.BANDS_OUT,
             "BAND_S01_A0001.OUT": elk.BAND_S01_A0001,
             "BAND_S02_A0001.OUT": elk.BAND_S02_A0001,
         },

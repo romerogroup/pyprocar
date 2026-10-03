@@ -1,14 +1,44 @@
 """elk.in input file parser for Elk calculations."""
 
-import re
+import logging
+from dataclasses import dataclass
 from functools import cached_property
+from itertools import takewhile
 from pathlib import Path
 from typing import Self
 
 import numpy as np
 import numpy.typing as npt
 
-from pyprocar.io.elk.geometry import ElkCell, bool_fortran, parse_elk_cell
+from pyprocar.core.kpoints import normalize_kpoint_name
+from pyprocar.io.elk.geometry import ElkCell, block_lines, bool_fortran, parse_elk_cell
+
+user_logger = logging.getLogger("user")
+
+
+@dataclass(frozen=True, slots=True)
+class Plot1D:
+    vertices: npt.NDArray[np.float64]
+    npoints: int
+    labels: list[str]
+
+
+# Elk 11.2.3 readinput.f90 defaults: nvp1d=2 vertices (0,0,0) and (1,1,1), npp1d=200.
+ELK_DEFAULT_PLOT1D = Plot1D(np.array([[0.0, 0.0, 0.0], [1.0, 1.0, 1.0]]), 200, ["0", "1"])
+
+
+def _vertex_label(line: str) -> str:
+    """Text after the last ':' of a plot1d vertex line.
+
+    KPath maps "Gamma" to its own symbol but not "\\Gamma", so a backslash is
+    dropped only when that turns the label into a KPath alias. Other LaTeX,
+    such as "\\Sigma_1", is kept for KPath to render.
+    """
+    if ":" not in line:
+        return ""
+    label = line.rpartition(":")[2].replace(",", "").replace("vlvp1d", "").replace(" ", "")
+    plain = label.lstrip("\\")
+    return plain if normalize_kpoint_name(plain) != plain else label
 
 
 class ElkIn:
@@ -54,13 +84,16 @@ class ElkIn:
         return self._file_str
 
     @cached_property
+    def _lines(self) -> list[str]:
+        return self.file_str.splitlines()
+
+    @cached_property
     def tasks(self) -> list[int]:
-        """List of task numbers from tasks block."""
-        pattern = re.compile(r"(?m)^[ \t]*tasks[ \t]*\n" + r"((?:[ \t]*\d+[ \t]*\n)+)")
-        match = pattern.search(self.file_str)
-        if not match:
+        """List of task numbers from tasks block, which ends at a blank line."""
+        block = block_lines(self._lines, "tasks")
+        if block is None:
             raise ValueError("No 'tasks' block found in elk.in")
-        return [int(n) for n in match.group(1).split()]
+        return [int(line.split()[0]) for line in takewhile(str.strip, block)]
 
     @cached_property
     def is_bands_calculation(self) -> bool:
@@ -70,10 +103,9 @@ class ElkIn:
     @cached_property
     def spinpol(self) -> bool:
         """Spin polarization flag."""
-        match = re.findall(r"spinpol\s*([.a-zA-Z]*)", self.file_str)
-        if len(match) != 0:
-            return bool_fortran(match[0])
-        return False
+        block = block_lines(self._lines, "spinpol")
+        rows = [line.split() for line in block or [] if line.strip()]
+        return bool(rows) and bool_fortran(rows[0][0])
 
     @cached_property
     def nspin(self) -> int:
@@ -83,17 +115,14 @@ class ElkIn:
     @cached_property
     def nspecies(self) -> int:
         """Number of atomic species."""
-        match = re.findall(r"atoms\n\s*([0-9]*)", self.file_str)
-        if match:
-            return int(match[0])
-        return 0
+        return len(self.composition)
 
     @cached_property
     def composition(self) -> dict[str, int]:
-        """Dictionary of species -> atom count."""
+        """Dictionary of species -> atom count, in elk.in order."""
         result: dict[str, int] = {}
-        for match in re.findall(r"'([A-Za-z]*).in'.*\n\s*([0-9]*)", self.file_str):
-            result[match[0]] = int(match[1])
+        for atom in self.atoms:
+            result[atom] = result.get(atom, 0) + 1
         return result
 
     @cached_property
@@ -124,31 +153,38 @@ class ElkIn:
     # K-path properties (from plot1d block)
 
     @cached_property
-    def _plot1d_info(self) -> tuple[int, int] | None:
-        """Parse plot1d block header: (n_high_sym, n_kpoints)."""
-        match = re.findall(r"plot1d\n\s*([0-9]*)\s*([0-9]*)", self.file_str)
-        if not match:
-            return None
-        return int(match[0][0]), int(match[0][1])
+    def plot1d(self) -> Plot1D:
+        """Band path vertices, total point count and vertex labels."""
+        block = block_lines(self._lines, "plot1d")
+        if block is None:
+            user_logger.warning(
+                "elk.in has no plot1d block; using the Elk default path (0,0,0) to (1,1,1)"
+                + " with 200 points"
+            )
+            return ELK_DEFAULT_PLOT1D
+        rows = [line for line in block if line.strip()]
+        nvertices, npoints = (int(token) for token in rows[0].split()[:2])
+        vertex_lines = rows[1 : 1 + nvertices]
+        vertices = np.array([[float(x) for x in line.split()[:3]] for line in vertex_lines])
+        labels = [_vertex_label(line) for line in vertex_lines]
+        if not all(labels):
+            labels = [str(x) for x in range(nvertices)]
+        return Plot1D(vertices, npoints, labels)
 
     @cached_property
     def has_kpath(self) -> bool:
-        """Check if k-path information is present."""
-        return self._plot1d_info is not None
+        """Check if elk.in has a plot1d block."""
+        return block_lines(self._lines, "plot1d") is not None
 
     @cached_property
     def n_high_sym(self) -> int:
         """Number of high-symmetry points."""
-        if self._plot1d_info is None:
-            return 0
-        return self._plot1d_info[0]
+        return len(self.plot1d.vertices)
 
     @cached_property
     def nkpoints(self) -> int:
         """Total number of k-points along path."""
-        if self._plot1d_info is None:
-            return 0
-        return self._plot1d_info[1]
+        return self.plot1d.npoints
 
     @cached_property
     def n_segments(self) -> int:
@@ -156,61 +192,12 @@ class ElkIn:
         return max(0, self.n_high_sym - 1)
 
     @cached_property
-    def ngrids(self) -> list[int]:
-        """Number of k-points per segment."""
-        if self.n_segments == 0:
-            return []
-        points_per_segment = self.nkpoints // self.n_segments
-        return [points_per_segment] * self.n_segments
-
-    @cached_property
     def high_symmetry_points(self) -> npt.NDArray[np.float64]:
         """High-symmetry point coordinates as (n_high_sym, 3) array."""
-        if self.n_high_sym == 0:
-            return np.array([])
-
-        pattern = r"plot1d.*\n.*\n\s* " + self.n_high_sym * r"(.*)\n*"
-        match = re.findall(pattern, self.file_str)
-        if not match:
-            return np.array([])
-
-        points = np.zeros((self.n_high_sym, 3))
-        for i, raw_kpoint in enumerate(match[0]):
-            points[i, :] = [float(k) for k in raw_kpoint.split()[:3]]
-        return points
+        return self.plot1d.vertices
 
     @cached_property
     def knames(self) -> list[list[str]]:
         """K-point labels as list of [start, end] pairs per segment."""
-        if self.n_high_sym == 0:
-            return []
-
-        pattern = r"plot1d\n\s*[0-9]*\s*[0-9]*.*\n" + self.n_high_sym * r".*:(.*)\n"
-        match = re.findall(pattern, self.file_str)
-
-        if len(match) == 0 or len(match[0]) != self.n_high_sym:
-            # Use numeric labels as fallback
-            labels = [str(x) for x in range(self.n_high_sym)]
-        else:
-            labels = [
-                "$%s$" % x.replace(",", "").replace("vlvp1d", "").replace(" ", "")
-                for x in match[0]
-            ]
-
-        # Convert to segment pairs
-        knames: list[list[str]] = []
-        for i in range(self.n_segments):
-            knames.append([labels[i], labels[i + 1]])
-        return knames
-
-    @cached_property
-    def special_kpoints(self) -> npt.NDArray[np.float64]:
-        """Special k-points as (n_segments, 2, 3) array of [start, end] pairs."""
-        if self.n_segments == 0:
-            return np.array([])
-
-        special = np.zeros((self.n_segments, 2, 3))
-        for i in range(self.n_segments):
-            special[i, 0, :] = self.high_symmetry_points[i, :]
-            special[i, 1, :] = self.high_symmetry_points[i + 1, :]
-        return special
+        labels = self.plot1d.labels
+        return [[labels[i], labels[i + 1]] for i in range(self.n_segments)]

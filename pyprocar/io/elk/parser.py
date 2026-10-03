@@ -8,7 +8,7 @@ import numpy as np
 
 from pyprocar.core import DensityOfStates, Structure
 from pyprocar.core.ebs import ElectronicBandStructure, get_ebs_from_data
-from pyprocar.core.kpoints import KPath
+from pyprocar.core.kpoints import KPath, insert_continuous_points
 from pyprocar.io.base import BaseParser
 from pyprocar.io.elk.bands import ElkBands
 from pyprocar.io.elk.dos import ElkDOS
@@ -18,6 +18,7 @@ from pyprocar.io.elk.geometry import ElkGeometry
 from pyprocar.io.elk.projections import ElkProjections
 
 logger = logging.getLogger(__name__)
+user_logger = logging.getLogger("user")
 
 ORBITAL_NAMES = [
     "Y00",
@@ -192,12 +193,29 @@ class ElkParser(BaseParser):
     @cached_property
     def _bands_parser(self) -> ElkBands | None:
         """Bands file parser."""
-        if not self.is_bands_calculation or self._elkin is None:
+        if self._elkin is None:
+            return None
+        tasks = set(self._elkin.tasks)
+        if not self.is_bands_calculation:
+            if tasks & {23, 24}:
+                user_logger.warning(
+                    "Elk tasks 23 and 24 write spin and moment characters to BAND_S files;"
+                    + " pyprocar reads band structures from tasks 20, 21 and 22 only"
+                )
             return None
 
-        bands_path = self.dirpath / "BANDS.OUT"
+        # bandstr.f90 writes BAND.OUT for task 20 and BAND_Sss_Aaaaa.OUT for tasks
+        # 21-24; the first two columns (distance, energy) are the same in both.
+        band_out = self.dirpath / "BAND.OUT"
+        band_s = self.dirpath / "BAND_S01_A0001.OUT"
+        preferred, other = (band_out, band_s) if 20 in tasks else (band_s, band_out)
+        bands_path = preferred if preferred.exists() else other
+        if band_out.exists() and band_s.exists() and not (20 in tasks and tasks & {21, 22}):
+            user_logger.warning(
+                f"Both BAND.OUT and BAND_S01_A0001.OUT are in {self.dirpath};"
+                + f" reading {bands_path.name}, which the elk.in tasks write"
+            )
         bandlines_path = self.dirpath / "BANDLINES.OUT"
-
         if not bands_path.exists() or not bandlines_path.exists():
             return None
 
@@ -217,7 +235,9 @@ class ElkParser(BaseParser):
         if not self.is_bands_calculation or self._elkin is None:
             return None
 
-        if self._bands_parser is None:
+        if self._bands_parser is None or self._bands_parser.bands_filepath is None:
+            return None
+        if not self._bands_parser.bands_filepath.name.startswith("BAND_S"):
             return None
 
         # Find all BAND_S*_A*.OUT files
@@ -263,6 +283,9 @@ class ElkParser(BaseParser):
                 fractional_coordinates=self._geometry.fractional_coordinates,
             )
         if self._elkin is not None:
+            user_logger.warning(
+                f"No GEOMETRY.OUT in {self.dirpath}; reading the structure from elk.in"
+            )
             return Structure(
                 atoms=self._elkin.atoms,
                 lattice=self._elkin.lattice,
@@ -283,14 +306,11 @@ class ElkParser(BaseParser):
         if self._bands_parser is None or self._elkin is None:
             return None
 
-        # Convert ngrids to list[int]
         n_grids = self._bands_parser.ngrids.tolist()
-
-        # Convert knames from list[list[str]] to list[tuple[str, str]]
         segment_names = [(pair[0], pair[1]) for pair in self._elkin.knames]
 
         return KPath(
-            kpoints=self._bands_parser.kpoints,
+            kpoints=self._along_path(self._bands_parser.kpoints),
             n_grids=n_grids,
             segment_names=segment_names,
             reciprocal_lattice=self.reciprocal_lattice,
@@ -300,6 +320,11 @@ class ElkParser(BaseParser):
     def kpath(self) -> KPath | None:
         """K-point path for band structure."""
         return self._kpath
+
+    def _along_path(self, per_kpoint: np.ndarray) -> np.ndarray:
+        """Repeat the rows at inner vertices; Elk lists each vertex once, KPath needs it twice."""
+        assert self._bands_parser is not None
+        return insert_continuous_points(per_kpoint, self._bands_parser.kticks)
 
     # EBS property
 
@@ -314,16 +339,16 @@ class ElkParser(BaseParser):
         if kpath is None:
             return None
 
-        # Apply Fermi energy shift to bands
-        bands = self._bands_parser.bands + self.fermi
+        bands = self._along_path(self._bands_parser.bands + self.fermi)
 
-        # Get projections if available
         projected = None
         if self._projections_parser is not None:
-            projected = self._projections_parser.projected
+            raw_projected = self._projections_parser.projected
+            if raw_projected is not None:
+                projected = self._along_path(raw_projected)
 
         return get_ebs_from_data(
-            kpoints=self._bands_parser.kpoints,
+            kpoints=self._along_path(self._bands_parser.kpoints),
             bands=bands,
             projected=projected,
             projected_phase=None,

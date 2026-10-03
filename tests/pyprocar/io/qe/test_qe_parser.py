@@ -5,6 +5,11 @@ from pathlib import Path
 import numpy as np
 import pytest
 
+from pyprocar.core.ebs import (
+    ElectronicBandStructure,
+    ElectronicBandStructureMesh,
+    ElectronicBandStructurePath,
+)
 from pyprocar.core.kpoints import KGRID_MODE, KGridInfo, get_kpoints_from_kgrid
 from pyprocar.io import get_parser
 from pyprocar.io.qe.parser import QEParser
@@ -626,3 +631,117 @@ def test_contour_mode_has_no_kpath_and_keeps_the_mesh_kpoints(
     assert parser.kpath is None
     assert parser.kpoints is not None
     assert np.allclose(parser.kpoints, [[0, 0, 0], [0.25, 0, 0], [0, 0, 0.25], [0.25, 0, 0.25]])
+
+
+@pytest.mark.parametrize(
+    ("mode", "card"),
+    [
+        ("crystal", "4\n0 0 0 1\n0.5 0 0 1\n0 0 0.5 1\n0.25 0.25 0.5 1\n"),
+        ("tpiba", "4\n0 0 0 1\n0.5 0 0 1\n0 0 0.25 1\n0.25 0.25 0.25 1\n"),
+        ("automatic", "4 4 2 0 0 0\n"),
+    ],
+    ids=["crystal", "tpiba", "automatic"],
+)
+def test_bands_run_without_a_band_path_is_a_plain_ebs_of_the_computed_kpoints(
+    tmp_path: Path, mode: str, card: str
+) -> None:
+    calc_dir = _tetragonal_bands_dir(tmp_path, mode, card, TETRAGONAL_CARTESIAN_KPOINTS)
+    xml = (calc_dir / "test.xml").read_text()
+    (calc_dir / "test.xml").write_text(
+        xml.replace(
+            "<nbnd>1</nbnd>",
+            "<nbnd>1</nbnd>\n      <fermi_energy>0.2</fermi_energy>\n"
+            + '      <starting_k_points><monkhorst_pack nk1="4" nk2="4" nk3="2"'
+            + ' k1="0" k2="0" k3="0"/></starting_k_points>',
+        )
+    )
+    parser = QEParser(calc_dir)
+    ebs = parser.ebs
+
+    assert parser.kpath is None and parser.kgrid_info is None
+    assert type(ebs) is ElectronicBandStructure
+    assert np.allclose(ebs.kpoints, TETRAGONAL_FRACTIONAL_KPOINTS)
+
+
+def test_mixed_directory_follows_the_run_that_wrote_the_xml(tmp_path: Path) -> None:
+    card = "3\n0 0 0 10 !G\n0.5 0 0 10 !X\n0 0 0.5 1 !Z\n"
+    calc_dir = _tetragonal_bands_dir(tmp_path, "crystal_b", card, TETRAGONAL_CARTESIAN_KPOINTS)
+    xml = (calc_dir / "test.xml").read_text()
+    (calc_dir / "test.xml").write_text(
+        xml.replace(
+            "  <output>",
+            "  <input><control_variables><calculation>nscf</calculation>"
+            + "</control_variables></input>\n  <output>",
+        ).replace(
+            "<nbnd>1</nbnd>",
+            '<nbnd>1</nbnd>\n      <starting_k_points><monkhorst_pack nk1="4" nk2="4" nk3="2"'
+            + ' k1="0" k2="0" k3="0"/></starting_k_points>',
+        )
+    )
+    parser = QEParser(calc_dir)
+
+    assert parser.kpath is None
+    assert parser.kgrid_info == KGridInfo(
+        kgrid=(4, 4, 2), kgrid_mode=KGRID_MODE.GAMMA, kshift=(0.0, 0.0, 0.0)
+    )
+
+
+@pytest.mark.data
+def test_dos_directory_with_a_bands_input_still_gives_the_full_mesh(tmp_path: Path) -> None:
+    dos_dir = QE_CODES_DIR / "non-spin-polarized" / "dos"
+    for path in dos_dir.rglob("*"):
+        if path.is_file() and "pdos_" not in path.name and path.suffix != ".pkl":
+            target = tmp_path / path.relative_to(dos_dir)
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_bytes(path.read_bytes())
+    bands_in = QE_CODES_DIR / "non-spin-polarized" / "bands" / "bands.in"
+    (tmp_path / "bands.in").write_bytes(bands_in.read_bytes())
+    ebs = QEParser(tmp_path).ebs
+
+    assert type(ebs) is ElectronicBandStructureMesh
+    assert ebs.kpoints.shape == (4096, 3)
+
+
+def test_projwfc_kpoints_from_a_bands_run_win_over_a_later_nscf_xml(tmp_path: Path) -> None:
+    for relative_path, content in TETRAGONAL_PROJWFC_FILES.items():
+        (tmp_path / relative_path).write_text(content)
+    head, _, tail = TETRAGONAL_PW_XML.partition("      <ks_energies>")
+    (tmp_path / "test.xml").write_text(
+        head.replace(
+            "  <output>",
+            "  <input><control_variables><calculation>nscf</calculation>"
+            + "</control_variables></input>\n  <output>",
+        ).replace("<nks>4</nks>", "<nks>1</nks>")
+        + "      <ks_energies>"
+        + tail.split("      <ks_energies>")[0]
+        + tail.rpartition("      </ks_energies>\n")[2]
+    )
+    (tmp_path / "bands.in").write_text(
+        SCF_IN.replace("'scf'", "'bands'").replace(
+            "K_POINTS automatic\n4 4 4 0 0 0\n",
+            "K_POINTS crystal_b\n3\n0 0 0 1 !G\n0.5 0 0 1 !X\n0 0 0.5 1 !Z\n",
+        )
+    )
+    parser = QEParser(tmp_path)
+
+    assert parser.pw_xml is not None and parser.pw_xml.kpoints is not None
+    assert len(parser.pw_xml.kpoints) == 1
+    assert parser.is_bands_run
+    assert parser.kgrid_info is None
+
+
+@pytest.mark.data
+def test_bands_projwfc_then_nscf_in_one_directory_still_plots_the_bands(tmp_path: Path) -> None:
+    bands_dir = QE_CODES_DIR / "non-spin-polarized" / "bands"
+    dos_dir = QE_CODES_DIR / "non-spin-polarized" / "dos"
+    for path in bands_dir.rglob("*"):
+        if path.is_file() and "pdos_" not in path.name and path.suffix != ".pkl":
+            target = tmp_path / path.relative_to(bands_dir)
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_bytes(path.read_bytes())
+    for name in ("out/SrVO3.xml", "nscf.in", "nscf.out"):
+        (tmp_path / name).write_bytes((dos_dir / name).read_bytes())
+    ebs = QEParser(tmp_path).ebs
+
+    assert type(ebs) is ElectronicBandStructurePath
+    assert ebs.kpoints.shape == (155, 3)
