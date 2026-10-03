@@ -31,11 +31,11 @@ AtomicCoordinatesFormat Fractional
 
 %block BandLines
   1  0.5  0.5  0.5  L
-  2  0.0  0.0  0.0  G
+  1  0.0  0.0  0.0  G
 %endblock BandLines
 """
 
-# Bands file with 2 k-points, 3 bands, 1 spin (matching the 2 grid points in BandLines)
+# Bands file with 2 k-points, 3 bands, 1 spin (BandLines: L, then 1 point to G)
 BANDS_STR = """
 -5.5000
 0.0000 1.0000
@@ -151,3 +151,65 @@ class TestSiestaParserMissingFiles:
         assert parser._fdf is not None
         assert parser._bands is None
         assert parser.fermi is None
+
+
+FCC_FDF_STR = """
+SystemLabel fcc
+LatticeConstant 5.43 Ang
+%block LatticeVectors
+  0.5  0.5  0.0
+  0.0  0.5  0.5
+  0.5  0.0  0.5
+%endblock LatticeVectors
+%block ChemicalSpeciesLabel
+  1  14  Si
+%endblock ChemicalSpeciesLabel
+{format_line}
+%block AtomicCoordinatesAndAtomicSpecies
+  0.5  0.0  0.0  1
+%endblock AtomicCoordinatesAndAtomicSpecies
+%block BandLines
+  1  0.000  0.000  0.000  G
+ 20  0.500  0.000  0.500  X
+ 20  0.500  0.250  0.750  W
+%endblock BandLines
+BandLinesScale ReciprocalLatticeVectors
+"""
+
+
+@pytest.mark.parametrize(
+    ("format_line", "cartesian"),
+    [
+        ("AtomicCoordinatesFormat Fractional", [1.3575, 1.3575, 0.0]),
+        ("AtomicCoordinatesFormat ScaledByLatticeVectors", [1.3575, 1.3575, 0.0]),
+        ("AtomicCoordinatesFormat ScaledCartesian", [2.715, 0.0, 0.0]),
+        ("AtomicCoordinatesFormat Ang", [0.5, 0.0, 0.0]),
+        ("AtomicCoordinatesFormat NotScaledCartesianAng", [0.5, 0.0, 0.0]),
+        ("AtomicCoordinatesFormat Bohr", [0.26458860533560, 0.0, 0.0]),
+        ("AtomicCoordinatesFormat NotScaledCartesianBohr", [0.26458860533560, 0.0, 0.0]),
+        ("", [0.26458860533560, 0.0, 0.0]),
+    ],
+)
+def test_structure_reads_each_atomic_coordinates_format(
+    tmp_path: Path, format_line: str, cartesian: list[float]
+) -> None:
+    (tmp_path / "fcc.fdf").write_text(FCC_FDF_STR.format(format_line=format_line))
+
+    structure = SiestaParser(tmp_path).structure
+
+    assert structure is not None
+    assert np.allclose(structure.cartesian_coordinates, [cartesian])
+
+
+def test_kpath_has_siestas_band_line_point_count(tmp_path: Path) -> None:
+    (tmp_path / "fcc.fdf").write_text(FCC_FDF_STR.format(format_line=""))
+
+    kpath = SiestaParser(tmp_path).kpath
+
+    assert kpath is not None
+    assert kpath.n_kpoints == 41
+    assert list(zip(kpath.tick_positions, kpath.tick_names, strict=True)) == [
+        (0, "Γ"),
+        (20, "X"),
+        (40, "W"),
+    ]

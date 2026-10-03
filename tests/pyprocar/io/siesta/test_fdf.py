@@ -99,3 +99,32 @@ class TestFDF:
         assert fdf["system_label"] == "silicon"
         assert len(fdf) == 2  # Number of atoms
         assert list(fdf) == ["Si", "Si"]
+
+
+@pytest.mark.parametrize(
+    "label", ["LatticeConstant", "Lattice.Constant", "lattice_constant", "LATTICE-CONSTANT"]
+)
+def test_labels_ignore_case_dots_underscores_and_dashes(label: str) -> None:
+    fdf = FDF.from_str(
+        FDF_STR.replace("LatticeConstant", label).replace("block LatticeVectors", "block lattice_vectors")
+    )
+
+    assert fdf.lattice_constant == pytest.approx(5.43)
+    assert np.allclose(fdf.lattice_vectors[0], [2.715, 2.715, 0.0])
+
+
+@pytest.mark.parametrize(
+    ("value", "angstrom"),
+    [
+        ("5.43 Ang", 5.43),
+        ("0.543 nm", 5.43),
+        ("543.0 pm", 5.43),
+        ("5.43e-8 cm", 5.43),
+        ("5.43e-10 m", 5.43),
+        ("10.0 Bohr", 5.2917721067121),
+    ],
+)
+def test_lattice_constant_reads_documented_length_units(value: str, angstrom: float) -> None:
+    fdf = FDF.from_str(FDF_STR.replace("5.43 Ang", value))
+
+    assert fdf.lattice_constant == pytest.approx(angstrom)

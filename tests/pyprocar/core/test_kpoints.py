@@ -1031,3 +1031,13 @@ def test_kpath_jump_ignores_a_segment_start_off_its_k_points(user_warnings):
         user_warnings.text
     )
     assert kpath.k_distances[-1] == pytest.approx(1.0)
+
+
+def test_kpath_rejects_segment_start_kpoints_with_the_wrong_row_count():
+    with pytest.raises(ValueError, match="segment_start_kpoints has 1 rows for 2 segment names"):
+        KPath(
+            kpoints=GAMMA_X_R_M,
+            segment_names=[("G", "X"), ("R", "M")],
+            reciprocal_lattice=np.eye(3),
+            segment_start_kpoints=np.array([G_POINT]),
+        )
