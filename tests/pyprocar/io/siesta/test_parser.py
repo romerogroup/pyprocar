@@ -256,3 +256,31 @@ def test_kpath_matches_siesta_542_ticks_with_a_one_point_row(tmp_path: Path) -> 
     tick_x = np.asarray(kpath.k_distances)[kpath.tick_positions]
     siesta_x = np.array(SIESTA_542_TICK_X) / (2 * np.pi * 0.52917721067121)
     assert tick_x == pytest.approx(siesta_x, abs=1e-6)
+
+
+def test_bands_and_fermi_survive_a_bad_unrelated_block(siesta_dir: Path) -> None:
+    (siesta_dir / "silicon.fdf").write_text(FDF_STR + "%block Unrelated\n 1 2 3\n")
+
+    parser = SiestaParser(siesta_dir)
+
+    assert parser._bands is not None
+    assert parser.fermi == -5.5
+    assert parser.structure is not None
+
+
+def test_auto_detect_skips_an_fdf_another_fdf_redirects_to(tmp_path: Path) -> None:
+    # Layout of a Siesta 5.4.2 run: si.fdf reads its lattice from lv.fdf.
+    main = SIESTA_542_FDF.replace(
+        "%block lattice-vectors\n  1.0 0.0 0.0\n  0.0 1.0 0.0\n  0.0 0.0 1.0\n"
+        "%endblock lattice-vectors",
+        "%block LatticeVectors < lv.fdf",
+    )
+    (tmp_path / "lv.fdf").write_text("  1.0 0.0 0.0\n  0.0 1.1 0.0\n  0.0 0.0 1.2\n")
+    (tmp_path / "si.fdf").write_text(main)
+
+    parser = SiestaParser(tmp_path)
+
+    assert parser._fdf is not None
+    assert parser._fdf.filepath == tmp_path / "si.fdf"
+    assert parser.structure is not None
+    assert np.allclose(np.diag(parser.structure.lattice), [2.6, 2.86, 3.12])

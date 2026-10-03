@@ -158,11 +158,24 @@ def test_block_redirect_reads_the_named_file(tmp_path) -> None:
     assert fdf.atomic_coords_format == "Fractional"
 
 
-def test_unterminated_block_raises() -> None:
-    fdf = FDF.from_str(FDF_STR.replace("%endblock LatticeVectors", ""))
+@pytest.mark.parametrize(
+    ("bad_block", "message"),
+    [
+        ("%block LatticeVectors\n 1.0 0.0 0.0\n", "%block LatticeVectors has no %endblock"),
+        ("%block LatticeVectors < missing.fdf\n", "missing.fdf"),
+    ],
+)
+def test_a_bad_block_fails_only_when_requested(bad_block: str, message: str) -> None:
+    lattice_block = FDF_STR[FDF_STR.index("%block LatticeVectors") :].split(
+        "%endblock LatticeVectors"
+    )[0] + "%endblock LatticeVectors\n"
+    fdf = FDF.from_str(FDF_STR.replace(lattice_block, "") + bad_block)
 
-    with pytest.raises(ValueError, match="%block LatticeVectors has no %endblock"):
-        _ = fdf.lattice_constant
+    assert fdf.system_label == "silicon"
+    assert fdf.lattice_constant == pytest.approx(5.43)
+    assert fdf.atoms == ["Si", "Si"]
+    with pytest.raises(ValueError, match=message):
+        _ = fdf.lattice_vectors
 
 
 def test_band_lines_accept_rows_without_a_label() -> None:
