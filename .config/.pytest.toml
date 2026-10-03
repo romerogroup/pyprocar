@@ -1,3 +1,5 @@
+# Only pytest >= 9 reads a [pytest] table from .pytest.toml; pytest 8 ignores this file.
+# testpaths resolve against the rootdir, so run with --rootdir set to the repo root.
 [pytest]
 log_auto_indent = "Off"
 log_cli = false
@@ -43,5 +45,5 @@ addopts = [
 filterwarnings = [
   "ignore::DeprecationWarning",
 ]
-testpaths = ["../tests"]
+testpaths = ["tests"]
 verbosity_test_cases = "0"
