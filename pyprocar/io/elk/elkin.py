@@ -8,12 +8,7 @@ from typing import Self
 import numpy as np
 import numpy.typing as npt
 
-from pyprocar.utils.units import AU_TO_ANG
-
-
-def bool_fortran(string: str) -> bool:
-    """Convert Fortran boolean string to Python bool."""
-    return string.strip().lower() in (".true.", "true", "t", ".t.")
+from pyprocar.io.elk.geometry import ElkCell, bool_fortran, parse_elk_cell
 
 
 class ElkIn:
@@ -102,43 +97,24 @@ class ElkIn:
         return result
 
     @cached_property
+    def cell(self) -> ElkCell:
+        """Lattice in Angstrom, atom symbols and fractional coordinates."""
+        return parse_elk_cell(self.file_str)
+
+    @property
     def lattice(self) -> npt.NDArray[np.float64]:
         """Lattice vectors in Angstrom as 3x3 array (rows are vectors); Elk writes Bohr."""
-        raw_lattice = re.findall(r"avec\s*\n(.*\n.*\n.*)", self.file_str)
-        if not raw_lattice:
-            raise ValueError("No lattice vectors found in elk.in")
+        return self.cell.lattice
 
-        lattice = np.zeros((3, 3))
-        for i, vec in enumerate(raw_lattice[0].split("\n")):
-            lattice[i, :] = [float(coord) for coord in vec.strip().split()]
-
-        # Apply scale factor if present
-        scale_match = re.findall(r"scale\s*\n(.*)", self.file_str)
-        if scale_match:
-            scale = float(scale_match[0])
-            lattice *= scale
-
-        return lattice * AU_TO_ANG
-
-    @cached_property
+    @property
     def atoms(self) -> list[str]:
         """List of atom symbols."""
-        atoms: list[str] = []
-        raw_species = re.findall(r"'([A-Za-z]*).in'.*\n.*\n\s*([0-9.\s]*)", self.file_str)
-        for specie_name, coords_block in raw_species:
-            n_atoms = len(coords_block.strip().split("\n"))
-            atoms.extend([specie_name] * n_atoms)
-        return atoms
+        return self.cell.atoms
 
-    @cached_property
+    @property
     def fractional_coordinates(self) -> npt.NDArray[np.float64]:
         """Fractional coordinates as (natom, 3) array."""
-        coords: list[list[float]] = []
-        raw_species = re.findall(r"'([A-Za-z]*).in'.*\n.*\n\s*([0-9.\s]*)", self.file_str)
-        for _, coords_block in raw_species:
-            for line in coords_block.strip().split("\n"):
-                coords.append([float(c) for c in line.split()[:3]])
-        return np.array(coords)
+        return self.cell.fractional_coordinates
 
     @cached_property
     def natoms(self) -> int:

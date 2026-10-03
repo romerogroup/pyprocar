@@ -54,8 +54,6 @@ class ElkParser(BaseParser):
         Path to FERMI.OUT file or pre-initialized ElkFermi instance
     geometry : str | ElkGeometry | None
         Path to GEOMETRY.OUT file or pre-initialized ElkGeometry instance
-    kdirect : bool
-        If True, return k-points in direct coordinates; if False, in Cartesian
 
     Examples
     --------
@@ -70,10 +68,8 @@ class ElkParser(BaseParser):
         elkin: str | ElkIn | None = "elk.in",
         fermi: str | ElkFermi | None = "FERMI.OUT",
         geometry: str | ElkGeometry | None = "GEOMETRY.OUT",
-        kdirect: bool = True,
     ):
         super().__init__(dirpath)
-        self._kdirect: bool = kdirect
 
         # Initialize individual parsers
         self._elkin: ElkIn | None = self._init_elkin(elkin)
@@ -326,13 +322,8 @@ class ElkParser(BaseParser):
         if self._projections_parser is not None:
             projected = self._projections_parser.projected
 
-        # Transform k-points to Cartesian if requested
-        kpoints = self._bands_parser.kpoints
-        if not self._kdirect:
-            kpoints = np.dot(kpoints, self.reciprocal_lattice)
-
         return get_ebs_from_data(
-            kpoints=kpoints,
+            kpoints=self._bands_parser.kpoints,
             bands=bands,
             projected=projected,
             projected_phase=None,

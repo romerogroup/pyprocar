@@ -105,7 +105,7 @@ Usage::
 Converting :math:`k`-points from reduced to cartesian coordinates
 =================================================================
 
-PyProcar defaults to plotting using the reduced coordinates of the :math:`k`-points. If one wishes to plot using cartesian coordinates, set ``kdirect=False``. However, an ``OUTCAR`` must be supplied for this case to retrieve the reciprocal lattice vectors to transform the coordinates from reduced to cartesian. Note that for the case of Elk, the output is automatically retrieved so it is not necessary to provide it for the conversion.
+The parsers read the :math:`k`-points in reduced coordinates and convert them with the reciprocal lattice of the calculation, so there is no ``kdirect`` option. For a band structure along a path, ``ebs.kpoints_cartesian`` gives the cartesian :math:`k`-points in inverse Angstrom, without the factor :math:`2\pi`, and ``ebs.kpath.get_distances(cartesian=True)`` gives the cartesian distances along the path.
 
 ============================================================
 Plotting band structures with a discontinuous :math:`k`-path

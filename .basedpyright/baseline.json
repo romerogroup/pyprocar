@@ -5674,16 +5674,6 @@
                 }
             }
         ],
-        "./pyprocar/io/elk/parser.py": [
-            {
-                "code": "reportArgumentType",
-                "range": {
-                    "startColumn": 38,
-                    "endColumn": 61,
-                    "lineCount": 1
-                }
-            }
-        ],
         "./pyprocar/io/frmsf/frmsf.py": [
             {
                 "code": "reportUnannotatedClassAttribute",

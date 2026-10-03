@@ -23,6 +23,8 @@ The proven end state (1f36aae1):
 - `vasp` (SrVO3 bands): `bands_shape` is `[200, 20, 1]`, ticks are `Γ M Γ R X`, species are `O Sr V`, and `ebs_fermi` is 4.9992.
   - That 4.9992 is the nscf vasprun value. It is not the SCF value 5.3017 that the examples pass as `fermi=`, so object-API plots are shifted by 4.9992.
 - `qe` (`data/codes/qe/7.2/SrVO3/non-spin-polarized/bands`): `bands_shape` is `[155, 25, 1]`, ticks are `Γ M Γ R X`, and `ebs_fermi` is 12.5491.
+  - The cell is cubic, so a private copy with `K_POINTS crystal_b` changed to `tpiba_b` must give the same 155 k-points and ticks (proven at #262). `tpiba_c` and `crystal_c` give `kpath` `None`; only the synthetic tests in `tests/pyprocar/io/qe/test_qe_parser.py` cover them.
+- `elk` structure: all four `data/codes/elk/6.3/SrVO3/*` dirs give a 3.841244 Angstrom cubic lattice, through `GEOMETRY.OUT` or, in `non-spin-polarized/bands`, the `elk.in` fallback. Their `structure.pkl` files hold the pre-#242 Bohr lattice (7.2589), so do not compare against them.
 - `Parser` writes nothing into the dir.
 
 ## Gotchas
