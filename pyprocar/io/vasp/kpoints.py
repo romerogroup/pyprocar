@@ -151,12 +151,14 @@ class Kpoints(Mapping[str, Any]):
             stripped = line.strip()
             if not stripped:
                 continue
-            coords_part, _, label_part = line.partition("!")
+            coords_part, bang, label_part = line.partition("!")
             coord_tokens = coords_part.split()
             if len(coord_tokens) < 3:
                 continue
             points.append([float(token) for token in coord_tokens[:3]])
-            names.append(label_part.replace("!", "").strip())
+            # VASP also reads a label written after the coordinates without '!'
+            label = label_part.replace("!", "") if bang else " ".join(coord_tokens[3:])
+            names.append(label.strip())
 
         if not points:
             return (None, None)

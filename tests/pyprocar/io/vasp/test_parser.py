@@ -211,4 +211,4 @@ def test_issue_199_kpath_labels():
     kpath = get_parser("vasp", DATA_DIR / "issues" / "issue-199").kpath
 
     assert kpath is not None
-    assert kpath.segment_names[0] == ("GAMMA", "K")
+    assert kpath.segment_names[:2] == [("$\\Gamma$", "K"), ("K", "M")]
