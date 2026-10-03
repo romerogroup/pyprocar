@@ -73,11 +73,12 @@ def slice_loop_areas(slc: pv.PolyData) -> tuple[list[float], int]:
     return areas, n_open
 
 
+def open_curves_note(n_open: int) -> str:
+    return f" ({n_open} open curve{'s' if n_open > 1 else ''} not counted)" if n_open else ""
+
+
 def area_text(areas: list[float], n_open: int, scale: float = 1.0) -> str:
-    text = f"Cross sectional area : {sum(areas) * scale:.4f} Ang^-2"
-    if n_open:
-        text += f" ({n_open} open curve{'s' if n_open > 1 else ''} not counted)"
-    return text
+    return f"Cross sectional area : {sum(areas) * scale:.4f} Ang^-2" + open_curves_note(n_open)
 
 
 def clip_to_zone(surface: pv.PolyData, zone: pv.PolyData) -> pv.PolyData:

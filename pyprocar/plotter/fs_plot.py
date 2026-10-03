@@ -19,6 +19,7 @@ from pyprocar.plotter._surface_plot import (
     area_text,
     find_nearest,
     normalize_to_range,
+    open_curves_note,
     slice_loop_areas,
 )
 
@@ -369,8 +370,12 @@ class FermiPlotter(SurfacePlotter):
         if show_van_alphen_frequency or show_cross_section_area:
             areas, n_open = slice_loop_areas(cast(pv.PolyData, slc))
             if show_van_alphen_frequency:
-                largest = max(areas, default=0.0) * FS_AREA_SCALE_FACTOR
-                text = f"Van Alphen Frequency : {dHvA_frequency(largest):.4f} Gauss"
+                frequency = (
+                    f"{dHvA_frequency(max(areas) * FS_AREA_SCALE_FACTOR):.4f} Gauss"
+                    if areas
+                    else "no closed orbit"
+                )
+                text = f"Van Alphen Frequency : {frequency}" + open_curves_note(n_open)
             else:
                 text = area_text(areas, n_open, scale=FS_AREA_SCALE_FACTOR)
             self.add_text(text, name="area_text", **add_text_args)
