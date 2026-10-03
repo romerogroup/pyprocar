@@ -340,3 +340,19 @@ class TestStructure:
         assert struct.volume > 0
         assert len(struct.masses) == 1
         assert struct.density > 0
+
+    def test_str_reports_space_group_and_coordinate_table(self, nacl_structure):
+        assert str(nacl_structure) == "\n".join(
+            [
+                "Structure with 2 atoms and 2 species",
+                "Species: Cl, Na",
+                "Volume: 64.000 Å^3",
+                "Angles (α, β, γ): 90.00°, 90.00°, 90.00°",
+                "Space group: Pm-3m",
+                "Fractional coordinates:",
+                "Atom         x           y           z      ",
+                "-" * 44,
+                "Na          0.000000    0.000000    0.000000",
+                "Cl          0.500000    0.500000    0.500000",
+            ]
+        )

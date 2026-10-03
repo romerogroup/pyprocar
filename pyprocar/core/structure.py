@@ -137,16 +137,23 @@ class Structure:
         """Human-readable summary of the structure."""
         header = f"Structure with {self.natoms} atoms and {self.nspecies} species"
         species_line = f"Species: {', '.join(self.species)}"
-        volume_line = f"Volume: {self.volume * 1e30:.3f} A^3"
+        volume_line = f"Volume: {self.volume * 1e30:.3f} Å^3"
         angle_line = f"Angles (α, β, γ): {self.alpha:.2f}°, {self.beta:.2f}°, {self.gamma:.2f}°"
+        space_group = self.get_space_group_international() if self.has_complete_data else "N/A"
+        sg_line = f"Space group: {space_group}"
 
-        # Only show first few fractional coords for readability
-        frac_preview = "\n".join(
-            f"  {atom}: {coord}" for atom, coord in zip(self.atoms, self.fractional_coordinates)
-        )
+        col_width = 12
+        coord_header = f"{'Atom':<8}{'x':^{col_width}}{'y':^{col_width}}{'z':^{col_width}}"
+        coord_lines = [coord_header, "-" * len(coord_header)]
+        if self.atoms is not None and self.fractional_coordinates is not None:
+            for atom, coord in zip(self.atoms, self.fractional_coordinates):
+                coord_lines.append(
+                    f"{atom:<8}{coord[0]:{col_width}.6f}{coord[1]:{col_width}.6f}{coord[2]:{col_width}.6f}"
+                )
 
         return "\n".join(
-            [header, species_line, volume_line, angle_line, "Fractional coordinates:", frac_preview]
+            [header, species_line, volume_line, angle_line, sg_line, "Fractional coordinates:"]
+            + coord_lines
         )
 
     def __eq__(self, other):
