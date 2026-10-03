@@ -13,29 +13,46 @@ from pyprocar.utils.units import AU_TO_ANG
 
 logger = logging.getLogger(__name__)
 
-_LENGTH_UNITS_IN_ANGSTROM = {"ang": 1.0, "angstrom": 1.0, "bohr": AU_TO_ANG, "nm": 10.0}
+_LENGTH_UNITS_IN_ANGSTROM = {
+    "m": 1e10,
+    "cm": 1e8,
+    "nm": 10.0,
+    "pm": 0.01,
+    "ang": 1.0,
+    "angstrom": 1.0,
+    "bohr": AU_TO_ANG,
+}
 
 
-def _extract_block(text: str, block_name: str) -> str | None:
-    """Extract content from a %block...%endblock section.
+def normalize_label(label: str) -> str:
+    """FDF label as FDF compares it: case-insensitive, ignoring '.', '_' and '-'."""
+    return re.sub(r"[._-]", "", label).lower()
 
-    Parameters
-    ----------
-    text : str
-        The full FDF file content
-    block_name : str
-        Name of the block (case insensitive)
 
-    Returns
-    -------
-    str | None
-        Block content or None if not found
+def _parse_fdf(text: str) -> tuple[dict[str, list[str]], dict[str, list[list[str]]]]:
+    """Split FDF text into labels and blocks, keyed by normalized label.
+
+    Each label maps to the tokens after it, and each block to its token rows.
+    '#', '!' and ';' start comments. The first occurrence of a label wins.
     """
-    pattern = rf"%block\s+{block_name}\s*\n([\s\S]*?)%endblock\s+{block_name}"
-    match = re.search(pattern, text, re.IGNORECASE)
-    if match:
-        return match.group(1).strip()
-    return None
+    labels: dict[str, list[str]] = {}
+    blocks: dict[str, list[list[str]]] = {}
+    block_name: str | None = None
+    for raw_line in text.splitlines():
+        tokens = re.split(r"[#!;]", raw_line, maxsplit=1)[0].split()
+        if not tokens:
+            continue
+        keyword = tokens[0].lower()
+        if keyword == "%block" and len(tokens) > 1:
+            block_name = normalize_label(tokens[1])
+            blocks.setdefault(block_name, [])
+        elif keyword == "%endblock":
+            block_name = None
+        elif block_name is not None:
+            blocks[block_name].append(tokens)
+        else:
+            labels.setdefault(normalize_label(tokens[0]), tokens[1:])
+    return labels, blocks
 
 
 class FDF(Mapping[str, Any]):
@@ -71,12 +88,24 @@ class FDF(Mapping[str, Any]):
         return self._file_str
 
     @cached_property
+    def _parsed(self) -> tuple[dict[str, list[str]], dict[str, list[list[str]]]]:
+        return _parse_fdf(self.file_str)
+
+    def label(self, name: str) -> list[str] | None:
+        """Tokens after an FDF label, or None when the label is absent."""
+        return self._parsed[0].get(normalize_label(name))
+
+    def block(self, name: str) -> list[list[str]] | None:
+        """Token rows of an FDF block, or None when the block is absent."""
+        return self._parsed[1].get(normalize_label(name))
+
+    @cached_property
     def system_label(self) -> str:
         """Extract SystemLabel from FDF file."""
-        match = re.findall(r"SystemLabel\s+([0-9A-Za-z_-]+)", self.file_str, re.IGNORECASE)
-        if not match:
+        tokens = self.label("SystemLabel")
+        if not tokens:
             raise ValueError("No SystemLabel found in FDF file")
-        return match[0]
+        return tokens[0]
 
     @cached_property
     def lattice_constant(self) -> float:
@@ -85,100 +114,78 @@ class FDF(Mapping[str, Any]):
         A value without a unit is in Bohr, as FDF reads it. Without the
         keyword, 1.0 is returned, so LatticeVectors are read as Angstrom.
         """
-        match = re.search(
-            r"^\s*LatticeConstant\s+([0-9.eE+-]+)\s*([A-Za-z]*)",
-            self.file_str,
-            re.IGNORECASE | re.MULTILINE,
-        )
-        if match is None:
+        tokens = self.label("LatticeConstant")
+        if not tokens:
             return 1.0
-        unit = match.group(2).lower() or "bohr"
+        unit = tokens[1].lower() if len(tokens) > 1 else "bohr"
         if unit not in _LENGTH_UNITS_IN_ANGSTROM:
-            raise ValueError(f"Unsupported LatticeConstant unit: {match.group(2)}")
-        return float(match.group(1)) * _LENGTH_UNITS_IN_ANGSTROM[unit]
+            raise ValueError(f"Unsupported LatticeConstant unit: {tokens[1]}")
+        return float(tokens[0]) * _LENGTH_UNITS_IN_ANGSTROM[unit]
 
     @cached_property
     def band_lines_scale(self) -> str:
         """BandLinesScale: "pi/a" (the Siesta default) or "ReciprocalLatticeVectors"."""
-        match = re.search(
-            r"^\s*BandLinesScale\s+(\S+)", self.file_str, re.IGNORECASE | re.MULTILINE
-        )
-        return "pi/a" if match is None else match.group(1)
+        tokens = self.label("BandLinesScale")
+        return tokens[0] if tokens else "pi/a"
 
     @cached_property
     def lattice_vectors(self) -> np.ndarray:
-        """Extract lattice vectors from LatticeVectors block."""
-        raw_lattice = _extract_block(self.file_str, "LatticeVectors")
-        if raw_lattice is None:
+        """Lattice vectors in Angstrom: the LatticeVectors block times LatticeConstant."""
+        rows = self.block("LatticeVectors")
+        if rows is None:
             raise ValueError("No LatticeVectors block found in FDF file")
-
-        lines = raw_lattice.split("\n")
-        lattice = np.zeros(shape=(3, 3))
-        for i, line in enumerate(lines[:3]):
-            coords = line.split()
-            for j, coord in enumerate(coords[:3]):
-                lattice[i, j] = float(coord)
+        lattice = np.array([[float(x) for x in row[:3]] for row in rows[:3]])
         return lattice * self.lattice_constant
 
     @cached_property
     def atomic_coords_format(self) -> str:
-        """Extract AtomicCoordinatesFormat from FDF file."""
-        match = re.findall(r"AtomicCoordinatesFormat\s+(\w+)", self.file_str, re.IGNORECASE)
-        if not match:
-            return "Fractional"  # Default
-        return match[0]
+        """AtomicCoordinatesFormat, NotScaledCartesianBohr by default as in Siesta."""
+        tokens = self.label("AtomicCoordinatesFormat")
+        return tokens[0] if tokens else "NotScaledCartesianBohr"
 
     @cached_property
     def species_labels(self) -> dict[str, str]:
         """Extract species index to label mapping from ChemicalSpeciesLabel block."""
-        raw_species = _extract_block(self.file_str, "ChemicalSpeciesLabel")
-        if raw_species is None:
+        rows = self.block("ChemicalSpeciesLabel")
+        if rows is None:
             raise ValueError("No ChemicalSpeciesLabel block found in FDF file")
-
-        mapping = {}
-        for line in raw_species.split("\n"):
-            parts = line.split()
-            if len(parts) >= 3:
-                index = parts[0]
-                label = parts[2]
-                mapping[index] = label
-        return mapping
+        return {row[0]: row[2] for row in rows if len(row) >= 3}
 
     @cached_property
     def atomic_positions(self) -> np.ndarray:
-        """Extract atomic positions from AtomicCoordinatesAndAtomicSpecies block."""
-        raw_positions = _extract_block(self.file_str, "AtomicCoordinatesAndAtomicSpecies")
-        if raw_positions is None:
+        """Positions in the AtomicCoordinatesAndAtomicSpecies block, as written."""
+        rows = self.block("AtomicCoordinatesAndAtomicSpecies")
+        if rows is None:
             raise ValueError("No AtomicCoordinatesAndAtomicSpecies block found")
+        return np.array([[float(x) for x in row[:3]] for row in rows])
 
-        lines = raw_positions.split("\n")
-        n_atoms = len(lines)
-        positions = np.zeros(shape=(n_atoms, 3))
-        for i, line in enumerate(lines):
-            parts = line.split()
-            for j in range(3):
-                positions[i, j] = float(parts[j])
-        return positions
+    @cached_property
+    def cartesian_positions(self) -> np.ndarray:
+        """Atomic positions in Cartesian Angstrom, read per AtomicCoordinatesFormat."""
+        coord_format = normalize_label(self.atomic_coords_format)
+        positions = self.atomic_positions
+        if coord_format in ("fractional", "scaledbylatticevectors"):
+            return positions @ self.lattice_vectors
+        if coord_format == "scaledcartesian":
+            return positions * self.lattice_constant
+        if coord_format in ("ang", "notscaledcartesianang"):
+            return positions
+        if coord_format in ("bohr", "notscaledcartesianbohr"):
+            return positions * AU_TO_ANG
+        raise ValueError(f"Unsupported AtomicCoordinatesFormat: {self.atomic_coords_format}")
 
     @cached_property
     def atoms(self) -> list[str]:
         """Extract atom list with species labels."""
-        raw_positions = _extract_block(self.file_str, "AtomicCoordinatesAndAtomicSpecies")
-        if raw_positions is None:
+        rows = self.block("AtomicCoordinatesAndAtomicSpecies")
+        if rows is None:
             return []
-
-        atoms = []
-        for line in raw_positions.split("\n"):
-            parts = line.split()
-            if len(parts) >= 4:
-                species_index = parts[3]
-                atoms.append(self.species_labels.get(species_index, species_index))
-        return atoms
+        return [self.species_labels.get(row[3], row[3]) for row in rows if len(row) >= 4]
 
     @cached_property
     def has_band_lines(self) -> bool:
         """Check if BandLines block exists."""
-        return _extract_block(self.file_str, "BandLines") is not None
+        return self.block("BandLines") is not None
 
     @cached_property
     def band_lines(self) -> list[dict] | None:
@@ -186,20 +193,18 @@ class FDF(Mapping[str, Any]):
 
         Returns list of dicts with keys: npoints, kpoint, label
         """
-        raw_kpath = _extract_block(self.file_str, "BandLines")
-        if raw_kpath is None:
+        rows = self.block("BandLines")
+        if rows is None:
             return None
-
-        result = []
-        for line in raw_kpath.split("\n"):
-            parts = line.split()
-            if len(parts) >= 5:
-                result.append({
-                    "npoints": int(parts[0]),
-                    "kpoint": [float(parts[1]), float(parts[2]), float(parts[3])],
-                    "label": parts[4] if len(parts) > 4 else "",
-                })
-        return result
+        return [
+            {
+                "npoints": int(row[0]),
+                "kpoint": [float(row[1]), float(row[2]), float(row[3])],
+                "label": row[4],
+            }
+            for row in rows
+            if len(row) >= 5
+        ]
 
     # Mapping interface
     @override

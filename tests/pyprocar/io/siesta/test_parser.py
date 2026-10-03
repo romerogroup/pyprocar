@@ -198,6 +198,7 @@ def test_structure_reads_each_atomic_coordinates_format(
     structure = SiestaParser(tmp_path).structure
 
     assert structure is not None
+    assert structure.cartesian_coordinates is not None
     assert np.allclose(structure.cartesian_coordinates, [cartesian])
 
 

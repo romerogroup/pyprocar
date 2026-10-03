@@ -105,9 +105,8 @@ class TestFDF:
     "label", ["LatticeConstant", "Lattice.Constant", "lattice_constant", "LATTICE-CONSTANT"]
 )
 def test_labels_ignore_case_dots_underscores_and_dashes(label: str) -> None:
-    fdf = FDF.from_str(
-        FDF_STR.replace("LatticeConstant", label).replace("block LatticeVectors", "block lattice_vectors")
-    )
+    text = FDF_STR.replace("LatticeConstant", label)
+    fdf = FDF.from_str(text.replace("block LatticeVectors", "block lattice_vectors"))
 
     assert fdf.lattice_constant == pytest.approx(5.43)
     assert np.allclose(fdf.lattice_vectors[0], [2.715, 2.715, 0.0])
