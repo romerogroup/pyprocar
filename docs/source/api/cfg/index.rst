@@ -23,7 +23,7 @@ PyProcar has the following data types:
 
 - ``pyprocar/cfg/fermi_surface_3d.yml`` : Controls the plotting options for the fermi surface 3d plots
 
-- ``pyprocar/cfg/fermi_surface_2d.yml`` : Controls the plotting options for the fermi surface 2d plots
+- ``fermi_surface_2d`` : The plotting options of ``pyprocar.fermi2D``, which takes them as keyword arguments
 
 
 .. toctree::

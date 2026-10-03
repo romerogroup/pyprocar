@@ -1,137 +1,92 @@
 fermi surface 2d plotting Options
 =====================================================
-add_axes_labels
----------------
 
-:description: Boolean to add axes labels
+:func:`pyprocar.fermi2D` takes its plotting options as keyword arguments.
+It does not read ``pyprocar/cfg/fermi_surface_2d.yml``.
+
+mode
+----
+
+:description: ``plain``, ``plain_bands``, ``parametric`` or ``spin_texture``. ``parametric`` colors the contours by the ``atoms``, ``orbitals`` and ``spins`` projection. ``spin_texture`` needs a non-collinear calculation.
+
+:value: plain
+
+
+k_z_plane
+---------
+
+:description: The k_z coordinate of the slicing plane
+
+:value: 0.0
+
+
+extend_zone_directions
+----------------------
+
+:description: Directions to extend the surface into neighboring Brillouin zones
+
+:value: None
+
+
+show_colorbar
+-------------
+
+:description: Boolean to draw a colorbar in ``parametric`` and ``spin_texture`` modes
 
 :value: True
-
-
-add_legend
-----------
-
-:description: Boolean to add legend
-
-:value: False
-
-
-plot_color_bar
---------------
-
-:description: Boolean to plot the color bar
-
-:value: False
 
 
 cmap
 ----
 
-:description: The colormap used for the plot.
+:description: The colormap for the projection colors and spin arrows
 
-:value: jet
-
-
-clim
-----
-
-:description: The color scale for the color bar
-
-:value: [None, None]
+:value: plasma
 
 
-color
------
+plot_line_kwargs
+----------------
 
-:description: The colors for the spin plot lines.
-
-:value: ['blue', 'red']
-
-
-linestyle
----------
-
-:description: The linestyles for the spin plot lines.
-
-:value: ['solid', 'dashed']
-
-
-linewidth
----------
-
-:description: The linewidth of the fermi surface
-
-:value: 0.2
-
-
-no_arrow
---------
-
-:description: Boolean to use no arrows to represent the spin texture
-
-:value: False
-
-
-arrow_color
------------
-
-:description: The linestyles for the spin plot lines.
+:description: Keyword arguments for the matplotlib LineCollection of the contours, such as ``{"colors": "purple", "linewidths": 2.0, "linestyles": "dashed"}``
 
 :value: None
 
 
-arrow_density
--------------
+plot_arrows
+-----------
 
-:description: The arrow density for the spin texture
+:description: Boolean to draw spin arrows in ``spin_texture`` mode
+
+:value: True
+
+
+plot_arrows_kwargs
+------------------
+
+:description: Keyword arguments for the matplotlib quiver of the spin arrows, such as ``{"scale": 2.0}``
+
+:value: None
+
+
+padding
+-------
+
+:description: Padding of the k-mesh for the Fermi surface calculation
 
 :value: 10
 
 
-arrow_size
-----------
+figsize
+-------
 
-:description: The arrow size for the spin texture
+:description: The figure size in inches
 
-:value: 3
-
-
-spin_projection
----------------
-
-:description: The projection for the color scale for spin texture
-
-:value: z^2
-
-
-marker
-------
-
-:description: Controls the marker used for the spin plot
-
-:value: .
+:value: (8, 6)
 
 
 dpi
 ---
 
-:description: The dpi value to save the image as
+:description: The figure resolution
 
-:value: figure
-
-
-x_label
--------
-
-:description: The x label of the plot
-
-:value: $k_{x}$  ($\AA^{-1}$)
-
-
-y_label
--------
-
-:description: The x label of the plot
-
-:value: $k_{y}$  ($\AA^{-1}$)
-
+:value: 100
