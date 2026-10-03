@@ -421,7 +421,7 @@ class QEParser(BaseParser):
 
         kticks = find_high_symmetry_ticks(self._raw_kpoints, high_sym_points)
         self._kticks = kticks
-        new_kpoints = insert_continuous_points(self._raw_kpoints, kticks)
+        new_kpoints = k_utils.insert_continuous_points(self._raw_kpoints, kticks)
         new_kpoints = np.array(new_kpoints)
 
         # Convert list[list[str]] to list[tuple[str, str]]
@@ -603,7 +603,7 @@ class QEParser(BaseParser):
             return None
 
         if self.kpath is not None:
-            bands = insert_continuous_points(bands, self.kticks)
+            bands = k_utils.insert_continuous_points(bands, self.kticks)
         logger.debug(f"Bands: {bands.shape}")
 
         return bands
@@ -654,7 +654,7 @@ class QEParser(BaseParser):
             pyprocar_projections_phase[..., i_atom, i_orbital] += projections[..., i_state]
 
         if self.kpath is not None:
-            pyprocar_projections_phase = insert_continuous_points(
+            pyprocar_projections_phase = k_utils.insert_continuous_points(
                 pyprocar_projections_phase, self.kticks
             )
         logger.debug(f"Spd Phase: {pyprocar_projections_phase.shape}")
@@ -670,7 +670,7 @@ class QEParser(BaseParser):
 
         n_kpoints = self.spd_phase.shape[0]
         if self.kpath is not None and n_kpoints != self.kpath.n_kpoints:
-            spd = insert_continuous_points(spd, self.kticks)
+            spd = k_utils.insert_continuous_points(spd, self.kticks)
         logger.debug(f"Spd: {spd.shape}")
         return spd
 
@@ -840,35 +840,3 @@ def find_high_symmetry_ticks(raw_kpoints, high_sym_points, atol=1e-4):
             raise ValueError(f"No match found for high_sym_point {j}: {high_sym_points[j]}")
 
     return kticks
-
-
-def insert_continuous_points(arr: np.ndarray, tick_indices: list[int] | np.ndarray) -> np.ndarray:
-    """
-    Insert duplicates at tick indices to enforce VASP-style repeated kpoints.
-
-    Parameters
-    ----------
-    arr : np.ndarray
-        Array with shape (nk, ...), where axis=0 corresponds to kpoints.
-    tick_indices : array-like
-        Indices of tick points (end of each segment).
-        Continuous ticks will be duplicated.
-
-    Returns
-    -------
-    np.ndarray
-        New array with duplicated rows at continuous tick points.
-    """
-    tick_indices_arr = np.asarray(tick_indices)
-
-    # Continuous ticks are all except the very first one
-    continuous_ticks = tick_indices_arr[1:-1]
-
-    # Values to duplicate
-    rows_to_insert = arr[continuous_ticks]
-
-    # Insert them back at the right positions
-    # np.insert shifts indices automatically, so we need to offset
-    out = np.insert(arr, continuous_ticks + 1, rows_to_insert, axis=0)
-
-    return out

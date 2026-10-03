@@ -138,6 +138,38 @@ def cartesian_to_reduced(
         return None
 
 
+def insert_continuous_points(arr: np.ndarray, tick_indices: list[int] | np.ndarray) -> np.ndarray:
+    """
+    Insert duplicates at tick indices to enforce VASP-style repeated kpoints.
+
+    Parameters
+    ----------
+    arr : np.ndarray
+        Array with shape (nk, ...), where axis=0 corresponds to kpoints.
+    tick_indices : array-like
+        Indices of tick points (end of each segment).
+        Continuous ticks will be duplicated.
+
+    Returns
+    -------
+    np.ndarray
+        New array with duplicated rows at continuous tick points.
+    """
+    tick_indices_arr = np.asarray(tick_indices)
+
+    # Continuous ticks are all except the very first one
+    continuous_ticks = tick_indices_arr[1:-1]
+
+    # Values to duplicate
+    rows_to_insert = arr[continuous_ticks]
+
+    # Insert them back at the right positions
+    # np.insert shifts indices automatically, so we need to offset
+    out = np.insert(arr, continuous_ticks + 1, rows_to_insert, axis=0)
+
+    return out
+
+
 def format_names(names: list[str], as_latex: bool = False):
     new_names = []
     for x in names:
