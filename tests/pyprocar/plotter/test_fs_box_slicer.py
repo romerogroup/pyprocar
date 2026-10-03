@@ -75,3 +75,15 @@ def test_saved_slice_uses_the_surface_cmap_and_clim(tmp_path):
     top_green = np.array([0.0, 0.267, 0.106])
     assert np.count_nonzero(np.abs(image - top_green).max(axis=-1) < 0.05) > 100
     plotter.close()
+
+
+@pytest.mark.parametrize("method", ["add_box_slicer", "add_slicer"])
+def test_slicers_accept_an_origin_outside_the_surface(method):
+    sphere = pv.Sphere(radius=0.5)
+    plotter = FermiPlotter(off_screen=True)
+
+    getattr(plotter, method)(sphere, normal=(0, 0, 1), origin=(0, 0, 2.0))
+
+    assert plotter.plane_widgets[0].GetOrigin() == (0.0, 0.0, 2.0)
+    assert "slice" not in plotter.actors
+    plotter.close()

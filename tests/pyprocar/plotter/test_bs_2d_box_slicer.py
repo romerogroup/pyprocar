@@ -42,3 +42,15 @@ def test_box_slicer_saves_the_3d_view_and_the_2d_slice(tmp_path):
         image = plt.imread(path)[..., :3]
         assert np.count_nonzero(image.min(axis=-1) < 0.5) > minimum
     plotter.close()
+
+
+def test_box_slicer_accepts_an_origin_outside_the_energy_range():
+    sphere = pv.Sphere(radius=0.5)
+    sphere.point_data["energy"] = sphere.points[:, 2]
+    plotter = BS2DPlotter(SimpleNamespace(), off_screen=True)
+
+    plotter.add_box_slicer(sphere, normal=(0, 0, 1), origin=(0, 0, 2.0), cross_section_area=True)
+
+    assert plotter.plane_widgets[0].GetOrigin() == (0.0, 0.0, 2.0)
+    assert "slice" not in plotter.actors
+    plotter.close()
