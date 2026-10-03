@@ -583,3 +583,47 @@ def test_band_path_repeats_each_inner_vertex_so_kpath_finds_every_segment(bands_
     assert np.allclose(
         kpoints[[0, 8, 9, 10]], [[0, 0, 0], [0.5, 0, 0], [0.5, 0, 0], [0.5, 0.0625, 0]]
     )
+
+
+def _band_dir(tmp_path, task, files):
+    (tmp_path / "elk.in").write_text(ELKIN_BANDS.replace("  22\n", f"  {task}\n"))
+    (tmp_path / "FERMI.OUT").write_text(EFERMI_OUT)
+    (tmp_path / "BANDLINES.OUT").write_text(BANDLINES_OUT)
+    for name, content in files.items():
+        (tmp_path / name).write_text(content)
+    return tmp_path
+
+
+def test_band_file_follows_the_elk_in_task_and_warns_about_the_other(tmp_path, user_warnings):
+    stale = BAND_OUT.replace("-2.401220419", "-9.000000000")
+    calc_dir = _band_dir(
+        tmp_path,
+        "22",
+        {"BAND.OUT": stale, "BAND_S01_A0001.OUT": BAND_S01_A0001, "BAND_S02_A0001.OUT": BAND_S02_A0001},
+    )
+    ebs = ElkParser(calc_dir).ebs
+
+    assert isinstance(ebs, ElectronicBandStructurePath) and ebs.bands is not None
+    assert ebs.bands.to_array()[0, 0, 0] == pytest.approx(-56.582434, abs=1e-5)
+    assert "BAND.OUT" in user_warnings.text
+
+
+def test_band_character_tasks_23_and_24_warn_that_they_are_unsupported(tmp_path, user_warnings):
+    calc_dir = _band_dir(tmp_path, "23", {"BAND_S01_A0001.OUT": BAND_S01_A0001})
+
+    assert ElkParser(calc_dir).ebs is None
+    assert "23" in user_warnings.text
+
+
+def test_vertex_labels_keep_latex_that_kpath_does_not_alias(tmp_path):
+    calc_dir = _band_dir(
+        tmp_path, "22", {"BAND_S01_A0001.OUT": BAND_S01_A0001, "BAND_S02_A0001.OUT": BAND_S02_A0001}
+    )
+    (calc_dir / "elk.in").write_text(
+        (calc_dir / "elk.in").read_text().replace(": G", ": \\Gamma").replace(": A", ": \\Sigma_1")
+    )
+    ebs = ElkParser(calc_dir).ebs
+
+    assert isinstance(ebs, ElectronicBandStructurePath)
+    assert ebs.kpath.tick_names == ["Γ", "X", "\\Sigma_1"]
+    assert ebs.kpath.tick_names_latex[2] == "$\\Sigma_1$"
