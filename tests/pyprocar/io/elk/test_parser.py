@@ -503,7 +503,7 @@ def test_bands_come_from_the_files_elk_writes(tmp_path, task, files):
 
     assert isinstance(ebs, ElectronicBandStructurePath) and ebs.bands is not None
     bands = ebs.bands.to_array()
-    assert bands.shape == (10, 2, 1)
+    assert bands.shape == (11, 2, 1)
     assert bands[0, :, 0] == pytest.approx([-56.582434, -30.753990], abs=1e-5)
 
 
@@ -511,8 +511,8 @@ def test_bands_come_from_the_files_elk_writes(tmp_path, task, files):
 @pytest.mark.parametrize(
     ("mag", "shape", "first_band_at_gamma"),
     [
-        ("non-spin-polarized", (50, 41, 1), [-56.582434]),
-        ("spin-polarized-colinear", (40, 71, 2), [-55.780498, -56.116906]),
+        ("non-spin-polarized", (54, 41, 1), [-56.582434]),
+        ("spin-polarized-colinear", (44, 71, 2), [-55.780498, -56.116906]),
     ],
 )
 def test_real_elk_bands_read_band_s_files(mag, shape, first_band_at_gamma):
@@ -522,7 +522,12 @@ def test_real_elk_bands_read_band_s_files(mag, shape, first_band_at_gamma):
     bands = ebs.bands.to_array()
     assert bands.shape == shape
     assert bands[0, 0, :] == pytest.approx(first_band_at_gamma, abs=1e-5)
-    assert ebs.kpath.segment_names[0] == ("Γ", "X")
+    assert ebs.kpath.tick_names == ["Γ", "X", "M", "Γ", "R", "X"]
+    kpoints = np.asarray(ebs.kpath.kpoints)
+    assert np.allclose(
+        kpoints[ebs.kpath.tick_positions],
+        [[0, 0, 0], [0.5, 0, 0], [0.5, 0.5, 0], [0, 0, 0], [0.5, 0.5, 0.5], [0.5, 0, 0]],
+    )
 
 
 def test_repeated_block_keeps_the_last_copy_like_elk(tmp_path):
@@ -567,3 +572,12 @@ def test_structure_from_elk_in_warns_that_geometry_out_is_missing(tmp_path, user
     assert ElkParser(tmp_path).structure is not None
 
     assert "GEOMETRY.OUT" in user_warnings.text
+
+
+def test_band_path_repeats_each_inner_vertex_so_kpath_finds_every_segment(bands_calc_dir):
+    ebs = ElkParser(bands_calc_dir).ebs
+
+    assert isinstance(ebs, ElectronicBandStructurePath) and ebs.bands is not None
+    kpoints = np.asarray(ebs.kpath.kpoints)
+    assert len(kpoints) == 11 and ebs.bands.to_array().shape == (11, 2, 1)
+    assert np.allclose(kpoints[[0, 8, 9, 10]], [[0, 0, 0], [0.5, 0, 0], [0.5, 0, 0], [0.5, 0.5, 0]])
