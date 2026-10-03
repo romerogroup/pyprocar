@@ -552,3 +552,77 @@ def test_pw_xml_fallback_matches_atomic_proj_kpoints_on_srvo3(tmp_path: Path) ->
     fallback_lattice, primary_lattice = fallback.reciprocal_lattice, primary.reciprocal_lattice
     assert fallback_lattice is not None and primary_lattice is not None
     assert np.allclose(fallback_lattice, primary_lattice)
+
+
+def _tetragonal_bands_dir(
+    tmp_path: Path, mode: str, card: str, cartesian_kpoints: list[str]
+) -> Path:
+    head, _, tail = TETRAGONAL_PW_XML.partition("      <ks_energies>")
+    tail = tail.rpartition("      </ks_energies>\n")[2]
+    (tmp_path / "test.xml").write_text(
+        head.replace("<nks>4</nks>", f"<nks>{len(cartesian_kpoints)}</nks>")
+        + "".join(
+            f"""      <ks_energies>
+        <k_point weight="1.0">{k}</k_point>
+        <npw>100</npw>
+        <eigenvalues size="1">0.1</eigenvalues>
+        <occupations size="1">1.0</occupations>
+      </ks_energies>
+"""
+            for k in cartesian_kpoints
+        )
+        + tail
+    )
+    (tmp_path / "bands.in").write_text(
+        SCF_IN.replace("'scf'", "'bands'").replace(
+            "K_POINTS automatic\n4 4 4 0 0 0\n", f"K_POINTS {mode}\n{card}"
+        )
+    )
+    return tmp_path
+
+
+TETRAGONAL_GXZ_PATH = [
+    *(f"{0.05 * i:.2f} 0.0 0.0" for i in range(10)),
+    *(f"{0.5 - 0.05 * i:.2f} 0.0 {0.025 * i:.3f}" for i in range(11)),
+]
+
+
+@pytest.mark.parametrize(
+    ("mode", "card"),
+    [
+        ("crystal_b", "3\n0 0 0 10 !G\n0.5 0 0 10 !X\n0 0 0.5 1 !Z\n"),
+        ("tpiba_b", "3\n0 0 0 10 !G\n0.5 0 0 10 !X\n0 0 0.25 1 !Z\n"),
+    ],
+    ids=["crystal_b", "tpiba_b"],
+)
+def test_band_path_vertices_in_crystal_or_tpiba_units_give_the_same_kpath(
+    tmp_path: Path, mode: str, card: str
+) -> None:
+    kpath = QEParser(_tetragonal_bands_dir(tmp_path, mode, card, TETRAGONAL_GXZ_PATH)).kpath
+
+    assert kpath is not None
+    assert kpath.segment_names == [("Γ", "X"), ("X", "Z")]
+    kpoints = np.asarray(kpath.kpoints)
+    assert len(kpoints) == 22
+    assert np.allclose(
+        kpoints[[0, 10, 11, 21]], [[0, 0, 0], [0.5, 0, 0], [0.5, 0, 0], [0, 0, 0.5]]
+    )
+
+
+@pytest.mark.parametrize(
+    ("mode", "card"),
+    [
+        ("crystal_c", "3\n0 0 0 1\n0.5 0 0 2\n0 0 0.5 2\n"),
+        ("tpiba_c", "3\n0 0 0 1\n0.5 0 0 2\n0 0 0.25 2\n"),
+    ],
+    ids=["crystal_c", "tpiba_c"],
+)
+def test_contour_mode_has_no_kpath_and_keeps_the_mesh_kpoints(
+    tmp_path: Path, mode: str, card: str
+) -> None:
+    mesh = ["0 0 0", "0.25 0 0", "0 0 0.125", "0.25 0 0.125"]
+    parser = QEParser(_tetragonal_bands_dir(tmp_path, mode, card, mesh))
+
+    assert parser.kpath is None
+    assert parser.kpoints is not None
+    assert np.allclose(parser.kpoints, [[0, 0, 0], [0.25, 0, 0], [0, 0, 0.25], [0.25, 0, 0.25]])
