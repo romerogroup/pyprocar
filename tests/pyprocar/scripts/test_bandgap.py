@@ -53,3 +53,9 @@ def test_spin_polarized_metal_in_one_channel(monkeypatch):
 
     assert type(gap) is float
     assert gap == 0.0
+
+
+def test_band_crossing_fermi_below_the_highest_occupied_state_is_metal(monkeypatch):
+    _use_bands(monkeypatch, np.array([[-1.0, -0.5], [-0.01, 0.5]])[..., np.newaxis])
+
+    assert scriptBandGap.bandgap(dirname=".", fermi=0.0) == 0.0

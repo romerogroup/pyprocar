@@ -1,5 +1,3 @@
-import numpy as np
-
 from pyprocar.io import get_parser
 
 
@@ -41,22 +39,13 @@ def bandgap(
         fermi = ebs.fermi
 
     bands = ebs.bands.value - fermi
-    if bands.ndim == 2:
-        bands = bands[..., np.newaxis]
+    band_crosses_fermi = (bands < 0).any(axis=0) & (bands > 0).any(axis=0)
 
-    bandGap = 0.0 if _is_metal(bands) else float(bands[bands > 0].min() - bands[bands < 0].max())
+    if band_crosses_fermi.any():
+        bandGap = 0.0
+    else:
+        bandGap = float(bands[bands > 0].min() - bands[bands < 0].max())
 
     print("Band Gap = %s eV " % str(bandGap))
 
     return bandGap
-
-
-def _is_metal(bands: np.ndarray) -> bool:
-    for channel in np.moveaxis(bands, -1, 0):
-        occupied = channel[channel < 0]
-        if occupied.size == 0:
-            continue
-        highest_occupied_band = channel[:, np.where(channel == occupied.max())[1][0]]
-        if (highest_occupied_band > 0).any() and (highest_occupied_band < 0).any():
-            return True
-    return False
