@@ -1,7 +1,6 @@
 import logging
 from functools import partial
 
-import matplotlib.pyplot as plt
 import numpy as np
 import pyvista as pv
 import vtk
@@ -14,7 +13,6 @@ from pyvista.plotting.utilities.algorithms import (
 
 from pyprocar.plotter._series import SurfaceSeries, surface_series
 from pyprocar.plotter._surface_plot import SurfacePlotter, find_nearest, normalize_to_range
-from pyprocar.plotter.fs_slice_plot import FermiSlicePlotter
 
 logger = logging.getLogger(__name__)
 
@@ -442,6 +440,7 @@ class FermiPlotter(SurfacePlotter):
         save_2d_slice=None,
         **kwargs,
     ):
+        self.check_can_save_2d(save_2d)
         if add_surface_args is None:
             add_surface_args = {}
 
@@ -506,13 +505,14 @@ class FermiPlotter(SurfacePlotter):
         if save_2d:
             self.savefig(save_2d)
         if save_2d_slice:
-            self.save_slice_2d(surface, normal, origin, save_2d_slice)
-
-    def save_slice_2d(self, surface, normal, origin, filename):
-        slice_plotter = FermiSlicePlotter(surface, normal=normal, origin=origin)
-        slice_plotter.plot(scalars_name=surface.active_scalars_name)
-        slice_plotter.savefig(filename)
-        plt.close(slice_plotter.fig)
+            self.save_slice_2d(
+                surface,
+                normal,
+                origin,
+                save_2d_slice,
+                cmap=add_surface_args.get("cmap", "plasma"),
+                clim=add_surface_args.get("clim"),
+            )
 
     def _box_callback(
         self,

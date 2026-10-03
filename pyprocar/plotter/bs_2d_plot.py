@@ -312,6 +312,7 @@ class BS2DPlotter(SurfacePlotter):
         save_2d_slice=None,
         **kwargs,
     ):
+        self.check_can_save_2d(save_2d)
         if add_surface_args is None:
             add_surface_args = {}
 
@@ -370,6 +371,18 @@ class BS2DPlotter(SurfacePlotter):
             bounds=surface.bounds,
             **add_plane_widget_args,
         )
+
+        if save_2d:
+            self.savefig(save_2d)
+        if save_2d_slice:
+            self.save_slice_2d(
+                surface,
+                normal,
+                origin,
+                save_2d_slice,
+                cmap=add_surface_args.get("cmap", "plasma"),
+                clim=add_surface_args.get("clim"),
+            )
 
     def _box_callback(
         self,

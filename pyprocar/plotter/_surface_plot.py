@@ -4,11 +4,13 @@ import logging
 import os
 from typing import Any, cast
 
+import matplotlib.pyplot as plt
 import numpy as np
 import pyvista as pv
 from pyvista import ColorLike
 
 from pyprocar.plotter._series import SurfaceSeries, finite_range
+from pyprocar.plotter.fs_slice_plot import FermiSlicePlotter
 
 logger = logging.getLogger(__name__)
 
@@ -215,3 +217,19 @@ class SurfacePlotter(pv.Plotter):
             self.save_graphic(filename)
         else:
             self.screenshot(filename)
+
+    def check_can_save_2d(self, save_2d) -> None:
+        if save_2d and not self.off_screen:
+            raise ValueError(
+                "save_2d needs a plotter created with off_screen=True, because PyVista "
+                + "cannot screenshot an on-screen plotter before show()"
+            )
+
+    def save_slice_2d(self, surface, normal, origin, filename, cmap="plasma", clim=None):
+        """Draw the cross section of ``surface`` at ``normal``/``origin`` with matplotlib."""
+        slice_plotter = FermiSlicePlotter(surface, normal=normal, origin=origin)
+        slice_plotter.plot(
+            scalars_name=surface.active_scalars_name, scalars_cmap=cmap, scalars_clim=clim
+        )
+        slice_plotter.savefig(filename)
+        plt.close(slice_plotter.fig)
