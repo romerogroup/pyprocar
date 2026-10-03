@@ -21,3 +21,7 @@ def test_find_defect_on_srvo3_finds_none():
     )
 
     assert list(FindDefect(poscar).all_defects) == []
+
+
+def test_superheavy_elements_use_their_iupac_symbols():
+    assert DB().estimateBond("Nh", "Og") == pytest.approx(1.36 + 1.57)

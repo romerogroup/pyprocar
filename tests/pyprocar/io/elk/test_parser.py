@@ -748,3 +748,18 @@ def test_real_spin_polarized_task_22_reads_the_spin_down_states():
     assert projected[0, 70, 1, 0, :, 1].sum() == pytest.approx(0.132893, abs=1e-6)
     assert projected[0, 0, 1, 0, 0, :] == pytest.approx([0.989874, 0.989950])
     assert ebs.orbital_names is not None and len(ebs.orbital_names) == 16
+
+
+def test_task_20_reads_bands_from_band_s_files_without_their_characters(tmp_path, user_warnings):
+    calc_dir = _band_dir(
+        tmp_path, "20", {"BAND_S01_A0001.OUT": BAND_S01_A0001, "BAND_S02_A0001.OUT": BAND_S02_A0001}
+    )
+
+    ebs = ElkParser(calc_dir).ebs
+
+    assert isinstance(ebs, ElectronicBandStructurePath) and ebs.bands is not None
+    assert ebs.bands.to_array()[0, 0, 0] == pytest.approx(
+        (-2.401220419 + 0.3218543102) * 27.211386245988
+    )
+    assert ebs.projected is None
+    assert "no task 21 to 24" in user_warnings.text

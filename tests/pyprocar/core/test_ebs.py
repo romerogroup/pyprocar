@@ -1135,3 +1135,96 @@ def test_ibz_unfolds_with_time_reversal_when_the_point_group_lacks_inversion():
     band_at = {tuple(np.round(k, 3)): bands[i, 0, 0] for i, k in enumerate(ebs.kpoints)}
     assert band_at[(-0.333, -0.333, 0.0)] == 3.0
     assert band_at[(-0.333, 0.333, 0.0)] == 4.0
+
+
+def test_time_reversal_images_carry_the_negated_non_collinear_spin():
+    from pyprocar.core import Structure
+
+    t = 0.33333333
+    ibz = np.array([[0, 0, 0], [t, 0, 0], [0, t, 0], [t, t, 0], [t, -t, 0]])
+    # per k-point: total 1.0 and spin (sx, sy, sz) = (0.1, 0.2, 0.3) * (index + 1)
+    spin = 0.1 * np.arange(1, 4) * np.arange(1, 6)[:, None]
+    projected = np.concatenate([np.ones((5, 1)), spin], axis=1).reshape(5, 1, 4, 1, 1)
+    structure = Structure(
+        atoms=["X"],
+        fractional_coordinates=np.zeros((1, 3)),
+        lattice=np.eye(3),
+        rotations=np.array([np.eye(3)]),
+    )
+
+    ebs = ElectronicBandStructureMesh(
+        kpoints=ibz,
+        bands=np.zeros((5, 1, 1)),
+        projected=projected,
+        fermi=0.0,
+        reciprocal_lattice=np.eye(3),
+        structure=structure,
+        kgrid_info=KGridInfo(kgrid=(3, 3, 1), kgrid_mode=KGRID_MODE.GAMMA, kshift=(0, 0, 0)),
+    )
+
+    assert ebs.projected is not None
+    unfolded = ebs.projected.to_array()
+    spin_at = {
+        tuple(np.round(k, 3)): unfolded[i, 0, :, 0, 0].tolist() for i, k in enumerate(ebs.kpoints)
+    }
+    assert spin_at[(0.333, 0.333, 0.0)] == pytest.approx([1.0, 0.4, 0.8, 1.2])
+    assert spin_at[(-0.333, -0.333, 0.0)] == pytest.approx([1.0, -0.4, -0.8, -1.2])
+    assert spin_at[(0.333, -0.333, 0.0)] == pytest.approx([1.0, 0.5, 1.0, 1.5])
+    assert spin_at[(-0.333, 0.333, 0.0)] == pytest.approx([1.0, -0.5, -1.0, -1.5])
+    assert spin_at[(0.0, 0.0, 0.0)] == pytest.approx([1.0, 0.1, 0.2, 0.3])
+
+
+@pytest.mark.data
+def test_reduced_non_collinear_bisb_mesh_unfolds_to_the_full_mesh_spin():
+    spglib = pytest.importorskip("spglib")
+    from pyprocar.core.ebs import get_ebs_from_code, get_ebs_from_data
+
+    # Full 60x60x1 non-collinear mesh (ISYM=-1); reduce it under the point group and k ~ -k
+    full = get_ebs_from_code("vasp", str(DATA_DIR / "examples" / "fermi2d" / "bisb_monolayer"))
+    structure = full.structure
+    assert isinstance(full, ElectronicBandStructureMesh) and structure is not None
+    assert full.bands is not None and full.projected is not None
+    full_bands, full_projected = full.bands.to_array(), full.projected.to_array()
+    cell = (structure.lattice, structure.fractional_coordinates, structure.atomic_numbers)
+    rotations = np.array([w.T for w in spglib.get_symmetry(cell, symprec=1e-3)["rotations"]])
+    structure._rotations = rotations.astype(float)
+
+    def wrap(k):
+        k = np.round(np.asarray(k, dtype=float), 3)
+        return np.round(k - np.floor(k + 0.5 - 1e-9), 3) + 0.0
+
+    full_k = wrap(full.kpoints)
+    index = {tuple(k): i for i, k in enumerate(full_k)}
+    group = np.concatenate([rotations, -rotations])
+    kept, seen = [], set()
+    for i, k in enumerate(full.kpoints):
+        if tuple(full_k[i]) not in seen:
+            kept.append(i)
+            seen.update(tuple(wrap(k @ g.T)) for g in group)
+    reduced = get_ebs_from_data(
+        kpoints=full.kpoints[kept],
+        bands=full_bands[kept],
+        projected=full_projected[kept],
+        fermi=full.fermi,
+        reciprocal_lattice=full.reciprocal_lattice,
+        orbital_names=full.orbital_names,
+        structure=structure,
+        kgrid_info=full.kgrid_info,
+    )
+
+    assert len(kept) == 331
+    assert reduced.n_kpoints == 3600 and reduced.projected is not None
+    true = full_projected.sum(axis=(3, 4))
+    unfolded = reduced.projected.to_array().sum(axis=(3, 4))
+    ibz = {tuple(full_k[i]): i for i in kept}
+    minus_k = [
+        (j, index[tuple(k)], ibz[tuple(wrap(-k))])
+        for j, k in enumerate(wrap(reduced.kpoints))
+        if tuple(k) not in ibz and tuple(wrap(-k)) in ibz
+    ]
+    assert len(minus_k) == 329
+    image, target, source = (np.array(column) for column in zip(*minus_k, strict=True))
+    assert np.array_equal(unfolded[image, :, 1:], -true[source, :, 1:])
+    assert np.array_equal(unfolded[image, :, 0], true[source, :, 0])
+    # -S(k) matches the computed S(-k) up to degenerate bands
+    assert np.abs(unfolded[image, :, 1:] - true[target, :, 1:]).mean() < 0.005

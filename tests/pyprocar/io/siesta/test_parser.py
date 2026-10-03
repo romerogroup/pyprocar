@@ -324,3 +324,16 @@ def test_auto_detect_skips_included_and_label_redirected_fdf(
     assert structure is not None
     assert structure.lattice is not None
     assert np.allclose(np.diag(structure.lattice), [2.0, 2.0, 2.0])
+
+
+@pytest.mark.parametrize("broken", ["%include gone.fdf\n", "SystemLabel < missing.fdf\n"])
+def test_auto_detect_skips_a_sibling_fdf_that_cannot_be_read(tmp_path: Path, broken: str) -> None:
+    (tmp_path / "input.fdf").write_text(FDF_STR)
+    (tmp_path / "silicon.bands").write_text(BANDS_STR)
+    (tmp_path / "old.fdf").write_text(broken)
+
+    parser = SiestaParser(tmp_path)
+
+    assert parser._fdf is not None
+    assert parser._fdf.filepath == tmp_path / "input.fdf"
+    assert parser.fermi == -5.5
