@@ -230,7 +230,7 @@ class KPath:
         self.zero_diff_threshold = zero_diff_threshold
         self._tick_name_map = tick_name_map
         self._reciprocal_lattice = reciprocal_lattice
-        self._segment_end_indices = segment_end_indices
+        self._segment_end_indices: list[int] | None = segment_end_indices
 
         # Normalizing kpoint names to canonical form
         segment_names = self._normalize_kpoint_names(segment_names)
@@ -271,7 +271,7 @@ class KPath:
         ret += "------\n"
 
         for isegment, ((start_name, end_name), (start_kpoint, end_kpoint)) in enumerate(
-            zip(self.segment_names, self.special_kpoints)
+            zip(self.segment_names, self.special_kpoints, strict=False)
         ):
             ret += f"{isegment + 1:>2}. {start_name:<8}: ({start_kpoint[0]:>6.2f} {start_kpoint[1]:>6.2f} {start_kpoint[2]:>6.2f}) -> {end_name:<8}: ({end_kpoint[0]:>6.2f} {end_kpoint[1]:>6.2f} {end_kpoint[2]:>6.2f})\n"
 
@@ -486,7 +486,7 @@ class KPath:
 
     def get_distances(
         self,
-        isegments: list[int] = None,
+        isegments: list[int] | None = None,
         as_segments: bool = True,
         cumlative_across_segments: bool = True,
         cartesian: bool = True,
@@ -499,9 +499,12 @@ class KPath:
         steps[self.discontinuity_start_indices] = 0.0
         path_distances = np.insert(np.cumsum(steps), 0, 0.0)
 
-        k_segment_distances = [path_distances[self.segment_indices[i]] for i in isegments]
-        if not cumlative_across_segments:
-            k_segment_distances = [d - d[0] for d in k_segment_distances]
+        k_segment_distances = []
+        for isegment in isegments:
+            k_distances = path_distances[self.segment_indices[isegment]]
+            if not cumlative_across_segments:
+                k_distances = k_distances - k_distances[0]
+            k_segment_distances.append(k_distances)
 
         if as_segments:
             return k_segment_distances

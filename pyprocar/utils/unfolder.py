@@ -130,6 +130,7 @@ class Unfolder:
                    ---
                    i=1
         """
+        assert self.trans_indices is not None
         weight = 0j
         N = self.nfold
         for ind in self.trans_indices:

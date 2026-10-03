@@ -225,7 +225,7 @@ class AbinitParser(BaseParser):
             orbital_names=procar.orbital_names_old[:-1],
             reciprocal_lattice=self.abinit_output.reclat,
             structure=self.structure,
-            kpath=self.kpath,
+            kpath=self.kpath,  # pyright: ignore[reportArgumentType]
         )
 
     @property

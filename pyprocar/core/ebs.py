@@ -1325,6 +1325,7 @@ class ElectronicBandStructurePath(
         if as_cartesian:
             mesh_points = self.kpoints_cartesian
         else:
+            assert self.reciprocal_lattice is not None
             mesh_points = kpoints.cartesian_to_reduced(self.kpoints, self.reciprocal_lattice)
         mesh = pv.PointSet(mesh_points)
         self._mesh = mesh

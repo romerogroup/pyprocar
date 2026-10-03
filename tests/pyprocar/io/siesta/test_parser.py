@@ -90,7 +90,10 @@ class TestSiestaParser:
         kpath = SiestaParser(siesta_dir).kpath
 
         assert kpath is not None
-        assert list(zip(kpath.tick_positions, kpath.tick_names)) == [(0, "L"), (1, "Γ")]
+        assert list(zip(kpath.tick_positions, kpath.tick_names, strict=True)) == [
+            (0, "L"),
+            (1, "Γ"),
+        ]
 
     def test_ebs(self, siesta_dir: Path) -> None:
         parser = SiestaParser(siesta_dir)
