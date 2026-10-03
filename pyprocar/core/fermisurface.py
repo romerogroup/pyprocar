@@ -1030,8 +1030,8 @@ def generate_band_isosurfaces(ebs: ElectronicBandStructureMesh, isovalue: float,
 
     # Must be the points on non-padded grid
     x_spacing = 1 / ebs.n_kx
-    y_spacing = 1 / ebs.n_kx
-    z_spacing = 1 / ebs.n_kx
+    y_spacing = 1 / ebs.n_ky
+    z_spacing = 1 / ebs.n_kz
 
     grid = pv.ImageData(
         dimensions=(nx, ny, nz),

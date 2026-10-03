@@ -15,6 +15,7 @@ from pyprocar.plotter._series import SurfaceSeries, surface_series
 from pyprocar.plotter._surface_plot import SurfacePlotter, find_nearest, normalize_to_range
 
 logger = logging.getLogger(__name__)
+user_logger = logging.getLogger("user")
 
 
 BZ_SCALE_FACTOR = 0.01
@@ -133,6 +134,12 @@ class FermiPlotter(SurfacePlotter):
         series_list = self._to_series_list(fermi_surface, scalars_data, vectors_data, **kwargs)
         if spins is not None:
             series_list = [s for s in series_list if s.spin_index in spins]
+            if not series_list:
+                user_logger.warning(
+                    f"No Fermi surface found: no band of spin channel(s) {list(spins)} crosses"
+                    + " the isovalue (Fermi energy + fermi_shift). Try another spin channel,"
+                    + " a different fermi_shift, or check the Fermi energy."
+                )
 
         if show_brillouin_zone:
             self.add_brillouin_zone(fermi_surface.brillouin_zone)

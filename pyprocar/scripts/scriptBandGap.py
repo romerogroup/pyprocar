@@ -32,32 +32,31 @@ def bandgap(
         Returns the bandgap energy
     """
 
-    bandGap = None
-
     parser = get_parser(code, dirname)
     ebs = parser.ebs
+    if ebs is None or ebs.bands is None:
+        raise ValueError(f"No band structure found in {dirname}")
 
     if fermi is None:
         fermi = ebs.fermi
 
-    bands = np.array(ebs.bands)
-    subBands = np.subtract(bands, fermi)
+    bands = ebs.bands.value - fermi
+    if bands.ndim == 2:
+        bands = bands[..., np.newaxis]
 
-    negArr = subBands[subBands < 0]
-    posArr = subBands[subBands > 0]
-
-    negVal = np.amax(negArr)
-    posVal = np.amin(posArr)
-
-    idx = np.where(subBands == negVal)[1][0]
-
-    if all(i >= 0 for i in subBands[:, idx]) or all(i <= 0 for i in subBands[:, idx]):
-        possibleGap = posVal - negVal
-        if bandGap is None or possibleGap < bandGap:
-            bandGap = possibleGap
-    else:
-        bandGap = 0
+    bandGap = 0.0 if _is_metal(bands) else float(bands[bands > 0].min() - bands[bands < 0].max())
 
     print("Band Gap = %s eV " % str(bandGap))
 
     return bandGap
+
+
+def _is_metal(bands: np.ndarray) -> bool:
+    for channel in np.moveaxis(bands, -1, 0):
+        occupied = channel[channel < 0]
+        if occupied.size == 0:
+            continue
+        highest_occupied_band = channel[:, np.where(channel == occupied.max())[1][0]]
+        if (highest_occupied_band > 0).any() and (highest_occupied_band < 0).any():
+            return True
+    return False

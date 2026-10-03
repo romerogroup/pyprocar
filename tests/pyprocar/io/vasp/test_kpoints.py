@@ -262,6 +262,12 @@ class TestKpoints:
         assert kpoints_gamma.kshift == [0, 0, 0]
         assert kpoints_mp.kshift == [0, 0, 0]
 
+    def test_kpoints_grid_and_shift_on_one_line(self):
+        kpoints = vasp.Kpoints.from_str("Automatic mesh\n0\nMonkhorst-Pack\n4 4 2 1 1 1\n")
+
+        assert kpoints.kgrid == [4, 4, 2]
+        assert kpoints.kshift == [1, 1, 1]
+
     def test_kpoints_special_points_array_structure(self, kpoints_line_mode_path: Path):
         """Test the structure of special k-points array for band calculations."""
         kpoints = vasp.Kpoints(filepath=kpoints_line_mode_path)
