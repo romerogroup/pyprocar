@@ -10,7 +10,8 @@ from pyprocar.core.ebs import ElectronicBandStructure, get_ebs_from_data
 from pyprocar.core.kpoints import KGRID_MODE, KGridInfo
 from pyprocar.io.base import BaseParser
 from pyprocar.io.bxsf.bxsf import Bxsf, BxsfWriter
-from pyprocar.io.qe import QEParser
+from pyprocar.io.qe.pw import PwOut
+from pyprocar.utils.units import AU_TO_ANG
 
 logger = logging.getLogger(__name__)
 user_logger = logging.getLogger("user")
@@ -23,17 +24,21 @@ class BxsfParser(BaseParser):
     ----------
     dirpath : str | Path
         Directory containing BXSF file(s).
-    filepaths : str | Path | list[Path]
-        Path(s) to .bxsf file(s). Multiple files for spin-polarized data.
+    filepaths : str | Path | list[Path] | None
+        One BXSF file, or the QE ``fs.x`` spin pair ``<prefix>_fsup.bxsf`` and
+        ``<prefix>_fsdw.bxsf``. ``None`` reads ``in.bxsf``, else that pair, else the first
+        ``*.bxsf`` or ABINIT ``*_BXSF`` file in ``dirpath``.
     """
 
     def __init__(
         self,
         dirpath: str | Path,
-        filepaths: str | Path | list[Path] = Path("in.bxsf"),
+        filepaths: str | Path | list[Path] | None = None,
     ):
         super().__init__(dirpath)
-        self._filepaths = self._normalize_filepaths(filepaths)
+        self._filepaths = (
+            self._find_bxsf_files() if filepaths is None else self._normalize_filepaths(filepaths)
+        )
         self._extractors: list[Bxsf] = []
 
         for filepath in self._filepaths:
@@ -42,6 +47,25 @@ class BxsfParser(BaseParser):
                 self._extractors.append(Bxsf(full_path))
             else:
                 user_logger.warning(f"BXSF file not found: {full_path}")
+        _check_spin_files(self._extractors)
+
+    def _find_bxsf_files(self) -> list[Path]:
+        if (self.dirpath / "in.bxsf").exists():
+            return [Path("in.bxsf")]
+        found = sorted(
+            Path(p.name)
+            for p in self.dirpath.glob("*")
+            if p.is_file() and p.name.lower().endswith((".bxsf", "_bxsf"))
+        )
+        chosen = _qe_fs_spin_pair(found) or found[:1]
+        if not found:
+            user_logger.warning(f"No in.bxsf, *.bxsf or *_BXSF file found in {self.dirpath}")
+        elif len(found) > len(chosen):
+            user_logger.warning(
+                f"Found several BXSF files in {self.dirpath}: {[str(p) for p in found]}; "
+                + f"reading {[str(p) for p in chosen]}. Pass filepaths to choose another."
+            )
+        return chosen
 
     def _normalize_filepaths(self, filepaths: str | Path | list[Path]) -> list[Path]:
         """Normalize filepaths to list of Path objects."""
@@ -87,7 +111,7 @@ class BxsfParser(BaseParser):
             case BxsfWriter.ABINIT:
                 return b
             case BxsfWriter.QE_FS:
-                alat = QEParser(ext.filepath.parent).alat if ext.filepath else None
+                alat = _pw_alat_angstrom_beside(ext.filepath) if ext.filepath else None
                 if alat is None:
                     user_logger.warning(
                         "QE fs.x BXSF stores b in units of 2*pi/alat and no QE output with "
@@ -113,7 +137,7 @@ class BxsfParser(BaseParser):
             ext = self._extractors[0]
             return get_ebs_from_data(
                 kpoints=ext.kpoints,
-                bands=ext.bands,
+                bands=self._bands(),
                 projected=None,
                 fermi=ext.fermi_energy,
                 reciprocal_lattice=self.reciprocal_lattice,
@@ -122,3 +146,76 @@ class BxsfParser(BaseParser):
         except Exception as e:
             user_logger.warning(f"Error creating EBS from BXSF: {e}")
             return None
+
+    def _bands(self) -> np.ndarray:
+        if len(self._extractors) == 1:
+            return self._extractors[0].bands
+        up, down = self._extractors
+        return _stack_spin_pair(up, down)
+
+
+def _stack_spin_pair(up: Bxsf, down: Bxsf) -> np.ndarray:
+    """Stack the fs.x spin files on the union of their BAND labels.
+
+    fs.x keeps, per spin, only the bands within deltaE of the Fermi level. A band
+    missing from one spin lies wholly below or above that window there, so it is
+    filled with a constant on that side, which adds no Fermi surface.
+    """
+    labels = sorted(set(up.band_labels) | set(down.band_labels))
+    fermi = up.fermi_energy
+    present = np.concatenate([up.bands, down.bands], axis=1)
+    margin = float(present.max() - present.min()) + 1.0
+    channels = []
+    for spin in (up, down):
+        columns = []
+        for label in labels:
+            if label in spin.band_labels:
+                columns.append(spin.bands[:, spin.band_labels.index(label), 0])
+            else:
+                side = -1.0 if label < min(spin.band_labels) else 1.0
+                columns.append(np.full(spin.bands.shape[0], fermi + side * margin))
+        channels.append(np.stack(columns, axis=1))
+    return np.stack(channels, axis=2)
+
+
+def _check_spin_files(extractors: list[Bxsf]) -> None:
+    paths = [ext.filepath for ext in extractors if ext.filepath is not None]
+    if not extractors:
+        return
+    if len(extractors) == 1:
+        name = paths[0].name if paths else ""
+        if extractors[0].writer is BxsfWriter.QE_FS and name.endswith(("up.bxsf", "dw.bxsf")):
+            user_logger.warning(
+                f"{name} holds one spin of a QE fs.x spin-polarized run, and its partner file "
+                + "is missing; reading it as a single spin channel."
+            )
+        return
+    is_pair = (
+        len(extractors) == 2
+        and all(ext.writer is BxsfWriter.QE_FS for ext in extractors)
+        and extractors[0].nk_dim == extractors[1].nk_dim
+        and _qe_fs_spin_pair(paths) == paths
+    )
+    if not is_pair:
+        raise ValueError(
+            f"BXSF files {[p.name for p in paths]} do not form a QE fs.x spin pair. Pass one "
+            + "file, or the <prefix>_fsup.bxsf and <prefix>_fsdw.bxsf files of one fs.x run, "
+            + "in that order."
+        )
+
+
+def _qe_fs_spin_pair(found: list[Path]) -> list[Path] | None:
+    names = {p.name for p in found}
+    for p in found:
+        if p.name.endswith("up.bxsf") and p.name[: -len("up.bxsf")] + "dw.bxsf" in names:
+            return [p, p.with_name(p.name[: -len("up.bxsf")] + "dw.bxsf")]
+    return None
+
+
+def _pw_alat_angstrom_beside(filepath: Path) -> float | None:
+    for candidate in sorted(filepath.parent.iterdir()):
+        if candidate.suffix.lower() in {".out", ".log"} and PwOut.is_file_of_type(candidate):
+            alat = PwOut(candidate).alat
+            if alat is not None:
+                return alat * AU_TO_ANG
+    return None

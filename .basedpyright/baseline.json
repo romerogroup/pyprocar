@@ -5658,14 +5658,6 @@
         ],
         "./pyprocar/io/bxsf/parser.py": [
             {
-                "code": "reportCallInDefaultInitializer",
-                "range": {
-                    "startColumn": 45,
-                    "endColumn": 60,
-                    "lineCount": 1
-                }
-            },
-            {
                 "code": "reportUnannotatedClassAttribute",
                 "range": {
                     "startColumn": 13,
