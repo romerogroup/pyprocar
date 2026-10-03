@@ -10,7 +10,9 @@ phase reported.
 Paths are resolved with realpath, so a symlinked alias of data/ counts. File
 descriptors and ``dir_fd`` arguments are resolved through /proc/self/fd, which
 exists on Linux only. The ``open`` audit event carries no ``dir_fd``, so
-``os.open`` is wrapped to check ``dir_fd``-relative writes.
+``os.open`` is wrapped to check ``dir_fd``-relative opens itself. The wrapper is
+added to ``os.supports_dir_fd`` so callers that test for dir_fd support still
+find it.
 
 Not caught: writes from subprocesses. An audit hook sees only its own
 interpreter, and the external programs tests run need not be Python.
@@ -18,6 +20,7 @@ interpreter, and the external programs tests run need not be Python.
 
 import os
 import sys
+import threading
 
 import pytest
 
@@ -44,6 +47,8 @@ _MUTATING_EVENTS: dict[str, tuple[tuple[int, int | None, bool], ...]] = {
 }
 _WATCHED_EVENTS = {"open", "os.listdir", "os.scandir", *_MUTATING_EVENTS}
 _current_test: tuple[str, bool] | None = None
+# set while the os.open wrapper runs, whose own check already resolved dir_fd
+_dir_fd_open = threading.local()
 _violations: list[str] = []
 
 
@@ -94,6 +99,8 @@ def _check_write(nodeid: str, path: object, dir_fd: object, follow: bool = True)
 def _guard_data_dir(event: str, args: tuple[object, ...]) -> None:
     if _current_test is None or not args or event not in _WATCHED_EVENTS:
         return
+    if event == "open" and getattr(_dir_fd_open, "active", False):
+        return
     nodeid, marked = _current_test
     if written := _written_paths(event, args):
         for path, dir_fd, follow in written:
@@ -108,12 +115,18 @@ _os_open = os.open
 
 
 def _guarded_os_open(path, flags, mode=0o777, *, dir_fd=None):
-    if dir_fd is not None and _current_test is not None and flags & _WRITE_FLAGS:
-        _check_write(_current_test[0], path, dir_fd)
-    return _os_open(path, flags, mode, dir_fd=dir_fd)
+    if dir_fd is None or dir_fd < 0:
+        return _os_open(path, flags, mode, dir_fd=dir_fd)
+    _guard_data_dir("open", (os.path.join(_fd_path(dir_fd), os.fsdecode(path)), None, flags))
+    _dir_fd_open.active = True
+    try:
+        return _os_open(path, flags, mode, dir_fd=dir_fd)
+    finally:
+        _dir_fd_open.active = False
 
 
 os.open = _guarded_os_open
+os.supports_dir_fd.add(_guarded_os_open)
 
 
 def pytest_configure(config: pytest.Config) -> None:
@@ -138,12 +151,13 @@ def pytest_runtest_makereport():
         text = "\n".join(_violations)
         if isinstance(report.longrepr, tuple):
             text += f"\n\n{report.longrepr[2]}"
+        if hasattr(report, "wasxfail"):
+            text += f"\n\nThe test was marked xfail: {report.wasxfail}"
+            del report.wasxfail
         if addsection := getattr(report.longrepr, "addsection", None):
             addsection("data/ guard", text)
         else:
             report.longrepr = text
         report.outcome = "failed"
-        if hasattr(report, "wasxfail"):
-            del report.wasxfail
     _violations.clear()
     return report

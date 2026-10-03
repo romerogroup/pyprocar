@@ -2,6 +2,16 @@ import pytest
 
 from tests.utils import ROOT_DIR
 
+INNER_CONFTEST = """
+from pathlib import Path
+
+import tests.utils
+
+tests.utils.DATA_DIR = Path(__file__).parent / "data"
+
+from tests.conftest import *
+"""
+
 INNER_TESTS = """
 import os
 
@@ -46,6 +56,10 @@ def test_remove_symlink_to_data(tmp_path):
     alias = tmp_path / "alias"
     os.symlink(DATA_DIR, alias)
     os.remove(alias)
+
+
+def test_os_open_keeps_dir_fd_support():
+    assert os.open in os.supports_dir_fd
 
 
 def test_write_then_skip():
@@ -129,18 +143,21 @@ def test_writes_under_data_fail_even_when_swallowed(
     pytester: pytest.Pytester, monkeypatch: pytest.MonkeyPatch
 ):
     monkeypatch.setenv("PYTHONPATH", str(ROOT_DIR))
-    pytester.makeconftest("from tests.conftest import *")
+    pytester.mkdir("data")
+    pytester.makeconftest(INNER_CONFTEST)
     pytester.makepyfile(test_inner=INNER_TESTS)
 
     result = pytester.runpytest_subprocess("-p", "no:cacheprovider", "-rA")
 
-    result.assert_outcomes(passed=2, failed=len(WRITTEN_PATH_BY_FAILING_TEST))
+    result.assert_outcomes(passed=3, failed=len(WRITTEN_PATH_BY_FAILING_TEST))
     result.stdout.fnmatch_lines_random(
         [
             "FAILED test_inner.py::test_direct_write - RuntimeError: *",
             "PASSED test_inner.py::test_tmp_path_write",
             "PASSED test_inner.py::test_remove_symlink_to_data",
+            "PASSED test_inner.py::test_os_open_keeps_dir_fd_support",
             "*Skipped: skipped after the write*",
+            "*The test was marked xfail: fails after the write*",
             "*AssertionError: unrelated failure*",
             *(f"FAILED test_inner.py::{name}*" for name in WRITTEN_PATH_BY_FAILING_TEST),
             *(
