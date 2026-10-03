@@ -188,9 +188,11 @@ def surface_series(
 
     Band-resolved values, shaped ``(n_points, n_bands, n_spins)`` for scalars or
     ``(n_points, n_bands, n_spins, 3)`` for vectors, also select the surface's own
-    band and spin.
+    band and spin. Band-resolved vectors given as scalars color by their magnitude.
     """
     scalars = scalars_data.to_array() if scalars_data is not None else None
+    if scalars is not None and scalars.ndim == 4:
+        scalars = np.linalg.norm(scalars, axis=-1)
     vectors = vectors_data.to_array() if vectors_data is not None else None
     return [
         SurfaceSeries(
