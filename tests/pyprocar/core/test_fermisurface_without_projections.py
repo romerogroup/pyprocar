@@ -1,5 +1,3 @@
-"""Fermi surfaces from band structures that carry energies only, as BXSF and FRMSF files do."""
-
 from pathlib import Path
 
 import numpy as np
