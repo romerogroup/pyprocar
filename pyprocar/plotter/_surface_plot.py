@@ -181,7 +181,7 @@ class SurfacePlotter(pv.Plotter):
         if glyph_args is None:
             glyph_args = {}
         glyph_args["color_mode"] = glyph_args.get("color_mode", "vector")
-        glyph_args["scale"] = glyph_args.get("scale", True)
+        glyph_args["scale"] = glyph_args.get("scale", surface.active_vectors_name)
         glyph_args["orient"] = glyph_args.get("orient", vectors)
 
         if longest is None:
