@@ -1285,22 +1285,6 @@
                 "code": "reportReturnType",
                 "range": {
                     "startColumn": 15,
-                    "endColumn": 35,
-                    "lineCount": 1
-                }
-            },
-            {
-                "code": "reportOptionalMemberAccess",
-                "range": {
-                    "startColumn": 30,
-                    "endColumn": 35,
-                    "lineCount": 1
-                }
-            },
-            {
-                "code": "reportReturnType",
-                "range": {
-                    "startColumn": 15,
                     "endColumn": 33,
                     "lineCount": 1
                 }
