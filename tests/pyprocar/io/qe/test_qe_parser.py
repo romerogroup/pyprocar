@@ -435,3 +435,120 @@ def test_shifted_automatic_grid_is_gamma_centred_with_half_step_shift(tmp_path: 
         kgrid_info.kgrid, kshift=kgrid_info.kshift, mode=kgrid_info.kgrid_mode
     )
     assert sorted(set(np.round(kpoints[:, 0], 6))) == [-0.375, -0.125, 0.125, 0.375]
+
+
+TETRAGONAL_FRACTIONAL_KPOINTS = [
+    [0.0, 0.0, 0.0],
+    [0.5, 0.0, 0.0],
+    [0.0, 0.0, 0.5],
+    [0.25, 0.25, 0.5],
+]
+TETRAGONAL_CARTESIAN_KPOINTS = [
+    "0.0 0.0 0.0",
+    "0.5 0.0 0.0",
+    "0.0 0.0 0.25",
+    "0.25 0.25 0.25",
+]
+
+TETRAGONAL_PW_XML = (
+    """<?xml version="1.0" encoding="UTF-8"?>
+<qes:espresso xmlns:qes="http://www.quantum-espresso.org/ns/qes/qes-1.0">
+  <output>
+    <atomic_structure nat="1" alat="10.2608">
+      <atomic_positions>
+        <atom name="Si" index="1">0.0 0.0 0.0</atom>
+      </atomic_positions>
+      <cell>
+        <a1>10.2608 0.0 0.0</a1>
+        <a2>0.0 10.2608 0.0</a2>
+        <a3>0.0 0.0 20.5216</a3>
+      </cell>
+    </atomic_structure>
+    <basis_set>
+      <reciprocal_lattice>
+        <b1>1.0 0.0 0.0</b1>
+        <b2>0.0 1.0 0.0</b2>
+        <b3>0.0 0.0 0.5</b3>
+      </reciprocal_lattice>
+    </basis_set>
+    <magnetization>
+      <lsda>false</lsda>
+      <noncolin>false</noncolin>
+    </magnetization>
+    <band_structure>
+      <nbnd>1</nbnd>
+      <nks>4</nks>
+"""
+    + "".join(
+        f"""      <ks_energies>
+        <k_point weight="0.25">{k}</k_point>
+        <npw>100</npw>
+        <eigenvalues size="1">0.1</eigenvalues>
+        <occupations size="1">1.0</occupations>
+      </ks_energies>
+"""
+        for k in TETRAGONAL_CARTESIAN_KPOINTS
+    )
+    + """    </band_structure>
+  </output>
+</qes:espresso>
+"""
+)
+
+
+TETRAGONAL_PROJWFC_FILES = {
+    "scf.out": SCF_OUT.replace(
+        "b(3) = (  0.000000  0.000000  1.000000 )",
+        "b(3) = (  0.000000  0.000000  0.500000 )",
+    ),
+    "projwfc.out": PROJWFC_OUT.replace("nkstot   =   10", "nkstot   =    4").split(
+        "     k ="
+    )[0]
+    + "".join(f"     k =   {k}\n" for k in TETRAGONAL_CARTESIAN_KPOINTS),
+}
+
+
+@pytest.mark.parametrize(
+    "files",
+    [
+        pytest.param(TETRAGONAL_PROJWFC_FILES, id="projwfc.out"),
+        pytest.param({"test.xml": TETRAGONAL_PW_XML}, id="pw.xml"),
+        pytest.param(
+            {"test.save/data-file-schema.xml": TETRAGONAL_PW_XML},
+            id="data-file-schema.xml",
+        ),
+    ],
+)
+def test_every_kpoint_source_yields_the_same_fractional_kpoints(
+    tmp_path: Path, files: dict[str, str]
+) -> None:
+    for relative_path, content in files.items():
+        (tmp_path / relative_path).parent.mkdir(parents=True, exist_ok=True)
+        (tmp_path / relative_path).write_text(content)
+    parser = QEParser(dirpath=tmp_path)
+
+    assert parser.reciprocal_lattice is not None and parser.alat is not None
+    assert np.allclose(
+        parser.reciprocal_lattice * parser.alat, np.diag([1.0, 1.0, 0.5])
+    )
+    assert parser.kpoints is not None
+    assert np.allclose(parser.kpoints, TETRAGONAL_FRACTIONAL_KPOINTS)
+
+
+@pytest.mark.data
+def test_pw_xml_fallback_matches_atomic_proj_kpoints_on_srvo3(tmp_path: Path) -> None:
+    calc_dir = QE_CODES_DIR / "non-spin-polarized" / "dos"
+    for relative_path in ["out/SrVO3.xml", "scf.in", "scf.out"]:
+        (tmp_path / relative_path).parent.mkdir(parents=True, exist_ok=True)
+        (tmp_path / relative_path).write_bytes((calc_dir / relative_path).read_bytes())
+
+    primary, fallback = QEParser(dirpath=calc_dir), QEParser(dirpath=tmp_path)
+
+    assert primary.atomic_proj_xml is not None and fallback.atomic_proj_xml is None
+    assert fallback.pw_xml is not None
+    assert primary.kpoints is not None and fallback.kpoints is not None
+    assert np.allclose(fallback.kpoints[:2], [[0.0, 0.0, 0.0], [0.0, 0.0, 0.0625]])
+    assert np.allclose(fallback.kpoints, primary.kpoints)
+    fallback_lattice, primary_lattice = fallback.reciprocal_lattice, primary.reciprocal_lattice
+    assert fallback_lattice is not None and primary_lattice is not None
+    assert np.allclose(fallback_lattice, primary_lattice)
