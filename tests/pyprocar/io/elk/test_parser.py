@@ -6,7 +6,7 @@ import numpy as np
 import pytest
 
 from pyprocar.core import DensityOfStates, Structure
-from pyprocar.core.ebs import ElectronicBandStructure
+from pyprocar.core.ebs import ElectronicBandStructure, ElectronicBandStructurePath
 from pyprocar.core.kpoints import KPath
 from pyprocar.io.elk import ElkParser
 from tests.utils import DATA_DIR, BaseTest
@@ -350,4 +350,128 @@ def test_lattice_is_angstrom_and_reciprocal_lattice_is_inverse_angstrom_without_
     )
     assert kpath.get_distances(as_segments=False, cartesian=True)[2] == pytest.approx(
         0.125 * 0.260332, abs=1e-6
+    )
+
+
+SCALED_ELKIN = """tasks
+  0
+
+scale
+  2.0
+
+scale1
+  1.5
+
+scale3
+  3.0
+
+scalex
+  2.0
+
+avec
+  1.0 1.0 0.0
+  0.0 1.0 0.0
+  0.0 0.0 1.0
+
+atoms
+  1                                    : nspecies
+  'Si.in'                              : spfname
+  2                                    : natoms; atpos, bfcmt below
+  0.0 0.0 0.0
+  0.25 0.75 0.5    0.0 0.0 0.0
+"""
+
+MOLECULE_ELKIN = """tasks
+  0
+
+molecule
+  .true.
+
+avec
+  10.0 0.0 0.0
+  0.0 10.0 0.0
+  0.0 0.0 20.0
+
+atoms
+  1
+  'N.in'
+  2
+  2.5 0.0 -1.0
+  2.5 0.0  1.0
+"""
+
+MOLECULE_GEOMETRY_OUT = """
+scale
+ 1.0
+
+scale1
+ 1.0
+
+scale2
+ 1.0
+
+scale3
+ 1.0
+
+avec
+   10.00000000       0.000000000       0.000000000
+   0.000000000       10.00000000       0.000000000
+   0.000000000       0.000000000       20.00000000
+
+molecule
+ T
+
+atoms
+   1                                    : nspecies
+'N.in'                                  : spfname
+   2                                    : natoms; atpos, bfcmt below
+    2.50000000    0.00000000   -1.00000000    0.00000000  0.00000000  0.00000000
+    2.50000000    0.00000000    1.00000000    0.00000000  0.00000000  0.00000000
+"""
+
+
+def test_elkin_fallback_applies_scale_scale123_and_scalexyz_to_the_lattice(tmp_path):
+    (tmp_path / "elk.in").write_text(SCALED_ELKIN)
+    structure = ElkParser(tmp_path).structure
+
+    assert structure is not None
+    lattice, fractional = structure.lattice, structure.fractional_coordinates
+    assert lattice is not None and fractional is not None
+    assert np.allclose(
+        lattice,
+        [[3.175063, 1.587532, 0.0], [0.0, 1.058354, 0.0], [0.0, 0.0, 3.175063]],
+        atol=1e-6,
+    )
+    assert np.allclose(fractional, [[0, 0, 0], [0.25, 0.75, 0.5]])
+
+
+@pytest.mark.parametrize(
+    ("filename", "content"),
+    [("elk.in", MOLECULE_ELKIN), ("GEOMETRY.OUT", MOLECULE_GEOMETRY_OUT)],
+    ids=["elk.in", "GEOMETRY.OUT"],
+)
+def test_molecule_positions_are_cartesian_bohr(tmp_path, filename, content):
+    (tmp_path / filename).write_text(content)
+    structure = ElkParser(tmp_path).structure
+
+    assert structure is not None
+    lattice, fractional = structure.lattice, structure.fractional_coordinates
+    cartesian = structure.cartesian_coordinates
+    assert lattice is not None and fractional is not None and cartesian is not None
+    assert np.allclose(lattice, np.diag([5.291772, 5.291772, 10.583544]), atol=1e-6)
+    assert np.allclose(fractional, [[0.25, 0, -0.05], [0.25, 0, 0.05]])
+    assert np.allclose(
+        cartesian, [[1.322943, 0, -0.529177], [1.322943, 0, 0.529177]], atol=1e-6
+    )
+
+
+def test_ebs_kpoints_are_fractional_and_kdirect_is_gone(bands_calc_dir):
+    with pytest.raises(TypeError):
+        ElkParser(bands_calc_dir, kdirect=False)  # pyright: ignore[reportCallIssue]
+    ebs = ElkParser(bands_calc_dir).ebs
+
+    assert isinstance(ebs, ElectronicBandStructurePath)
+    assert np.allclose(ebs.kpath.kpoints[:2], [[0, 0, 0], [0.0625, 0, 0]])
+    assert np.allclose(
+        ebs.kpoints_cartesian[:2], [[0, 0, 0], [0.0625 * 0.260332, 0, 0]], atol=1e-7
     )
