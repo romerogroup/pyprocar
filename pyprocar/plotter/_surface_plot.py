@@ -185,7 +185,7 @@ class SurfacePlotter(pv.Plotter):
         glyph_args["orient"] = glyph_args.get("orient", vectors)
 
         if longest is None:
-            longest = float(np.linalg.norm(surface.active_vectors, axis=1).max())
+            longest = float(np.linalg.norm(active_vectors, axis=1).max())
         if length is None:
             length = self.glyph_scale
         factor = length / longest * factor
