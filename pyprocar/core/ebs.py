@@ -1658,7 +1658,6 @@ class ElectronicBandStructureMesh(
                 self,
                 rotations=self.structure.rotations,
                 kgrid_info=self.kgrid_info,
-                decimals=4,
                 inplace=True,
             )
 
@@ -2108,16 +2107,13 @@ def spin_transforms(
     return axial[first]
 
 
-def ibz2fbz(ebs, rotations=None, kgrid_info=None, decimals=4, inplace=True, **kwargs):
+def ibz2fbz(ebs, rotations=None, kgrid_info=None, inplace=True, **kwargs):
     """Applys symmetry operations to the kpoints, bands, and projections
 
     Parameters
     ----------
     rotations : np.ndarray
         The point symmetry operations of the lattice
-    decimals : int
-        The number of decimals to round the kpoints
-        to when checking for uniqueness
     """
     if not inplace:
         ebs = copy.deepcopy(ebs)
@@ -2169,19 +2165,14 @@ def ibz2fbz(ebs, rotations=None, kgrid_info=None, decimals=4, inplace=True, **kw
 
         diff = new_kpoints[:, np.newaxis, :] - kpoints_grid_points[np.newaxis, :, :]
         distances = np.linalg.norm(diff, axis=2)
-        # Find the minimum distance for each k-point in new_kpoints to any
-        # k-point in kpoints_grid_points
-        min_distances = np.min(distances, axis=1)
-
-        # Get the indices in new_kpoints where the minimum distance is within the tolerance
+        nearest = np.argmin(distances, axis=1)
+        min_distances = distances.min(axis=1)
         new_in_original_grid_indices = np.where(min_distances < 0.000001)[0]
 
-        new_kpoints = new_kpoints[new_in_original_grid_indices, ...]
+        # The exact grid points, so the unique test and the grid spacing see no float error.
+        new_kpoints = kpoints_grid_points[nearest[new_in_original_grid_indices]]
         source = source[new_in_original_grid_indices]
 
-    # # Floating point error can cause the kpoints to be off by 0.000001 or so
-    # # causing the unique indices to misidentify the kpoints
-    new_kpoints = new_kpoints.round(decimals=3)
     _, unique_indices = np.unique(new_kpoints, axis=0, return_index=True)
 
     new_kpoints = new_kpoints[unique_indices, ...]
