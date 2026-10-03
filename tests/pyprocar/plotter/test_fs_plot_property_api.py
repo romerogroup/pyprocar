@@ -147,11 +147,28 @@ class TestFermiPlotterPlot:
 
         assert "scalars" not in meshes[(0, 0)].point_data
 
-    def test_vectors_add_glyphs_scaled_to_a_hundredth_of_the_longest(self, plotter):
+    def test_every_surface_keeps_its_own_arrows(self, plotter):
         plotter.plot(_fermi_surface(), vectors_data=_property(VECTORS))
 
-        arrows = plotter.actors["vectors"].mapper.dataset
-        assert arrows.bounds[5] == pytest.approx(1.01)
+        assert sorted(name for name in plotter.actors if name.startswith("vectors")) == [
+            "vectors_0_0",
+            "vectors_3_1",
+        ]
+
+    def test_longest_arrow_is_a_tenth_of_the_zone_and_lengths_compare_across_surfaces(
+        self, plotter
+    ):
+        """Isosurfaces carry the isovalue as active scalars; arrows must scale by |v| alone."""
+        vectors = np.vstack([np.tile([0.0, 0.0, 2.0], (3, 1)), np.tile([0.0, 0.0, 1.0], (3, 1))])
+        fs = _fermi_surface()
+        fs.brillouin_zone = pv.Cube(x_length=4.0, y_length=4.0, z_length=4.0)
+        for surface in fs.band_isosurfaces.values():
+            surface.point_data["Contour Data"] = np.full(3, 5.3)
+
+        plotter.plot(fs, vectors_data=_property(vectors))
+
+        assert plotter.actors["vectors_0_0"].mapper.dataset.bounds[5] == pytest.approx(0.4)
+        assert plotter.actors["vectors_3_1"].mapper.dataset.bounds[5] == pytest.approx(1.2)
 
     def test_records_points_scalars_and_vectors_per_surface(self, plotter):
         plotter.plot(
@@ -251,3 +268,26 @@ class TestFermiPlotterScalarBarMethods:
             assert callable(plotter.set_scalar_bar_position)
         finally:
             plotter.close()
+
+
+class TestArrowsLeaveTheSurfaceColoring:
+    def test_surface_keeps_its_scalars_when_arrows_are_added(self, plotter):
+        meshes = plotter.plot(
+            _fermi_surface(), scalars_data=_property(SCALARS), vectors_data=_property(VECTORS)
+        )
+
+        assert [m.active_scalars_name for m in meshes.values()] == ["scalars", "scalars"]
+        assert plotter.actors["surface_0_0"].mapper.scalar_range == (-1.0, 2.0)
+
+    def test_slice_after_add_surface_with_arrows_still_carries_vectors(self, plotter):
+        sphere = pv.Sphere(radius=1.0)
+        sphere.point_data["v"] = sphere.points.copy()
+        sphere.point_data["v-norm"] = np.linalg.norm(sphere.points, axis=1)
+        sphere.set_active_vectors("v")
+        sphere.set_active_scalars("v-norm")
+
+        plotter.add_surface(sphere, add_active_vectors=True)
+        cut = sphere.slice(normal=(0.0, 0.0, 1.0), origin=(0.0, 0.0, 0.0))
+
+        assert sphere.active_scalars_name == "v-norm"
+        assert cut.active_vectors_name == "v"
