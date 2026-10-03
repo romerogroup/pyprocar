@@ -256,8 +256,7 @@ class AbinitParser(BaseParser):
         if self.abinit_procar and self.abinit_procar.vasp_procar:
             kpoints = self.abinit_procar.vasp_procar.kpoints
 
-        # Abinit writes each segment boundary once, so segment i ends after
-        # the first i+1 division counts.
+        # Abinit writes each segment boundary once.
         segment_end_indices = np.cumsum(self.abinit_kpoints.ngrids).tolist()
         if kpoints is None or segment_end_indices[-1] != len(kpoints) - 1:
             user_logger.warning("KPOINTS divisions do not match the PROCAR k-points")

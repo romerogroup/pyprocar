@@ -34,11 +34,8 @@ def write_procar(path: Path, kpoints: np.ndarray) -> None:
 
 @pytest.fixture
 def abinit_path_dir(tmp_path: Path) -> Path:
-    """Abinit line-mode layout for G-H-N | P-G with 5 divisions per segment.
-
-    Abinit writes each shared boundary once, and the zero-division N-P segment
-    leaves P itself out, so the run holds 1 + 3 * 5 = 16 k-points.
-    """
+    # Like data/codes/abinit/9.6/Fe/*/bands: P, the start after the
+    # zero-division N-P jump, is not written.
     t = np.linspace(0, 1, 6)[:, None]
     gamma_h = np.array(GAMMA) + t * (np.array(H) - np.array(GAMMA))
     h_n = np.array(H) + t[1:] * (np.array(N) - np.array(H))
