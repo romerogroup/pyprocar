@@ -695,45 +695,6 @@ class ProjwfcOut:
 
         return self._split_spin(np.array(psi2_list, dtype=float).reshape(self.nkstot, self.nbnd))
 
-    @cached_property
-    def psi_coeffs(self) -> np.ndarray | None:
-        """
-        Parse psi coefficients into shape (nkstot, nbnd, n_spin_channels, natomwfc).
-        Missing coefficients are filled with 0.0.
-        """
-        if self.nkstot is None or self.nbnd is None or self.natomwfc is None:
-            return None
-
-        # Match each psi line and capture the whole coefficient list
-        psi_line_re = re.compile(r"psi\s*=\s*([^\n\r]+)", re.IGNORECASE)
-
-        # Match individual coefficient/index pairs
-        coeff_re = re.compile(rf"({FLOAT_PATTERN})\s*\*\s*\[#\s*(\d+)\]")
-
-        matches = psi_line_re.findall(self.text)
-        if not matches:
-            return None
-
-        # Prepare output array
-        psi_array = np.zeros((self.nkstot, self.nbnd, self.natomwfc), dtype=float)
-
-        if len(matches) != self.nkstot * self.nbnd:
-            msg = f"Expected {self.nkstot * self.nbnd} psi lines, found {len(matches)}"
-            raise ValueError(msg)
-
-        for ikb, line in enumerate(matches):
-            coeffs = coeff_re.findall(line)
-            for coeff_str, idx_str in coeffs:
-                coeff_val = float(coeff_str)
-                idx_val = int(idx_str) - 1  # convert to 0-based index
-                psi_array[
-                    ikb // self.nbnd,  # k-point index
-                    ikb % self.nbnd,  # band index
-                    idx_val,  # atomic wfc index
-                ] = coeff_val
-
-        return self._split_spin(psi_array)
-
     def _split_spin(self, per_kpoint: np.ndarray) -> np.ndarray:
         """Turn (nkstot, nbnd, ...) into (nk, nbnd, n_spin_channels, ...).
 
