@@ -133,8 +133,9 @@ class FDF(Mapping[str, Any]):
     def lattice_constant(self) -> float:
         """LatticeConstant in Angstrom.
 
-        A value without a unit is in Bohr, as FDF reads it. Without the
-        keyword, 1.0 is returned, so LatticeVectors are read as Angstrom.
+        Siesta refuses a value without a unit; this reader falls back to
+        Bohr for one. Without the keyword, 1.0 is returned, so LatticeVectors
+        are read as Angstrom.
         """
         tokens = self.label("LatticeConstant")
         if not tokens:
