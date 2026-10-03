@@ -1,5 +1,6 @@
 """PyVista plotter behaviour shared by FermiPlotter and BS2DPlotter."""
 
+import itertools
 import logging
 import os
 from typing import Any, cast
@@ -24,6 +25,46 @@ def find_nearest(array, value):
 MATCH_TOL = 1e-5
 """Fractional distance within which two curve ends are the same point."""
 
+SNAP_ANGLE = 3e-4
+"""Radians within which a slice normal is replaced by a low-index lattice direction.
+
+Rounding a lattice direction to 4 significant digits turns it by at most 7.4e-5 rad on
+cubic, hexagonal and fcc cells (3 digits: 7.7e-4, which random normals reach too);
+distinct directions with indices up to 4 are at least 2.4e-2 rad apart there.
+"""
+
+_DIRECTION_INDICES = np.array(
+    [
+        uvw
+        for uvw in itertools.product(range(-4, 5), repeat=3)
+        if any(uvw) and np.gcd.reduce(np.abs(uvw)) == 1
+    ]
+)
+
+
+def snap_normal(
+    normal, reciprocal_lattice: np.ndarray
+) -> tuple[np.ndarray, tuple[int, int, int] | None]:
+    """The unit normal, or the lattice direction [u v w] within SNAP_ANGLE of it.
+
+    Only along a real-space lattice vector t = u a1 + v a2 + w a3 do the plane's lattice
+    translates sit at discrete offsets: for G = m1 b1 + m2 b2 + m3 b3, n . G =
+    (u m1 + v m2 + w m3) / |t|. A normal typed with a few digits misses such a direction
+    slightly and cuts an irrational plane, where near-copies of one orbit count
+    separately. Returns the indices when the normal was changed, otherwise None.
+    """
+    normal = np.asarray(normal, dtype=np.float64) / np.linalg.norm(normal)
+    real = np.linalg.inv(np.asarray(reciprocal_lattice, dtype=np.float64)).T
+    directions = _DIRECTION_INDICES @ real
+    directions /= np.linalg.norm(directions, axis=1, keepdims=True)
+    cosines = directions @ normal
+    best = int(np.argmax(cosines))
+    angle = float(np.arccos(min(cosines[best], 1.0)))
+    if angle > SNAP_ANGLE or angle < 1e-12:
+        return normal, None
+    u, v, w = (int(i) for i in _DIRECTION_INDICES[best])
+    return directions[best], (u, v, w)
+
 
 def slice_loop_areas(slc: pv.PolyData) -> tuple[list[float], int]:
     """Areas of the closed loops in a planar slice, and the number of open curves."""
@@ -40,9 +81,12 @@ def cross_section_areas(
     periodic surface, such as a Fermi surface clipped to the first zone. A curve that
     leaves the cut is followed through the cuts of the plane's lattice translates, and it
     is a closed orbit when it comes back with no net translation. Orbits of the plane
-    that never pass through this cut are not counted.
+    that never pass through this cut are not counted. A normal within SNAP_ANGLE of a
+    low-index lattice direction is first replaced by it (see ``snap_normal``).
     """
     normal = np.asarray(normal, dtype=np.float64) / np.linalg.norm(normal)
+    if reciprocal_lattice is not None:
+        normal, _ = snap_normal(normal, reciprocal_lattice)
     origin = np.asarray(origin, dtype=np.float64)
     areas, chains, n_open = slice_loops(cast(pv.PolyData, mesh.slice(normal=normal, origin=origin)))
     if reciprocal_lattice is None or not chains:

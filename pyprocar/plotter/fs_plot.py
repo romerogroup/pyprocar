@@ -22,6 +22,7 @@ from pyprocar.plotter._surface_plot import (
     find_nearest,
     normalize_to_range,
     open_curves_note,
+    snap_normal,
 )
 
 logger = logging.getLogger(__name__)
@@ -382,6 +383,10 @@ class FermiPlotter(SurfacePlotter):
                 text = f"Van Alphen Frequency : {frequency}" + open_curves_note(n_open)
             else:
                 text = area_text(areas, n_open, scale=FS_AREA_SCALE_FACTOR)
+            if reciprocal_lattice is not None:
+                _, snapped = snap_normal(normal, reciprocal_lattice)
+                if snapped is not None:
+                    text += " (normal snapped to [{} {} {}])".format(*snapped)
             self.add_text(text, name="area_text", **add_text_args)
 
         return slc
