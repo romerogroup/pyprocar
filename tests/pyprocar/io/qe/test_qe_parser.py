@@ -745,3 +745,48 @@ def test_bands_projwfc_then_nscf_in_one_directory_still_plots_the_bands(tmp_path
 
     assert type(ebs) is ElectronicBandStructurePath
     assert ebs.kpoints.shape == (155, 3)
+
+
+def test_an_nscf_xml_with_as_many_but_different_kpoints_does_not_win(tmp_path: Path) -> None:
+    for relative_path, content in TETRAGONAL_PROJWFC_FILES.items():
+        (tmp_path / relative_path).write_text(content)
+    shifted = [
+        " ".join(f"{float(x) + 0.125:.3f}" for x in k.split()) for k in TETRAGONAL_CARTESIAN_KPOINTS
+    ]
+    xml = TETRAGONAL_PW_XML.replace(
+        "  <output>",
+        "  <input><control_variables><calculation>nscf</calculation>"
+        + "</control_variables></input>\n  <output>",
+    )
+    for original, moved in zip(TETRAGONAL_CARTESIAN_KPOINTS, shifted, strict=True):
+        xml = xml.replace(f">{original}</k_point>", f">{moved}</k_point>")
+    (tmp_path / "test.xml").write_text(xml)
+    (tmp_path / "bands.in").write_text(
+        SCF_IN.replace("'scf'", "'bands'").replace(
+            "K_POINTS automatic\n4 4 4 0 0 0\n",
+            "K_POINTS crystal_b\n3\n0 0 0 1 !G\n0.5 0 0 1 !X\n0 0 0.5 1 !Z\n",
+        )
+    )
+    parser = QEParser(tmp_path)
+
+    assert parser.pw_xml is not None and parser.pw_xml.kpoints is not None
+    assert len(parser.pw_xml.kpoints) == 4
+    assert parser.is_bands_run
+    assert parser.kgrid_info is None
+
+
+@pytest.mark.data
+def test_projwfc_out_bands_match_atomic_proj_bands_in_ev(tmp_path: Path) -> None:
+    bands_dir = QE_CODES_DIR / "non-spin-polarized" / "bands"
+    for path in bands_dir.rglob("*"):
+        skip = "pdos_" in path.name or path.suffix == ".pkl" or path.name == "atomic_proj.xml"
+        if path.is_file() and not skip:
+            target = tmp_path / path.relative_to(bands_dir)
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_bytes(path.read_bytes())
+    primary, fallback = QEParser(bands_dir), QEParser(tmp_path)
+
+    assert fallback.atomic_proj_xml is None and fallback.projwfc_out is not None
+    assert primary.bands is not None and fallback.bands is not None
+    assert fallback.bands[0, 0, 0] == pytest.approx(-53.32013, abs=1e-4)
+    np.testing.assert_allclose(fallback.bands, primary.bands, atol=1e-4)
