@@ -31,9 +31,9 @@ jobs:
         with:
           pixi-version: v0.81.0
           environments: lint
-          frozen: true
+          locked: true
       - name: ruff check (fails on new violations in changed files)
-        run: pixi run --frozen -e lint python .github/scripts/ruff_new_violations.py check "$BASE"
+        run: pixi run --locked -e lint python .github/scripts/ruff_new_violations.py check "$BASE"
 
   format:
     # One-time exemption: merging dos-rewrite into dev (#237) adds ~245 files the gate would treat as all-new.
@@ -48,9 +48,9 @@ jobs:
         with:
           pixi-version: v0.81.0
           environments: lint
-          frozen: true
+          locked: true
       - name: ruff format --check (changed files that were formatted must stay formatted)
-        run: pixi run --frozen -e lint python .github/scripts/ruff_new_violations.py format "$BASE"
+        run: pixi run --locked -e lint python .github/scripts/ruff_new_violations.py format "$BASE"
 
   typecheck:
     runs-on: ubuntu-latest
@@ -62,11 +62,11 @@ jobs:
         with:
           pixi-version: v0.81.0
           environments: dev
-          frozen: true
+          locked: true
           # A cached env skips the editable build that writes pyprocar/_version.py.
           cache: false
       - name: basedpyright (fails on errors not in .basedpyright/baseline.json)
-        run: pixi run --frozen -e dev basedpyright --project pyrightconfig.json
+        run: pixi run --locked -e dev basedpyright --project pyrightconfig.json
 
   test:
     runs-on: ubuntu-latest
@@ -78,8 +78,8 @@ jobs:
         with:
           pixi-version: v0.81.0
           environments: dev
-          frozen: true
+          locked: true
           # A cached env skips the editable build that writes pyprocar/_version.py.
           cache: false
       - name: pytest (quick set, tests marked data need DFT fixtures)
-        run: pixi run --frozen -e dev pytest tests -c .config/.pytest.toml --rootdir . -n auto -m "not data"
+        run: pixi run --locked -e dev pytest tests -c .config/.pytest.toml --rootdir . -n auto -m "not data"

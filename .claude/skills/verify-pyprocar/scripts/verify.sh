@@ -12,7 +12,7 @@ abs() { (cd "$(dirname "$1")" && echo "$PWD/$(basename "$1")"); }
 [ "${1:-}" = run ] && [ $# -ge 4 ] && set -- "$1" "$2" "$3" "$(abs "$4")"
 cd "$REPO"
 
-py() { pixi run --frozen -q -e default python "$@"; }
+py() { pixi run -q -e default python "$@"; }
 
 case "${1:-}" in
 doctor)
@@ -44,7 +44,7 @@ run)
   set +e
   TMPDIR="$run/work/tmp" CALC="$run/work/calc" EVIDENCE="$run/evidence" REPO="$REPO" MPLBACKEND=Agg PYVISTA_OFF_SCREEN=true \
     PYTHONPATH="$REPO/.claude/skills/verify-pyprocar/scripts/lib${PYTHONPATH:+:$PYTHONPATH}" \
-    pixi run --frozen -q -e default python "$run/evidence/driver.py" >"$run/evidence/run.log" 2>&1
+    pixi run -q -e default python "$run/evidence/driver.py" >"$run/evidence/run.log" 2>&1
   code=$?
   set -e
   echo "$code" >"$run/evidence/exit_code"
