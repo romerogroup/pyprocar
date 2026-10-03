@@ -76,7 +76,6 @@ build-release = "hatch build --hooks-only"
 init = "python scripts/init-template.py"
 release = "python scripts/release.py"
 
-test = { depends-on = ["test-all"], description = "Run all tests" }
 ###############################################################
 # Additional workspace Feature Set Definitions
 ###############################################################
@@ -184,7 +183,6 @@ matplotlib-stubs = "*"
 
 [feature.dev.tasks]
 check = "pixi run -q -e dev typecheck && pixi run -q -e dev test && pixi run -q -e dev lint"
-ci-check = "pixi run -q -e ci typecheck && pixi run -q -e ci test && pixi run -q -e ci lint"
 
 
 
