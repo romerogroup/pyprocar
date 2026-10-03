@@ -158,9 +158,12 @@ class TestFermiPlotterPlot:
     def test_longest_arrow_is_a_tenth_of_the_zone_and_lengths_compare_across_surfaces(
         self, plotter
     ):
+        """Isosurfaces carry the isovalue as active scalars; arrows must scale by |v| alone."""
         vectors = np.vstack([np.tile([0.0, 0.0, 2.0], (3, 1)), np.tile([0.0, 0.0, 1.0], (3, 1))])
         fs = _fermi_surface()
         fs.brillouin_zone = pv.Cube(x_length=4.0, y_length=4.0, z_length=4.0)
+        for surface in fs.band_isosurfaces.values():
+            surface.point_data["Contour Data"] = np.full(3, 5.3)
 
         plotter.plot(fs, vectors_data=_property(vectors))
 
