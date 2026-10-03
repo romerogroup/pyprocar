@@ -46,10 +46,11 @@ $H run <name> <fixture-relpath> <driver.py>
 ```
 
 What the harness does:
-1. Creates `data/verify-runs/<timestamp>-<name>/`.
-2. Copies the fixture to `work/calc` and the driver to `evidence/driver.py`.
-3. Runs the driver with `TMPDIR=work/tmp`, `CALC=<calc copy>`, `EVIDENCE=<evidence dir>`, `REPO=<repo root>`, `MPLBACKEND=Agg`, `PYVISTA_OFF_SCREEN=true`, and `scripts/lib` on `PYTHONPATH`.
-4. Records the exit code, `run.log` (stdout+stderr), and `side_effects.txt`, which lists files created or modified inside the calc copy.
+1. Refuses to start, with exit code 3, when `data/verify-runs/` or `$TMPDIR` (default `/tmp`) has less free space than the fixture size plus `VERIFY_MIN_FREE_MB` (default 2048). The message prints the free space.
+2. Creates `data/verify-runs/<timestamp>-<name>/`.
+3. Copies the fixture to `work/calc` and the driver to `evidence/driver.py`.
+4. Runs the driver with `TMPDIR=work/tmp`, `PYTEST_ADDOPTS=--basetemp=work/tmp/pytest`, `CALC=<calc copy>`, `EVIDENCE=<evidence dir>`, `REPO=<repo root>`, `MPLBACKEND=Agg`, `PYVISTA_OFF_SCREEN=true`, and `scripts/lib` on `PYTHONPATH`.
+5. Records the exit code, `run.log` (stdout+stderr), and `side_effects.txt`, which lists files created or modified inside the calc copy.
 
 The harness exits with the driver's exit code. Runs are isolated per directory, so parallel runs are safe.
 
@@ -99,11 +100,17 @@ Proof standards:
 $H clean data/verify-runs/<run>
 ```
 
-This removes only that run's `work/` scratch copy (including its `TMPDIR`) and keeps `evidence/`. It refuses paths outside `data/verify-runs/`. Clean every run you made before hand-back, and leave other agents' runs alone. There are no processes to kill. Fetched fixtures in `data/examples/` are shared cache; leave them.
+This removes only that run's `work/` scratch copy (including its `TMPDIR`) and keeps `evidence/`. It refuses paths outside `data/verify-runs/`. Clean every run you made before hand-back, and leave other agents' runs alone. There are no processes to kill.
+
+```bash
+$H gc [hours]     # default 24
+```
+
+This removes the `work/` copy of every run older than `hours`, from any agent, and keeps each `evidence/`. Run it when `$H run` refuses for lack of space. Fetched fixtures in `data/examples/` are shared cache; leave them.
 
 ## Helpers
 
-- `scripts/verify.sh`: `doctor | fetch <relpath>... | run <name> <fixture> <driver.py> | clean <run-dir>`
+- `scripts/verify.sh`: `doctor | fetch <relpath>... | run <name> <fixture> <driver.py> | clean <run-dir> | gc [hours]`
 - `scripts/examples/bands_plain.py`: the minimal single-call template, which exits 0. Copy it for a one-off driver.
 - `scripts/examples/{bands,dos,fermi3d,fermi2d,bs2d,parsers,utilities}.py`: full per-feature drivers. Run them as shown under Drive.
 - `scripts/lib/verify_steps.py`: `step`, `png`, `distinct_colors` and `finish` for multi-step drivers. It is importable because the harness puts `scripts/lib` on `PYTHONPATH`.
