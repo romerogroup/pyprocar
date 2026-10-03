@@ -6,6 +6,8 @@ from functools import cached_property
 from pathlib import Path
 from typing import Any
 
+import numpy as np
+
 from pyprocar.core import DensityOfStates, ElectronicBandStructure, KPath, Structure
 from pyprocar.io.abinit.dos import AbinitDOS
 from pyprocar.io.abinit.kpoints import AbinitKpoints
@@ -247,11 +249,18 @@ class AbinitParser(BaseParser):
         if self.abinit_procar and self.abinit_procar.vasp_procar:
             kpoints = self.abinit_procar.vasp_procar.kpoints
 
+        # Abinit writes each segment boundary once, so segment i ends after
+        # the first i+1 division counts.
+        segment_end_indices = np.cumsum(self.abinit_kpoints.ngrids).tolist()
+        if kpoints is None or segment_end_indices[-1] != len(kpoints) - 1:
+            segment_end_indices = None
+
         return KPath(
             kpoints=kpoints,
             segment_names=self.abinit_kpoints.knames,
             n_grids=self.abinit_kpoints.ngrids,
             reciprocal_lattice=self.abinit_output.reclat if self.abinit_output else None,
+            segment_end_indices=segment_end_indices,
         )
 
     @property

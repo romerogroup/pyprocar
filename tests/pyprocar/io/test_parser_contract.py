@@ -81,7 +81,7 @@ CASES = [
     pytest.param(
         "siesta",
         {"silicon.fdf": FDF_STR, "silicon.bands": BANDS_STR},
-        {"ebs", "structure", "fermi", "reciprocal_lattice"},
+        {"ebs", "structure", "fermi", "reciprocal_lattice", "kpath"},
         id="siesta-bands",
     ),
     pytest.param(

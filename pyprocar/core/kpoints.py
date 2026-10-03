@@ -180,6 +180,7 @@ class KPath:
         discontinuity_threshold=0.2,
         zero_diff_threshold=1e-6,
         as_latex=True,
+        segment_end_indices: list[int] | None = None,
     ):
         """
         The Kpath object to handle labels and ticks for band structure
@@ -206,6 +207,11 @@ class KPath:
             The threshold for a discontinuity
         zero_diff_threshold: float
             The threshold for a zero difference
+        segment_end_indices: List[int], optional
+            The index of the last k-point of each segment. Use it when the
+            k-points do not repeat segment boundaries, so the segments cannot
+            be found from the k-points alone. By default the segments are found
+            from repeated k-points and jumps.
         """
         logger.info("Initializing KPath")
         logger.debug(f"n_grids: {n_grids}")
@@ -224,6 +230,7 @@ class KPath:
         self.zero_diff_threshold = zero_diff_threshold
         self._tick_name_map = tick_name_map
         self._reciprocal_lattice = reciprocal_lattice
+        self._segment_end_indices = segment_end_indices
 
         # Normalizing kpoint names to canonical form
         segment_names = self._normalize_kpoint_names(segment_names)
@@ -233,6 +240,7 @@ class KPath:
         self._kpoints = kpoints
         if self._kpoints is None:
             self._kpoints = self.generate_points(segment_names, special_kpoint_map, n_grids)
+            self._segment_end_indices = (np.cumsum(n_grids) - 1).tolist()
         logger.debug(f"Kpoints shape: {self._kpoints.shape}")
 
         # Get kpoint indices per kpath segment
@@ -248,7 +256,7 @@ class KPath:
         # Format special kpoint names
         self.special_kpoint_names = format_names(self._special_kpoint_names, as_latex=as_latex)
 
-        logger.info(f"\n{self}\n")
+        logger.info("\n%s\n", self)
         logger.info("KPath initialized")
 
     def __eq__(self, other):
@@ -262,11 +270,9 @@ class KPath:
         ret = "K-Path\n"
         ret += "------\n"
 
-        for isegment, segment_indices in enumerate(self.segment_indices):
-            start_name, end_name = self.segment_names[isegment]
-            start_kpoint = self.special_kpoint_map[start_name]
-            end_kpoint = self.special_kpoint_map[end_name]
-
+        for isegment, ((start_name, end_name), (start_kpoint, end_kpoint)) in enumerate(
+            zip(self.segment_names, self.special_kpoints)
+        ):
             ret += f"{isegment + 1:>2}. {start_name:<8}: ({start_kpoint[0]:>6.2f} {start_kpoint[1]:>6.2f} {start_kpoint[2]:>6.2f}) -> {end_name:<8}: ({end_kpoint[0]:>6.2f} {end_kpoint[1]:>6.2f} {end_kpoint[2]:>6.2f})\n"
 
         ret += "\n"
@@ -401,9 +407,13 @@ class KPath:
     def get_special_kpoints(self, as_segments: bool = False, cartesian: bool = False):
         special_kpoints = []
         kpoints = self.kpoints_cartesian if cartesian else self.kpoints
+        start_index = 0
         for segment_indices in self.segment_indices:
-            start_kpoint = kpoints[segment_indices[0]]
+            start_kpoint = kpoints[start_index]
             end_kpoint = kpoints[segment_indices[-1]]
+            start_index = segment_indices[-1]
+            if start_index in self.discontinuity_start_indices:
+                start_index += 1
 
             if as_segments:
                 special_kpoints.append((start_kpoint, end_kpoint))
@@ -479,21 +489,17 @@ class KPath:
         cumlative_across_segments: bool = True,
         cartesian: bool = False,
     ):
-        segments = self.get_segments(isegments=isegments, cartesian=cartesian)
+        if isegments is None:
+            isegments = list(range(self.n_segments))
 
-        k_segment_distances = []
-        previous_segment_max = 0
-        for isegment, segment in enumerate(segments):
-            k_diffs = np.diff(segment, axis=0)
-            k_diffs = np.linalg.norm(k_diffs, axis=1)
-            k_distances = np.cumsum(k_diffs)
+        kpoints = self.kpoints_cartesian if cartesian else self.kpoints
+        steps = np.linalg.norm(np.diff(kpoints, axis=0), axis=1)
+        steps[self.discontinuity_start_indices] = 0.0
+        path_distances = np.insert(np.cumsum(steps), 0, 0.0)
 
-            k_distances = np.insert(k_distances, 0, 0)
-            if cumlative_across_segments:
-                k_distances = k_distances + previous_segment_max
-                previous_segment_max = k_distances[-1]
-
-            k_segment_distances.append(k_distances)
+        k_segment_distances = [path_distances[self.segment_indices[i]] for i in isegments]
+        if not cumlative_across_segments:
+            k_segment_distances = [d - d[0] for d in k_segment_distances]
 
         if as_segments:
             return k_segment_distances
@@ -510,9 +516,17 @@ class KPath:
         # Calculate the norm of differences
         k_diff_norms = np.linalg.norm(k_diffs, axis=1)
 
-        # Find indices where difference is 0 (or very close to 0)
-        continuous_end_indices = list(np.where(k_diff_norms < self.zero_diff_threshold)[0])
-        discontinuity_end_indices = list(np.where(k_diff_norms > self.discontinuity_threshold)[0])
+        if self._segment_end_indices is None:
+            continuous_end_indices = list(np.where(k_diff_norms < self.zero_diff_threshold)[0])
+            discontinuity_end_indices = list(
+                np.where(k_diff_norms > self.discontinuity_threshold)[0]
+            )
+        else:
+            boundaries = self._segment_end_indices[:-1]
+            discontinuity_end_indices = [
+                i for i in boundaries if k_diff_norms[i] > self.discontinuity_threshold
+            ]
+            continuous_end_indices = [i for i in boundaries if i not in discontinuity_end_indices]
 
         segment_end_indices = (
             continuous_end_indices + discontinuity_end_indices + [len(self._kpoints) - 1]

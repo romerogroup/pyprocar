@@ -87,13 +87,10 @@ class TestSiestaParser:
         assert np.allclose(recip, np.eye(3) / 5.43)
 
     def test_kpath(self, siesta_dir: Path) -> None:
-        parser = SiestaParser(siesta_dir)
-        # kpath property should not raise an exception
-        # Note: KPath creation may fail due to upstream issues, returning None
-        kpath = parser.kpath
-        # Just verify it doesn't raise an exception - kpath may be None
-        # due to KPath class issues when logging (pre-existing bug)
-        assert kpath is None or hasattr(kpath, "n_kpoints")
+        kpath = SiestaParser(siesta_dir).kpath
+
+        assert kpath is not None
+        assert list(zip(kpath.tick_positions, kpath.tick_names)) == [(0, "L"), (1, "Γ")]
 
     def test_ebs(self, siesta_dir: Path) -> None:
         parser = SiestaParser(siesta_dir)
