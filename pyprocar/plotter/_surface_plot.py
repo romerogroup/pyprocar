@@ -21,11 +21,15 @@ def find_nearest(array, value):
     return idx
 
 
-def slice_loop_areas(slc: pv.PolyData) -> tuple[list[float], int]:
+def slice_loop_areas(
+    slc: pv.PolyData, reciprocal_lattice: np.ndarray | None = None
+) -> tuple[list[float], int]:
     """Areas of the closed loops in a planar slice, and the number of open curves.
 
     Segments that touch a non-finite point are dropped first, so a curve broken by
-    NaN energies counts as open.
+    NaN energies counts as open. With ``reciprocal_lattice`` (rows are the b vectors),
+    curves cut by the zone boundary join into one orbit when their ends meet modulo
+    a reciprocal lattice vector.
     """
     cells = np.asarray(slc.lines)
     pairs = []
@@ -47,6 +51,7 @@ def slice_loop_areas(slc: pv.PolyData) -> tuple[list[float], int]:
         neighbours.setdefault(b, []).append(a)
 
     areas: list[float] = []
+    chains: list[np.ndarray] = []
     n_open = 0
     seen: set[int] = set()
     for start in neighbours:
@@ -59,17 +64,71 @@ def slice_loop_areas(slc: pv.PolyData) -> tuple[list[float], int]:
                 if nxt not in seen:
                     seen.add(nxt)
                     component.append(nxt)
-        if any(len(neighbours[node]) != 2 for node in component):
+        if any(len(neighbours[node]) > 2 for node in component):
             n_open += 1
             continue
-        loop = [start, neighbours[start][0]]
-        while len(loop) < len(component):
-            a, b = neighbours[loop[-1]]
-            loop.append(b if a == loop[-2] else a)
-        corners = unique_points[loop]
-        areas.append(
-            0.5 * float(np.linalg.norm(np.cross(corners, np.roll(corners, -1, axis=0)).sum(axis=0)))
-        )
+        ends = [node for node in component if len(neighbours[node]) == 1]
+        path = [ends[0] if ends else start]
+        path.append(neighbours[path[0]][0])
+        while len(path) < len(component):
+            a, b = neighbours[path[-1]]
+            path.append(b if a == path[-2] else a)
+        if ends:
+            chains.append(unique_points[path])
+        else:
+            areas.append(polygon_area(unique_points[path]))
+    if reciprocal_lattice is None or not chains:
+        return areas, n_open + len(chains)
+    orbit_areas, n_unjoined = join_across_zone(chains, reciprocal_lattice)
+    return areas + orbit_areas, n_open + n_unjoined
+
+
+def polygon_area(corners: np.ndarray) -> float:
+    return 0.5 * float(np.linalg.norm(np.cross(corners, np.roll(corners, -1, axis=0)).sum(axis=0)))
+
+
+def join_across_zone(
+    chains: list[np.ndarray], reciprocal_lattice: np.ndarray
+) -> tuple[list[float], int]:
+    """Join open chains whose ends coincide modulo a reciprocal lattice vector.
+
+    An orbit is closed when following the joins returns to its first chain with no net
+    lattice translation. Returns the closed orbits' areas and the number of curves left
+    open: chains with an end that matches nothing, and orbits that run through the zone.
+    """
+    ends = np.array([chain[i] for chain in chains for i in (0, -1)])
+    frac = ends @ np.linalg.inv(reciprocal_lattice)
+    partner: dict[int, tuple[int, np.ndarray]] = {}
+    for a in range(len(ends)):
+        shift = frac - frac[a]
+        whole = np.rint(shift)
+        match = np.flatnonzero((np.abs(shift - whole).max(axis=1) < 1e-5) & whole.any(axis=1))
+        if len(match) == 1:
+            partner[a] = (int(match[0]), whole[match[0]] @ reciprocal_lattice)
+
+    areas: list[float] = []
+    n_open = 0
+    done: set[int] = set()
+    for first in range(len(chains)):
+        if first in done:
+            continue
+        entry, offset, pieces = 2 * first, np.zeros(3), []
+        while True:
+            done.add(entry // 2)
+            forward = entry % 2 == 0
+            pieces.append(chains[entry // 2][:: 1 if forward else -1] + offset)
+            leave = entry + 1 if forward else entry - 1
+            if leave not in partner:
+                n_open += 1
+                break
+            entry, lattice_vector = partner[leave]
+            offset = offset - lattice_vector
+            if entry // 2 in done:
+                if entry == 2 * first and np.allclose(offset, 0.0):
+                    areas.append(polygon_area(np.concatenate(pieces)))
+                else:
+                    n_open += 1
+                break
     return areas, n_open
 
 
