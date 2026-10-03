@@ -9,6 +9,7 @@ set -euo pipefail
 
 REPO="$(git -C "$(dirname "${BASH_SOURCE[0]}")" rev-parse --show-toplevel)"
 RUNS="$REPO/data/verify-runs"
+MIN_FREE_MB="${VERIFY_MIN_FREE_MB:-2048}"
 abs() { (cd "$(dirname "$1")" && echo "$PWD/$(basename "$1")"); }
 [ "${1:-}" = run ] && [ $# -ge 4 ] && set -- "$1" "$2" "$3" "$(abs "$4")"
 cd "$REPO"
@@ -29,7 +30,7 @@ require_free() {
   done
 }
 
-MIN_FREE_MB="${VERIFY_MIN_FREE_MB:-2048}"
+scrub() { rm -rf "$1/work" "$1/.start"; }
 
 case "${1:-}" in
 doctor)
@@ -54,14 +55,14 @@ run)
   name="$2" fixture="$3" driver="$4"
   [ -d "$fixture" ] || { echo "missing fixture $fixture; run: verify.sh fetch $fixture" >&2; exit 2; }
   mkdir -p "$RUNS"
-  require_free $(( $(du -smL "$fixture" | cut -f1) + MIN_FREE_MB ))
+  require_free $(( $(du -sm "$fixture" | cut -f1) + MIN_FREE_MB ))
   run="$RUNS/$(date +%Y%m%d-%H%M%S)-$name"
   mkdir -p "$run/evidence" "$run/work/tmp"
-  cp -r "$fixture" "$run/work/calc"
+  cp -r --reflink=auto "$fixture" "$run/work/calc"
   cp "$driver" "$run/evidence/driver.py"
   touch "$run/.start"
   set +e
-  TMPDIR="$run/work/tmp" PYTEST_ADDOPTS="--basetemp=$run/work/tmp/pytest${PYTEST_ADDOPTS:+ $PYTEST_ADDOPTS}" CALC="$run/work/calc" EVIDENCE="$run/evidence" REPO="$REPO" MPLBACKEND=Agg PYVISTA_OFF_SCREEN=true \
+  TMPDIR="$run/work/tmp" CALC="$run/work/calc" EVIDENCE="$run/evidence" REPO="$REPO" MPLBACKEND=Agg PYVISTA_OFF_SCREEN=true \
     PYTHONPATH="$REPO/.claude/skills/verify-pyprocar/scripts/lib${PYTHONPATH:+:$PYTHONPATH}" \
     pixi run -q -e default python "$run/evidence/driver.py" >"$run/evidence/run.log" 2>&1
   code=$?
@@ -78,7 +79,7 @@ run)
 clean)
   run="$(realpath "$2")"
   case "$run" in "$RUNS"/*) ;; *) echo "refusing: $run is not under $RUNS" >&2; exit 2 ;; esac
-  rm -rf "$run/work" "$run/.start"
+  scrub "$run"
   echo "removed scratch; evidence kept at $run/evidence"
   ;;
 gc)
@@ -87,8 +88,8 @@ gc)
   [ -d "$RUNS" ] || exit 0
   find "$RUNS" -mindepth 2 -maxdepth 2 -name work -type d -mmin +$((hours * 60)) -print0 |
     while IFS= read -r -d '' work; do
-      echo "removing $work ($(du -sh "$work" | cut -f1))"
-      rm -rf "$work" "$(dirname "$work")/.start"
+      echo "removing $work"
+      scrub "$(dirname "$work")"
     done
   echo "free under $RUNS: $(free_mb "$RUNS") MB"
   ;;

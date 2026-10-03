@@ -46,13 +46,12 @@ $H run <name> <fixture-relpath> <driver.py>
 ```
 
 What the harness does:
-1. Refuses to start, with exit code 3, when `data/verify-runs/` or `$TMPDIR` (default `/tmp`) has less free space than the fixture size plus `VERIFY_MIN_FREE_MB` (default 2048). The message prints the free space.
-2. Creates `data/verify-runs/<timestamp>-<name>/`.
-3. Copies the fixture to `work/calc` and the driver to `evidence/driver.py`.
-4. Runs the driver with `TMPDIR=work/tmp`, `PYTEST_ADDOPTS=--basetemp=work/tmp/pytest`, `CALC=<calc copy>`, `EVIDENCE=<evidence dir>`, `REPO=<repo root>`, `MPLBACKEND=Agg`, `PYVISTA_OFF_SCREEN=true`, and `scripts/lib` on `PYTHONPATH`.
-5. Records the exit code, `run.log` (stdout+stderr), and `side_effects.txt`, which lists files created or modified inside the calc copy.
+1. Creates `data/verify-runs/<timestamp>-<name>/`.
+2. Copies the fixture to `work/calc` (a reflink copy where the filesystem supports it) and the driver to `evidence/driver.py`.
+3. Runs the driver with `TMPDIR=work/tmp`, `CALC=<calc copy>`, `EVIDENCE=<evidence dir>`, `REPO=<repo root>`, `MPLBACKEND=Agg`, `PYVISTA_OFF_SCREEN=true`, and `scripts/lib` on `PYTHONPATH`. pytest puts its `--basetemp` root under `TMPDIR`, so a driver that starts pytest also writes under the run.
+4. Records the exit code, `run.log` (stdout+stderr), and `side_effects.txt`, which lists files created or modified inside the calc copy.
 
-The harness exits with the driver's exit code. Runs are isolated per directory, so parallel runs are safe.
+Before step 1, the harness exits 3 when `data/verify-runs/` or `$TMPDIR` (default `/tmp`) has less free space than the fixture size plus `VERIFY_MIN_FREE_MB` (default 2048). The message prints the free space. The harness exits with the driver's exit code. Runs are isolated per directory, so parallel runs are safe.
 
 Several agents in separate worktrees may verify at once. Never symlink the shared `data/` into a worktree and drive the library on it directly. The library has written into its input directory (`ebs.pkl` caches, a merged Abinit `PROCAR`). Run every sweep through `$H run` so it works on the per-run `work/calc` copy. Keep temp files off the shared tmpfs `/tmp`; the harness does this, and outside it set `TMPDIR` (or pytest `--basetemp`) to a dir under your run.
 
