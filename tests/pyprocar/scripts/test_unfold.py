@@ -18,8 +18,26 @@ SUPERCELL = np.diag([2, 2, 2])
 FERMI = 5.2182
 MG_ATOMS = list(range(8))
 N_KPOINTS, N_BANDS = 150, 80
-
-pytestmark = pytest.mark.data
+REMOVED_PARAMETERS = (
+    "kdirect",
+    "projection_mask",
+    "unfold_mask",
+    "interpolation_factor",
+    "interpolation_type",
+    "old",
+    "savetab",
+)
+# Popescu-Zunger weights computed from the raw PROCAR phases and POSCAR by an
+# independent script (no pyprocar parsing), keyed by (k-point, band).
+INDEPENDENT_WEIGHTS = {
+    (0, 0): 0.0,
+    (0, 24): 1.0,
+    (25, 20): 0.137785,
+    (25, 21): 0.861611,
+    (49, 0): 0.252059,
+    (49, 1): 0.500521,
+    (75, 30): 0.999997,
+}
 
 
 def _copy(tmp_path, name):
@@ -65,6 +83,7 @@ def _weights(ebs):
     return np.asarray(ebs.weights.value)[..., 0]
 
 
+@pytest.mark.data
 class TestUnfoldedWeights:
     def test_mg_2p_semicore_unfolds_to_the_three_primitive_bands(self, unfolded, primitive_bands):
         bands = np.asarray(unfolded.bands.value)[..., 0]
@@ -73,6 +92,14 @@ class TestUnfoldedWeights:
         assert set((primitive_bands < -20).sum(axis=1).tolist()) == {3}
         assert set(semicore.sum(axis=1).tolist()) == {24}
         np.testing.assert_allclose((_weights(unfolded) * semicore).sum(axis=1), 3.0, atol=5e-3)
+        gamma = np.sort(_weights(unfolded)[0][semicore[0]])
+        np.testing.assert_allclose(gamma, [0.0] * 21 + [1.0] * 3, atol=1e-3)
+
+    def test_weights_match_an_independent_popescu_zunger_computation(self, unfolded):
+        weights = _weights(unfolded)
+
+        for (ik, iband), expected in INDEPENDENT_WEIGHTS.items():
+            assert weights[ik, iband] == pytest.approx(expected, abs=1e-5), (ik, iband)
 
     def test_unfolded_bands_are_the_primitive_bands(self, unfolded, primitive_bands):
         bands = np.asarray(unfolded.bands.value)[..., 0]
@@ -97,8 +124,11 @@ class TestUnfoldedWeights:
         assert weights.shape == (N_KPOINTS, N_BANDS)
         assert weights.min() > -1e-9
         assert weights.max() < 1 + 1e-9
+        assert (weights[0] > 0.5).sum() == 10
+        assert (weights[0] < 0.01).sum() == 70
 
 
+@pytest.mark.data
 class TestUnfoldPlot:
     def test_color_mode_colors_each_band_by_its_weight(self, supercell, unfolded, tmp_path):
         out = tmp_path / "unfold.png"
@@ -238,3 +268,10 @@ class TestUnfoldPlot:
 
         with pytest.raises(ValueError, match="LORBIT = 12"):
             pyprocar.unfold(code="vasp", dirname=calc, transformation_matrix=SUPERCELL, show=False)
+
+
+class TestUnfoldArguments:
+    @pytest.mark.parametrize("name", REMOVED_PARAMETERS)
+    def test_removed_parameter_raises_type_error(self, name, tmp_path):
+        with pytest.raises(TypeError, match=rf"unfold\(\) no longer takes {name}"):
+            pyprocar.unfold(dirname=tmp_path, show=False, **{name: True})

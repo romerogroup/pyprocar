@@ -18,6 +18,7 @@ matplotlib.use("Agg")
 
 from unittest.mock import Mock
 
+import matplotlib.colors as mpcolors
 import matplotlib.pyplot as plt
 import numpy as np
 import pytest
@@ -318,6 +319,31 @@ class TestBandStructurePlotterSeries:
         )
 
         np.testing.assert_allclose(artists[(1, 1)].get_sizes(), [14.0, 18.0, 5.0])
+        plt.close(plotter.fig)
+
+    def test_caller_cmap_and_colors_in_scatter_kwargs_win(self):
+        plotter = BandStructurePlotter()
+        artists = plotter.plot(
+            _make_literal_property(LITERAL_BANDS),
+            scalars_data=_literal_scalars(None),
+            scalars_mode="scatter",
+            scatter_kwargs={"cmap": "Greys", "c": [0.0, 0.5, 1.0]},
+        )
+
+        assert artists[(1, 0)].get_cmap().name == "Greys"
+        np.testing.assert_array_equal(artists[(1, 0)].get_array(), [0.0, 0.5, 1.0])
+        plt.close(plotter.fig)
+
+    def test_caller_norm_in_collection_kwargs_wins(self):
+        plotter = BandStructurePlotter()
+        artists = plotter.plot(
+            _make_literal_property(LITERAL_BANDS),
+            scalars_data=_literal_scalars(None),
+            scalars_mode="parametric",
+            collection_kwargs={"norm": mpcolors.Normalize(0.0, 10.0)},
+        )
+
+        assert artists[(1, 0)].norm.vmax == 10.0
         plt.close(plotter.fig)
 
     @pytest.mark.parametrize("shape", [(3, 1, 1), (3, 1), (3, 2, 1)])
