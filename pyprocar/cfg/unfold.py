@@ -140,20 +140,12 @@ class UnfoldingConfig(BandStructureConfig):
     savefig: Optional[str], optional
         The file name to save the figure. If null, the figure will not be saved.
 
-    Advanced Configurations
-    -----------------------
-    weighted_color: bool, optional (default True)
-        If true, the color of the lines will be weighted.
-    weighted_width: bool, optional (default False)
-        If true, the width of the lines will be weighted.
-
     Methods
     -------
     __post_init__():
         Post-initialization to validate the data and set default values.
     """
 
-    modes: list[str] = field(default_factory=lambda: [mode.value for mode in UnfoldMode])
     # Basic Plot Settings
     color: str = "#eeeeee"
     spin_colors: tuple[str] = ("blue", "red")
@@ -195,10 +187,6 @@ class UnfoldingConfig(BandStructureConfig):
     dpi: str = "figure"
     savefig: str | None = None
 
-    # Advanced Configurations
-    weighted_color: bool = True
-    weighted_width: bool = False
-
     # label params
     x_label_params: dict[str, any] = field(default_factory=lambda: {})
     y_label_params: dict[str, any] = field(default_factory=lambda: {})
@@ -237,9 +225,6 @@ class UnfoldingConfig(BandStructureConfig):
     minor_y_locator = None
     multiple_locator_y_major_value: float = None
     multiple_locator_y_minor_value: float = None
-
-    weighted_width: bool = False
-    weighted_color: bool = True
 
     def __post_init__(self):
         """Post-initialization to validate the data and set default values."""

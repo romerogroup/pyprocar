@@ -10,44 +10,25 @@ The Brillouin zone of a supercell shrinks respect to the primitive cell. For ins
 
 
 Usage:
-First, calculate the band structure in the primitive cell BZ. The PROCAR should be produced with the phase factor included, by setting ``LORBIT=12`` in VASP.
+First, calculate the band structure of the supercell along the primitive cell's :math:`k`-path, with the :math:`k`-points written in the supercell's reciprocal basis. Set ``LORBIT=12`` in VASP so that the PROCAR includes the phase factors.
 
-Then the unfold module can be used to plot the unfolded band as follows::
+Then plot the unfolded bands::
 
 	import numpy as np
-	pyprocar.unfold(
-                fname='PROCAR',
-                poscar='POSCAR',
-                outcar='OUTCAR',
-                supercell_matrix=np.diag([2, 2, 2]),
-                ispin=None, # None for non-spin polarized calculation. For spin polarized case, ispin=1: up, ispin=2: down
-                efermi=None,
-                shift_efermi=True,
-                elimit=(-5, 15),
-                kticks=[0, 36, 54, 86, 110, 147, 165, 199],
-                knames=['$\Gamma$', 'K', 'M', '$\Gamma$', 'A', 'H', 'L', 'A'],
-                print_kpts=False,
-                show_band=True,
-                width=4,
-                color='blue',
-                savetab='unfolding.csv',
-                savefig='unfolded_band.png',
-                exportplt=False)
-
-=========================================
-Export plot as a matplotlib.pyplot object
-=========================================
-
-PyProcar allows the plot to be exported as a matplotlib.pyplot object. This allows for further processing of the plot through options available in matplotlib.
-This can be enabled by setting ``exportplt = True``.
-Usage::
-
-	import matplotlib.pyplot as plt
 	import pyprocar
 
-	plt = pyprocar.unfold('PROCAR', outcar='OUTCAR', exportplt=True)  
-	plt.title('Using matplotlib options')
-	plt.show()	        
+	fig, ax = pyprocar.unfold(
+		code="vasp",
+		dirname="supercell",
+		mode="plain",
+		unfold_mode="both",
+		transformation_matrix=np.diag([2, 2, 2]),
+		fermi=5.2182,
+		elimit=[-5, 5],
+		savefig="unfolded_band.png",
+	)
+
+``unfold_mode`` sets how the weight is drawn: ``thickness``, ``color`` or ``both``. The ``parametric`` and ``scatter`` modes color the bands by the projection on ``atoms`` and ``orbitals`` and draw the weight as thickness. The overlay modes fill each projection with a thickness of projection times weight. ``unfold`` returns the matplotlib figure and axes, so you can change the plot before you save or show it.
 
 .. automodule:: pyprocar.scripts.scriptUnfold
 	:members:

@@ -10,7 +10,8 @@ Plot E(k) along a high-symmetry path from a non-SCF bands calculation. Optionall
 - Overlays: `ebs.build_overlay_species_weights(...)` / `build_overlay_orbitals_weights(...)` with `p.plot_overlay(ebs.kpath, ebs.bands, weights, labels=...)`.
 - Spin: `spin-polarized` and `non-colinear` fixtures; `channel_mode="flip"` (on the non-spin fixture it renders the same as `normal`).
 - Bands + DOS side by side: legacy `pyprocar.bandsdosplot(bands_settings=dict(...), dos_settings=dict(...))`.
-- Other legacy modes and notebooks: `ipr`, `atomic`, `overlay*`, `autobandsplot`, `unfold`; fixtures `bands/{ipr,atomic_levels,auto,unfolding,compare_bands}`. Not driven.
+- Other legacy modes and notebooks: `ipr`, `atomic`, `overlay*`, `autobandsplot`; fixtures `bands/{ipr,atomic_levels,auto,compare_bands}`. Not driven.
+- Band unfolding: `pyprocar.unfold(code="vasp", dirname=<bands/unfolding/supercell copy>, mode=, unfold_mode=, transformation_matrix=np.diag([2, 2, 2]), fermi=5.2182, show=False, savefig=...)`, or `ebs.unfold(transformation_matrix=, structure=ebs.structure)` for the weights alone (#277). Check the weights against `bands/unfolding/primitive` (the same Γ M K Γ path, 150 k-points): every k has 24 supercell bands below -20 eV whose weights sum to 3.00 (the three primitive Mg 2p bands), and every supercell band with weight above 0.25 between -10 and 12 eV lies within 0.5 eV of a primitive band. The primitive run was self-consistent on its line-mode k-points, so the two calculations differ by 0.1 to 0.4 eV. Convention trap: adding a k-dependent phase exp(i k.r) to the weight breaks this (4 eV mismatches, negative weights). `tests/pyprocar/scripts/test_unfold.py` runs these checks.
 
 ## How to get to it (user POV)
 

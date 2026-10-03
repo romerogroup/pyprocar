@@ -35,15 +35,6 @@ class Unfolder:
             return int(N)
 
     def _prepare_unfold_basis(self):
-        # basis, which are the name of the bands e.g. 'Ti|dxy|0'
-        # self.eigenvectors = np.zeros(
-        #    (self.procar.kpointsCount, self.procar.bandsCount,
-        #     (self.procar.orbitalCount - 1) * (self.procar.ionsCount - 1) *
-        #     self.procar.ispin), dtype='complex')
-        # if self.ispin is None:
-        #     iispin = 0
-        # else:
-        #     self.ispin -= 1
         self.basis = []
         self.positions = []
         self.eigenvectors = np.zeros(
@@ -53,7 +44,7 @@ class Unfolder:
                 self.ebs.n_spins,
                 self.ebs.n_atoms * self.ebs.n_orbitals,
             ),
-            dtype=np.complex_,
+            dtype=np.complex128,
         )
         for ispin in range(self.ebs.n_spins):
             self.eigenvectors[:, :, ispin, :] = np.reshape(
@@ -69,13 +60,12 @@ class Unfolder:
         norm = np.linalg.norm(self.eigenvectors, ord=2, axis=-1)
         self.eigenvectors /= norm[:, :, None]
 
-        for iatom, chem in enumerate(self.structure.atoms):
-            for iorb, orb in enumerate(self.ebs.orbital_names):
-                # for spin in range(self.ebs.nspins):
-                for spin in range(1):
-                    # todo: what about spin?
-                    self.basis.append("%s|%s|%s" % (None, orb, spin))
-                    self.positions.append(self.structure.fractional_coordinates[iatom])
+        ebs, structure = self.ebs, self.structure
+        assert ebs is not None and structure is not None
+        for iatom in range(ebs.n_atoms):
+            for iorb in range(ebs.n_orbitals):
+                self.basis.append(iorb)
+                self.positions.append(structure.fractional_coordinates[iatom])
 
     def _make_translate_maps(self):
         """

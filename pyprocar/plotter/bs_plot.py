@@ -25,6 +25,11 @@ from pyprocar.plotter._series import LineSeries, channel_lims, line_series, reso
 
 logger = logging.getLogger(__name__)
 
+
+def _midpoints(values: np.ndarray) -> np.ndarray:
+    return (values[:-1] + values[1:]) / 2
+
+
 # Removed legacy style/strategy scaffolding in favor of simpler API.
 
 # Simplified main plotter class
@@ -89,6 +94,7 @@ class BandStructurePlotter:
         point_data,
         scalars_data=None,
         vectors_data=None,
+        widths_data=None,
         scalars_mode: str = "none",  # "none", "scatter", "parametric"
         channel_mode: str = "normal",  # "normal", "flip"
         scalars_cmap: str = "plasma",
@@ -113,6 +119,9 @@ class BandStructurePlotter:
             Property for scalar coloring (e.g., projections).
         vectors_data : Property, optional
             Property for vector arrows (e.g., spin texture).
+        widths_data : Property, optional
+            Property that scales each segment's line width, or each scatter
+            marker's size (e.g., unfolding weights).
         scalars_mode : str
             How to render scalar data:
             - "none": Plain line plot (ignore scalars_data)
@@ -162,6 +171,7 @@ class BandStructurePlotter:
             vectors_data.to_array() if vectors_data is not None else None,
             channel_mode,
             kwargs,
+            widths=widths_data.to_array() if widths_data is not None else None,
         )
 
         if scalars_data is not None and scalars_mode != "none":
@@ -171,9 +181,11 @@ class BandStructurePlotter:
                 [s.scalars for s in series_list],
             )
             cmap = scalars_cmap
+            colormap = (cmap, clim)
         else:
             clim = None
             cmap = None
+            colormap = None
 
         # Validate scalars_mode early
         valid_modes = ("none", "scatter", "parametric")
@@ -185,17 +197,13 @@ class BandStructurePlotter:
         for series in series_list:
             key = (series.band_index, series.spin_index)
 
-            if scalars_mode == "none" or series.scalars is None:
-                # Plain line plot
+            series_colormap = colormap if series.scalars is not None else None
+            if series_colormap is None and series.widths is None:
                 artist = self._add_line(series, line_kwargs or {})
             elif scalars_mode == "scatter":
-                # Scatter with scalar coloring (cmap/clim are set when scalars_mode != "none")
-                assert cmap is not None and clim is not None
-                artist = self._add_scatter(series, cmap, clim, scatter_kwargs or {})
-            else:  # scalars_mode == "parametric"
-                # LineCollection with segment coloring
-                assert cmap is not None and clim is not None
-                artist = self._add_line_collection(series, cmap, clim, collection_kwargs or {})
+                artist = self._add_scatter(series, series_colormap, scatter_kwargs or {})
+            else:
+                artist = self._add_line_collection(series, series_colormap, collection_kwargs or {})
 
             artists[key] = artist
 
@@ -236,54 +244,45 @@ class BandStructurePlotter:
     def _add_scatter(
         self,
         series: LineSeries,
-        cmap: str,
-        clim: tuple[float, float],
+        colormap: tuple[str, tuple[float, float]] | None,
         scatter_kwargs: dict,
     ) -> PathCollection:
-        """Add scatter plot with scalar coloring for one band."""
         merged_kwargs = {**series.kwargs, **scatter_kwargs}
         merged_kwargs.setdefault("s", 10)  # default marker size
+        if series.widths is not None:
+            merged_kwargs["s"] = merged_kwargs["s"] * series.widths
+        if colormap is not None:
+            cmap, (vmin, vmax) = colormap
+            defaults: dict[str, Any] = {"c": series.scalars, "cmap": cmap}
+            if "norm" not in merged_kwargs:
+                defaults.update(vmin=vmin, vmax=vmax)
+            merged_kwargs = {**defaults, **merged_kwargs}
 
-        scatter = self.ax.scatter(
-            series.x,
-            series.y,
-            c=series.scalars,
-            cmap=cmap,
-            vmin=clim[0],
-            vmax=clim[1],
-            **merged_kwargs,
-        )
-        return scatter
+        return self.ax.scatter(series.x, series.y, **merged_kwargs)
 
     def _add_line_collection(
         self,
         series: LineSeries,
-        cmap: str,
-        clim: tuple[float, float],
+        colormap: tuple[str, tuple[float, float]] | None,
         collection_kwargs: dict,
     ) -> LineCollection:
-        """Add LineCollection with segment coloring for one band."""
-        # Create segments from consecutive point pairs
         points = np.array([series.x, series.y]).T.reshape(-1, 1, 2)
         segments = np.concatenate([points[:-1], points[1:]], axis=1)
 
-        # Use midpoint scalars for segment colors
-        if series.scalars is not None:
-            segment_scalars = (series.scalars[:-1] + series.scalars[1:]) / 2
-        else:
-            segment_scalars = None
-
         merged_kwargs = {**series.kwargs, **collection_kwargs}
         merged_kwargs.setdefault("linewidth", 2.0)
+        if series.widths is not None:
+            merged_kwargs["linewidth"] = merged_kwargs["linewidth"] * _midpoints(series.widths)
+        if colormap is not None:
+            cmap, (vmin, vmax) = colormap
+            merged_kwargs = {"cmap": cmap, "norm": mpcolors.Normalize(vmin, vmax), **merged_kwargs}
 
         lc = LineCollection(
             segments,
-            cmap=cmap,
-            norm=plt.Normalize(clim[0], clim[1]),
             **merged_kwargs,
         )
-        if segment_scalars is not None:
-            lc.set_array(segment_scalars)
+        if colormap is not None and series.scalars is not None:
+            lc.set_array(_midpoints(series.scalars))
 
         self.ax.add_collection(lc)
         return lc

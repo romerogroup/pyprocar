@@ -184,21 +184,6 @@ title
 :value: None
 
 
-weighted_color
---------------
-
-:description: If true, the color of the lines will be weighted.
-
-:value: True
-
-
-weighted_width
---------------
-
-:description: If true, the width of the lines will be weighted.
-
-:value: False
-
 
 figure_size
 -----------

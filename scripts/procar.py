@@ -22,34 +22,26 @@ def call_bandsplot(args):
     """
     This module calls the band structure plotting function.
     """
-
     pyprocar.bandsplot(
-        args.file,
+        code=args.code,
+        dirname=args.dirname,
         mode=args.mode,
-        color=args.color,
-        abinit_output=args.abinit,
-        spin=args.spin,
+        spins=args.spins,
         atoms=args.atoms,
         orbitals=args.orbitals,
         fermi=args.fermi,
         elimit=args.elimit,
-        mask=args.mask,
-        markersize=args.markersize,
-        cmap=args.cmap,
-        vmax=args.vmax,
-        vmin=args.vmin,
-        grid=args.grid,
-        marker=args.marker,
-        permissive=args.permissive,
-        human=args.human,
-        savefig=args.savefig,
         kticks=args.kticks,
         knames=args.knames,
-        title=args.title,
-        outcar=args.outcar,
-        kpointsfile=args.kpointsfile,
-        kdirect=args.kdirect,
+        savefig=args.savefig,
+        show=args.savefig is None,
+        **_given_plot_options(args),
     )
+
+
+def _given_plot_options(args) -> dict:
+    names = ("title", "cmap", "clim")
+    return {name: getattr(args, name) for name in names if getattr(args, name, None) is not None}
 
 
 def call_kpath(args):
@@ -159,22 +151,20 @@ def call_unfold(args):
     This module calls the band unfolding function.
     """
     pyprocar.unfold(
-        fname=args.fname,
-        poscar=args.poscar,
-        outcar=args.outcar,
-        supercell_matrix=args.supercell_matrix,
-        ispin=args.ispin,
-        efermi=args.efermi,
-        shift_efermi=args.shift_efermi,
+        code=args.code,
+        dirname=args.dirname,
+        mode=args.mode,
+        unfold_mode=args.unfold_mode,
+        transformation_matrix=np.diag(args.supercell),
+        atoms=args.atoms,
+        orbitals=args.orbitals,
+        fermi=args.fermi,
         elimit=args.elimit,
         kticks=args.kticks,
         knames=args.knames,
-        print_kpts=args.print_kpts,
-        show_band=args.show_band,
-        width=args.width,
-        color=args.color,
-        savetab=args.savetab,
         savefig=args.savefig,
+        show=args.savefig is None,
+        **_given_plot_options(args),
     )
 
 
@@ -216,47 +206,39 @@ if __name__ == "__main__":
 
         ############### unfold #######################################
         parserunfold = subparsers.add_parser("unfold", help="Band unfolding.")
-        parserunfold.add_argument("-fname", help="PROCAR filename.")
-        parserunfold.add_argument("-poscar", help="POSCAR filename.")
-        parserunfold.add_argument("-outcar", help="OUTCAR filename. Used to get Fermi energy.")
+        parserunfold.add_argument("dirname", help="Supercell calculation directory (LORBIT = 12).")
+        parserunfold.add_argument("--code", help="DFT code.", default="vasp")
         parserunfold.add_argument(
-            "-supercell_matrix",
-            help="Supercell matrix from primitive cell to supercell.",
+            "-m",
+            "--mode",
+            default="plain",
+            choices=["plain", "parametric", "scatter", "overlay_species", "overlay_orbitals"],
         )
         parserunfold.add_argument(
-            "-ispin",
-            help="None - non spin polarized \n 1 - spin up\n 2 - spin down.",
-            choices=[None, 1, 2],
+            "--unfold-mode",
+            help="How the unfolding weight is drawn.",
+            default="both",
+            choices=["both", "thickness", "color"],
         )
-        parserunfold.add_argument("-efermi", help="Fermi energy. Only when no OUTCAR is given.")
-        parserunfold.add_argument("-elimit", help="Range of energy to be plotted.")
         parserunfold.add_argument(
-            "-kticks",
-            help="The indices of k-points for labels.",
+            "--supercell",
+            help="Diagonal of the primitive-to-supercell matrix.",
             type=int,
-            nargs="+",
-            action="append",
+            nargs=3,
+            default=[2, 2, 2],
         )
+        parserunfold.add_argument("-a", "--atoms", type=int, nargs="+", default=None)
+        parserunfold.add_argument("-o", "--orbitals", type=int, nargs="+", default=None)
+        parserunfold.add_argument("-f", "--fermi", help="Fermi energy.", type=float, default=None)
+        parserunfold.add_argument("--elimit", help="Energy range.", type=float, nargs=2)
         parserunfold.add_argument(
-            "-knames", help="Labels of k-points.", type=str, nargs="+", action="append"
+            "--kticks", help="k-point indices of the ticks.", type=int, nargs="+"
         )
-        parserunfold.add_argument(
-            "-print_kpts", help="Print all the k-points to screen.", action="store_true"
-        )
-        parserunfold.add_argument(
-            "-show_band",
-            help="Whether to plot the bands before unfolding.",
-            action="store_true",
-        )
-        parserunfold.add_argument("-width", help="Width of the unfolded band.", type=float)
-        parserunfold.add_argument("-color", help="Color of the unfolded band.", type=str)
-        parserunfold.add_argument(
-            "-savetab",
-            help="The csv file name of which the table of unfolding result will be written into",
-        )
-        parserunfold.add_argument(
-            "-savefig", help="The file name of which the figure will be saved."
-        )
+        parserunfold.add_argument("--knames", help="Names of the ticks.", type=str, nargs="+")
+        parserunfold.add_argument("--cmap", help="Colormap.", default=None)
+        parserunfold.add_argument("--clim", help="Color range.", type=float, nargs=2, default=None)
+        parserunfold.add_argument("-t", "--title", type=str, default=None)
+        parserunfold.add_argument("--savefig", help="Save the figure instead of showing it.")
         parserunfold.set_defaults(func=call_unfold)
 
         ############### filter ##########################################
@@ -489,51 +471,25 @@ if __name__ == "__main__":
             formatter_class=RawTextHelpFormatter,
         )
 
-        phelp = "Input file. It can be compressed"
-        parserBandsplot.add_argument("file", help=phelp)
+        parserBandsplot.add_argument("dirname", help="Calculation directory.")
+        parserBandsplot.add_argument("--code", help="DFT code.", default="vasp")
+
+        choices = [
+            "plain",
+            "parametric",
+            "scatter",
+            "atomic",
+            "overlay_species",
+            "overlay_orbitals",
+            "ipr",
+        ]
+        parserBandsplot.add_argument("-m", "--mode", default="plain", choices=choices)
 
         phelp = (
-            "Plot mode:\n"
-            "-m  scatter : is a points plot with the color given by the chosen\n"
-            "  projection. It produces a rather heavy pdf file.\n\n"
-            "-m  parametric : like scatter, but with lines instead of points \n"
-            "  (bands crossings are not handled, and some  unphysical 'jumps' \n"
-            " can be present). Sligthy smaller PDF size.\n\n"
-            "-m plain : is a featureless bandstructure ignoring all data about\n"
-            "  projections. Rather light-weight\n\n"
-            "-m atomic : For non-periodic system, like molecules, rather ugly \n"
-            "  but useful to visualize energy level. Only 1 K-point!\n\n"
+            "Spin channels to plot. A non-collinear calculation takes one\n"
+            "component: 0 total, 1 Sx, 2 Sy, 3 Sz.\n\n"
         )
-        choices = ["scatter", "plain", "parametric", "atomic"]
-        parserBandsplot.add_argument("-m", "--mode", help=phelp, default="plain", choices=choices)
-
-        phelp = "Color of the bands for plain mode."
-        parserBandsplot.add_argument("-color", help=phelp, default="blue")
-
-        phelp = "Name of Abinit output file if used."
-        parserBandsplot.add_argument("-abinit", help=phelp, default=None)
-
-        phelp = (
-            "Spin component to be used (default -s 0): \n\n"
-            "Non-polarized calculations density is '-s 0', just ignore it.\n\n"
-            "Spin-Polarized (collinear) calculation: \n"
-            "-s 0 are the unpolarized bands, the spin-polarization is ignored.\n"
-            "-s 1 'spin-polarized' bands, the character of 'up' bands positive,\n"
-            "  but negative for 'down' bands, this means that the color of \n"
-            "  'down' is negative. Useful together with '--cmap seismic'.\n\n"
-            "Non-collinear calculation: \n"
-            "-s 0 : density, ie: Spin-orbit-coupling but don't care of spin.\n"
-            "-s 1 : Sx, projection along 'x' quantization axis, see SAXIS flag\n"
-            "  in the VASP manual\n"
-            "-s 2 : Sy, projection along 'y' quantization axis.\n"
-            "-s 3 : Sy, projection along 'z' quantization axis.\n"
-            "-s st : Spin-texture perpendicular in the plane (kx,ky) to each\n "
-            "(kx,ky) vector. Useful for Rashba-like states in surfaces. Use\n "
-            "'--cmap seismic'\n\n "
-        )
-        parserBandsplot.add_argument(
-            "-s", "--spin", choices=["0", "1", "2", "3", "st"], default="0", help=phelp
-        )
+        parserBandsplot.add_argument("-s", "--spins", type=int, nargs="+", help=phelp, default=None)
 
         phelp = (
             "List of rows (atoms) to be used. This list refers to the rows of\n"
@@ -541,8 +497,7 @@ if __name__ == "__main__":
             "PROCAR (eg: with the '-a' option of 'filter' mode) each row\n"
             "correspond to the respective atom in the POSCAR.\n\n"
             "Mind: This list is 0-based, ie: the 1st atom is 0, the 2nd is 1,\n"
-            "  and so on. If you need to be treated like a human, specify '-u'\n"
-            "or '--human' and 1st->1, 2nd->2, etc.\n\n"
+            "  and so on.\n\n"
             "Example:\n"
             "-a 0 2 :  select the 1st  and 3rd. rows (likely 1st and 3rd atoms)"
             "\n\n"
@@ -565,15 +520,10 @@ if __name__ == "__main__":
 
         phelp = (
             "Set the Fermi energy (or any reference energy) as the zero energy.\n"
-            "See '--outcar', avoids to give it explicitly. A list of \n"
-            "k-dependant 'fermi-like energies' are also accepted (useful to\n"
-            "compare different systems in one PROCAR made by hand). \n\n"
             "Mind: The Fermi energy MUST be the one from the self-consistent\n"
             "calculation, not from a Bandstructure calculation!\n\n"
         )
-        parserBandsplot.add_argument(
-            "-f", "--fermi", type=float, help=phelp, nargs="+", default=None
-        )
+        parserBandsplot.add_argument("-f", "--fermi", type=float, help=phelp, default=None)
 
         phelp = (
             "Min/Max energy to be ploted. Example:\n "
@@ -582,67 +532,16 @@ if __name__ == "__main__":
         parserBandsplot.add_argument("--elimit", type=float, nargs=2, help=phelp, default=None)
 
         phelp = (
-            "If given, it masks(hides) bands with values lowers than 'mask'.\n"
-            "It is useful to remove 'unwanted' bands. For instance, if you\n"
-            "project the bandstructure on a 'surface' atom -with the default\n"
-            "colormap- some white points can appear, they are bands with \n"
-            "almost no contribution to the 'surface': no physics but they \n"
-            "still look ugly, to hide those bands use '--mask 0.08' (or some \n"
-            "other small value). Mind: it works with the absolute value of\n"
-            "projection (no problem with spin polarization)\n\n"
-        )
-        parserBandsplot.add_argument("--mask", type=float, help=phelp, default=None)
-
-        phelp = "Size of markers, if used. Each mode has it own scale,\njust test them\n\n"
-        parserBandsplot.add_argument("--markersize", type=float, help=phelp, default=0.02)
-
-        phelp = (
             "Change the color scheme. Example:\n\n"
             "--cmap  seismic : blue->white->red, useful to see the \n"
             "  spin-polarization of a band (it will blueish or reddish)\n"
             "  depending of spin channel\n"
             "--cmap  seismic_r : the 'seismic' colormap, but reversed.\n\n"
         )
-        parserBandsplot.add_argument("--cmap", help=phelp, default="jet")
+        parserBandsplot.add_argument("--cmap", help=phelp, default=None)
 
-        phelp = (
-            "Do you want to Normalize the plots to the same scale of colors\n"
-            "(ie: the numbers on the bar at the right), just try '--vmax'\n\n"
-            "--vmax 1 : If you are looking for the s, p or d character.\n"
-            "--vmax 0.2: If you want to capture some tiny effect, eg: s-band of\n"
-            "  a impurity on a metal\n\n"
-        )
-        parserBandsplot.add_argument("--vmax", type=float, help=phelp, default=None)
-
-        phelp = (
-            "Like '--vmax' (see '--vmax'), However, for spin-polarized \n"
-            "(collinear or not) you can set it to a negative value. Actually\n"
-            "you can do it for a non-spin-polarized calculation and the \n"
-            "effect will be a 'stretching' of the color scheme, try it.\n\n"
-        )
-        parserBandsplot.add_argument("--vmin", type=float, help=phelp, default=None)
-
-        phelp = "switch on/off the grid. Default is 'on'\n\n"
-        parserBandsplot.add_argument("--grid", type=bool, help=phelp, default=True)
-
-        phelp = (
-            "set the marker shape, ie: 'o'=circle, 's'=square,\ '-'=line\n"
-            "(only mode `plain`, other symbols: google pyplot markers)\n\n"
-        )
-        parserBandsplot.add_argument("--marker", type=str, help=phelp, default="o")
-
-        phelp = (
-            "Some fault tolerance for ill-formatted files (stupid fortran)\n"
-            "But be careful, something could be messed up and don't work (at\n"
-            "least as expected). Length of K-points paths will be ignored\n\n"
-        )
-        parserBandsplot.add_argument("--permissive", help=phelp, action="store_true")
-
-        phelp = (
-            "Enable human-like 1-based order (ie 1st is 1, 2nd is 2, and so\n"
-            "on). Mind: this only works for atoms, not for orbitals or spin\n\n"
-        )
-        parserBandsplot.add_argument("-u", "--human", help=phelp, action="store_true")
+        phelp = "Color range of the projections, for example '--clim 0 1'.\n\n"
+        parserBandsplot.add_argument("--clim", type=float, nargs=2, help=phelp, default=None)
 
         phelp = (
             "Saves the figure, instead of display it on screen. Anyway, you can\n"
@@ -672,22 +571,6 @@ if __name__ == "__main__":
             "\$\\\\alpha\$"
         )
         parserBandsplot.add_argument("-t", "--title", help=phelp, type=str, default=None)
-
-        phelp = (
-            "OUTCAR file where to find the reciprocal lattice vectors and\n "
-            "perhaps E_fermi.\n"
-            "Mind: '--fermi' has precedence, remember that the E-fermi should\n"
-            "correspond to a self-consistent run, not to a bandstructure!\n"
-            "(however, the basis and reciprocal vectors will be safe from the\n"
-            "non-self-consistentness)\n\n"
-        )
-        parserBandsplot.add_argument("--outcar", help=phelp, default=None)
-
-        phelp = "KPOINTS file for bandstructure plotting.\n"
-        parserBandsplot.add_argument("--kpointsfile", help=phelp, default=None)
-
-        phelp = "Convert k-points from reduced to cartesian for plot #1?"
-        parserBandsplot.add_argument("-kdirect", help=phelp, action="store_false")
 
         parserBandsplot.set_defaults(func=call_bandsplot)
 

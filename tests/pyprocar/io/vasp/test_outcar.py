@@ -173,6 +173,34 @@ OUTCAR_v544_reclat_issue = """ vasp.5.4.4.18Apr17-6-g9f103f2a35 (build Oct 26 20
 """
 
 
+OUTCAR_v621_primitive_cell_section = """ vasp.6.2.1 16May21 (build May 19 2022 15:04:39) complex
+----------------------------------------------------------------------------------------
+
+                                     Primitive cell
+
+  volume of cell :      28.9173
+
+  direct lattice vectors                    reciprocal lattice vectors
+     3.073679924  0.000000000  0.000000000     0.325342919  0.187836822  0.000000000
+    -1.536839962  2.661884897  0.000000000     0.000000000  0.375673644  0.000000000
+     0.000000000  0.000000000  3.534349918     0.000000000  0.000000000  0.282937463
+
+  length of vectors
+     3.073679924  3.073679924  3.534349918     0.375673644  0.375673644  0.282937463
+
+  energy-cutoff  :      600.00
+  volume of cell :      231.34
+      direct lattice vectors                 reciprocal lattice vectors
+     6.147359848  0.000000000  0.000000000     0.162671460  0.093918411  0.000000000
+    -3.073679924  5.323769795  0.000000000     0.000000000  0.187836822  0.000000000
+     0.000000000  0.000000000  7.068699837     0.000000000  0.000000000  0.141468732
+
+  length of vectors
+     6.147359848  6.147359848  7.068699837     0.187836822  0.187836822  0.141468732
+
+ E-fermi :   5.2182     XC(G=0): -11.1654     alpha+bet :-13.3455
+"""
+
 OUTCAR_v642 = """ vasp.6.2.1 16May21 (build May 19 2022 15:04:39) complex                        
   
  executed on             LinuxIFC date 2022.12.04  09:57:01
@@ -364,6 +392,15 @@ class TestOutcar(BaseTest):
             [0.057120192, -0.032978358, 0.0],
             [0.057120192, 0.032978358, 0.0],
             [0.0, 0.0, 0.062500000],
+        ]
+
+    def test_reciprocal_lattice_skips_the_primitive_cell_section(self):
+        outcar = vasp.Outcar.from_str(OUTCAR_v621_primitive_cell_section)
+
+        assert outcar.reciprocal_lattice.tolist() == [
+            [0.162671460, 0.093918411, 0.0],
+            [0.0, 0.187836822, 0.0],
+            [0.0, 0.0, 0.141468732],
         ]
 
     def test_outcar_v642(self, outcar_v642):

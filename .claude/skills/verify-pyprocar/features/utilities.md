@@ -10,7 +10,7 @@ Small one-call helpers exported at top level (`pyprocar/scripts/__init__.py`) th
 - PROCAR repair: `pyprocar.repair(infile, outfile)` (`scriptRepair.py`).
 - PROCAR merge: `pyprocar.cat(inFiles=[...], outFile="PROCAR_merged")`. It globs `PROCAR_*` in the CWD when `inFiles` is None. `mergeparallel`/`fixformat` are Abinit paths, which are not driven (`scriptCat.py`).
 - 2D k-grid: `pyprocar.generate2dkmesh(x1, y1, x2, y2, z, nkx, nky)` returns an `(nkx*nky, 3)` array and **always writes `./Kgrid.dat` into the CWD** (`scriptKmesh2D.py`).
-- `spin_asymmetry`, `unfold` and `autobandsplot` are also exported. They are not driven.
+- `spin_asymmetry` and `autobandsplot` are also exported. They are not driven. `unfold` is a band plot; see `bands.md`.
 
 ## How to get to it (user POV)
 

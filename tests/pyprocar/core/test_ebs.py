@@ -7,7 +7,8 @@ import numpy as np
 import pytest
 import pyvista as pv
 
-from pyprocar.core import kpoints
+from pyprocar.core import Structure, kpoints
+from pyprocar.core.atomic_orbital_index import OrbitalIndexer
 from pyprocar.core.ebs import (
     ElectronicBandStructure,
     ElectronicBandStructureMesh,
@@ -1082,3 +1083,26 @@ def test_path_to_mesh_can_return_fractional_points(hexagonal_ebs_path):
     points = np.asarray(hexagonal_ebs_path.to_mesh(as_cartesian=False).points)
 
     assert np.allclose(points, np.column_stack([np.zeros(5), np.linspace(0, 0.5, 5), np.zeros(5)]))
+
+
+def test_unfold_weights_are_the_primitive_cell_character_of_each_band():
+    structure = Structure(
+        atoms=["H", "H"],
+        fractional_coordinates=[[0.0, 0.0, 0.0], [0.5, 0.0, 0.0]],
+        lattice=np.diag([2.0, 5.0, 5.0]),
+    )
+    in_phase, out_of_phase, one_site = [1, 1], [1, -1], [1, 0]
+    phase = np.array([in_phase, out_of_phase, one_site], dtype=complex).reshape(1, 3, 1, 2, 1)
+    ebs = ElectronicBandStructure(
+        kpoints=np.array([[0.0, 0.0, 0.0]]),
+        bands=np.array([[[-1.0], [1.0], [2.0]]]),
+        projected=np.abs(phase) ** 2,
+        projected_phase=phase,
+        orbital_names=OrbitalIndexer().flat_conventional,
+        structure=structure,
+    )
+
+    ebs.unfold(transformation_matrix=np.diag([2, 1, 1]), structure=structure)
+
+    assert ebs.weights is not None
+    assert np.asarray(ebs.weights.value).ravel().tolist() == pytest.approx([1.0, 0.0, 0.5])
