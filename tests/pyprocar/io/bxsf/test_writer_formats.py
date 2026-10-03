@@ -247,3 +247,50 @@ def test_band_grid_header_tolerates_blank_and_comment_lines(tmp_path: Path) -> N
     bands = _bands(BxsfParser(tmp_path).ebs)
 
     assert bands[:, 0, 0] == pytest.approx([3.0, 7.5, 4.5, 9.0, 3.5, 8.0, 5.0, 9.5])
+
+
+def test_from_code_reads_the_qe_fs_spin_pair_as_two_spins(tmp_path: Path) -> None:
+    (tmp_path / "Al_fsup.bxsf").write_text(_qe_fs([_energies(3.0, 0.5)], first_band=2))
+    (tmp_path / "Al_fsdw.bxsf").write_text(_qe_fs([_energies(4.0, 0.5)], first_band=2))
+    (tmp_path / "scf.out").write_text(AL_SCF_OUT)
+
+    bands = _bands(ElectronicBandStructureMesh.from_code("bxsf", str(tmp_path)))
+
+    assert bands.shape == (8, 1, 2)
+    assert bands[:, 0, 0] == pytest.approx([3.0, 7.5, 4.5, 9.0, 3.5, 8.0, 5.0, 9.5])
+    assert bands[:, 0, 1] == pytest.approx([4.0, 8.5, 5.5, 10.0, 4.5, 9.0, 6.0, 10.5])
+
+
+def test_qe_fs_spin_pair_with_different_bands_is_refused(
+    tmp_path: Path, user_warnings: pytest.LogCaptureFixture
+) -> None:
+    (tmp_path / "Al_fsup.bxsf").write_text(_qe_fs([_energies(3.0, 0.5)], first_band=2))
+    (tmp_path / "Al_fsdw.bxsf").write_text(_qe_fs([_energies(4.0, 0.5)], first_band=3))
+
+    ebs = BxsfParser(tmp_path).ebs
+
+    assert ebs is None
+    assert "spin-up file holds bands [2]" in user_warnings.text
+    assert "spin-down file holds bands [3]" in user_warnings.text
+
+
+def test_several_bxsf_files_read_the_first_by_name_and_warn(
+    tmp_path: Path, user_warnings: pytest.LogCaptureFixture
+) -> None:
+    (tmp_path / "b.bxsf").write_text(_qe_fs([_energies(8.0, 0.5)], first_band=1))
+    (tmp_path / "a.bxsf").write_text(_qe_fs([_energies(3.0, 0.5)], first_band=1))
+
+    bands = _bands(BxsfParser(tmp_path).ebs)
+
+    assert bands[0, 0, 0] == pytest.approx(3.0)
+    assert "Found several BXSF files" in user_warnings.text
+    assert "reading a.bxsf" in user_warnings.text
+
+
+def test_band_values_accept_fortran_d_exponents(tmp_path: Path) -> None:
+    text = _wannier90([_energies(-1.5, 0.25)]).replace("E+", "D+").replace("E-", "D-")
+    (tmp_path / "wannier90.bxsf").write_text(text)
+
+    bands = _bands(BxsfParser(tmp_path, filepaths="wannier90.bxsf").ebs)
+
+    assert bands[:, 0, 0] == pytest.approx([-1.5, 0.75, -0.75, 1.5, -1.25, 1.0, -0.5, 1.75])
