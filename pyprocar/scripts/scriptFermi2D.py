@@ -4,6 +4,7 @@ __email__ = "petavazohi@mail.wvu.edu, lllang@mix.wvu.edu"
 __date__ = "December 01, 2020"
 
 import logging
+import warnings
 from enum import Enum
 
 import matplotlib.pyplot as plt
@@ -204,10 +205,12 @@ def fermi2D(
         assert isinstance(selected, FermiSurface)
         fs = selected
     if not keys:
-        user_logger.warning(
+        warnings.warn(
             f"No Fermi surface found: no band of spin channel(s) {channels} crosses"
             + " the isovalue (Fermi energy + energy). Try another spin channel,"
-            + " a different energy, or check the Fermi energy."
+            + " a different energy, or check the Fermi energy.",
+            UserWarning,
+            stacklevel=2,
         )
 
     component = component_label = None
