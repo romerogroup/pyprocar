@@ -231,7 +231,14 @@ class ElkParser(BaseParser):
             return None
 
         # bandstr.f90 gives tasks 21-24 the same file names, so the last one in elk.in wrote them.
-        task = [t for t in self._elkin.tasks if t in (21, 22, 23, 24)][-1]
+        character_tasks = [t for t in self._elkin.tasks if t in (21, 22, 23, 24)]
+        if not character_tasks:
+            user_logger.warning(
+                "elk.in lists no task 21 to 24, so the band characters in the BAND_S files"
+                + " are not read"
+            )
+            return None
+        task = character_tasks[-1]
         return ElkProjections(
             filepaths=filepaths,
             nkpoints=self._bands_parser.nkpoints,
