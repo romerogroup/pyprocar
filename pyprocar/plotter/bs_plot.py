@@ -253,7 +253,7 @@ class BandStructurePlotter:
             merged_kwargs["s"] = merged_kwargs["s"] * series.widths
         if colormap is not None:
             cmap, (vmin, vmax) = colormap
-            defaults = {"c": series.scalars, "cmap": cmap}
+            defaults: dict[str, Any] = {"c": series.scalars, "cmap": cmap}
             if "norm" not in merged_kwargs:
                 defaults.update(vmin=vmin, vmax=vmax)
             merged_kwargs = {**defaults, **merged_kwargs}

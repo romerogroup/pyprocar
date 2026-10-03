@@ -1,4 +1,5 @@
 import shutil
+from typing import Any
 
 import matplotlib
 
@@ -274,4 +275,5 @@ class TestUnfoldArguments:
     @pytest.mark.parametrize("name", REMOVED_PARAMETERS)
     def test_removed_parameter_raises_type_error(self, name, tmp_path):
         with pytest.raises(TypeError, match=rf"unfold\(\) no longer takes {name}"):
-            pyprocar.unfold(dirname=tmp_path, show=False, **{name: True})
+            removed: dict[str, Any] = {name: True}
+            pyprocar.unfold(dirname=tmp_path, show=False, **removed)
