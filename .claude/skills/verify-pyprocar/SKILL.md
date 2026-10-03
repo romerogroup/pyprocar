@@ -25,9 +25,15 @@ $H fetch data/examples/bands/non-spin-polarized     # idempotent; ~20-35 MB each
 
 Fixture relpaths (HF dataset `lllangWV/pyprocar_test_data`): `data/examples/{bands,dos,fermi3d,fermi2d}/{non-spin-polarized,spin-polarized,non-colinear}`, plus `bands/{atomic_levels,auto,compare_bands,ipr,unfolding,2d-bands}`, `fermi2d/bisb_monolayer`, `fermi3d/van-alphen`. All are VASP; Fermi energy for the SrVO3 sets is `5.3017`.
 
-Run every gate as `pixi run --frozen [-e <env>] <task>`, e.g. `pixi run --frozen -e dev typecheck`, `... test`, `... lint`. `--frozen` is required because the committed `pixi.lock` is stale vs `pixi.toml`; without it pixi re-solves and rewrites the tracked lockfile. If that happens, `git checkout -- pixi.lock`.
+Run the gates through pixi, the way CI does:
 
-Never call an env binary such as `.pixi/envs/dev/bin/basedpyright` without the env activated. On clean dev it reports 70 phantom errors without the env on `PATH` and 0 with it, which matches CI.
+- `pixi run -e dev typecheck` runs the CI type check (`basedpyright --project pyrightconfig.json`).
+- `pixi run -e dev pytest tests -c .config/.pytest.toml --rootdir . -n auto -m "not data"` runs the CI test set. `pixi run -e dev test` also runs the tests marked `data`, which need the fixtures.
+- `pixi run -e lint python .github/scripts/ruff_new_violations.py check origin/dev` and `... format origin/dev` run the CI ruff gates. The `lint` task applies `ruff --fix` to every file, so it is not the CI gate.
+
+CI fails when `pixi.lock` does not match `pixi.toml`. After you edit `pixi.toml`, run `pixi lock` and commit `pixi.lock` with it.
+
+Never call an env binary such as `.pixi/envs/dev/bin/basedpyright` directly. Without the env on `PATH` it reports 70 phantom errors on clean dev, where `pixi run` reports 0, as CI does.
 
 ## Doctor
 
@@ -108,7 +114,6 @@ This removes only that run's `work/` scratch copy (including its `TMPDIR`) and k
 
 Known repo issues that affect verification (as of dos-rewrite @ 1f36aae1):
 - `pyprocar.download_from_hf(relpath, output_path=".")` crashes when given a str; it needs a `Path`. The harness passes a `Path`.
-- The stale `pixi.lock` (see Launch).
 - The EBS-based `from_code` calls and legacy `bandsplot` write `ebs.pkl` into the calc dir even with `use_cache=False`. This is a library defect, not expected behaviour; [PR #245](https://github.com/romerogroup/pyprocar/pull/245) fixes it. Once it lands, `ebs.pkl` in `side_effects.txt` without `use_cache=True` is a regression.
 
 A PR that changes a documented side effect updates this skill in the same PR.
