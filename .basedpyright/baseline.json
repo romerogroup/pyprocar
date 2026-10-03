@@ -8652,14 +8652,6 @@
                 }
             },
             {
-                "code": "reportArgumentType",
-                "range": {
-                    "startColumn": 25,
-                    "endColumn": 28,
-                    "lineCount": 1
-                }
-            },
-            {
                 "code": "reportUnannotatedClassAttribute",
                 "range": {
                     "startColumn": 13,
