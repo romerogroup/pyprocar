@@ -37,7 +37,9 @@ def test_box_slicer_saves_the_3d_view_and_the_2d_slice(tmp_path):
     plotter = FermiPlotter(off_screen=True)
     view, cut = tmp_path / "view.png", tmp_path / "slice.png"
 
-    plotter.add_box_slicer(sphere, normal=(0, 0, 1), origin=(0, 0, 0), save_2d=view, save_2d_slice=cut)
+    plotter.add_box_slicer(
+        sphere, normal=(0, 0, 1), origin=(0, 0, 0), save_2d=view, save_2d_slice=cut
+    )
 
     assert _inked_pixels(view) > 1000
     assert _inked_pixels(cut) > 100

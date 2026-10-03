@@ -721,7 +721,9 @@ class FermiHandler:
         user_logger.info(f"Generated Fermi surface with {fermi_surface.n_points} points")
 
         # Create plotter and add box slicer
-        plotter_kwargs = {k: v for k, v in kwargs.items() if k in ["off_screen", "window_size", "theme"]}
+        plotter_kwargs = {
+            k: v for k, v in kwargs.items() if k in ["off_screen", "window_size", "theme"]
+        }
         if save_2d:
             plotter_kwargs["off_screen"] = True
         fsplt = FermiPlotter(**plotter_kwargs)

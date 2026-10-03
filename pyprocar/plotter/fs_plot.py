@@ -448,9 +448,6 @@ class FermiPlotter(SurfacePlotter):
         if add_plane_widget_args is None:
             add_plane_widget_args = {}
 
-        origin = np.array(origin)
-        normal = np.array(normal)
-
         add_surface_args["add_texture_args"] = add_surface_args.get("add_texture_args", {})
         add_surface_args["add_texture_args"]["name"] = "vectors"
 

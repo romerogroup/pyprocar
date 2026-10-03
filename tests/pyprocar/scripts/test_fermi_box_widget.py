@@ -18,7 +18,7 @@ def _inked_pixels(path) -> int:
 def test_box_widget_saves_the_3d_view_and_the_2d_slice(monkeypatch, tmp_path):
     ebs = sphere_mesh(1, np.full((2, 1, 2, 1), 0.5))
 
-    def from_code(cls: type[ElectronicBandStructureMesh], *_args: object, **_kwargs: object):
+    def from_code(_cls: type[ElectronicBandStructureMesh], *_args: object, **_kwargs: object):
         return ebs
 
     monkeypatch.setattr(ElectronicBandStructureMesh, "from_code", classmethod(from_code))
