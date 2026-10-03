@@ -112,6 +112,14 @@ class SurfacePlotter(pv.Plotter):
         self._meshes: list[pv.PolyData] = []
         self.values_dict: dict[str, np.ndarray] = {}
 
+    def add_plane_widget(self, callback, *, origin=None, bounds=None, **kwargs):
+        """Grow ``bounds`` to hold ``origin``; VTK's plane widget rejects an origin outside them."""
+        if origin is not None and bounds is not None:
+            low = np.minimum(np.asarray(bounds)[::2], origin)
+            high = np.maximum(np.asarray(bounds)[1::2], origin)
+            bounds = tuple(np.column_stack([low, high]).ravel().tolist())
+        return super().add_plane_widget(callback, origin=origin, bounds=bounds, **kwargs)
+
     def _plot_series(
         self,
         series_list: list[SurfaceSeries],
