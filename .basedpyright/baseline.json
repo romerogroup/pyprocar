@@ -6692,22 +6692,6 @@
                 }
             },
             {
-                "code": "reportCallIssue",
-                "range": {
-                    "startColumn": 34,
-                    "endColumn": 80,
-                    "lineCount": 1
-                }
-            },
-            {
-                "code": "reportArgumentType",
-                "range": {
-                    "startColumn": 49,
-                    "endColumn": 71,
-                    "lineCount": 1
-                }
-            },
-            {
                 "code": "reportArgumentType",
                 "range": {
                     "startColumn": 22,
