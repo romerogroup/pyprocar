@@ -193,6 +193,20 @@ def test_orbit_around_the_zone_corner_closes_across_the_zone_boundary():
     assert _number(text) == pytest.approx(np.pi * 0.1 * (2 * np.pi) ** 2, rel=0.02)
 
 
+@pytest.mark.parametrize("height", [0.5, 0.5 - 1e-4, -0.5 + 1e-4])
+def test_cut_on_a_zone_face_counts_the_orbit_once(height):
+    def cylinder_around_m(k):
+        to_m = k[:, :2] % 1.0 - 0.5
+        return np.sum(to_m**2, axis=1)
+
+    text = _slice_text(
+        _periodic_surface(cylinder_around_m), origin=(0, 0, height), show_cross_section_area=True
+    )
+
+    assert text.endswith(" Ang^-2")
+    assert _number(text) == pytest.approx(np.pi * 0.1 * (2 * np.pi) ** 2, rel=0.02)
+
+
 def test_sheets_that_run_through_the_zone_stay_open():
     def planes_at_ky(k):
         to_gamma = (k[:, 1] + 0.5) % 1.0 - 0.5
