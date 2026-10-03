@@ -488,8 +488,14 @@ class FermiSlicePlotter:
         if len(colors) == 0:
             colors = None
 
-        merged_kwargs = {"cmap": cmap_obj, "norm": norm, **series.additional_kwargs, **line_kwargs}
-        lc = LineCollection(line_segments, array=colors, **merged_kwargs)
+        merged_kwargs = {**series.additional_kwargs, **line_kwargs}
+        lc = LineCollection(
+            line_segments,
+            array=colors,
+            cmap=merged_kwargs.pop("cmap", cmap_obj),
+            norm=merged_kwargs.pop("norm", norm),
+            **merged_kwargs,
+        )
         self._scalar_plot = self.ax.add_collection(lc)
         return lc
 
@@ -501,16 +507,17 @@ class FermiSlicePlotter:
         scatter_kwargs: dict,
     ):
         """Add scatter plot with scalar coloring."""
+        merged_kwargs = {**series.additional_kwargs, **scatter_kwargs}
+
         vmin, vmax = clim if clim else (None, None)
-        merged_kwargs = {
-            "cmap": cmap,
-            "vmin": vmin,
-            "vmax": vmax,
-            **series.additional_kwargs,
-            **scatter_kwargs,
-        }
         self._scalar_plot = self.ax.scatter(
-            series.points_2d[:, 0], series.points_2d[:, 1], c=series.scalars, **merged_kwargs
+            series.points_2d[:, 0],
+            series.points_2d[:, 1],
+            c=series.scalars,
+            cmap=merged_kwargs.pop("cmap", cmap),
+            vmin=merged_kwargs.pop("vmin", vmin),
+            vmax=merged_kwargs.pop("vmax", vmax),
+            **merged_kwargs,
         )
         return self._scalar_plot
 
@@ -528,17 +535,16 @@ class FermiSlicePlotter:
 
         vector_magnitude = np.linalg.norm(vectors, axis=-1)
 
+        merged_kwargs = {**series.additional_kwargs, **quiver_kwargs}
+        merged_kwargs.setdefault("angles", "uv")
+        merged_kwargs.setdefault("scale_units", "inches")
+        merged_kwargs.setdefault("units", "inches")
+
+        if "scale" not in merged_kwargs:
+            merged_kwargs["scale"] = vector_magnitude.max() * 3
+
         vmin, vmax = clim if clim else (vector_magnitude.min(), vector_magnitude.max())
-        merged_kwargs = {
-            "cmap": cmap,
-            "norm": Normalize(vmin=vmin, vmax=vmax),
-            "angles": "uv",
-            "scale_units": "inches",
-            "units": "inches",
-            "scale": vector_magnitude.max() * 3,
-            **series.additional_kwargs,
-            **quiver_kwargs,
-        }
+        norm = Normalize(vmin=vmin, vmax=vmax)
 
         # Use first 2 components for 2D plot
         u = vectors[:, 0]
@@ -550,6 +556,8 @@ class FermiSlicePlotter:
             u,
             v,
             vector_magnitude,
+            cmap=merged_kwargs.pop("cmap", cmap),
+            norm=merged_kwargs.pop("norm", norm),
             **merged_kwargs,
         )
         return self._vector_plot

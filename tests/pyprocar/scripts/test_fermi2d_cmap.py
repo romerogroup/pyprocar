@@ -12,16 +12,21 @@ import pyprocar
 from pyprocar.core.fermisurface import FermiSurface
 from tests.pyprocar.core.test_fermisurface_noncollinear import sphere_mesh
 
+TOTAL, SX, SY, SZ = 0.4, 0.1, 0.2, 0.3
+
+pytestmark = pytest.mark.usefixtures("noncollinear_calc")
+
 
 @pytest.fixture
 def noncollinear_calc(monkeypatch):
-    """fermi2D reads a non-collinear sphere whose band 0 has spin (0.1, 0.2, 0.3)."""
     projected = np.zeros((2, 4, 2, 1))
-    projected[0, :, 0, 0] = [0.4, 0.1, 0.2, 0.3]
+    projected[0, :, 0, 0] = [TOTAL, SX, SY, SZ]
     ebs = sphere_mesh(4, projected)
-    monkeypatch.setattr(
-        FermiSurface, "from_code", classmethod(lambda cls, **kwargs: cls.from_ebs(ebs))
-    )
+
+    def from_code(cls: type[FermiSurface], **_kwargs: object) -> FermiSurface:
+        return cls.from_ebs(ebs)
+
+    monkeypatch.setattr(FermiSurface, "from_code", classmethod(from_code))
     yield
     plt.close("all")
 
@@ -31,7 +36,7 @@ def _artist(ax, kind):
     return artist
 
 
-def test_spin_texture_arrows_use_cmap(noncollinear_calc):
+def test_spin_texture_arrows_use_cmap():
     _, ax = pyprocar.fermi2D(
         code="vasp", dirname="calc", mode="spin_texture", cmap="viridis", show=False
     )
@@ -39,7 +44,7 @@ def test_spin_texture_arrows_use_cmap(noncollinear_calc):
     assert _artist(ax, Quiver).get_cmap().name == "viridis"
 
 
-def test_plot_line_kwargs_cmap_colors_the_contours(noncollinear_calc):
+def test_plot_line_kwargs_cmap_colors_the_contours():
     _, ax = pyprocar.fermi2D(
         code="vasp",
         dirname="calc",
@@ -53,17 +58,18 @@ def test_plot_line_kwargs_cmap_colors_the_contours(noncollinear_calc):
     lines = _artist(ax, LineCollection)
     assert lines.get_cmap().name == "magma"
     assert np.asarray(lines.get_linewidth()).tolist() == [3.0]
+    np.testing.assert_allclose(lines.get_array(), SZ)
 
 
-def test_plot_arrows_kwargs_cmap_colors_the_arrows(noncollinear_calc):
+def test_plot_arrows_kwargs_cmap_colors_the_arrows():
     _, ax = pyprocar.fermi2D(
         code="vasp",
         dirname="calc",
         mode="spin_texture",
-        plot_arrows_kwargs={"cmap": "cividis", "scale": 2.0},
+        plot_arrows_kwargs={"cmap": "cividis", "alpha": 0.5},
         show=False,
     )
 
     arrows = _artist(ax, Quiver)
     assert arrows.get_cmap().name == "cividis"
-    assert arrows.scale == 2.0
+    assert arrows.get_alpha() == 0.5

@@ -632,7 +632,6 @@ class FermiSurface(pv.PolyData):
             cell_data = {}
             field_data = {}
             fs_indices = np.flatnonzero(combined_mask)
-            new_point_set = self.point_set.select_points(fs_indices)
 
         else:
             new_surface, fs_indices = self.remove_points(~combined_mask, inplace=False)
@@ -641,13 +640,13 @@ class FermiSurface(pv.PolyData):
             point_data = new_surface.point_data
             cell_data = new_surface.cell_data
             field_data = new_surface.field_data
-            new_point_set = self.point_set.select_points(fs_indices)
-            # spin_band_index holds positions in band_isosurfaces, which shrank to the selection.
-            kept_surfaces = [self.band_spin_surface_map[key] for key in selected_band_surfaces]
-            surface_index = new_point_set.get_property("spin_band_index").value
-            new_point_set.add_property(
-                name="spin_band_index", value=np.searchsorted(kept_surfaces, surface_index)
-            )
+
+        new_point_set = self.point_set.select_points(fs_indices)
+        old_positions = [self.band_spin_surface_map[key] for key in selected_band_surfaces]
+        new_point_set.add_property(
+            name="spin_band_index",
+            value=np.searchsorted(old_positions, new_point_set.point_data["spin_band_index"].value),
+        )
 
         fs = FermiSurface(
             points=points,

@@ -7,20 +7,18 @@ from pyprocar.core.fermisurface import FermiSurface
 from pyprocar.core.kpoints import KGRID_MODE, KGridInfo
 
 N_K = 10
+ATOM_0_WEIGHT = (0.3, 0.6)
+ATOM_1_WEIGHT = 0.1
 
 
 @pytest.fixture(scope="module")
 def two_sphere_surface() -> FermiSurface:
-    """Bands 0 and 1 are nested spheres around Gamma, both crossing E_F = 0.1.
-
-    Atom 0 holds 0.3 on band 0 and 0.6 on band 1; atom 1 holds 0.1 on both.
-    """
     frac = np.arange(N_K) / N_K
     kpoints = np.stack(np.meshgrid(frac, frac, frac, indexing="ij"), axis=-1).reshape(-1, 3)
     k2 = np.sum(((kpoints + 0.5) % 1.0 - 0.5) ** 2, axis=1)
     projected = np.zeros((len(kpoints), 2, 1, 2, 1))
-    projected[:, 0, 0, :, 0] = [0.3, 0.1]
-    projected[:, 1, 0, :, 0] = [0.6, 0.1]
+    for iband, weight in enumerate(ATOM_0_WEIGHT):
+        projected[:, iband, 0, :, 0] = [weight, ATOM_1_WEIGHT]
     ebs = ElectronicBandStructureMesh(
         kgrid_info=KGridInfo(
             kgrid=(N_K, N_K, N_K), kgrid_mode=KGRID_MODE.GAMMA, kshift=(0.0, 0.0, 0.0)
@@ -46,7 +44,7 @@ def test_select_bands_keeps_the_selected_surface_and_its_projection(two_sphere_s
     assert list(selected.band_spin_mask) == [key]
     assert selected.n_points == fs.band_spin_mask[key].sum()
     np.testing.assert_allclose(selected.points, fs.points[fs.band_spin_mask[key]])
-    np.testing.assert_allclose(values[:, iband, ispin], [0.3, 0.6][iband])
+    np.testing.assert_allclose(values[:, iband, ispin], ATOM_0_WEIGHT[iband])
     np.testing.assert_array_equal(values[:, 1 - iband, ispin], 0.0)
 
 
@@ -78,7 +76,7 @@ def test_select_bands_keeps_several_surfaces_in_surface_order(two_sphere_surface
     values = selected.compute_projected_sum(atoms=[0]).value
 
     assert list(selected.band_spin_mask) == [(0, 0), (1, 0)]
-    for key, weight in [((0, 0), 0.3), ((1, 0), 0.6)]:
+    for key in [(0, 0), (1, 0)]:
         mask = selected.band_spin_mask[key]
         np.testing.assert_allclose(selected.points[mask], fs.points[fs.band_spin_mask[key]])
-        np.testing.assert_allclose(values[mask, key[0], 0], weight)
+        np.testing.assert_allclose(values[mask, key[0], 0], ATOM_0_WEIGHT[key[0]])
