@@ -5036,38 +5036,6 @@
             {
                 "code": "reportArgumentType",
                 "range": {
-                    "startColumn": 56,
-                    "endColumn": 66,
-                    "lineCount": 1
-                }
-            },
-            {
-                "code": "reportArgumentType",
-                "range": {
-                    "startColumn": 56,
-                    "endColumn": 66,
-                    "lineCount": 1
-                }
-            },
-            {
-                "code": "reportArgumentType",
-                "range": {
-                    "startColumn": 68,
-                    "endColumn": 95,
-                    "lineCount": 1
-                }
-            },
-            {
-                "code": "reportArgumentType",
-                "range": {
-                    "startColumn": 68,
-                    "endColumn": 95,
-                    "lineCount": 1
-                }
-            },
-            {
-                "code": "reportArgumentType",
-                "range": {
                     "startColumn": 33,
                     "endColumn": 45,
                     "lineCount": 1
@@ -13270,14 +13238,6 @@
                     "endColumn": 25,
                     "lineCount": 1
                 }
-            },
-            {
-                "code": "reportOptionalMemberAccess",
-                "range": {
-                    "startColumn": 25,
-                    "endColumn": 30,
-                    "lineCount": 1
-                }
             }
         ],
         "./pyprocar/scripts/scriptBandStructure2DHandler.py": [
@@ -15892,14 +15852,6 @@
                 "range": {
                     "startColumn": 70,
                     "endColumn": 80,
-                    "lineCount": 1
-                }
-            },
-            {
-                "code": "reportInvalidStringEscapeSequence",
-                "range": {
-                    "startColumn": 19,
-                    "endColumn": 21,
                     "lineCount": 1
                 }
             },
