@@ -6,7 +6,7 @@ The layer that turns raw DFT output directories into canonical objects. Every pl
 
 - Codes: the dispatcher accepts exactly `vasp`, `qe`, `elk`, `abinit`, `siesta`, `lobster`, `bxsf`, `frmsf` and `dftbplus`. The DFT+ string is `dftbplus`, not `dftb+`; that raises `ValueError: Invalid code`. Adapters live in `pyprocar/io/<code>/`; DFTB+ is the single file `pyprocar/io/dftbplus.py`.
 - Products: `Parser(code, dirpath)` has `.ebs`, `.dos`, `.structure`, `.kpath` and `.reciprocal_lattice`. There is no `Parser.fermi`; use `p.ebs.fermi`.
-- Elk: bands from `BANDS.OUT` plus `BANDLINES.OUT`, the Fermi level from `FERMI.OUT`, `elk.in` plot1d paths, and `GEOMETRY.OUT`. These are recent work.
+- Elk: bands from `BAND.OUT` (task 20) or `BAND_S01_A0001.OUT` (tasks 21 and 22) plus `BANDLINES.OUT`, the Fermi level from `FERMI.OUT` or `EFERMI.OUT`, `elk.in` plot1d paths, and `GEOMETRY.OUT`. Elk never writes `BANDS.OUT`.
 
 ## How to get to it (user POV)
 
@@ -33,4 +33,4 @@ The proven end state (1f36aae1):
 
 - The HF `data/examples/*` sets are VASP only. Non-VASP fixtures are already extracted locally at `data/codes/{abinit,elk,qe,vasp}` and `data/io/vasp`, and the unit tests read them from `ROOT/data`. If they are missing, `$H fetch data/codes` (or `data/io`) should fetch and extract the dataset zip, according to `utils/download_examples.py`. This hasn't been driven, because the dirs already exist and the fetch returns early. There are no siesta, lobster, bxsf, frmsf or dftb fixtures.
 - **BXSF has no fixture in `data/`, so make one.** ABINIT: `pixi exec -s abinit abinit run.abi` with `prtfsurf 1`, `shiftk 0 0 0` and a metal (the conda package ships only the H GTH pseudopotential `info/test/01h.pspgth`; simple-cubic H with `acell 3*3.0` works, and `acell 3*5.0` plus `nsppol 2` gives distinct spin channels). It writes `runo_BXSF` in Hartree. QE: `pw.x` scf and nscf, then `fs.x`, which writes `<prefix>_fs.bxsf`. `ElectronicBandStructureMesh.from_code("bxsf", dir)` finds either file. Check Gamma energies against `runo_EIG` or `nscf.out`. `FermiSurface.from_code("bxsf", ...)` crashes in `ElectronicBandStructure.n_spins` because BXSF has no projections.
-- **Elk is verified-unreachable with the local fixtures.** The `data/codes/elk/*` dirs use the older layout (`BAND_S0x_A000y.OUT`, `EFERMI.OUT`, no `BANDS.OUT`/`FERMI.OUT`), so `Parser("elk", ...).ebs` is `None`. Proving Elk needs a calc made by a current Elk version. The Elk unit tests build inline `elk.in` text instead.
+- Elk bands (proven at #268): `data/codes/elk/6.3/SrVO3/non-spin-polarized/bands` gives bands `(54, 41, 1)` and `spin-polarized-colinear/bands` gives `(44, 71, 2)`, with ticks `Γ X M Γ R X` at the plot1d vertices. Elk lists each vertex once, and the parser repeats the 4 inner ones, so 50 and 40 points become 54 and 44.
