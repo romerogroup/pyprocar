@@ -68,8 +68,8 @@ class TestBS2DPlotterPlot:
     def test_vectors_add_glyphs_scaled_to_the_longest(self, plotter):
         plotter.plot(vectors_data=_property(VECTORS))
 
-        arrows = plotter.actors["vectors"].mapper.dataset
-        assert arrows.bounds[5] == pytest.approx(3.0)
+        assert plotter.actors["vectors_1_0"].mapper.dataset.bounds[5] == pytest.approx(0.0)
+        assert plotter.actors["vectors_2_0"].mapper.dataset.bounds[5] == pytest.approx(3.0)
 
     def test_records_points_and_scalars_per_surface(self, plotter):
         plotter.plot(scalars_data="band_speed")
