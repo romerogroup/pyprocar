@@ -270,11 +270,9 @@ def test_bands_and_fermi_survive_a_bad_unrelated_block(siesta_dir: Path) -> None
 
 def test_auto_detect_skips_an_fdf_another_fdf_redirects_to(tmp_path: Path) -> None:
     # Layout of a Siesta 5.4.2 run: si.fdf reads its lattice from lv.fdf.
-    main = SIESTA_542_FDF.replace(
-        "%block lattice-vectors\n  1.0 0.0 0.0\n  0.0 1.0 0.0\n  0.0 0.0 1.0\n"
-        "%endblock lattice-vectors",
-        "%block LatticeVectors < lv.fdf",
-    )
+    start = SIESTA_542_FDF.index("%block lattice-vectors")
+    end = SIESTA_542_FDF.index("%endblock lattice-vectors") + len("%endblock lattice-vectors")
+    main = SIESTA_542_FDF[:start] + "%block LatticeVectors < lv.fdf" + SIESTA_542_FDF[end:]
     (tmp_path / "lv.fdf").write_text("  1.0 0.0 0.0\n  0.0 1.1 0.0\n  0.0 0.0 1.2\n")
     (tmp_path / "si.fdf").write_text(main)
 
@@ -282,5 +280,7 @@ def test_auto_detect_skips_an_fdf_another_fdf_redirects_to(tmp_path: Path) -> No
 
     assert parser._fdf is not None
     assert parser._fdf.filepath == tmp_path / "si.fdf"
-    assert parser.structure is not None
-    assert np.allclose(np.diag(parser.structure.lattice), [2.6, 2.86, 3.12])
+    structure = parser.structure
+    assert structure is not None
+    assert structure.lattice is not None
+    assert np.allclose(np.diag(structure.lattice), [2.6, 2.86, 3.12])
