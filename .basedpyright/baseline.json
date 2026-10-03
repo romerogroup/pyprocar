@@ -5300,22 +5300,6 @@
                     "endColumn": 21,
                     "lineCount": 1
                 }
-            },
-            {
-                "code": "reportCallIssue",
-                "range": {
-                    "startColumn": 12,
-                    "endColumn": 42,
-                    "lineCount": 1
-                }
-            },
-            {
-                "code": "reportArgumentType",
-                "range": {
-                    "startColumn": 12,
-                    "endColumn": 42,
-                    "lineCount": 1
-                }
             }
         ],
         "./pyprocar/io/abinit/output.py": [
