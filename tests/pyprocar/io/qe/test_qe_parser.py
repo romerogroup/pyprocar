@@ -776,8 +776,18 @@ def test_an_nscf_xml_with_as_many_but_different_kpoints_does_not_win(tmp_path: P
 
 
 @pytest.mark.data
-def test_projwfc_out_bands_match_atomic_proj_bands_in_ev(tmp_path: Path) -> None:
-    bands_dir = QE_CODES_DIR / "non-spin-polarized" / "bands"
+@pytest.mark.parametrize(
+    ("mag", "gamma_band_0"),
+    [
+        ("non-spin-polarized", [-53.32013]),
+        ("spin-polarized-colinear", [-53.3077, -53.3059]),
+        ("non-colinear", None),
+    ],
+)
+def test_projwfc_out_bands_match_atomic_proj_bands_in_ev(
+    tmp_path: Path, mag: str, gamma_band_0: list[float] | None
+) -> None:
+    bands_dir = QE_CODES_DIR / mag / "bands"
     for path in bands_dir.rglob("*"):
         skip = "pdos_" in path.name or path.suffix == ".pkl" or path.name == "atomic_proj.xml"
         if path.is_file() and not skip:
@@ -788,5 +798,6 @@ def test_projwfc_out_bands_match_atomic_proj_bands_in_ev(tmp_path: Path) -> None
 
     assert fallback.atomic_proj_xml is None and fallback.projwfc_out is not None
     assert primary.bands is not None and fallback.bands is not None
-    assert fallback.bands[0, 0, 0] == pytest.approx(-53.32013, abs=1e-4)
+    if gamma_band_0 is not None:
+        assert fallback.bands[0, 0, :] == pytest.approx(gamma_band_0, abs=1e-4)
     np.testing.assert_allclose(fallback.bands, primary.bands, atol=1e-4)

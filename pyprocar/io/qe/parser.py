@@ -452,8 +452,9 @@ class QEParser(BaseParser):
 
         The xml names the run that wrote it. A later pw.x run in the same
         directory overwrites the xml but not the projwfc output, so the xml
-        decides only when its k-point count matches the projwfc k-points;
-        otherwise the presence of a bands input decides.
+        decides only when it lists the same k-points as the projwfc output;
+        otherwise the presence of a bands input decides. Both files give the
+        k-points in cartesian units of 2 pi/alat.
         """
         projwfc_kpoints = None
         if self.atomic_proj_xml is not None:
@@ -467,7 +468,10 @@ class QEParser(BaseParser):
             same_run = (
                 projwfc_kpoints is None
                 or xml_kpoints is None
-                or len(xml_kpoints) == len(projwfc_kpoints)
+                or (
+                    xml_kpoints.shape == projwfc_kpoints.shape
+                    and np.allclose(xml_kpoints, projwfc_kpoints, atol=1e-5)
+                )
             )
             if same_run:
                 return xml.calculation == "bands"
@@ -615,10 +619,8 @@ class QEParser(BaseParser):
             logger.info("Parsing bands from atomic_proj.xml")
             bands = self.atomic_proj_xml.bands
         elif self.projwfc_out is not None and self.projwfc_out.bands is not None:
-            logger.info("Parsing bands from projwfc.out")
-            bands = HARTREE_TO_EV * self.projwfc_out.bands
-            logger.info("Parsing bands from projwfc.out")
-            bands = HARTREE_TO_EV * self.projwfc_out.bands
+            logger.info("Parsing bands from projwfc.out, which prints them in eV")
+            bands = self.projwfc_out.bands
         elif self.pw_xml is not None and self.pw_xml.bands is not None:
             logger.info("Parsing bands from pw.xml")
             bands = HARTREE_TO_EV * self.pw_xml.bands
