@@ -78,7 +78,16 @@ def test_kpath_distances_keep_steps_across_shared_boundaries(abinit_path_dir: Pa
     distances = np.asarray(kpath.get_distances(as_segments=False, cartesian=False))
     gamma_h = np.linalg.norm(H)
     h_n = np.linalg.norm(np.subtract(N, H))
-    assert distances[[5, 6, 10]] == pytest.approx([gamma_h, gamma_h + h_n / 5, gamma_h + h_n])
+    p_gamma = np.linalg.norm(P)
+    assert distances[[5, 6, 10, 11, 15]] == pytest.approx(
+        [
+            gamma_h,
+            gamma_h + h_n / 5,
+            gamma_h + h_n,
+            gamma_h + h_n + p_gamma / 5,
+            gamma_h + h_n + p_gamma,
+        ]
+    )
 
 
 @pytest.mark.data
@@ -109,8 +118,8 @@ def test_fe_bands_ebs_is_a_path_with_cartesian_tick_distances():
     kpath_meta = bands.metadata["kpath"]
 
     a = 2 * 1.420026
-    gamma_h, h_n, gamma_p = 1 / a, 1 / (np.sqrt(2) * a), np.sqrt(3) / (2 * a)
-    expected = np.cumsum([0, gamma_h, h_n, h_n, gamma_p, gamma_p])
+    gamma_h, h_n, gamma_p, p_n = 1 / a, 1 / (np.sqrt(2) * a), np.sqrt(3) / (2 * a), 1 / (2 * a)
+    expected = np.cumsum([0, gamma_h, h_n, h_n, gamma_p, gamma_p, p_n])
     tick_x = kpath_meta["k_distances"][kpath_meta["tick_positions"]]
     assert kpath_meta["tick_names"] == ["$\\Gamma$", "H", "N", "$\\Gamma$", "P", "H|P", "N"]
-    assert tick_x[:6] == pytest.approx(expected, rel=1e-4)
+    assert tick_x == pytest.approx(expected, rel=1e-4)
