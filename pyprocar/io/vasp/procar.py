@@ -138,7 +138,8 @@ class Procar(Mapping[str, Any]):
 
     @cached_property
     def _raw_kpoints(self) -> np.ndarray:
-        regex = r"k-point\s+\d+\s*:\s+([-.\d]+)\s+([-.\d]+)\s+([-.\d]+)\s+"
+        # Fixed-width columns: a minus sign can follow the previous number without a space.
+        regex = r"k-point\s+\d+\s*:\s*(-?\d+\.\d+)\s*(-?\d+\.\d+)\s*(-?\d+\.\d+)"
         kpoints = re.findall(regex, self.file_str)
         if len(kpoints) == 0:
             raise ValueError("No kpoints found in PROJCAR file. Issue with regex parsing.")
@@ -257,6 +258,15 @@ class Procar(Mapping[str, Any]):
             return None
         return self._read_phases()
 
+    def _projection_blocks(self, n_rows: int) -> list[str]:
+        """The n_rows rows after each 'ion' header line, without blank lines.
+
+        VASP 6.5 puts a blank line between the four non-collinear spin components.
+        """
+        pattern = r"^ion.*\n(" + r"\n*.+\n" * n_rows + ")"
+        blocks = re.findall(pattern, self.file_str, re.MULTILINE)
+        return ["\n".join(line for line in block.splitlines() if line.strip()) for block in blocks]
+
     def _read_projections(self) -> np.ndarray | None:
         """
         Reads all the spd-projected data. A typical/expected block is:
@@ -305,18 +315,12 @@ class Procar(Mapping[str, Any]):
         if self.is_non_colinear:
             n_spd_rows *= 4
 
-        line_pattern = [r".+\n" for _ in range(n_spd_rows)]
-        pattern = r"ion.*\n(" + "".join(line_pattern) + ")"
-
-        projection_blocks = re.findall(pattern, self.file_str)
-
         spd = []
-        for block in projection_blocks:
+        for block in self._projection_blocks(n_spd_rows):
             if "charge" in block:
                 continue
-            projection_lines = block.replace("tot", "0").strip().split("\n")
-            for line in projection_lines:
-                spd.append(line.strip().split())  # pyright: ignore[reportUnknownMemberType]
+            for line in block.replace("tot", "0").splitlines():
+                spd.append(line.split())
 
         spd = np.array(spd, dtype=float)
 
@@ -407,19 +411,13 @@ class Procar(Mapping[str, Any]):
         if self.is_non_colinear:
             n_spd_rows *= 4
 
-        line_pattern = [r".+\n" for _ in range(n_spd_rows)]
-        pattern = r"ion.*\n(" + "".join(line_pattern) + ")"
-
-        projection_blocks = re.findall(pattern, self.file_str)
-
         spd_phase = []
         real_parts = []
         imaginary_parts = []
-        for block in projection_blocks:
+        for block in self._projection_blocks(n_spd_rows):
             if "charge" not in block:
                 continue
-            projection_lines = block.replace("tot", "0").strip().split("\n")
-            for line in projection_lines:
+            for line in block.replace("tot", "0").splitlines():
                 if "charge" in line:
                     continue
                 projection_phases_with_tot_with_ion = line.strip().split()
