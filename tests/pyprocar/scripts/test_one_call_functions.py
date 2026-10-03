@@ -1,5 +1,9 @@
 """Smoke tests for the one-call plotting functions, called the way the notebooks call them."""
 
+import ast
+import inspect
+import json
+import re
 import shutil
 from typing import Any, cast
 
@@ -20,7 +24,7 @@ from pyprocar.core import (
     FermiSurface,
 )
 from pyprocar.core.property_store import Property
-from tests.utils import DATA_DIR
+from tests.utils import DATA_DIR, ROOT_DIR
 
 FERMI = 5.3017
 V_ATOM = [1]
@@ -627,6 +631,103 @@ class TestFermi2D:
         assert len(fig.axes) == 2
         segments = [c for c in ax.collections if isinstance(c, LineCollection)]
         assert segments[0].get_array() is not None
+
+    def test_plot_line_kwargs_style_every_contour(self, tmp_path):
+        calc = _calc(tmp_path, "fermi2d/spin-polarized")
+
+        _, ax = pyprocar.fermi2D(
+            code="vasp",
+            dirname=calc,
+            mode="plain",
+            fermi=FERMI,
+            energy=0.0,
+            plot_line_kwargs={"colors": "purple", "linewidths": 2.0, "linestyles": "dashed"},
+            show=False,
+        )
+
+        (lines,) = _line_collections(ax)
+        assert np.asarray(lines.get_edgecolor()).tolist() == [
+            [0.5019607843137255, 0.0, 0.5019607843137255, 1.0]
+        ]
+        assert np.asarray(lines.get_linewidth()).tolist() == [2.0]
+        assert lines.get_linestyle() == [(0.0, [7.4, 3.2])]
+
+    def test_parametric_spin_channel_uses_cmap(self, tmp_path):
+        calc = _calc(tmp_path, "fermi2d/spin-polarized")
+
+        fig, ax = pyprocar.fermi2D(
+            code="vasp",
+            dirname=calc,
+            mode="parametric",
+            fermi=FERMI,
+            energy=0.0,
+            k_z_plane=0.0,
+            atoms=V_ATOM,
+            orbitals=D_ORBITALS,
+            spins=[0],
+            show_colorbar=True,
+            cmap="viridis",
+            use_cache=False,
+            verbose=2,
+            show=False,
+        )
+
+        (lines,) = _line_collections(ax)
+        assert lines.get_cmap().name == "viridis"
+        assert len(fig.axes) == 2
+
+    def test_show_colorbar_false_draws_no_colorbar(self, tmp_path):
+        calc = _calc(tmp_path, "fermi2d/non-spin-polarized")
+
+        fig, _ = pyprocar.fermi2D(
+            code="vasp",
+            dirname=calc,
+            mode="parametric",
+            fermi=FERMI,
+            atoms=V_ATOM,
+            orbitals=D_ORBITALS,
+            show_colorbar=False,
+            show=False,
+        )
+
+        assert len(fig.axes) == 1
+
+
+def _documented_fermi2d_calls():
+    """Yield (location, keyword names) for every pyprocar.fermi2D call in the notebooks and docs."""
+    sources = []
+    for notebook in sorted((ROOT_DIR / "examples").rglob("*.ipynb")):
+        cells = json.loads(notebook.read_text(encoding="utf-8"))["cells"]
+        sources += [
+            (f"{notebook.name}#cell{i}", "".join(cell["source"]))
+            for i, cell in enumerate(cells)
+            if cell["cell_type"] == "code"
+        ]
+    for page in sorted((ROOT_DIR / "docs").rglob("*.rst")):
+        text = page.read_text(encoding="utf-8")
+        sources += [
+            (f"{page.name}#{i}", match.group(0))
+            for i, match in enumerate(re.finditer(r"pyprocar\.fermi2D\(.*?\)", text, re.DOTALL))
+        ]
+    for location, source in sources:
+        for node in ast.walk(ast.parse(source)):
+            if isinstance(node, ast.Call) and ast.unparse(node.func) == "pyprocar.fermi2D":
+                yield location, [kw.arg for kw in node.keywords if kw.arg]
+
+
+class TestFermi2DDocumentedCalls:
+    def test_every_documented_keyword_is_accepted(self):
+        accepted = set(inspect.signature(pyprocar.fermi2D).parameters)
+        calls = list(_documented_fermi2d_calls())
+
+        rejected = {
+            location: sorted(set(keywords) - accepted)
+            for location, keywords in calls
+            if set(keywords) - accepted
+        }
+
+        assert rejected == {}
+        assert len(calls) == 26
 
 
 class TestFermiHandlerSignature:
