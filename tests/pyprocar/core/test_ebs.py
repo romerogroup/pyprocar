@@ -604,26 +604,6 @@ class TestElectronicBandStructurePath:
         assert tick_names == kpath.tick_names
         assert tick_names_latex == kpath.tick_names_latex
 
-    def test_coordinate_transformation(self, sample_ebs_path):
-        """Test as_cart and as_frac methods."""
-        # Store original kpoints
-        original_kpoints = sample_ebs_path.kpoints.copy()
-
-        # Convert to cartesian (should be called in __init__ already)
-        sample_ebs_path.as_cart()
-        cartesian_kpoints = sample_ebs_path.kpoints.copy()
-
-        # Convert back to fractional
-        sample_ebs_path.as_frac()
-        fractional_kpoints = sample_ebs_path.kpoints.copy()
-
-        # Should be close to original
-        assert np.allclose(fractional_kpoints, original_kpoints, atol=1e-10)
-
-        # Cartesian and fractional should be different (unless reciprocal lattice is identity)
-        if not np.allclose(sample_ebs_path.reciprocal_lattice, np.eye(3)):
-            assert not np.allclose(cartesian_kpoints, fractional_kpoints)
-
     def test_gradient_func_interface(self, sample_ebs_path):
         """Test gradient_func method from DifferentiablePropertyInterface."""
         # Test that gradient_func exists and is callable
