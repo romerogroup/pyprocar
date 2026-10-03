@@ -68,7 +68,7 @@ def _band_surface_with_nan_energies() -> pv.PolyData:
     energy = kx**2 + ky**2
     energy[np.hypot(kx, ky) > 0.4] = np.nan
     grid = pv.StructuredGrid(kx[..., None], ky[..., None], energy[..., None])
-    surface = grid.extract_surface().triangulate()
+    surface = cast(pv.PolyData, grid.extract_surface().triangulate())
     surface.point_data["energy"] = surface.points[:, 2]
     surface.set_active_scalars("energy")
     return surface
@@ -108,5 +108,5 @@ def test_saved_slice_draws_the_active_vectors_as_arrows(tmp_path):
 
     (arrows,) = [c for c in slice_plotter.ax.collections if isinstance(c, Quiver)]
     assert arrows.get_cmap().name == "viridis"
-    np.testing.assert_allclose(arrows.V, 1.0)
+    np.testing.assert_allclose(arrows.get_array(), 1.0)
     plotter.close()

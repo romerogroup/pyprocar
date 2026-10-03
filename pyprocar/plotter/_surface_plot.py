@@ -21,6 +21,70 @@ def find_nearest(array, value):
     return idx
 
 
+def slice_loop_areas(slc: pv.PolyData, normal) -> tuple[list[float], int]:
+    """Areas of the closed loops in a planar slice, and the number of open curves.
+
+    Segments that touch a non-finite point are dropped first, so a curve broken by
+    NaN energies counts as open.
+    """
+    cells = np.asarray(slc.lines)
+    pairs = []
+    i = 0
+    while i < len(cells):
+        ids = cells[i + 1 : i + 1 + cells[i]]
+        pairs.append(np.column_stack([ids[:-1], ids[1:]]))
+        i += 1 + cells[i]
+    lines = np.concatenate(pairs) if pairs else np.empty((0, 2), dtype=int)
+    points = np.asarray(slc.points, dtype=np.float64)
+    lines = lines[np.isfinite(points[lines]).all(axis=(1, 2))]
+    if len(lines) == 0:
+        return [], 0
+    unit = np.asarray(normal, dtype=np.float64) / np.linalg.norm(normal)
+    helper = np.eye(3)[np.argmin(np.abs(unit))]
+    u = np.cross(unit, helper)
+    u /= np.linalg.norm(u)
+    v = np.cross(unit, u)
+    unique_points, merged = np.unique(np.round(points, 9), axis=0, return_inverse=True)
+    planar = unique_points @ np.column_stack([u, v])
+    lines = merged.reshape(-1)[lines]
+    neighbours: dict[int, list[int]] = {}
+    for a, b in lines[lines[:, 0] != lines[:, 1]].tolist():
+        neighbours.setdefault(a, []).append(b)
+        neighbours.setdefault(b, []).append(a)
+
+    areas: list[float] = []
+    n_open = 0
+    seen: set[int] = set()
+    for start in neighbours:
+        if start in seen:
+            continue
+        component = [start]
+        seen.add(start)
+        for node in component:
+            for nxt in neighbours[node]:
+                if nxt not in seen:
+                    seen.add(nxt)
+                    component.append(nxt)
+        if any(len(neighbours[node]) != 2 for node in component):
+            n_open += 1
+            continue
+        loop = [start, neighbours[start][0]]
+        while len(loop) < len(component):
+            a, b = neighbours[loop[-1]]
+            loop.append(b if a == loop[-2] else a)
+        xy = planar[loop]
+        x, y = xy[:, 0], xy[:, 1]
+        areas.append(0.5 * abs(float(np.dot(x, np.roll(y, -1)) - np.dot(y, np.roll(x, -1)))))
+    return areas, n_open
+
+
+def area_text(areas: list[float], n_open: int, scale: float = 1.0) -> str:
+    text = f"Cross sectional area : {sum(areas) * scale:.4f} Ang^-2"
+    if n_open:
+        text += f" ({n_open} open curve{'s' if n_open > 1 else ''} not counted)"
+    return text
+
+
 def clip_to_zone(surface: pv.PolyData, zone: pv.PolyData) -> pv.PolyData:
     """Cut ``surface`` down to the part inside every face plane of ``zone``."""
     for normal, center in zip(zone.face_normals, zone.centers, strict=True):
@@ -228,8 +292,15 @@ class SurfacePlotter(pv.Plotter):
     def save_slice_2d(self, surface, normal, origin, filename, cmap="plasma", clim=None):
         """Draw the cross section of ``surface`` at ``normal``/``origin`` with matplotlib."""
         slice_plotter = FermiSlicePlotter(surface, normal=normal, origin=origin)
+        vectors_name = surface.active_vectors_name
         slice_plotter.plot(
-            scalars_name=surface.active_scalars_name, scalars_cmap=cmap, scalars_clim=clim
+            scalars_name=surface.active_scalars_name,
+            vectors_name=vectors_name,
+            scalars_cmap=cmap,
+            scalars_clim=clim,
+            vectors_cmap=cmap,
+            plot_arrows=vectors_name is not None,
         )
         slice_plotter.savefig(filename)
         plt.close(slice_plotter.fig)
+        return slice_plotter
