@@ -14696,14 +14696,6 @@
                 }
             },
             {
-                "code": "reportOptionalOperand",
-                "range": {
-                    "startColumn": 19,
-                    "endColumn": 32,
-                    "lineCount": 1
-                }
-            },
-            {
                 "code": "reportUnusedVariable",
                 "range": {
                     "startColumn": 4,
