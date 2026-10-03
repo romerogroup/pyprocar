@@ -39,6 +39,7 @@ class BxsfWriter(Enum):
 
 
 _ABINIT_SPIN_NOTE = "the first band is relative to spin-up electrons"
+_FORTRAN_EXPONENT = str.maketrans("dD", "eE")
 
 
 @dataclass(frozen=True, slots=True)
@@ -71,9 +72,8 @@ def _parse_band_grid(file_str: str) -> _BandGrid:
             f"BXSF header declares {n_bands} bands but has {len(band_texts)} BAND blocks"
         )
     n_points = n1 * n2 * n3
-    fortran_exponent = str.maketrans("dD", "eE")
     blocks = [
-        np.array(text.translate(fortran_exponent).split(), dtype=float) for text in band_texts
+        np.array(text.translate(_FORTRAN_EXPONENT).split(), dtype=float) for text in band_texts
     ]
     for i, block in enumerate(blocks, start=1):
         if block.size != n_points:
@@ -131,10 +131,10 @@ class Bxsf(Mapping[str, Any]):
     @cached_property
     def fermi_energy(self) -> float:
         """Fermi energy in eV."""
-        match = re.findall(r"Fermi\s+Energy:\s*([\d.eE+-]+)", self.file_str)
+        match = re.findall(r"Fermi\s+Energy:\s*([\d.eEdD+-]+)", self.file_str)
         if not match:
             raise ValueError("No Fermi energy found in BXSF file")
-        return float(match[0]) * self.writer.energy_to_ev
+        return float(match[0].translate(_FORTRAN_EXPONENT)) * self.writer.energy_to_ev
 
     @cached_property
     def writer(self) -> BxsfWriter:

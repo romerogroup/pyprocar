@@ -25,10 +25,9 @@ class BxsfParser(BaseParser):
     dirpath : str | Path
         Directory containing BXSF file(s).
     filepaths : str | Path | list[Path] | None
-        Path(s) to .bxsf file(s). Two files are read as spin up and spin down. ``None``
-        reads ``in.bxsf``, else the QE ``fs.x`` pair ``<prefix>_fsup.bxsf`` and
-        ``<prefix>_fsdw.bxsf``, else the first ``*.bxsf`` or ABINIT ``*_BXSF`` file in
-        ``dirpath``.
+        One BXSF file, or the QE ``fs.x`` spin pair ``<prefix>_fsup.bxsf`` and
+        ``<prefix>_fsdw.bxsf``. ``None`` reads ``in.bxsf``, else that pair, else the first
+        ``*.bxsf`` or ABINIT ``*_BXSF`` file in ``dirpath``.
     """
 
     def __init__(
@@ -48,6 +47,7 @@ class BxsfParser(BaseParser):
                 self._extractors.append(Bxsf(full_path))
             else:
                 user_logger.warning(f"BXSF file not found: {full_path}")
+        _check_spin_files(self._extractors)
 
     def _find_bxsf_files(self) -> list[Path]:
         if (self.dirpath / "in.bxsf").exists():
@@ -57,17 +57,15 @@ class BxsfParser(BaseParser):
             for p in self.dirpath.glob("*")
             if p.is_file() and p.name.lower().endswith((".bxsf", "_bxsf"))
         )
-        spin_pair = _qe_fs_spin_pair(found)
-        if spin_pair is not None:
-            return spin_pair
+        chosen = _qe_fs_spin_pair(found) or found[:1]
         if not found:
             user_logger.warning(f"No in.bxsf, *.bxsf or *_BXSF file found in {self.dirpath}")
-        elif len(found) > 1:
+        elif len(found) > len(chosen):
             user_logger.warning(
                 f"Found several BXSF files in {self.dirpath}: {[str(p) for p in found]}; "
-                + f"reading {found[0]}. Pass filepaths to choose another."
+                + f"reading {[str(p) for p in chosen]}. Pass filepaths to choose another."
             )
-        return found[:1]
+        return chosen
 
     def _normalize_filepaths(self, filepaths: str | Path | list[Path]) -> list[Path]:
         """Normalize filepaths to list of Path objects."""
@@ -153,15 +151,57 @@ class BxsfParser(BaseParser):
         if len(self._extractors) == 1:
             return self._extractors[0].bands
         up, down = self._extractors
-        if up.band_labels != down.band_labels or up.nk_dim != down.nk_dim:
-            raise ValueError(
-                f"The spin-up file holds bands {list(up.band_labels)} on grid {up.nk_dim} and "
-                + f"the spin-down file holds bands {list(down.band_labels)} on grid "
-                + f"{down.nk_dim}, so they cannot form one spin-polarized band structure. "
-                + "fs.x picks the bands that cross the Fermi level in each spin separately; "
-                + "rerun it with a larger deltaE, or pass one file in filepaths."
+        return _stack_spin_pair(up, down)
+
+
+def _stack_spin_pair(up: Bxsf, down: Bxsf) -> np.ndarray:
+    """Stack the fs.x spin files on the union of their BAND labels.
+
+    fs.x keeps, per spin, only the bands within deltaE of the Fermi level. A band
+    missing from one spin lies wholly below or above that window there, so it is
+    filled with a constant on that side, which adds no Fermi surface.
+    """
+    labels = sorted(set(up.band_labels) | set(down.band_labels))
+    fermi = up.fermi_energy
+    present = np.concatenate([up.bands, down.bands], axis=1)
+    margin = float(present.max() - present.min()) + 1.0
+    channels = []
+    for spin in (up, down):
+        columns = []
+        for label in labels:
+            if label in spin.band_labels:
+                columns.append(spin.bands[:, spin.band_labels.index(label), 0])
+            else:
+                side = -1.0 if label < min(spin.band_labels) else 1.0
+                columns.append(np.full(spin.bands.shape[0], fermi + side * margin))
+        channels.append(np.stack(columns, axis=1))
+    return np.stack(channels, axis=2)
+
+
+def _check_spin_files(extractors: list[Bxsf]) -> None:
+    paths = [ext.filepath for ext in extractors if ext.filepath is not None]
+    if not extractors:
+        return
+    if len(extractors) == 1:
+        name = paths[0].name if paths else ""
+        if extractors[0].writer is BxsfWriter.QE_FS and name.endswith(("up.bxsf", "dw.bxsf")):
+            user_logger.warning(
+                f"{name} holds one spin of a QE fs.x spin-polarized run, and its partner file "
+                + "is missing; reading it as a single spin channel."
             )
-        return np.concatenate([up.bands, down.bands], axis=2)
+        return
+    is_pair = (
+        len(extractors) == 2
+        and all(ext.writer is BxsfWriter.QE_FS for ext in extractors)
+        and extractors[0].nk_dim == extractors[1].nk_dim
+        and _qe_fs_spin_pair(paths) == paths
+    )
+    if not is_pair:
+        raise ValueError(
+            f"BXSF files {[p.name for p in paths]} do not form a QE fs.x spin pair. Pass one "
+            + "file, or the <prefix>_fsup.bxsf and <prefix>_fsdw.bxsf files of one fs.x run, "
+            + "in that order."
+        )
 
 
 def _qe_fs_spin_pair(found: list[Path]) -> list[Path] | None:
