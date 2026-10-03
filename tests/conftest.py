@@ -1,18 +1,26 @@
 """Keep data/ read-only and reserve it for tests marked ``data``.
 
-An audit hook watches every test. Writing, renaming, removing, creating or
-truncating a path under data/ raises, so the write never happens. An unmarked
-test that reads data/ raises too. Library code may swallow that RuntimeError
-in an ``except Exception``, so each violation is also recorded and fails the
-test phase it happened in.
+An audit hook watches every test. Writing, renaming, removing, creating,
+truncating, linking, chmod-ing or touching a path under data/ raises, so the
+write never happens. An unmarked test that reads data/ raises too. Library code
+may swallow that RuntimeError in an ``except Exception``, so each violation is
+also recorded and fails the test phase it happened in, whatever outcome the
+phase reported.
 
-Paths are resolved with realpath, so a symlinked alias of data/ counts. Not
-caught: writes from subprocesses, opens relative to a ``dir_fd``, and
-metadata changes such as chmod or utime.
+Paths are resolved with realpath, so a symlinked alias of data/ counts. File
+descriptors and ``dir_fd`` arguments are resolved through /proc/self/fd, which
+exists on Linux only. The ``open`` audit event carries no ``dir_fd``, so
+``os.open`` is wrapped to check ``dir_fd``-relative opens itself. The wrapper is
+added to ``os.supports_dir_fd`` so callers that test for dir_fd support still
+find it.
+
+Not caught: writes from subprocesses. An audit hook sees only its own
+interpreter, and the external programs tests run need not be Python.
 """
 
 import os
 import sys
+import threading
 
 import pytest
 
@@ -20,36 +28,62 @@ from tests.utils import DATA_DIR
 
 pytest_plugins = ["pytester"]
 
-_DATA_PREFIX = os.path.realpath(DATA_DIR) + os.sep
+_DATA_ROOT = os.path.realpath(DATA_DIR)
 _WRITE_FLAGS = os.O_WRONLY | os.O_RDWR | os.O_CREAT | os.O_APPEND | os.O_TRUNC
-_MUTATING_EVENTS = {
-    "os.remove",
-    "os.rename",
-    "os.replace",
-    "os.mkdir",
-    "os.rmdir",
-    "os.truncate",
-    "shutil.rmtree",
+# event: (path position, dir_fd position, follows a final symlink) per mutated path
+_MUTATING_EVENTS: dict[str, tuple[tuple[int, int | None, bool], ...]] = {
+    "os.remove": ((0, 1, False),),
+    "os.rename": ((0, 2, False), (1, 3, False)),
+    "os.replace": ((0, 2, False), (1, 3, False)),
+    "os.mkdir": ((0, 2, False),),
+    "os.rmdir": ((0, 1, False),),
+    "os.truncate": ((0, None, True),),
+    "os.symlink": ((1, 2, False),),
+    "os.link": ((0, 2, True), (1, 3, False)),
+    "os.chmod": ((0, 2, True),),
+    "os.chown": ((0, 3, True),),
+    "os.utime": ((0, 3, True),),
+    "shutil.rmtree": ((0, 1, False),),
 }
+_WATCHED_EVENTS = {"open", "os.listdir", "os.scandir", *_MUTATING_EVENTS}
 _current_test: tuple[str, bool] | None = None
+# set while the os.open wrapper runs, whose own check already resolved dir_fd
+_dir_fd_open = threading.local()
 _violations: list[str] = []
 
 
-def _data_path(path: object) -> str | None:
-    if not isinstance(path, str | bytes | os.PathLike):
+def _fd_path(fd: int) -> str:
+    return f"/proc/self/fd/{fd}"
+
+
+def _data_path(path: object, dir_fd: object = None, follow: bool = True) -> str | None:
+    if isinstance(path, int):
+        full = os.path.realpath(_fd_path(path))
+    elif isinstance(path, str | bytes | os.PathLike):
+        path = os.fsdecode(path)
+        if isinstance(dir_fd, int) and dir_fd >= 0 and not os.path.isabs(path):
+            path = os.path.join(_fd_path(dir_fd), path)
+        if follow:
+            full = os.path.realpath(path)
+        else:
+            head, tail = os.path.split(os.path.abspath(path))
+            full = os.path.join(os.path.realpath(head), tail)
+    else:
         return None
-    full = os.path.realpath(os.fsdecode(path)) + os.sep
-    return full if full.startswith(_DATA_PREFIX) else None
+    return full if full == _DATA_ROOT or full.startswith(_DATA_ROOT + os.sep) else None
 
 
-def _is_write(event: str, args: tuple[object, ...]) -> bool:
+def _written_paths(event: str, args: tuple[object, ...]) -> list[tuple[object, object, bool]]:
     if event == "open":
-        mode = args[1] if len(args) > 1 else None
-        flags = args[2] if len(args) > 2 else 0
-        return (isinstance(mode, str) and any(c in mode for c in "wax+")) or (
+        path, mode, flags = args
+        writes = (isinstance(mode, str) and any(c in mode for c in "wax+")) or (
             isinstance(flags, int) and bool(flags & _WRITE_FLAGS)
         )
-    return event in _MUTATING_EVENTS
+        return [(path, None, True)] if writes else []
+    return [
+        (args[path], None if dir_fd is None else args[dir_fd], follow)
+        for path, dir_fd, follow in _MUTATING_EVENTS.get(event, ())
+    ]
 
 
 def _violate(message: str) -> None:
@@ -57,23 +91,42 @@ def _violate(message: str) -> None:
     raise RuntimeError(message)
 
 
+def _check_write(nodeid: str, path: object, dir_fd: object, follow: bool = True) -> None:
+    if full := _data_path(path, dir_fd, follow):
+        _violate(f"{nodeid} writes {full}; data/ is read-only, write to tmp_path")
+
+
 def _guard_data_dir(event: str, args: tuple[object, ...]) -> None:
-    if _current_test is None or not args:
+    if _current_test is None or not args or event not in _WATCHED_EVENTS:
+        return
+    if event == "open" and getattr(_dir_fd_open, "active", False):
         return
     nodeid, marked = _current_test
-    if _is_write(event, args):
-        for path in args[:2]:
-            if full := _data_path(path):
-                _violate(f"{nodeid} writes {full}; data/ is read-only, write to tmp_path")
-    elif (
-        not marked
-        and event in {"open", "os.listdir", "os.scandir"}
-        and (full := _data_path(args[0]))
-    ):
+    if written := _written_paths(event, args):
+        for path, dir_fd, follow in written:
+            _check_write(nodeid, path, dir_fd, follow)
+    elif not marked and (full := _data_path(args[0])):
         _violate(f"{nodeid} reads {full}; mark it with pytest.mark.data")
 
 
 sys.addaudithook(_guard_data_dir)
+
+_os_open = os.open
+
+
+def _guarded_os_open(path, flags, mode=0o777, *, dir_fd=None):
+    if dir_fd is None or dir_fd < 0:
+        return _os_open(path, flags, mode, dir_fd=dir_fd)
+    _guard_data_dir("open", (os.path.join(_fd_path(dir_fd), os.fsdecode(path)), None, flags))
+    _dir_fd_open.active = True
+    try:
+        return _os_open(path, flags, mode, dir_fd=dir_fd)
+    finally:
+        _dir_fd_open.active = False
+
+
+os.open = _guarded_os_open
+os.supports_dir_fd.add(_guarded_os_open)
 
 
 def pytest_configure(config: pytest.Config) -> None:
@@ -94,8 +147,17 @@ def pytest_runtest_protocol(item: pytest.Item):
 @pytest.hookimpl(wrapper=True)
 def pytest_runtest_makereport():
     report: pytest.TestReport = yield
-    if _violations and report.passed:
+    if _violations:
+        text = "\n".join(_violations)
+        if isinstance(report.longrepr, tuple):
+            text += f"\n\n{report.longrepr[2]}"
+        if hasattr(report, "wasxfail"):
+            text += f"\n\nThe test was marked xfail: {report.wasxfail}"
+            del report.wasxfail
+        if addsection := getattr(report.longrepr, "addsection", None):
+            addsection("data/ guard", text)
+        else:
+            report.longrepr = text
         report.outcome = "failed"
-        report.longrepr = "\n".join(_violations)
     _violations.clear()
     return report
