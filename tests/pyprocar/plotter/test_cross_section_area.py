@@ -44,9 +44,23 @@ def test_van_alphen_frequency_uses_the_largest_closed_orbit():
         small.merge(_sphere(0.5)), normal=(0, 0, 1), show_van_alphen_frequency=True
     )
 
-    expected = dHvA_frequency(np.pi * RADIUS**2 * FS_AREA_SCALE_FACTOR)
-    assert _number(_area_text(plotter)) == pytest.approx(expected, rel=1e-3)
+    assert _number(_area_text(plotter)) == pytest.approx(onsager_gauss(RADIUS), rel=1e-3)
     plotter.close()
+
+
+def onsager_gauss(radius: float) -> float:
+    """F = hbar A / (2 pi e) in SI with CODATA 2018 constants, converted from tesla to gauss.
+
+    ``radius`` is in 1/Angstrom without 2 pi, so the physical orbit area is
+    pi (2 pi radius)^2 in 1/Angstrom^2, times 1e20 for 1/m^2.
+    """
+    hbar, e = 1.054571817e-34, 1.602176634e-19
+    area = np.pi * (2 * np.pi * radius) ** 2 * 1e20
+    return hbar * area / (2 * np.pi * e) * 1e4
+
+
+def test_dhva_frequency_of_one_inverse_square_angstrom():
+    assert dHvA_frequency(1.0) == pytest.approx(1.04758e8, rel=1e-5)
 
 
 def test_open_curves_are_reported_and_not_counted():
