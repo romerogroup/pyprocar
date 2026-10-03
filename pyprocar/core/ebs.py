@@ -930,7 +930,7 @@ class ElectronicBandStructure(PointSet):
         self,
         atoms: list[int] = None,
         orbitals: list[int] = None,
-        spins: list[int] = None,
+        spins: Sequence[int] | None = None,
         sum_noncolinear: bool = True,
     ):
         """_summary_
@@ -941,8 +941,9 @@ class ElectronicBandStructure(PointSet):
             list of atoms to be summed over, by default None
         orbitals : list[int], optional
             list of orbitals to be summed over, by default None
-        spins : list[int], optional
-            list of spins to be summed over, by default None
+        spins : Sequence[int], optional
+            spins to be summed over. By default every collinear channel, or only
+            the total (component 0) of a non-collinear calculation.
         sum_noncolinear : bool, optional
             Determines if the projection should be summed in a non-colinear calculation, by default True
 
@@ -955,7 +956,7 @@ class ElectronicBandStructure(PointSet):
         if atoms is None:
             atoms = np.arange(self.n_atoms, dtype=int)
         if spins is None:
-            spins = np.arange(self.n_spins, dtype=int)
+            spins = [0] if self.is_non_collinear else list(range(self.n_spins))
         if orbitals is None:
             orbitals = np.arange(self.n_orbitals, dtype=int)
         # sum over orbitals

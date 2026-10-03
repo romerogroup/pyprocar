@@ -359,6 +359,9 @@ def generate_band_2d_surfaces(
     surface_band_spin_map: dict[int, tuple[int, int]] = {}
 
     _, n_bands, n_spin_channels = new_bands.shape
+    # Non-collinear energies repeat across the 4 spin components; they are one channel.
+    if ebs.is_non_collinear:
+        n_spin_channels = 1
 
     for iband in range(n_bands):
         for ispin in range(n_spin_channels):
