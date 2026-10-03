@@ -1,5 +1,6 @@
 import numpy as np
 import pytest
+import pyvista as pv
 
 from pyprocar.core.ebs import ElectronicBandStructureMesh
 from pyprocar.core.fermisurface import FermiSurface
@@ -54,8 +55,11 @@ def test_select_bands_integral_normalizes_over_the_selected_surface(two_sphere_s
 
     values = selected.compute_projected_sum(atoms=[0], norm_mode="integral").value
 
-    sphere_area = 4 * np.pi * 0.05
-    np.testing.assert_allclose(values[:, 1, 0], 1 / sphere_area, rtol=0.05)
+    mesh = pv.PolyData(np.asarray(selected.points), np.asarray(selected.faces))
+    mesh.point_data["normed"] = values[:, 1, 0]
+    integral = np.asarray(mesh.integrate_data().point_data["normed"])[0]
+    assert integral == pytest.approx(1.0, abs=1e-12)
+    np.testing.assert_allclose(values[:, 1, 0], 1 / mesh.area)
 
 
 @pytest.mark.parametrize("norm_mode", ["raw", "max", "total", "integral"])
