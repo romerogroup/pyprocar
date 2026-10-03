@@ -25,15 +25,11 @@ $H fetch data/examples/bands/non-spin-polarized     # idempotent; ~20-35 MB each
 
 Fixture relpaths (HF dataset `lllangWV/pyprocar_test_data`): `data/examples/{bands,dos,fermi3d,fermi2d}/{non-spin-polarized,spin-polarized,non-colinear}`, plus `bands/{atomic_levels,auto,compare_bands,ipr,unfolding,2d-bands}`, `fermi2d/bisb_monolayer`, `fermi3d/van-alphen`. All are VASP; Fermi energy for the SrVO3 sets is `5.3017`.
 
-Run the gates through pixi, the way CI does:
+Run the gates with the `pixi run --locked ...` commands in `.github/workflows/ci.yml`, as written. Replace `"$BASE"` with `origin/dev`. `pixi run -e dev typecheck` is the same type check. The `test` task also runs the tests marked `data`, and the `lint` task applies `ruff --fix` to every file, so neither is a CI gate.
 
-- `pixi run -e dev typecheck` runs the CI type check (`basedpyright --project pyrightconfig.json`).
-- `pixi run -e dev pytest tests -c .config/.pytest.toml --rootdir . -n auto -m "not data"` runs the CI test set. `pixi run -e dev test` also runs the tests marked `data`, which need the fixtures.
-- `pixi run -e lint python .github/scripts/ruff_new_violations.py check origin/dev` and `... format origin/dev` run the CI ruff gates. The `lint` task applies `ruff --fix` to every file, so it is not the CI gate.
+`--locked` fails when `pixi.lock` does not match `pixi.toml`, in CI and locally. After you edit `pixi.toml`, run `pixi lock` and commit `pixi.lock` with it.
 
-CI fails when `pixi.lock` does not match `pixi.toml`. After you edit `pixi.toml`, run `pixi lock` and commit `pixi.lock` with it.
-
-Never call an env binary such as `.pixi/envs/dev/bin/basedpyright` directly. Without the env on `PATH` it reports 70 phantom errors on clean dev, where `pixi run` reports 0, as CI does.
+Never call an env binary such as `.pixi/envs/dev/bin/basedpyright` directly. Without the env on `PATH` it reports phantom errors that `pixi run` and CI do not.
 
 ## Doctor
 
