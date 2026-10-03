@@ -35,15 +35,6 @@ class Unfolder:
             return int(N)
 
     def _prepare_unfold_basis(self):
-        # basis, which are the name of the bands e.g. 'Ti|dxy|0'
-        # self.eigenvectors = np.zeros(
-        #    (self.procar.kpointsCount, self.procar.bandsCount,
-        #     (self.procar.orbitalCount - 1) * (self.procar.ionsCount - 1) *
-        #     self.procar.ispin), dtype='complex')
-        # if self.ispin is None:
-        #     iispin = 0
-        # else:
-        #     self.ispin -= 1
         self.basis = []
         self.positions = []
         self.eigenvectors = np.zeros(

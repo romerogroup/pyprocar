@@ -1,5 +1,5 @@
 import logging
-from typing import Any, cast
+from typing import cast
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -10,6 +10,7 @@ from pyprocar.core import ElectronicBandStructurePath, Structure
 from pyprocar.core.property_store import Property
 from pyprocar.plotter.bs_plot import BandStructurePlotter
 from pyprocar.scripts._selection import (
+    as_lim,
     orbital_indices,
     per_channel,
     projection_components,
@@ -20,12 +21,8 @@ from pyprocar.utils.log_utils import set_verbose_level
 from pyprocar.utils.splash import welcome
 
 user_logger = logging.getLogger("user")
-logger = logging.getLogger(__name__)
 
-PLOT_MODES = (
-    UnfoldPlotMode.PLAIN,
-    UnfoldPlotMode.PARAMETRIC,
-    UnfoldPlotMode.SACATTER,
+OVERLAY_MODES = (
     UnfoldPlotMode.OVERLAY,
     UnfoldPlotMode.OVERLAY_SPECIES,
     UnfoldPlotMode.OVERLAY_ORBITALS,
@@ -125,8 +122,8 @@ def unfold(
     welcome()
 
     plot_mode = UnfoldPlotMode(mode)
-    if plot_mode not in PLOT_MODES:
-        raise ValueError(f"unfold has no {mode} mode; use one of {[m.value for m in PLOT_MODES]}")
+    if plot_mode is UnfoldPlotMode.ATOMIC:
+        raise ValueError("unfold has no atomic mode; use bandsplot for single k-point levels")
     weight_mode = UnfoldMode(unfold_mode)
     if weight_mode is UnfoldMode.COLOR and plot_mode is not UnfoldPlotMode.PLAIN:
         raise ValueError(
@@ -134,9 +131,9 @@ def unfold(
             + " so use unfold_mode='thickness'"
         )
 
+    default_config = cast(UnfoldingConfig, ConfigFactory.create_config(PlotType.UNFOLD))
     if vmin is not None or vmax is not None:
-        kwargs["clim"] = (0.0 if vmin is None else vmin, 1.0 if vmax is None else vmax)
-    default_config = ConfigFactory.create_config(PlotType.UNFOLD)
+        kwargs["clim"] = as_lim((vmin, vmax), default_config.clim or (0.0, 1.0))
     config = cast(UnfoldingConfig, ConfigManager.merge_configs(default_config, kwargs))
     if print_plot_opts:
         for key, value in default_config.as_dict().items():
@@ -175,16 +172,16 @@ def unfold(
     orbitals = orbital_indices(orbitals)
 
     plotter = BandStructurePlotter(ax=ax)
-    style: dict[str, Any] = {
-        "linestyle": per_channel(config.linestyle, n_channels),
-        "linewidth": per_channel(config.linewidth, n_channels),
-    }
+    linestyle = per_channel(config.linestyle, n_channels)
     plotter.plot(
-        bands, color=config.color, alpha=per_channel(config.opacity, n_channels), **style
+        bands,
+        color=config.color,
+        alpha=per_channel(config.opacity, n_channels),
+        linestyle=linestyle,
+        linewidth=per_channel(config.linewidth, n_channels),
     )
 
-    clim = config.clim or (0.0, 1.0)
-    if plot_mode in (UnfoldPlotMode.PLAIN, UnfoldPlotMode.PARAMETRIC, UnfoldPlotMode.SACATTER):
+    if plot_mode not in OVERLAY_MODES:
         if plot_mode is UnfoldPlotMode.PLAIN:
             scalars = weights if weight_mode is not UnfoldMode.THICKNESS else None
             colorbar_title = "Unfolding weight"
@@ -194,18 +191,15 @@ def unfold(
             )
             scalars = take_channels(projection, channels)
             colorbar_title = config.colorbar_title
-        line_color: dict[str, Any] = {}
-        if scalars is None:
-            line_color["color"] = per_channel(config.spin_colors, n_channels)
         plotter.plot(
             bands,
             scalars_data=scalars,
             widths_data=weights if weight_mode is not UnfoldMode.COLOR else None,
             scalars_mode="scatter" if plot_mode is UnfoldPlotMode.SACATTER else "parametric",
             scalars_cmap=config.cmap,
-            scalars_clim=clim,
-            **line_color,
-            linestyle=style["linestyle"],
+            scalars_clim=config.clim,
+            color=per_channel(config.spin_colors, n_channels) if scalars is None else None,
+            linestyle=linestyle,
         )
         plotter.set_colorbar_label(colorbar_title)
     else:

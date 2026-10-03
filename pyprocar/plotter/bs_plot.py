@@ -27,7 +27,6 @@ logger = logging.getLogger(__name__)
 
 
 def _midpoints(values: np.ndarray) -> np.ndarray:
-    """Per-segment values of a line through ``values``: the mean of each consecutive pair."""
     return (values[:-1] + values[1:]) / 2
 
 
@@ -182,9 +181,11 @@ class BandStructurePlotter:
                 [s.scalars for s in series_list],
             )
             cmap = scalars_cmap
+            colormap = (cmap, clim)
         else:
             clim = None
             cmap = None
+            colormap = None
 
         # Validate scalars_mode early
         valid_modes = ("none", "scatter", "parametric")
@@ -196,17 +197,13 @@ class BandStructurePlotter:
         for series in series_list:
             key = (series.band_index, series.spin_index)
 
-            colored = scalars_mode != "none" and series.scalars is not None
-            if not colored and series.widths is None:
+            series_colormap = colormap if series.scalars is not None else None
+            if series_colormap is None and series.widths is None:
                 artist = self._add_line(series, line_kwargs or {})
             elif scalars_mode == "scatter":
-                artist = self._add_scatter(
-                    series, cmap if colored else None, clim, scatter_kwargs or {}
-                )
+                artist = self._add_scatter(series, series_colormap, scatter_kwargs or {})
             else:
-                artist = self._add_line_collection(
-                    series, cmap if colored else None, clim, collection_kwargs or {}
-                )
+                artist = self._add_line_collection(series, series_colormap, collection_kwargs or {})
 
             artists[key] = artist
 
@@ -247,29 +244,25 @@ class BandStructurePlotter:
     def _add_scatter(
         self,
         series: LineSeries,
-        cmap: str | None,
-        clim: tuple[float, float] | None,
+        colormap: tuple[str, tuple[float, float]] | None,
         scatter_kwargs: dict,
     ) -> PathCollection:
-        """Add a scatter plot for one band, colored by its scalars when ``cmap`` is given."""
         merged_kwargs = {**series.kwargs, **scatter_kwargs}
         merged_kwargs.setdefault("s", 10)  # default marker size
         if series.widths is not None:
             merged_kwargs["s"] = merged_kwargs["s"] * series.widths
-        if cmap is not None:
-            assert clim is not None
-            merged_kwargs.update(c=series.scalars, cmap=cmap, vmin=clim[0], vmax=clim[1])
+        if colormap is not None:
+            cmap, (vmin, vmax) = colormap
+            merged_kwargs.update(c=series.scalars, cmap=cmap, vmin=vmin, vmax=vmax)
 
         return self.ax.scatter(series.x, series.y, **merged_kwargs)
 
     def _add_line_collection(
         self,
         series: LineSeries,
-        cmap: str | None,
-        clim: tuple[float, float] | None,
+        colormap: tuple[str, tuple[float, float]] | None,
         collection_kwargs: dict,
     ) -> LineCollection:
-        """Add a LineCollection for one band, colored by its scalars when ``cmap`` is given."""
         points = np.array([series.x, series.y]).T.reshape(-1, 1, 2)
         segments = np.concatenate([points[:-1], points[1:]], axis=1)
 
@@ -277,15 +270,15 @@ class BandStructurePlotter:
         merged_kwargs.setdefault("linewidth", 2.0)
         if series.widths is not None:
             merged_kwargs["linewidth"] = merged_kwargs["linewidth"] * _midpoints(series.widths)
-        if cmap is not None:
-            assert clim is not None
-            merged_kwargs.update(cmap=cmap, norm=mpcolors.Normalize(clim[0], clim[1]))
+        if colormap is not None:
+            cmap, (vmin, vmax) = colormap
+            merged_kwargs.update(cmap=cmap, norm=mpcolors.Normalize(vmin, vmax))
 
         lc = LineCollection(
             segments,
             **merged_kwargs,
         )
-        if cmap is not None and series.scalars is not None:
+        if colormap is not None and series.scalars is not None:
             lc.set_array(_midpoints(series.scalars))
 
         self.ax.add_collection(lc)

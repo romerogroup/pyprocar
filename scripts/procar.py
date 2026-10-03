@@ -35,12 +35,11 @@ def call_bandsplot(args):
         knames=args.knames,
         savefig=args.savefig,
         show=args.savefig is None,
-        **_plot_options(args),
+        **_given_plot_options(args),
     )
 
 
-def _plot_options(args) -> dict:
-    """The plot options given on the command line, so that unset ones keep their defaults."""
+def _given_plot_options(args) -> dict:
     names = ("title", "cmap", "clim")
     return {name: getattr(args, name) for name in names if getattr(args, name, None) is not None}
 
@@ -165,7 +164,7 @@ def call_unfold(args):
         knames=args.knames,
         savefig=args.savefig,
         show=args.savefig is None,
-        **_plot_options(args),
+        **_given_plot_options(args),
     )
 
 
@@ -232,7 +231,9 @@ if __name__ == "__main__":
         parserunfold.add_argument("-o", "--orbitals", type=int, nargs="+", default=None)
         parserunfold.add_argument("-f", "--fermi", help="Fermi energy.", type=float, default=None)
         parserunfold.add_argument("--elimit", help="Energy range.", type=float, nargs=2)
-        parserunfold.add_argument("--kticks", help="k-point indices of the ticks.", type=int, nargs="+")
+        parserunfold.add_argument(
+            "--kticks", help="k-point indices of the ticks.", type=int, nargs="+"
+        )
         parserunfold.add_argument("--knames", help="Names of the ticks.", type=str, nargs="+")
         parserunfold.add_argument("--cmap", help="Colormap.", default=None)
         parserunfold.add_argument("--clim", help="Color range.", type=float, nargs=2, default=None)

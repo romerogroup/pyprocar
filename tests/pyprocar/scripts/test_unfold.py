@@ -1,5 +1,3 @@
-"""pyprocar.unfold on the MgB2 2x2x2 supercell, checked against the primitive cell calculation."""
-
 import shutil
 
 import matplotlib
@@ -82,8 +80,12 @@ class TestUnfoldedWeights:
         unmatched_supercell, unmatched_primitive = [], []
         for ik in range(N_KPOINTS):
             visible = bands[ik][(weights[ik] > 0.25) & (bands[ik] > -10) & (bands[ik] < 12)]
-            reference = primitive_bands[ik][(primitive_bands[ik] > -9.5) & (primitive_bands[ik] < 11.5)]
-            unmatched_supercell += [e for e in visible if np.abs(primitive_bands[ik] - e).min() > 0.5]
+            reference = primitive_bands[ik][
+                (primitive_bands[ik] > -9.5) & (primitive_bands[ik] < 11.5)
+            ]
+            unmatched_supercell += [
+                e for e in visible if np.abs(primitive_bands[ik] - e).min() > 0.5
+            ]
             unmatched_primitive += [e for e in reference if np.abs(visible - e).min() > 0.5]
 
         assert unmatched_supercell == []
@@ -235,6 +237,4 @@ class TestUnfoldPlot:
         calc = _copy(tmp_path, "primitive")
 
         with pytest.raises(ValueError, match="LORBIT = 12"):
-            pyprocar.unfold(
-                code="vasp", dirname=calc, transformation_matrix=SUPERCELL, show=False
-            )
+            pyprocar.unfold(code="vasp", dirname=calc, transformation_matrix=SUPERCELL, show=False)
