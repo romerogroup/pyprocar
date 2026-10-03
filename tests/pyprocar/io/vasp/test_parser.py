@@ -194,7 +194,6 @@ class TestVaspParserMissingFiles:
 def test_bisb_spin_polarized_mesh_unfolds_to_the_full_grid():
     from pyprocar.io import get_parser
 
-    # OUTCAR: 6 space group operations, 60 60 3 grid, 962 irreducible k-points
     ebs = get_parser(
         "vasp", DATA_DIR / "examples" / "other" / "BiSb_monolayer" / "spin-polarized"
     ).ebs

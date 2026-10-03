@@ -911,7 +911,6 @@ def _projection_rows(weights: tuple[float, float]) -> list[str]:
 
 
 def _procar(kpoint_lines: list[str], band_rows: list[list[str]]) -> str:
-    """A PROCAR with one band, two ions and the given k-point headers and projection rows."""
     lines = [
         "PROCAR lm decomposed",
         f"# of k-points:  {len(kpoint_lines)}         # of bands:   1         # of ions:    2",
@@ -924,7 +923,6 @@ def _procar(kpoint_lines: list[str], band_rows: list[list[str]]) -> str:
 
 
 def test_kpoint_coordinates_without_a_separating_space_are_read():
-    # VASP writes fixed-width coordinates, so a minus sign can follow a digit
     headers = [
         " k-point     1 :    0.00000000 0.00000000 0.00000000     weight = 0.50000000",
         " k-point     2 :    0.50000000-0.25000000 0.00000000     weight = 0.50000000",
@@ -963,7 +961,6 @@ def test_issue_196_vasp65_non_collinear_procar():
 
     assert procar.projected is not None
     assert procar.projected.shape == (18, 112, 4, 14, 16)
-    # line 9 of dos/PROCAR: "    1  0.469 ..."
     assert procar.projected[0, 0, 0, 0, 0] == 0.469
 
 
@@ -981,7 +978,6 @@ def test_issue_197_spin_polarized_bands():
     procar = vasp.Procar(filepath=ISSUES_DIR / "issue-197" / "PROCAR")
 
     assert procar.is_spin_polarized
-    # band 1 energies of k-point 1, PROCAR lines 6 and 142207
     assert procar.bands[0, 0].tolist() == [-40.11109769, -36.96386682]
 
 
@@ -990,7 +986,6 @@ def test_issue_199_fused_kpoints():
     procar = vasp.Procar(filepath=ISSUES_DIR / "issue-199" / "PROCAR")
 
     assert procar.kpoints.shape == (80, 3)
-    # PROCAR lines 78745 and 82783
     assert procar.kpoints[39].tolist() == [0.5, 0.0, 0.0]
     assert procar.kpoints[41].tolist() == [0.50877193, -0.01754386, 0.0]
     assert procar.projected is not None

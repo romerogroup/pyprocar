@@ -230,7 +230,7 @@ class ElkParser(BaseParser):
         if not filepaths:
             return None
 
-        # Tasks 21-24 write the same file names, so the last one in elk.in wrote them.
+        # bandstr.f90 gives tasks 21-24 the same file names, so the last one in elk.in wrote them.
         task = [t for t in self._elkin.tasks if t in (21, 22, 23, 24)][-1]
         return ElkProjections(
             filepaths=filepaths,

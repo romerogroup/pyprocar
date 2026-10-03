@@ -210,7 +210,6 @@ def test_include_reads_the_named_file_in_place(tmp_path) -> None:
 
     fdf = FDF(tmp_path / "si.fdf")
 
-    # 10 Bohr = 5.2917721067121 Ang
     assert fdf.lattice_constant == pytest.approx(5.2917721067121)
     assert np.allclose(fdf.lattice_vectors[0], [0.0, 2.64588605, 2.64588605])
     assert fdf.atoms == ["Si", "Si"]

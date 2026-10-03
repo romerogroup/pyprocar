@@ -1112,7 +1112,6 @@ def test_ibz_unfolds_with_time_reversal_when_the_point_group_lacks_inversion():
     from pyprocar.core import Structure
 
     t = 0.33333333
-    # IBZ of a 3x3x1 Gamma grid when only k ~ -k relates points; band value = IBZ index
     ibz = np.array([[0, 0, 0], [t, 0, 0], [0, t, 0], [t, t, 0], [t, -t, 0]])
     structure = Structure(
         atoms=["X"],

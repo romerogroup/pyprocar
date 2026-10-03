@@ -54,16 +54,14 @@ class _ParsedFDF:
     redirects: list[str] = field(default_factory=list)
 
 
-# libfdf stops at more than 7 open fdf files, which also ends an include cycle.
-_MAX_FDF_DEPTH = 7
+_LIBFDF_MAX_OPEN_FILES = 7
 
 
 def _read_target(target: str, directory: Path | None, depth: int) -> str:
-    """Text of a file named in the FDF, or ValueError with the reason it cannot be read."""
     if directory is None:
         raise ValueError(f"{target} needs a file path")
-    if depth >= _MAX_FDF_DEPTH:
-        raise ValueError(f"{target}: more than {_MAX_FDF_DEPTH} nested fdf files")
+    if depth >= _LIBFDF_MAX_OPEN_FILES:
+        raise ValueError(f"{target}: more than {_LIBFDF_MAX_OPEN_FILES} nested fdf files")
     if not (directory / target).is_file():
         raise ValueError(f"{target}: file not found")
     return (directory / target).read_text()
@@ -196,7 +194,6 @@ class FDF(Mapping[str, Any]):
         return _parse_fdf(self.file_str, directory)
 
     def _check_absent(self, name: str) -> None:
-        """Raise ValueError when ``name`` is absent because something could not be read."""
         key = normalize_label(name)
         if key in self._parsed.errors:
             raise ValueError(self._parsed.errors[key])

@@ -16,11 +16,6 @@ _LM_COLUMNS = slice(11, 20)
 
 
 def _read_dos_file(text: str) -> tuple[np.ndarray, float]:
-    """Data rows of an Abinit DOS file as (nsppol, n_energies, n_columns), and the Fermi energy.
-
-    The energy column and the Fermi energy are converted from Hartree to eV.
-    The other columns keep the file's units.
-    """
     nsppol = int(re.findall(r"nsppol\s*=\s*(\d)", text)[0])
     fermi = float(re.findall(r"Fermi energy\s*:\s*(\S+)", text)[0])
     rows = np.loadtxt(text.splitlines(), comments="#", ndmin=2)
@@ -103,5 +98,4 @@ class AbinitDOS:
             atom_index = int(re.findall(r"iatom=\s*(\d+)", text)[0])
             atoms[atom_index] = _read_dos_file(text)[0][:, :, _LM_COLUMNS] / HARTREE_TO_EV
 
-        # (n_atoms, n_spins, n_energies, n_orbitals) -> (n_energies, n_spins, n_atoms, n_orbitals)
         return np.transpose(np.array([atoms[i] for i in sorted(atoms)]), (2, 1, 0, 3))

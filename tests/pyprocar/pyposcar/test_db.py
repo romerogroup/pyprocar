@@ -7,7 +7,6 @@ from pyprocar.pyposcar.poscar import Poscar
 
 
 def test_vanadium_bond_uses_cordero_radius():
-    # Cordero et al. single-bond radii: V 153 pm, O 66 pm
     assert DB().estimateBond("V", "O") == pytest.approx(2.19)
 
 

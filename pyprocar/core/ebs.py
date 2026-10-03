@@ -2063,6 +2063,17 @@ class ElectronicBandStructureMesh(
         return gradients
 
 
+def with_time_reversal(rotations: npt.ArrayLike) -> np.ndarray:
+    """The rotations plus their negatives, k -> -k, unless the group already holds inversion.
+
+    DFT codes reduce k-meshes with time reversal as well as the point group.
+    """
+    rotations = np.asarray(rotations)
+    if any(np.allclose(rotation, -np.eye(3)) for rotation in rotations):
+        return rotations
+    return np.concatenate([rotations, -rotations])
+
+
 def ibz2fbz(ebs, rotations=None, kgrid_info=None, decimals=4, inplace=True, **kwargs):
     """Applys symmetry operations to the kpoints, bands, and projections
 
@@ -2089,10 +2100,7 @@ def ibz2fbz(ebs, rotations=None, kgrid_info=None, decimals=4, inplace=True, **kw
     if len(rotations) == 0:
         logger.warning("No rotations provided, skipping ibz2fbz")
         return ebs
-    # k-meshes are also reduced with time reversal (k ~ -k), which a point group without
-    # inversion lacks. A k-point the IBZ already holds keeps its own values below.
-    if not any(np.allclose(rotation, -np.eye(3)) for rotation in rotations):
-        rotations = np.concatenate([rotations, -np.asarray(rotations)])
+    rotations = with_time_reversal(rotations)
 
     n_kpoints = ebs.n_kpoints
 

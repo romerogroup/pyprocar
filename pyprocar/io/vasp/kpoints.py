@@ -156,7 +156,7 @@ class Kpoints(Mapping[str, Any]):
             if len(coord_tokens) < 3:
                 continue
             points.append([float(token) for token in coord_tokens[:3]])
-            # VASP also reads a label written after the coordinates without '!'
+            # VASP also reads a label written without '!' (issue-199 vasprun.xml lists them).
             label = label_part.replace("!", "") if bang else " ".join(coord_tokens[3:])
             names.append(label.strip())
 

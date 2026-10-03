@@ -16,7 +16,6 @@ def _lm_names(n_columns: int) -> list[str]:
     return [f"Y{ang}{m}" for ang in range(lmax + 1) for m in range(-ang, ang + 1)]
 
 
-# Per task: the character columns after distance and energy, and their orbital names.
 _LAYOUTS: dict[int, tuple[slice, Callable[[int], list[str]]]] = {
     21: (slice(1, None), lambda n: _L_NAMES[:n]),
     22: (slice(None), _lm_names),
@@ -120,7 +119,6 @@ class ElkProjections:
 
     @cached_property
     def _characters(self) -> npt.NDArray[np.float64]:
-        """Character columns of the task, as (natoms, nspin * nbands states, nkpoints, ncols)."""
         n_states = self.nspin * self.nbands
         columns = _LAYOUTS[self._task][0]
         return np.array(
@@ -146,10 +144,7 @@ class ElkProjections:
         if not self.file_strs:
             return None
 
-        # (natoms, nspin, nbands, nkpoints, ncols)
         by_spin = self._characters.reshape(self.natoms, self.nspin, self.nbands, self.nkpoints, -1)
         if self._task == 23:
-            # each state keeps the character of its own spin
             by_spin = np.stack([by_spin[:, s, ..., s : s + 1] for s in range(self.nspin)], axis=1)
-        # -> (nkpoints, nbands, natoms, ncols, nspin), then add the principal axis
         return np.transpose(by_spin, (3, 2, 0, 4, 1))[:, :, :, np.newaxis]

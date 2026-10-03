@@ -259,10 +259,7 @@ class Procar(Mapping[str, Any]):
         return self._read_phases()
 
     def _projection_blocks(self, n_rows: int) -> list[str]:
-        """The n_rows rows after each 'ion' header line, without blank lines.
-
-        VASP 6.5 puts a blank line between the four non-collinear spin components.
-        """
+        # VASP 6.5 puts a blank line between the four non-collinear spin components.
         pattern = r"^ion.*\n(" + r"\n*.+\n" * n_rows + ")"
         blocks = re.findall(pattern, self.file_str, re.MULTILINE)
         return ["\n".join(line for line in block.splitlines() if line.strip()) for block in blocks]
