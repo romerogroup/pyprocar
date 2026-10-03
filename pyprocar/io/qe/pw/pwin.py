@@ -462,10 +462,11 @@ class KPointsCard(QECardBlock):
         elif self.mode == "crystal":
             self.parse_crystal_mode()
 
-        elif self.mode == "crystal_b":
-            self.parse_crystal_b_mode()
+        elif self.mode in ("crystal_b", "tpiba_b"):
+            self.parse_band_path_mode()
 
-        else:
+        # tpiba_c and crystal_c list the corners of a contour mesh, not the k-points pw.x ran.
+        elif self.mode == "tpiba":
             self.parse_explicit_mode(lines)
         return
 
@@ -507,7 +508,7 @@ class KPointsCard(QECardBlock):
                 self.line_comments.append(comment)
         self.nhigh_sym = len(self.knames)
 
-    def parse_crystal_b_mode(self) -> None:
+    def parse_band_path_mode(self) -> None:
         lines = self.block.splitlines()
         self.nhigh_sym = int(lines[0])
         high_symmetry_points = []

@@ -402,14 +402,22 @@ class QEParser(BaseParser):
             return None
 
         kpoints_card = self.bands_in.kpoints_card
- 
+        high_sym_points = kpoints_card.high_symmetry_points
+        if high_sym_points is None:
+            logger.info(f"K_POINTS {kpoints_card.mode} defines no band path")
+            return None
+
         modified_knames = kpoints_card.modified_knames
 
         if self._raw_kpoints is None:
             logger.info("No kpoints found, therefore not parsing kpath")
             return None
 
-        high_sym_points = kpoints_card.high_symmetry_points
+        if kpoints_card.mode == "tpiba_b":
+            assert self.alat is not None and self.reciprocal_lattice is not None
+            high_sym_points = (high_sym_points / self.alat) @ np.linalg.inv(
+                self.reciprocal_lattice
+            )
 
         kticks = find_high_symmetry_ticks(self._raw_kpoints, high_sym_points)
         self._kticks = kticks
