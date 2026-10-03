@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+import logging
+
 import numpy as np
 
 from pyprocar.core import ElectronicBandStructure
@@ -8,6 +10,8 @@ from pyprocar.pyposcar.clusters import Clusters
 from pyprocar.pyposcar.defects import FindDefect
 from pyprocar.pyposcar.poscar import Poscar
 from pyprocar.scripts.scriptBandsplot import bandsplot
+
+logger = logging.getLogger(__name__)
 
 try:
     pass
