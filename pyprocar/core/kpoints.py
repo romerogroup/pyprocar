@@ -440,31 +440,13 @@ class KPath:
             The list of tick names
         """
         if self._tick_name_map is None:
-            tick_name_map = {}
+            tick_name_map = {self._segment_indices[0][0]: self._segment_names[0][0]}
             for i, segment_indices in enumerate(self._segment_indices):
-                start_index = segment_indices[0]
                 end_index = segment_indices[-1]
-                if i == 0:
-                    tick_name_map[start_index] = self._segment_names[i][0]
-                    continue
-                if i == len(self._segment_indices) - 1:
-                    tick_name_map[end_index] = self._segment_names[i][1]
-                    continue
-
+                name = self._segment_names[i][1]
                 if end_index in self.discontinuity_start_indices:
-                    tick_name_map[end_index] = (
-                        self._segment_names[i][0] + "|" + self._segment_names[i][1]
-                    )
-
-                    # Remove the previous segment end index. To avoid double tick
-                    previous_segment_end_index = self._segment_indices[i - 1][-1]
-                    tick_name_map.pop(previous_segment_end_index)
-                elif end_index in self.continuous_start_indices:
-                    tick_name_map[end_index] = self._segment_names[i][1]
-                else:
-                    raise ValueError(
-                        f"Segment {i} is not a discontinuity or continuous segment. Likely a bug in get_segment_indices"
-                    )
+                    name += "|" + self._segment_names[i + 1][0]
+                tick_name_map[end_index] = name
 
             self._tick_name_map = tick_name_map
 
