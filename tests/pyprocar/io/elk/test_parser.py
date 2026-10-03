@@ -40,7 +40,7 @@ plot1d
   3 10
    0.0  0.0  0.0 : G
    0.5  0.0  0.0 : X
-   0.5  0.5  0.0 : M
+   0.5  0.0625  0.0 : A
 """
 
 # Minimal elk.in for DOS calculation (no plot1d)
@@ -554,7 +554,7 @@ def test_inline_comments_on_keyword_lines_are_ignored(tmp_path):
     assert parser.is_bands_calculation
     assert parser.elkin is not None
     assert parser.elkin.nkpoints == 10
-    assert parser.elkin.high_symmetry_points.tolist() == [[0, 0, 0], [0.5, 0, 0], [0.5, 0.5, 0]]
+    assert parser.elkin.high_symmetry_points.tolist() == [[0, 0, 0], [0.5, 0, 0], [0.5, 0.0625, 0]]
 
 
 def test_missing_plot1d_uses_the_elk_default_path_and_warns(tmp_path, user_warnings):
@@ -580,4 +580,6 @@ def test_band_path_repeats_each_inner_vertex_so_kpath_finds_every_segment(bands_
     assert isinstance(ebs, ElectronicBandStructurePath) and ebs.bands is not None
     kpoints = np.asarray(ebs.kpath.kpoints)
     assert len(kpoints) == 11 and ebs.bands.to_array().shape == (11, 2, 1)
-    assert np.allclose(kpoints[[0, 8, 9, 10]], [[0, 0, 0], [0.5, 0, 0], [0.5, 0, 0], [0.5, 0.5, 0]])
+    assert np.allclose(
+        kpoints[[0, 8, 9, 10]], [[0, 0, 0], [0.5, 0, 0], [0.5, 0, 0], [0.5, 0.0625, 0]]
+    )

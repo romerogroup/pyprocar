@@ -26,6 +26,18 @@ class Plot1D:
 ELK_DEFAULT_PLOT1D = Plot1D(np.array([[0.0, 0.0, 0.0], [1.0, 1.0, 1.0]]), 200, ["0", "1"])
 
 
+def _vertex_label(line: str) -> str:
+    """Text after the last ':' of a plot1d vertex line, as a plain name.
+
+    KPath maps plain names such as "Gamma" to its symbols, so the LaTeX
+    backslash of "\\Gamma" is dropped.
+    """
+    if ":" not in line:
+        return ""
+    label = line.rpartition(":")[2]
+    return label.replace(",", "").replace("vlvp1d", "").replace(" ", "").lstrip("\\")
+
+
 class ElkIn:
     """Parser for Elk elk.in input file.
 
@@ -151,13 +163,7 @@ class ElkIn:
         nvertices, npoints = (int(token) for token in rows[0].split()[:2])
         vertex_lines = rows[1 : 1 + nvertices]
         vertices = np.array([[float(x) for x in line.split()[:3]] for line in vertex_lines])
-        # KPath takes plain names such as "Gamma", so drop the LaTeX backslash of "\Gamma".
-        labels = [
-            line.rpartition(":")[2].replace(",", "").replace("vlvp1d", "").replace(" ", "").lstrip("\\")
-            if ":" in line
-            else ""
-            for line in vertex_lines
-        ]
+        labels = [_vertex_label(line) for line in vertex_lines]
         if not all(labels):
             labels = [str(x) for x in range(nvertices)]
         return Plot1D(vertices, npoints, labels)
