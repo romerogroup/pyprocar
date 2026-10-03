@@ -97,6 +97,27 @@ class TestFermiPlotterPlot:
         with pytest.raises(ValueError, match="ebs_ipr_atom has shape"):
             plotter.plot(_fermi_surface(), scalars_data=_property(ipr_atom, name="ebs_ipr_atom"))
 
+    @pytest.mark.parametrize("role", ["scalars_data", "vectors_data"])
+    @pytest.mark.parametrize(
+        ("name", "shape"),
+        [("projected", (6, 4, 2, 3, 1)), ("spin_texture", (6, 4, 2, 1, 3))],
+    )
+    def test_per_atom_and_orbital_properties_are_refused(self, plotter, role, name, shape):
+        prop = _property(np.ones(shape), name=name)
+
+        with pytest.raises(
+            ValueError, match=rf"^{name} has shape \({', '.join(map(str, shape))}\);"
+        ):
+            plotter.plot(_fermi_surface(), **{role: prop})
+
+    def test_scalar_property_given_as_vectors_is_refused(self, plotter):
+        prop = _property(np.ones((6, 4, 2)), name="projected_sum")
+
+        with pytest.raises(
+            ValueError, match=r"^projected_sum has shape \(6, 4, 2\); surface vectors"
+        ):
+            plotter.plot(_fermi_surface(), vectors_data=prop)
+
     def test_spins_limits_the_drawn_surfaces(self, plotter):
         meshes = plotter.plot(_fermi_surface(), spins=[1])
 
