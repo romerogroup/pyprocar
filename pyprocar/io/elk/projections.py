@@ -1,4 +1,4 @@
-"""BAND_S*_A*.OUT orbital projections parser for Elk calculations."""
+"""BAND_S*_A*.OUT band-character parser for Elk calculations."""
 
 from functools import cached_property
 from pathlib import Path
@@ -7,12 +7,28 @@ from typing import Self
 import numpy as np
 import numpy.typing as npt
 
+_L_NAMES = ["s", "p", "d", "f", "g", "h"]
+
+
+def _lm_names(n_columns: int) -> list[str]:
+    lmax = round(n_columns**0.5) - 1
+    return [f"Y{ang}{m}" for ang in range(lmax + 1) for m in range(-ang, ang + 1)]
+
 
 class ElkProjections:
-    """Parser for Elk BAND_S*_A*.OUT orbital projection files.
+    """Parser for Elk BAND_S{species:02d}_A{atom:04d}.OUT band-character files, one per atom.
 
-    Each file contains projections onto spherical harmonics for one atom.
-    Files are named BAND_S{species:02d}_A{atom:04d}.OUT
+    Elk's bandstr.f90 writes each file state by state, with one line per
+    k-point and a blank line after each state. Each line starts with the path
+    distance and the energy. The columns after them depend on the task:
+
+    - 21: the sum over l, then the l = 0..lmaxdb characters
+    - 22: the (l,m) characters, l = 0..lmaxdb and m = -l..l
+    - 23: the spin-up and spin-down characters (spin-polarized runs only)
+    - 24: the moment character, m_z for a collinear run
+
+    In a collinear spin-polarized run the first nbands states are spin up and
+    the next nbands spin down. A state's character goes to its own spin channel.
 
     Parameters
     ----------
@@ -28,9 +44,9 @@ class ElkProjections:
         Number of spin channels
     natoms : int
         Number of atoms
+    task : int
+        The Elk task, 21 to 24, that wrote the files
     """
-
-    N_ORBITALS: int = 16  # Y00 through Y3-3
 
     def __init__(
         self,
@@ -40,6 +56,7 @@ class ElkProjections:
         nbands: int = 0,
         nspin: int = 1,
         natoms: int = 0,
+        task: int = 22,
     ):
         self._filepaths: list[Path] = filepaths or []
         self._file_strs: list[str] = file_strs or []
@@ -47,6 +64,7 @@ class ElkProjections:
         self._nbands: int = nbands
         self._nspin: int = nspin
         self._natoms: int = natoms
+        self.task: int = task
 
     @classmethod
     def from_str(
@@ -55,6 +73,7 @@ class ElkProjections:
         nkpoints: int,
         nbands: int,
         nspin: int = 1,
+        task: int = 22,
     ) -> Self:
         """Create parser from file content strings."""
         return cls(
@@ -63,6 +82,7 @@ class ElkProjections:
             nbands=nbands,
             nspin=nspin,
             natoms=len(file_contents),
+            task=task,
         )
 
     @cached_property
@@ -70,8 +90,6 @@ class ElkProjections:
         """Lazily load all projection file contents."""
         if not self._file_strs and self._filepaths:
             return [Path(fp).read_text() for fp in self._filepaths]
-        elif not self._file_strs and not self._filepaths:
-            return []
         return self._file_strs
 
     @cached_property
@@ -91,54 +109,29 @@ class ElkProjections:
         return self._natoms
 
     @cached_property
-    def spd(self) -> npt.NDArray[np.float64]:
-        """Raw SPD array in Elk format.
-
-        Shape: (nkpoints, nbands, nspin, natoms+1, norbitals+2)
-        - natoms+1: last column is total over atoms
-        - norbitals+2: first column is atom index, last is total over orbitals
-        """
-        if not self.file_strs:
-            return np.array([])
-
-        spd = np.zeros(
-            (
-                self.nkpoints,
-                self.nbands,
-                self.nspin,
-                self.natoms + 1,
-                self.N_ORBITALS + 2,
-            )
+    def _characters(self) -> npt.NDArray[np.float64]:
+        """Columns after distance and energy, as (natoms, nspin * nbands states, nkpoints, ncols)."""
+        n_states = self.nspin * self.nbands
+        return np.array(
+            [
+                np.loadtxt(content.splitlines(), ndmin=2)[: n_states * self.nkpoints, 2:].reshape(
+                    n_states, self.nkpoints, -1
+                )
+                for content in self.file_strs
+            ]
         )
 
-        for iatom, content in enumerate(self.file_strs):
-            lines = content.splitlines()
-            iline = 0
-
-            for iband in range(self.nbands):
-                for ikpoint in range(self.nkpoints):
-                    temp = np.array([float(x) for x in lines[iline].split()])
-                    spd[ikpoint, iband, 0, iatom, 0] = iatom + 1  # Atom index
-                    spd[ikpoint, iband, 0, iatom, 1:-1] = temp[2:]  # Orbital projections
-                    iline += 1
-                # Skip blank line between bands (only if we have k-points)
-                if self.nkpoints > 0:
-                    iline += 1
-
-        # Sum over orbitals for each atom
-        spd[:, :, :, :, -1] = np.sum(spd[:, :, :, :, 1:-1], axis=4)
-        # Sum over atoms
-        spd[:, :, :, -1, :] = spd.sum(axis=3)
-        spd[:, :, 0, -1, 0] = 0
-
-        # Handle spin polarized case
-        if self.nspin == 2:
-            # Copy spin up to second spin channel
-            spd[:, : self.nbands // 2, 1, :, :] = spd[:, : self.nbands // 2, 0, :, :]
-            # Negate spin down projections
-            spd[:, self.nbands // 2 :, 1, :, :] = -1 * spd[:, self.nbands // 2 :, 0, :, :]
-
-        return spd
+    @cached_property
+    def orbital_names(self) -> list[str]:
+        """Names of the orbital axis of ``projected`` for this task."""
+        n_columns = self._characters.shape[-1]
+        if self.task == 21:
+            return _L_NAMES[: n_columns - 1]
+        if self.task == 23:
+            return ["spin"]
+        if self.task == 24:
+            return ["moment"]
+        return _lm_names(n_columns)
 
     @cached_property
     def projected(self) -> npt.NDArray[np.float64] | None:
@@ -146,32 +139,18 @@ class ElkProjections:
 
         Shape: (nkpoints, nbands, natoms, nprincipals, norbitals, nspin)
         """
-        if self.spd.size == 0:
+        if not self.file_strs:
             return None
 
-        nprincipals = 1
-        projected = np.zeros(
-            (
-                self.nkpoints,
-                self.nbands,
-                self.natoms,
-                nprincipals,
-                self.N_ORBITALS,
-                self.nspin,
-            ),
-            dtype=self.spd.dtype,
-        )
-
-        temp_spd = self.spd.copy()
-        # Reorder axes: (nkpoints, nbands, nspin, natom, norbital)
-        # -> (nkpoints, nbands, natom, norbital, nspin)
-        temp_spd = np.swapaxes(temp_spd, 2, 4)
-        temp_spd = np.swapaxes(temp_spd, 2, 3)
-
-        if self.nspin == 2:
-            projected[:, :, :, 0, :, 0] = temp_spd[:, :, :-1, 1:-1, 0]
-            projected[:, :, :, 0, :, 1] = temp_spd[:, :, :-1, 1:-1, 1]
-        else:
-            projected[:, :, :, 0, :, :] = temp_spd[:, :, :-1, 1:-1, :]
-
-        return projected
+        characters = self._characters
+        if self.task == 21:
+            characters = characters[..., 1:]
+        elif self.task == 24:
+            characters = characters[..., -1:]
+        # (natoms, nspin, nbands, nkpoints, ncols)
+        by_spin = characters.reshape(self.natoms, self.nspin, self.nbands, self.nkpoints, -1)
+        if self.task == 23:
+            # each state keeps the character of its own spin
+            by_spin = np.stack([by_spin[:, s, ..., s : s + 1] for s in range(self.nspin)], axis=1)
+        # -> (nkpoints, nbands, natoms, ncols, nspin), then add the principal axis
+        return np.transpose(by_spin, (3, 2, 0, 4, 1))[:, :, :, np.newaxis]

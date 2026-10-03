@@ -2,7 +2,6 @@
 
 import logging
 
-import numpy as np
 import pytest
 
 from pyprocar.io.elk.projections import ElkProjections
@@ -109,31 +108,6 @@ class TestElkProjectionsDimensions(BaseTest):
             nspin=1,
         )
         assert proj.natoms == 2
-
-
-class TestElkProjectionsSPD(BaseTest):
-    def test_spd_shape(self):
-        """Test SPD array shape."""
-        proj = ElkProjections.from_str(
-            file_contents=[BAND_S01_A0001, BAND_S02_A0001],
-            nkpoints=3,
-            nbands=2,
-            nspin=1,
-        )
-        # Shape: (nkpoints, nbands, nspin, natoms+1, norbitals+2)
-        assert proj.spd.shape == (3, 2, 1, 3, 18)
-
-    def test_spd_not_empty(self):
-        """Test SPD array has data."""
-        proj = ElkProjections.from_str(
-            file_contents=[BAND_S01_A0001, BAND_S02_A0001],
-            nkpoints=3,
-            nbands=2,
-            nspin=1,
-        )
-        assert proj.spd.size > 0
-        # Should have some non-zero values
-        assert np.any(proj.spd != 0)
 
 
 class TestElkProjectionsProjected(BaseTest):

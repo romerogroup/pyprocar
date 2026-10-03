@@ -612,13 +612,6 @@ def test_band_file_follows_the_elk_in_task_and_warns_about_the_other(tmp_path, u
     assert "BAND.OUT" in user_warnings.text
 
 
-def test_band_character_tasks_23_and_24_warn_that_they_are_unsupported(tmp_path, user_warnings):
-    calc_dir = _band_dir(tmp_path, "23", {"BAND_S01_A0001.OUT": BAND_S01_A0001})
-
-    assert ElkParser(calc_dir).ebs is None
-    assert "23" in user_warnings.text
-
-
 def test_vertex_labels_keep_latex_that_kpath_does_not_alias(tmp_path):
     calc_dir = _band_dir(
         tmp_path, "22", {"BAND_S01_A0001.OUT": BAND_S01_A0001, "BAND_S02_A0001.OUT": BAND_S02_A0001}
@@ -708,8 +701,8 @@ def test_task_23_spin_characters_go_to_each_state_spin_channel(tmp_path):
     ends = _first_and_last_kpoint(ebs)
     assert ends.shape == (2, 1, 2, 1, 1, 2)
     # (k-point, atom, spin) at the first and last k-point
-    assert ends[0, 0, :, 0, 0, :] == pytest.approx([[0.100, 0.200], [0.300, 0.400]])
-    assert ends[1, 0, :, 0, 0, :] == pytest.approx([[0.109, 0.209], [0.309, 0.409]])
+    assert ends[0, 0, :, 0, 0, :] == pytest.approx(np.array([[0.100, 0.200], [0.300, 0.400]]))
+    assert ends[1, 0, :, 0, 0, :] == pytest.approx(np.array([[0.109, 0.209], [0.309, 0.409]]))
 
 
 def test_task_24_moment_character_is_read_per_atom(tmp_path):
@@ -727,7 +720,7 @@ def test_task_24_moment_character_is_read_per_atom(tmp_path):
     assert ebs is not None
     assert ebs.orbital_names == ["moment"]
     ends = _first_and_last_kpoint(ebs)
-    assert ends[0, 0, :, 0, 0, :] == pytest.approx([[0.300, -0.250], [0.050, -0.020]])
+    assert ends[0, 0, :, 0, 0, :] == pytest.approx(np.array([[0.300, -0.250], [0.050, -0.020]]))
 
 
 def test_task_21_reads_l_characters_without_the_sum_column(tmp_path):

@@ -20,24 +20,6 @@ from pyprocar.io.elk.projections import ElkProjections
 logger = logging.getLogger(__name__)
 user_logger = logging.getLogger("user")
 
-ORBITAL_NAMES = [
-    "Y00",
-    "Y1-1",
-    "Y10",
-    "Y11",
-    "Y2-2",
-    "Y2-1",
-    "Y20",
-    "Y21",
-    "Y22",
-    "Y3-3",
-    "Y3-2",
-    "Y3-1",
-    "Y30",
-    "Y3-1",
-    "Y3-2",
-]
-
 
 class ElkParser(BaseParser):
     """Parser for Elk DFT calculation outputs.
@@ -197,15 +179,10 @@ class ElkParser(BaseParser):
             return None
         tasks = set(self._elkin.tasks)
         if not self.is_bands_calculation:
-            if tasks & {23, 24}:
-                user_logger.warning(
-                    "Elk tasks 23 and 24 write spin and moment characters to BAND_S files;"
-                    + " pyprocar reads band structures from tasks 20, 21 and 22 only"
-                )
             return None
 
         # bandstr.f90 writes BAND.OUT for task 20 and BAND_Sss_Aaaaa.OUT for tasks
-        # 21-24; the first two columns (distance, energy) are the same in both.
+        # 21-24; the first two columns (distance, energy) are the same in all of them.
         band_out = self.dirpath / "BAND.OUT"
         band_s = self.dirpath / "BAND_S01_A0001.OUT"
         preferred, other = (band_out, band_s) if 20 in tasks else (band_s, band_out)
@@ -253,12 +230,15 @@ class ElkParser(BaseParser):
         if not filepaths:
             return None
 
+        # Tasks 21-24 write the same file names, so the last one in elk.in wrote them.
+        task = [t for t in self._elkin.tasks if t in (21, 22, 23, 24)][-1]
         return ElkProjections(
             filepaths=filepaths,
             nkpoints=self._bands_parser.nkpoints,
             nbands=self._bands_parser.nbands,
             nspin=self.nspin,
             natoms=len(filepaths),
+            task=task,
         )
 
     # DOS parser (lazy initialization)
@@ -342,10 +322,12 @@ class ElkParser(BaseParser):
         bands = self._along_path(self._bands_parser.bands + self.fermi)
 
         projected = None
+        orbital_names = None
         if self._projections_parser is not None:
             raw_projected = self._projections_parser.projected
             if raw_projected is not None:
                 projected = self._along_path(raw_projected)
+                orbital_names = self._projections_parser.orbital_names
 
         return get_ebs_from_data(
             kpoints=self._along_path(self._bands_parser.kpoints),
@@ -354,7 +336,7 @@ class ElkParser(BaseParser):
             projected_phase=None,
             fermi=self.fermi,
             reciprocal_lattice=self.reciprocal_lattice,
-            orbital_names=ORBITAL_NAMES,
+            orbital_names=orbital_names,
             structure=self._structure,
             kpath=kpath,
         )
