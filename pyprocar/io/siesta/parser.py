@@ -179,6 +179,7 @@ class SiestaParser(BaseParser):
                 n_grids=n_grids,
                 segment_names=segment_names,
                 special_kpoint_map=special_kpoint_map,
+                reciprocal_lattice=self.reciprocal_lattice,
             )
         except Exception as e:
             user_logger.warning(f"Error creating kpath: {e}")

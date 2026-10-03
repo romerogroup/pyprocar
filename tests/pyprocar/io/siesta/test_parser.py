@@ -95,6 +95,12 @@ class TestSiestaParser:
             (1, "Γ"),
         ]
 
+    def test_kpath_distances_are_cartesian(self, siesta_dir: Path) -> None:
+        kpath = SiestaParser(siesta_dir).kpath
+
+        assert kpath is not None
+        assert kpath.k_distances == pytest.approx([0.0, np.sqrt(3) / 2 / 5.43])
+
     def test_ebs(self, siesta_dir: Path) -> None:
         parser = SiestaParser(siesta_dir)
         ebs = parser.ebs
