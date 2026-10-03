@@ -27,6 +27,15 @@ OVERLAY_MODES = (
     UnfoldPlotMode.OVERLAY_SPECIES,
     UnfoldPlotMode.OVERLAY_ORBITALS,
 )
+REMOVED_PARAMETERS = (
+    "kdirect",
+    "projection_mask",
+    "unfold_mask",
+    "interpolation_factor",
+    "interpolation_type",
+    "old",
+    "savetab",
+)
 
 
 def unfold(
@@ -118,6 +127,12 @@ def unfold(
     tuple
         The matplotlib figure and axes.
     """
+    removed = [name for name in REMOVED_PARAMETERS if name in kwargs]
+    if removed:
+        raise TypeError(
+            f"unfold() no longer takes {', '.join(removed)}; these parameters were removed"
+            + " because they had no effect"
+        )
     set_verbose_level(verbose)
     welcome()
 
