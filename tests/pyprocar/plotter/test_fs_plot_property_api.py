@@ -268,3 +268,26 @@ class TestFermiPlotterScalarBarMethods:
             assert callable(plotter.set_scalar_bar_position)
         finally:
             plotter.close()
+
+
+class TestArrowsLeaveTheSurfaceColoring:
+    def test_surface_keeps_its_scalars_when_arrows_are_added(self, plotter):
+        meshes = plotter.plot(
+            _fermi_surface(), scalars_data=_property(SCALARS), vectors_data=_property(VECTORS)
+        )
+
+        assert [m.active_scalars_name for m in meshes.values()] == ["scalars", "scalars"]
+        assert plotter.actors["surface_0_0"].mapper.scalar_range == (-1.0, 2.0)
+
+    def test_slice_after_add_surface_with_arrows_still_carries_vectors(self, plotter):
+        sphere = pv.Sphere(radius=1.0)
+        sphere.point_data["v"] = sphere.points.copy()
+        sphere.point_data["v-norm"] = np.linalg.norm(sphere.points, axis=1)
+        sphere.set_active_vectors("v")
+        sphere.set_active_scalars("v-norm")
+
+        plotter.add_surface(sphere, add_active_vectors=True)
+        cut = sphere.slice(normal=(0.0, 0.0, 1.0), origin=(0.0, 0.0, 0.0))
+
+        assert sphere.active_scalars_name == "v-norm"
+        assert cut.active_vectors_name == "v"

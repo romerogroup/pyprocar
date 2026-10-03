@@ -71,6 +71,12 @@ class TestBS2DPlotterPlot:
         assert plotter.actors["vectors_1_0"].mapper.dataset.bounds[5] == pytest.approx(0.0)
         assert plotter.actors["vectors_2_0"].mapper.dataset.bounds[5] == pytest.approx(3.0)
 
+    def test_band_surfaces_keep_their_scalars_when_arrows_are_added(self, plotter):
+        meshes = plotter.plot(scalars_data="band_speed", vectors_data=_property(VECTORS))
+
+        assert [m.active_scalars_name for m in meshes.values()] == ["scalars", "scalars"]
+        assert plotter.actors["surface_1_0"].mapper.scalar_range == (3.0, 8.0)
+
     def test_records_points_and_scalars_per_surface(self, plotter):
         plotter.plot(scalars_data="band_speed")
 
