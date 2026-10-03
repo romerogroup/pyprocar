@@ -2089,7 +2089,8 @@ def ibz2fbz(ebs, rotations=None, kgrid_info=None, decimals=4, inplace=True, **kw
     if len(rotations) == 0:
         logger.warning("No rotations provided, skipping ibz2fbz")
         return ebs
-    # VASP also maps k to -k (time reversal), which a point group without inversion lacks.
+    # k-meshes are also reduced with time reversal (k ~ -k), which a point group without
+    # inversion lacks. A k-point the IBZ already holds keeps its own values below.
     if not any(np.allclose(rotation, -np.eye(3)) for rotation in rotations):
         rotations = np.concatenate([rotations, -np.asarray(rotations)])
 

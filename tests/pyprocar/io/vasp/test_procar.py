@@ -958,18 +958,22 @@ ISSUES_DIR = DATA_DIR / "issues"
 
 
 @pytest.mark.data
-@pytest.mark.parametrize("name", ["PROCAR", "PROCAR_OPT"])
-def test_issue_196_vasp65_non_collinear_procar(name: str):
-    procar = vasp.Procar(filepath=ISSUES_DIR / "issue-196" / "dos" / name)
+def test_issue_196_vasp65_non_collinear_procar():
+    procar = vasp.Procar(filepath=ISSUES_DIR / "issue-196" / "dos" / "PROCAR")
 
     assert procar.projected is not None
-    assert procar.projected.shape[1:] == (112, 4, 14, 16)
+    assert procar.projected.shape == (18, 112, 4, 14, 16)
     # line 9 of dos/PROCAR: "    1  0.469 ..."
-    if name == "PROCAR":
-        assert procar.projected.shape[0] == 18
-        assert procar.projected[0, 0, 0, 0, 0] == 0.469
-    else:
-        assert procar.kpoints.shape == (90, 3)
+    assert procar.projected[0, 0, 0, 0, 0] == 0.469
+
+
+@pytest.mark.data
+def test_issue_196_vasp65_non_collinear_procar_opt():
+    procar = vasp.Procar(filepath=ISSUES_DIR / "issue-196" / "dos" / "PROCAR_OPT")
+
+    assert procar.projected is not None
+    assert procar.projected.shape == (90, 112, 4, 14, 16)
+    assert procar.kpoints.shape == (90, 3)
 
 
 @pytest.mark.data

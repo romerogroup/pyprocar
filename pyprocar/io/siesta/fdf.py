@@ -100,8 +100,9 @@ def _parse_fdf(text: str, directory: Path | None, depth: int = 0) -> _ParsedFDF:
         parsed.redirects.append(target)
         try:
             source = _parse_fdf(_read_target(target, directory, depth + 1), directory, depth + 1)
+            missing = "; ".join(source.unread) or "label not found"
         except ValueError as exc:
-            source = _ParsedFDF(unread=[str(exc)])
+            source, missing = _ParsedFDF(), str(exc)
         for name in names:
             key = normalize_label(name)
             if key in parsed.labels or key in parsed.blocks:
@@ -111,7 +112,7 @@ def _parse_fdf(text: str, directory: Path | None, depth: int = 0) -> _ParsedFDF:
             elif key in source.blocks:
                 parsed.blocks[key] = source.blocks[key]
             else:
-                reason = source.errors.get(key) or "; ".join(source.unread) or "label not found"
+                reason = source.errors.get(key, missing)
                 parsed.errors.setdefault(key, f"{name} < {target}: {reason}")
 
     def drop_open_block() -> None:
