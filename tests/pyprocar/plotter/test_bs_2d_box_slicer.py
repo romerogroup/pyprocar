@@ -54,3 +54,20 @@ def test_box_slicer_accepts_an_origin_outside_the_energy_range():
     assert plotter.plane_widgets[0].GetOrigin() == (0.0, 0.0, 2.0)
     assert "slice" not in plotter.actors
     plotter.close()
+
+
+def test_moving_the_plane_to_an_empty_cut_clears_the_previous_area():
+    sphere = pv.Sphere(radius=0.5)
+    sphere.point_data["energy"] = sphere.points[:, 2]
+    plotter = BS2DPlotter(SimpleNamespace(), off_screen=True)
+    plotter.add_box_slicer(sphere, normal=(0, 0, 1), origin=(0, 0, 0), cross_section_area=True)
+    widget = plotter.plane_widgets[0]
+
+    widget.SetOrigin(0.0, 0.0, 0.52)
+    widget.InvokeEvent("EndInteractionEvent")
+
+    assert widget.GetOrigin()[2] > 0.5
+    text = cast(pv.CornerAnnotation, plotter.actors["area_text"]).GetText(2)
+    assert text == "Cross sectional area : 0.0000 Ang^-2"
+    assert "slice" not in plotter.actors
+    plotter.close()

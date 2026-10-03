@@ -201,6 +201,58 @@ def test_sheets_that_run_through_the_zone_stay_open():
     assert text == "Cross sectional area : 0.0000 Ang^-2 (2 open curves not counted)"
 
 
+def test_offset_oblique_cut_finds_the_orbit_in_the_neighbouring_zones():
+    """The plane kx + ky = 3/4 cuts the sphere |k - M| = sqrt(0.1) mostly outside the first zone.
+
+    Its distance to M is 1 / (4 sqrt 2), so the orbit has area pi (0.1 - 1/32).
+    """
+
+    def sphere_around_m(k):
+        to_m = k % 1.0 - np.array([0.5, 0.5, 0.0])
+        to_m[:, 2] = (k[:, 2] + 0.5) % 1.0 - 0.5
+        return np.sum(to_m**2, axis=1)
+
+    plotter = FermiPlotter(off_screen=True)
+    plotter.add_box_slicer(
+        _periodic_surface(sphere_around_m),
+        normal=(1, 1, 0),
+        origin=(0.5, 0.25, 0),
+        show_cross_section_area=True,
+    )
+    text = _area_text(plotter)
+    plotter.close()
+
+    assert text.endswith(" Ang^-2")
+    assert _number(text) == pytest.approx(np.pi * (0.1 - 1 / 32) * (2 * np.pi) ** 2, rel=0.03)
+
+
+@pytest.mark.data
+def test_srvo3_band_16_offset_oblique_cut_finds_both_orbits():
+    """SrVO3 band 16 on the plane kx + ky = 10/21 (fractional), normal (1, 1, 0).
+
+    The plane holds the grid points (i, 10 - i, k). A matplotlib contour of the parsed
+    energies on that periodic in-plane grid has two closed orbits per in-plane cell, each
+    0.1632 of the cell |b1 - b2| |b3| = sqrt(2) / a^2.
+    """
+    a = 3.84652
+    fs = FermiSurface.from_code(
+        code="vasp", dirpath=DATA_DIR / "examples/fermi3d/non-spin-polarized"
+    )
+    band_16 = fs.select_bands([(16, 0)])
+    assert isinstance(band_16, FermiSurface)
+
+    plotter = FermiPlotter(off_screen=True)
+    plotter.add_box_slicer(
+        band_16, normal=(1, 1, 0), origin=(10 / (21 * a), 0, 0), show_cross_section_area=True
+    )
+    text = _area_text(plotter)
+    plotter.close()
+
+    assert text.endswith(" Ang^-2")
+    expected = 2 * 0.1632 * np.sqrt(2) / a**2 * (2 * np.pi) ** 2
+    assert _number(text) == pytest.approx(expected, rel=0.03)
+
+
 @pytest.mark.data
 def test_srvo3_band_16_orbit_around_m_closes_across_the_zone_boundary():
     """SrVO3 band 16 at kz = 0 meets the zone boundary four times around M.
@@ -220,3 +272,24 @@ def test_srvo3_band_16_orbit_around_m_closes_across_the_zone_boundary():
 
     assert text.endswith(" Ang^-2")
     assert _number(text) == pytest.approx(0.020664 * (2 * np.pi) ** 2, rel=0.01)
+
+
+@pytest.mark.parametrize(
+    ("flag", "text"),
+    [
+        ("show_cross_section_area", "Cross sectional area : 0.0000 Ang^-2"),
+        ("show_van_alphen_frequency", "Van Alphen Frequency : no closed orbit"),
+    ],
+)
+def test_moving_the_plane_to_an_empty_cut_clears_the_previous_result(flag, text):
+    plotter = FermiPlotter(off_screen=True)
+    plotter.add_box_slicer(_sphere(0.0), normal=(1, 0, 0), origin=(0, 0, 0), **{flag: True})
+    widget = plotter.plane_widgets[0]
+
+    widget.SetOrigin(0.32, 0.0, 0.0)
+    widget.InvokeEvent("EndInteractionEvent")
+
+    assert widget.GetOrigin()[0] > RADIUS
+    assert _area_text(plotter) == text
+    assert "slice" not in plotter.actors
+    plotter.close()
