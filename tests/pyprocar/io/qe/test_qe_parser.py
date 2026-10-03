@@ -724,7 +724,8 @@ def test_projwfc_kpoints_from_a_bands_run_win_over_a_later_nscf_xml(tmp_path: Pa
     )
     parser = QEParser(tmp_path)
 
-    assert parser.pw_xml is not None and len(parser.pw_xml.kpoints) == 1
+    assert parser.pw_xml is not None and parser.pw_xml.kpoints is not None
+    assert len(parser.pw_xml.kpoints) == 1
     assert parser.is_bands_run
     assert parser.kgrid_info is None
 
