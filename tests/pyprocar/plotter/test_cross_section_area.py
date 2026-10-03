@@ -252,23 +252,6 @@ def test_generic_normal_cuts_the_cylinder_around_m_in_one_ellipse():
     assert np.asarray(areas) == pytest.approx([np.pi * 0.1 / normal[2]], rel=0.02)
 
 
-def test_nearly_axial_normal_counts_the_orbit_around_m_once():
-    """Tilted 1e-7 off kz, the plane meets the four corner columns at heights a hair apart,
-    so each corner arc closes into its own orbit; those orbits are lattice translates of
-    one another and count once.
-    """
-
-    def cylinder_around_m(k: np.ndarray) -> np.ndarray:
-        return np.sum((k[:, :2] % 1.0 - 0.5) ** 2, axis=1)
-
-    areas, n_open = cross_section_areas(
-        _periodic_surface(cylinder_around_m), (1e-7, 0, 1), (0, 0, 0), np.eye(3)
-    )
-
-    assert n_open == 0
-    assert np.asarray(areas) == pytest.approx([np.pi * 0.1], rel=0.02)
-
-
 ROUNDED_111 = (0.5774, 0.5773, 0.5774)
 
 

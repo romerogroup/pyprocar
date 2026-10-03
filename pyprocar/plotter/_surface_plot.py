@@ -170,15 +170,6 @@ def polygon_area(corners: np.ndarray) -> float:
     return 0.5 * float(np.linalg.norm(np.cross(corners, np.roll(corners, -1, axis=0)).sum(axis=0)))
 
 
-def polygon_centroid(corners: np.ndarray) -> np.ndarray:
-    """Area centroid of a planar polygon, from a fan of triangles on its first corner."""
-    edges = corners[1:] - corners[0]
-    cross = np.cross(edges[:-1], edges[1:])
-    weights = cross @ cross.sum(axis=0)
-    centres = (corners[0] + corners[1:-1] + corners[2:]) / 3
-    return weights @ centres / weights.sum()
-
-
 def join_across_zone(
     chains: list[np.ndarray], reciprocal_lattice: np.ndarray, n_seeds: int | None = None
 ) -> tuple[list[float], int]:
@@ -187,14 +178,12 @@ def join_across_zone(
     Walks start from the first ``n_seeds`` chains (all by default); the other chains only
     complete them. An end continues into an end at the same point when there is one, and
     otherwise into the closest end modulo a lattice vector. An orbit is closed when the
-    walk returns to its first chain with no net lattice translation, and orbits that are
-    lattice translates of each other count once. Returns the closed orbits' areas and the
-    number of curves left open: chains with an end that matches nothing, and orbits that
-    run through the zone.
+    walk returns to its first chain with no net lattice translation. Returns the closed
+    orbits' areas and the number of curves left open: chains with an end that matches
+    nothing, and orbits that run through the zone.
     """
-    inverse = np.linalg.inv(reciprocal_lattice)
     ends = np.array([chain[i] for chain in chains for i in (0, -1)])
-    frac = ends @ inverse
+    frac = ends @ np.linalg.inv(reciprocal_lattice)
     partner: dict[int, tuple[int, np.ndarray]] = {}
     for a in range(len(ends)):
         shift = frac - frac[a]
@@ -208,7 +197,7 @@ def join_across_zone(
             best = int(np.argmin(np.where(pool, residual, np.inf)))
             partner[a] = (best, whole[best] @ reciprocal_lattice)
 
-    orbits: list[tuple[float, np.ndarray]] = []
+    areas: list[float] = []
     n_open = 0
     done: set[int] = set()
     for first in range(len(chains) if n_seeds is None else n_seeds):
@@ -227,26 +216,11 @@ def join_across_zone(
             offset = offset - lattice_vector
             if entry // 2 in done:
                 if entry == 2 * first and np.allclose(offset, 0.0):
-                    orbit = np.concatenate(pieces)
-                    area, centre = polygon_area(orbit), polygon_centroid(orbit) @ inverse
-                    if not any(same_orbit(area, centre, *seen) for seen in orbits):
-                        orbits.append((area, centre))
+                    areas.append(polygon_area(np.concatenate(pieces)))
                 else:
                     n_open += 1
                 break
-    return [area for area, _ in orbits], n_open
-
-
-def same_orbit(
-    area: float, centre: np.ndarray, other_area: float, other_centre: np.ndarray
-) -> bool:
-    """Whether two orbits are lattice translates of each other: fractional centres within
-    1e-4 of a lattice vector and areas within a relative 1e-6."""
-    shift = centre - other_centre
-    return bool(
-        abs(area - other_area) <= 1e-6 * max(area, other_area)
-        and np.abs(shift - np.rint(shift)).max() < 1e-4
-    )
+    return areas, n_open
 
 
 def open_curves_note(n_open: int) -> str:
