@@ -448,13 +448,14 @@ class QEParser(BaseParser):
 
     @cached_property
     def kgrid_info(self) -> k_utils.KGridInfo | None:
-        if self.kpath is not None:
+        # A bands run computes the k-points it lists, never the scf grid.
+        if self.bands_in is not None:
             return None
 
         nk1, nk2, nk3 = self.nk1, self.nk2, self.nk3
         sk1, sk2, sk3 = self.sk1, self.sk2, self.sk3
 
-        if nk1 is None or nk2 is None or nk3 is None:
+        if not (nk1 and nk2 and nk3):
             return None
         if sk1 is None or sk2 is None or sk3 is None:
             return None
