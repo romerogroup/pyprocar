@@ -288,7 +288,9 @@ class KPath:
         n_starts = None if segment_start_kpoints is None else len(segment_start_kpoints)
         if n_starts is not None and n_starts != len(segment_names):
             n_names = len(segment_names)
-            raise ValueError(f"segment_start_kpoints has {n_starts} rows for {n_names} segment names")
+            raise ValueError(
+                f"segment_start_kpoints has {n_starts} rows for {n_names} segment names"
+            )
         if len(segment_names) != self.n_segments:
             user_logger.warning(
                 "KPath got %d segment names for %d segments in the k-points; ticks use %d",
