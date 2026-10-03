@@ -2097,7 +2097,10 @@ def spin_transforms(
     positions = signs[np.newaxis, :, np.newaxis] * np.einsum("rij,kj->kri", rotations, sources)
     offsets = images[:, np.newaxis, :] - positions
     offsets -= np.round(offsets)
-    first = np.argmax(np.all(np.abs(offsets) < 2e-3, axis=2), axis=1)
+    reached = np.all(np.abs(offsets) < 2e-3, axis=2)
+    if not reached.any(axis=1).all():
+        raise ValueError("An unfolded k-point is reached from its source by no symmetry operation")
+    first = np.argmax(reached, axis=1)
 
     b_t = np.asarray(reciprocal_lattice).T
     cartesian = b_t @ rotations @ np.linalg.inv(b_t)
@@ -2190,13 +2193,18 @@ def ibz2fbz(ebs, rotations=None, kgrid_info=None, decimals=4, inplace=True, **kw
             unique_indices
         ]
 
-    if ebs.is_non_collinear and ebs.reciprocal_lattice is not None:
+    if ebs.is_non_collinear:
+        reciprocal_lattice = ebs.reciprocal_lattice
+        if reciprocal_lattice is None and ebs.structure is not None:
+            reciprocal_lattice = ebs.structure.reciprocal_lattice
+        if reciprocal_lattice is None:
+            raise ValueError("Unfolding a non-collinear spin needs a reciprocal lattice")
         transforms = spin_transforms(
             new_kpoints,
             ibz_kpoints[source],
             point_group,
             len(rotations) > len(point_group),
-            ebs.reciprocal_lattice,
+            reciprocal_lattice,
         )
         projected = ebs.get_property("projected")
         for calc_name, gradient_order, value_array in projected.iter_arrays():
