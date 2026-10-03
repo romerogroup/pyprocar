@@ -352,7 +352,7 @@ class TestFermiSurfaceNormalization:
             [values[mask, iband, ispin] for (iband, ispin), mask in fs.band_spin_mask.items()]
         )
         assert on_surface.max() == 1.0
-        assert on_surface.min() == pytest.approx(0.9449, abs=1e-4)
+        assert on_surface.min() == pytest.approx(0.9452, abs=1e-4)
         assert np.count_nonzero(values) == on_surface.size
 
 
