@@ -87,3 +87,28 @@ def test_slicers_accept_an_origin_outside_the_surface(method):
     assert plotter.plane_widgets[0].GetOrigin() == (0.0, 0.0, 2.0)
     assert "slice" not in plotter.actors
     plotter.close()
+
+
+def _sphere_with_arrows() -> pv.PolyData:
+    sphere = pv.Sphere(radius=0.5, theta_resolution=30, phi_resolution=30)
+    sphere.point_data["spin"] = np.tile([0.0, 1.0, 0.0], (sphere.n_points, 1))
+    sphere.set_active_vectors("spin")
+    return sphere
+
+
+def test_slice_updates_keep_the_surface_arrows():
+    sphere = _sphere_with_arrows()
+    plotter = FermiPlotter(off_screen=True)
+    plotter.add_surface(sphere, add_active_vectors=True)
+    surface_arrows = plotter.actors["vectors"]
+
+    plotter.add_box_slicer(sphere, normal=(0, 0, 1), origin=(0, 0, 2.0))
+    after_empty_cut = plotter.actors.get("vectors")
+    widget = plotter.plane_widgets[0]
+    widget.SetOrigin(0.0, 0.0, 0.0)
+    widget.InvokeEvent("EndInteractionEvent")
+
+    assert after_empty_cut is surface_arrows
+    assert plotter.actors["vectors"] is surface_arrows
+    assert "slice_vectors" in plotter.actors
+    plotter.close()

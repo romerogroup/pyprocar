@@ -256,6 +256,35 @@ def test_srvo3_band_16_offset_oblique_cut_finds_both_orbits():
 
 
 @pytest.mark.data
+@pytest.mark.parametrize(
+    ("normal", "origin", "area"),
+    [
+        ((0.02, 0.03, 1), (0.002559, 0.003839, 0.127955), 0.0104771),
+        ((0.3, 0.7, 1), (0.016287, 0.038004, 0.054292), 0.12629),
+    ],
+)
+def test_srvo3_band_16_orbit_through_a_translate_at_the_surface_edge_closes(normal, origin, area):
+    """Each orbit passes through a lattice translate of the plane that cuts band 16 near its
+    lowest or highest point along the normal.
+
+    The expected areas come from the PR verifier's marching cubes on a periodic tile of the
+    unfolded EIGENVAL energies, sliced by the plane with no zone clipping.
+    """
+    fs = FermiSurface.from_code(
+        code="vasp", dirpath=DATA_DIR / "examples/fermi3d/non-spin-polarized"
+    )
+    band_16 = fs.select_bands([(16, 0)])
+    assert isinstance(band_16, FermiSurface)
+
+    plotter = FermiPlotter(off_screen=True)
+    plotter.add_box_slicer(band_16, normal=normal, origin=origin, show_cross_section_area=True)
+    text = _area_text(plotter)
+    plotter.close()
+
+    assert _number(text) == pytest.approx(area * (2 * np.pi) ** 2, rel=0.01)
+
+
+@pytest.mark.data
 def test_srvo3_band_16_orbit_around_m_closes_across_the_zone_boundary():
     """SrVO3 band 16 at kz = 0 meets the zone boundary four times around M.
 
