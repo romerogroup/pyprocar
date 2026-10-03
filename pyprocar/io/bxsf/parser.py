@@ -9,7 +9,8 @@ import numpy as np
 from pyprocar.core.ebs import ElectronicBandStructure, get_ebs_from_data
 from pyprocar.core.kpoints import KGRID_MODE, KGridInfo
 from pyprocar.io.base import BaseParser
-from pyprocar.io.bxsf.bxsf import Bxsf
+from pyprocar.io.bxsf.bxsf import Bxsf, BxsfWriter
+from pyprocar.io.qe import QEParser
 
 logger = logging.getLogger(__name__)
 user_logger = logging.getLogger("user")
@@ -73,11 +74,33 @@ class BxsfParser(BaseParser):
     def reciprocal_lattice(self) -> np.ndarray | None:
         """Reciprocal lattice in 1/Angstrom without the 2*pi factor.
 
-        BXSF files store b with the 2*pi, in 1/Angstrom (the XCrySDen and Wannier90 convention).
+        The unit in the file depends on its writer (see ``BxsfWriter``). A QE ``fs.x`` file
+        carries no alat, so it is read from the QE output beside the file.
         """
         if not self._extractors:
             return None
-        return self._extractors[0].reciprocal_lattice / (2 * np.pi)
+        ext = self._extractors[0]
+        b = ext.reciprocal_lattice
+        match ext.writer:
+            case BxsfWriter.WANNIER90:
+                return b / (2 * np.pi)
+            case BxsfWriter.ABINIT:
+                return b
+            case BxsfWriter.QE_FS:
+                alat = QEParser(ext.filepath.parent).alat if ext.filepath else None
+                if alat is None:
+                    user_logger.warning(
+                        "QE fs.x BXSF stores b in units of 2*pi/alat and no QE output with "
+                        + "alat was found beside it; b is left in units of 1/alat."
+                    )
+                    return b
+                return b / alat
+            case BxsfWriter.UNKNOWN:
+                user_logger.warning(
+                    "BXSF writer not recognised; assuming b includes the 2*pi in 1/Angstrom "
+                    + "(the XCrySDen and Wannier90 convention)."
+                )
+                return b / (2 * np.pi)
 
     @property
     def ebs(self) -> ElectronicBandStructure | None:
