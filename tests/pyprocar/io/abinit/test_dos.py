@@ -127,11 +127,11 @@ class TestAbinitDOSUnits(BaseTest):
         from pyprocar.io.abinit import AbinitParser
 
         # abinit.out "Fermi (or HOMO) energy (eV) =   9.11796"; DOS header 0.33507858 Ha
-        bands_fermi = AbinitParser(SP_DIR / "bands").abinit_output.fermi
+        bands_output = AbinitParser(SP_DIR / "bands").abinit_output
         dos = AbinitParser(SP_DIR / "dos").dos
-        assert bands_fermi == pytest.approx(9.11796)
-        assert dos is not None
-        assert dos.fermi == pytest.approx(bands_fermi, abs=1e-4)
+        assert bands_output is not None and dos is not None
+        assert bands_output.fermi == pytest.approx(9.11796)
+        assert dos.fermi == pytest.approx(bands_output.fermi, abs=1e-4)
 
 
 def test_dosplot_puts_abinit_fermi_at_zero():
@@ -143,7 +143,7 @@ def test_dosplot_puts_abinit_fermi_at_zero():
     import pyprocar
 
     fig, ax = pyprocar.dosplot(code="abinit", dirname=str(NSP_DOS), orientation="vertical", show=False)
-    energies = ax.get_lines()[0].get_ydata()
+    energies = np.asarray(ax.get_lines()[0].get_ydata())
     plt.close(fig)
     # (-2.9 Ha - 0.37035511 Ha) and (3.7 Ha - 0.37035511 Ha), in eV
     assert energies.min() == pytest.approx(-88.9908960598)
