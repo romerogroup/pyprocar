@@ -214,6 +214,25 @@ def test_zone_face_cut_joins_its_four_corner_arcs_into_one_orbit(height):
     assert np.asarray(areas) == pytest.approx([np.pi * 0.1], rel=0.02)
 
 
+def test_translate_through_the_highest_vertex_is_cut_although_its_offset_rounds_above_it():
+    """E = 0.1 - 0.3 sum cos(2 pi k), normal (1, 1, 1), one zone below a mesh vertex.
+
+    One translate plane is tangent to the surface at its highest point. numpy puts that
+    translate's offset 1 ULP above the highest vertex height, while VTK's cut of it has
+    3 cells; slicing every translate leaves 1 open curve.
+    """
+
+    def sum_of_cosines(k: np.ndarray) -> np.ndarray:
+        return 0.1 - 0.3 * np.cos(2 * np.pi * k).sum(axis=1)
+
+    mesh = _periodic_surface(sum_of_cosines)
+    origin = np.asarray(mesh.points, dtype=np.float64)[484] + np.array([-1.0, 0.0, 0.0])
+
+    areas, n_open = cross_section_areas(mesh, np.ones(3) / np.sqrt(3), origin, np.eye(3))
+
+    assert (areas, n_open) == ([], 1)
+
+
 def test_sheets_that_run_through_the_zone_stay_open():
     def planes_at_ky(k):
         to_gamma = (k[:, 1] + 0.5) % 1.0 - 0.5
