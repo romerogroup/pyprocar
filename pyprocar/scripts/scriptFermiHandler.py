@@ -680,9 +680,11 @@ class FermiHandler:
         show : bool, optional
             Whether to show the plot, by default True
         save_2d : str, optional
-            Filename to save 2D plot, by default None
+            Filename for a screenshot of the 3D view with the widgets. The plot is
+            rendered off screen and not shown. By default None
         save_2d_slice : str, optional
-            Filename to save 2D slice plot, by default None
+            Filename for a matplotlib plot of the cross section at ``slice_normal``
+            and ``slice_origin``, by default None
         print_plot_opts: bool, optional
             Boolean to print the plotting options
         """
@@ -719,9 +721,10 @@ class FermiHandler:
         user_logger.info(f"Generated Fermi surface with {fermi_surface.n_points} points")
 
         # Create plotter and add box slicer
-        fsplt = FermiPlotter(
-            **{k: v for k, v in kwargs.items() if k in ["off_screen", "window_size", "theme"]}
-        )
+        plotter_kwargs = {k: v for k, v in kwargs.items() if k in ["off_screen", "window_size", "theme"]}
+        if save_2d:
+            plotter_kwargs["off_screen"] = True
+        fsplt = FermiPlotter(**plotter_kwargs)
 
         add_active_vectors = spin_texture or property_name == "fermi_velocity"
         fsplt.add_surface(
@@ -737,8 +740,6 @@ class FermiHandler:
             fermi_surface,
             normal=slice_normal,
             origin=slice_origin,
-            save_2d=save_2d,
-            save_2d_slice=save_2d_slice,
             show_cross_section_area=show_cross_section_area,
             show_van_alphen_frequency=show_van_alphen_frequency,
             add_surface_args={
@@ -753,8 +754,11 @@ class FermiHandler:
         if not (property_name is not None or show_colorbar) or mode == "plain":
             fsplt.remove_scalar_bar()
 
-        # Handle saving and showing
-        if show:
+        if save_2d:
+            fsplt.savefig(filename=save_2d)
+        if save_2d_slice:
+            fsplt.save_slice_2d(fermi_surface, slice_normal, slice_origin, save_2d_slice)
+        if show and not save_2d:
             fsplt.show()
 
     def print_default_settings(self):

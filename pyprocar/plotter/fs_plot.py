@@ -1,6 +1,7 @@
 import logging
 from functools import partial
 
+import matplotlib.pyplot as plt
 import numpy as np
 import pyvista as pv
 import vtk
@@ -13,6 +14,7 @@ from pyvista.plotting.utilities.algorithms import (
 
 from pyprocar.plotter._series import SurfaceSeries, surface_series
 from pyprocar.plotter._surface_plot import SurfacePlotter, find_nearest, normalize_to_range
+from pyprocar.plotter.fs_slice_plot import FermiSlicePlotter
 
 logger = logging.getLogger(__name__)
 
@@ -304,8 +306,8 @@ class FermiPlotter(SurfacePlotter):
                 show_van_alphen_frequency=show_van_alphen_frequency,
                 show_cross_section_area=show_cross_section_area,
             ),
-            normal,
-            origin,
+            normal=normal,
+            origin=origin,
             **add_plane_widget_args,
         )
 
@@ -498,11 +500,22 @@ class FermiPlotter(SurfacePlotter):
                 show_van_alphen_frequency=show_van_alphen_frequency,
                 show_cross_section_area=show_cross_section_area,
             ),
-            normal,
-            origin,
+            normal=normal,
+            origin=origin,
             bounds=surface.bounds,
             **add_plane_widget_args,
         )
+
+        if save_2d:
+            self.savefig(save_2d)
+        if save_2d_slice:
+            self.save_slice_2d(surface, normal, origin, save_2d_slice)
+
+    def save_slice_2d(self, surface, normal, origin, filename):
+        slice_plotter = FermiSlicePlotter(surface, normal=normal, origin=origin)
+        slice_plotter.plot(scalars_name=surface.active_scalars_name)
+        slice_plotter.savefig(filename)
+        plt.close(slice_plotter.fig)
 
     def _box_callback(
         self,
