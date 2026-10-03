@@ -327,11 +327,27 @@ def test_real_dos_is_in_core_layout_in_ev(
     assert (muffin_tin_sum <= total + 1e-9).all()
 
 
-def test_reciprocal_lattice_has_no_two_pi_and_kpath_stays_fractional(bands_calc_dir):
+@pytest.mark.parametrize("with_geometry_out", [True, False])
+def test_lattice_is_angstrom_and_reciprocal_lattice_is_inverse_angstrom_without_two_pi(
+    bands_calc_dir, with_geometry_out: bool
+):
+    if not with_geometry_out:
+        (bands_calc_dir / "GEOMETRY.OUT").unlink()
     parser = ElkParser(bands_calc_dir)
-    reciprocal_lattice, kpath = parser.reciprocal_lattice, parser.kpath
-    assert reciprocal_lattice is not None and kpath is not None
-    assert np.allclose(reciprocal_lattice, np.eye(3) * 0.137762, atol=1e-6)
+    structure, reciprocal_lattice, kpath = (
+        parser.structure,
+        parser.reciprocal_lattice,
+        parser.kpath,
+    )
+    assert structure is not None and reciprocal_lattice is not None and kpath is not None
+    lattice = structure.lattice
+    assert lattice is not None
+    assert np.allclose(lattice, np.eye(3) * 3.841244, atol=1e-6)
+    assert np.allclose(reciprocal_lattice, np.eye(3) * 0.260332, atol=1e-6)
+    assert np.allclose(reciprocal_lattice, np.linalg.inv(lattice).T)
     assert np.allclose(
         kpath.kpoints[:4], [[0, 0, 0], [0.0625, 0, 0], [0.125, 0, 0], [0.1875, 0, 0]]
+    )
+    assert kpath.get_distances(as_segments=False, cartesian=True)[2] == pytest.approx(
+        0.125 * 0.260332, abs=1e-6
     )

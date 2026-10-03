@@ -75,12 +75,12 @@ class TestElkGeometryLattice(BaseTest):
         assert geometry.lattice.shape == (3, 3)
 
     def test_lattice_values(self):
-        """Test lattice vectors values."""
+        """Test lattice vectors are converted from Bohr to Angstrom."""
         geometry = ElkGeometry.from_str(GEOMETRY_OUT)
         expected = np.array([
-            [7.2589, 0.0, 0.0],
-            [0.0, 7.2589, 0.0],
-            [0.0, 0.0, 7.2589],
+            [3.841244, 0.0, 0.0],
+            [0.0, 3.841244, 0.0],
+            [0.0, 0.0, 3.841244],
         ])
         np.testing.assert_allclose(geometry.lattice, expected, rtol=1e-5)
 

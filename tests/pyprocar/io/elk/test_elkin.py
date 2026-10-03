@@ -253,14 +253,14 @@ class TestElkInStructure(BaseTest):
         assert elkin.lattice.shape == (3, 3)
 
     def test_lattice_values(self):
-        """Test lattice vectors with scale factor applied."""
+        """Test lattice vectors with scale factor applied, converted from Bohr to Angstrom."""
         elkin = ElkIn.from_str(ELKIN_NON_SPIN_BANDS)
         expected = np.array([
-            [7.2589, 0.0, 0.0],
-            [0.0, 7.2589, 0.0],
-            [0.0, 0.0, 7.2589],
+            [3.841244, 0.0, 0.0],
+            [0.0, 3.841244, 0.0],
+            [0.0, 0.0, 3.841244],
         ])
-        np.testing.assert_allclose(elkin.lattice, expected)
+        np.testing.assert_allclose(elkin.lattice, expected, rtol=1e-6)
 
     def test_fractional_coordinates_shape(self):
         """Test fractional coordinates shape."""

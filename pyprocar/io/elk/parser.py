@@ -172,7 +172,7 @@ class ElkParser(BaseParser):
 
     @cached_property
     def reciprocal_lattice(self) -> np.ndarray | None:
-        """Reciprocal lattice vectors."""
+        """Reciprocal lattice vectors in 1/Angstrom, without the 2*pi."""
         lattice = self._get_lattice()
         if lattice is None:
             return None

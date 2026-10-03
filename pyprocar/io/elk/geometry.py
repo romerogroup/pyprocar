@@ -8,6 +8,8 @@ from typing import Self
 import numpy as np
 import numpy.typing as npt
 
+from pyprocar.utils.units import AU_TO_ANG
+
 FLOAT = r"[-+]?(?:\d+\.\d*|\.\d+|\d+)(?:[Ee][-+]?\d+)?"
 float_re = re.compile(FLOAT)
 
@@ -53,7 +55,7 @@ class ElkGeometry:
 
     @cached_property
     def lattice(self) -> npt.NDArray[np.float64]:
-        """Lattice vectors as 3x3 array (rows are vectors)."""
+        """Lattice vectors in Angstrom as 3x3 array (rows are vectors); Elk writes Bohr."""
         pattern_matrix = re.compile(
             r"avec[\s\S]*?\n" + rf"((?:[ \t]*{FLOAT}\s+){{8}}" + rf"{FLOAT}\s*\n)"
         )
@@ -61,7 +63,7 @@ class ElkGeometry:
         if match is None:
             raise ValueError("No lattice vectors found in GEOMETRY.OUT")
         matrix_block_str = match.group(1)
-        return np.fromstring(matrix_block_str, sep=" ").reshape(3, 3)
+        return np.fromstring(matrix_block_str, sep=" ").reshape(3, 3) * AU_TO_ANG
 
     @cached_property
     def nspecies(self) -> int:
