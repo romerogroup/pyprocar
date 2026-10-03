@@ -62,3 +62,24 @@ def test_single_kz_surface_spans_only_the_filled_slab():
     z = fs.points[:, 2]
     assert (z.min(), z.max()) == pytest.approx((-FILL_TOL, FILL_TOL))
     assert fs.area == pytest.approx(2 * np.pi * np.sqrt(FERMI) * 2 * FILL_TOL, rel=0.02)
+
+
+def test_grid_spacing_is_exact_when_parsed_kpoints_are_rounded():
+    n = 15
+    frac = np.arange(n) / n
+    kpoints = np.stack(np.meshgrid(frac, frac, frac, indexing="ij"), axis=-1).reshape(-1, 3)
+    centred = ((kpoints + 0.5) % 1.0 - 0.5).round(3)
+    energies = np.stack([np.sum(centred**2, axis=1), np.full(len(centred), 5.0)], axis=1)
+    mesh = ElectronicBandStructureMesh(
+        kgrid_info=KGridInfo(kgrid=(n, n, n), kgrid_mode=KGRID_MODE.GAMMA, kshift=(0.0, 0.0, 0.0)),
+        kpoints=centred,
+        bands=energies[..., np.newaxis],
+        projected=np.ones((len(centred), 2, 1, 1, 1)),
+        fermi=FERMI,
+        reciprocal_lattice=np.eye(3),
+        orbital_names=["s"],
+    )
+
+    grid = FermiSurface.from_ebs(mesh).grid
+
+    assert grid.spacing == pytest.approx((1 / n, 1 / n, 1 / n), abs=1e-12)

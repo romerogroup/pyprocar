@@ -154,7 +154,7 @@ class FermiSurface(pv.PolyData):
 
     @property
     def grid(self):
-        return padded_image_grid(self.ebs)
+        return padded_image_grid(self.ebs, self.original_ebs.kgrid)
 
     @property
     def transform_matrix_to_cart(self):
@@ -965,16 +965,19 @@ class FermiSurface(pv.PolyData):
         return interpolated_surface
 
 
-def padded_image_grid(padded_ebs: ElectronicBandStructureMesh) -> pv.ImageData:
-    """Image grid whose points are the padded k-points, in fractional coordinates.
+def padded_image_grid(padded_ebs: ElectronicBandStructureMesh, kgrid) -> pv.ImageData:
+    """Image grid on the padded k-points, in fractional coordinates.
 
-    The spacing comes from the k-points themselves, so a single-point axis that
-    ``expand_single_dimension`` widened by a fill offset keeps that offset.
+    An axis with ``kgrid[axis]`` points is spaced exactly 1/kgrid[axis], because
+    parsers round the k-points they read. A single-point axis, which
+    ``expand_single_dimension`` widened by a fill offset, takes its spacing from
+    the points.
     """
     coords = padded_ebs.kpoints
     dims = (padded_ebs.n_kx, padded_ebs.n_ky, padded_ebs.n_kz)
     spacing = tuple(
-        float(np.ptp(coords[:, axis])) / (n - 1) if n > 1 else 1.0 for axis, n in enumerate(dims)
+        1 / kgrid[axis] if kgrid[axis] > 1 else float(np.ptp(coords[:, axis])) / max(n - 1, 1)
+        for axis, n in enumerate(dims)
     )
     return pv.ImageData(dimensions=dims, spacing=spacing, origin=tuple(coords.min(axis=0)))
 
@@ -1008,7 +1011,7 @@ def generate_band_isosurfaces(ebs: ElectronicBandStructureMesh, isovalue: float,
     transform_matrix_to_cart = np.eye(4)
     transform_matrix_to_cart[:3, :3] = ebs.reciprocal_lattice
 
-    grid = padded_image_grid(padded_ebs)
+    grid = padded_image_grid(padded_ebs, ebs.kgrid)
     brillouin_zone = BrillouinZone(
         ebs.reciprocal_lattice, transformation_matrix=np.array([1, 1, 1])
     )
