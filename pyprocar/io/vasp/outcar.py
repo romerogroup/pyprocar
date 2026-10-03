@@ -134,10 +134,10 @@ class Outcar(Mapping[str, Any]):
             return the reciprocal lattice vectors
         """
 
-        match = re.search(r"reciprocal lattice vectors[\s\S]+?(?=\n\s?\n\s?)", self.file_str)
-        if match is None:
+        matches = re.findall(r"reciprocal lattice vectors[\s\S]+?(?=\n\s?\n\s?)", self.file_str)
+        if not matches:
             raise ValueError("No reciprocal lattice vectors found")
-        numbers = re.findall(r"[-]?\d+\.\d+", match.group(0))
+        numbers = re.findall(r"[-]?\d+\.\d+", matches[-1])
 
         # Create a NumPy array from the found numbers, reshape it to 3 rows and 6 columns
         all_vectors = np.array(numbers, dtype=float).reshape(3, 6)
