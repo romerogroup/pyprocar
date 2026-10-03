@@ -266,7 +266,23 @@ class TestKpoints:
         kpoints = vasp.Kpoints.from_str("Automatic mesh\n0\nMonkhorst-Pack\n4 4 2 1 1 1\n")
 
         assert kpoints.kgrid == [4, 4, 2]
-        assert kpoints.kshift == [1, 1, 1]
+        assert kpoints.kshift == [1.0, 1.0, 1.0]
+
+    @pytest.mark.parametrize("grid_line", ["4 4 2 1", "4 4 2 1 1"])
+    def test_kpoints_partial_shift_after_grid_means_no_shift(self, grid_line: str):
+        kpoints = vasp.Kpoints.from_str(f"Automatic mesh\n0\nGamma\n{grid_line}\n")
+
+        assert kpoints.kshift == [0.0, 0.0, 0.0]
+
+    def test_kpoints_shift_line_wins_over_numbers_after_grid(self):
+        kpoints = vasp.Kpoints.from_str("Automatic mesh\n0\nGamma\n4 4 2 1 1 1\n0.5 0.5 0\n")
+
+        assert kpoints.kshift == [0.5, 0.5, 0.0]
+
+    def test_kpoints_fractional_shift_is_kept(self):
+        kpoints = vasp.Kpoints.from_str("Automatic mesh\n0\nMonkhorst-Pack\n4 4 4\n0.5 0.5 0.5\n")
+
+        assert kpoints.kshift == [0.5, 0.5, 0.5]
 
     def test_kpoints_special_points_array_structure(self, kpoints_line_mode_path: Path):
         """Test the structure of special k-points array for band calculations."""

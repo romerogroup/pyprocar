@@ -119,15 +119,15 @@ class Kpoints(Mapping[str, Any]):
         return [int(float(token)) for token in tokens[:3]]
 
     @cached_property
-    def kshift(self) -> list[int] | None:
+    def kshift(self) -> list[float] | None:
         if self.mode not in {"gamma", "monkhorst-pack"}:
             return None
-        tokens = self._split_numeric_tokens(self.lines[3])[3:6] if len(self.lines) > 3 else []
-        if len(tokens) < 3 and len(self.lines) > 4:
-            tokens = self._split_numeric_tokens(self.lines[4])[:3]
-        if not tokens:
-            return [0, 0, 0]
-        return [int(float(token)) for token in tokens]
+        shift_line = self._split_numeric_tokens(self.lines[4])[:3] if len(self.lines) > 4 else []
+        after_grid = self._split_numeric_tokens(self.lines[3])[3:6] if len(self.lines) > 3 else []
+        for tokens in (shift_line, after_grid):
+            if len(tokens) == 3:
+                return [float(token) for token in tokens]
+        return [0.0, 0.0, 0.0]
 
     @cached_property
     def cartesian(self) -> bool:
