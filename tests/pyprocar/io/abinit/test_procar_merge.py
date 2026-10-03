@@ -30,3 +30,12 @@ def test_spin_polarized_merge_appends_spin_down_block(parallel_dir):
         "PROCAR_0000",
         "PROCAR_0001",
     ]
+
+
+def test_spin_polarized_merge_tolerates_a_one_line_first_part(tmp_path):
+    (tmp_path / "PROCAR_0000").write_text("head A\n")
+    (tmp_path / "PROCAR_0001").write_text("head A\nhead B\ndown\n")
+    procar = AbinitProcar(dirpath=tmp_path, nspin=2).vasp_procar
+
+    assert procar is not None
+    assert procar.file_str == "head A\n\n\nhead A\nhead B\ndown\n"
