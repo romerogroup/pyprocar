@@ -110,10 +110,6 @@ class BandStructureConfig(BaseConfig):
         The file name to save the figure. If null, the figure will not be saved.
     title : str, optional
         The title for the plot. If null, no title will be displayed.
-    weighted_color : bool, optional
-        If true, the color of the lines will be weighted.
-    weighted_width : bool, optional
-        If true, the width of the lines will be weighted.
     figure_size : Tuple[int], optional
         The size of the figure (width, height) in inches.
     dpi : str, optional
@@ -162,7 +158,6 @@ class BandStructureConfig(BaseConfig):
     >>> custom_config = BandStructureConfig(cmap='magma', linestyle=('dotted', 'dashed'))
     """
 
-    modes: list[str] = field(default_factory=lambda: [mode.value for mode in BandStructureMode])
     # Basic Plot Settings
     color: str = "black"
     spin_colors: tuple[str] = field(default_factory=lambda: ("blue", "red"))
@@ -195,8 +190,6 @@ class BandStructureConfig(BaseConfig):
     plot_color_bar: bool = True
     savefig: str | None = None
     title: str | None = None
-    weighted_color: bool = True
-    weighted_width: bool = False
     figure_size: tuple[int] = field(default_factory=lambda: (9, 6))
     dpi: int = 300
 
