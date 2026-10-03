@@ -462,25 +462,25 @@ class FermiPlotter(SurfacePlotter):
 
         add_text_args["color"] = add_text_args.get("color", "black")
 
-        self.add_text_args = add_text_args
-
         # Initialize clipper for surface
         mesh = pv.PolyData(surface)
         mesh, algo = algorithm_to_mesh_handler(
             add_ids_algorithm(mesh, point_ids=False, cell_ids=True)
         )
 
-        self.clipper = vtk.vtkBoxClipDataSet()
-        set_algorithm_input(self.clipper, algo)
-        self.clipper.GenerateClippedOutputOn()
+        clipper = vtk.vtkBoxClipDataSet()
+        set_algorithm_input(clipper, algo)
+        clipper.GenerateClippedOutputOn()
 
         # Initialize box widget
 
         self.add_box_widget(
             callback=partial(
                 self._box_callback,
+                clipper=clipper,
                 port=0,
                 add_surface_args=add_surface_args,
+                add_text_args=add_text_args,
                 show_van_alphen_frequency=show_van_alphen_frequency,
                 show_cross_section_area=show_cross_section_area,
             ),
@@ -507,8 +507,10 @@ class FermiPlotter(SurfacePlotter):
     def _box_callback(
         self,
         planes,
+        clipper,
         port=0,
         add_surface_args=None,
+        add_text_args=None,
         show_van_alphen_frequency=False,
         show_cross_section_area=False,
     ):
@@ -519,10 +521,10 @@ class FermiPlotter(SurfacePlotter):
             bounds.append(plane.GetNormal())
             bounds.append(plane.GetOrigin())
 
-        self.clipper.SetBoxClip(*bounds)
-        self.clipper.Update()
+        clipper.SetBoxClip(*bounds)
+        clipper.Update()
 
-        clipped = _get_output(self.clipper, oport=port)
+        clipped = _get_output(clipper, oport=port)
 
         if len(self._meshes) == 0:
             self._meshes.append(clipped)
@@ -538,7 +540,7 @@ class FermiPlotter(SurfacePlotter):
                 origin=widget_origin,
                 mesh=self._meshes[0],
                 add_surface_args=add_surface_args,
-                add_text_args=self.add_text_args,
+                add_text_args=add_text_args,
                 show_van_alphen_frequency=show_van_alphen_frequency,
                 show_cross_section_area=show_cross_section_area,
             )
