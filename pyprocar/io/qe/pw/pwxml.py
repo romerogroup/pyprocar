@@ -536,6 +536,14 @@ class PwXML:
         return None
 
     @cached_property
+    def calculation(self) -> str | None:
+        """The pw.x calculation type of the run that wrote this file, e.g. 'nscf' or 'bands'."""
+        match = self.root.find(".//input/control_variables/calculation")
+        if match is None or match.text is None:
+            return None
+        return match.text.strip().lower()
+
+    @cached_property
     def fermi(self) -> float | None:
         match = self.root.findall(".//output/band_structure/fermi_energy")
         if match and match[0].text is not None:

@@ -397,8 +397,8 @@ class QEParser(BaseParser):
             logger.info("No kpath found for DOS calculation")
             return None
 
-        if self.bands_in is None:
-            logger.info("No bands.in file found, therefore not parsing kpath")
+        if self.bands_in is None or not self.is_bands_run:
+            logger.info("The parsed k-points do not come from a bands run")
             return None
 
         kpoints_card = self.bands_in.kpoints_card
@@ -447,9 +447,21 @@ class QEParser(BaseParser):
         return kpoints
 
     @cached_property
+    def is_bands_run(self) -> bool:
+        """Whether the parsed k-points come from a calculation='bands' run.
+
+        The xml names the run that wrote it, which is also the run projwfc
+        read. A bands.in in the same directory may belong to an earlier run.
+        """
+        for xml in (self.pw_xml, self.data_file_schema_xml):
+            if xml is not None and xml.calculation is not None:
+                return xml.calculation == "bands"
+        return self.bands_in is not None
+
+    @cached_property
     def kgrid_info(self) -> k_utils.KGridInfo | None:
         # A bands run computes the k-points it lists, never the scf grid.
-        if self.bands_in is not None:
+        if self.is_bands_run:
             return None
 
         nk1, nk2, nk3 = self.nk1, self.nk2, self.nk3
