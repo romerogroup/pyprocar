@@ -99,8 +99,8 @@ BANDLINES_OUT = """   0.000000000      -4.832432739
 
 """
 
-# Minimal BANDS.OUT - 10 k-points, 2 bands
-BANDS_OUT = """   0.000000000      -2.401220419        0.000002    0.000000
+# Minimal BAND.OUT - 10 k-points, 2 bands
+BAND_OUT = """   0.000000000      -2.401220419        0.000002    0.000000
   0.0540989794      -2.401219000        0.000002    0.000000
   0.1081979588      -2.401218000        0.000002    0.000000
   0.1622969382      -2.401217000        0.000001    0.000000
@@ -190,7 +190,6 @@ def bands_calc_dir(tmp_path):
     (tmp_path / "FERMI.OUT").write_text(EFERMI_OUT)  # Parser expects FERMI.OUT
     (tmp_path / "GEOMETRY.OUT").write_text(GEOMETRY_OUT)
     (tmp_path / "BANDLINES.OUT").write_text(BANDLINES_OUT)
-    (tmp_path / "BANDS.OUT").write_text(BANDS_OUT)
     (tmp_path / "BAND_S01_A0001.OUT").write_text(BAND_S01_A0001)
     (tmp_path / "BAND_S02_A0001.OUT").write_text(BAND_S02_A0001)
     return tmp_path
@@ -490,7 +489,7 @@ def user_warnings(caplog: pytest.LogCaptureFixture):
     ("task", "files"),
     [
         ("22", {"BAND_S01_A0001.OUT": BAND_S01_A0001, "BAND_S02_A0001.OUT": BAND_S02_A0001}),
-        ("20", {"BAND.OUT": BANDS_OUT}),
+        ("20", {"BAND.OUT": BAND_OUT}),
     ],
     ids=["task22-BAND_S", "task20-BAND.OUT"],
 )
@@ -502,7 +501,7 @@ def test_bands_come_from_the_files_elk_writes(tmp_path, task, files):
         (tmp_path / name).write_text(content)
     ebs = ElkParser(tmp_path).ebs
 
-    assert isinstance(ebs, ElectronicBandStructurePath)
+    assert isinstance(ebs, ElectronicBandStructurePath) and ebs.bands is not None
     bands = ebs.bands.to_array()
     assert bands.shape == (10, 2, 1)
     assert bands[0, :, 0] == pytest.approx([-56.582434, -30.753990], abs=1e-5)
@@ -519,7 +518,7 @@ def test_bands_come_from_the_files_elk_writes(tmp_path, task, files):
 def test_real_elk_bands_read_band_s_files(mag, shape, first_band_at_gamma):
     ebs = ElkParser(ELK_DOS_DIR / mag / "bands").ebs
 
-    assert isinstance(ebs, ElectronicBandStructurePath)
+    assert isinstance(ebs, ElectronicBandStructurePath) and ebs.bands is not None
     bands = ebs.bands.to_array()
     assert bands.shape == shape
     assert bands[0, 0, :] == pytest.approx(first_band_at_gamma, abs=1e-5)
@@ -529,7 +528,7 @@ def test_real_elk_bands_read_band_s_files(mag, shape, first_band_at_gamma):
 def test_repeated_block_keeps_the_last_copy_like_elk(tmp_path):
     (tmp_path / "elk.in").write_text(
         "avec\n1 0 0\n0 1 0\n0 0 1\n\navec\n2 0 0\n0 2 0\n0 0 2\n\n"
-        "atoms\n1\n'Si.in'\n1\n0 0 0\n"
+        + "atoms\n1\n'Si.in'\n1\n0 0 0\n"
     )
     structure = ElkParser(tmp_path).structure
 

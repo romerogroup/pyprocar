@@ -23,12 +23,24 @@ class ElkCell(NamedTuple):
     fractional_coordinates: npt.NDArray[np.float64]
 
 
-def _rows_after(lines: Sequence[str], keyword: str) -> Iterator[list[str]] | None:
-    for i, line in enumerate(lines):
-        tokens = line.split()
+def block_lines(lines: Sequence[str], keyword: str) -> Sequence[str] | None:
+    """Lines after the last line whose first token is ``keyword``.
+
+    Elk reads the first token of a block line, so ``scale : global`` opens
+    ``scale``, and a later copy of a block overrides an earlier one.
+    """
+    for i in range(len(lines) - 1, -1, -1):
+        tokens = lines[i].split()
         if tokens and tokens[0] == keyword:
-            return (row.split() for row in lines[i + 1 :] if row.strip())
+            return lines[i + 1 :]
     return None
+
+
+def _rows_after(lines: Sequence[str], keyword: str) -> Iterator[list[str]] | None:
+    block = block_lines(lines, keyword)
+    if block is None:
+        return None
+    return (row.split() for row in block if row.strip())
 
 
 def _fortran_floats(tokens: Sequence[str]) -> list[float]:

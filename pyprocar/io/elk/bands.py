@@ -1,4 +1,4 @@
-"""BANDS.OUT and BANDLINES.OUT parser for Elk calculations."""
+"""BAND.OUT (or BAND_Sss_Aaaaa.OUT) and BANDLINES.OUT parser for Elk calculations."""
 
 from functools import cached_property
 from pathlib import Path
@@ -11,19 +11,19 @@ HARTREE_TO_EV = 27.211386245988
 
 
 class ElkBands:
-    """Parser for Elk BANDS.OUT and BANDLINES.OUT files.
+    """Parser for Elk BAND.OUT and BANDLINES.OUT files.
 
-    BANDS.OUT contains eigenvalues for each k-point and band.
+    BAND.OUT contains eigenvalues for each k-point and band.
     BANDLINES.OUT contains k-point positions along the band path.
 
     Parameters
     ----------
     bands_filepath : Path | None
-        Path to BANDS.OUT file
+        Path to BAND.OUT file
     bandlines_filepath : Path | None
         Path to BANDLINES.OUT file
     bands_str : str
-        Content of BANDS.OUT file (alternative to filepath)
+        Content of BAND.OUT file (alternative to filepath)
     bandlines_str : str
         Content of BANDLINES.OUT file (alternative to filepath)
     nkpoints : int
@@ -74,11 +74,11 @@ class ElkBands:
 
     @cached_property
     def bands_str(self) -> str:
-        """Lazily load BANDS.OUT content."""
+        """Lazily load BAND.OUT content."""
         if self._bands_str == "" and self._bands_filepath is not None:
             return Path(self._bands_filepath).read_text()
         elif self._bands_str == "" and self._bands_filepath is None:
-            raise ValueError("No BANDS.OUT filepath or content provided")
+            raise ValueError("No BAND.OUT filepath or content provided")
         return self._bands_str
 
     @cached_property

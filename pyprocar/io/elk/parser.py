@@ -18,6 +18,7 @@ from pyprocar.io.elk.geometry import ElkGeometry
 from pyprocar.io.elk.projections import ElkProjections
 
 logger = logging.getLogger(__name__)
+user_logger = logging.getLogger("user")
 
 ORBITAL_NAMES = [
     "Y00",
@@ -195,10 +196,18 @@ class ElkParser(BaseParser):
         if not self.is_bands_calculation or self._elkin is None:
             return None
 
-        bands_path = self.dirpath / "BANDS.OUT"
+        # Elk writes BAND.OUT for task 20 and BAND_Sss_Aaaaa.OUT, with the same
+        # first two columns, for tasks 21 and 22 (bandstr.f90).
         bandlines_path = self.dirpath / "BANDLINES.OUT"
-
-        if not bands_path.exists() or not bandlines_path.exists():
+        bands_path = next(
+            (
+                path
+                for path in (self.dirpath / "BAND.OUT", self.dirpath / "BAND_S01_A0001.OUT")
+                if path.exists()
+            ),
+            None,
+        )
+        if bands_path is None or not bandlines_path.exists():
             return None
 
         return ElkBands(
@@ -263,6 +272,9 @@ class ElkParser(BaseParser):
                 fractional_coordinates=self._geometry.fractional_coordinates,
             )
         if self._elkin is not None:
+            user_logger.warning(
+                f"No GEOMETRY.OUT in {self.dirpath}; reading the structure from elk.in"
+            )
             return Structure(
                 atoms=self._elkin.atoms,
                 lattice=self._elkin.lattice,
