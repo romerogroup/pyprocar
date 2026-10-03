@@ -102,7 +102,7 @@ def test_slice_updates_keep_the_surface_arrows():
     plotter.add_surface(sphere, add_active_vectors=True)
     surface_arrows = plotter.actors["vectors"]
 
-    plotter.add_box_slicer(sphere, normal=(0, 0, 1), origin=(0, 0, 2.0))
+    plotter.add_box_slicer(sphere, normal=(0, 0, 1), origin=(0, 0, 2.0), add_active_vectors=True)
     after_empty_cut = plotter.actors.get("vectors")
     widget = plotter.plane_widgets[0]
     widget.SetOrigin(0.0, 0.0, 0.0)

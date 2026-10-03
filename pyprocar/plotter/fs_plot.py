@@ -360,14 +360,14 @@ class FermiPlotter(SurfacePlotter):
         is_empty_slice = slc.n_points == 0
         if is_empty_slice:
             self.renderer.remove_actor("slice")
-            self.renderer.remove_actor("vectors")
+            self.renderer.remove_actor("slice_vectors")
         else:
             if active_vector_name:
                 add_surface_args["add_active_vectors"] = add_surface_args.get(
                     "add_active_vectors", True
                 )
                 add_surface_args["add_texture_args"] = add_surface_args.get("add_texture_args", {})
-                add_surface_args["add_texture_args"]["name"] = "vectors"
+                add_surface_args["add_texture_args"]["name"] = "slice_vectors"
                 slc.set_active_vectors(active_vector_name)
             self.add_surface(cast(pv.PolyData, slc), name="slice", **add_surface_args)
 
@@ -471,7 +471,7 @@ class FermiPlotter(SurfacePlotter):
             add_plane_widget_args = {}
 
         add_surface_args["add_texture_args"] = add_surface_args.get("add_texture_args", {})
-        add_surface_args["add_texture_args"]["name"] = "vectors"
+        add_surface_args["add_texture_args"]["name"] = "slice_vectors"
 
         add_surface_args["add_active_vectors"] = add_surface_args.get(
             "add_active_vectors", add_active_vectors
