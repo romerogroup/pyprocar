@@ -20,6 +20,9 @@ user_logger = logging.getLogger("user")
 
 BZ_SCALE_FACTOR = 0.01
 
+ARROW_ZONE_FRACTION = 0.1
+"""Longest arrow in FermiPlotter.plot as a fraction of the Brillouin zone's largest extent."""
+
 FS_AREA_SCALE_FACTOR = (2 * np.pi) ** 2
 
 
@@ -152,6 +155,8 @@ class FermiPlotter(SurfacePlotter):
             scalars_clim,
             add_surface_kwargs,
             add_texture_kwargs,
+            glyph_length=ARROW_ZONE_FRACTION
+            * float(np.max(np.ptp(fermi_surface.brillouin_zone.points, axis=0))),
         )
 
     def add_surface(

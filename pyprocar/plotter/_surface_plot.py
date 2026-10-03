@@ -41,7 +41,8 @@ def normalize_to_range(scalars, clim=(0, 1)):
 class SurfacePlotter(pv.Plotter):
     """Renders one mesh per (band, spin) series, with optional scalars and vector glyphs.
 
-    Subclasses set ``glyph_scale``, the arrow length relative to the longest vector.
+    Subclasses set ``glyph_scale``, the length of the longest arrow unless a plot passes
+    ``glyph_length``.
     """
 
     glyph_scale: float = 1.0
@@ -61,10 +62,16 @@ class SurfacePlotter(pv.Plotter):
         add_surface_kwargs: dict | None,
         add_texture_kwargs: dict | None,
         clip_to: pv.PolyData | None = None,
+        glyph_length: float | None = None,
     ) -> dict[tuple[int, int], pv.PolyData]:
         has_scalars = any(s.scalars is not None for s in series_list)
         if scalars_clim is None and has_scalars and scalars_mode != "none":
             scalars_clim = finite_range(s.scalars for s in series_list)
+
+        vector_norms = [
+            np.linalg.norm(s.vectors, axis=-1) for s in series_list if s.vectors is not None
+        ]
+        longest = max((float(n.max()) for n in vector_norms if n.size), default=0.0)
 
         meshes: dict[tuple[int, int], pv.PolyData] = {}
         for i, series in enumerate(series_list):
@@ -101,7 +108,13 @@ class SurfacePlotter(pv.Plotter):
                 texture_kwargs: dict[str, Any] = {
                     "cmap": scalars_cmap,
                     "clim": scalars_clim,
+                    "longest": longest,
+                    "length": glyph_length,
                     **(add_texture_kwargs or {}),
+                }
+                texture_kwargs["add_mesh_args"] = {
+                    "name": f"vectors_{series.band_index}_{series.spin_index}",
+                    **(texture_kwargs.get("add_mesh_args") or {}),
                 }
                 self.add_texture(mesh, **texture_kwargs)
 
@@ -142,8 +155,14 @@ class SurfacePlotter(pv.Plotter):
         factor: float = 1.0,
         add_mesh_args: dict | None = None,
         glyph_args: dict | None = None,
+        longest: float | None = None,
+        length: float | None = None,
         **kwargs,
     ):
+        """Draw ``surface``'s active vectors as arrows; the ``longest`` vector gets ``length``.
+
+        ``longest`` defaults to this surface's longest vector and ``length`` to ``glyph_scale``.
+        """
         active_vectors = surface.active_vectors
         if active_vectors is None:
             return None
@@ -165,9 +184,11 @@ class SurfacePlotter(pv.Plotter):
         glyph_args["scale"] = glyph_args.get("scale", True)
         glyph_args["orient"] = glyph_args.get("orient", vectors)
 
-        active_vector_magnitude = np.linalg.norm(surface.active_vectors, axis=1)
-        vector_scale_factor = 1 / active_vector_magnitude.max()
-        factor = vector_scale_factor * self.glyph_scale * factor
+        if longest is None:
+            longest = float(np.linalg.norm(surface.active_vectors, axis=1).max())
+        if length is None:
+            length = self.glyph_scale
+        factor = length / longest * factor
 
         glyph_args["factor"] = factor
         glyph_args["indices"] = glyph_args.get("indices")
