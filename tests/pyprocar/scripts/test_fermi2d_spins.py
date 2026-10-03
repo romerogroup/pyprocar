@@ -1,5 +1,3 @@
-import logging
-
 import matplotlib
 
 matplotlib.use("Agg")
@@ -66,18 +64,8 @@ def test_fermi2d_draws_both_channels_by_default(tmp_path):
     assert np.isclose(radii, np.sqrt(FERMI / 2), atol=0.02).any()
 
 
-@pytest.fixture
-def user_warnings(caplog):
-    """Capture warnings on the non-propagating "user" logger."""
-    user_logger = logging.getLogger("user")
-    user_logger.addHandler(caplog.handler)
-    with caplog.at_level(logging.WARNING, logger="user"):
-        yield caplog
-    user_logger.removeHandler(caplog.handler)
-
-
-def test_fermi2d_spin_channel_without_a_crossing_draws_nothing(tmp_path, user_warnings):
-    radii = contour_radii(tmp_path, None, [1])
+def test_fermi2d_spin_channel_without_a_crossing_warns_and_draws_nothing(tmp_path):
+    with pytest.warns(UserWarning, match=r"no band of spin channel\(s\) \[1\] crosses"):
+        radii = contour_radii(tmp_path, None, [1])
 
     assert radii.size == 0
-    assert "no band of spin channel(s) [1] crosses" in user_warnings.text

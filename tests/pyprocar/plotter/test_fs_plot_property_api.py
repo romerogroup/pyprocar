@@ -1,6 +1,5 @@
 """Tests for FermiPlotter.plot() through the rendered meshes."""
 
-import logging
 from types import SimpleNamespace
 
 import numpy as np
@@ -123,17 +122,12 @@ class TestFermiPlotterPlot:
 
         assert list(meshes) == [(3, 1)]
 
-    def test_spin_without_surface_warns_and_draws_nothing(self, plotter, caplog):
-        user_logger = logging.getLogger("user")
-        user_logger.addHandler(caplog.handler)
-        try:
-            with caplog.at_level(logging.WARNING, logger="user"):
-                meshes = plotter.plot(_fermi_surface(), spins=[2])
-        finally:
-            user_logger.removeHandler(caplog.handler)
+    def test_spin_without_surface_warns_and_draws_nothing(self, plotter):
+        with pytest.warns(UserWarning) as caught:
+            meshes = plotter.plot(_fermi_surface(), spins=[2])
 
         assert meshes == {}
-        assert [r.getMessage() for r in caplog.records] == [
+        assert [str(w.message) for w in caught] == [
             "No Fermi surface found: no band of spin channel(s) [2] crosses the isovalue"
             + " (Fermi energy + fermi_shift). Try another spin channel, a different"
             + " fermi_shift, or check the Fermi energy."
