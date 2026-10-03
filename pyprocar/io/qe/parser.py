@@ -415,8 +415,8 @@ class QEParser(BaseParser):
 
         if kpoints_card.mode == "tpiba_b":
             assert self.alat is not None and self.reciprocal_lattice is not None
-            high_sym_points = (high_sym_points / self.alat) @ np.linalg.inv(
-                self.reciprocal_lattice
+            high_sym_points = k_utils.cartesian_to_reduced(
+                high_sym_points / self.alat, self.reciprocal_lattice
             )
 
         kticks = find_high_symmetry_ticks(self._raw_kpoints, high_sym_points)
