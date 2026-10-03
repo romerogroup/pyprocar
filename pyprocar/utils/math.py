@@ -394,47 +394,6 @@ def calculate_central_differences_on_meshgrid_axis(scalar_mesh, axis):
         ) / 2
 
 
-def calculate_forward_averages_on_meshgrid_axis(scalar_mesh, axis):
-    """Calculates the scalar differences over the
-    k mesh grid using central differences
-
-    Parameters
-    ----------
-    scalar_mesh : np.ndarray
-        The scalar mesh. shape = [n_kx,n_ky,n_kz]
-
-    Returns
-    -------
-    np.ndarray
-        scalar_gradient_mesh shape = [n_kx,n_ky,n_kz]
-    """
-    n = scalar_mesh.shape[axis]
-
-    # Calculate indices with periodic boundary conditions
-    plus_one_indices = np.arange(n) + 1
-    zero_one_indices = np.arange(n)
-    plus_one_indices[-1] = 0
-    if axis == 0:
-        return (scalar_mesh[zero_one_indices, ...] + scalar_mesh[plus_one_indices, ...]) / 2
-    elif axis == 1:
-        return (
-            scalar_mesh[:, zero_one_indices, :, ...] + scalar_mesh[:, plus_one_indices, :, ...]
-        ) / 2
-    elif axis == 2:
-        return (
-            scalar_mesh[:, :, zero_one_indices, ...] + scalar_mesh[:, :, plus_one_indices, ...]
-        ) / 2
-
-
-def calculate_scalar_volume_averages(scalar_mesh):
-    """Calculates the scalar averages over the k mesh grid in cartesian coordinates"""
-    scalar_sums_i = calculate_forward_averages_on_meshgrid_axis(scalar_mesh, axis=0)
-    scalar_sums_j = calculate_forward_averages_on_meshgrid_axis(scalar_mesh, axis=1)
-    scalar_sums_k = calculate_forward_averages_on_meshgrid_axis(scalar_mesh, axis=2)
-    scalar_sums = (scalar_sums_i + scalar_sums_j + scalar_sums_k) / 3
-    return scalar_sums
-
-
 def calculate_scalar_differences(scalar_mesh):
     """Calculates the scalar gradient over the k mesh grid in cartesian coordinates
 
@@ -547,21 +506,6 @@ def calculate_3d_mesh_scalar_gradients(
     # scalar_gradients = np.einsum(ein_sum_string, reciprocal_lattice.T, scalar_diffs)
 
     return scalar_gradients
-
-
-def calculate_3d_mesh_scalar_integral(scalar_mesh, reciprocal_lattice):
-    """Calculate the scalar integral"""
-    n1, n2, n3 = scalar_mesh.shape[:3]
-    volume_reduced_vector = np.array([1, 1, 1])
-    volume_cartesian_vector = np.dot(reciprocal_lattice, volume_reduced_vector)
-    volume = np.prod(volume_cartesian_vector)
-    dv = volume / (n1 * n2 * n3)
-
-    scalar_volume_avg = calculate_scalar_volume_averages(scalar_mesh)
-    # Compute the integral by summing up the product of scalar values and the volume of each grid cell.
-    integral = np.sum(scalar_volume_avg * dv, axis=(0, 1, 2))
-
-    return integral
 
 
 def q_multi(q1, q2):
