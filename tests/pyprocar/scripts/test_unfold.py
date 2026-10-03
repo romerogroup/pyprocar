@@ -150,7 +150,7 @@ class TestUnfoldPlot:
 
         collections = [c for c in ax.collections if isinstance(c, LineCollection)]
         assert len(collections) == N_BANDS
-        widths = collections[30].get_linewidths()
+        widths = np.asarray(collections[30].get_linewidths())
         expected = _midpoints(_weights(unfolded)[:, 30])
         np.testing.assert_allclose(widths / widths.max(), expected / expected.max())
         assert collections[30].get_array() is None
@@ -171,7 +171,7 @@ class TestUnfoldPlot:
 
         collections = [c for c in ax.collections if isinstance(c, LineCollection)]
         np.testing.assert_allclose(collections[30].get_array(), _midpoints(projection[:, 30]))
-        widths = collections[30].get_linewidths()
+        widths = np.asarray(collections[30].get_linewidths())
         expected = _midpoints(_weights(unfolded)[:, 30])
         np.testing.assert_allclose(widths / widths.max(), expected / expected.max())
 
@@ -208,12 +208,12 @@ class TestUnfoldPlot:
             show=False,
         )
 
-        assert [t.get_text() for t in ax.get_legend().get_texts()] == ["Mg", "B"]
+        assert [t.get_text() for t in ax.get_legend().get_texts()] == ["B", "Mg"]
         fills = [c for c in ax.collections if isinstance(c, PolyCollection)]
         assert len(fills) == 2 * N_BANDS
-        top = fills[30].get_paths()[0].vertices[1 : N_KPOINTS + 1, 1]
-        expected = bands[:, 30] + mg[:, 30] * _weights(unfolded)[:, 30] / 2
-        np.testing.assert_allclose(top, expected, atol=1e-9)
+        lower_edge = fills[N_BANDS + 30].get_paths()[0].vertices[1 : N_KPOINTS + 1, 1]
+        expected = bands[:, 30] - mg[:, 30] * _weights(unfolded)[:, 30] / 2
+        np.testing.assert_allclose(lower_edge, expected, atol=1e-9)
 
     def test_color_mode_needs_plain_mode(self, supercell):
         with pytest.raises(ValueError, match="unfold_mode='color'"):
