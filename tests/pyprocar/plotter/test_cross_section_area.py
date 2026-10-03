@@ -72,9 +72,9 @@ def _bowl() -> pv.PolyData:
     return cast(pv.PolyData, _sphere(-0.5).clip(normal=(1, 0, 0), origin=(-0.6, 0, 0)))
 
 
-def _slice_text(surface: pv.PolyData, origin=(0, 0, 0), **flags: bool) -> str:
+def _slice_text(surface: pv.PolyData, origin=(0, 0, 0), normal=(0, 0, 1), **flags: bool) -> str:
     plotter = FermiPlotter(off_screen=True)
-    plotter.add_box_slicer(surface, normal=(0, 0, 1), origin=origin, **flags)
+    plotter.add_box_slicer(surface, normal=normal, origin=origin, **flags)
     text = _area_text(plotter)
     plotter.close()
     return text
@@ -267,6 +267,36 @@ def test_nearly_axial_normal_counts_the_orbit_around_m_once():
 
     assert n_open == 0
     assert np.asarray(areas) == pytest.approx([np.pi * 0.1], rel=0.02)
+
+
+ROUNDED_111 = (0.5774, 0.5773, 0.5774)
+
+
+def _cylinder_around_m(k: np.ndarray) -> np.ndarray:
+    return np.sum((k[:, :2] % 1.0 - 0.5) ** 2, axis=1)
+
+
+def test_rounded_111_normal_cuts_the_exact_111_plane():
+    """Typed to 4 digits, the normal is 1e-4 rad off [1 1 1]. The (1 1 1) plane through
+    Gamma cuts the cylinder around M in one ellipse of area pi 0.1 sqrt(3) per cell.
+    """
+    areas, n_open = cross_section_areas(
+        _periodic_surface(_cylinder_around_m), ROUNDED_111, (0, 0, 0), np.eye(3)
+    )
+
+    assert n_open == 0
+    assert np.asarray(areas) == pytest.approx([np.pi * 0.1 * np.sqrt(3)], rel=0.02)
+
+
+def test_widget_says_when_it_snapped_the_normal():
+    surface = _periodic_surface(_cylinder_around_m)
+
+    snapped = _slice_text(surface, normal=ROUNDED_111, show_cross_section_area=True)
+    exact = _slice_text(surface, normal=(1, 1, 1), show_cross_section_area=True)
+
+    assert snapped.endswith(" Ang^-2 (normal snapped to [1 1 1])")
+    assert exact.endswith(" Ang^-2")
+    assert _number(snapped) == pytest.approx(_number(exact), rel=1e-6)
 
 
 def test_sheets_that_run_through_the_zone_stay_open():
