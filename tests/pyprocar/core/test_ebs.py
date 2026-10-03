@@ -1293,3 +1293,89 @@ def test_unfolded_non_collinear_spin_rotates_as_an_axial_vector():
     s = np.sin(2 * np.pi / 3)
     at = {key(k): i for i, k in enumerate(ebs.kpoints)}
     assert unfolded[at[(0.0, 0.333, 0.333)], 1:] == pytest.approx([-0.5 * s, s, 0.3 * s])
+
+
+def _c3v_hexagonal_spin_case():
+    """An IBZ of a hexagonal 6x6x2 grid under C3v and k ~ -k, with an analytic axial spin field.
+
+    The group is set up in Cartesian coordinates, a 120 degree turn about z and the mirror
+    y -> -y. Each fractional k rotation is defined by k_cart' = R_c k_cart with
+    k_cart = B.T k. The field S = sum_h s_h det(R_h) R_h v(h^-1 k), over h = (R, s) in
+    C3v x {1, -1} and with v a periodic function of fractional k without symmetry, obeys
+    S(h k) = s_h det(R_h) R_h S(k).
+    """
+    from pyprocar.core import Structure
+
+    lattice = np.array([[3.0, 0.0, 0.0], [-1.5, 1.5 * np.sqrt(3), 0.0], [0.0, 0.0, 5.0]])
+    b_t = np.linalg.inv(lattice)
+    turn = np.array([[-0.5, -np.sqrt(3) / 2, 0], [np.sqrt(3) / 2, -0.5, 0], [0, 0, 1]])
+    mirror = np.diag([1.0, -1.0, 1.0])
+    cartesian = [np.linalg.matrix_power(turn, n) @ m for n in range(3) for m in (np.eye(3), mirror)]
+    fractional = np.array([np.linalg.solve(b_t, r @ b_t) for r in cartesian])
+    assert np.allclose(fractional, np.round(fractional))
+    fractional = np.round(fractional)
+
+    def v(k):
+        phases = np.asarray(k, dtype=float) @ np.array([[1, 0, 1], [0, 1, 2], [0, 1, 0]])
+        x, y, z = 2 * np.pi * phases.T
+        return np.stack([np.sin(x) + 0.3, np.sin(y) + 0.5 * np.cos(z), np.sin(z)], axis=-1)
+
+    def spin(k):
+        total = np.zeros((len(k), 3))
+        for r_c, r in zip(cartesian, fractional, strict=True):
+            for s in (1, -1):
+                source = s * np.asarray(k) @ np.linalg.inv(r).T
+                total += v(source) @ (s * np.linalg.det(r_c) * r_c).T
+        return total
+
+    def key(k):
+        return tuple(np.round(k - np.round(k), 3) + 0.0)
+
+    grid = kpoints.get_kpoints_from_kgrid(kgrid=(6, 6, 2), kshift=(0, 0, 0), mode=KGRID_MODE.GAMMA)
+    ibz, seen = [], set()
+    for k in grid:
+        if key(k) not in seen:
+            ibz.append(k)
+            seen.update(key(s * (r @ k)) for r in fractional for s in (1, -1))
+    ibz = np.array(ibz)
+    structure = Structure(
+        atoms=["X"],
+        fractional_coordinates=np.zeros((1, 3)),
+        lattice=lattice,
+        rotations=fractional,
+    )
+    return ibz, structure, spin, b_t.T
+
+
+@pytest.mark.parametrize("on_the_ebs", [True, False], ids=["ebs_lattice", "structure_lattice"])
+def test_hexagonal_unfolded_spin_turns_with_the_cartesian_axial_rotation(on_the_ebs: bool):
+    ibz, structure, spin, reciprocal_lattice = _c3v_hexagonal_spin_case()
+    projected = np.concatenate([np.ones((len(ibz), 1)), spin(ibz)], axis=1)
+    assert np.abs(projected[:, 1:]).max() > 1
+
+    ebs = ElectronicBandStructureMesh(
+        kpoints=ibz,
+        bands=np.zeros((len(ibz), 1, 1)),
+        projected=projected.reshape(len(ibz), 1, 4, 1, 1),
+        fermi=0.0,
+        reciprocal_lattice=reciprocal_lattice if on_the_ebs else None,
+        structure=structure,
+        kgrid_info=KGridInfo(kgrid=(6, 6, 2), kgrid_mode=KGRID_MODE.GAMMA, kshift=(0, 0, 0)),
+    )
+
+    assert len(ibz) < 72 and ebs.n_kpoints == 72 and ebs.projected is not None
+    exact = np.round(ebs.kpoints * 6) / 6
+    assert np.allclose(ebs.projected.to_array()[:, 0, 1:, 0, 0], spin(exact), atol=1e-10)
+
+
+def test_spin_transforms_rejects_an_image_no_operation_reaches():
+    from pyprocar.core.ebs import spin_transforms
+
+    with pytest.raises(ValueError, match="by no symmetry operation"):
+        spin_transforms(
+            np.array([[0.1, 0.2, 0.0]]),
+            np.array([[0.0, 0.0, 0.3]]),
+            np.array([np.eye(3)]),
+            True,
+            np.eye(3),
+        )
