@@ -1,5 +1,6 @@
 """Tests for SIESTA Parser."""
 
+import os
 from pathlib import Path
 
 import numpy as np
@@ -333,6 +334,24 @@ def test_auto_detect_skips_a_sibling_fdf_that_cannot_be_read(tmp_path: Path, bro
     (tmp_path / "old.fdf").write_text(broken)
 
     parser = SiestaParser(tmp_path)
+
+    assert parser._fdf is not None
+    assert parser._fdf.filepath == tmp_path / "input.fdf"
+    assert parser.fermi == -5.5
+
+
+@pytest.mark.skipif(os.geteuid() == 0, reason="root reads files whatever their mode")
+def test_auto_detect_skips_a_sibling_fdf_whose_include_cannot_be_read(tmp_path: Path) -> None:
+    (tmp_path / "input.fdf").write_text(FDF_STR)
+    (tmp_path / "silicon.bands").write_text(BANDS_STR)
+    (tmp_path / "old.fdf").write_text("%include locked.inc\n")
+    locked = tmp_path / "locked.inc"
+    locked.write_text("SystemLabel locked\n")
+    locked.chmod(0)
+    try:
+        parser = SiestaParser(tmp_path)
+    finally:
+        locked.chmod(0o644)
 
     assert parser._fdf is not None
     assert parser._fdf.filepath == tmp_path / "input.fdf"

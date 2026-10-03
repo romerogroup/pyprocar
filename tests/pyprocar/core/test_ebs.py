@@ -1214,17 +1214,82 @@ def test_reduced_non_collinear_bisb_mesh_unfolds_to_the_full_mesh_spin():
 
     assert len(kept) == 331
     assert reduced.n_kpoints == 3600 and reduced.projected is not None
-    true = full_projected.sum(axis=(3, 4))
-    unfolded = reduced.projected.to_array().sum(axis=(3, 4))
-    ibz = {tuple(full_k[i]): i for i in kept}
-    minus_k = [
-        (j, index[tuple(k)], ibz[tuple(wrap(-k))])
-        for j, k in enumerate(wrap(reduced.kpoints))
-        if tuple(k) not in ibz and tuple(wrap(-k)) in ibz
-    ]
-    assert len(minus_k) == 329
-    image, target, source = (np.array(column) for column in zip(*minus_k, strict=True))
-    assert np.array_equal(unfolded[image, :, 1:], -true[source, :, 1:])
-    assert np.array_equal(unfolded[image, :, 0], true[source, :, 0])
-    # -S(k) matches the computed S(-k) up to degenerate bands
-    assert np.abs(unfolded[image, :, 1:] - true[target, :, 1:]).mean() < 0.005
+    # bands 60-79 are unconverged; bands 0-59 obey the symmetry to about 3 meV
+    true = full_projected[:, :60].sum(axis=(3, 4))
+    unfolded = reduced.projected.to_array()[:, :60].sum(axis=(3, 4))
+    orbit_source: dict[tuple, int] = {}
+    for i in kept:
+        for g in group:
+            orbit_source.setdefault(tuple(wrap(full.kpoints[i] @ g.T)), i)
+    kinds: dict[str, list[tuple[int, int, int]]] = {"source": [], "-k": [], "Rk": [], "-Rk": []}
+    for j, k in enumerate(wrap(reduced.kpoints)):
+        source = orbit_source[tuple(k)]
+        k_source = full.kpoints[source]
+        if tuple(k) == tuple(full_k[source]):
+            kind = "source"
+        elif tuple(k) == tuple(wrap(-k_source)):
+            kind = "-k"
+        elif any(tuple(k) == tuple(wrap(k_source @ r.T)) for r in rotations):
+            kind = "Rk"
+        else:
+            kind = "-Rk"
+        kinds[kind].append((j, index[tuple(k)], source))
+
+    assert {kind: len(rows) for kind, rows in kinds.items()} == {
+        "source": 331,
+        "-k": 329,
+        "Rk": 1527,
+        "-Rk": 1413,
+    }
+    for kind, rows in kinds.items():
+        image, target, source = (np.array(column) for column in zip(*rows, strict=True))
+        assert np.array_equal(unfolded[image, :, 0], true[source, :, 0]), kind
+        assert np.abs(unfolded[image, :, 1:] - true[target, :, 1:]).mean() < 0.004, kind
+
+
+def test_unfolded_non_collinear_spin_rotates_as_an_axial_vector():
+    from pyprocar.core import Structure
+
+    # Point group C4 about z, no inversion, so the IBZ is also reduced by time reversal.
+    # S(k) = (sx - 0.5 sy, sy + 0.5 sx, 0.3 sz) with s_i = sin(2 pi k_i) obeys
+    # S(Rk) = det(R) R S(k) under C4 and S(-k) = -S(k).
+    c4 = np.array([[0, -1, 0], [1, 0, 0], [0, 0, 1]], dtype=float)
+    group = np.array([np.linalg.matrix_power(c4, n) for n in range(4)])
+
+    def spin(k):
+        sx, sy, sz = np.sin(2 * np.pi * np.asarray(k, dtype=float)).T
+        return np.stack([sx - 0.5 * sy, sy + 0.5 * sx, 0.3 * sz], axis=-1)
+
+    def key(k):
+        return tuple(np.round(k - np.round(k), 3) + 0.0)
+
+    grid = kpoints.get_kpoints_from_kgrid(kgrid=(3, 3, 3), kshift=(0, 0, 0), mode=KGRID_MODE.GAMMA)
+    ibz, seen = [], set()
+    for k in grid:
+        if key(k) not in seen:
+            ibz.append(k)
+            seen.update(key(sign * (g @ k)) for g in group for sign in (1, -1))
+    ibz = np.array(ibz)
+    projected = np.concatenate([np.ones((len(ibz), 1)), spin(ibz)], axis=1)
+    structure = Structure(
+        atoms=["X"], fractional_coordinates=np.zeros((1, 3)), lattice=np.eye(3), rotations=group
+    )
+
+    ebs = ElectronicBandStructureMesh(
+        kpoints=ibz,
+        bands=np.zeros((len(ibz), 1, 1)),
+        projected=projected.reshape(len(ibz), 1, 4, 1, 1),
+        fermi=0.0,
+        reciprocal_lattice=np.eye(3),
+        structure=structure,
+        kgrid_info=KGridInfo(kgrid=(3, 3, 3), kgrid_mode=KGRID_MODE.GAMMA, kshift=(0, 0, 0)),
+    )
+
+    assert len(ibz) < 27 and ebs.n_kpoints == 27 and ebs.projected is not None
+    unfolded = ebs.projected.to_array()[:, 0, :, 0, 0]
+    assert np.allclose(unfolded[:, 0], 1.0)
+    assert np.allclose(unfolded[:, 1:], spin(np.round(ebs.kpoints * 3) / 3), atol=1e-12)
+    # C4 maps (1/3, 0, 1/3) to (0, 1/3, 1/3): the spin turns by 90 degrees, it is not negated
+    s = np.sin(2 * np.pi / 3)
+    at = {key(k): i for i, k in enumerate(ebs.kpoints)}
+    assert unfolded[at[(0.0, 0.333, 0.333)], 1:] == pytest.approx([-0.5 * s, s, 0.3 * s])
