@@ -75,6 +75,31 @@ def test_open_curves_are_reported_and_not_counted():
     plotter.close()
 
 
+def _bowl() -> pv.PolyData:
+    return cast(pv.PolyData, _sphere(-0.5).clip(normal=(1, 0, 0), origin=(-0.6, 0, 0)))
+
+
+def _van_alphen_text(surface: pv.PolyData, origin=(0, 0, 0)) -> str:
+    plotter = FermiPlotter(off_screen=True)
+    plotter.add_box_slicer(surface, normal=(0, 0, 1), origin=origin, show_van_alphen_frequency=True)
+    text = _area_text(plotter)
+    plotter.close()
+    return text
+
+
+def test_van_alphen_frequency_without_a_closed_orbit_says_so():
+    text = _van_alphen_text(_bowl(), origin=(-0.7, 0, 0))
+
+    assert text == "Van Alphen Frequency : no closed orbit (1 open curve not counted)"
+
+
+def test_van_alphen_frequency_reports_the_open_curves_it_skipped():
+    text = _van_alphen_text(_bowl().merge(_sphere(0.5)))
+
+    assert text.endswith(" Gauss (1 open curve not counted)")
+    assert _number(text) == pytest.approx(onsager_gauss(RADIUS), rel=1e-3)
+
+
 def _band_surface_with_nan_energies() -> pv.PolyData:
     """E = kx^2 + ky^2 with NaN energies beyond |k| = 0.4, as BandStructure2D leaves them."""
     k = np.linspace(-0.5, 0.5, 41)
