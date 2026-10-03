@@ -678,14 +678,7 @@ class ProjwfcOut:
         if not bands_list:
             return None
 
-        bands = np.array(bands_list, dtype=float).reshape(self.nkstot, self.nbnd)
-
-        if self.is_spin_polarized:
-            bands = bands.reshape(self.nkstot // 2, self.nbnd, self.n_spin_channels)
-        else:
-            bands = bands.reshape(self.nkstot, self.nbnd, self.n_spin_channels)
-
-        return bands
+        return self._split_spin(np.array(bands_list, dtype=float).reshape(self.nkstot, self.nbnd))
 
     @cached_property
     def psi2(self) -> np.ndarray | None:
@@ -700,14 +693,7 @@ class ProjwfcOut:
         if not psi2_list:
             return None
 
-        psi2 = np.array(psi2_list, dtype=float).reshape(self.nkstot, self.nbnd)
-
-        if self.is_spin_polarized:
-            psi2 = psi2.reshape(self.nkstot // 2, self.nbnd, self.n_spin_channels)
-        else:
-            psi2 = psi2.reshape(self.nkstot, self.nbnd, self.n_spin_channels)
-
-        return psi2
+        return self._split_spin(np.array(psi2_list, dtype=float).reshape(self.nkstot, self.nbnd))
 
     @cached_property
     def psi_coeffs(self) -> np.ndarray | None:
@@ -746,16 +732,19 @@ class ProjwfcOut:
                     idx_val,  # atomic wfc index
                 ] = coeff_val
 
-        if self.is_spin_polarized:
-            psi_array = psi_array.reshape(
-                self.nkstot // 2, self.nbnd, self.n_spin_channels, self.natomwfc
-            )
-        else:
-            psi_array = psi_array.reshape(
-                self.nkstot, self.nbnd, self.n_spin_channels, self.natomwfc
-            )
+        return self._split_spin(psi_array)
 
-        return psi_array
+    def _split_spin(self, per_kpoint: np.ndarray) -> np.ndarray:
+        """Turn (nkstot, nbnd, ...) into (nk, nbnd, n_spin_channels, ...).
+
+        For a collinear spin-polarized run projwfc.out lists every spin-up
+        k-point first and then every spin-down k-point.
+        """
+        if not self.is_spin_polarized:
+            return np.expand_dims(per_kpoint, axis=2)
+        n_spin = self.n_spin_channels
+        by_spin = per_kpoint.reshape(n_spin, per_kpoint.shape[0] // n_spin, *per_kpoint.shape[1:])
+        return np.moveaxis(by_spin, 0, 2)
 
     @cached_property
     def lowdin_charges(self) -> dict[str, np.ndarray | float] | None:
