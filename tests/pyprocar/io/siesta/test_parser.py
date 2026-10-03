@@ -268,13 +268,22 @@ def test_bands_and_fermi_survive_a_bad_unrelated_block(siesta_dir: Path) -> None
     assert parser.structure is not None
 
 
-def test_auto_detect_skips_an_fdf_another_fdf_redirects_to(tmp_path: Path) -> None:
-    # Layout of a Siesta 5.4.2 run: si.fdf reads its lattice from lv.fdf.
+def test_auto_detect_skips_an_fdf_another_fdf_redirects_to(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    # Layout of a Siesta 5.4.2 run: si.fdf reads its lattice from another fdf.
     start = SIESTA_542_FDF.index("%block lattice-vectors")
     end = SIESTA_542_FDF.index("%endblock lattice-vectors") + len("%endblock lattice-vectors")
-    main = SIESTA_542_FDF[:start] + "%block LatticeVectors < lv.fdf" + SIESTA_542_FDF[end:]
-    (tmp_path / "lv.fdf").write_text("  1.0 0.0 0.0\n  0.0 1.1 0.0\n  0.0 0.0 1.2\n")
+    main = SIESTA_542_FDF[:start] + "%block LatticeVectors < a_lv.fdf" + SIESTA_542_FDF[end:]
+    (tmp_path / "a_lv.fdf").write_text("  1.0 0.0 0.0\n  0.0 1.1 0.0\n  0.0 0.0 1.2\n")
     (tmp_path / "si.fdf").write_text(main)
+    # List the redirect target first whatever order the filesystem returns.
+    unordered_glob = Path.glob
+
+    def sorted_glob(self: Path, pattern: str) -> list[Path]:
+        return sorted(unordered_glob(self, pattern))
+
+    monkeypatch.setattr(Path, "glob", sorted_glob)
 
     parser = SiestaParser(tmp_path)
 
