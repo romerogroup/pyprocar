@@ -2074,6 +2074,26 @@ def with_time_reversal(rotations: npt.ArrayLike) -> np.ndarray:
     return np.concatenate([rotations, -rotations])
 
 
+def time_reversal_images(
+    images: np.ndarray, sources: np.ndarray, point_group: np.ndarray
+) -> np.ndarray:
+    """Mask of the images whose spin is the reversed spin of their source: S(-k) = -S(k).
+
+    That is an image at -k (modulo 1), unless it is the source itself, and an image no
+    point-group rotation of its source reaches. Spins are not rotated, so an image at -k
+    that a rotation also reaches takes the exact time-reversal value.
+    """
+
+    def reached(operations: np.ndarray) -> np.ndarray:
+        offsets = images[:, np.newaxis, :] - np.einsum("rij,kj->kri", operations, sources)
+        offsets -= np.round(offsets)
+        return np.all(np.abs(offsets) < 2e-3, axis=2).any(axis=1)
+
+    identity = np.eye(3)[np.newaxis]
+    at_source = reached(identity)
+    return ~at_source & (reached(-identity) | ~reached(point_group))
+
+
 def ibz2fbz(ebs, rotations=None, kgrid_info=None, decimals=4, inplace=True, **kwargs):
     """Applys symmetry operations to the kpoints, bands, and projections
 
@@ -2100,9 +2120,12 @@ def ibz2fbz(ebs, rotations=None, kgrid_info=None, decimals=4, inplace=True, **kw
     if len(rotations) == 0:
         logger.warning("No rotations provided, skipping ibz2fbz")
         return ebs
-    rotations = with_time_reversal(rotations)
+    point_group = np.asarray(rotations)
+    rotations = with_time_reversal(point_group)
 
     n_kpoints = ebs.n_kpoints
+    ibz_kpoints = ebs.kpoints.copy()
+    source = np.tile(np.arange(n_kpoints), len(rotations) + 1)
 
     # Apply rotations and copy properties
     new_kpoints = ebs.kpoints.copy()
@@ -2140,6 +2163,7 @@ def ibz2fbz(ebs, rotations=None, kgrid_info=None, decimals=4, inplace=True, **kw
         new_in_original_grid_indices = np.where(min_distances < 0.000001)[0]
 
         new_kpoints = new_kpoints[new_in_original_grid_indices, ...]
+        source = source[new_in_original_grid_indices]
 
     # # Floating point error can cause the kpoints to be off by 0.000001 or so
     # # causing the unique indices to misidentify the kpoints
@@ -2147,12 +2171,21 @@ def ibz2fbz(ebs, rotations=None, kgrid_info=None, decimals=4, inplace=True, **kw
     _, unique_indices = np.unique(new_kpoints, axis=0, return_index=True)
 
     new_kpoints = new_kpoints[unique_indices, ...]
+    source = source[unique_indices]
 
     for prop_name, calc_name, gradient_order, value_array in ebs.iter_properties():
         property = ebs.get_property(prop_name)
         property[calc_name, gradient_order] = value_array[new_in_original_grid_indices][
             unique_indices
         ]
+
+    if len(rotations) > len(point_group) and ebs.is_non_collinear:
+        reversed_images = time_reversal_images(new_kpoints, ibz_kpoints[source], point_group)
+        projected = ebs.get_property("projected")
+        for calc_name, gradient_order, value_array in projected.iter_arrays():
+            flipped = value_array.copy()
+            flipped[reversed_images, :, 1:] *= -1
+            projected[calc_name, gradient_order] = flipped
 
     ebs.update_points(new_kpoints)
     return sort_by_kpoints(ebs, inplace=inplace, **kwargs)
