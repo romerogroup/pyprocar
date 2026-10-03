@@ -15,6 +15,7 @@ from argparse import RawTextHelpFormatter
 import numpy as np
 
 import pyprocar
+from pyprocar.scripts.scriptFermi2D import Fermi2DMode
 
 
 def call_bandsplot(args):
@@ -87,22 +88,16 @@ def call_fermi2D(args):
     This module calls the fermi2D plotting function.
     """
     pyprocar.fermi2D(
-        args.file,
-        outcar=args.outcar,
-        spin=args.spin,
+        args.code,
+        args.dirname,
+        mode=args.mode,
+        fermi=args.fermi,
+        spins=args.spins,
         atoms=args.atoms,
         orbitals=args.orbitals,
         energy=args.energy,
-        fermi=args.fermi,
-        rec_basis=args.rec_basis,
-        rot_symm=args.rot_symm,
-        translate=args.translate,
-        rotation=args.rotation,
-        human=args.human,
-        mask=args.mask,
         savefig=args.savefig,
-        st=args.st,
-        noarrow=args.noarrow,
+        plot_arrows=not args.noarrow,
     )
 
 
@@ -334,119 +329,56 @@ if __name__ == "__main__":
         ################ fermi2D ##########################################
         parserFermi2D = subparsers.add_parser(
             "fermi2D",
-            help="Plot the Fermi surface for a 2D Brillouin zone (layer-wise)"
-            "along z and just perpendicular to z! (actually k_z)",
+            help="Plot the Fermi surface in the k_z = 0 plane",
         )
 
-        phelp = "Input file. It can be compressed"
-        parserFermi2D.add_argument("file", help=phelp)
+        phelp = "Directory that holds the DFT calculation."
+        parserFermi2D.add_argument("dirname", help=phelp)
 
         phelp = (
-            "Spin component to be used: for non-polarized calculations density "
-            "is '-s 0'. For spin polarized case test '-s 0' (ignore the spin) or"
-            " '-s 1' (assing a sign to the spin channel). For "
-            "non-collinear stuff you can use '-s 0', '-s 1', '-s 2', -s "
-            "3 for the magnitude, x, y, z components of your spin "
-            "vector, in this case you really want to see spin textures "
-            "'--st'. Default: s=0"
+            "DFT code of the calculation: vasp, qe, elk, abinit, siesta or lobster. Default: vasp"
+        )
+        parserFermi2D.add_argument("--code", help=phelp, default="vasp")
+
+        phelp = (
+            "plain, plain_bands, parametric or spin_texture. parametric colors the "
+            "contours by the '-a', '-o' and '-s' projection. spin_texture needs a "
+            "non-collinear calculation. Default: plain"
         )
         parserFermi2D.add_argument(
-            "-s", "--spin", type=int, choices=[0, 1, 2, 3], default=0, help=phelp
+            "--mode",
+            help=phelp,
+            choices=[m.value for m in Fermi2DMode],
+            default=Fermi2DMode.plain.value,
         )
 
         phelp = (
-            "List of atoms to be used (0-based): ie. '-a 0 2' to select the 1st"
-            " and 3rd. It defaults to the last one (-a -1 the 'tot' entry)"
+            "Spin indices to project onto in parametric mode. For a non-collinear "
+            "calculation, 0 is the total and 1, 2, 3 are Sx, Sy, Sz."
         )
+        parserFermi2D.add_argument(
+            "-s", "--spins", type=int, nargs="+", choices=[0, 1, 2, 3], help=phelp
+        )
+
+        phelp = "Atom indices (0-based) to project onto, ie. '-a 0 2'. Default: all atoms"
         parserFermi2D.add_argument("-a", "--atoms", type=int, nargs="+", help=phelp)
 
         phelp = (
-            "Orbital index(es) to be used 0-based. Take a look to the PROCAR "
-            "file. Its default is the last field (ie: 'tot'). From a standard "
-            "PROCAR: `-o 0`='s', `-o 1 2 3`='p', `-o 4 5 6 7 8`='d'."
+            "Orbital indices (0-based) to project onto: `-o 0`='s', `-o 1 2 3`='p', "
+            "`-o 4 5 6 7 8`='d'. Default: all orbitals"
         )
         parserFermi2D.add_argument("-o", "--orbitals", type=int, nargs="+", help=phelp)
 
-        phelp = "Energy for the surface. To plot the Fermi surface at Fermi Energy `-e 0`"
-        parserFermi2D.add_argument("-e", "--energy", help=phelp, type=float, required=True)
+        phelp = "Energy of the surface relative to the Fermi energy, in eV. Default: 0"
+        parserFermi2D.add_argument("-e", "--energy", help=phelp, type=float, default=0.0)
 
-        phelp = (
-            "Set the Fermi energy (or any reference energy) as zero. To get it "
-            "you should `grep E-fermi` the self-consistent OUTCAR. See `--outcar`"
-        )
+        phelp = "Fermi energy in eV. Default: the Fermi energy of the calculation"
         parserFermi2D.add_argument("-f", "--fermi", help=phelp, type=float)
 
-        phelp = (
-            "reciprocal space basis vectors. 9 number are required b1x b1y ... "
-            " b3z. This option is quite involved, so I recommend you to use `--outcar`"
-        )
-        parserFermi2D.add_argument("--rec_basis", help=phelp, type=float, nargs=9)
-
-        phelp = (
-            "Apply a rotational symmetry to unfold the Kpoints found. If your"
-            "PROCAR only has a portion of the Brillouin Zone, you may want to "
-            "plot the FULL BZ (ie: a Dirac cone at Gamma will look like a cone "
-            "and not like a segment of circle). Supported rotations are "
-            "1,2,3,4,6. All of them along Z and centered at Gamma. Consider to "
-            "'--translate' your cell to rotate with other origin. This is the "
-            "last symmetry operation to be performed."
-        )
-        parserFermi2D.add_argument("--rot_symm", help=phelp, type=int, default=1)
-
-        phelp = (
-            "Translate your mesh to the specified point. The point can be 3 "
-            "coordinates (numbers) or the index of one K-point (zero-based, as "
-            "usual). This is the first symmetry operation to be performed "
-            "(i.e. rotations will take this point as the origin)."
-        )
-        parserFermi2D.add_argument("--translate", help=phelp, nargs="+", default=[0, 0, 0])
-
-        phelp = (
-            "A general rotation is applied to the data in the PROCAR. While this "
-            " script has a large bias to work on the 'xy' plane, with this option"
-            " you can rotate your whole PROCAR to fit the 'xy' plane. A rotation "
-            "is composed by one angle plus one fixed axis, eg: '--rotation 90 1 0"
-            " 0' is 90 degrees along the x axis, this changes the 'xy'->'xz'. The"
-            " rotation is performed after the translation and before applying "
-            "rot_symm. "
-        )
-        parserFermi2D.add_argument(
-            "--rotation", help=phelp, type=float, nargs=4, default=[0, 0, 0, 1]
-        )
-
-        phelp = "enable to give atoms list in a more human, 1-based way (say the 1st is 1,2nd is 2 and so on )"
-        parserFermi2D.add_argument("-u", "--human", help=phelp, action="store_true")
-
-        phelp = "If set, masks(hides) values lowers than it. Useful to remove unwanted bands."
-        parserFermi2D.add_argument("--mask", type=float, help=phelp)
-
-        phelp = (
-            "Saves the figure, instead of display it on screen. Anyway, you can save from"
-            " the screen too. Any file extension supported by"
-            "matplotlib.savefig is valid (if you are too lazy"
-            " to google it, trial and error also works)"
-        )
+        phelp = "Save the figure to this file instead of showing it."
         parserFermi2D.add_argument("--savefig", help=phelp)
 
-        phelp = (
-            "OUTCAR file where to find the reciprocal lattice vectors and "
-            "perhaps E_fermi. Mind: '--fermi' has precedence, remember that the"
-            " E-fermi should correspond to a self-consistent run, not a "
-            "bandstructure! (however, this is irrelevant for basis vectors)"
-        )
-        parserFermi2D.add_argument("--outcar", help=phelp)
-
-        phelp = (
-            "Plot of the spin texture (ie: spin arrows) on the Fermi's surface."
-            " This option works quite indepentent of another options."
-        )
-        parserFermi2D.add_argument("--st", help=phelp, action="store_true")
-
-        phelp = (
-            "Plot of the spin texture without arrows (just intensity) for a "
-            "given spin direction on the Fermi's surface.  This option works"
-            "quite indepentent of another options but needs to set '--st' and '--spin'."
-        )
+        phelp = "In spin_texture mode, draw no spin arrows."
         parserFermi2D.add_argument("--noarrow", help=phelp, action="store_true")
 
         parserFermi2D.set_defaults(func=call_fermi2D)
