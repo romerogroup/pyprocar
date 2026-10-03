@@ -5,6 +5,8 @@ This module contains unit tests for k-point generation functions,
 coordinate transformation utilities, and the KPath class.
 """
 
+import logging
+
 import numpy as np
 import pytest
 
@@ -956,3 +958,24 @@ def test_kpath_distances_default_to_cartesian():
     assert kpath.get_distances(as_segments=False) == pytest.approx(
         [0.0, 0.01, 0.02, 0.03, 0.04, 0.05]
     )
+
+
+def test_kpath_with_fewer_names_than_segments_warns_and_labels_what_it_can(caplog):
+    gamma_x = np.linspace([0, 0, 0], [0.5, 0, 0], 5)
+    r_m = np.linspace([0.5, 0.5, 0.5], [0.5, 0.5, 0], 5)
+    kpoints = np.vstack([gamma_x, r_m])
+
+    user_logger = logging.getLogger("user")
+    user_logger.addHandler(caplog.handler)
+    try:
+        with caplog.at_level(logging.WARNING, logger="user"):
+            kpath = KPath(
+                kpoints=kpoints,
+                segment_names=[("G", "X")],
+                special_kpoint_map={"G": kpoints[0], "X": kpoints[4]},
+            )
+    finally:
+        user_logger.removeHandler(caplog.handler)
+
+    assert "KPath got 1 segment names for 2 segments in the k-points; ticks use 1" in caplog.text
+    assert list(zip(kpath.tick_positions, kpath.tick_names, strict=True)) == [(0, "Γ"), (4, "X")]

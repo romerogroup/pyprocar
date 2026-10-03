@@ -17,6 +17,7 @@ from pyprocar.core.brillouin_zone import BrillouinZone
 from pyprocar.utils import math, np_utils
 
 logger = logging.getLogger(__name__)
+user_logger = logging.getLogger("user")
 
 KPOINTS_DTYPE = np.ndarray[tuple[int, Literal[3]], np.dtype[np_utils.FLOAT_DTYPE]]
 RECIPROCAL_LATTICE_DTYPE = np.ndarray[tuple[Literal[3], Literal[3]], np.dtype[np_utils.FLOAT_DTYPE]]
@@ -241,25 +242,28 @@ class KPath:
 
         # Generate kpoints if not provided
         self._kpoints = kpoints
+        self._segment_start_kpoints: list[np.ndarray] | None = None
         if self._kpoints is None:
             self._kpoints = self.generate_points(segment_names, special_kpoint_map, n_grids)
             self._segment_end_indices = (np.cumsum(n_grids) - 1).tolist()
+        elif special_kpoint_map:
+            self._segment_start_kpoints = [
+                np.asarray(special_kpoint_map[start]) for start, _ in raw_segment_names
+            ]
         logger.debug(f"Kpoints shape: {self._kpoints.shape}")
 
         # Get kpoint indices per kpath segment
         self._segment_indices, self._continuous_start_indices, self._discontinuity_start_indices = (
             self.get_segment_indices()
         )
-
-        self._segment_start_kpoints: list[np.ndarray] | None = None
-        if (
-            kpoints is not None
-            and special_kpoint_map is not None
-            and len(raw_segment_names) == self.n_segments
-        ):
-            self._segment_start_kpoints = [
-                np.asarray(special_kpoint_map[start]) for start, _ in raw_segment_names
-            ]
+        if len(segment_names) != self.n_segments:
+            user_logger.warning(
+                "KPath got %d segment names for %d segments in the k-points; ticks use %d",
+                len(segment_names),
+                self.n_segments,
+                min(len(segment_names), self.n_segments),
+            )
+            self._segment_start_kpoints = None
 
         # Get unique special kpoint names
         self._special_kpoint_names = self.get_special_kpoint_names(
@@ -465,12 +469,13 @@ class KPath:
             The list of tick names
         """
         if self._tick_name_map is None:
-            tick_name_map = {self._segment_indices[0][0]: self._segment_names[0][0]}
-            for i, segment_indices in enumerate(self._segment_indices):
+            names = self._segment_names
+            tick_name_map = {self._segment_indices[0][0]: names[0][0]}
+            for i, segment_indices in enumerate(self._segment_indices[: len(names)]):
                 end_index = segment_indices[-1]
-                name = self._segment_names[i][1]
-                if end_index in self.discontinuity_start_indices:
-                    name += "|" + self._segment_names[i + 1][0]
+                name = names[i][1]
+                if end_index in self.discontinuity_start_indices and i + 1 < len(names):
+                    name += "|" + names[i + 1][0]
                 tick_name_map[end_index] = name
 
             self._tick_name_map = tick_name_map

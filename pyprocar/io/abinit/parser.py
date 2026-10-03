@@ -250,7 +250,9 @@ class AbinitParser(BaseParser):
     def kpath(self) -> KPath | None:
         if self.abinit_kpoints is None:
             return None
-        if self.abinit_kpoints.knames is None:
+        knames = self.abinit_kpoints.knames
+        special_kpoints = self.abinit_kpoints.special_kpoints
+        if knames is None or special_kpoints is None:
             return None
 
         kpoints = None
@@ -263,15 +265,13 @@ class AbinitParser(BaseParser):
             user_logger.warning("KPOINTS divisions do not match the PROCAR k-points")
             segment_end_indices = None
 
-        knames = self.abinit_kpoints.knames
-        special_kpoints = self.abinit_kpoints.special_kpoints
-        special_kpoint_map = None
-        if special_kpoints is not None:
-            special_kpoint_map = dict(zip(knames.ravel(), special_kpoints.reshape(-1, 3), strict=True))
+        special_kpoint_map = dict(
+            zip(knames.ravel(), special_kpoints.reshape(-1, 3), strict=True)
+        )
 
         return KPath(
             kpoints=kpoints,
-            segment_names=knames,
+            segment_names=self.abinit_kpoints.knames,
             special_kpoint_map=special_kpoint_map,
             n_grids=self.abinit_kpoints.ngrids,
             reciprocal_lattice=self.abinit_output.reclat if self.abinit_output else None,
