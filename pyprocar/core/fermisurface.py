@@ -304,7 +304,11 @@ class FermiSurface(pv.PolyData):
         atoms_orbital_map : Mapping[int | Iterable[int], Iterable[int]] | None
             Map atoms to specific orbitals
         norm_mode : str | NormMode | None
-            Normalization mode: 'raw', 'max', 'total', 'integral'
+            Normalization mode: 'raw', 'max', 'total', 'integral'. 'max' and
+            'integral' each use one denominator across every plotted band and
+            spin: the largest value, or the area integral over all plotted
+            surfaces. DOS 'integral' instead divides each spin channel by its own
+            integral over energy.
         label : str
             Display label for the property
         name : str
@@ -387,26 +391,21 @@ class FermiSurface(pv.PolyData):
         )
 
     def _surface_integral(self, values_array: np.ndarray) -> float:
-        values_array = np.asarray(values_array, dtype=np.float64)
+        """Integrate point values over every plotted surface, summed over the other axes.
 
-        cell_sizes = self.compute_cell_sizes()
-        if cell_sizes is None or len(cell_sizes) == 0:
-            return np.sum(np.abs(values_array))
-
-        point_weights = np.zeros(self.n_points)
-        cell_count = np.zeros(self.n_points)
-
-        for i, cell in enumerate(self.cell):
-            for point_idx in cell:
-                point_weights[point_idx] += cell_sizes[i]
-                cell_count[point_idx] += 1
-
-        nonzero_mask = cell_count > 0
-        point_weights[nonzero_mask] /= cell_count[nonzero_mask]
-
-        if values_array.ndim == 1:
-            return np.sum(values_array * point_weights)
-        return np.sum(values_array * point_weights[:, np.newaxis])
+        Each triangle gives a third of its area to each of its vertices.
+        """
+        if self.n_cells == 0:
+            return 0.0
+        if not self.is_all_triangles:
+            raise ValueError("norm_mode='integral' needs a Fermi surface made of triangles")
+        triangles = np.asarray(self.regular_faces)
+        corners = np.asarray(self.points, dtype=np.float64)[triangles]
+        normals = np.cross(corners[:, 1] - corners[:, 0], corners[:, 2] - corners[:, 0])
+        triangle_areas = 0.5 * np.linalg.norm(normals, axis=1)
+        vertex_areas = np.zeros(self.n_points)
+        np.add.at(vertex_areas, triangles, triangle_areas[:, np.newaxis] / 3)
+        return float(np.tensordot(vertex_areas, values_array, axes=(0, 0)).sum())
 
     def normed_units(self, mode: NormMode, units: str | None) -> None:
         return None

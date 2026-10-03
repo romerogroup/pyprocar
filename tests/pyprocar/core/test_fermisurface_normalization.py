@@ -1,5 +1,6 @@
 import numpy as np
 import pytest
+import pyvista as pv
 
 from pyprocar.core.ebs import ElectronicBandStructureMesh
 from pyprocar.core.fermisurface import FermiSurface
@@ -46,3 +47,44 @@ def test_projected_sum_normalizes_over_plotted_points(sphere_surface, norm_mode,
     assert values.shape == (fs.n_points, 2, 1)
     np.testing.assert_allclose(values[:, 0, 0], on_surface)
     np.testing.assert_array_equal(values[:, 1, 0], 0.0)
+
+
+def test_projected_sum_integral_normalizes_by_surface_area_integral(sphere_surface):
+    fs = sphere_surface
+
+    values = fs.get_property("projected_sum", atoms=[0], norm_mode="integral").value
+
+    sphere_area = 4 * np.pi * 0.1
+    np.testing.assert_allclose(values[:, 0, 0], 1 / sphere_area, rtol=0.05)
+    np.testing.assert_array_equal(values[:, 1, 0], 0.0)
+    mesh = pv.PolyData(np.asarray(fs.points), np.asarray(fs.faces))
+    mesh.point_data["normed"] = values[:, 0, 0]
+    integral = np.asarray(mesh.integrate_data().point_data["normed"])[0]
+    assert integral == pytest.approx(1.0, abs=1e-12)
+
+
+def _with_faces(fs: FermiSurface, faces: np.ndarray) -> FermiSurface:
+    return FermiSurface(
+        points=np.asarray(fs.points),
+        faces=faces,
+        band_isosurfaces={},
+        isovalue=0.1,
+        original_ebs=fs.original_ebs,
+        ebs=fs.ebs,
+        point_set=fs.point_set,
+    )
+
+
+def test_integral_normalization_rejects_non_triangular_cells(sphere_surface):
+    quads = _with_faces(sphere_surface, np.array([4, 0, 1, 2, 3]))
+
+    with pytest.raises(ValueError, match="made of triangles"):
+        quads.normalize("integral", np.ones((sphere_surface.n_points, 2, 1)))
+
+
+def test_integral_normalization_leaves_values_on_an_empty_mesh(sphere_surface):
+    empty = _with_faces(sphere_surface, np.array([], dtype=int))
+
+    values = np.full((sphere_surface.n_points, 2, 1), 0.3)
+
+    np.testing.assert_array_equal(empty.normalize("integral", values), 0.3)
