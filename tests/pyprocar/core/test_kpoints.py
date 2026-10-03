@@ -960,22 +960,59 @@ def test_kpath_distances_default_to_cartesian():
     )
 
 
-def test_kpath_with_fewer_names_than_segments_warns_and_labels_what_it_can(caplog):
+@pytest.fixture
+def user_warnings(caplog):
+    """Capture warnings on the non-propagating "user" logger."""
+    user_logger = logging.getLogger("user")
+    user_logger.addHandler(caplog.handler)
+    with caplog.at_level(logging.WARNING, logger="user"):
+        yield caplog
+    user_logger.removeHandler(caplog.handler)
+
+
+def test_kpath_with_fewer_names_than_segments_warns_and_labels_what_it_can(user_warnings):
     gamma_x = np.linspace([0, 0, 0], [0.5, 0, 0], 5)
     r_m = np.linspace([0.5, 0.5, 0.5], [0.5, 0.5, 0], 5)
     kpoints = np.vstack([gamma_x, r_m])
 
-    user_logger = logging.getLogger("user")
-    user_logger.addHandler(caplog.handler)
-    try:
-        with caplog.at_level(logging.WARNING, logger="user"):
-            kpath = KPath(
-                kpoints=kpoints,
-                segment_names=[("G", "X")],
-                special_kpoint_map={"G": kpoints[0], "X": kpoints[4]},
-            )
-    finally:
-        user_logger.removeHandler(caplog.handler)
+    kpath = KPath(
+        kpoints=kpoints,
+        segment_names=[("G", "X")],
+        special_kpoint_map={"G": kpoints[0], "X": kpoints[4]},
+    )
 
-    assert "KPath got 1 segment names for 2 segments in the k-points; ticks use 1" in caplog.text
+    assert "KPath got 1 segment names for 2 segments in the k-points; ticks use 1" in (
+        user_warnings.text
+    )
     assert list(zip(kpath.tick_positions, kpath.tick_names, strict=True)) == [(0, "Γ"), (4, "X")]
+
+
+GAMMA_X_M_R_GAMMA = np.vstack(
+    [
+        np.linspace([0, 0, 0], [0.5, 0, 0], 5),
+        np.linspace([0.5, 0, 0], [0.5, 0.5, 0], 5),
+        np.linspace([0.5, 0.5, 0.5], [0, 0, 0], 9),
+    ]
+)
+PATH_POINTS = {"G": np.zeros(3), "X": np.array([0.5, 0, 0]), "M": np.array([0.5, 0.5, 0])}
+
+
+@pytest.mark.parametrize(
+    ("last_segment", "warning"),
+    [
+        (("R", "G"), "KPath has no point for R; the jump before it counts as zero"),
+        (("X", "G"), "KPath point for X does not match its segment; jump counts as zero"),
+    ],
+)
+def test_kpath_jump_ignores_a_named_start_it_cannot_trust(
+    user_warnings, last_segment, warning
+):
+    kpath = KPath(
+        kpoints=GAMMA_X_M_R_GAMMA,
+        segment_names=[("G", "X"), ("X", "M"), last_segment],
+        special_kpoint_map=PATH_POINTS,
+        reciprocal_lattice=np.eye(3),
+    )
+
+    assert warning in user_warnings.text
+    assert kpath.k_distances[-1] == pytest.approx(1.0 + np.sqrt(3) / 2)

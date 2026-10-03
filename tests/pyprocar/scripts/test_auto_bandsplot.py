@@ -11,17 +11,25 @@ class ReachedStructure(Exception):
 
 
 class FakeEBS:
-    fermi = 9.13835
+    fermi: float = 9.13835
 
     @property
     def structure(self):
         raise ReachedStructure
 
 
+def fake_parser(*_: object) -> SimpleNamespace:
+    return SimpleNamespace()
+
+
+def fake_from_code(*_: object, **_kwargs: object) -> FakeEBS:
+    return FakeEBS()
+
+
 @pytest.mark.parametrize("code", ["abinit", "qe", "elk"])
 def test_autobandsplot_without_fermi_gets_past_the_fermi_lookup(code, monkeypatch):
-    monkeypatch.setattr(scriptAutoBandsplot, "get_parser", lambda *_: SimpleNamespace())
-    monkeypatch.setattr(ElectronicBandStructure, "from_code", lambda *_, **__: FakeEBS())
+    monkeypatch.setattr(scriptAutoBandsplot, "get_parser", fake_parser)
+    monkeypatch.setattr(ElectronicBandStructure, "from_code", fake_from_code)
 
     with pytest.raises(ReachedStructure):
         scriptAutoBandsplot.autobandsplot(code=code, dirname="unused")

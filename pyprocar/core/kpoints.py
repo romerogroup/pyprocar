@@ -242,14 +242,12 @@ class KPath:
 
         # Generate kpoints if not provided
         self._kpoints = kpoints
-        self._segment_start_kpoints: list[np.ndarray] | None = None
+        named_starts: list[np.ndarray | None] = []
         if self._kpoints is None:
             self._kpoints = self.generate_points(segment_names, special_kpoint_map, n_grids)
             self._segment_end_indices = (np.cumsum(n_grids) - 1).tolist()
         elif special_kpoint_map:
-            self._segment_start_kpoints = [
-                np.asarray(special_kpoint_map[start]) for start, _ in raw_segment_names
-            ]
+            named_starts = [special_kpoint_map.get(start) for start, _ in raw_segment_names]
         logger.debug(f"Kpoints shape: {self._kpoints.shape}")
 
         # Get kpoint indices per kpath segment
@@ -263,7 +261,8 @@ class KPath:
                 self.n_segments,
                 min(len(segment_names), self.n_segments),
             )
-            self._segment_start_kpoints = None
+            named_starts = []
+        self._jump_start_kpoints: dict[int, np.ndarray] = self._get_jump_start_kpoints(named_starts)
 
         # Get unique special kpoint names
         self._special_kpoint_names = self.get_special_kpoint_names(
@@ -502,6 +501,44 @@ class KPath:
 
         return [segments[i] for i in isegments]
 
+    def _get_jump_start_kpoints(
+        self, named_starts: list[np.ndarray | None]
+    ) -> dict[int, np.ndarray]:
+        """Named start point of each segment that follows a jump, by jump index.
+
+        A code may leave out the first point after a jump (Abinit), so the
+        step across the jump is measured from the named start point. A name
+        is trusted only when its point is the segment's first k-point or one
+        step before it; otherwise the jump counts as zero.
+        """
+        jump_starts: dict[int, np.ndarray] = {}
+        if not named_starts:
+            return jump_starts
+        for isegment in range(1, self.n_segments):
+            jump_index = self.segment_indices[isegment - 1][-1]
+            if jump_index not in self.discontinuity_start_indices:
+                continue
+            start_name = self._segment_names[isegment][0]
+            named = named_starts[isegment]
+            if named is None:
+                user_logger.warning(
+                    "KPath has no point for %s; the jump before it counts as zero", start_name
+                )
+                continue
+            named = np.asarray(named, dtype=float)
+            segment = self._kpoints[self.segment_indices[isegment]]
+            candidates = [segment[0]]
+            if len(segment) > 1:
+                candidates.append(2 * segment[0] - segment[1])
+            if not any(np.allclose(named, c, atol=1e-4) for c in candidates):
+                user_logger.warning(
+                    "KPath point for %s does not match its segment; jump counts as zero",
+                    start_name,
+                )
+                continue
+            jump_starts[jump_index] = named
+        return jump_starts
+
     def get_distances(
         self,
         isegments: list[int] | None = None,
@@ -515,17 +552,10 @@ class KPath:
         kpoints = self.kpoints_cartesian if cartesian else self.kpoints
         steps = np.linalg.norm(np.diff(kpoints, axis=0), axis=1)
         steps[self.discontinuity_start_indices] = 0.0
-        if self._segment_start_kpoints is not None:
-            # A code may leave out the first point after a jump, so measure
-            # that step from the segment's named start point.
-            for isegment in range(1, self.n_segments):
-                jump_index = self.segment_indices[isegment - 1][-1]
-                if jump_index not in self.discontinuity_start_indices:
-                    continue
-                start = self._segment_start_kpoints[isegment]
-                if cartesian:
-                    start = start @ self._reciprocal_lattice
-                steps[jump_index] = np.linalg.norm(kpoints[jump_index + 1] - start)
+        for jump_index, start in self._jump_start_kpoints.items():
+            if cartesian:
+                start = start @ self._reciprocal_lattice
+            steps[jump_index] = np.linalg.norm(kpoints[jump_index + 1] - start)
         path_distances = np.insert(np.cumsum(steps), 0, 0.0)
 
         k_segment_distances = []
