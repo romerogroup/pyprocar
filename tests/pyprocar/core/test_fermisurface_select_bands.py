@@ -69,3 +69,16 @@ def test_empty_selection_gives_an_empty_projection(two_sphere_surface, norm_mode
     values = empty.compute_projected_sum(atoms=[0], norm_mode=norm_mode).value
 
     assert values.shape == (0, 2, 1)
+
+
+def test_select_bands_keeps_several_surfaces_in_surface_order(two_sphere_surface):
+    fs = two_sphere_surface
+
+    selected = fs.select_bands([(1, 0), (0, 0)])
+    values = selected.compute_projected_sum(atoms=[0]).value
+
+    assert list(selected.band_spin_mask) == [(0, 0), (1, 0)]
+    for key, weight in [((0, 0), 0.3), ((1, 0), 0.6)]:
+        mask = selected.band_spin_mask[key]
+        np.testing.assert_allclose(selected.points[mask], fs.points[fs.band_spin_mask[key]])
+        np.testing.assert_allclose(values[mask, key[0], 0], weight)
