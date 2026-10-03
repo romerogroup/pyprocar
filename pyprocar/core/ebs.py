@@ -343,6 +343,8 @@ class ElectronicBandStructure(PointSet):
         int
             The number of spin projections
         """
+        if self.projected is None:
+            return self.n_spin_channels
         return self.projected.shape[2]
 
     @property
