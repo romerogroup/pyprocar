@@ -732,7 +732,8 @@ class ElectronicBandStructure(PointSet):
         orbitals : Sequence[int] | int | None
             Orbital indices to sum over
         spins : Sequence[int] | int | None
-            Spin channels to sum over
+            Spin channels to sum over. By default every collinear channel, or
+            only the total (component 0) of a non-collinear calculation.
         species : Sequence[str] | str | None
             Species names (resolved to atom indices)
         species_orbital_map : Mapping | None
