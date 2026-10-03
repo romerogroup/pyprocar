@@ -64,7 +64,10 @@ def _read_target(target: str, directory: Path | None, depth: int) -> str:
         raise ValueError(f"{target}: more than {_LIBFDF_MAX_OPEN_FILES} nested fdf files")
     if not (directory / target).is_file():
         raise ValueError(f"{target}: file not found")
-    return (directory / target).read_text()
+    try:
+        return (directory / target).read_text()
+    except OSError as exc:
+        raise ValueError(f"{target}: {exc.strerror or exc}") from exc
 
 
 def _parse_fdf(text: str, directory: Path | None, depth: int = 0) -> _ParsedFDF:
