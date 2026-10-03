@@ -925,3 +925,28 @@ class TestKPathDiscontinuities:
         assert len(kpath_low.discontinuity_start_indices) >= len(
             kpath_high.discontinuity_start_indices
         )
+
+
+def test_kpath_without_repeated_boundaries_builds_and_prints():
+    gamma_x = np.linspace([0, 0, 0], [0.5, 0, 0], 5)
+    x_m = np.linspace([0.5, 0, 0], [0.5, 0.5, 0], 5)[1:]
+    m_gamma = np.linspace([0.5, 0.5, 0], [0, 0, 0], 5)[1:]
+    kpath = KPath(
+        kpoints=np.vstack([gamma_x, x_m, m_gamma]),
+        segment_names=[("G", "X"), ("X", "M"), ("M", "G")],
+    )
+
+    assert kpath.tick_positions == [0, 12]
+    assert str(kpath).splitlines()[:2] == ["K-Path", "------"]
+
+
+def test_kpath_distances_default_to_cartesian():
+    kpath = KPath(
+        kpoints=np.linspace([0.0, 0.0, 0.0], [0.0, 0.0, 0.5], 6),
+        segment_names=[("G", "Z")],
+        reciprocal_lattice=np.diag([0.25, 0.25, 0.1]),
+    )
+
+    assert kpath.get_distances(as_segments=False) == pytest.approx(
+        [0.0, 0.01, 0.02, 0.03, 0.04, 0.05]
+    )

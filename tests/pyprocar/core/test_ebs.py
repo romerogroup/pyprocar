@@ -1090,3 +1090,15 @@ def test_path_plot_draws_cartesian_kpoints(hexagonal_ebs_path, monkeypatch):
     for plotter in shown:
         path_mesh = next(m for m in plotter.meshes if m.n_points == 5)
         assert np.allclose(np.asarray(path_mesh.points), HEXAGONAL_PATH_CARTESIAN)
+
+
+def test_path_band_x_distances_are_cartesian(hexagonal_ebs_path):
+    k_distances = hexagonal_ebs_path.bands.metadata["kpath"]["k_distances"]
+
+    assert k_distances == pytest.approx([0.0, 0.03125, 0.0625, 0.09375, 0.125], abs=1e-6)
+
+
+def test_path_to_mesh_can_return_fractional_points(hexagonal_ebs_path):
+    points = np.asarray(hexagonal_ebs_path.to_mesh(as_cartesian=False).points)
+
+    assert np.allclose(points, np.column_stack([np.zeros(5), np.linspace(0, 0.5, 5), np.zeros(5)]))
