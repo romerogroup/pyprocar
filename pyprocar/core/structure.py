@@ -4,6 +4,7 @@ __email__ = "petavazohi@mail.wvu.edu, lllang@mix.wvu.edu"
 __date__ = "March 31, 2020"
 
 import logging
+from collections import Counter
 from pathlib import Path
 
 import numpy as np
@@ -136,7 +137,8 @@ class Structure:
     def __str__(self):
         """Human-readable summary of the structure."""
         header = f"Structure with {self.natoms} atoms and {self.nspecies} species"
-        species_line = f"Species: {', '.join(self.species)}"
+        species_line = " ".join(f"{name}:{count}" for name, count in self.composition.items())
+        lattice_line = f"Lattice Parameters (a, b, c): {self.a:.2f}, {self.b:.2f}, {self.c:.2f}"
         volume_line = f"Volume: {self.volume * 1e30:.3f} Å^3"
         angle_line = f"Angles (α, β, γ): {self.alpha:.2f}°, {self.beta:.2f}°, {self.gamma:.2f}°"
         space_group = self.get_space_group_international() if self.has_complete_data else "N/A"
@@ -152,7 +154,15 @@ class Structure:
                 )
 
         return "\n".join(
-            [header, species_line, volume_line, angle_line, sg_line, "Fractional coordinates:"]
+            [
+                header,
+                species_line,
+                lattice_line,
+                angle_line,
+                volume_line,
+                sg_line,
+                "Fractional coordinates:",
+            ]
             + coord_lines
         )
 
@@ -389,6 +399,20 @@ class Structure:
         reciprocal_lattice[2, :] = c_star
 
         return reciprocal_lattice
+
+    @property
+    def composition(self) -> dict[str, int]:
+        """
+        Count of each species, in order of first appearance in ``atoms``.
+
+        Returns
+        -------
+        dict[str, int]
+            For example ``{'Ba': 2, 'Cu': 3, 'O': 2}``.
+        """
+        if self.atoms is None:
+            return {}
+        return dict(Counter(self.atoms.tolist()))
 
     @property
     def _spglib_cell(self):

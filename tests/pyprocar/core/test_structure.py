@@ -345,9 +345,10 @@ class TestStructure:
         assert str(nacl_structure) == "\n".join(
             [
                 "Structure with 2 atoms and 2 species",
-                "Species: Cl, Na",
-                "Volume: 64.000 Å^3",
+                "Na:1 Cl:1",
+                "Lattice Parameters (a, b, c): 4.00, 4.00, 4.00",
                 "Angles (α, β, γ): 90.00°, 90.00°, 90.00°",
+                "Volume: 64.000 Å^3",
                 "Space group: Pm-3m",
                 "Fractional coordinates:",
                 "Atom         x           y           z      ",
@@ -356,3 +357,12 @@ class TestStructure:
                 "Cl          0.500000    0.500000    0.500000",
             ]
         )
+
+    def test_composition_counts_species_in_order_of_appearance(self):
+        struct = Structure(
+            atoms=["Ba", "Ba", "Cu", "Cu", "Cu", "O", "O"],
+            fractional_coordinates=np.zeros((7, 3)),
+            lattice=np.eye(3),
+        )
+
+        assert struct.composition == {"Ba": 2, "Cu": 3, "O": 2}
