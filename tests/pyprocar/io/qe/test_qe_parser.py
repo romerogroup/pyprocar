@@ -647,8 +647,8 @@ def test_bands_run_without_a_band_path_is_a_plain_ebs_of_the_computed_kpoints(
         xml.replace(
             "<nbnd>1</nbnd>",
             "<nbnd>1</nbnd>\n      <fermi_energy>0.2</fermi_energy>\n"
-            '      <starting_k_points><monkhorst_pack nk1="4" nk2="4" nk3="2" '
-            'k1="0" k2="0" k3="0"/></starting_k_points>',
+            + '      <starting_k_points><monkhorst_pack nk1="4" nk2="4" nk3="2"'
+            + ' k1="0" k2="0" k3="0"/></starting_k_points>',
         )
     )
     parser = QEParser(calc_dir)
