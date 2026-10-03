@@ -356,7 +356,7 @@ class ElectronicBandStructure(PointSet):
         int
             The number of atoms
         """
-        return self.projected.shape[3]
+        return self._require_projected().shape[3]
 
     @property
     def n_orbitals(self):
@@ -367,7 +367,15 @@ class ElectronicBandStructure(PointSet):
         int
             The number of orbitals
         """
-        return self.projected.shape[4]
+        return self._require_projected().shape[4]
+
+    def _require_projected(self) -> Property:
+        if self.projected is None:
+            raise ValueError(
+                "This band structure has no projections (BXSF and FRMSF files hold only "
+                + "energies), so projection quantities cannot be computed."
+            )
+        return self.projected
 
     @property
     def n_spin_channels(self):
@@ -753,6 +761,7 @@ class ElectronicBandStructure(PointSet):
         Property
             Property object with summed projections and metadata
         """
+        self._require_projected()
         # Check if any selection is specified
         has_selection = any(
             x is not None
@@ -817,6 +826,7 @@ class ElectronicBandStructure(PointSet):
         ValueError
             If calculation is not non-collinear
         """
+        self._require_projected()
         if not self.is_non_collinear:
             raise ValueError("Spin texture is only available for non-collinear calculations")
 
@@ -875,6 +885,7 @@ class ElectronicBandStructure(PointSet):
         ValueError
             If calculation is not non-collinear
         """
+        self._require_projected()
         if not self.is_non_collinear:
             raise ValueError("Spin texture is only available for non-collinear calculations")
 
@@ -956,6 +967,7 @@ class ElectronicBandStructure(PointSet):
             The summed projections
         """
 
+        self._require_projected()
         if atoms is None:
             atoms = np.arange(self.n_atoms, dtype=int)
         if spins is None:
