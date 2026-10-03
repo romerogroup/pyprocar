@@ -1106,3 +1106,33 @@ def test_unfold_weights_are_the_primitive_cell_character_of_each_band():
 
     assert ebs.weights is not None
     assert np.asarray(ebs.weights.value).ravel().tolist() == pytest.approx([1.0, 0.0, 0.5])
+
+
+def test_ibz_unfolds_with_time_reversal_when_the_point_group_lacks_inversion():
+    from pyprocar.core import Structure
+
+    t = 0.33333333
+    # IBZ of a 3x3x1 Gamma grid when only k ~ -k relates points; band value = IBZ index
+    ibz = np.array([[0, 0, 0], [t, 0, 0], [0, t, 0], [t, t, 0], [t, -t, 0]])
+    structure = Structure(
+        atoms=["X"],
+        fractional_coordinates=np.zeros((1, 3)),
+        lattice=np.eye(3),
+        rotations=np.array([np.eye(3)]),
+    )
+
+    ebs = ElectronicBandStructureMesh(
+        kpoints=ibz,
+        bands=np.arange(5, dtype=float).reshape(5, 1, 1),
+        fermi=0.0,
+        reciprocal_lattice=np.eye(3),
+        structure=structure,
+        kgrid_info=KGridInfo(kgrid=(3, 3, 1), kgrid_mode=KGRID_MODE.GAMMA, kshift=(0, 0, 0)),
+    )
+
+    bands = ebs.bands
+    assert bands is not None
+    assert ebs.n_kpoints == 9
+    band_at = {tuple(np.round(k, 3)): bands[i, 0, 0] for i, k in enumerate(ebs.kpoints)}
+    assert band_at[(-0.333, -0.333, 0.0)] == 3.0
+    assert band_at[(-0.333, 0.333, 0.0)] == 4.0
