@@ -522,16 +522,15 @@ class KPath:
         k_diff_norms = np.linalg.norm(k_diffs, axis=1)
 
         if self._segment_end_indices is None:
-            continuous_end_indices = list(np.where(k_diff_norms < self.zero_diff_threshold)[0])
-            discontinuity_end_indices = list(
-                np.where(k_diff_norms > self.discontinuity_threshold)[0]
+            is_boundary = (k_diff_norms < self.zero_diff_threshold) | (
+                k_diff_norms > self.discontinuity_threshold
             )
+            boundaries = list(np.where(is_boundary)[0])
         else:
             boundaries = self._segment_end_indices[:-1]
-            discontinuity_end_indices = [
-                i for i in boundaries if k_diff_norms[i] > self.discontinuity_threshold
-            ]
-            continuous_end_indices = [i for i in boundaries if i not in discontinuity_end_indices]
+        is_jump = k_diff_norms > self.discontinuity_threshold
+        continuous_end_indices = [i for i in boundaries if not is_jump[i]]
+        discontinuity_end_indices = [i for i in boundaries if is_jump[i]]
 
         segment_end_indices = (
             continuous_end_indices + discontinuity_end_indices + [len(self._kpoints) - 1]

@@ -260,6 +260,7 @@ class AbinitParser(BaseParser):
         # the first i+1 division counts.
         segment_end_indices = np.cumsum(self.abinit_kpoints.ngrids).tolist()
         if kpoints is None or segment_end_indices[-1] != len(kpoints) - 1:
+            user_logger.warning("KPOINTS divisions do not match the PROCAR k-points")
             segment_end_indices = None
 
         return KPath(
