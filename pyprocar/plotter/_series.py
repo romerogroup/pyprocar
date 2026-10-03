@@ -88,6 +88,7 @@ class LineSeries:
     band_index: int
     spin_index: int
     kwargs: dict[str, Any] = field(default_factory=dict)
+    widths: np.ndarray | None = None
 
 
 @dataclass
@@ -143,16 +144,18 @@ def line_series(
     kwargs: Mapping[str, Any],
     labels: Callable[[int, int], str | None] | None = None,
     share_single_channel: bool = False,
+    widths: np.ndarray | None = None,
 ) -> list[LineSeries]:
     """One series per (band, channel) of ``y``, shaped ``(n_points, n_bands, n_channels)``.
 
-    ``scalars`` and ``vectors`` are sliced per series: 3D arrays by band and
+    ``scalars``, ``vectors`` and ``widths`` are sliced per series: 3D arrays by band and
     channel, 2D arrays by band, 1D arrays are shared by every series. Their band
     and channel counts must match ``y``, except that ``share_single_channel``
     lets a single channel colour every channel.
     """
     _check_layout("scalars", scalars, y.shape, share_single_channel)
     _check_layout("vectors", vectors, y.shape, share_single_channel)
+    _check_layout("widths", widths, y.shape, share_single_channel)
     flip = ChannelMode.from_string(channel_mode) is ChannelMode.FLIP
     _, n_bands, n_channels = y.shape
     per_channel = distribute_kwargs(kwargs, n_channels)
@@ -172,6 +175,7 @@ def line_series(
                     band_index=iband,
                     spin_index=ichannel,
                     kwargs=per_channel[ichannel],
+                    widths=_take(widths, iband, ichannel),
                 )
             )
     return series
