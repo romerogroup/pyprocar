@@ -2074,24 +2074,35 @@ def with_time_reversal(rotations: npt.ArrayLike) -> np.ndarray:
     return np.concatenate([rotations, -rotations])
 
 
-def time_reversal_images(
-    images: np.ndarray, sources: np.ndarray, point_group: np.ndarray
+def spin_transforms(
+    images: np.ndarray,
+    sources: np.ndarray,
+    point_group: np.ndarray,
+    time_reversal: bool,
+    reciprocal_lattice: np.ndarray,
 ) -> np.ndarray:
-    """Mask of the images whose spin is the reversed spin of their source: S(-k) = -S(k).
+    """Cartesian matrix that carries the spin of each source to its image, shape (n, 3, 3).
 
-    That is an image at -k (modulo 1), unless it is the source itself, and an image no
-    point-group rotation of its source reaches. Spins are not rotated, so an image at -k
-    that a rotation also reaches takes the exact time-reversal value.
+    An image is matched to the first operation that maps its source onto it (modulo 1):
+    the identity, then the point group, then time reversal times the point group. A
+    rotation R of fractional k (k' = R k, reciprocal_lattice rows B, k_cart = k @ B) acts
+    on Cartesian vectors as R_c = B.T @ R @ inv(B.T). Spin is an axial vector, so it turns
+    by det(R_c) R_c, and time reversal reverses it.
     """
+    rotations = np.concatenate([np.eye(3)[np.newaxis], point_group])
+    signs = np.ones(len(rotations))
+    if time_reversal:
+        rotations = np.concatenate([rotations, point_group])
+        signs = np.concatenate([signs, -np.ones(len(point_group))])
+    positions = signs[np.newaxis, :, np.newaxis] * np.einsum("rij,kj->kri", rotations, sources)
+    offsets = images[:, np.newaxis, :] - positions
+    offsets -= np.round(offsets)
+    first = np.argmax(np.all(np.abs(offsets) < 2e-3, axis=2), axis=1)
 
-    def reached(operations: np.ndarray) -> np.ndarray:
-        offsets = images[:, np.newaxis, :] - np.einsum("rij,kj->kri", operations, sources)
-        offsets -= np.round(offsets)
-        return np.all(np.abs(offsets) < 2e-3, axis=2).any(axis=1)
-
-    identity = np.eye(3)[np.newaxis]
-    at_source = reached(identity)
-    return ~at_source & (reached(-identity) | ~reached(point_group))
+    b_t = np.asarray(reciprocal_lattice).T
+    cartesian = b_t @ rotations @ np.linalg.inv(b_t)
+    axial = (signs * np.linalg.det(cartesian))[:, np.newaxis, np.newaxis] * cartesian
+    return axial[first]
 
 
 def ibz2fbz(ebs, rotations=None, kgrid_info=None, decimals=4, inplace=True, **kwargs):
@@ -2179,13 +2190,19 @@ def ibz2fbz(ebs, rotations=None, kgrid_info=None, decimals=4, inplace=True, **kw
             unique_indices
         ]
 
-    if len(rotations) > len(point_group) and ebs.is_non_collinear:
-        reversed_images = time_reversal_images(new_kpoints, ibz_kpoints[source], point_group)
+    if ebs.is_non_collinear and ebs.reciprocal_lattice is not None:
+        transforms = spin_transforms(
+            new_kpoints,
+            ibz_kpoints[source],
+            point_group,
+            len(rotations) > len(point_group),
+            ebs.reciprocal_lattice,
+        )
         projected = ebs.get_property("projected")
         for calc_name, gradient_order, value_array in projected.iter_arrays():
-            flipped = value_array.copy()
-            flipped[reversed_images, :, 1:] *= -1
-            projected[calc_name, gradient_order] = flipped
+            turned = value_array.copy()
+            turned[:, :, 1:] = np.einsum("kij,kbj...->kbi...", transforms, value_array[:, :, 1:])
+            projected[calc_name, gradient_order] = turned
 
     ebs.update_points(new_kpoints)
     return sort_by_kpoints(ebs, inplace=inplace, **kwargs)
