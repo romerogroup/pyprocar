@@ -5,6 +5,7 @@ from pathlib import Path
 import numpy as np
 import pytest
 
+from pyprocar.core.ebs import ElectronicBandStructure
 from pyprocar.core.kpoints import KGRID_MODE, KGridInfo, get_kpoints_from_kgrid
 from pyprocar.io import get_parser
 from pyprocar.io.qe.parser import QEParser
@@ -626,3 +627,33 @@ def test_contour_mode_has_no_kpath_and_keeps_the_mesh_kpoints(
     assert parser.kpath is None
     assert parser.kpoints is not None
     assert np.allclose(parser.kpoints, [[0, 0, 0], [0.25, 0, 0], [0, 0, 0.25], [0.25, 0, 0.25]])
+
+
+@pytest.mark.parametrize(
+    ("mode", "card"),
+    [
+        ("crystal", "4\n0 0 0 1\n0.5 0 0 1\n0 0 0.5 1\n0.25 0.25 0.5 1\n"),
+        ("tpiba", "4\n0 0 0 1\n0.5 0 0 1\n0 0 0.25 1\n0.25 0.25 0.25 1\n"),
+        ("automatic", "4 4 2 0 0 0\n"),
+    ],
+    ids=["crystal", "tpiba", "automatic"],
+)
+def test_bands_run_without_a_band_path_is_a_plain_ebs_of_the_computed_kpoints(
+    tmp_path: Path, mode: str, card: str
+) -> None:
+    calc_dir = _tetragonal_bands_dir(tmp_path, mode, card, TETRAGONAL_CARTESIAN_KPOINTS)
+    xml = (calc_dir / "test.xml").read_text()
+    (calc_dir / "test.xml").write_text(
+        xml.replace(
+            "<nbnd>1</nbnd>",
+            "<nbnd>1</nbnd>\n      <fermi_energy>0.2</fermi_energy>\n"
+            '      <starting_k_points><monkhorst_pack nk1="4" nk2="4" nk3="2" '
+            'k1="0" k2="0" k3="0"/></starting_k_points>',
+        )
+    )
+    parser = QEParser(calc_dir)
+    ebs = parser.ebs
+
+    assert parser.kpath is None and parser.kgrid_info is None
+    assert type(ebs) is ElectronicBandStructure
+    assert np.allclose(ebs.kpoints, TETRAGONAL_FRACTIONAL_KPOINTS)
