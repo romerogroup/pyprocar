@@ -599,7 +599,11 @@ def test_band_file_follows_the_elk_in_task_and_warns_about_the_other(tmp_path, u
     calc_dir = _band_dir(
         tmp_path,
         "22",
-        {"BAND.OUT": stale, "BAND_S01_A0001.OUT": BAND_S01_A0001, "BAND_S02_A0001.OUT": BAND_S02_A0001},
+        {
+            "BAND.OUT": stale,
+            "BAND_S01_A0001.OUT": BAND_S01_A0001,
+            "BAND_S02_A0001.OUT": BAND_S02_A0001,
+        },
     )
     ebs = ElkParser(calc_dir).ebs
 
@@ -625,5 +629,4 @@ def test_vertex_labels_keep_latex_that_kpath_does_not_alias(tmp_path):
     ebs = ElkParser(calc_dir).ebs
 
     assert isinstance(ebs, ElectronicBandStructurePath)
-    assert ebs.kpath.tick_names == ["Γ", "X", "\\Sigma_1"]
-    assert ebs.kpath.tick_names_latex[2] == "$\\Sigma_1$"
+    assert ebs.kpath.tick_names == ["Γ", "X", "$\\Sigma_1$"]

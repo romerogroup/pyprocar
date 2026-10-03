@@ -193,21 +193,30 @@ class ElkParser(BaseParser):
     @cached_property
     def _bands_parser(self) -> ElkBands | None:
         """Bands file parser."""
-        if not self.is_bands_calculation or self._elkin is None:
+        if self._elkin is None:
+            return None
+        tasks = set(self._elkin.tasks)
+        if not self.is_bands_calculation:
+            if tasks & {23, 24}:
+                user_logger.warning(
+                    "Elk tasks 23 and 24 write spin and moment characters to BAND_S files;"
+                    + " pyprocar reads band structures from tasks 20, 21 and 22 only"
+                )
             return None
 
-        # Elk writes BAND.OUT for task 20 and BAND_Sss_Aaaaa.OUT, with the same
-        # first two columns, for tasks 21 and 22 (bandstr.f90).
+        # bandstr.f90 writes BAND.OUT for task 20 and BAND_Sss_Aaaaa.OUT for tasks
+        # 21-24; the first two columns (distance, energy) are the same in both.
+        band_out = self.dirpath / "BAND.OUT"
+        band_s = self.dirpath / "BAND_S01_A0001.OUT"
+        preferred, other = (band_out, band_s) if 20 in tasks else (band_s, band_out)
+        bands_path = preferred if preferred.exists() else other
+        if band_out.exists() and band_s.exists() and not (20 in tasks and tasks & {21, 22}):
+            user_logger.warning(
+                f"Both BAND.OUT and BAND_S01_A0001.OUT are in {self.dirpath};"
+                + f" reading {bands_path.name}, which the elk.in tasks write"
+            )
         bandlines_path = self.dirpath / "BANDLINES.OUT"
-        bands_path = next(
-            (
-                path
-                for path in (self.dirpath / "BAND.OUT", self.dirpath / "BAND_S01_A0001.OUT")
-                if path.exists()
-            ),
-            None,
-        )
-        if bands_path is None or not bandlines_path.exists():
+        if not bands_path.exists() or not bandlines_path.exists():
             return None
 
         return ElkBands(

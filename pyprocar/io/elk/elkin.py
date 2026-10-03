@@ -10,6 +10,7 @@ from typing import Self
 import numpy as np
 import numpy.typing as npt
 
+from pyprocar.core.kpoints import normalize_kpoint_name
 from pyprocar.io.elk.geometry import ElkCell, block_lines, bool_fortran, parse_elk_cell
 
 user_logger = logging.getLogger("user")
@@ -27,15 +28,17 @@ ELK_DEFAULT_PLOT1D = Plot1D(np.array([[0.0, 0.0, 0.0], [1.0, 1.0, 1.0]]), 200, [
 
 
 def _vertex_label(line: str) -> str:
-    """Text after the last ':' of a plot1d vertex line, as a plain name.
+    """Text after the last ':' of a plot1d vertex line.
 
-    KPath maps plain names such as "Gamma" to its symbols, so the LaTeX
-    backslash of "\\Gamma" is dropped.
+    KPath maps "Gamma" to its own symbol but not "\\Gamma", so a backslash is
+    dropped only when that turns the label into a KPath alias. Other LaTeX,
+    such as "\\Sigma_1", is kept for KPath to render.
     """
     if ":" not in line:
         return ""
-    label = line.rpartition(":")[2]
-    return label.replace(",", "").replace("vlvp1d", "").replace(" ", "").lstrip("\\")
+    label = line.rpartition(":")[2].replace(",", "").replace("vlvp1d", "").replace(" ", "")
+    plain = label.lstrip("\\")
+    return plain if normalize_kpoint_name(plain) != plain else label
 
 
 class ElkIn:
