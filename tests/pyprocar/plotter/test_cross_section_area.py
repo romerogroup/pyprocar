@@ -233,6 +233,25 @@ def test_translate_through_the_highest_vertex_is_cut_although_its_offset_rounds_
     assert (areas, n_open) == ([], 1)
 
 
+def test_generic_normal_cuts_the_cylinder_around_m_in_one_ellipse():
+    """A plane with normal n cuts the cylinder |k_xy - M|^2 = 0.1 in an ellipse of area
+    pi 0.1 / |n_z|. Two of the plane's lattice translates that cross the surface are only
+    9.3e-4 apart along this normal, and each carries a piece of the ellipse.
+    """
+
+    def cylinder_around_m(k: np.ndarray) -> np.ndarray:
+        return np.sum((k[:, :2] % 1.0 - 0.5) ** 2, axis=1)
+
+    normal = np.array([0.630914259462603, -0.6191560458478862, 0.4675392904310453])
+
+    areas, n_open = cross_section_areas(
+        _periodic_surface(cylinder_around_m), normal, 0.5790289704673109 * normal, np.eye(3)
+    )
+
+    assert n_open == 0
+    assert np.asarray(areas) == pytest.approx([np.pi * 0.1 / normal[2]], rel=0.02)
+
+
 def test_sheets_that_run_through_the_zone_stay_open():
     def planes_at_ky(k):
         to_gamma = (k[:, 1] + 0.5) % 1.0 - 0.5
@@ -322,6 +341,31 @@ def test_srvo3_band_16_orbit_through_a_translate_at_the_surface_edge_closes(norm
     plotter.close()
 
     assert _number(text) == pytest.approx(area * (2 * np.pi) ** 2, rel=0.01)
+
+
+@pytest.mark.data
+def test_srvo3_band_16_random_normal_cut_closes_its_orbit():
+    """A random normal, so translate planes can lie closer together than 1e-3 |b|.
+
+    The expected area is the PR verifier's independent reference: marching cubes on a
+    periodic tile of the unfolded EIGENVAL energies, sliced by the plane with no zone
+    clipping, gives one closed orbit of 0.2223563 1/A^2 (no 2 pi).
+    """
+    fs = FermiSurface.from_code(
+        code="vasp", dirpath=DATA_DIR / "examples/fermi3d/non-spin-polarized"
+    )
+    band_16 = fs.select_bands([(16, 0)])
+    assert isinstance(band_16, FermiSurface)
+    normal = (-0.5452820360305133, -0.670617501299716, 0.5029310769210262)
+    origin = tuple(0.054881091342609614 * np.asarray(normal))
+
+    plotter = FermiPlotter(off_screen=True)
+    plotter.add_box_slicer(band_16, normal=normal, origin=origin, show_cross_section_area=True)
+    text = _area_text(plotter)
+    plotter.close()
+
+    assert text.endswith(" Ang^-2")
+    assert _number(text) == pytest.approx(0.2223563 * (2 * np.pi) ** 2, rel=0.01)
 
 
 @pytest.mark.data
