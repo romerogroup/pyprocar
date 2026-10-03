@@ -177,6 +177,10 @@ def line_series(
     return series
 
 
+VECTOR_PROPERTIES = frozenset({"fermi_velocity", "bands_velocity", "projected_sum_spin_texture"})
+"""Band-resolved properties whose last axis holds Cartesian components, not atoms or orbitals."""
+
+
 def surface_series(
     surfaces: Mapping[tuple[int, int], pv.PolyData],
     masks: Mapping[tuple[int, int], np.ndarray],
@@ -188,16 +192,25 @@ def surface_series(
 
     Band-resolved values, shaped ``(n_points, n_bands, n_spins)`` for scalars or
     ``(n_points, n_bands, n_spins, 3)`` for vectors, also select the surface's own
-    band and spin.
+    band and spin. A vector property given as scalars colors by its magnitude.
     """
     scalars = scalars_data.to_array() if scalars_data is not None else None
+    scalars_label = scalars_data.label if scalars_data else None
+    if scalars is not None and scalars.ndim == 4:
+        if scalars_data.name not in VECTOR_PROPERTIES:
+            raise ValueError(
+                f"{scalars_data.name} has shape {scalars.shape}; surface scalars need one value "
+                + "per point, band and spin. Select a component, or sum the last axis first."
+            )
+        scalars = np.linalg.norm(scalars, axis=-1)
+        scalars_label = f"|{scalars_label}|"
     vectors = vectors_data.to_array() if vectors_data is not None else None
     return [
         SurfaceSeries(
             mesh=surface,
             scalars=_surface_values(scalars, masks[key], key, band_resolved_ndim=3),
             vectors=_surface_values(vectors, masks[key], key, band_resolved_ndim=4),
-            scalars_label=scalars_data.label if scalars_data else None,
+            scalars_label=scalars_label,
             band_index=key[0],
             spin_index=key[1],
             kwargs=dict(kwargs),

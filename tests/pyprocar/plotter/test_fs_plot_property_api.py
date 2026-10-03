@@ -16,9 +16,9 @@ def _triangle(z: float) -> pv.PolyData:
     return pv.PolyData(np.array([[0.0, 0.0, z], [1.0, 0.0, z], [0.0, 1.0, z]]), TRIANGLE_FACES)
 
 
-def _property(values, label="Projection"):
+def _property(values, label="Projection", name="projected_sum"):
     return SimpleNamespace(
-        to_array=lambda: np.asarray(values), label=label, units="", data_lim=None
+        to_array=lambda: np.asarray(values), name=name, label=label, units="", data_lim=None
     )
 
 
@@ -78,6 +78,24 @@ class TestFermiPlotterPlot:
 
         assert meshes[(0, 0)].point_data["scalars"].tolist() == [0.1, 0.2, 0.3]
         assert meshes[(3, 1)].point_data["scalars"].tolist() == [0.7, 0.8, 0.9]
+
+    def test_band_resolved_vectors_as_scalars_color_by_magnitude(self, plotter):
+        velocity = np.zeros((6, 4, 2, 3))
+        velocity[:3, 0, 0] = [[3.0, 4.0, 0.0], [0.0, 0.0, 2.0], [1.0, 2.0, 2.0]]
+        velocity[3:, 3, 1] = [[6.0, 8.0, 0.0], [0.0, 5.0, 12.0], [0.0, 0.0, 0.0]]
+
+        prop = _property(velocity, label="fermi_velocity", name="fermi_velocity")
+        meshes = plotter.plot(_fermi_surface(), scalars_data=prop)
+
+        assert meshes[(0, 0)].point_data["scalars"].tolist() == [5.0, 2.0, 3.0]
+        assert meshes[(3, 1)].point_data["scalars"].tolist() == [10.0, 13.0, 0.0]
+        assert list(plotter.scalar_bars.keys()) == ["|fermi_velocity|"]
+
+    def test_per_atom_scalars_of_a_three_atom_cell_are_refused(self, plotter):
+        ipr_atom = np.ones((6, 4, 2, 3))
+
+        with pytest.raises(ValueError, match="ebs_ipr_atom has shape"):
+            plotter.plot(_fermi_surface(), scalars_data=_property(ipr_atom, name="ebs_ipr_atom"))
 
     def test_spins_limits_the_drawn_surfaces(self, plotter):
         meshes = plotter.plot(_fermi_surface(), spins=[1])
