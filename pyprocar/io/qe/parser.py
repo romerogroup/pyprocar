@@ -450,11 +450,26 @@ class QEParser(BaseParser):
     def is_bands_run(self) -> bool:
         """Whether the parsed k-points come from a calculation='bands' run.
 
-        The xml names the run that wrote it, which is also the run projwfc
-        read. A bands.in in the same directory may belong to an earlier run.
+        The xml names the run that wrote it. A later pw.x run in the same
+        directory overwrites the xml but not the projwfc output, so the xml
+        decides only when its k-point count matches the projwfc k-points;
+        otherwise the presence of a bands input decides.
         """
+        projwfc_kpoints = None
+        if self.atomic_proj_xml is not None:
+            projwfc_kpoints = self.atomic_proj_xml.kpoints
+        elif self.projwfc_out is not None:
+            projwfc_kpoints = self.projwfc_out.kpoints
         for xml in (self.pw_xml, self.data_file_schema_xml):
-            if xml is not None and xml.calculation is not None:
+            if xml is None or xml.calculation is None:
+                continue
+            xml_kpoints = xml.kpoints
+            same_run = (
+                projwfc_kpoints is None
+                or xml_kpoints is None
+                or len(xml_kpoints) == len(projwfc_kpoints)
+            )
+            if same_run:
                 return xml.calculation == "bands"
         return self.bands_in is not None
 
