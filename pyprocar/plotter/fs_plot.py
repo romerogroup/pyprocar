@@ -11,6 +11,7 @@ from pyvista.plotting.utilities.algorithms import (
     algorithm_to_mesh_handler,
     set_algorithm_input,
 )
+from scipy.constants import elementary_charge, hbar
 
 from pyprocar.plotter._series import SurfaceSeries, surface_series
 from pyprocar.plotter._surface_plot import (
@@ -34,12 +35,9 @@ FS_AREA_SCALE_FACTOR = (2 * np.pi) ** 2
 
 
 def dHvA_frequency(A_max_angstrom2):
-    hbar = 1.0546e-27  # erg·s
-    e = 4.768e-10  # statcoulombs
-    c = 3.0e10  # cm/s
-    A_max_cm2 = A_max_angstrom2 * 1e16  # cm^-2
-    F_max_theory = (hbar * A_max_cm2 * c) / (2 * np.pi * e)  # Gauss
-    return F_max_theory
+    """Onsager frequency F = hbar A / (2 pi e), in gauss, of an orbit of area A in 1/Angstrom^2."""
+    tesla = hbar * A_max_angstrom2 * 1e20 / (2 * np.pi * elementary_charge)
+    return tesla * 1e4
 
 
 class FermiPlotter(SurfacePlotter):
