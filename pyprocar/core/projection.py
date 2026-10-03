@@ -139,8 +139,11 @@ def build_property(
 
     values = owner.normalize(mode, values, **(normalize_kwargs or {}))
     normed_units = owner.normed_units(mode, units)
-    data_min = np.min(values, axis=0)
-    data_max = np.max(values, axis=0)
+    if len(values) == 0:
+        data_min = data_max = np.zeros(values.shape[1:])
+    else:
+        data_min = np.min(values, axis=0)
+        data_max = np.max(values, axis=0)
 
     property_metadata: dict[str, Any] = {
         "norm_mode": mode,
