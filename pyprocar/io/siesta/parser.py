@@ -64,12 +64,7 @@ class SiestaParser(BaseParser):
                 user_logger.warning(f"No .fdf file found in {self.dirpath}")
                 return None
             # Prefer the input whose SystemLabel names a .bands file here.
-            with_bands = [
-                fdf
-                for fdf in candidates
-                if (label := fdf.label("SystemLabel"))
-                and (self.dirpath / f"{label[0]}.bands").exists()
-            ]
+            with_bands = [fdf for fdf in candidates if self._names_bands_file(fdf)]
             chosen = (with_bands or candidates)[0]
             if len(candidates) > 1:
                 user_logger.warning(
@@ -86,6 +81,14 @@ class SiestaParser(BaseParser):
 
         user_logger.warning(f"FDF file not found: {filepath}")
         return None
+
+    def _names_bands_file(self, fdf: FDF) -> bool:
+        """Whether the fdf's SystemLabel names a .bands file here; an unreadable fdf does not."""
+        try:
+            label = fdf.label("SystemLabel")
+        except ValueError:
+            return False
+        return bool(label) and (self.dirpath / f"{label[0]}.bands").exists()
 
     def _initialize_bands(self, param: str | Path | Bands | None) -> Bands | None:
         """Initialize Bands extractor from path or instance."""

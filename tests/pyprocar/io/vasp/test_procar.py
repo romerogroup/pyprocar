@@ -900,3 +900,93 @@ def test_abinit_single_ion_non_collinear_fixture_matches_dev():
     assert projected is not None
     assert projected.shape == (301, 30, 4, 1, 9)
     assert projected[0, 0, :, 0, 0].tolist() == [0.399, -0.35, 0.038, -0.186]
+
+
+def _projection_rows(weights: tuple[float, float]) -> list[str]:
+    rows = [
+        f"    {ion}  {w:.3f}" + "  0.000" * 8 + f"  {w:.3f}" for ion, w in enumerate(weights, 1)
+    ]
+    total = sum(weights)
+    return rows + [f"tot    {total:.3f}" + "  0.000" * 8 + f"  {total:.3f}"]
+
+
+def _procar(kpoint_lines: list[str], band_rows: list[list[str]]) -> str:
+    lines = [
+        "PROCAR lm decomposed",
+        f"# of k-points:  {len(kpoint_lines)}         # of bands:   1         # of ions:    2",
+        "",
+    ]
+    for header, rows in zip(kpoint_lines, band_rows, strict=True):
+        lines += [header, "", "band     1 # energy  -1.00000000 # occ.  1.00000000", " ", ORBITALS]
+        lines += rows + [""]
+    return "\n".join(lines) + "\n"
+
+
+def test_kpoint_coordinates_without_a_separating_space_are_read():
+    headers = [
+        " k-point     1 :    0.00000000 0.00000000 0.00000000     weight = 0.50000000",
+        " k-point     2 :    0.50000000-0.25000000 0.00000000     weight = 0.50000000",
+    ]
+    up = _procar(headers, [_projection_rows((0.1, 0.2)), _projection_rows((0.3, 0.4))])
+    down = _procar(headers, [_projection_rows((0.5, 0.6)), _projection_rows((0.7, 0.8))])
+
+    procar = vasp.Procar(file_str=up + down)
+
+    assert procar.is_spin_polarized
+    assert procar.kpoints.tolist() == [[0.0, 0.0, 0.0], [0.5, -0.25, 0.0]]
+    assert procar.projected is not None
+    assert procar.projected[1, 0, :, 0, 0].tolist() == [0.3, 0.7]
+
+
+def test_vasp65_non_collinear_blank_line_between_spin_components():
+    components = [(0.5, 0.1), (0.01, 0.02), (0.03, 0.04), (-0.5, -0.1)]
+    rows: list[str] = []
+    for weights in components:
+        rows += _projection_rows(weights) + [""]
+    header = " k-point     1 :    0.00000000 0.00000000 0.00000000     weight = 1.00000000"
+
+    procar = vasp.Procar(file_str=_procar([header], [rows[:-1]]))
+
+    assert procar.is_non_colinear
+    assert procar.projected is not None
+    assert procar.projected[0, 0, :, 0, 0].tolist() == [0.5, 0.01, 0.03, -0.5]
+
+
+ISSUES_DIR = DATA_DIR / "issues"
+
+
+@pytest.mark.data
+def test_issue_196_vasp65_non_collinear_procar():
+    procar = vasp.Procar(filepath=ISSUES_DIR / "issue-196" / "dos" / "PROCAR")
+
+    assert procar.projected is not None
+    assert procar.projected.shape == (18, 112, 4, 14, 16)
+    assert procar.projected[0, 0, 0, 0, 0] == 0.469
+
+
+@pytest.mark.data
+def test_issue_196_vasp65_non_collinear_procar_opt():
+    procar = vasp.Procar(filepath=ISSUES_DIR / "issue-196" / "dos" / "PROCAR_OPT")
+
+    assert procar.projected is not None
+    assert procar.projected.shape == (90, 112, 4, 14, 16)
+    assert procar.kpoints.shape == (90, 3)
+
+
+@pytest.mark.data
+def test_issue_197_spin_polarized_bands():
+    procar = vasp.Procar(filepath=ISSUES_DIR / "issue-197" / "PROCAR")
+
+    assert procar.is_spin_polarized
+    assert procar.bands[0, 0].tolist() == [-40.11109769, -36.96386682]
+
+
+@pytest.mark.data
+def test_issue_199_fused_kpoints():
+    procar = vasp.Procar(filepath=ISSUES_DIR / "issue-199" / "PROCAR")
+
+    assert procar.kpoints.shape == (80, 3)
+    assert procar.kpoints[39].tolist() == [0.5, 0.0, 0.0]
+    assert procar.kpoints[41].tolist() == [0.50877193, -0.01754386, 0.0]
+    assert procar.projected is not None
+    assert procar.projected[0, 0, :, 0, 0].tolist() == [0.834, 0.0, 0.0, -0.834]

@@ -1,0 +1,27 @@
+import numpy as np
+import pytest
+
+from pyprocar.pyposcar.db import DB
+from pyprocar.pyposcar.defects import FindDefect
+from pyprocar.pyposcar.poscar import Poscar
+
+
+def test_vanadium_bond_uses_cordero_radius():
+    assert DB().estimateBond("V", "O") == pytest.approx(2.19)
+
+
+def test_find_defect_on_srvo3_finds_none():
+    poscar = Poscar()
+    poscar.load_from_data(
+        direct_positions=np.array(
+            [[0, 0, 0], [0.5, 0.5, 0.5], [0.5, 0.5, 0], [0.5, 0, 0.5], [0, 0.5, 0.5]]
+        ),
+        lattice=3.84 * np.eye(3),
+        elements=["Sr", "V", "O", "O", "O"],
+    )
+
+    assert list(FindDefect(poscar).all_defects) == []
+
+
+def test_superheavy_elements_use_their_iupac_symbols():
+    assert DB().estimateBond("Nh", "Og") == pytest.approx(1.36 + 1.57)

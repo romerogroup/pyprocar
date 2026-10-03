@@ -97,8 +97,8 @@ class ElkIn:
 
     @cached_property
     def is_bands_calculation(self) -> bool:
-        """Check if this is a band structure calculation (task 20, 21, or 22)."""
-        return any(t in self.tasks for t in [20, 21, 22])
+        """Check if this is a band structure calculation (tasks 20 to 24)."""
+        return any(t in self.tasks for t in [20, 21, 22, 23, 24])
 
     @cached_property
     def spinpol(self) -> bool:

@@ -76,3 +76,68 @@ class TestAbinitDOSProjected(BaseTest):
         if projected is not None:
             # Shape: (n_energies, n_spins, n_atoms, n_orbitals)
             assert len(projected.shape) == 4
+
+
+NSP_DOS = ABINIT_DATA_DIR / "non-spin-polarized" / "dos"
+SP_DIR = ABINIT_DATA_DIR / "spin-polarized-colinear"
+
+
+class TestAbinitDOSUnits(BaseTest):
+    def test_energies_are_absolute_ev(self):
+        from pyprocar.io.abinit import AbinitDOS
+
+        dos = AbinitDOS(NSP_DOS)
+        assert dos.energies.shape == (13201,)
+        assert dos.energies[0] == pytest.approx(-78.9130201134)
+        assert dos.energies[5985] == pytest.approx(2.5170532278)
+
+    def test_fermi_is_ev(self):
+        from pyprocar.io.abinit import AbinitDOS
+
+        assert AbinitDOS(NSP_DOS).fermi == pytest.approx(10.0778759464)
+
+    def test_total_dos_is_states_per_ev(self):
+        from pyprocar.io.abinit import AbinitDOS
+
+        assert AbinitDOS(NSP_DOS).dos_total[5985, 0] == pytest.approx(0.1125300994)
+
+    def test_spin_down_block_is_states_per_ev(self):
+        from pyprocar.io.abinit import AbinitDOS
+
+        dos = AbinitDOS(SP_DIR / "dos")
+        assert dos.energies[69] == pytest.approx(-77.9742272879)
+        assert dos.dos_total[69] == pytest.approx([2.6780113053, 2.6781840271])
+
+    def test_projected_dos_is_states_per_ev(self):
+        from pyprocar.io.abinit import AbinitDOS
+
+        projected = AbinitDOS(NSP_DOS).projected
+        assert projected is not None
+        assert projected[5985, 0, 0, 0] == pytest.approx(0.0385867883)
+        assert projected[5985, 0, 0, 2] == pytest.approx(0.0040424254)
+
+    def test_dos_fermi_matches_bands_fermi(self):
+        from pyprocar.io.abinit import AbinitParser
+
+        bands_output = AbinitParser(SP_DIR / "bands").abinit_output
+        dos = AbinitParser(SP_DIR / "dos").dos
+        assert bands_output is not None and dos is not None
+        assert bands_output.fermi == pytest.approx(9.11796)
+        assert dos.fermi == pytest.approx(bands_output.fermi, abs=1e-4)
+
+
+def test_dosplot_puts_abinit_fermi_at_zero():
+    import matplotlib
+
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+
+    import pyprocar
+
+    fig, ax = pyprocar.dosplot(
+        code="abinit", dirname=str(NSP_DOS), orientation="vertical", show=False
+    )
+    energies = np.asarray(ax.get_lines()[0].get_ydata())
+    plt.close(fig)
+    assert energies.min() == pytest.approx(-88.9908960598)
+    assert energies.max() == pytest.approx(90.6042531638)

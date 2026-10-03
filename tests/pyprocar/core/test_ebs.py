@@ -1106,3 +1106,276 @@ def test_unfold_weights_are_the_primitive_cell_character_of_each_band():
 
     assert ebs.weights is not None
     assert np.asarray(ebs.weights.value).ravel().tolist() == pytest.approx([1.0, 0.0, 0.5])
+
+
+def test_ibz_unfolds_with_time_reversal_when_the_point_group_lacks_inversion():
+    from pyprocar.core import Structure
+
+    t = 0.33333333
+    ibz = np.array([[0, 0, 0], [t, 0, 0], [0, t, 0], [t, t, 0], [t, -t, 0]])
+    structure = Structure(
+        atoms=["X"],
+        fractional_coordinates=np.zeros((1, 3)),
+        lattice=np.eye(3),
+        rotations=np.array([np.eye(3)]),
+    )
+
+    ebs = ElectronicBandStructureMesh(
+        kpoints=ibz,
+        bands=np.arange(5, dtype=float).reshape(5, 1, 1),
+        fermi=0.0,
+        reciprocal_lattice=np.eye(3),
+        structure=structure,
+        kgrid_info=KGridInfo(kgrid=(3, 3, 1), kgrid_mode=KGRID_MODE.GAMMA, kshift=(0, 0, 0)),
+    )
+
+    bands = ebs.bands
+    assert bands is not None
+    assert ebs.n_kpoints == 9
+    band_at = {tuple(np.round(k, 3)): bands[i, 0, 0] for i, k in enumerate(ebs.kpoints)}
+    assert band_at[(-0.333, -0.333, 0.0)] == 3.0
+    assert band_at[(-0.333, 0.333, 0.0)] == 4.0
+
+
+def test_time_reversal_images_carry_the_negated_non_collinear_spin():
+    from pyprocar.core import Structure
+
+    t = 0.33333333
+    ibz = np.array([[0, 0, 0], [t, 0, 0], [0, t, 0], [t, t, 0], [t, -t, 0]])
+    # per k-point: total 1.0 and spin (sx, sy, sz) = (0.1, 0.2, 0.3) * (index + 1)
+    spin = 0.1 * np.arange(1, 4) * np.arange(1, 6)[:, None]
+    projected = np.concatenate([np.ones((5, 1)), spin], axis=1).reshape(5, 1, 4, 1, 1)
+    structure = Structure(
+        atoms=["X"],
+        fractional_coordinates=np.zeros((1, 3)),
+        lattice=np.eye(3),
+        rotations=np.array([np.eye(3)]),
+    )
+
+    ebs = ElectronicBandStructureMesh(
+        kpoints=ibz,
+        bands=np.zeros((5, 1, 1)),
+        projected=projected,
+        fermi=0.0,
+        reciprocal_lattice=np.eye(3),
+        structure=structure,
+        kgrid_info=KGridInfo(kgrid=(3, 3, 1), kgrid_mode=KGRID_MODE.GAMMA, kshift=(0, 0, 0)),
+    )
+
+    assert ebs.projected is not None
+    unfolded = ebs.projected.to_array()
+    spin_at = {
+        tuple(np.round(k, 3)): unfolded[i, 0, :, 0, 0].tolist() for i, k in enumerate(ebs.kpoints)
+    }
+    assert spin_at[(0.333, 0.333, 0.0)] == pytest.approx([1.0, 0.4, 0.8, 1.2])
+    assert spin_at[(-0.333, -0.333, 0.0)] == pytest.approx([1.0, -0.4, -0.8, -1.2])
+    assert spin_at[(0.333, -0.333, 0.0)] == pytest.approx([1.0, 0.5, 1.0, 1.5])
+    assert spin_at[(-0.333, 0.333, 0.0)] == pytest.approx([1.0, -0.5, -1.0, -1.5])
+    assert spin_at[(0.0, 0.0, 0.0)] == pytest.approx([1.0, 0.1, 0.2, 0.3])
+
+
+@pytest.mark.data
+def test_reduced_non_collinear_bisb_mesh_unfolds_to_the_full_mesh_spin():
+    spglib = pytest.importorskip("spglib")
+    from pyprocar.core.ebs import get_ebs_from_code, get_ebs_from_data
+
+    # Full 60x60x1 non-collinear mesh (ISYM=-1); reduce it under the point group and k ~ -k
+    full = get_ebs_from_code("vasp", str(DATA_DIR / "examples" / "fermi2d" / "bisb_monolayer"))
+    structure = full.structure
+    assert isinstance(full, ElectronicBandStructureMesh) and structure is not None
+    assert full.bands is not None and full.projected is not None
+    full_bands, full_projected = full.bands.to_array(), full.projected.to_array()
+    cell = (structure.lattice, structure.fractional_coordinates, structure.atomic_numbers)
+    rotations = np.array([w.T for w in spglib.get_symmetry(cell, symprec=1e-3)["rotations"]])
+    structure._rotations = rotations.astype(float)
+
+    def wrap(k):
+        k = np.round(np.asarray(k, dtype=float), 3)
+        return np.round(k - np.floor(k + 0.5 - 1e-9), 3) + 0.0
+
+    full_k = wrap(full.kpoints)
+    index = {tuple(k): i for i, k in enumerate(full_k)}
+    group = np.concatenate([rotations, -rotations])
+    kept, seen = [], set()
+    for i, k in enumerate(full.kpoints):
+        if tuple(full_k[i]) not in seen:
+            kept.append(i)
+            seen.update(tuple(wrap(k @ g.T)) for g in group)
+    reduced = get_ebs_from_data(
+        kpoints=full.kpoints[kept],
+        bands=full_bands[kept],
+        projected=full_projected[kept],
+        fermi=full.fermi,
+        reciprocal_lattice=full.reciprocal_lattice,
+        orbital_names=full.orbital_names,
+        structure=structure,
+        kgrid_info=full.kgrid_info,
+    )
+
+    assert len(kept) == 331
+    assert reduced.n_kpoints == 3600 and reduced.projected is not None
+    # bands 60-79 are unconverged; bands 0-59 obey the symmetry to about 3 meV
+    true = full_projected[:, :60].sum(axis=(3, 4))
+    unfolded = reduced.projected.to_array()[:, :60].sum(axis=(3, 4))
+    orbit_source: dict[tuple, int] = {}
+    for i in kept:
+        for g in group:
+            orbit_source.setdefault(tuple(wrap(full.kpoints[i] @ g.T)), i)
+    kinds: dict[str, list[tuple[int, int, int]]] = {"source": [], "-k": [], "Rk": [], "-Rk": []}
+    for j, k in enumerate(wrap(reduced.kpoints)):
+        source = orbit_source[tuple(k)]
+        k_source = full.kpoints[source]
+        if tuple(k) == tuple(full_k[source]):
+            kind = "source"
+        elif tuple(k) == tuple(wrap(-k_source)):
+            kind = "-k"
+        elif any(tuple(k) == tuple(wrap(k_source @ r.T)) for r in rotations):
+            kind = "Rk"
+        else:
+            kind = "-Rk"
+        kinds[kind].append((j, index[tuple(k)], source))
+
+    assert {kind: len(rows) for kind, rows in kinds.items()} == {
+        "source": 331,
+        "-k": 329,
+        "Rk": 1527,
+        "-Rk": 1413,
+    }
+    for kind, rows in kinds.items():
+        image, target, source = (np.array(column) for column in zip(*rows, strict=True))
+        assert np.array_equal(unfolded[image, :, 0], true[source, :, 0]), kind
+        assert np.abs(unfolded[image, :, 1:] - true[target, :, 1:]).mean() < 0.004, kind
+
+
+def test_unfolded_non_collinear_spin_rotates_as_an_axial_vector():
+    from pyprocar.core import Structure
+
+    # Point group C4 about z, no inversion, so the IBZ is also reduced by time reversal.
+    # S(k) = (sx - 0.5 sy, sy + 0.5 sx, 0.3 sz) with s_i = sin(2 pi k_i) obeys
+    # S(Rk) = det(R) R S(k) under C4 and S(-k) = -S(k).
+    c4 = np.array([[0, -1, 0], [1, 0, 0], [0, 0, 1]], dtype=float)
+    group = np.array([np.linalg.matrix_power(c4, n) for n in range(4)])
+
+    def spin(k):
+        sx, sy, sz = np.sin(2 * np.pi * np.asarray(k, dtype=float)).T
+        return np.stack([sx - 0.5 * sy, sy + 0.5 * sx, 0.3 * sz], axis=-1)
+
+    def key(k):
+        return tuple(np.round(k - np.round(k), 3) + 0.0)
+
+    grid = kpoints.get_kpoints_from_kgrid(kgrid=(3, 3, 3), kshift=(0, 0, 0), mode=KGRID_MODE.GAMMA)
+    ibz, seen = [], set()
+    for k in grid:
+        if key(k) not in seen:
+            ibz.append(k)
+            seen.update(key(sign * (g @ k)) for g in group for sign in (1, -1))
+    ibz = np.array(ibz)
+    projected = np.concatenate([np.ones((len(ibz), 1)), spin(ibz)], axis=1)
+    structure = Structure(
+        atoms=["X"], fractional_coordinates=np.zeros((1, 3)), lattice=np.eye(3), rotations=group
+    )
+
+    ebs = ElectronicBandStructureMesh(
+        kpoints=ibz,
+        bands=np.zeros((len(ibz), 1, 1)),
+        projected=projected.reshape(len(ibz), 1, 4, 1, 1),
+        fermi=0.0,
+        reciprocal_lattice=np.eye(3),
+        structure=structure,
+        kgrid_info=KGridInfo(kgrid=(3, 3, 3), kgrid_mode=KGRID_MODE.GAMMA, kshift=(0, 0, 0)),
+    )
+
+    assert len(ibz) < 27 and ebs.n_kpoints == 27 and ebs.projected is not None
+    unfolded = ebs.projected.to_array()[:, 0, :, 0, 0]
+    assert np.allclose(unfolded[:, 0], 1.0)
+    assert np.allclose(unfolded[:, 1:], spin(np.round(ebs.kpoints * 3) / 3), atol=1e-12)
+    # C4 maps (1/3, 0, 1/3) to (0, 1/3, 1/3): the spin turns by 90 degrees, it is not negated
+    s = np.sin(2 * np.pi / 3)
+    at = {key(k): i for i, k in enumerate(ebs.kpoints)}
+    assert unfolded[at[(0.0, 0.333, 0.333)], 1:] == pytest.approx([-0.5 * s, s, 0.3 * s])
+
+
+def _c3v_hexagonal_spin_case():
+    """An IBZ of a hexagonal 6x6x2 grid under C3v and k ~ -k, with an analytic axial spin field.
+
+    The group is set up in Cartesian coordinates, a 120 degree turn about z and the mirror
+    y -> -y. Each fractional k rotation is defined by k_cart' = R_c k_cart with
+    k_cart = B.T k. The field S = sum_h s_h det(R_h) R_h v(h^-1 k), over h = (R, s) in
+    C3v x {1, -1} and with v a periodic function of fractional k without symmetry, obeys
+    S(h k) = s_h det(R_h) R_h S(k).
+    """
+    from pyprocar.core import Structure
+
+    lattice = np.array([[3.0, 0.0, 0.0], [-1.5, 1.5 * np.sqrt(3), 0.0], [0.0, 0.0, 5.0]])
+    b_t = np.linalg.inv(lattice)
+    turn = np.array([[-0.5, -np.sqrt(3) / 2, 0], [np.sqrt(3) / 2, -0.5, 0], [0, 0, 1]])
+    mirror = np.diag([1.0, -1.0, 1.0])
+    cartesian = [np.linalg.matrix_power(turn, n) @ m for n in range(3) for m in (np.eye(3), mirror)]
+    fractional = np.array([np.linalg.solve(b_t, r @ b_t) for r in cartesian])
+    assert np.allclose(fractional, np.round(fractional))
+    fractional = np.round(fractional)
+
+    def v(k):
+        phases = np.asarray(k, dtype=float) @ np.array([[1, 0, 1], [0, 1, 2], [0, 1, 0]])
+        x, y, z = 2 * np.pi * phases.T
+        return np.stack([np.sin(x) + 0.3, np.sin(y) + 0.5 * np.cos(z), np.sin(z)], axis=-1)
+
+    def spin(k):
+        total = np.zeros((len(k), 3))
+        for r_c, r in zip(cartesian, fractional, strict=True):
+            for s in (1, -1):
+                source = s * np.asarray(k) @ np.linalg.inv(r).T
+                total += v(source) @ (s * np.linalg.det(r_c) * r_c).T
+        return total
+
+    def key(k):
+        return tuple(np.round(k - np.round(k), 3) + 0.0)
+
+    grid = kpoints.get_kpoints_from_kgrid(kgrid=(6, 6, 2), kshift=(0, 0, 0), mode=KGRID_MODE.GAMMA)
+    ibz, seen = [], set()
+    for k in grid:
+        if key(k) not in seen:
+            ibz.append(k)
+            seen.update(key(s * (r @ k)) for r in fractional for s in (1, -1))
+    ibz = np.array(ibz)
+    structure = Structure(
+        atoms=["X"],
+        fractional_coordinates=np.zeros((1, 3)),
+        lattice=lattice,
+        rotations=fractional,
+    )
+    return ibz, structure, spin, b_t.T
+
+
+@pytest.mark.parametrize("on_the_ebs", [True, False], ids=["ebs_lattice", "structure_lattice"])
+def test_hexagonal_unfolded_spin_turns_with_the_cartesian_axial_rotation(on_the_ebs: bool):
+    ibz, structure, spin, reciprocal_lattice = _c3v_hexagonal_spin_case()
+    projected = np.concatenate([np.ones((len(ibz), 1)), spin(ibz)], axis=1)
+    assert np.abs(projected[:, 1:]).max() > 1
+
+    ebs = ElectronicBandStructureMesh(
+        kpoints=ibz,
+        bands=np.zeros((len(ibz), 1, 1)),
+        projected=projected.reshape(len(ibz), 1, 4, 1, 1),
+        fermi=0.0,
+        reciprocal_lattice=reciprocal_lattice if on_the_ebs else None,
+        structure=structure,
+        kgrid_info=KGridInfo(kgrid=(6, 6, 2), kgrid_mode=KGRID_MODE.GAMMA, kshift=(0, 0, 0)),
+    )
+
+    assert len(ibz) < 72 and ebs.n_kpoints == 72 and ebs.projected is not None
+    exact = np.round(ebs.kpoints * 6) / 6
+    assert np.allclose(ebs.projected.to_array()[:, 0, 1:, 0, 0], spin(exact), atol=1e-10)
+
+
+def test_spin_transforms_rejects_an_image_no_operation_reaches():
+    from pyprocar.core.ebs import spin_transforms
+
+    with pytest.raises(ValueError, match="by no symmetry operation"):
+        spin_transforms(
+            np.array([[0.1, 0.2, 0.0]]),
+            np.array([[0.0, 0.0, 0.3]]),
+            np.array([np.eye(3)]),
+            True,
+            np.eye(3),
+        )

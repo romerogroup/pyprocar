@@ -187,3 +187,107 @@ def test_band_lines_accept_rows_without_a_label() -> None:
 
     assert fdf.band_lines is not None
     assert [line["label"] for line in fdf.band_lines] == ["L", "", "X"]
+
+
+def _without_lattice(text: str) -> str:
+    start = text.index("LatticeConstant")
+    end = text.index("%endblock LatticeVectors") + len("%endblock LatticeVectors")
+    return text[:start] + text[end:]
+
+
+LATTICE_FDF = """LatticeConstant 10.0 Bohr
+%block LatticeVectors
+  0.0  0.5  0.5
+  0.5  0.0  0.5
+  0.5  0.5  0.0
+%endblock LatticeVectors
+"""
+
+
+def test_include_reads_the_named_file_in_place(tmp_path) -> None:
+    (tmp_path / "lattice.fdf").write_text(LATTICE_FDF)
+    (tmp_path / "si.fdf").write_text(_without_lattice(FDF_STR) + "%include lattice.fdf\n")
+
+    fdf = FDF(tmp_path / "si.fdf")
+
+    assert fdf.lattice_constant == pytest.approx(5.2917721067121)
+    assert np.allclose(fdf.lattice_vectors[0], [0.0, 2.64588605, 2.64588605])
+    assert fdf.atoms == ["Si", "Si"]
+
+
+def test_first_definition_wins_across_an_include(tmp_path) -> None:
+    (tmp_path / "defaults.fdf").write_text("SystemLabel fromdefaults\nBandLinesScale pi/a\n")
+    (tmp_path / "si.fdf").write_text(
+        "%include defaults.fdf\n"
+        + FDF_STR.replace("SystemLabel silicon", "")
+        + "SystemLabel late\nBandLinesScale ReciprocalLatticeVectors\n"
+    )
+    (tmp_path / "ge.fdf").write_text("SystemLabel early\n%include defaults.fdf\n")
+
+    assert FDF(tmp_path / "si.fdf").system_label == "fromdefaults"
+    assert FDF(tmp_path / "si.fdf").band_lines_scale == "pi/a"
+    assert FDF(tmp_path / "ge.fdf").system_label == "early"
+
+
+def test_nested_includes_resolve_against_the_main_fdf_directory(tmp_path) -> None:
+    (tmp_path / "inc").mkdir()
+    (tmp_path / "inc" / "outer.fdf").write_text("%include inc/lattice.fdf\n")
+    (tmp_path / "inc" / "lattice.fdf").write_text(LATTICE_FDF)
+    (tmp_path / "si.fdf").write_text(_without_lattice(FDF_STR) + "%include inc/outer.fdf\n")
+
+    assert FDF(tmp_path / "si.fdf").lattice_constant == pytest.approx(5.2917721067121)
+
+
+def test_label_redirect_looks_the_labels_up_in_the_named_file(tmp_path) -> None:
+    (tmp_path / "params.fdf").write_text(
+        "MeshCutoff 300 Ry\n"
+        + LATTICE_FDF
+        + "AtomicCoordinatesFormat ScaledCartesian\nLatticeConstant 99.0 Ang\n"
+    )
+    text = _without_lattice(FDF_STR).replace("AtomicCoordinatesFormat Fractional", "")
+    (tmp_path / "si.fdf").write_text(
+        text
+        + "Lattice.Constant atomic-coordinates-format < params.fdf\n"
+        + "LatticeVectors < params.fdf\n"
+    )
+
+    fdf = FDF(tmp_path / "si.fdf")
+
+    assert fdf.lattice_constant == pytest.approx(5.2917721067121)
+    assert fdf.atomic_coords_format == "ScaledCartesian"
+    assert np.allclose(fdf.lattice_vectors[2], [2.64588605, 2.64588605, 0.0])
+    assert fdf.label("MeshCutoff") is None
+
+
+def test_label_redirect_to_a_file_without_the_label_fails_when_requested(tmp_path) -> None:
+    (tmp_path / "params.fdf").write_text("MeshCutoff 300 Ry\n")
+    (tmp_path / "si.fdf").write_text(
+        FDF_STR.replace("LatticeConstant 5.43 Ang", "LatticeConstant < params.fdf")
+    )
+
+    fdf = FDF(tmp_path / "si.fdf")
+
+    assert fdf.system_label == "silicon"
+    with pytest.raises(ValueError, match="LatticeConstant < params.fdf"):
+        _ = fdf.lattice_constant
+
+
+def test_a_missing_include_fails_only_lookups_it_could_answer(tmp_path) -> None:
+    (tmp_path / "si.fdf").write_text(_without_lattice(FDF_STR) + "%include lattice.fdf\n")
+
+    fdf = FDF(tmp_path / "si.fdf")
+
+    assert fdf.system_label == "silicon"
+    assert fdf.atoms == ["Si", "Si"]
+    with pytest.raises(ValueError, match="lattice.fdf"):
+        _ = fdf.lattice_vectors
+
+
+def test_a_self_include_stops_with_an_error(tmp_path) -> None:
+    (tmp_path / "si.fdf").write_text(_without_lattice(FDF_STR) + "%include si.fdf\n")
+
+    fdf = FDF(tmp_path / "si.fdf")
+
+    assert fdf.system_label == "silicon"
+    with pytest.raises(ValueError, match="nested"):
+        _ = fdf.lattice_vectors

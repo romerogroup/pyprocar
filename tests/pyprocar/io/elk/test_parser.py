@@ -612,13 +612,6 @@ def test_band_file_follows_the_elk_in_task_and_warns_about_the_other(tmp_path, u
     assert "BAND.OUT" in user_warnings.text
 
 
-def test_band_character_tasks_23_and_24_warn_that_they_are_unsupported(tmp_path, user_warnings):
-    calc_dir = _band_dir(tmp_path, "23", {"BAND_S01_A0001.OUT": BAND_S01_A0001})
-
-    assert ElkParser(calc_dir).ebs is None
-    assert "23" in user_warnings.text
-
-
 def test_vertex_labels_keep_latex_that_kpath_does_not_alias(tmp_path):
     calc_dir = _band_dir(
         tmp_path, "22", {"BAND_S01_A0001.OUT": BAND_S01_A0001, "BAND_S02_A0001.OUT": BAND_S02_A0001}
@@ -647,3 +640,126 @@ def test_task_20_bands_carry_no_projections_from_stale_band_s_files(tmp_path):
     assert isinstance(ebs, ElectronicBandStructurePath) and ebs.bands is not None
     assert ebs.bands.to_array().shape == (11, 2, 1)
     assert ebs.projected is None
+
+
+DISTANCES = [line.split()[0] for line in BAND_OUT.splitlines()[:10]]
+
+
+def _band_s(states: list[tuple[float, list[float]]]) -> str:
+    lines = []
+    for energy, characters in states:
+        for ik, distance in enumerate(DISTANCES):
+            values = "".join(f"{c + 0.001 * ik:12.6f}" for c in characters)
+            lines.append(f"{distance:>18}{energy:18.10f}{values}")
+        lines.append("")
+    return "\n".join(lines) + "\n"
+
+
+def _band_task_dir(tmp_path, task: int, spinpol: bool, atom_states) -> ElkParser:
+    elkin = ELKIN_BANDS.replace("  22\n", f"  {task}\n")
+    if spinpol:
+        elkin += "\nspinpol\n  .true.\n"
+    (tmp_path / "elk.in").write_text(elkin)
+    (tmp_path / "FERMI.OUT").write_text(EFERMI_OUT)
+    (tmp_path / "GEOMETRY.OUT").write_text(GEOMETRY_OUT)
+    (tmp_path / "BANDLINES.OUT").write_text(BANDLINES_OUT)
+    for name, states in zip(("BAND_S01_A0001.OUT", "BAND_S02_A0001.OUT"), atom_states, strict=True):
+        (tmp_path / name).write_text(_band_s(states))
+    return ElkParser(tmp_path)
+
+
+def _first_and_last_kpoint(ebs: ElectronicBandStructure) -> np.ndarray:
+    projected = ebs.projected
+    assert projected is not None
+    return projected.to_array()[[0, -1]]
+
+
+def test_task_23_spin_characters_go_to_each_state_spin_channel(tmp_path):
+    parser = _band_task_dir(
+        tmp_path,
+        23,
+        spinpol=True,
+        atom_states=[
+            [(-0.30, [0.100, 0.000]), (-0.28, [0.000, 0.200])],
+            [(-0.30, [0.300, 0.000]), (-0.28, [0.000, 0.400])],
+        ],
+    )
+
+    ebs = parser.ebs
+    assert ebs is not None and ebs.bands is not None
+    assert ebs.bands.to_array()[0, 0] == pytest.approx(
+        [(-0.30 + 0.3218543102) * 27.211386245988, (-0.28 + 0.3218543102) * 27.211386245988]
+    )
+    assert ebs.orbital_names == ["spin"]
+    ends = _first_and_last_kpoint(ebs)
+    assert ends.shape == (2, 1, 2, 1, 1, 2)
+    assert ends[0, 0, :, 0, 0, :] == pytest.approx(np.array([[0.100, 0.200], [0.300, 0.400]]))
+    assert ends[1, 0, :, 0, 0, :] == pytest.approx(np.array([[0.109, 0.209], [0.309, 0.409]]))
+
+
+def test_task_24_moment_character_is_read_per_atom(tmp_path):
+    parser = _band_task_dir(
+        tmp_path,
+        24,
+        spinpol=True,
+        atom_states=[
+            [(-0.30, [0.300]), (-0.28, [-0.250])],
+            [(-0.30, [0.050]), (-0.28, [-0.020])],
+        ],
+    )
+
+    ebs = parser.ebs
+    assert ebs is not None
+    assert ebs.orbital_names == ["moment"]
+    ends = _first_and_last_kpoint(ebs)
+    assert ends[0, 0, :, 0, 0, :] == pytest.approx(np.array([[0.300, -0.250], [0.050, -0.020]]))
+
+
+def test_task_21_reads_l_characters_without_the_sum_column(tmp_path):
+    parser = _band_task_dir(
+        tmp_path,
+        21,
+        spinpol=False,
+        atom_states=[
+            [(-0.30, [0.600, 0.100, 0.200, 0.300, 0.000])],
+            [(-0.30, [0.040, 0.010, 0.000, 0.030, 0.000])],
+        ],
+    )
+
+    ebs = parser.ebs
+    assert ebs is not None
+    assert ebs.orbital_names == ["s", "p", "d", "f"]
+    ends = _first_and_last_kpoint(ebs)
+    assert ends[0, 0, 0, 0, :, 0] == pytest.approx([0.100, 0.200, 0.300, 0.000])
+    assert ends[0, 0, 1, 0, :, 0] == pytest.approx([0.010, 0.000, 0.030, 0.000])
+
+
+ELK_BANDS_SP = DATA_DIR / "codes" / "elk" / "6.3" / "SrVO3" / "spin-polarized-colinear" / "bands"
+
+
+@pytest.mark.data
+def test_real_spin_polarized_task_22_reads_the_spin_down_states():
+    ebs = ElkParser(ELK_BANDS_SP).ebs
+
+    assert ebs is not None and ebs.projected is not None
+    projected = ebs.projected.to_array()
+    assert projected.shape == (44, 71, 5, 1, 16, 2)
+    assert projected[0, 70, 1, 0, :, 0].sum() == pytest.approx(0.135255, abs=1e-6)
+    assert projected[0, 70, 1, 0, :, 1].sum() == pytest.approx(0.132893, abs=1e-6)
+    assert projected[0, 0, 1, 0, 0, :] == pytest.approx([0.989874, 0.989950])
+    assert ebs.orbital_names is not None and len(ebs.orbital_names) == 16
+
+
+def test_task_20_reads_bands_from_band_s_files_without_their_characters(tmp_path, user_warnings):
+    calc_dir = _band_dir(
+        tmp_path, "20", {"BAND_S01_A0001.OUT": BAND_S01_A0001, "BAND_S02_A0001.OUT": BAND_S02_A0001}
+    )
+
+    ebs = ElkParser(calc_dir).ebs
+
+    assert isinstance(ebs, ElectronicBandStructurePath) and ebs.bands is not None
+    assert ebs.bands.to_array()[0, 0, 0] == pytest.approx(
+        (-2.401220419 + 0.3218543102) * 27.211386245988
+    )
+    assert ebs.projected is None
+    assert "no task 21 to 24" in user_warnings.text

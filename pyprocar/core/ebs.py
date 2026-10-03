@@ -2063,6 +2063,51 @@ class ElectronicBandStructureMesh(
         return gradients
 
 
+def with_time_reversal(rotations: npt.ArrayLike) -> np.ndarray:
+    """The rotations plus their negatives, k -> -k, unless the group already holds inversion.
+
+    DFT codes reduce k-meshes with time reversal as well as the point group.
+    """
+    rotations = np.asarray(rotations)
+    if any(np.allclose(rotation, -np.eye(3)) for rotation in rotations):
+        return rotations
+    return np.concatenate([rotations, -rotations])
+
+
+def spin_transforms(
+    images: np.ndarray,
+    sources: np.ndarray,
+    point_group: np.ndarray,
+    time_reversal: bool,
+    reciprocal_lattice: np.ndarray,
+) -> np.ndarray:
+    """Cartesian matrix that carries the spin of each source to its image, shape (n, 3, 3).
+
+    An image is matched to the first operation that maps its source onto it (modulo 1):
+    the identity, then the point group, then time reversal times the point group. A
+    rotation R of fractional k (k' = R k, reciprocal_lattice rows B, k_cart = k @ B) acts
+    on Cartesian vectors as R_c = B.T @ R @ inv(B.T). Spin is an axial vector, so it turns
+    by det(R_c) R_c, and time reversal reverses it.
+    """
+    rotations = np.concatenate([np.eye(3)[np.newaxis], point_group])
+    signs = np.ones(len(rotations))
+    if time_reversal:
+        rotations = np.concatenate([rotations, point_group])
+        signs = np.concatenate([signs, -np.ones(len(point_group))])
+    positions = signs[np.newaxis, :, np.newaxis] * np.einsum("rij,kj->kri", rotations, sources)
+    offsets = images[:, np.newaxis, :] - positions
+    offsets -= np.round(offsets)
+    reached = np.all(np.abs(offsets) < 2e-3, axis=2)
+    if not reached.any(axis=1).all():
+        raise ValueError("An unfolded k-point is reached from its source by no symmetry operation")
+    first = np.argmax(reached, axis=1)
+
+    b_t = np.asarray(reciprocal_lattice).T
+    cartesian = b_t @ rotations @ np.linalg.inv(b_t)
+    axial = (signs * np.linalg.det(cartesian))[:, np.newaxis, np.newaxis] * cartesian
+    return axial[first]
+
+
 def ibz2fbz(ebs, rotations=None, kgrid_info=None, decimals=4, inplace=True, **kwargs):
     """Applys symmetry operations to the kpoints, bands, and projections
 
@@ -2089,8 +2134,12 @@ def ibz2fbz(ebs, rotations=None, kgrid_info=None, decimals=4, inplace=True, **kw
     if len(rotations) == 0:
         logger.warning("No rotations provided, skipping ibz2fbz")
         return ebs
+    point_group = np.asarray(rotations)
+    rotations = with_time_reversal(point_group)
 
     n_kpoints = ebs.n_kpoints
+    ibz_kpoints = ebs.kpoints.copy()
+    source = np.tile(np.arange(n_kpoints), len(rotations) + 1)
 
     # Apply rotations and copy properties
     new_kpoints = ebs.kpoints.copy()
@@ -2128,6 +2177,7 @@ def ibz2fbz(ebs, rotations=None, kgrid_info=None, decimals=4, inplace=True, **kw
         new_in_original_grid_indices = np.where(min_distances < 0.000001)[0]
 
         new_kpoints = new_kpoints[new_in_original_grid_indices, ...]
+        source = source[new_in_original_grid_indices]
 
     # # Floating point error can cause the kpoints to be off by 0.000001 or so
     # # causing the unique indices to misidentify the kpoints
@@ -2135,12 +2185,32 @@ def ibz2fbz(ebs, rotations=None, kgrid_info=None, decimals=4, inplace=True, **kw
     _, unique_indices = np.unique(new_kpoints, axis=0, return_index=True)
 
     new_kpoints = new_kpoints[unique_indices, ...]
+    source = source[unique_indices]
 
     for prop_name, calc_name, gradient_order, value_array in ebs.iter_properties():
         property = ebs.get_property(prop_name)
         property[calc_name, gradient_order] = value_array[new_in_original_grid_indices][
             unique_indices
         ]
+
+    if ebs.is_non_collinear:
+        reciprocal_lattice = ebs.reciprocal_lattice
+        if reciprocal_lattice is None and ebs.structure is not None:
+            reciprocal_lattice = ebs.structure.reciprocal_lattice
+        if reciprocal_lattice is None:
+            raise ValueError("Unfolding a non-collinear spin needs a reciprocal lattice")
+        transforms = spin_transforms(
+            new_kpoints,
+            ibz_kpoints[source],
+            point_group,
+            len(rotations) > len(point_group),
+            reciprocal_lattice,
+        )
+        projected = ebs.get_property("projected")
+        for calc_name, gradient_order, value_array in projected.iter_arrays():
+            turned = value_array.copy()
+            turned[:, :, 1:] = np.einsum("kij,kbj...->kbi...", transforms, value_array[:, :, 1:])
+            projected[calc_name, gradient_order] = turned
 
     ebs.update_points(new_kpoints)
     return sort_by_kpoints(ebs, inplace=inplace, **kwargs)

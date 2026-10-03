@@ -188,3 +188,26 @@ class TestVaspParserMissingFiles:
     def test_version_tuple_is_none_without_outcar_or_vasprun(self, tmp_path):
         assert VaspParser(dirpath=BANDS_DIR).version_tuple == (6, 4, 3)
         assert VaspParser(dirpath=tmp_path).version_tuple is None
+
+
+@pytest.mark.data
+def test_bisb_spin_polarized_mesh_unfolds_to_the_full_grid():
+    from pyprocar.io import get_parser
+
+    ebs = get_parser(
+        "vasp", DATA_DIR / "examples" / "other" / "BiSb_monolayer" / "spin-polarized"
+    ).ebs
+
+    assert ebs is not None and ebs.bands is not None
+    assert ebs.n_kpoints == 60 * 60 * 3
+    assert ebs.bands.shape[1:] == (80, 2)
+
+
+@pytest.mark.data
+def test_issue_199_kpath_labels():
+    from pyprocar.io import get_parser
+
+    kpath = get_parser("vasp", DATA_DIR / "issues" / "issue-199").kpath
+
+    assert kpath is not None
+    assert kpath.segment_names[:2] == [("$\\Gamma$", "K"), ("K", "M")]
