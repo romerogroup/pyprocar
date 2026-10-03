@@ -1,17 +1,80 @@
 """GEOMETRY.OUT parser for Elk calculations."""
 
 import re
+from collections.abc import Iterator, Sequence
 from functools import cached_property
 from pathlib import Path
-from typing import Self
+from typing import NamedTuple, Self
 
 import numpy as np
 import numpy.typing as npt
 
 from pyprocar.utils.units import AU_TO_ANG
 
-FLOAT = r"[-+]?(?:\d+\.\d*|\.\d+|\d+)(?:[Ee][-+]?\d+)?"
-float_re = re.compile(FLOAT)
+
+def bool_fortran(string: str) -> bool:
+    """Convert Fortran boolean string to Python bool."""
+    return string.strip().lower() in (".true.", "true", "t", ".t.")
+
+
+class ElkCell(NamedTuple):
+    lattice: npt.NDArray[np.float64]
+    atoms: list[str]
+    fractional_coordinates: npt.NDArray[np.float64]
+
+
+def _rows_after(lines: Sequence[str], keyword: str) -> Iterator[list[str]] | None:
+    for i, line in enumerate(lines):
+        tokens = line.split()
+        if tokens and tokens[0] == keyword:
+            return (row.split() for row in lines[i + 1 :] if row.strip())
+    return None
+
+
+def _fortran_floats(tokens: Sequence[str]) -> list[float]:
+    return [float(token.lower().replace("d", "e")) for token in tokens]
+
+
+def parse_elk_cell(text: str) -> ElkCell:
+    """Read the cell from the elk.in blocks that GEOMETRY.OUT also uses.
+
+    Follows Elk 11.2.3 ``readinput.f90``: ``avec`` rows are lattice vectors in
+    Bohr, scaled by ``scale``, then row i by ``scale<i>``, then Cartesian
+    column x/y/z by ``scalex/y/z``. With ``molecule .true.`` the atom
+    positions are Cartesian Bohr and convert to lattice coordinates through
+    the scaled lattice.
+    """
+    lines = text.splitlines()
+
+    def scalar(keyword: str) -> float:
+        rows = _rows_after(lines, keyword)
+        return 1.0 if rows is None else _fortran_floats(next(rows)[:1])[0]
+
+    rows = _rows_after(lines, "avec")
+    if rows is None:
+        raise ValueError("No avec block found")
+    avec = np.array([_fortran_floats(next(rows)[:3]) for _ in range(3)])
+    avec *= scalar("scale")
+    avec *= np.array([[scalar("scale1")], [scalar("scale2")], [scalar("scale3")]])
+    avec *= np.array([scalar("scalex"), scalar("scaley"), scalar("scalez")])
+
+    rows = _rows_after(lines, "atoms")
+    if rows is None:
+        raise ValueError("No atoms block found")
+    atoms: list[str] = []
+    positions: list[list[float]] = []
+    for _ in range(int(next(rows)[0])):
+        species = next(rows)[0].strip("'\"").removesuffix(".in")
+        for _ in range(int(next(rows)[0])):
+            atoms.append(species)
+            positions.append(_fortran_floats(next(rows)[:3]))
+    fractional = np.array(positions)
+
+    molecule = _rows_after(lines, "molecule")
+    if molecule is not None and bool_fortran(next(molecule)[0]):
+        fractional = fractional @ np.linalg.inv(avec)
+
+    return ElkCell(avec * AU_TO_ANG, atoms, fractional)
 
 
 class ElkGeometry:
@@ -54,16 +117,14 @@ class ElkGeometry:
         return self._file_str
 
     @cached_property
+    def cell(self) -> ElkCell:
+        """Lattice in Angstrom, atom symbols and fractional coordinates."""
+        return parse_elk_cell(self.file_str)
+
+    @property
     def lattice(self) -> npt.NDArray[np.float64]:
         """Lattice vectors in Angstrom as 3x3 array (rows are vectors); Elk writes Bohr."""
-        pattern_matrix = re.compile(
-            r"avec[\s\S]*?\n" + rf"((?:[ \t]*{FLOAT}\s+){{8}}" + rf"{FLOAT}\s*\n)"
-        )
-        match = pattern_matrix.search(self.file_str)
-        if match is None:
-            raise ValueError("No lattice vectors found in GEOMETRY.OUT")
-        matrix_block_str = match.group(1)
-        return np.fromstring(matrix_block_str, sep=" ").reshape(3, 3) * AU_TO_ANG
+        return self.cell.lattice
 
     @cached_property
     def nspecies(self) -> int:
@@ -73,40 +134,15 @@ class ElkGeometry:
             raise ValueError("No species count found in GEOMETRY.OUT")
         return int(pattern.group(1))
 
-    @cached_property
-    def _atoms_and_coords(self) -> tuple[list[str], npt.NDArray[np.float64]]:
-        """Parse atoms and fractional coordinates."""
-        pattern_spc = re.compile(r"(?mi)^\s*'([A-Za-z]+\.in)'[\s\S]*?^\s*(\d+).*\s")
-
-        atoms: list[str] = []
-        fractional_coords: list[list[float]] = []
-
-        for m in pattern_spc.finditer(self.file_str):
-            atom_count = int(m.group(2))
-            atom_symbols = [m.group(1).replace(".in", "")] * atom_count
-            atoms += atom_symbols
-            start = m.end()
-            tail = self.file_str[start:].splitlines()
-            pos_lines = tail[:atom_count]
-            for line in pos_lines:
-                fractional_coords += [[float(x) for x in float_re.findall(line)]]
-
-        coords_array = np.array(fractional_coords)
-        # Handle optional magnetic field columns
-        if coords_array.shape[1] == 6:
-            coords_array = coords_array[:, :3]
-
-        return atoms, coords_array
-
-    @cached_property
+    @property
     def atoms(self) -> list[str]:
         """List of atom symbols."""
-        return self._atoms_and_coords[0]
+        return self.cell.atoms
 
-    @cached_property
+    @property
     def fractional_coordinates(self) -> npt.NDArray[np.float64]:
         """Fractional coordinates as (natom, 3) array."""
-        return self._atoms_and_coords[1]
+        return self.cell.fractional_coordinates
 
     @cached_property
     def natoms(self) -> int:
