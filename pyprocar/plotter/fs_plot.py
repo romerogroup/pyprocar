@@ -1,5 +1,6 @@
 import logging
 from functools import partial
+from typing import cast
 
 import numpy as np
 import pyvista as pv
@@ -12,7 +13,13 @@ from pyvista.plotting.utilities.algorithms import (
 )
 
 from pyprocar.plotter._series import SurfaceSeries, surface_series
-from pyprocar.plotter._surface_plot import SurfacePlotter, find_nearest, normalize_to_range
+from pyprocar.plotter._surface_plot import (
+    SurfacePlotter,
+    area_text,
+    find_nearest,
+    normalize_to_range,
+    slice_loop_areas,
+)
 
 logger = logging.getLogger(__name__)
 user_logger = logging.getLogger("user")
@@ -361,16 +368,13 @@ class FermiPlotter(SurfacePlotter):
                 "show_van_alphen_frequency and show_cross_section_area cannot be True at the same time"
             )
 
-        if show_van_alphen_frequency:
-            surface = slc.delaunay_2d()
-            text = (
-                f"Van Alphen Frequency : {dHvA_frequency(surface.area * FS_AREA_SCALE_FACTOR):.4f}"
-                + " Gauss"
-            )
-            self.add_text(text, name="area_text", **add_text_args)
-        elif show_cross_section_area:
-            surface = slc.delaunay_2d()
-            text = f"Cross sectional area : {surface.area * FS_AREA_SCALE_FACTOR:.4f}" + " Ang^-2"
+        if show_van_alphen_frequency or show_cross_section_area:
+            areas, n_open = slice_loop_areas(cast(pv.PolyData, slc))
+            if show_van_alphen_frequency:
+                largest = max(areas, default=0.0) * FS_AREA_SCALE_FACTOR
+                text = f"Van Alphen Frequency : {dHvA_frequency(largest):.4f} Gauss"
+            else:
+                text = area_text(areas, n_open, scale=FS_AREA_SCALE_FACTOR)
             self.add_text(text, name="area_text", **add_text_args)
 
         return slc

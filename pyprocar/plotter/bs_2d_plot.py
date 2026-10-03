@@ -1,5 +1,6 @@
 import logging
 from functools import partial
+from typing import cast
 
 import numpy as np
 import pyvista as pv
@@ -13,7 +14,13 @@ from pyvista.plotting.utilities.algorithms import (
 )
 
 from pyprocar.plotter._series import SurfaceSeries, surface_series
-from pyprocar.plotter._surface_plot import SurfacePlotter, clip_to_zone, normalize_to_range
+from pyprocar.plotter._surface_plot import (
+    SurfacePlotter,
+    area_text,
+    clip_to_zone,
+    normalize_to_range,
+    slice_loop_areas,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -292,9 +299,8 @@ class BS2DPlotter(SurfacePlotter):
         self.add_surface(slc, name="slice", **add_surface_args)
 
         if cross_section_area:
-            surface = slc.delaunay_2d()
-            text = f"Cross sectional area : {surface.area:.4f}" + " Ang^-2"
-            self.add_text(text, name="area_text", **add_text_args)
+            areas, n_open = slice_loop_areas(cast(pv.PolyData, slc))
+            self.add_text(area_text(areas, n_open), name="area_text", **(add_text_args or {}))
 
         return slc
 
