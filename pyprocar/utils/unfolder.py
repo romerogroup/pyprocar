@@ -69,10 +69,12 @@ class Unfolder:
         norm = np.linalg.norm(self.eigenvectors, ord=2, axis=-1)
         self.eigenvectors /= norm[:, :, None]
 
-        for iatom in range(self.ebs.n_atoms):
-            for iorb in range(self.ebs.n_orbitals):
+        ebs, structure = self.ebs, self.structure
+        assert ebs is not None and structure is not None
+        for iatom in range(ebs.n_atoms):
+            for iorb in range(ebs.n_orbitals):
                 self.basis.append(iorb)
-                self.positions.append(self.structure.fractional_coordinates[iatom])
+                self.positions.append(structure.fractional_coordinates[iatom])
 
     def _make_translate_maps(self):
         """

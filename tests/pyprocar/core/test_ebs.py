@@ -1094,7 +1094,7 @@ def test_unfold_weights_are_the_primitive_cell_character_of_each_band():
     in_phase, out_of_phase, one_site = [1, 1], [1, -1], [1, 0]
     phase = np.array([in_phase, out_of_phase, one_site], dtype=complex).reshape(1, 3, 1, 2, 1)
     ebs = ElectronicBandStructure(
-        kpoints=np.zeros((1, 3)),
+        kpoints=np.array([[0.0, 0.0, 0.0]]),
         bands=np.array([[[-1.0], [1.0], [2.0]]]),
         projected=np.abs(phase) ** 2,
         projected_phase=phase,
@@ -1104,4 +1104,5 @@ def test_unfold_weights_are_the_primitive_cell_character_of_each_band():
 
     ebs.unfold(transformation_matrix=np.diag([2, 1, 1]), structure=structure)
 
+    assert ebs.weights is not None
     assert np.asarray(ebs.weights.value).ravel().tolist() == pytest.approx([1.0, 0.0, 0.5])

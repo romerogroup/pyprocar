@@ -16,8 +16,8 @@ from pyprocar.scripts._selection import (
     resolve_spins,
     take_channels,
 )
-from pyprocar.utils import welcome
 from pyprocar.utils.log_utils import set_verbose_level
+from pyprocar.utils.splash import welcome
 
 user_logger = logging.getLogger("user")
 logger = logging.getLogger(__name__)
@@ -39,8 +39,8 @@ def unfold(
     unfold_mode: str = "both",
     transformation_matrix=np.diag([2, 2, 2]),
     spins: list[int] | None = None,
-    atoms: list[int] | list[str] | None = None,
-    orbitals: list[int] | list[str] | None = None,
+    atoms: list[int] | None = None,
+    orbitals: list[int] | None = None,
     items: dict | list[dict] | None = None,
     fermi: float | None = None,
     fermi_shift: float = 0,
@@ -171,7 +171,7 @@ def unfold(
 
     if atoms is not None and isinstance(atoms[0], str):
         species = set(atoms)
-        atoms = [i for i, name in enumerate(structure.atoms) if name in species]
+        atoms = [i for i, name in enumerate(np.asarray(structure.atoms)) if name in species]
     orbitals = orbital_indices(orbitals)
 
     plotter = BandStructurePlotter(ax=ax)
@@ -194,6 +194,9 @@ def unfold(
             )
             scalars = take_channels(projection, channels)
             colorbar_title = config.colorbar_title
+        line_color: dict[str, Any] = {}
+        if scalars is None:
+            line_color["color"] = per_channel(config.spin_colors, n_channels)
         plotter.plot(
             bands,
             scalars_data=scalars,
@@ -201,8 +204,8 @@ def unfold(
             scalars_mode="scatter" if plot_mode is UnfoldPlotMode.SACATTER else "parametric",
             scalars_cmap=config.cmap,
             scalars_clim=clim,
+            **line_color,
             linestyle=style["linestyle"],
-            **({} if scalars else {"color": per_channel(config.spin_colors, n_channels)}),
         )
         plotter.set_colorbar_label(colorbar_title)
     else:

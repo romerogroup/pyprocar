@@ -279,9 +279,12 @@ class BandStructurePlotter:
             merged_kwargs["linewidth"] = merged_kwargs["linewidth"] * _midpoints(series.widths)
         if cmap is not None:
             assert clim is not None
-            merged_kwargs.update(cmap=cmap, norm=plt.Normalize(clim[0], clim[1]))
+            merged_kwargs.update(cmap=cmap, norm=mpcolors.Normalize(clim[0], clim[1]))
 
-        lc = LineCollection(segments, **merged_kwargs)
+        lc = LineCollection(
+            segments,
+            **merged_kwargs,
+        )
         if cmap is not None and series.scalars is not None:
             lc.set_array(_midpoints(series.scalars))
 

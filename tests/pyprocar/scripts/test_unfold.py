@@ -48,7 +48,9 @@ def unfolded(supercell):
 @pytest.fixture(scope="module")
 def primitive_bands(tmp_path_factory):
     calc = _copy(tmp_path_factory.mktemp("primitive"), "primitive")
-    return np.asarray(ElectronicBandStructurePath.from_code("vasp", calc).bands.value)[..., 0]
+    bands = ElectronicBandStructurePath.from_code("vasp", calc).bands
+    assert bands is not None
+    return np.asarray(bands.value)[..., 0]
 
 
 @pytest.fixture(autouse=True)
@@ -150,7 +152,7 @@ class TestUnfoldPlot:
 
         collections = [c for c in ax.collections if isinstance(c, LineCollection)]
         assert len(collections) == N_BANDS
-        widths = np.asarray(collections[30].get_linewidths())
+        widths = np.asarray(collections[30].get_linewidth())
         expected = _midpoints(_weights(unfolded)[:, 30])
         np.testing.assert_allclose(widths / widths.max(), expected / expected.max())
         assert collections[30].get_array() is None
@@ -171,7 +173,7 @@ class TestUnfoldPlot:
 
         collections = [c for c in ax.collections if isinstance(c, LineCollection)]
         np.testing.assert_allclose(collections[30].get_array(), _midpoints(projection[:, 30]))
-        widths = np.asarray(collections[30].get_linewidths())
+        widths = np.asarray(collections[30].get_linewidth())
         expected = _midpoints(_weights(unfolded)[:, 30])
         np.testing.assert_allclose(widths / widths.max(), expected / expected.max())
 
@@ -208,7 +210,9 @@ class TestUnfoldPlot:
             show=False,
         )
 
-        assert [t.get_text() for t in ax.get_legend().get_texts()] == ["B", "Mg"]
+        legend = ax.get_legend()
+        assert legend is not None
+        assert [t.get_text() for t in legend.get_texts()] == ["B", "Mg"]
         fills = [c for c in ax.collections if isinstance(c, PolyCollection)]
         assert len(fills) == 2 * N_BANDS
         lower_edge = fills[N_BANDS + 30].get_paths()[0].vertices[1 : N_KPOINTS + 1, 1]
