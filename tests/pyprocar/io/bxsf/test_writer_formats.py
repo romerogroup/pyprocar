@@ -261,17 +261,79 @@ def test_from_code_reads_the_qe_fs_spin_pair_as_two_spins(tmp_path: Path) -> Non
     assert bands[:, 0, 1] == pytest.approx([4.0, 8.5, 5.5, 10.0, 4.5, 9.0, 6.0, 10.5])
 
 
-def test_qe_fs_spin_pair_with_different_bands_is_refused(
+def test_qe_fs_spin_pair_with_fe_like_windows_pads_the_missing_bands(tmp_path: Path) -> None:
+    up = [_energies(offset, 0.5) for offset in (0.0, 5.0, 8.0, 14.0)]
+    down = [_energies(offset, 0.5) for offset in (-3.0, 1.0, 6.0, 9.0)]
+    (tmp_path / "Fe_fsup.bxsf").write_text(_qe_fs(up, first_band=7))
+    (tmp_path / "Fe_fsdw.bxsf").write_text(_qe_fs(down, first_band=6))
+
+    bands = _bands(ElectronicBandStructureMesh.from_code("bxsf", str(tmp_path)))
+
+    assert bands.shape == (8, 5, 2)
+    assert bands[:, 1, 0] == pytest.approx([0.0, 4.5, 1.5, 6.0, 0.5, 5.0, 2.0, 6.5])
+    assert bands[:, 0, 1] == pytest.approx([-3.0, 1.5, -1.5, 3.0, -2.5, 2.0, -1.0, 3.5])
+    assert bands[:, 4, 0] == pytest.approx([14.0, 18.5, 15.5, 20.0, 14.5, 19.0, 16.0, 20.5])
+    assert np.ptp(bands[:, 0, 0]) == 0.0
+    assert bands[0, 0, 0] < -3.0
+    assert np.ptp(bands[:, 4, 1]) == 0.0
+    assert bands[0, 4, 1] > 27.0
+
+
+@pytest.mark.parametrize(
+    "files",
+    [
+        ["a_BXSF", "b_BXSF"],
+        ["Al_fsup.bxsf", "outo_BXSF"],
+        ["Al_fsup.bxsf", "Al_fsdw.bxsf", "Al_fs.bxsf"],
+        ["Al_fsdw.bxsf", "Al_fsup.bxsf"],
+    ],
+)
+def test_explicit_files_must_be_one_file_or_an_fs_x_spin_pair(
+    tmp_path: Path, files: list[str]
+) -> None:
+    for name in files:
+        if name.endswith("_BXSF"):
+            text = _abinit([_energies(0.2, 0.001), _energies(0.21, 0.001)], nsppol=2)
+        else:
+            text = _qe_fs([_energies(3.0, 0.5)], first_band=2)
+        (tmp_path / name).write_text(text)
+
+    with pytest.raises(ValueError, match="do not form a QE fs.x spin pair"):
+        BxsfParser(tmp_path, filepaths=[Path(name) for name in files])
+
+
+def test_lone_fs_x_spin_file_warns_that_its_partner_is_missing(
     tmp_path: Path, user_warnings: pytest.LogCaptureFixture
 ) -> None:
     (tmp_path / "Al_fsup.bxsf").write_text(_qe_fs([_energies(3.0, 0.5)], first_band=2))
-    (tmp_path / "Al_fsdw.bxsf").write_text(_qe_fs([_energies(4.0, 0.5)], first_band=3))
+
+    bands = _bands(BxsfParser(tmp_path).ebs)
+
+    assert bands.shape == (8, 1, 1)
+    assert "partner file is missing" in user_warnings.text
+
+
+def test_spin_pair_next_to_other_bxsf_files_warns(
+    tmp_path: Path, user_warnings: pytest.LogCaptureFixture
+) -> None:
+    for name in ("Al_fs.bxsf", "Al_fsup.bxsf", "Al_fsdw.bxsf"):
+        (tmp_path / name).write_text(_qe_fs([_energies(3.0, 0.5)], first_band=2))
+
+    bands = _bands(BxsfParser(tmp_path).ebs)
+
+    assert bands.shape == (8, 1, 2)
+    assert "Found several BXSF files" in user_warnings.text
+    assert "reading ['Al_fsup.bxsf', 'Al_fsdw.bxsf']" in user_warnings.text
+
+
+def test_fermi_energy_accepts_a_fortran_d_exponent(tmp_path: Path) -> None:
+    text = _qe_fs([_energies(3.0, 0.5)], first_band=1).replace("7.9923", "0.79923D+01")
+    (tmp_path / "in.bxsf").write_text(text)
 
     ebs = BxsfParser(tmp_path).ebs
 
-    assert ebs is None
-    assert "spin-up file holds bands [2]" in user_warnings.text
-    assert "spin-down file holds bands [3]" in user_warnings.text
+    assert ebs is not None
+    assert ebs.fermi == pytest.approx(7.9923)
 
 
 def test_several_bxsf_files_read_the_first_by_name_and_warn(
@@ -284,7 +346,7 @@ def test_several_bxsf_files_read_the_first_by_name_and_warn(
 
     assert bands[0, 0, 0] == pytest.approx(3.0)
     assert "Found several BXSF files" in user_warnings.text
-    assert "reading a.bxsf" in user_warnings.text
+    assert "reading ['a.bxsf']" in user_warnings.text
 
 
 def test_band_values_accept_fortran_d_exponents(tmp_path: Path) -> None:
