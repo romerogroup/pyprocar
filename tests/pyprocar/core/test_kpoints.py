@@ -987,32 +987,47 @@ def test_kpath_with_fewer_names_than_segments_warns_and_labels_what_it_can(user_
     assert list(zip(kpath.tick_positions, kpath.tick_names, strict=True)) == [(0, "Γ"), (4, "X")]
 
 
-GAMMA_X_M_R_GAMMA = np.vstack(
-    [
-        np.linspace([0, 0, 0], [0.5, 0, 0], 5),
-        np.linspace([0.5, 0, 0], [0.5, 0.5, 0], 5),
-        np.linspace([0.5, 0.5, 0.5], [0, 0, 0], 9),
-    ]
+G_POINT, X_POINT, R_POINT, M_POINT = (
+    np.zeros(3),
+    np.array([0.5, 0, 0]),
+    np.array([0.5, 0.5, 0.5]),
+    np.array([0.5, 0.5, 0]),
 )
-PATH_POINTS = {"G": np.zeros(3), "X": np.array([0.5, 0, 0]), "M": np.array([0.5, 0.5, 0])}
+GAMMA_X_R_M = np.vstack([np.linspace(G_POINT, X_POINT, 5), np.linspace(R_POINT, M_POINT, 5)])
 
 
-@pytest.mark.parametrize(
-    ("last_segment", "warning"),
-    [
-        (("R", "G"), "KPath has no point for R; the jump before it counts as zero"),
-        (("X", "G"), "KPath point for X does not match its segment; jump counts as zero"),
-    ],
-)
-def test_kpath_jump_ignores_a_named_start_it_cannot_trust(
-    user_warnings, last_segment, warning
-):
+def test_kpath_builds_with_a_canonically_keyed_map_and_raw_names():
     kpath = KPath(
-        kpoints=GAMMA_X_M_R_GAMMA,
-        segment_names=[("G", "X"), ("X", "M"), last_segment],
-        special_kpoint_map=PATH_POINTS,
+        kpoints=GAMMA_X_R_M,
+        segment_names=[("GAMMA", "X"), ("R", "M")],
+        special_kpoint_map={"Γ": G_POINT, "X": X_POINT, "R": R_POINT, "M": M_POINT},
         reciprocal_lattice=np.eye(3),
     )
 
-    assert warning in user_warnings.text
-    assert kpath.k_distances[-1] == pytest.approx(1.0 + np.sqrt(3) / 2)
+    assert kpath.tick_names == ["$\\Gamma$", "X|R", "M"]
+
+
+def test_kpath_jump_ignores_a_label_reused_for_another_point():
+    kpath = KPath(
+        kpoints=GAMMA_X_R_M,
+        segment_names=[("G", "X"), ("R", "M")],
+        special_kpoint_map={"G": G_POINT, "X": X_POINT, "R": np.array([-0.5, 0.5, 0.5])},
+        reciprocal_lattice=np.eye(3),
+    )
+
+    tick_x = np.asarray(kpath.k_distances)[kpath.tick_positions]
+    assert tick_x == pytest.approx([0.0, 0.5, 1.0])
+
+
+def test_kpath_jump_ignores_a_segment_start_off_its_k_points(user_warnings):
+    kpath = KPath(
+        kpoints=GAMMA_X_R_M,
+        segment_names=[("G", "X"), ("R", "M")],
+        reciprocal_lattice=np.eye(3),
+        segment_start_kpoints=np.array([G_POINT, np.array([-0.5, 0.5, 0.5])]),
+    )
+
+    assert "KPath start of segment 2 does not match its k-points; jump counts as zero" in (
+        user_warnings.text
+    )
+    assert kpath.k_distances[-1] == pytest.approx(1.0)

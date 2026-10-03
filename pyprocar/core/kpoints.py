@@ -182,6 +182,7 @@ class KPath:
         zero_diff_threshold=1e-6,
         as_latex=True,
         segment_end_indices: list[int] | None = None,
+        segment_start_kpoints: np.ndarray | None = None,
     ):
         """
         The Kpath object to handle labels and ticks for band structure
@@ -199,8 +200,6 @@ class KPath:
         special_kpoint_map: Dict[str, np.ndarray]
             A dictionary containing the special kpoints.
             The key is the name of the special kpoint and the value is the kpoint.
-            With kpoints given, it measures the first step after a jump from the
-            next segment's start point, for codes that leave that point out.
         tick_name_map: Dict[int, str]
             A dictionary containing the names of ticks on the kpath.
             The key is the index of the tick and the value is the name of the tick.
@@ -215,6 +214,10 @@ class KPath:
             k-points do not repeat segment boundaries, so the segments cannot
             be found from the k-points alone. By default the segments are found
             from repeated k-points and jumps.
+        segment_start_kpoints: np.ndarray, optional
+            The fractional start point of each segment, shape (n_segments, 3).
+            The step across a jump is measured from it, for codes that leave
+            the first point after a jump out of the k-points (Abinit).
         """
         logger.info("Initializing KPath")
         logger.debug(f"n_grids: {n_grids}")
@@ -236,18 +239,14 @@ class KPath:
         self._segment_end_indices: list[int] | None = segment_end_indices
 
         # Normalizing kpoint names to canonical form
-        raw_segment_names = segment_names
         segment_names = self._normalize_kpoint_names(segment_names)
         self._segment_names = segment_names
 
         # Generate kpoints if not provided
         self._kpoints = kpoints
-        named_starts: list[np.ndarray | None] = []
         if self._kpoints is None:
             self._kpoints = self.generate_points(segment_names, special_kpoint_map, n_grids)
             self._segment_end_indices = (np.cumsum(n_grids) - 1).tolist()
-        elif special_kpoint_map:
-            named_starts = [special_kpoint_map.get(start) for start, _ in raw_segment_names]
         logger.debug(f"Kpoints shape: {self._kpoints.shape}")
 
         # Get kpoint indices per kpath segment
@@ -261,8 +260,10 @@ class KPath:
                 self.n_segments,
                 min(len(segment_names), self.n_segments),
             )
-            named_starts = []
-        self._jump_start_kpoints: dict[int, np.ndarray] = self._get_jump_start_kpoints(named_starts)
+            segment_start_kpoints = None
+        self._jump_start_kpoints: dict[int, np.ndarray] = self._get_jump_start_kpoints(
+            segment_start_kpoints
+        )
 
         # Get unique special kpoint names
         self._special_kpoint_names = self.get_special_kpoint_names(
@@ -502,41 +503,32 @@ class KPath:
         return [segments[i] for i in isegments]
 
     def _get_jump_start_kpoints(
-        self, named_starts: list[np.ndarray | None]
+        self, segment_start_kpoints: np.ndarray | None
     ) -> dict[int, np.ndarray]:
-        """Named start point of each segment that follows a jump, by jump index.
+        """Given start point of each segment that follows a jump, by jump index.
 
-        A code may leave out the first point after a jump (Abinit), so the
-        step across the jump is measured from the named start point. A name
-        is trusted only when its point is the segment's first k-point or one
-        step before it; otherwise the jump counts as zero.
+        A start point is used only when it is the segment's first k-point or
+        one step before it; otherwise the jump counts as zero.
         """
         jump_starts: dict[int, np.ndarray] = {}
-        if not named_starts:
+        if segment_start_kpoints is None:
             return jump_starts
         for isegment in range(1, self.n_segments):
             jump_index = self.segment_indices[isegment - 1][-1]
             if jump_index not in self.discontinuity_start_indices:
                 continue
-            start_name = self._segment_names[isegment][0]
-            named = named_starts[isegment]
-            if named is None:
-                user_logger.warning(
-                    "KPath has no point for %s; the jump before it counts as zero", start_name
-                )
-                continue
-            named = np.asarray(named, dtype=float)
+            start = np.asarray(segment_start_kpoints[isegment], dtype=float)
             segment = self._kpoints[self.segment_indices[isegment]]
             candidates = [segment[0]]
             if len(segment) > 1:
                 candidates.append(2 * segment[0] - segment[1])
-            if not any(np.allclose(named, c, atol=1e-4) for c in candidates):
+            if not any(np.allclose(start, c, atol=1e-4) for c in candidates):
                 user_logger.warning(
-                    "KPath point for %s does not match its segment; jump counts as zero",
-                    start_name,
+                    "KPath start of segment %d does not match its k-points; jump counts as zero",
+                    isegment + 1,
                 )
                 continue
-            jump_starts[jump_index] = named
+            jump_starts[jump_index] = start
         return jump_starts
 
     def get_distances(
