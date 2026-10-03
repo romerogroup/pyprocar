@@ -366,3 +366,19 @@ class TestStructure:
         )
 
         assert struct.composition == {"Ba": 2, "Cu": 3, "O": 2}
+
+    def test_lattice_only_structure_prints(self):
+        struct = Structure(lattice=2 * np.eye(3))
+
+        assert repr(struct) == (
+            "Structure(natoms=0, species=[], volume=8.000 A^3, "
+            + "angles=(90.00, 90.00, 90.00), spacegroup='N/A')"
+        )
+        assert str(struct).splitlines()[:6] == [
+            "Structure with 0 atoms and 0 species",
+            "",
+            "Lattice Parameters (a, b, c): 2.00, 2.00, 2.00",
+            "Angles (α, β, γ): 90.00°, 90.00°, 90.00°",
+            "Volume: 8.000 Å^3",
+            "Space group: N/A",
+        ]

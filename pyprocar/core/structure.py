@@ -126,11 +126,16 @@ class Structure:
 
     def __repr__(self):
         """Unambiguous representation with essential details for debugging."""
+        cell = (
+            "lattice=None"
+            if self.lattice is None
+            else f"volume={self.volume * 1e30:.3f} A^3, "
+            + f"angles=({self.alpha:.2f}, {self.beta:.2f}, {self.gamma:.2f})"
+        )
         return (
             f"Structure(natoms={self.natoms}, "
             f"species={list(self.species)}, "
-            f"volume={self.volume * 1e30:.3f} A^3, "
-            f"angles=({self.alpha:.2f}, {self.beta:.2f}, {self.gamma:.2f}), "
+            f"{cell}, "
             f"spacegroup='{self.get_space_group_international() if self.has_complete_data else 'N/A'}')"
         )
 
@@ -138,9 +143,14 @@ class Structure:
         """Human-readable summary of the structure."""
         header = f"Structure with {self.natoms} atoms and {self.nspecies} species"
         species_line = " ".join(f"{name}:{count}" for name, count in self.composition.items())
-        lattice_line = f"Lattice Parameters (a, b, c): {self.a:.2f}, {self.b:.2f}, {self.c:.2f}"
-        volume_line = f"Volume: {self.volume * 1e30:.3f} Å^3"
-        angle_line = f"Angles (α, β, γ): {self.alpha:.2f}°, {self.beta:.2f}°, {self.gamma:.2f}°"
+        if self.lattice is None:
+            cell_lines = ["Lattice: N/A"]
+        else:
+            cell_lines = [
+                f"Lattice Parameters (a, b, c): {self.a:.2f}, {self.b:.2f}, {self.c:.2f}",
+                f"Angles (α, β, γ): {self.alpha:.2f}°, {self.beta:.2f}°, {self.gamma:.2f}°",
+                f"Volume: {self.volume * 1e30:.3f} Å^3",
+            ]
         space_group = self.get_space_group_international() if self.has_complete_data else "N/A"
         sg_line = f"Space group: {space_group}"
 
@@ -154,16 +164,7 @@ class Structure:
                 )
 
         return "\n".join(
-            [
-                header,
-                species_line,
-                lattice_line,
-                angle_line,
-                volume_line,
-                sg_line,
-                "Fractional coordinates:",
-            ]
-            + coord_lines
+            [header, species_line, *cell_lines, sg_line, "Fractional coordinates:", *coord_lines]
         )
 
     def __eq__(self, other):
@@ -332,7 +333,7 @@ class Structure:
             List of different species present in the cell.
 
         """
-        return np.unique(self.atoms)
+        return np.unique(self.atoms if self.atoms is not None else [])
 
     @property
     def nspecies(self):
@@ -358,7 +359,7 @@ class Structure:
             Number of atoms.
 
         """
-        return len(self.atoms)
+        return len(self.atoms) if self.atoms is not None else 0
 
     @property
     def atomic_numbers(self):

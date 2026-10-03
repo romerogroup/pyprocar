@@ -329,7 +329,9 @@ class DensityOfStates(PointSet):
 
     @property
     def species(self) -> list[str]:
-        return self.structure.species
+        if self.structure is None:
+            raise ValueError("This density of states has no structure")
+        return list(self.structure.species)
 
     @property
     def orbitals(self) -> list[str]:
