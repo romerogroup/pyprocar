@@ -49,7 +49,7 @@ def cross_section_areas(
     shifts = steps @ lattice
     offsets = (origin - shifts) @ normal
     tol = 1e-3 * float(np.linalg.norm(lattice, axis=1).min())
-    crossing = (offsets >= heights.min()) & (offsets <= heights.max())
+    crossing = (offsets >= heights.min() - tol) & (offsets <= heights.max() + tol)
     other = crossing & (np.abs(offsets - origin @ normal) > tol)
     _, first = np.unique(np.round(offsets[other] / tol), return_index=True)
     pieces = []
