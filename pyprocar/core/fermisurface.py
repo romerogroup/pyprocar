@@ -1017,7 +1017,7 @@ def generate_band_isosurfaces(ebs: ElectronicBandStructureMesh, isovalue: float,
     padded_ebs = padded_ebs.expand_single_dimension(inplace=False)
 
     transform_matrix_to_cart = np.eye(4)
-    transform_matrix_to_cart[:3, :3] = ebs.reciprocal_lattice
+    transform_matrix_to_cart[:3, :3] = np.asarray(ebs.reciprocal_lattice).T
 
     grid = padded_image_grid(padded_ebs, ebs.kgrid)
     brillouin_zone = BrillouinZone(
