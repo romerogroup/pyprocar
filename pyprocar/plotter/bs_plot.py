@@ -253,7 +253,10 @@ class BandStructurePlotter:
             merged_kwargs["s"] = merged_kwargs["s"] * series.widths
         if colormap is not None:
             cmap, (vmin, vmax) = colormap
-            merged_kwargs.update(c=series.scalars, cmap=cmap, vmin=vmin, vmax=vmax)
+            defaults = {"c": series.scalars, "cmap": cmap}
+            if "norm" not in merged_kwargs:
+                defaults.update(vmin=vmin, vmax=vmax)
+            merged_kwargs = {**defaults, **merged_kwargs}
 
         return self.ax.scatter(series.x, series.y, **merged_kwargs)
 
@@ -272,7 +275,7 @@ class BandStructurePlotter:
             merged_kwargs["linewidth"] = merged_kwargs["linewidth"] * _midpoints(series.widths)
         if colormap is not None:
             cmap, (vmin, vmax) = colormap
-            merged_kwargs.update(cmap=cmap, norm=mpcolors.Normalize(vmin, vmax))
+            merged_kwargs = {"cmap": cmap, "norm": mpcolors.Normalize(vmin, vmax), **merged_kwargs}
 
         lc = LineCollection(
             segments,
