@@ -10,10 +10,12 @@ from pyprocar.io.siesta import FDF, Bands, SiestaParser
 FDF_STR = """
 SystemLabel silicon
 
+LatticeConstant 5.43 Ang
+
 %block LatticeVectors
-  5.43  0.00  0.00
-  0.00  5.43  0.00
-  0.00  0.00  5.43
+  1.00  0.00  0.00
+  0.00  1.00  0.00
+  0.00  0.00  1.00
 %endblock LatticeVectors
 
 %block ChemicalSpeciesLabel
@@ -95,11 +97,22 @@ class TestSiestaParser:
             (1, "Γ"),
         ]
 
-    def test_kpath_distances_are_cartesian(self, siesta_dir: Path) -> None:
+    @pytest.mark.parametrize(
+        ("scale_line", "gamma_l"),
+        [
+            ("", np.sqrt(3) / 4 / 5.43),
+            ("BandLinesScale pi/a\n", np.sqrt(3) / 4 / 5.43),
+            ("BandLinesScale ReciprocalLatticeVectors\n", np.sqrt(3) / 2 / 5.43),
+        ],
+    )
+    def test_kpath_distances_follow_band_lines_scale(
+        self, siesta_dir: Path, scale_line: str, gamma_l: float
+    ) -> None:
+        (siesta_dir / "silicon.fdf").write_text(FDF_STR + scale_line)
         kpath = SiestaParser(siesta_dir).kpath
 
         assert kpath is not None
-        assert kpath.k_distances == pytest.approx([0.0, np.sqrt(3) / 2 / 5.43])
+        assert kpath.k_distances == pytest.approx([0.0, gamma_l])
 
     def test_ebs(self, siesta_dir: Path) -> None:
         parser = SiestaParser(siesta_dir)
