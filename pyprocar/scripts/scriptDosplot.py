@@ -307,7 +307,7 @@ def dosplot(
         raise ValueError("dirname is required")
     dos = DensityOfStates.from_code(code, dirname, use_cache=use_cache)
 
-    codes_with_scf_fermi = ["qe", "elk"]
+    codes_with_scf_fermi = ["qe", "elk", "abinit"]
     if code in codes_with_scf_fermi and fermi is None:
         logger.info(f"No fermi given, using the found fermi energy: {dos.fermi}")
         fermi = dos.fermi
