@@ -1,4 +1,5 @@
 from pathlib import Path
+from types import SimpleNamespace
 
 import numpy as np
 import pytest
@@ -123,3 +124,27 @@ def test_fe_bands_ebs_is_a_path_with_cartesian_tick_distances():
     tick_x = kpath_meta["k_distances"][kpath_meta["tick_positions"]]
     assert kpath_meta["tick_names"] == ["$\\Gamma$", "H", "N", "$\\Gamma$", "P", "H|P", "N"]
     assert tick_x == pytest.approx(expected, rel=1e-4)
+
+
+def test_ebs_band_energies_are_in_ev(abinit_path_dir: Path):
+    parser = AbinitParser(abinit_path_dir)
+    parser.__dict__["abinit_output"] = SimpleNamespace(
+        fermi=9.13835, reclat=np.eye(3), nspin=1, structure=None
+    )
+
+    ebs = parser.ebs
+
+    assert ebs is not None
+    assert ebs.bands is not None
+    assert ebs.bands.to_array()[0, 0, 0] == pytest.approx(-27.211386, abs=1e-5)
+    assert ebs.fermi == pytest.approx(9.13835)
+
+
+@pytest.mark.data
+def test_fe_bands_energies_match_the_eig_file():
+    ebs = AbinitParser(ABINIT_DATA_DIR / "non-spin-polarized" / "bands").ebs
+    assert ebs is not None
+    assert ebs.bands is not None
+
+    first_kpoint = ebs.bands.to_array()[0, :4, 0]
+    assert first_kpoint == pytest.approx([-77.95306, -43.76407, -43.76407, -43.76407], abs=2e-3)
