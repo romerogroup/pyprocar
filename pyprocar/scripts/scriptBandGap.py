@@ -1,5 +1,3 @@
-import numpy as np
-
 from pyprocar.io import get_parser
 
 
@@ -32,31 +30,21 @@ def bandgap(
         Returns the bandgap energy
     """
 
-    bandGap = None
-
     parser = get_parser(code, dirname)
     ebs = parser.ebs
+    if ebs is None or ebs.bands is None:
+        raise ValueError(f"No band structure found in {dirname}")
 
     if fermi is None:
         fermi = ebs.fermi
 
-    bands = np.array(ebs.bands)
-    subBands = np.subtract(bands, fermi)
+    bands = ebs.bands.value - fermi
+    band_crosses_fermi = (bands < 0).any(axis=0) & (bands > 0).any(axis=0)
 
-    negArr = subBands[subBands < 0]
-    posArr = subBands[subBands > 0]
-
-    negVal = np.amax(negArr)
-    posVal = np.amin(posArr)
-
-    idx = np.where(subBands == negVal)[1][0]
-
-    if all(i >= 0 for i in subBands[:, idx]) or all(i <= 0 for i in subBands[:, idx]):
-        possibleGap = posVal - negVal
-        if bandGap is None or possibleGap < bandGap:
-            bandGap = possibleGap
+    if band_crosses_fermi.any():
+        bandGap = 0.0
     else:
-        bandGap = 0
+        bandGap = float(bands[bands > 0].min() - bands[bands < 0].max())
 
     print("Band Gap = %s eV " % str(bandGap))
 

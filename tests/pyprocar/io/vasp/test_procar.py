@@ -5,6 +5,7 @@ import numpy as np
 import pytest
 
 from pyprocar.io import vasp
+from tests.utils import DATA_DIR
 
 NON_COLINEAR_PROCAR = """PROCAR lm decomposed
 # of k-points:  2         # of bands:   2         # of ions:    5
@@ -809,3 +810,93 @@ class TestProcar:
             assert procar.projected_phase[1, 1, 0, 3, 3] == np.complex128(0.134, 0.215)
         else:
             assert procar.projected_phase is None
+
+
+SINGLE_ION_PROCAR = """PROCAR lm decomposed
+# of k-points:  2         # of bands:   2         # of ions:    1
+
+ k-point     1 :    0.00000000 0.00000000 0.00000000     weight = 0.50000000
+
+band     1 # energy   -0.74763103 # occ.  2.00000000
+ 
+ion      s     py     pz     px    dxy    dyz    dz2    dxz  x2-y2    tot
+    1  0.573  0.000  0.000  0.000  0.000  0.000  0.000  0.000  0.000  0.573
+ 
+band     2 # energy    4.09031337 # occ.  2.00000000
+ 
+ion      s     py     pz     px    dxy    dyz    dz2    dxz  x2-y2    tot
+    1  0.000  0.000  0.000  0.000  0.154  0.231  0.000  0.077  0.463  0.926
+ 
+
+ k-point     2 :    0.50000000 0.00000000 0.00000000     weight = 0.50000000
+
+band     1 # energy   -0.54763103 # occ.  2.00000000
+ 
+ion      s     py     pz     px    dxy    dyz    dz2    dxz  x2-y2    tot
+    1  0.500  0.000  0.000  0.000  0.000  0.000  0.000  0.000  0.000  0.500
+ 
+band     2 # energy    4.29031337 # occ.  2.00000000
+ 
+ion      s     py     pz     px    dxy    dyz    dz2    dxz  x2-y2    tot
+    1  0.000  0.100  0.000  0.000  0.154  0.231  0.000  0.077  0.463  1.026
+ 
+"""
+
+
+def test_single_ion_procar_has_no_tot_row():
+    procar = vasp.Procar(file_str=SINGLE_ION_PROCAR)
+
+    projected = procar.projected
+    assert projected is not None
+    assert projected.shape == (2, 2, 1, 1, 9)
+    assert projected[0, 0, 0, 0, 0] == 0.573
+    assert projected[1, 1, 0, 0].tolist() == [0.0, 0.1, 0.0, 0.0, 0.154, 0.231, 0.0, 0.077, 0.463]
+
+
+ORBITALS = "ion      s     py     pz     px    dxy    dyz    dz2    dxz  x2-y2    tot"
+SPIN_S_WEIGHTS = (0.399, -0.350, 0.038, -0.186)
+
+
+def _single_ion_non_collinear_procar(with_tot_rows: bool) -> str:
+    """One k-point, two bands, one ion; each block holds total, mx, my, mz rows."""
+    lines = [
+        "PROCAR lm decomposed",
+        "# of k-points:  1         # of bands:   2         # of ions:    1",
+        "",
+        " k-point     1 :    0.00000000 0.00000000 0.00000000     weight = 1.00000000",
+        "",
+    ]
+    for band in (1, 2):
+        lines += [f"band     {band} # energy   {band - 3:.8f} # occ.  1.00000000", " ", ORBITALS]
+        for weight in SPIN_S_WEIGHTS:
+            row = f"{weight * band:6.3f}" + "  0.000" * 8 + f" {weight * band:6.3f}"
+            lines.append(f"    1 {row}")
+            if with_tot_rows:
+                lines.append(f"tot   {row}")
+        lines.append(" ")
+    return "\n".join(lines) + "\n"
+
+
+@pytest.mark.parametrize("with_tot_rows", [True, False], ids=["abinit_layout", "vasp_layout"])
+def test_single_ion_non_collinear_keeps_the_four_spin_components(with_tot_rows: bool):
+    procar = vasp.Procar(file_str=_single_ion_non_collinear_procar(with_tot_rows))
+
+    projected = procar.projected
+    assert procar.is_non_colinear
+    assert projected is not None
+    assert projected.shape == (1, 2, 4, 1, 9)
+    assert projected[0, 0, :, 0, 0].tolist() == [0.399, -0.35, 0.038, -0.186]
+    assert projected[0, 1, :, 0, 0].tolist() == [0.798, -0.7, 0.076, -0.372]
+
+
+ABINIT_FE_NON_COLLINEAR = DATA_DIR / "codes" / "abinit" / "9.6" / "Fe" / "non-colinear" / "bands"
+
+
+@pytest.mark.data
+def test_abinit_single_ion_non_collinear_fixture_matches_dev():
+    procar = vasp.Procar(filepath=ABINIT_FE_NON_COLLINEAR / "PROCAR")
+
+    projected = procar.projected
+    assert projected is not None
+    assert projected.shape == (301, 30, 4, 1, 9)
+    assert projected[0, 0, :, 0, 0].tolist() == [0.399, -0.35, 0.038, -0.186]

@@ -6,9 +6,9 @@ Created on Tue Aug 18 11:14:17 2020
 """
 
 
+import matplotlib
 import numpy as np
 import pyvista
-from matplotlib import cm
 from matplotlib import colors as mpcolors
 
 from pyprocar.core import ProcarSelect
@@ -149,7 +149,7 @@ def spin_asymmetry(
 
     nsurface = len(surfaces)
     norm = mpcolors.Normalize(vmin=vmin, vmax=vmax)
-    cmap = cm.get_cmap(cmap)
+    cmap = matplotlib.colormaps.get_cmap(cmap)
     scalars = np.arange(nsurface + 1) / nsurface
     if colors is None:
         colors = np.array([cmap(norm(x)) for x in (scalars)]).reshape(-1, 4)

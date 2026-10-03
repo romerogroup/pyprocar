@@ -4,6 +4,7 @@ __email__ = "petavazohi@mail.wvu.edu, lllang@mix.wvu.edu"
 __date__ = "March 31, 2020"
 
 import logging
+from collections import Counter
 from pathlib import Path
 
 import numpy as np
@@ -125,28 +126,45 @@ class Structure:
 
     def __repr__(self):
         """Unambiguous representation with essential details for debugging."""
+        cell = (
+            "lattice=None"
+            if self.lattice is None
+            else f"volume={self.volume * 1e30:.3f} A^3, "
+            + f"angles=({self.alpha:.2f}, {self.beta:.2f}, {self.gamma:.2f})"
+        )
         return (
             f"Structure(natoms={self.natoms}, "
             f"species={list(self.species)}, "
-            f"volume={self.volume * 1e30:.3f} A^3, "
-            f"angles=({self.alpha:.2f}, {self.beta:.2f}, {self.gamma:.2f}), "
+            f"{cell}, "
             f"spacegroup='{self.get_space_group_international() if self.has_complete_data else 'N/A'}')"
         )
 
     def __str__(self):
         """Human-readable summary of the structure."""
         header = f"Structure with {self.natoms} atoms and {self.nspecies} species"
-        species_line = f"Species: {', '.join(self.species)}"
-        volume_line = f"Volume: {self.volume * 1e30:.3f} A^3"
-        angle_line = f"Angles (α, β, γ): {self.alpha:.2f}°, {self.beta:.2f}°, {self.gamma:.2f}°"
+        species_line = " ".join(f"{name}:{count}" for name, count in self.composition.items())
+        if self.lattice is None:
+            cell_lines = ["Lattice: N/A"]
+        else:
+            cell_lines = [
+                f"Lattice Parameters (a, b, c): {self.a:.2f}, {self.b:.2f}, {self.c:.2f}",
+                f"Angles (α, β, γ): {self.alpha:.2f}°, {self.beta:.2f}°, {self.gamma:.2f}°",
+                f"Volume: {self.volume * 1e30:.3f} Å^3",
+            ]
+        space_group = self.get_space_group_international() if self.has_complete_data else "N/A"
+        sg_line = f"Space group: {space_group}"
 
-        # Only show first few fractional coords for readability
-        frac_preview = "\n".join(
-            f"  {atom}: {coord}" for atom, coord in zip(self.atoms, self.fractional_coordinates)
-        )
+        col_width = 12
+        coord_header = f"{'Atom':<8}{'x':^{col_width}}{'y':^{col_width}}{'z':^{col_width}}"
+        coord_lines = [coord_header, "-" * len(coord_header)]
+        if self.atoms is not None and self.fractional_coordinates is not None:
+            for atom, coord in zip(self.atoms, self.fractional_coordinates):
+                coord_lines.append(
+                    f"{atom:<8}{coord[0]:{col_width}.6f}{coord[1]:{col_width}.6f}{coord[2]:{col_width}.6f}"
+                )
 
         return "\n".join(
-            [header, species_line, volume_line, angle_line, "Fractional coordinates:", frac_preview]
+            [header, species_line, *cell_lines, sg_line, "Fractional coordinates:", *coord_lines]
         )
 
     def __eq__(self, other):
@@ -315,7 +333,7 @@ class Structure:
             List of different species present in the cell.
 
         """
-        return np.unique(self.atoms)
+        return np.unique(self.atoms if self.atoms is not None else [])
 
     @property
     def nspecies(self):
@@ -341,7 +359,7 @@ class Structure:
             Number of atoms.
 
         """
-        return len(self.atoms)
+        return len(self.atoms) if self.atoms is not None else 0
 
     @property
     def atomic_numbers(self):
@@ -382,6 +400,20 @@ class Structure:
         reciprocal_lattice[2, :] = c_star
 
         return reciprocal_lattice
+
+    @property
+    def composition(self) -> dict[str, int]:
+        """
+        Count of each species, in order of first appearance in ``atoms``.
+
+        Returns
+        -------
+        dict[str, int]
+            For example ``{'Ba': 2, 'Cu': 3, 'O': 2}``.
+        """
+        if self.atoms is None:
+            return {}
+        return dict(Counter(self.atoms.tolist()))
 
     @property
     def _spglib_cell(self):

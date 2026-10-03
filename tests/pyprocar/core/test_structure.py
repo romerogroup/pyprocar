@@ -340,3 +340,45 @@ class TestStructure:
         assert struct.volume > 0
         assert len(struct.masses) == 1
         assert struct.density > 0
+
+    def test_str_reports_space_group_and_coordinate_table(self, nacl_structure):
+        assert str(nacl_structure) == "\n".join(
+            [
+                "Structure with 2 atoms and 2 species",
+                "Na:1 Cl:1",
+                "Lattice Parameters (a, b, c): 4.00, 4.00, 4.00",
+                "Angles (α, β, γ): 90.00°, 90.00°, 90.00°",
+                "Volume: 64.000 Å^3",
+                "Space group: Pm-3m",
+                "Fractional coordinates:",
+                "Atom         x           y           z      ",
+                "-" * 44,
+                "Na          0.000000    0.000000    0.000000",
+                "Cl          0.500000    0.500000    0.500000",
+            ]
+        )
+
+    def test_composition_counts_species_in_order_of_appearance(self):
+        struct = Structure(
+            atoms=["Ba", "Ba", "Cu", "Cu", "Cu", "O", "O"],
+            fractional_coordinates=np.zeros((7, 3)),
+            lattice=np.eye(3),
+        )
+
+        assert struct.composition == {"Ba": 2, "Cu": 3, "O": 2}
+
+    def test_lattice_only_structure_prints(self):
+        struct = Structure(lattice=2 * np.eye(3))
+
+        assert repr(struct) == (
+            "Structure(natoms=0, species=[], volume=8.000 A^3, "
+            + "angles=(90.00, 90.00, 90.00), spacegroup='N/A')"
+        )
+        assert str(struct).splitlines()[:6] == [
+            "Structure with 0 atoms and 0 species",
+            "",
+            "Lattice Parameters (a, b, c): 2.00, 2.00, 2.00",
+            "Angles (α, β, γ): 90.00°, 90.00°, 90.00°",
+            "Volume: 8.000 Å^3",
+            "Space group: N/A",
+        ]

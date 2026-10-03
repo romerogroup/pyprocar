@@ -163,10 +163,13 @@ class Procar(Mapping[str, Any]):
         # (one per spin component)
         # Count the number of "tot" lines in projection blocks
         tot_lines = re.findall(r"^tot\s+", self.file_str, re.MULTILINE)
-        if len(tot_lines) == 0:
-            return False
         # Don't use self.n_spins here to avoid circular dependency
         expected_base = self.n_kpoints * self.n_bands
+        if len(tot_lines) == 0:
+            # VASP writes no "tot" row for a single ion, so count the ion rows instead
+            ion_rows = re.findall(r"^\s*\d+\s+-?\d*\.\d+", self.file_str, re.MULTILINE)
+            four_rows_per_ion = len(ion_rows) == expected_base * 4 * self.n_atoms
+            return (not self.is_spin_polarized) and four_rows_per_ion
         actual_count = len(tot_lines)
         # Non-colinear has 4 "tot" lines per k-point/band
         # but is_spin_polarized is False (no duplicate k-points)
@@ -295,9 +298,10 @@ class Procar(Mapping[str, Any]):
                 + "They are unknow (if you did 'filter' them it is OK)."
             )
 
-        # Vasp format different for 1 atom
-        n_spd_rows = self.n_atoms + 1
-        n_projection_rows = self.n_atoms + 1
+        # VASP writes no "tot" row for a single ion; Abinit writes one anyway
+        has_tot_row = self.n_atoms > 1 or re.search(r"^\s*tot\s", self.file_str, re.M) is not None
+        n_projection_rows = self.n_atoms + 1 if has_tot_row else self.n_atoms
+        n_spd_rows = n_projection_rows
         if self.is_non_colinear:
             n_spd_rows *= 4
 
@@ -357,7 +361,7 @@ class Procar(Mapping[str, Any]):
                 n_spd_columns,
             )
 
-        if self.n_atoms == 1:
+        if not has_tot_row:
             spd = np.pad(
                 spd,
                 ((0, 0), (0, 0), (0, 0), (0, 1), (0, 0)),
