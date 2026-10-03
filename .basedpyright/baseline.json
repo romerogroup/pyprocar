@@ -7038,30 +7038,6 @@
                 }
             },
             {
-                "code": "reportUnannotatedClassAttribute",
-                "range": {
-                    "startColumn": 13,
-                    "endColumn": 31,
-                    "lineCount": 1
-                }
-            },
-            {
-                "code": "reportUnannotatedClassAttribute",
-                "range": {
-                    "startColumn": 13,
-                    "endColumn": 26,
-                    "lineCount": 1
-                }
-            },
-            {
-                "code": "reportUnannotatedClassAttribute",
-                "range": {
-                    "startColumn": 13,
-                    "endColumn": 20,
-                    "lineCount": 1
-                }
-            },
-            {
                 "code": "reportArgumentType",
                 "range": {
                     "startColumn": 32,
@@ -8968,30 +8944,6 @@
                 "range": {
                     "startColumn": 50,
                     "endColumn": 63,
-                    "lineCount": 1
-                }
-            },
-            {
-                "code": "reportUnusedParameter",
-                "range": {
-                    "startColumn": 8,
-                    "endColumn": 15,
-                    "lineCount": 1
-                }
-            },
-            {
-                "code": "reportUnusedParameter",
-                "range": {
-                    "startColumn": 8,
-                    "endColumn": 21,
-                    "lineCount": 1
-                }
-            },
-            {
-                "code": "reportArgumentType",
-                "range": {
-                    "startColumn": 12,
-                    "endColumn": 18,
                     "lineCount": 1
                 }
             },
