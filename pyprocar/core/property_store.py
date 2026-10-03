@@ -738,11 +738,6 @@ class PointSet:
             pass
 
     def select_points(self, indices):
-        if len(indices) == 0:
-            return PointSet(
-                points=np.empty((0, 3)), point_data={}, gradient_func=self.gradient_func
-            )
-
         points = self.points[indices]
 
         new_point_data = {}

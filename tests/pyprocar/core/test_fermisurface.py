@@ -214,21 +214,14 @@ class TestFermiSurface:
     def test_select_bands(self, fermisurface_3d_non_spin_polarized):
         fs = fermisurface_3d_non_spin_polarized
 
-        # Get the original number of surfaces and points
-        original_surface_count = len(fs.band_spin_mask)
-        original_point_count = fs.n_points
+        key = list(fs.band_spin_mask.keys())[0]
+        mask = fs.band_spin_mask[key]
 
-        # Select the first band-spin combination
-        band_spin_mask_key = list(fs.band_spin_mask.keys())[0]
-        band_spin_indices = [band_spin_mask_key]
+        selected_fs = fs.select_bands([key])
 
-        band_spin_mask_sum = fs.band_spin_mask[band_spin_mask_key].sum()
-
-        # Test that we can select bands without error
-        selected_fs = fs.select_bands(band_spin_indices)
-
-        # The selected surface should have fewer or equal points than the original
-        assert selected_fs.points.shape[0] + band_spin_mask_sum == original_point_count
+        assert list(selected_fs.band_spin_mask) == [key]
+        assert selected_fs.n_points == mask.sum()
+        assert np.allclose(selected_fs.points, fs.points[mask])
 
     def test_set_band_colors(self, fermisurface_3d_non_spin_polarized):
         fs = fermisurface_3d_non_spin_polarized

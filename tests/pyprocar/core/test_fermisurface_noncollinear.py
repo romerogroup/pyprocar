@@ -138,3 +138,9 @@ def test_spin_polarized_band_structure_2d_keeps_both_channels(spin_polarized_ebs
     bs2d = BandStructure2D.from_ebs(spin_polarized_ebs, grid_interpolation=(10, 10), padding=2)
 
     assert list(bs2d.band_spin_surface_map) == [(0, 0), (0, 1), (1, 0), (1, 1)]
+
+
+def test_spin_polarized_surface_keeps_both_spin_channels(spin_polarized_ebs):
+    fs = FermiSurface.from_ebs(spin_polarized_ebs)
+
+    assert list(fs.band_spin_mask) == [(0, 0), (0, 1)]

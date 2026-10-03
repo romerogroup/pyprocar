@@ -6,6 +6,7 @@ E(k_x, k_y) surfaces for 2D materials (graphene Dirac cones, BiSb Rashba bands),
 
 - Plain energy surfaces near E_F, with an optional Fermi plane.
 - Scalar coloring, e.g. `bands` or `bands_speed`. Parametric projections and spin texture are not driven.
+- Box and plane widgets: `BS2DPlotter(bs, off_screen=True).add_box_slicer(surface, normal=..., origin=..., cross_section_area=True)` on one of `bs.band_surfaces`. The surface needs active scalars. The slice is the `slice` actor and the area text is `p.actors["area_text"].GetText(2)`.
 
 ## How to get to it (user POV)
 

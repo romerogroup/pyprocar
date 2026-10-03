@@ -31,6 +31,16 @@ def find_nearest(array, value):
     return idx
 
 
+def _new_plotter(kwargs, save_2d) -> FermiPlotter:
+    """Build the FermiPlotter, off screen when a screenshot is requested."""
+    plotter_kwargs = {
+        k: v for k, v in kwargs.items() if k in ["off_screen", "window_size", "theme"]
+    }
+    if save_2d:
+        plotter_kwargs["off_screen"] = True
+    return FermiPlotter(**plotter_kwargs)
+
+
 class FermiHandler:
     def __init__(
         self,
@@ -262,9 +272,7 @@ class FermiHandler:
             else:
                 scalars_data = prop
 
-        fsplt = FermiPlotter(
-            **{k: v for k, v in kwargs.items() if k in ["off_screen", "window_size", "theme"]}
-        )
+        fsplt = _new_plotter(kwargs, save_2d)
         fsplt.plot(
             fermi_surface,
             scalars_data=scalars_data,
@@ -389,9 +397,7 @@ class FermiHandler:
             logger.debug(f"Surface has {fs.n_points} points")
 
         # Create plotter and add isoslider
-        fsplt = FermiPlotter(
-            **{k: v for k, v in kwargs.items() if k in ["off_screen", "window_size", "theme"]}
-        )
+        fsplt = _new_plotter(kwargs, save_2d)
 
         add_active_vectors = spin_texture or property_name == "fermi_velocity"
         fsplt.add_isoslider(
@@ -567,7 +573,7 @@ class FermiHandler:
             Boolean to print the plotting options
         """
         config = ConfigManager.merge_configs(self.default_config, kwargs)
-        config = ConfigManager.merge_config(config, "mode", mode)
+        config = cast(FermiSurface3DConfig, ConfigManager.merge_config(config, "mode", mode))
 
         user_logger.info("_" * 100)
         user_logger.info(self.notification_message)
@@ -597,9 +603,7 @@ class FermiHandler:
             fermi_surface.set_values(property_name, prop.value)
 
         # Create plotter and add slicer
-        fsplt = FermiPlotter(
-            **{k: v for k, v in kwargs.items() if k in ["off_screen", "window_size", "theme"]}
-        )
+        fsplt = _new_plotter(kwargs, save_2d)
 
         add_active_vectors = spin_texture or property_name == "fermi_velocity"
 
@@ -627,16 +631,19 @@ class FermiHandler:
             },
         )
 
-        # Handle saving and showing
         if save_2d:
             fsplt.savefig(filename=save_2d)
-            return None
-
-        if show:
-            fsplt.show()
-
         if save_2d_slice:
-            user_logger.warning("2D slice saving not yet implemented in new API")
+            fsplt.save_slice_2d(
+                fermi_surface,
+                slice_normal,
+                slice_origin,
+                save_2d_slice,
+                cmap=config.surface_cmap,
+                clim=config.surface_clim,
+            )
+        if show and not save_2d:
+            fsplt.show()
 
     def plot_fermi_cross_section_box_widget(
         self,
@@ -680,14 +687,16 @@ class FermiHandler:
         show : bool, optional
             Whether to show the plot, by default True
         save_2d : str, optional
-            Filename to save 2D plot, by default None
+            Filename for a screenshot of the 3D view with the widgets. The plot is
+            rendered off screen and not shown. By default None
         save_2d_slice : str, optional
-            Filename to save 2D slice plot, by default None
+            Filename for a matplotlib plot of the cross section at ``slice_normal``
+            and ``slice_origin``, by default None
         print_plot_opts: bool, optional
             Boolean to print the plotting options
         """
         config = ConfigManager.merge_configs(self.default_config, kwargs)
-        config = ConfigManager.merge_config(config, "mode", mode)
+        config = cast(FermiSurface3DConfig, ConfigManager.merge_config(config, "mode", mode))
 
         user_logger.info("_" * 100)
         user_logger.info(self.notification_message)
@@ -719,9 +728,7 @@ class FermiHandler:
         user_logger.info(f"Generated Fermi surface with {fermi_surface.n_points} points")
 
         # Create plotter and add box slicer
-        fsplt = FermiPlotter(
-            **{k: v for k, v in kwargs.items() if k in ["off_screen", "window_size", "theme"]}
-        )
+        fsplt = _new_plotter(kwargs, save_2d)
 
         add_active_vectors = spin_texture or property_name == "fermi_velocity"
         fsplt.add_surface(
@@ -737,8 +744,6 @@ class FermiHandler:
             fermi_surface,
             normal=slice_normal,
             origin=slice_origin,
-            save_2d=save_2d,
-            save_2d_slice=save_2d_slice,
             show_cross_section_area=show_cross_section_area,
             show_van_alphen_frequency=show_van_alphen_frequency,
             add_surface_args={
@@ -753,8 +758,18 @@ class FermiHandler:
         if not (property_name is not None or show_colorbar) or mode == "plain":
             fsplt.remove_scalar_bar()
 
-        # Handle saving and showing
-        if show:
+        if save_2d:
+            fsplt.savefig(filename=save_2d)
+        if save_2d_slice:
+            fsplt.save_slice_2d(
+                fermi_surface,
+                slice_normal,
+                slice_origin,
+                save_2d_slice,
+                cmap=config.surface_cmap,
+                clim=config.surface_clim,
+            )
+        if show and not save_2d:
             fsplt.show()
 
     def print_default_settings(self):

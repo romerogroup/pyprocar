@@ -763,7 +763,10 @@ class DensityOfStates(PointSet):
         atoms_orbital_map
             Mapping of atom indices/tuples to orbital indices.
         norm_mode
-            Normalization mode to apply after summing.
+            Normalization mode to apply after summing. 'integral' divides each
+            spin channel by its own integral over energy, so each channel
+            integrates to 1. FermiSurface 'integral' instead divides every
+            band and spin by one area integral over all plotted sheets.
         label
             Scalar label for the property.
         name

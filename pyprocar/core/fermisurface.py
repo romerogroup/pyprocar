@@ -384,7 +384,7 @@ class FermiSurface(pv.PolyData):
             values_array,
             mode,
             {
-                NormMode.MAX: lambda: np.max(np.abs(values_array)) or 1.0,
+                NormMode.MAX: lambda: np.max(np.abs(values_array), initial=0.0) or 1.0,
                 NormMode.TOTAL: lambda: self.interpolate_to_surface(self.ebs.ebs_sum()),
                 NormMode.INTEGRAL: lambda: self._surface_integral(values_array) or 1.0,
             },
@@ -601,16 +601,18 @@ class FermiSurface(pv.PolyData):
         logger.info(f"Selecting bands: {bands_spin_indices}")
 
         # Validate that all requested band-spin combinations exist
-        selected_band_surfaces = {}
         for iband, ispin in bands_spin_indices:
             if (iband, ispin) not in self.band_spin_mask:
                 available_bands = list(self.band_spin_mask.keys())
-                selected_band_surfaces[(iband, ispin)] = self.band_isosurfaces[(iband, ispin)]
-
                 raise ValueError(
                     f"Band-spin combination ({iband}, {ispin}) not found in Fermi surface. "
                     f"Available combinations: {available_bands}"
                 )
+
+        requested = {(iband, ispin) for iband, ispin in bands_spin_indices}
+        selected_band_surfaces = {
+            key: surface for key, surface in self.band_isosurfaces.items() if key in requested
+        }
 
         # Create combined mask for all selected band-spin combinations
         combined_mask = np.zeros(self.n_points, dtype=bool)
@@ -629,16 +631,22 @@ class FermiSurface(pv.PolyData):
             point_data = {}
             cell_data = {}
             field_data = {}
-            new_point_set = self.point_set
+            fs_indices = np.flatnonzero(combined_mask)
 
         else:
-            new_surface, fs_indices = self.remove_points(combined_mask, inplace=False)
+            new_surface, fs_indices = self.remove_points(~combined_mask, inplace=False)
             points = new_surface.points
             faces = new_surface.faces
             point_data = new_surface.point_data
             cell_data = new_surface.cell_data
             field_data = new_surface.field_data
-            new_point_set = self.point_set.select_points(fs_indices)
+
+        new_point_set = self.point_set.select_points(fs_indices)
+        old_positions = [self.band_spin_surface_map[key] for key in selected_band_surfaces]
+        new_point_set.add_property(
+            name="spin_band_index",
+            value=np.searchsorted(old_positions, new_point_set.point_data["spin_band_index"].value),
+        )
 
         fs = FermiSurface(
             points=points,

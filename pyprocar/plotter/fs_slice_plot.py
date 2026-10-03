@@ -490,7 +490,11 @@ class FermiSlicePlotter:
 
         merged_kwargs = {**series.additional_kwargs, **line_kwargs}
         lc = LineCollection(
-            line_segments, array=colors, cmap=cmap_obj, norm=norm, **merged_kwargs
+            line_segments,
+            array=colors,
+            cmap=merged_kwargs.pop("cmap", cmap_obj),
+            norm=merged_kwargs.pop("norm", norm),
+            **merged_kwargs,
         )
         self._scalar_plot = self.ax.add_collection(lc)
         return lc
@@ -510,9 +514,9 @@ class FermiSlicePlotter:
             series.points_2d[:, 0],
             series.points_2d[:, 1],
             c=series.scalars,
-            cmap=cmap,
-            vmin=vmin,
-            vmax=vmax,
+            cmap=merged_kwargs.pop("cmap", cmap),
+            vmin=merged_kwargs.pop("vmin", vmin),
+            vmax=merged_kwargs.pop("vmax", vmax),
             **merged_kwargs,
         )
         return self._scalar_plot
@@ -552,8 +556,8 @@ class FermiSlicePlotter:
             u,
             v,
             vector_magnitude,
-            cmap=cmap,
-            norm=norm,
+            cmap=merged_kwargs.pop("cmap", cmap),
+            norm=merged_kwargs.pop("norm", norm),
             **merged_kwargs,
         )
         return self._vector_plot

@@ -254,8 +254,8 @@ class BS2DPlotter(SurfacePlotter):
                 mesh=surface,
                 add_surface_args=add_surface_args,
             ),
-            normal,
-            origin,
+            normal=normal,
+            origin=origin,
             **add_plane_widget_args,
         )
 
@@ -312,7 +312,7 @@ class BS2DPlotter(SurfacePlotter):
         save_2d_slice=None,
         **kwargs,
     ):
-        self.cross_section_area = cross_section_area
+        self.check_can_save_2d(save_2d)
         if add_surface_args is None:
             add_surface_args = {}
 
@@ -332,22 +332,27 @@ class BS2DPlotter(SurfacePlotter):
 
         add_text_args["color"] = add_text_args.get("color", "black")
 
-        self.add_text_args = add_text_args
-
         # Initialize clipper for surface
         mesh = pv.PolyData(surface)
         mesh, algo = algorithm_to_mesh_handler(
             add_ids_algorithm(mesh, point_ids=False, cell_ids=True)
         )
 
-        self.clipper = vtk.vtkBoxClipDataSet()
-        set_algorithm_input(self.clipper, algo)
-        self.clipper.GenerateClippedOutputOn()
+        clipper = vtk.vtkBoxClipDataSet()
+        set_algorithm_input(clipper, algo)
+        clipper.GenerateClippedOutputOn()
 
         # Initialize box widget
 
         self.add_box_widget(
-            callback=partial(self._box_callback, port=0, add_surface_args=add_surface_args),
+            callback=partial(
+                self._box_callback,
+                clipper=clipper,
+                port=0,
+                add_surface_args=add_surface_args,
+                add_text_args=add_text_args,
+                cross_section_area=cross_section_area,
+            ),
             bounds=surface.bounds,
             use_planes=True,
             interaction_event="end",
@@ -359,15 +364,35 @@ class BS2DPlotter(SurfacePlotter):
                 self._slice_callback,
                 add_surface_args=add_surface_args,
                 add_text_args=add_text_args,
-                cross_section_area=self.cross_section_area,
+                cross_section_area=cross_section_area,
             ),
-            normal,
-            origin,
+            normal=normal,
+            origin=origin,
             bounds=surface.bounds,
             **add_plane_widget_args,
         )
 
-    def _box_callback(self, planes, port=0, add_surface_args=None):
+        if save_2d:
+            self.savefig(save_2d)
+        if save_2d_slice:
+            self.save_slice_2d(
+                surface,
+                normal,
+                origin,
+                save_2d_slice,
+                cmap=add_surface_args.get("cmap", "plasma"),
+                clim=add_surface_args.get("clim"),
+            )
+
+    def _box_callback(
+        self,
+        planes,
+        clipper,
+        port=0,
+        add_surface_args=None,
+        add_text_args=None,
+        cross_section_area=False,
+    ):
         bounds = []
 
         for i in range(planes.GetNumberOfPlanes()):
@@ -375,10 +400,10 @@ class BS2DPlotter(SurfacePlotter):
             bounds.append(plane.GetNormal())
             bounds.append(plane.GetOrigin())
 
-        self.clipper.SetBoxClip(*bounds)
-        self.clipper.Update()
+        clipper.SetBoxClip(*bounds)
+        clipper.Update()
 
-        clipped = _get_output(self.clipper, oport=port)
+        clipped = _get_output(clipper, oport=port)
 
         if len(self._meshes) == 0:
             self._meshes.append(clipped)
@@ -394,6 +419,6 @@ class BS2DPlotter(SurfacePlotter):
                 origin=widget_origin,
                 mesh=self._meshes[0],
                 add_surface_args=add_surface_args,
-                cross_section_area=self.cross_section_area,
-                add_text_args=self.add_text_args,
+                cross_section_area=cross_section_area,
+                add_text_args=add_text_args,
             )
