@@ -9,6 +9,7 @@ from matplotlib.quiver import Quiver
 from pyprocar.core.ebs import ElectronicBandStructureMesh
 from pyprocar.core.fermisurface import FermiSurface
 from pyprocar.core.kpoints import KGRID_MODE, KGridInfo
+from pyprocar.plotter._surface_plot import cross_section_areas
 from pyprocar.plotter.bs_2d_plot import BS2DPlotter
 from pyprocar.plotter.fs_plot import FS_AREA_SCALE_FACTOR, FermiPlotter, dHvA_frequency
 from tests.utils import DATA_DIR
@@ -194,17 +195,23 @@ def test_orbit_around_the_zone_corner_closes_across_the_zone_boundary():
 
 
 @pytest.mark.parametrize("height", [0.5, 0.5 - 1e-4, -0.5 + 1e-4])
-def test_cut_on_a_zone_face_counts_the_orbit_once(height):
+def test_zone_face_cut_joins_its_four_corner_arcs_into_one_orbit(height):
+    """The cut cylinder around M reaches the plane as four arcs, one per zone corner.
+
+    Following one arc across the zone boundary visits all four, so the orbit is counted
+    once: one area pi 0.1, not four.
+    """
+
     def cylinder_around_m(k):
         to_m = k[:, :2] % 1.0 - 0.5
         return np.sum(to_m**2, axis=1)
 
-    text = _slice_text(
-        _periodic_surface(cylinder_around_m), origin=(0, 0, height), show_cross_section_area=True
+    areas, n_open = cross_section_areas(
+        _periodic_surface(cylinder_around_m), (0, 0, 1), (0, 0, height), np.eye(3)
     )
 
-    assert text.endswith(" Ang^-2")
-    assert _number(text) == pytest.approx(np.pi * 0.1 * (2 * np.pi) ** 2, rel=0.02)
+    assert n_open == 0
+    assert np.asarray(areas) == pytest.approx([np.pi * 0.1], rel=0.02)
 
 
 def test_sheets_that_run_through_the_zone_stay_open():

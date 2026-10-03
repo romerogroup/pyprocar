@@ -49,10 +49,8 @@ def cross_section_areas(
     shifts = steps @ lattice
     offsets = (origin - shifts) @ normal
     tol = 1e-3 * float(np.linalg.norm(lattice, axis=1).min())
-    edge = 1e-6 * float(np.ptp(heights))
-    # A cut at the surface's extreme height is a point, or repeats the opposite zone face.
-    inside = (offsets > heights.min() + edge) & (offsets < heights.max() - edge)
-    other = inside & (np.abs(offsets - origin @ normal) > tol)
+    crossing = (offsets >= heights.min()) & (offsets <= heights.max())
+    other = crossing & (np.abs(offsets - origin @ normal) > tol)
     _, first = np.unique(np.round(offsets[other] / tol), return_index=True)
     pieces = []
     for shift in shifts[other][first]:
