@@ -83,7 +83,7 @@ SP_DIR = ABINIT_DATA_DIR / "spin-polarized-colinear"
 
 
 class TestAbinitDOSUnits(BaseTest):
-    """Expected values are the abinito_DOS_TOTAL / DOS_AT0001 columns times 27.211386245988 eV/Ha."""
+    """Expected values are the raw DOS_TOTAL and DOS_AT0001 columns times 27.211386245988 eV/Ha."""
 
     def test_energies_are_absolute_ev(self):
         from pyprocar.io.abinit import AbinitDOS
@@ -142,7 +142,9 @@ def test_dosplot_puts_abinit_fermi_at_zero():
 
     import pyprocar
 
-    fig, ax = pyprocar.dosplot(code="abinit", dirname=str(NSP_DOS), orientation="vertical", show=False)
+    fig, ax = pyprocar.dosplot(
+        code="abinit", dirname=str(NSP_DOS), orientation="vertical", show=False
+    )
     energies = np.asarray(ax.get_lines()[0].get_ydata())
     plt.close(fig)
     # (-2.9 Ha - 0.37035511 Ha) and (3.7 Ha - 0.37035511 Ha), in eV
