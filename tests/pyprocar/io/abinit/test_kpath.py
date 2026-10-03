@@ -90,3 +90,17 @@ def test_fe_bands_ticks_sit_on_the_high_symmetry_points(calc_type: str):
         (250, "H|P"),
         (300, "N"),
     ]
+
+
+@pytest.mark.data
+def test_fe_bands_ebs_is_a_path_with_cartesian_tick_distances():
+    kpath_meta = AbinitParser(ABINIT_DATA_DIR / "non-spin-polarized" / "bands").ebs.bands.metadata[
+        "kpath"
+    ]
+
+    a = 2 * 1.420026
+    gamma_h, h_n, gamma_p = 1 / a, 1 / (np.sqrt(2) * a), np.sqrt(3) / (2 * a)
+    expected = np.cumsum([0, gamma_h, h_n, h_n, gamma_p, gamma_p])
+    tick_x = kpath_meta["k_distances"][kpath_meta["tick_positions"]]
+    assert kpath_meta["tick_names"] == ["$\\Gamma$", "H", "N", "$\\Gamma$", "P", "H|P", "N"]
+    assert tick_x[:6] == pytest.approx(expected, rel=1e-4)

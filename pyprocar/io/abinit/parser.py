@@ -8,7 +8,13 @@ from typing import Any
 
 import numpy as np
 
-from pyprocar.core import DensityOfStates, ElectronicBandStructure, KPath, Structure
+from pyprocar.core import (
+    DensityOfStates,
+    ElectronicBandStructure,
+    KPath,
+    Structure,
+    get_ebs_from_data,
+)
 from pyprocar.io.abinit.dos import AbinitDOS
 from pyprocar.io.abinit.kpoints import AbinitKpoints
 from pyprocar.io.abinit.output import AbinitOutput
@@ -210,7 +216,7 @@ class AbinitParser(BaseParser):
         if hasattr(procar, 'spd_phase') and procar.spd_phase is not None:
             projected_phase = procar._spd2projected(procar.spd_phase)
         
-        return ElectronicBandStructure(
+        return get_ebs_from_data(
             kpoints=procar.kpoints,
             bands=procar.bands,
             projected=procar._spd2projected(procar.spd),
@@ -219,6 +225,7 @@ class AbinitParser(BaseParser):
             orbital_names=procar.orbital_names_old[:-1],
             reciprocal_lattice=self.abinit_output.reclat,
             structure=self.structure,
+            kpath=self.kpath,
         )
 
     @property
