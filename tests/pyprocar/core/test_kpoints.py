@@ -549,11 +549,14 @@ class TestKPathProperties:
     """Test class for KPath properties."""
 
     @pytest.fixture
-    def kpath_with_segments(self, simple_kpath_kpoints, simple_segment_names):
+    def kpath_with_segments(
+        self, simple_kpath_kpoints, simple_segment_names, identity_reciprocal_lattice
+    ):
         """Create a KPath with multiple segments for testing."""
         return KPath(
             kpoints=simple_kpath_kpoints,
             segment_names=simple_segment_names,
+            reciprocal_lattice=identity_reciprocal_lattice,
         )
 
     def test_n_kpoints(self, kpath_with_segments, simple_kpath_kpoints):
@@ -673,11 +676,14 @@ class TestKPathMethods:
     """Test class for KPath methods."""
 
     @pytest.fixture
-    def kpath_with_segments(self, simple_kpath_kpoints, simple_segment_names):
+    def kpath_with_segments(
+        self, simple_kpath_kpoints, simple_segment_names, identity_reciprocal_lattice
+    ):
         """Create a KPath with multiple segments for testing."""
         return KPath(
             kpoints=simple_kpath_kpoints,
             segment_names=simple_segment_names,
+            reciprocal_lattice=identity_reciprocal_lattice,
         )
 
     def test_get_segments_all(self, kpath_with_segments):

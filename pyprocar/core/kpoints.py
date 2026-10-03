@@ -339,6 +339,8 @@ class KPath:
 
     @property
     def kpoints_cartesian(self):
+        if self._reciprocal_lattice is None:
+            raise ValueError("KPath needs a reciprocal_lattice for Cartesian k-points")
         return reduced_to_cartesian(self.kpoints, self._reciprocal_lattice)
 
     @property
@@ -487,7 +489,7 @@ class KPath:
         isegments: list[int] = None,
         as_segments: bool = True,
         cumlative_across_segments: bool = True,
-        cartesian: bool = False,
+        cartesian: bool = True,
     ):
         if isegments is None:
             isegments = list(range(self.n_segments))
