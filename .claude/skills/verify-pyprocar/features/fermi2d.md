@@ -7,6 +7,8 @@ A constant-energy contour on one k-plane (e.g. k_z=0), with optional projection 
 - Plain contours at `energy=0.0` relative to E_F.
 - Parametric coloring by `atoms` and `orbitals`.
 - Spin texture (`non-colinear` fixture) and Rashba splitting (`bisb_monolayer` fixture). Not driven.
+- Line and arrow styles: `plot_line_kwargs` goes to the `LineCollection` and `plot_arrows_kwargs` to `quiver`. Either can carry `cmap`, which overrides the `cmap` argument for that artist.
+- Collinear spin selection: in `fermi2d/spin-polarized` and `fermi3d/spin-polarized` no spin-down band crosses E_F = 5.3017 (spin-down gap about 3.3 to 6.5 eV), so every sheet is spin up. `spins=[0]` matches no selection and `spins=[1]` is all zeros. That is correct, not a bug.
 
 ## How to get to it (user POV)
 

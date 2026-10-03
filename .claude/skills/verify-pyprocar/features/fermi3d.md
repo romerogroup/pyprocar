@@ -7,6 +7,8 @@ Build isosurfaces of E(k)=E_F on a full k-mesh inside the Brillouin zone. They c
 - Plain surface with the BZ: `FermiPlotter.plot(fs, show_brillouin_zone=True)`. It returns a dict of meshes keyed by `(band, spin)`.
 - Scalar coloring: compute the scalar first with `fs.get_property("projected_sum", atoms=, orbitals=, spins=)`, then pass `scalars_data="projected_sum"`, or pass a `Property`.
 - Vector arrows (spin texture): `vectors_data=...`. Use the `non-colinear` fixture. Not driven.
+- Band selection: `fs.select_bands([(band, spin), ...])` returns a new surface with only those sheets. On `fermi3d/non-spin-polarized` at E_F = 5.3017, `select_bands([(17, 0)])` keeps the 270 points of band 17, and its V d `projected_sum` spans about 0.794 to 0.803. `select_bands([])` gives an empty surface whose projections have shape `(0, n_bands, n_spins)`.
+- Box and plane widgets: `FermiHandler.plot_fermi_cross_section_box_widget(mode=..., show=False, off_screen=True)`, or `FermiPlotter.add_box_slicer(fs, show_cross_section_area=True)`. The cross-section text is the `area_text` actor; read it with `p.actors["area_text"].GetText(2)`.
 - Isovalue GIF: `add_isovalue_gif(e_surfaces, save_gif, ...)`. Not driven.
 - de Haas–van Alphen: `van-alphen` fixture. Not driven.
 
