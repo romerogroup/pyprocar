@@ -105,7 +105,7 @@ This removes only that run's `work/` scratch copy (including its `TMPDIR`) and k
 $H gc [hours]     # default 24
 ```
 
-This removes the `work/` copy of every run older than `hours`, from any agent, and keeps each `evidence/`. Run it when `$H run` refuses for lack of space. Fetched fixtures in `data/examples/` are shared cache; leave them.
+This removes the `work/` copy of every run that started more than `hours` ago, from any agent, and keeps each `evidence/`. It skips a run whose harness process is still alive, which the harness records in the run's `.pid` file. Run it when `$H run` refuses for lack of space. Fetched fixtures in `data/examples/` are shared cache; leave them.
 
 ## Helpers
 
