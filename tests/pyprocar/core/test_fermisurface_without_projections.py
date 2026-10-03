@@ -1,10 +1,14 @@
 from pathlib import Path
 
 import numpy as np
+import pytest
 
 from pyprocar.core.ebs import ElectronicBandStructureMesh
 from pyprocar.core.fermisurface import FermiSurface
 from pyprocar.core.kpoints import KGRID_MODE, KGridInfo
+from pyprocar.io.bxsf import BxsfParser
+from tests.pyprocar.io.bxsf.test_parser import BXSF_STR
+from tests.pyprocar.io.frmsf.test_parser import FRMSF_STR
 
 N_K = 10
 
@@ -47,3 +51,32 @@ def test_spin_polarized_mesh_without_projections_keeps_both_spin_surfaces() -> N
     assert ebs.n_spins == 2
     assert ebs.spin_projection_names == ["Spin-up", "Spin-down"]
     assert list(fs.band_spin_mask) == [(0, 0), (0, 1)]
+
+
+PROJECTION_QUANTITIES = [
+    "projected_sum",
+    "ebs_ipr",
+    "ebs_ipr_atom",
+    "spin_texture",
+    "projected_sum_spin_texture",
+]
+
+
+@pytest.mark.parametrize("name", PROJECTION_QUANTITIES)
+def test_projection_quantities_raise_a_clear_error_without_projections(name: str) -> None:
+    ebs = BxsfParser.from_str(BXSF_STR).ebs
+    assert ebs is not None
+
+    with pytest.raises(ValueError, match="no projections"):
+        ebs.get_property(name)
+
+
+@pytest.mark.parametrize("attribute", ["n_atoms", "n_orbitals"])
+def test_projection_shape_raises_a_clear_error_without_projections(
+    tmp_path: Path, attribute: str
+) -> None:
+    (tmp_path / "in.frmsf").write_text(FRMSF_STR)
+    ebs = ElectronicBandStructureMesh.from_code("frmsf", str(tmp_path))
+
+    with pytest.raises(ValueError, match="no projections"):
+        getattr(ebs, attribute)
