@@ -364,7 +364,7 @@ class FermiPlotter(SurfacePlotter):
             )
 
         if show_van_alphen_frequency or show_cross_section_area:
-            areas, n_open = slice_loop_areas(cast(pv.PolyData, slc), normal)
+            areas, n_open = slice_loop_areas(cast(pv.PolyData, slc))
             if show_van_alphen_frequency:
                 largest = max(areas, default=0.0) * FS_AREA_SCALE_FACTOR
                 text = f"Van Alphen Frequency : {dHvA_frequency(largest):.4f} Gauss"

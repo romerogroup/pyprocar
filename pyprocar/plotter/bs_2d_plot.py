@@ -299,7 +299,7 @@ class BS2DPlotter(SurfacePlotter):
         self.add_surface(slc, name="slice", **add_surface_args)
 
         if cross_section_area:
-            areas, n_open = slice_loop_areas(cast(pv.PolyData, slc), normal)
+            areas, n_open = slice_loop_areas(cast(pv.PolyData, slc))
             self.add_text(area_text(areas, n_open), name="area_text", **(add_text_args or {}))
 
         return slc

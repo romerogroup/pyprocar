@@ -21,7 +21,7 @@ def find_nearest(array, value):
     return idx
 
 
-def slice_loop_areas(slc: pv.PolyData, normal) -> tuple[list[float], int]:
+def slice_loop_areas(slc: pv.PolyData) -> tuple[list[float], int]:
     """Areas of the closed loops in a planar slice, and the number of open curves.
 
     Segments that touch a non-finite point are dropped first, so a curve broken by
@@ -39,13 +39,7 @@ def slice_loop_areas(slc: pv.PolyData, normal) -> tuple[list[float], int]:
     lines = lines[np.isfinite(points[lines]).all(axis=(1, 2))]
     if len(lines) == 0:
         return [], 0
-    unit = np.asarray(normal, dtype=np.float64) / np.linalg.norm(normal)
-    helper = np.eye(3)[np.argmin(np.abs(unit))]
-    u = np.cross(unit, helper)
-    u /= np.linalg.norm(u)
-    v = np.cross(unit, u)
     unique_points, merged = np.unique(np.round(points, 9), axis=0, return_inverse=True)
-    planar = unique_points @ np.column_stack([u, v])
     lines = merged.reshape(-1)[lines]
     neighbours: dict[int, list[int]] = {}
     for a, b in lines[lines[:, 0] != lines[:, 1]].tolist():
@@ -72,9 +66,10 @@ def slice_loop_areas(slc: pv.PolyData, normal) -> tuple[list[float], int]:
         while len(loop) < len(component):
             a, b = neighbours[loop[-1]]
             loop.append(b if a == loop[-2] else a)
-        xy = planar[loop]
-        x, y = xy[:, 0], xy[:, 1]
-        areas.append(0.5 * abs(float(np.dot(x, np.roll(y, -1)) - np.dot(y, np.roll(x, -1)))))
+        corners = unique_points[loop]
+        areas.append(
+            0.5 * float(np.linalg.norm(np.cross(corners, np.roll(corners, -1, axis=0)).sum(axis=0)))
+        )
     return areas, n_open
 
 
