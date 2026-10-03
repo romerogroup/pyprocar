@@ -9,18 +9,22 @@ phase reported.
 
 Paths are resolved with realpath, so a symlinked alias of data/ counts. File
 descriptors and ``dir_fd`` arguments are resolved through /proc/self/fd, which
-exists on Linux only. The ``open`` audit event carries no ``dir_fd``, so
-``os.open`` is wrapped to check ``dir_fd``-relative opens itself. The wrapper is
-added to ``os.supports_dir_fd`` so callers that test for dir_fd support still
-find it.
+exists on Linux only. Audit events carry neither the ``dir_fd`` of ``os.open``
+nor ``follow_symlinks``, so ``os.open`` (with ``dir_fd``), ``os.chmod``,
+``os.chown`` and ``os.utime`` (with ``follow_symlinks=False``), ``os.lchown``
+and ``os.lchmod`` are wrapped. A wrapper checks the call itself and skips the
+one audit event that call raises. Each wrapper joins the ``os.supports_*`` sets
+its original is in, so capability checks such as shutil's still pass.
 
 Not caught: writes from subprocesses. An audit hook sees only its own
 interpreter, and the external programs tests run need not be Python.
 """
 
+import functools
 import os
 import sys
 import threading
+from collections.abc import Callable
 
 import pytest
 
@@ -47,8 +51,8 @@ _MUTATING_EVENTS: dict[str, tuple[tuple[int, int | None, bool], ...]] = {
 }
 _WATCHED_EVENTS = {"open", "os.listdir", "os.scandir", *_MUTATING_EVENTS}
 _current_test: tuple[str, bool] | None = None
-# set while the os.open wrapper runs, whose own check already resolved dir_fd
-_dir_fd_open = threading.local()
+# (event, path) of the one audit event a wrapper below already checked
+_checked_by_wrapper = threading.local()
 _violations: list[str] = []
 
 
@@ -99,7 +103,8 @@ def _check_write(nodeid: str, path: object, dir_fd: object, follow: bool = True)
 def _guard_data_dir(event: str, args: tuple[object, ...]) -> None:
     if _current_test is None or not args or event not in _WATCHED_EVENTS:
         return
-    if event == "open" and getattr(_dir_fd_open, "active", False):
+    if getattr(_checked_by_wrapper, "call", None) == (event, args[0]):
+        _checked_by_wrapper.call = None
         return
     nodeid, marked = _current_test
     if written := _written_paths(event, args):
@@ -111,22 +116,54 @@ def _guard_data_dir(event: str, args: tuple[object, ...]) -> None:
 
 sys.addaudithook(_guard_data_dir)
 
-_os_open = os.open
 
-
-def _guarded_os_open(path, flags, mode=0o777, *, dir_fd=None):
-    if dir_fd is None or dir_fd < 0:
-        return _os_open(path, flags, mode, dir_fd=dir_fd)
-    _guard_data_dir("open", (os.path.join(_fd_path(dir_fd), os.fsdecode(path)), None, flags))
-    _dir_fd_open.active = True
+def _call_checked[T](event: str, path: object, call: Callable[[], T]) -> T:
+    # the audit event carries os.fspath of a PathLike, not the object itself
+    _checked_by_wrapper.call = (event, os.fspath(path) if isinstance(path, os.PathLike) else path)
     try:
-        return _os_open(path, flags, mode, dir_fd=dir_fd)
+        return call()
     finally:
-        _dir_fd_open.active = False
+        _checked_by_wrapper.call = None
 
 
-os.open = _guarded_os_open
-os.supports_dir_fd.add(_guarded_os_open)
+def _guard_os_open(os_open: Callable[..., int]) -> Callable[..., int]:
+    @functools.wraps(os_open)
+    def guarded(path, flags, mode=0o777, *, dir_fd=None):
+        if dir_fd is None or dir_fd < 0:
+            return os_open(path, flags, mode, dir_fd=dir_fd)
+        _guard_data_dir("open", (os.path.join(_fd_path(dir_fd), os.fsdecode(path)), None, flags))
+        return _call_checked("open", path, lambda: os_open(path, flags, mode, dir_fd=dir_fd))
+
+    return guarded
+
+
+def _guard_no_follow(fn: Callable[..., None], event: str, always: bool = False):
+    @functools.wraps(fn)
+    def guarded(path, *args, **kwargs):
+        if not always and kwargs.get("follow_symlinks", True):
+            return fn(path, *args, **kwargs)
+        if _current_test is not None:
+            _check_write(_current_test[0], path, kwargs.get("dir_fd"), follow=False)
+        return _call_checked(event, path, lambda: fn(path, *args, **kwargs))
+
+    return guarded
+
+
+_GUARDED = {
+    "open": _guard_os_open(os.open),
+    "chmod": _guard_no_follow(os.chmod, "os.chmod"),
+    "chown": _guard_no_follow(os.chown, "os.chown"),
+    "utime": _guard_no_follow(os.utime, "os.utime"),
+    "lchown": _guard_no_follow(os.lchown, "os.chown", always=True),
+}
+if hasattr(os, "lchmod"):
+    _GUARDED["lchmod"] = _guard_no_follow(os.lchmod, "os.chmod", always=True)
+for _name, _guarded in _GUARDED.items():
+    _original = getattr(os, _name)
+    for _support in (os.supports_dir_fd, os.supports_fd, os.supports_follow_symlinks):
+        if _original in _support:
+            _support.add(_guarded)
+    setattr(os, _name, _guarded)
 
 
 def pytest_configure(config: pytest.Config) -> None:
