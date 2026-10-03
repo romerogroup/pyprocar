@@ -286,6 +286,10 @@ class BS2DPlotter(SurfacePlotter):
 
         is_empty_slice = slc.n_points == 0
         if is_empty_slice:
+            self.renderer.remove_actor("slice")
+            self.renderer.remove_actor("vectors")
+            if cross_section_area:
+                self.add_text(area_text([], 0), name="area_text", **(add_text_args or {}))
             return None
 
         if active_vector_name:

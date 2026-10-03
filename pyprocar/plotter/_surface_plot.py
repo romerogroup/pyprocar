@@ -21,15 +21,53 @@ def find_nearest(array, value):
     return idx
 
 
-def slice_loop_areas(
-    slc: pv.PolyData, reciprocal_lattice: np.ndarray | None = None
+def slice_loop_areas(slc: pv.PolyData) -> tuple[list[float], int]:
+    """Areas of the closed loops in a planar slice, and the number of open curves."""
+    areas, chains, n_branched = slice_loops(slc)
+    return areas, n_branched + len(chains)
+
+
+def cross_section_areas(
+    mesh: pv.DataSet, normal, origin, reciprocal_lattice: np.ndarray | None = None
 ) -> tuple[list[float], int]:
-    """Areas of the closed loops in a planar slice, and the number of open curves.
+    """Areas of the closed orbits through the plane's cut of ``mesh``, and its open curves.
+
+    With ``reciprocal_lattice`` (rows are the b vectors), ``mesh`` is one period of a
+    periodic surface, such as a Fermi surface clipped to the first zone. A curve that
+    leaves the cut is followed through the cuts of the plane's lattice translates, and it
+    is a closed orbit when it comes back with no net translation. Orbits of the plane
+    that never pass through this cut are not counted.
+    """
+    normal = np.asarray(normal, dtype=np.float64) / np.linalg.norm(normal)
+    origin = np.asarray(origin, dtype=np.float64)
+    areas, chains, n_open = slice_loops(cast(pv.PolyData, mesh.slice(normal=normal, origin=origin)))
+    if reciprocal_lattice is None or not chains:
+        return areas, n_open + len(chains)
+    lattice = np.asarray(reciprocal_lattice, dtype=np.float64)
+    heights = np.asarray(mesh.points, dtype=np.float64) @ normal
+    steps = np.stack(np.meshgrid(*[np.arange(-3, 4)] * 3, indexing="ij"), axis=-1).reshape(-1, 3)
+    shifts = steps @ lattice
+    offsets = (origin - shifts) @ normal
+    tol = 1e-3 * float(np.linalg.norm(lattice, axis=1).min())
+    # Cuts at the surface's extreme heights are points or repeat the opposite zone face.
+    inside = (offsets > heights.min() + tol) & (offsets < heights.max() - tol)
+    other = inside & (np.abs(offsets - origin @ normal) > tol)
+    _, first = np.unique(np.round(offsets[other] / tol), return_index=True)
+    pieces = []
+    for shift in shifts[other][first]:
+        _, cut_chains, _ = slice_loops(
+            cast(pv.PolyData, mesh.slice(normal=normal, origin=origin - shift))
+        )
+        pieces += [chain + shift for chain in cut_chains]
+    orbit_areas, n_unjoined = join_across_zone(chains + pieces, lattice, n_seeds=len(chains))
+    return areas + orbit_areas, n_open + n_unjoined
+
+
+def slice_loops(slc: pv.PolyData) -> tuple[list[float], list[np.ndarray], int]:
+    """Closed-loop areas, open chains (ordered points) and branched curves of a slice.
 
     Segments that touch a non-finite point are dropped first, so a curve broken by
-    NaN energies counts as open. With ``reciprocal_lattice`` (rows are the b vectors),
-    curves cut by the zone boundary join into one orbit when their ends meet modulo
-    a reciprocal lattice vector.
+    NaN energies counts as open.
     """
     cells = np.asarray(slc.lines)
     pairs = []
@@ -42,7 +80,7 @@ def slice_loop_areas(
     points = np.asarray(slc.points, dtype=np.float64)
     lines = lines[np.isfinite(points[lines]).all(axis=(1, 2))]
     if len(lines) == 0:
-        return [], 0
+        return [], [], 0
     unique_points, merged = np.unique(np.round(points, 9), axis=0, return_inverse=True)
     lines = merged.reshape(-1)[lines]
     neighbours: dict[int, list[int]] = {}
@@ -77,10 +115,7 @@ def slice_loop_areas(
             chains.append(unique_points[path])
         else:
             areas.append(polygon_area(unique_points[path]))
-    if reciprocal_lattice is None or not chains:
-        return areas, n_open + len(chains)
-    orbit_areas, n_unjoined = join_across_zone(chains, reciprocal_lattice)
-    return areas + orbit_areas, n_open + n_unjoined
+    return areas, chains, n_open
 
 
 def polygon_area(corners: np.ndarray) -> float:
@@ -88,13 +123,15 @@ def polygon_area(corners: np.ndarray) -> float:
 
 
 def join_across_zone(
-    chains: list[np.ndarray], reciprocal_lattice: np.ndarray
+    chains: list[np.ndarray], reciprocal_lattice: np.ndarray, n_seeds: int | None = None
 ) -> tuple[list[float], int]:
-    """Join open chains whose ends coincide modulo a reciprocal lattice vector.
+    """Join open chains whose ends coincide, or coincide modulo a reciprocal lattice vector.
 
-    An orbit is closed when following the joins returns to its first chain with no net
-    lattice translation. Returns the closed orbits' areas and the number of curves left
-    open: chains with an end that matches nothing, and orbits that run through the zone.
+    Walks start from the first ``n_seeds`` chains (all by default); the other chains only
+    complete them. An orbit is closed when following the joins returns to its first chain
+    with no net lattice translation. Returns the closed orbits' areas and the number of
+    curves left open: chains with an end that matches nothing, and orbits that run
+    through the zone.
     """
     ends = np.array([chain[i] for chain in chains for i in (0, -1)])
     frac = ends @ np.linalg.inv(reciprocal_lattice)
@@ -102,14 +139,15 @@ def join_across_zone(
     for a in range(len(ends)):
         shift = frac - frac[a]
         whole = np.rint(shift)
-        match = np.flatnonzero((np.abs(shift - whole).max(axis=1) < 1e-5) & whole.any(axis=1))
+        others = np.arange(len(ends)) != a
+        match = np.flatnonzero((np.abs(shift - whole).max(axis=1) < 1e-5) & others)
         if len(match) == 1:
             partner[a] = (int(match[0]), whole[match[0]] @ reciprocal_lattice)
 
     areas: list[float] = []
     n_open = 0
     done: set[int] = set()
-    for first in range(len(chains)):
+    for first in range(len(chains) if n_seeds is None else n_seeds):
         if first in done:
             continue
         entry, offset, pieces = 2 * first, np.zeros(3), []

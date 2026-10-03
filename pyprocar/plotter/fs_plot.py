@@ -18,10 +18,10 @@ from pyprocar.plotter._series import SurfaceSeries, surface_series
 from pyprocar.plotter._surface_plot import (
     SurfacePlotter,
     area_text,
+    cross_section_areas,
     find_nearest,
     normalize_to_range,
     open_curves_note,
-    slice_loop_areas,
 )
 
 logger = logging.getLogger(__name__)
@@ -349,35 +349,35 @@ class FermiPlotter(SurfacePlotter):
 
         add_text_args = add_text_args or {}
 
-        slc = mesh.slice(normal=normal, origin=origin)
-        active_vector_name = slc.active_vectors_name
-
-        is_empty_slice = slc.n_points == 0
-        if is_empty_slice:
-            return None
-
-        if active_vector_name:
-            add_surface_args["add_active_vectors"] = add_surface_args.get(
-                "add_active_vectors", True
-            )
-            add_surface_args["add_texture_args"] = add_surface_args.get("add_texture_args", {})
-            add_surface_args["add_texture_args"]["name"] = "vectors"
-            slc.set_active_vectors(active_vector_name)
-
-        self.add_surface(slc, name="slice", **add_surface_args)
-
         if show_van_alphen_frequency and show_cross_section_area:
             raise ValueError(
                 "show_van_alphen_frequency and show_cross_section_area cannot be True at the same time"
             )
 
+        slc = mesh.slice(normal=normal, origin=origin)
+        active_vector_name = slc.active_vectors_name
+
+        is_empty_slice = slc.n_points == 0
+        if is_empty_slice:
+            self.renderer.remove_actor("slice")
+            self.renderer.remove_actor("vectors")
+        else:
+            if active_vector_name:
+                add_surface_args["add_active_vectors"] = add_surface_args.get(
+                    "add_active_vectors", True
+                )
+                add_surface_args["add_texture_args"] = add_surface_args.get("add_texture_args", {})
+                add_surface_args["add_texture_args"]["name"] = "vectors"
+                slc.set_active_vectors(active_vector_name)
+            self.add_surface(cast(pv.PolyData, slc), name="slice", **add_surface_args)
+
         if show_van_alphen_frequency or show_cross_section_area:
-            areas, n_open = slice_loop_areas(cast(pv.PolyData, slc), reciprocal_lattice)
+            areas, n_open = cross_section_areas(mesh, normal, origin, reciprocal_lattice)
             if show_van_alphen_frequency:
                 frequency = (
                     f"{dHvA_frequency(max(areas) * FS_AREA_SCALE_FACTOR):.4f} Gauss"
                     if areas
-                    else "no closed orbit"
+                    else "no closed orbit through this cut"
                 )
                 text = f"Van Alphen Frequency : {frequency}" + open_curves_note(n_open)
             else:

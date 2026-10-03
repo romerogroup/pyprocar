@@ -89,7 +89,9 @@ def test_open_curves_are_reported_and_not_counted():
 def test_van_alphen_frequency_without_a_closed_orbit_says_so():
     text = _slice_text(_bowl(), origin=(-0.7, 0, 0), show_van_alphen_frequency=True)
 
-    assert text == "Van Alphen Frequency : no closed orbit (1 open curve not counted)"
+    assert (
+        text == "Van Alphen Frequency : no closed orbit through this cut (1 open curve not counted)"
+    )
 
 
 def test_van_alphen_frequency_reports_the_open_curves_it_skipped():
@@ -278,7 +280,7 @@ def test_srvo3_band_16_orbit_around_m_closes_across_the_zone_boundary():
     ("flag", "text"),
     [
         ("show_cross_section_area", "Cross sectional area : 0.0000 Ang^-2"),
-        ("show_van_alphen_frequency", "Van Alphen Frequency : no closed orbit"),
+        ("show_van_alphen_frequency", "Van Alphen Frequency : no closed orbit through this cut"),
     ],
 )
 def test_moving_the_plane_to_an_empty_cut_clears_the_previous_result(flag, text):
