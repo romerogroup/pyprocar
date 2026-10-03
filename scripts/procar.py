@@ -48,7 +48,6 @@ def call_bandsplot(args):
         title=args.title,
         outcar=args.outcar,
         kpointsfile=args.kpointsfile,
-        kdirect=args.kdirect,
     )
 
 
@@ -685,9 +684,6 @@ if __name__ == "__main__":
 
         phelp = "KPOINTS file for bandstructure plotting.\n"
         parserBandsplot.add_argument("--kpointsfile", help=phelp, default=None)
-
-        phelp = "Convert k-points from reduced to cartesian for plot #1?"
-        parserBandsplot.add_argument("-kdirect", help=phelp, action="store_false")
 
         parserBandsplot.set_defaults(func=call_bandsplot)
 
