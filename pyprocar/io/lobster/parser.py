@@ -178,6 +178,7 @@ class LobsterParser(BaseParser):
                 "kpoints": kpoints,
                 "segment_names": segment_names,
                 "special_kpoint_map": special_kpoint_map,
+                "reciprocal_lattice": self.reciprocal_lattice,
             }
             if ngrids and len(ngrids) >= n_segments:
                 kpath_kwargs["n_grids"] = ngrids[:n_segments]
