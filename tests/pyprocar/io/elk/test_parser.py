@@ -630,3 +630,20 @@ def test_vertex_labels_keep_latex_that_kpath_does_not_alias(tmp_path):
 
     assert isinstance(ebs, ElectronicBandStructurePath)
     assert ebs.kpath.tick_names == ["Γ", "X", "$\\Sigma_1$"]
+
+
+def test_task_20_bands_carry_no_projections_from_stale_band_s_files(tmp_path):
+    calc_dir = _band_dir(
+        tmp_path,
+        "20",
+        {
+            "BAND.OUT": BAND_OUT,
+            "BAND_S01_A0001.OUT": BAND_S01_A0001,
+            "BAND_S02_A0001.OUT": BAND_S02_A0001,
+        },
+    )
+    ebs = ElkParser(calc_dir).ebs
+
+    assert isinstance(ebs, ElectronicBandStructurePath) and ebs.bands is not None
+    assert ebs.bands.to_array().shape == (11, 2, 1)
+    assert ebs.projected is None

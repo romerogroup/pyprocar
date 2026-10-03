@@ -5,7 +5,11 @@ from pathlib import Path
 import numpy as np
 import pytest
 
-from pyprocar.core.ebs import ElectronicBandStructure, ElectronicBandStructureMesh
+from pyprocar.core.ebs import (
+    ElectronicBandStructure,
+    ElectronicBandStructureMesh,
+    ElectronicBandStructurePath,
+)
 from pyprocar.core.kpoints import KGRID_MODE, KGridInfo, get_kpoints_from_kgrid
 from pyprocar.io import get_parser
 from pyprocar.io.qe.parser import QEParser
@@ -696,3 +700,47 @@ def test_dos_directory_with_a_bands_input_still_gives_the_full_mesh(tmp_path: Pa
 
     assert type(ebs) is ElectronicBandStructureMesh
     assert ebs.kpoints.shape == (4096, 3)
+
+
+def test_projwfc_kpoints_from_a_bands_run_win_over_a_later_nscf_xml(tmp_path: Path) -> None:
+    for relative_path, content in TETRAGONAL_PROJWFC_FILES.items():
+        (tmp_path / relative_path).write_text(content)
+    head, _, tail = TETRAGONAL_PW_XML.partition("      <ks_energies>")
+    (tmp_path / "test.xml").write_text(
+        head.replace(
+            "  <output>",
+            "  <input><control_variables><calculation>nscf</calculation>"
+            + "</control_variables></input>\n  <output>",
+        ).replace("<nks>4</nks>", "<nks>1</nks>")
+        + "      <ks_energies>"
+        + tail.split("      <ks_energies>")[0]
+        + tail.rpartition("      </ks_energies>\n")[2]
+    )
+    (tmp_path / "bands.in").write_text(
+        SCF_IN.replace("'scf'", "'bands'").replace(
+            "K_POINTS automatic\n4 4 4 0 0 0\n",
+            "K_POINTS crystal_b\n3\n0 0 0 1 !G\n0.5 0 0 1 !X\n0 0 0.5 1 !Z\n",
+        )
+    )
+    parser = QEParser(tmp_path)
+
+    assert parser.pw_xml is not None and len(parser.pw_xml.kpoints) == 1
+    assert parser.is_bands_run
+    assert parser.kgrid_info is None
+
+
+@pytest.mark.data
+def test_bands_projwfc_then_nscf_in_one_directory_still_plots_the_bands(tmp_path: Path) -> None:
+    bands_dir = QE_CODES_DIR / "non-spin-polarized" / "bands"
+    dos_dir = QE_CODES_DIR / "non-spin-polarized" / "dos"
+    for path in bands_dir.rglob("*"):
+        if path.is_file() and "pdos_" not in path.name and path.suffix != ".pkl":
+            target = tmp_path / path.relative_to(bands_dir)
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_bytes(path.read_bytes())
+    for name in ("out/SrVO3.xml", "nscf.in", "nscf.out"):
+        (tmp_path / name).write_bytes((dos_dir / name).read_bytes())
+    ebs = QEParser(tmp_path).ebs
+
+    assert type(ebs) is ElectronicBandStructurePath
+    assert ebs.kpoints.shape == (155, 3)
