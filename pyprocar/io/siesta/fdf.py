@@ -9,7 +9,11 @@ from typing import Any, override
 
 import numpy as np
 
+from pyprocar.utils.units import AU_TO_ANG
+
 logger = logging.getLogger(__name__)
+
+_LENGTH_UNITS_IN_ANGSTROM = {"ang": 1.0, "angstrom": 1.0, "bohr": AU_TO_ANG, "nm": 10.0}
 
 
 def _extract_block(text: str, block_name: str) -> str | None:
@@ -76,11 +80,30 @@ class FDF(Mapping[str, Any]):
 
     @cached_property
     def lattice_constant(self) -> float:
-        """Extract LatticeConstant from FDF file."""
-        match = re.findall(r"LatticeConstant\s+([0-9.]+)", self.file_str, re.IGNORECASE)
-        if not match:
-            return 1.0  # Default if not specified
-        return float(match[0])
+        """LatticeConstant in Angstrom.
+
+        A value without a unit is in Bohr, as FDF reads it. Without the
+        keyword, 1.0 is returned, so LatticeVectors are read as Angstrom.
+        """
+        match = re.search(
+            r"^\s*LatticeConstant\s+([0-9.eE+-]+)\s*([A-Za-z]*)",
+            self.file_str,
+            re.IGNORECASE | re.MULTILINE,
+        )
+        if match is None:
+            return 1.0
+        unit = match.group(2).lower() or "bohr"
+        if unit not in _LENGTH_UNITS_IN_ANGSTROM:
+            raise ValueError(f"Unsupported LatticeConstant unit: {match.group(2)}")
+        return float(match.group(1)) * _LENGTH_UNITS_IN_ANGSTROM[unit]
+
+    @cached_property
+    def band_lines_scale(self) -> str:
+        """BandLinesScale: "pi/a" (the Siesta default) or "ReciprocalLatticeVectors"."""
+        match = re.search(
+            r"^\s*BandLinesScale\s+(\S+)", self.file_str, re.IGNORECASE | re.MULTILINE
+        )
+        return "pi/a" if match is None else match.group(1)
 
     @cached_property
     def lattice_vectors(self) -> np.ndarray:
@@ -95,7 +118,7 @@ class FDF(Mapping[str, Any]):
             coords = line.split()
             for j, coord in enumerate(coords[:3]):
                 lattice[i, j] = float(coord)
-        return lattice
+        return lattice * self.lattice_constant
 
     @cached_property
     def atomic_coords_format(self) -> str:

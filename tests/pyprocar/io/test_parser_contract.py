@@ -81,7 +81,7 @@ CASES = [
     pytest.param(
         "siesta",
         {"silicon.fdf": FDF_STR, "silicon.bands": BANDS_STR},
-        {"ebs", "structure", "fermi", "reciprocal_lattice"},
+        {"ebs", "structure", "fermi", "reciprocal_lattice", "kpath"},
         id="siesta-bands",
     ),
     pytest.param(
@@ -143,15 +143,7 @@ def test_populated_directory_returns_core_types(
     [
         ("vasp", "vasp/6.4/SrVO3/non-spin-polarized/bands"),
         ("qe", "qe/7.2/SrVO3/non-spin-polarized/bands"),
-        pytest.param(
-            "abinit",
-            "abinit/9.6/Fe/non-spin-polarized/bands",
-            marks=pytest.mark.xfail(
-                reason="AbinitParser returns bands in Hartree and fermi in eV",
-                raises=AssertionError,
-                strict=True,
-            ),
-        ),
+        ("abinit", "abinit/9.6/Fe/non-spin-polarized/bands"),
     ],
 )
 @pytest.mark.data

@@ -152,8 +152,19 @@ class SiestaParser(BaseParser):
 
         try:
             band_lines = self._fdf.band_lines
-            if band_lines is None:
+            reciprocal_lattice = self.reciprocal_lattice
+            if band_lines is None or reciprocal_lattice is None:
                 return None
+
+            # pi/a (the Siesta default) gives Cartesian k in units of pi/a; this
+            # converts it to fractional coordinates of the 1/a reciprocal lattice.
+            scale = self._fdf.band_lines_scale.lower()
+            if scale == "pi/a":
+                to_fractional = np.linalg.inv(reciprocal_lattice) / (2 * self._fdf.lattice_constant)
+            elif scale == "reciprocallatticevectors":
+                to_fractional = np.eye(3)
+            else:
+                raise ValueError(f"Unsupported BandLinesScale: {self._fdf.band_lines_scale}")
 
             # Build segment names as list of tuples (start_name, end_name)
             segment_names: list[tuple[str, str]] = []
@@ -169,8 +180,8 @@ class SiestaParser(BaseParser):
                 segment_names.append((start_name, end_name))
 
                 # Add to special kpoint map with normalized names
-                special_kpoint_map[start_name] = np.array(band_lines[i]["kpoint"])
-                special_kpoint_map[end_name] = np.array(band_lines[i + 1]["kpoint"])
+                special_kpoint_map[start_name] = np.array(band_lines[i]["kpoint"]) @ to_fractional
+                special_kpoint_map[end_name] = np.array(band_lines[i + 1]["kpoint"]) @ to_fractional
 
                 # n_grids for this segment
                 n_grids.append(band_lines[i + 1]["npoints"])
@@ -179,6 +190,7 @@ class SiestaParser(BaseParser):
                 n_grids=n_grids,
                 segment_names=segment_names,
                 special_kpoint_map=special_kpoint_map,
+                reciprocal_lattice=reciprocal_lattice,
             )
         except Exception as e:
             user_logger.warning(f"Error creating kpath: {e}")

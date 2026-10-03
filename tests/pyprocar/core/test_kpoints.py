@@ -5,6 +5,8 @@ This module contains unit tests for k-point generation functions,
 coordinate transformation utilities, and the KPath class.
 """
 
+import logging
+
 import numpy as np
 import pytest
 
@@ -549,11 +551,14 @@ class TestKPathProperties:
     """Test class for KPath properties."""
 
     @pytest.fixture
-    def kpath_with_segments(self, simple_kpath_kpoints, simple_segment_names):
+    def kpath_with_segments(
+        self, simple_kpath_kpoints, simple_segment_names, identity_reciprocal_lattice
+    ):
         """Create a KPath with multiple segments for testing."""
         return KPath(
             kpoints=simple_kpath_kpoints,
             segment_names=simple_segment_names,
+            reciprocal_lattice=identity_reciprocal_lattice,
         )
 
     def test_n_kpoints(self, kpath_with_segments, simple_kpath_kpoints):
@@ -673,11 +678,14 @@ class TestKPathMethods:
     """Test class for KPath methods."""
 
     @pytest.fixture
-    def kpath_with_segments(self, simple_kpath_kpoints, simple_segment_names):
+    def kpath_with_segments(
+        self, simple_kpath_kpoints, simple_segment_names, identity_reciprocal_lattice
+    ):
         """Create a KPath with multiple segments for testing."""
         return KPath(
             kpoints=simple_kpath_kpoints,
             segment_names=simple_segment_names,
+            reciprocal_lattice=identity_reciprocal_lattice,
         )
 
     def test_get_segments_all(self, kpath_with_segments):
@@ -925,3 +933,101 @@ class TestKPathDiscontinuities:
         assert len(kpath_low.discontinuity_start_indices) >= len(
             kpath_high.discontinuity_start_indices
         )
+
+
+def test_kpath_without_repeated_boundaries_builds_and_prints():
+    gamma_x = np.linspace([0, 0, 0], [0.5, 0, 0], 5)
+    x_m = np.linspace([0.5, 0, 0], [0.5, 0.5, 0], 5)[1:]
+    m_gamma = np.linspace([0.5, 0.5, 0], [0, 0, 0], 5)[1:]
+    kpath = KPath(
+        kpoints=np.vstack([gamma_x, x_m, m_gamma]),
+        segment_names=[("G", "X"), ("X", "M"), ("M", "G")],
+    )
+
+    assert kpath.tick_positions == [0, 12]
+    assert str(kpath).splitlines()[:2] == ["K-Path", "------"]
+
+
+def test_kpath_distances_default_to_cartesian():
+    kpath = KPath(
+        kpoints=np.linspace([0.0, 0.0, 0.0], [0.0, 0.0, 0.5], 6),
+        segment_names=[("G", "Z")],
+        reciprocal_lattice=np.diag([0.25, 0.25, 0.1]),
+    )
+
+    assert kpath.get_distances(as_segments=False) == pytest.approx(
+        [0.0, 0.01, 0.02, 0.03, 0.04, 0.05]
+    )
+
+
+@pytest.fixture
+def user_warnings(caplog):
+    """Capture warnings on the non-propagating "user" logger."""
+    user_logger = logging.getLogger("user")
+    user_logger.addHandler(caplog.handler)
+    with caplog.at_level(logging.WARNING, logger="user"):
+        yield caplog
+    user_logger.removeHandler(caplog.handler)
+
+
+def test_kpath_with_fewer_names_than_segments_warns_and_labels_what_it_can(user_warnings):
+    gamma_x = np.linspace([0, 0, 0], [0.5, 0, 0], 5)
+    r_m = np.linspace([0.5, 0.5, 0.5], [0.5, 0.5, 0], 5)
+    kpoints = np.vstack([gamma_x, r_m])
+
+    kpath = KPath(
+        kpoints=kpoints,
+        segment_names=[("G", "X")],
+        special_kpoint_map={"G": kpoints[0], "X": kpoints[4]},
+    )
+
+    assert "KPath got 1 segment names for 2 segments in the k-points; ticks use 1" in (
+        user_warnings.text
+    )
+    assert list(zip(kpath.tick_positions, kpath.tick_names, strict=True)) == [(0, "Γ"), (4, "X")]
+
+
+G_POINT, X_POINT, R_POINT, M_POINT = (
+    np.zeros(3),
+    np.array([0.5, 0, 0]),
+    np.array([0.5, 0.5, 0.5]),
+    np.array([0.5, 0.5, 0]),
+)
+GAMMA_X_R_M = np.vstack([np.linspace(G_POINT, X_POINT, 5), np.linspace(R_POINT, M_POINT, 5)])
+
+
+def test_kpath_builds_with_a_canonically_keyed_map_and_raw_names():
+    kpath = KPath(
+        kpoints=GAMMA_X_R_M,
+        segment_names=[("GAMMA", "X"), ("R", "M")],
+        special_kpoint_map={"Γ": G_POINT, "X": X_POINT, "R": R_POINT, "M": M_POINT},
+        reciprocal_lattice=np.eye(3),
+    )
+
+    assert kpath.tick_names == ["$\\Gamma$", "X|R", "M"]
+
+
+def test_kpath_jump_ignores_a_label_reused_for_another_point():
+    kpath = KPath(
+        kpoints=GAMMA_X_R_M,
+        segment_names=[("G", "X"), ("R", "M")],
+        special_kpoint_map={"G": G_POINT, "X": X_POINT, "R": np.array([-0.5, 0.5, 0.5])},
+        reciprocal_lattice=np.eye(3),
+    )
+
+    tick_x = np.asarray(kpath.k_distances)[kpath.tick_positions]
+    assert tick_x == pytest.approx([0.0, 0.5, 1.0])
+
+
+def test_kpath_jump_ignores_a_segment_start_off_its_k_points(user_warnings):
+    kpath = KPath(
+        kpoints=GAMMA_X_R_M,
+        segment_names=[("G", "X"), ("R", "M")],
+        reciprocal_lattice=np.eye(3),
+        segment_start_kpoints=np.array([G_POINT, np.array([-0.5, 0.5, 0.5])]),
+    )
+
+    assert "KPath start of segment 2 does not match its k-points; jump counts as zero" in (
+        user_warnings.text
+    )
+    assert kpath.k_distances[-1] == pytest.approx(1.0)

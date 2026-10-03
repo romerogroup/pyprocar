@@ -1,6 +1,7 @@
 """Tests for SIESTA FDF extractor."""
 
 import numpy as np
+import pytest
 
 from pyprocar.io.siesta import FDF
 
@@ -47,11 +48,20 @@ class TestFDF:
         fdf = FDF.from_str(FDF_STR)
         assert fdf.lattice_vectors.shape == (3, 3)
         expected = np.array([
-            [0.5, 0.5, 0.0],
-            [0.0, 0.5, 0.5],
-            [0.5, 0.0, 0.5],
+            [2.715, 2.715, 0.0],
+            [0.0, 2.715, 2.715],
+            [2.715, 0.0, 2.715],
         ])
         assert np.allclose(fdf.lattice_vectors, expected)
+
+    def test_lattice_constant_without_unit_is_bohr(self) -> None:
+        fdf = FDF.from_str(FDF_STR.replace("5.43 Ang", "10.0"))
+        assert fdf.lattice_constant == pytest.approx(5.2917721067121)
+
+    def test_band_lines_scale_defaults_to_pi_over_a(self) -> None:
+        assert FDF.from_str(FDF_STR).band_lines_scale == "pi/a"
+        scaled = FDF.from_str(FDF_STR + "BandLinesScale ReciprocalLatticeVectors\n")
+        assert scaled.band_lines_scale == "ReciprocalLatticeVectors"
 
     def test_atomic_coords_format(self) -> None:
         fdf = FDF.from_str(FDF_STR)

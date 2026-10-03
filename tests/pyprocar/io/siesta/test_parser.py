@@ -10,10 +10,12 @@ from pyprocar.io.siesta import FDF, Bands, SiestaParser
 FDF_STR = """
 SystemLabel silicon
 
+LatticeConstant 5.43 Ang
+
 %block LatticeVectors
-  5.43  0.00  0.00
-  0.00  5.43  0.00
-  0.00  0.00  5.43
+  1.00  0.00  0.00
+  0.00  1.00  0.00
+  0.00  0.00  1.00
 %endblock LatticeVectors
 
 %block ChemicalSpeciesLabel
@@ -87,13 +89,30 @@ class TestSiestaParser:
         assert np.allclose(recip, np.eye(3) / 5.43)
 
     def test_kpath(self, siesta_dir: Path) -> None:
-        parser = SiestaParser(siesta_dir)
-        # kpath property should not raise an exception
-        # Note: KPath creation may fail due to upstream issues, returning None
-        kpath = parser.kpath
-        # Just verify it doesn't raise an exception - kpath may be None
-        # due to KPath class issues when logging (pre-existing bug)
-        assert kpath is None or hasattr(kpath, "n_kpoints")
+        kpath = SiestaParser(siesta_dir).kpath
+
+        assert kpath is not None
+        assert list(zip(kpath.tick_positions, kpath.tick_names, strict=True)) == [
+            (0, "L"),
+            (1, "Γ"),
+        ]
+
+    @pytest.mark.parametrize(
+        ("scale_line", "gamma_l"),
+        [
+            ("", np.sqrt(3) / 4 / 5.43),
+            ("BandLinesScale pi/a\n", np.sqrt(3) / 4 / 5.43),
+            ("BandLinesScale ReciprocalLatticeVectors\n", np.sqrt(3) / 2 / 5.43),
+        ],
+    )
+    def test_kpath_distances_follow_band_lines_scale(
+        self, siesta_dir: Path, scale_line: str, gamma_l: float
+    ) -> None:
+        (siesta_dir / "silicon.fdf").write_text(FDF_STR + scale_line)
+        kpath = SiestaParser(siesta_dir).kpath
+
+        assert kpath is not None
+        assert kpath.k_distances == pytest.approx([0.0, gamma_l])
 
     def test_ebs(self, siesta_dir: Path) -> None:
         parser = SiestaParser(siesta_dir)

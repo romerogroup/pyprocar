@@ -17,6 +17,7 @@ from pyprocar.core.brillouin_zone import BrillouinZone
 from pyprocar.utils import math, np_utils
 
 logger = logging.getLogger(__name__)
+user_logger = logging.getLogger("user")
 
 KPOINTS_DTYPE = np.ndarray[tuple[int, Literal[3]], np.dtype[np_utils.FLOAT_DTYPE]]
 RECIPROCAL_LATTICE_DTYPE = np.ndarray[tuple[Literal[3], Literal[3]], np.dtype[np_utils.FLOAT_DTYPE]]
@@ -180,6 +181,8 @@ class KPath:
         discontinuity_threshold=0.2,
         zero_diff_threshold=1e-6,
         as_latex=True,
+        segment_end_indices: list[int] | None = None,
+        segment_start_kpoints: np.ndarray | None = None,
     ):
         """
         The Kpath object to handle labels and ticks for band structure
@@ -206,6 +209,15 @@ class KPath:
             The threshold for a discontinuity
         zero_diff_threshold: float
             The threshold for a zero difference
+        segment_end_indices: List[int], optional
+            The index of the last k-point of each segment. Use it when the
+            k-points do not repeat segment boundaries, so the segments cannot
+            be found from the k-points alone. By default the segments are found
+            from repeated k-points and jumps.
+        segment_start_kpoints: np.ndarray, optional
+            The fractional start point of each segment, shape (n_segments, 3).
+            The step across a jump is measured from it, for codes that leave
+            the first point after a jump out of the k-points (Abinit).
         """
         logger.info("Initializing KPath")
         logger.debug(f"n_grids: {n_grids}")
@@ -224,6 +236,7 @@ class KPath:
         self.zero_diff_threshold = zero_diff_threshold
         self._tick_name_map = tick_name_map
         self._reciprocal_lattice = reciprocal_lattice
+        self._segment_end_indices: list[int] | None = segment_end_indices
 
         # Normalizing kpoint names to canonical form
         segment_names = self._normalize_kpoint_names(segment_names)
@@ -233,11 +246,23 @@ class KPath:
         self._kpoints = kpoints
         if self._kpoints is None:
             self._kpoints = self.generate_points(segment_names, special_kpoint_map, n_grids)
+            self._segment_end_indices = (np.cumsum(n_grids) - 1).tolist()
         logger.debug(f"Kpoints shape: {self._kpoints.shape}")
 
         # Get kpoint indices per kpath segment
         self._segment_indices, self._continuous_start_indices, self._discontinuity_start_indices = (
             self.get_segment_indices()
+        )
+        if len(segment_names) != self.n_segments:
+            user_logger.warning(
+                "KPath got %d segment names for %d segments in the k-points; ticks use %d",
+                len(segment_names),
+                self.n_segments,
+                min(len(segment_names), self.n_segments),
+            )
+            segment_start_kpoints = None
+        self._jump_start_kpoints: dict[int, np.ndarray] = self._get_jump_start_kpoints(
+            segment_start_kpoints
         )
 
         # Get unique special kpoint names
@@ -248,7 +273,7 @@ class KPath:
         # Format special kpoint names
         self.special_kpoint_names = format_names(self._special_kpoint_names, as_latex=as_latex)
 
-        logger.info(f"\n{self}\n")
+        logger.info("\n%s\n", self)
         logger.info("KPath initialized")
 
     def __eq__(self, other):
@@ -262,11 +287,9 @@ class KPath:
         ret = "K-Path\n"
         ret += "------\n"
 
-        for isegment, segment_indices in enumerate(self.segment_indices):
-            start_name, end_name = self.segment_names[isegment]
-            start_kpoint = self.special_kpoint_map[start_name]
-            end_kpoint = self.special_kpoint_map[end_name]
-
+        for isegment, ((start_name, end_name), (start_kpoint, end_kpoint)) in enumerate(
+            zip(self.segment_names, self.special_kpoints, strict=False)
+        ):
             ret += f"{isegment + 1:>2}. {start_name:<8}: ({start_kpoint[0]:>6.2f} {start_kpoint[1]:>6.2f} {start_kpoint[2]:>6.2f}) -> {end_name:<8}: ({end_kpoint[0]:>6.2f} {end_kpoint[1]:>6.2f} {end_kpoint[2]:>6.2f})\n"
 
         ret += "\n"
@@ -333,6 +356,8 @@ class KPath:
 
     @property
     def kpoints_cartesian(self):
+        if self._reciprocal_lattice is None:
+            raise ValueError("KPath needs a reciprocal_lattice for Cartesian k-points")
         return reduced_to_cartesian(self.kpoints, self._reciprocal_lattice)
 
     @property
@@ -401,9 +426,13 @@ class KPath:
     def get_special_kpoints(self, as_segments: bool = False, cartesian: bool = False):
         special_kpoints = []
         kpoints = self.kpoints_cartesian if cartesian else self.kpoints
+        start_index = 0
         for segment_indices in self.segment_indices:
-            start_kpoint = kpoints[segment_indices[0]]
+            start_kpoint = kpoints[start_index]
             end_kpoint = kpoints[segment_indices[-1]]
+            start_index = segment_indices[-1]
+            if start_index in self.discontinuity_start_indices:
+                start_index += 1
 
             if as_segments:
                 special_kpoints.append((start_kpoint, end_kpoint))
@@ -440,12 +469,13 @@ class KPath:
             The list of tick names
         """
         if self._tick_name_map is None:
-            tick_name_map = {self._segment_indices[0][0]: self._segment_names[0][0]}
-            for i, segment_indices in enumerate(self._segment_indices):
+            names = self._segment_names
+            tick_name_map = {self._segment_indices[0][0]: names[0][0]}
+            for i, segment_indices in enumerate(self._segment_indices[: len(names)]):
                 end_index = segment_indices[-1]
-                name = self._segment_names[i][1]
-                if end_index in self.discontinuity_start_indices:
-                    name += "|" + self._segment_names[i + 1][0]
+                name = names[i][1]
+                if end_index in self.discontinuity_start_indices and i + 1 < len(names):
+                    name += "|" + names[i + 1][0]
                 tick_name_map[end_index] = name
 
             self._tick_name_map = tick_name_map
@@ -472,27 +502,59 @@ class KPath:
 
         return [segments[i] for i in isegments]
 
+    def _get_jump_start_kpoints(
+        self, segment_start_kpoints: np.ndarray | None
+    ) -> dict[int, np.ndarray]:
+        """Given start point of each segment that follows a jump, by jump index.
+
+        A start point is used only when it is the segment's first k-point or
+        one step before it; otherwise the jump counts as zero.
+        """
+        jump_starts: dict[int, np.ndarray] = {}
+        if segment_start_kpoints is None:
+            return jump_starts
+        for isegment in range(1, self.n_segments):
+            jump_index = self.segment_indices[isegment - 1][-1]
+            if jump_index not in self.discontinuity_start_indices:
+                continue
+            start = np.asarray(segment_start_kpoints[isegment], dtype=float)
+            segment = self._kpoints[self.segment_indices[isegment]]
+            candidates = [segment[0]]
+            if len(segment) > 1:
+                candidates.append(2 * segment[0] - segment[1])
+            if not any(np.allclose(start, c, atol=1e-4) for c in candidates):
+                user_logger.warning(
+                    "KPath start of segment %d does not match its k-points; jump counts as zero",
+                    isegment + 1,
+                )
+                continue
+            jump_starts[jump_index] = start
+        return jump_starts
+
     def get_distances(
         self,
-        isegments: list[int] = None,
+        isegments: list[int] | None = None,
         as_segments: bool = True,
         cumlative_across_segments: bool = True,
-        cartesian: bool = False,
+        cartesian: bool = True,
     ):
-        segments = self.get_segments(isegments=isegments, cartesian=cartesian)
+        if isegments is None:
+            isegments = list(range(self.n_segments))
+
+        kpoints = self.kpoints_cartesian if cartesian else self.kpoints
+        steps = np.linalg.norm(np.diff(kpoints, axis=0), axis=1)
+        steps[self.discontinuity_start_indices] = 0.0
+        for jump_index, start in self._jump_start_kpoints.items():
+            if cartesian:
+                start = start @ self._reciprocal_lattice
+            steps[jump_index] = np.linalg.norm(kpoints[jump_index + 1] - start)
+        path_distances = np.insert(np.cumsum(steps), 0, 0.0)
 
         k_segment_distances = []
-        previous_segment_max = 0
-        for isegment, segment in enumerate(segments):
-            k_diffs = np.diff(segment, axis=0)
-            k_diffs = np.linalg.norm(k_diffs, axis=1)
-            k_distances = np.cumsum(k_diffs)
-
-            k_distances = np.insert(k_distances, 0, 0)
-            if cumlative_across_segments:
-                k_distances = k_distances + previous_segment_max
-                previous_segment_max = k_distances[-1]
-
+        for isegment in isegments:
+            k_distances = path_distances[self.segment_indices[isegment]]
+            if not cumlative_across_segments:
+                k_distances = k_distances - k_distances[0]
             k_segment_distances.append(k_distances)
 
         if as_segments:
@@ -510,9 +572,16 @@ class KPath:
         # Calculate the norm of differences
         k_diff_norms = np.linalg.norm(k_diffs, axis=1)
 
-        # Find indices where difference is 0 (or very close to 0)
-        continuous_end_indices = list(np.where(k_diff_norms < self.zero_diff_threshold)[0])
-        discontinuity_end_indices = list(np.where(k_diff_norms > self.discontinuity_threshold)[0])
+        if self._segment_end_indices is None:
+            is_boundary = (k_diff_norms < self.zero_diff_threshold) | (
+                k_diff_norms > self.discontinuity_threshold
+            )
+            boundaries = list(np.where(is_boundary)[0])
+        else:
+            boundaries = self._segment_end_indices[:-1]
+        is_jump = k_diff_norms > self.discontinuity_threshold
+        continuous_end_indices = [i for i in boundaries if not is_jump[i]]
+        discontinuity_end_indices = [i for i in boundaries if is_jump[i]]
 
         segment_end_indices = (
             continuous_end_indices + discontinuity_end_indices + [len(self._kpoints) - 1]

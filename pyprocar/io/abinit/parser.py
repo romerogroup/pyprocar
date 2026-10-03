@@ -6,12 +6,21 @@ from functools import cached_property
 from pathlib import Path
 from typing import Any
 
-from pyprocar.core import DensityOfStates, ElectronicBandStructure, KPath, Structure
+import numpy as np
+
+from pyprocar.core import (
+    DensityOfStates,
+    ElectronicBandStructure,
+    KPath,
+    Structure,
+    get_ebs_from_data,
+)
 from pyprocar.io.abinit.dos import AbinitDOS
 from pyprocar.io.abinit.kpoints import AbinitKpoints
 from pyprocar.io.abinit.output import AbinitOutput
 from pyprocar.io.abinit.procar import AbinitProcar
 from pyprocar.io.base import BaseParser
+from pyprocar.utils.units import HARTREE_TO_EV
 
 logger = logging.getLogger(__name__)
 user_logger = logging.getLogger("user")
@@ -208,15 +217,16 @@ class AbinitParser(BaseParser):
         if hasattr(procar, 'spd_phase') and procar.spd_phase is not None:
             projected_phase = procar._spd2projected(procar.spd_phase)
         
-        return ElectronicBandStructure(
+        return get_ebs_from_data(
             kpoints=procar.kpoints,
-            bands=procar.bands,
+            bands=procar.bands * HARTREE_TO_EV,
             projected=procar._spd2projected(procar.spd),
             fermi=self.abinit_output.fermi,
             projected_phase=projected_phase,
             orbital_names=procar.orbital_names_old[:-1],
             reciprocal_lattice=self.abinit_output.reclat,
             structure=self.structure,
+            kpath=self.kpath,  # pyright: ignore[reportArgumentType]
         )
 
     @property
@@ -240,18 +250,27 @@ class AbinitParser(BaseParser):
     def kpath(self) -> KPath | None:
         if self.abinit_kpoints is None:
             return None
-        if self.abinit_kpoints.knames is None:
+        special_kpoints = self.abinit_kpoints.special_kpoints
+        if self.abinit_kpoints.knames is None or special_kpoints is None:
             return None
 
         kpoints = None
         if self.abinit_procar and self.abinit_procar.vasp_procar:
             kpoints = self.abinit_procar.vasp_procar.kpoints
 
+        # Abinit writes each segment boundary once.
+        segment_end_indices = np.cumsum(self.abinit_kpoints.ngrids).tolist()
+        if kpoints is None or segment_end_indices[-1] != len(kpoints) - 1:
+            user_logger.warning("KPOINTS divisions do not match the PROCAR k-points")
+            segment_end_indices = None
+
         return KPath(
             kpoints=kpoints,
             segment_names=self.abinit_kpoints.knames,
             n_grids=self.abinit_kpoints.ngrids,
             reciprocal_lattice=self.abinit_output.reclat if self.abinit_output else None,
+            segment_end_indices=segment_end_indices,
+            segment_start_kpoints=special_kpoints[:, 0],
         )
 
     @property

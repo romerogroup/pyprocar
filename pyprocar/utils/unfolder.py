@@ -18,7 +18,6 @@ class Unfolder:
         self.basis = None
         self.positions = None
         self.cell = structure.lattice
-        self.qpoints = ebs.kpoints
         self.tol_radius = tol_radius
         self.trans_rs = None
         self.trans_indices = None
@@ -117,11 +116,8 @@ class Unfolder:
         self.trans_rs = rs
         self.trans_indices = indices
 
-    def _get_weight(self, evec, qpt, G=None):
+    def _get_weight(self, evec):
         """
-        get the weight of a mode which has the wave vector of qpt and
-        eigenvector of evec.
-
         W= sum_1^N < evec| T(r_i)exp(-I (K+G) * r_i| evec>, here
         G=0. T(r_i)exp(-I K r_i)| evec> = evec[indices[i]]
 
@@ -132,19 +128,11 @@ class Unfolder:
                    ---
                    i=1
         """
-
-        if G is None:
-            G = np.zeros_like(qpt)
+        assert self.trans_indices is not None
         weight = 0j
         N = self.nfold
-        _phase = False
-        for r_i, ind in zip(self.trans_rs, self.trans_indices):
-            if _phase:
-                weight += (
-                    np.vdot(evec, evec[ind]) * np.exp(1j * 2 * np.pi * np.dot(qpt + G, r_i)) / N
-                )
-            else:
-                weight += np.vdot(evec, evec[ind]) * np.exp(-1j * 2 * np.pi * np.dot(G, r_i)) / N
+        for ind in self.trans_indices:
+            weight += np.vdot(evec, evec[ind]) / N
 
         return weight.real
 
@@ -159,7 +147,7 @@ class Unfolder:
             for iqpt in range(nqpts):
                 for ifreq in range(nfreqs):
                     weights[iqpt, ifreq, ispin] = self._get_weight(
-                        self.eigenvectors[iqpt, ifreq, ispin, :], self.qpoints[iqpt]
+                        self.eigenvectors[iqpt, ifreq, ispin, :]
                     )
 
         return weights

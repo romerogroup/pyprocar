@@ -1227,8 +1227,8 @@ class ElectronicBandStructurePath(
     def __init__(self, kpath: kpoints.KPath, **kwargs):
         super().__init__(**kwargs)
         self._kpath = kpath
-        self.as_cart()
-        logger.debug(f"ElectronicBandStructurePath: \n {self}")
+        self.transform_points(self.reciprocal_lattice)
+        logger.debug("ElectronicBandStructurePath: \n %s", self)
         logger.info("___ElectronicBandStructurePath initialization complete___")
 
     @classmethod
@@ -1243,12 +1243,6 @@ class ElectronicBandStructurePath(
         ret += "------------------------     \n"
         ret += f"KPath = \n {self.kpath}\n"
         return ret
-
-    def as_cart(self):
-        self.transform_points(self.reciprocal_lattice)
-
-    def as_frac(self):
-        self.transform_points(np.linalg.inv(self.reciprocal_lattice))
 
     @property
     def kpoints_cartesian(self):
@@ -1331,7 +1325,8 @@ class ElectronicBandStructurePath(
         if as_cartesian:
             mesh_points = self.kpoints_cartesian
         else:
-            mesh_points = self.kpoints
+            assert self.reciprocal_lattice is not None
+            mesh_points = kpoints.cartesian_to_reduced(self.kpoints, self.reciprocal_lattice)
         mesh = pv.PointSet(mesh_points)
         self._mesh = mesh
         if scalars is not None:

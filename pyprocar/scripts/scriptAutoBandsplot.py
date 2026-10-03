@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+import logging
+
 import numpy as np
 
 from pyprocar.core import ElectronicBandStructure
@@ -8,6 +10,8 @@ from pyprocar.pyposcar.clusters import Clusters
 from pyprocar.pyposcar.defects import FindDefect
 from pyprocar.pyposcar.poscar import Poscar
 from pyprocar.scripts.scriptBandsplot import bandsplot
+
+logger = logging.getLogger(__name__)
 
 try:
     pass
@@ -21,7 +25,7 @@ class AutoBandsPlot:
         self.code = code
         self.ebs = ElectronicBandStructure.from_code(code, dirname, use_cache=use_cache)
 
-        codes_with_scf_fermi = ["qe", "elk"]
+        codes_with_scf_fermi = ["qe", "elk", "abinit"]
         if code in codes_with_scf_fermi and fermi is None:
             logger.info(f"No fermi given, using the found fermi energy: {self.ebs.fermi}")
             fermi = self.ebs.fermi

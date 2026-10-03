@@ -26,6 +26,8 @@ The proven end state (1f36aae1):
   - The cell is cubic, so a private copy with `K_POINTS crystal_b` changed to `tpiba_b` must give the same 155 k-points and ticks (proven at #262). `tpiba_c` and `crystal_c` give `kpath` `None`; only the synthetic tests in `tests/pyprocar/io/qe/test_qe_parser.py` cover them.
 - `elk` structure: all four `data/codes/elk/6.3/SrVO3/*` dirs give a 3.841244 Angstrom cubic lattice, through `GEOMETRY.OUT` or, in `non-spin-polarized/bands`, the `elk.in` fallback. Their `structure.pkl` files hold the pre-#242 Bohr lattice (7.2589), so do not compare against them.
 - `Parser` writes nothing into the dir.
+- `abinit` (`data/codes/abinit/9.6/Fe/*/bands`, #255): `kpath` ticks are `Γ(0) H(50) N(100) Γ(150) P(200) H|P(250) N(300)`, and `ebs` is an `ElectronicBandStructurePath`. Abinit writes each segment boundary once, so a wrong segmentation shows as 3 ticks `Γ(0) H|H(250) N(300)`. With Cartesian x-distances, Γ–H is `1/a` = 0.3521 Å⁻¹ (a = 2.84 Å).
+- Band x-distances are Cartesian (Å⁻¹, no 2π) since #255. On the hexagonal `data/examples/bands/unfolding/primitive` set the tick x values are `0, 0.1878, 0.2963, 0.5132`; fractional distances give `0, 0.5, 0.8727, 1.3441`.
 
 ## Gotchas
 
