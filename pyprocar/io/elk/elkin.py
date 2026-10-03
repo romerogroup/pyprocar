@@ -189,14 +189,6 @@ class ElkIn:
         return max(0, self.n_high_sym - 1)
 
     @cached_property
-    def ngrids(self) -> list[int]:
-        """Number of k-points per segment."""
-        if self.n_segments == 0:
-            return []
-        points_per_segment = self.nkpoints // self.n_segments
-        return [points_per_segment] * self.n_segments
-
-    @cached_property
     def high_symmetry_points(self) -> npt.NDArray[np.float64]:
         """High-symmetry point coordinates as (n_high_sym, 3) array."""
         return self.plot1d.vertices
@@ -206,15 +198,3 @@ class ElkIn:
         """K-point labels as list of [start, end] pairs per segment."""
         labels = self.plot1d.labels
         return [[labels[i], labels[i + 1]] for i in range(self.n_segments)]
-
-    @cached_property
-    def special_kpoints(self) -> npt.NDArray[np.float64]:
-        """Special k-points as (n_segments, 2, 3) array of [start, end] pairs."""
-        if self.n_segments == 0:
-            return np.array([])
-
-        special = np.zeros((self.n_segments, 2, 3))
-        for i in range(self.n_segments):
-            special[i, 0, :] = self.high_symmetry_points[i, :]
-            special[i, 1, :] = self.high_symmetry_points[i + 1, :]
-        return special

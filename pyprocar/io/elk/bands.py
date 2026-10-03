@@ -145,10 +145,8 @@ class ElkBands:
 
     @cached_property
     def ngrids(self) -> npt.NDArray[np.int64]:
-        """Number of k-points per segment."""
-        grids = np.diff(np.array(self.kticks))
-        grids[-1] += 1
-        return grids
+        """Number of k-points per segment, counting the shared vertex in both segments."""
+        return np.diff(np.array(self.kticks)) + 1
 
     @cached_property
     def kpoints(self) -> npt.NDArray[np.float64]:

@@ -2,7 +2,6 @@
 
 import logging
 from functools import cached_property
-from itertools import pairwise
 from pathlib import Path
 
 import numpy as np
@@ -296,8 +295,7 @@ class ElkParser(BaseParser):
         if self._bands_parser is None or self._elkin is None:
             return None
 
-        kticks = self._bands_parser.kticks
-        n_grids = [end - start + 1 for start, end in pairwise(kticks)]
+        n_grids = self._bands_parser.ngrids.tolist()
         segment_names = [(pair[0], pair[1]) for pair in self._elkin.knames]
 
         return KPath(

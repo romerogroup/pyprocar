@@ -215,7 +215,8 @@ class TestElkBandsKpoints(BaseTest):
             nspin=1,
             high_symmetry_points=HIGH_SYM_POINTS,
         )
-        assert isinstance(bands.ngrids, np.ndarray)
+        assert bands.kticks == [0, 4, 4]
+        assert bands.ngrids.tolist() == [5, 1]
 
 
 class TestElkBandsEnergies(BaseTest):
