@@ -196,31 +196,22 @@ def test_is_grid_is_false_for_an_ibz_whose_coordinates_form_a_smaller_grid():
     }
 
 
-def test_symmetry_images_swap_the_atoms_the_operation_swaps():
-    # C2z maps the site (0.2, 0.1, 0) onto (0.8, 0.9, 0) and back
-    structure = Structure(
-        atoms=["X", "X"],
-        fractional_coordinates=[[0.2, 0.1, 0], [0.8, 0.9, 0]],
-        lattice=np.eye(3),
-        rotations=np.array([np.eye(3), np.diag([-1.0, -1, 1])]),
-    )
-    k_actions = np.array([np.eye(3), np.diag([-1.0, -1, 1]), -np.eye(3), np.diag([1.0, 1, -1])])
-    swaps = np.array([False, True, False, True])
+def assert_images_carry_each_site_weight_to_its_image_site(structure, k_actions, lands_on):
+    """P(g k, g a) = P(k, a): site a sums the field at g^-1 k over the g taking site 0 to a."""
+    n_sites = len(structure.atoms)
 
     def weights(k):
-        """P(g k, g a) = P(k, a): site a sums the field at g^-1 k over the g taking site 0 to a."""
         k = np.atleast_2d(k)
-        result = np.zeros((len(k), 2))
-        for m, swap in zip(k_actions, swaps, strict=True):
-            result[:, int(swap)] += asymmetric_field(k @ np.linalg.inv(m).T) + 2
+        result = np.zeros((len(k), n_sites))
+        for m, site in zip(k_actions, lands_on, strict=True):
+            result[:, site] += asymmetric_field(k @ np.linalg.inv(m).T) + 2
         return result
 
-    grid = gamma_grid((4, 4, 4))
-    ibz = wedge(grid, k_actions)
+    ibz = wedge(gamma_grid((4, 4, 4)), k_actions)
     ebs = ElectronicBandStructureMesh(
         kpoints=ibz,
         bands=np.zeros((len(ibz), 1, 1)),
-        projected=weights(ibz).reshape(-1, 1, 1, 2, 1),
+        projected=weights(ibz).reshape(-1, 1, 1, n_sites, 1),
         orbital_names=["s"],
         fermi=0.0,
         reciprocal_lattice=np.eye(3),
@@ -231,46 +222,34 @@ def test_symmetry_images_swap_the_atoms_the_operation_swaps():
     assert ebs.n_kpoints == 64 and ebs.projected is not None
     exact = np.round(ebs.kpoints * 4) / 4
     np.testing.assert_allclose(ebs.projected.to_array()[:, 0, 0, :, 0], weights(exact), atol=1e-12)
+
+
+def test_symmetry_images_swap_the_atoms_the_operation_swaps():
+    # C2z maps the site (0.2, 0.1, 0) onto (0.8, 0.9, 0) and back
+    c2z = np.diag([-1.0, -1, 1])
+    structure = Structure(
+        atoms=["X", "X"],
+        fractional_coordinates=[[0.2, 0.1, 0], [0.8, 0.9, 0]],
+        lattice=np.eye(3),
+        rotations=np.array([np.eye(3), c2z]),
+    )
+    k_actions = np.array([np.eye(3), c2z, -np.eye(3), -c2z])
+    assert_images_carry_each_site_weight_to_its_image_site(structure, k_actions, [0, 1, 0, 1])
 
 
 def test_symmetry_images_cycle_the_three_oxygens_the_way_the_third_turn_does():
     # C3 about [111] sends (x, y, z) to (z, x, y): the O at (1/2, 1/2, 0) lands on the one at
     # (0, 1/2, 1/2), that one on (1/2, 0, 1/2), and that one back on (1/2, 1/2, 0).
     c3 = np.array([[0.0, 0, 1], [1, 0, 0], [0, 1, 0]])
+    turns = np.array([np.eye(3), c3, c3 @ c3])
     structure = Structure(
         atoms=["O", "O", "O"],
         fractional_coordinates=[[0.5, 0.5, 0], [0.5, 0, 0.5], [0, 0.5, 0.5]],
         lattice=np.eye(3),
-        rotations=np.array([np.eye(3), c3, c3 @ c3]),
+        rotations=turns,
     )
-    turns = [np.eye(3), c3, c3 @ c3]
-    k_actions = np.array([sign * turn for sign in (1, -1) for turn in turns])
-    lands_on = [0, 2, 1, 0, 2, 1]
-
-    def weights(k):
-        """P(g k, g a) = P(k, a): site a sums the field at g^-1 k over the g taking site 0 to a."""
-        k = np.atleast_2d(k)
-        result = np.zeros((len(k), 3))
-        for m, site in zip(k_actions, lands_on, strict=True):
-            result[:, site] += asymmetric_field(k @ np.linalg.inv(m).T) + 2
-        return result
-
-    grid = gamma_grid((4, 4, 4))
-    ibz = wedge(grid, k_actions)
-    ebs = ElectronicBandStructureMesh(
-        kpoints=ibz,
-        bands=np.zeros((len(ibz), 1, 1)),
-        projected=weights(ibz).reshape(-1, 1, 1, 3, 1),
-        orbital_names=["s"],
-        fermi=0.0,
-        reciprocal_lattice=np.eye(3),
-        structure=structure,
-        kgrid_info=gamma_info((4, 4, 4)),
-    )
-
-    assert ebs.n_kpoints == 64 and ebs.projected is not None
-    exact = np.round(ebs.kpoints * 4) / 4
-    np.testing.assert_allclose(ebs.projected.to_array()[:, 0, 0, :, 0], weights(exact), atol=1e-12)
+    k_actions = np.concatenate([turns, -turns])
+    assert_images_carry_each_site_weight_to_its_image_site(structure, k_actions, [0, 2, 1] * 2)
 
 
 def pure_orbital_projections(n_kpoints, orbitals):
@@ -522,26 +501,22 @@ def test_the_unrotated_orbital_warning_lists_the_orbitals_in_numeric_order():
         quarter_turn_mesh(11)
 
 
-def time_reversed_wedge():
+def time_reversed_ebs(time_reversals=None):
     # The calculation reduced the 4x4x4 grid by C2z and plain time reversal, k ~ -k
     c2z = np.diag([-1.0, -1, 1])
-    k_actions = np.array([np.eye(3), c2z, -np.eye(3), -c2z])
-    return wedge(gamma_grid((4, 4, 4)), k_actions), c2z
+    ibz = wedge(gamma_grid((4, 4, 4)), np.array([np.eye(3), c2z, -np.eye(3), -c2z]))
+    return ElectronicBandStructure(
+        kpoints=ibz,
+        bands=np.zeros((len(ibz), 1, 1)),
+        reciprocal_lattice=cast(kpoints.RECIPROCAL_LATTICE_DTYPE, np.eye(3)),
+        structure=single_site(rotations=np.array([np.eye(3), c2z]), time_reversals=time_reversals),
+    )
 
 
 def test_time_reversal_filling_points_of_a_magnetic_group_warns():
     # Listed as the magnetic group {E, C2z with time reversal}, k -> -C2z k reaches only
     # half of the missing points; plain time reversal, not in that group, fills the rest.
-    ibz, c2z = time_reversed_wedge()
-    structure = single_site(
-        rotations=np.array([np.eye(3), c2z]), time_reversals=np.array([False, True])
-    )
-    ebs = ElectronicBandStructure(
-        kpoints=ibz,
-        bands=np.zeros((len(ibz), 1, 1)),
-        reciprocal_lattice=cast(kpoints.RECIPROCAL_LATTICE_DTYPE, np.eye(3)),
-        structure=structure,
-    )
+    ebs = time_reversed_ebs(time_reversals=np.array([False, True]))
 
     with pytest.warns(UserWarning, match="time reversal"):
         ibz2fbz(ebs, kgrid_info=gamma_info((4, 4, 4)))
@@ -553,13 +528,7 @@ def test_time_reversal_filling_points_of_a_magnetic_group_warns():
     reason="time reversal stays a silent fill-in for groups without time-reversal flags"
 )
 def test_time_reversal_filling_points_of_a_group_without_flags_does_not_warn():
-    ibz, c2z = time_reversed_wedge()
-    ebs = ElectronicBandStructure(
-        kpoints=ibz,
-        bands=np.zeros((len(ibz), 1, 1)),
-        reciprocal_lattice=cast(kpoints.RECIPROCAL_LATTICE_DTYPE, np.eye(3)),
-        structure=single_site(rotations=np.array([np.eye(3), c2z])),
-    )
+    ebs = time_reversed_ebs()
 
     with warnings.catch_warnings():
         warnings.simplefilter("error")

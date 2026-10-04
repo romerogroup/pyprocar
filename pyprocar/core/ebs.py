@@ -12,7 +12,6 @@ from __future__ import annotations
 import copy
 import itertools
 import logging
-import re
 import warnings
 from abc import ABC, abstractmethod
 from collections.abc import Iterable, Mapping, Sequence
@@ -2120,35 +2119,42 @@ _SPHERE_POINTS = _fibonacci_sphere(64)
 _HARMONICS_ON_SPHERE = real_harmonics(_SPHERE_POINTS)
 
 
-def orbital_rotation(
-    orbital_names: Sequence[str], rotation: np.ndarray
-) -> tuple[np.ndarray, list[str]]:
-    """Matrix M that takes orbital coefficients c at k to M c at the rotated k-point.
-
-    M follows from Y_i(R^-1 r) = sum_j M_ji Y_j(r) for the Cartesian rotation R. Each shell
-    rotates only when all of its real harmonics are present. Returns M and the names it leaves
-    unrotated.
-    """
-    names = [ORBITAL_ALIASES.get(str(name), str(name)) for name in orbital_names]
-    matrix = np.eye(len(names))
+def _full_shells(names: Sequence[str]) -> dict[int, list[int]]:
     shells: dict[int, list[int]] = {}
     for i, name in enumerate(names):
         if name in ORBITAL_ANGULAR_MOMENTUM:
             shells.setdefault(ORBITAL_ANGULAR_MOMENTUM[name], []).append(i)
-    unrotated = [
-        name for name in names if name not in ORBITAL_ANGULAR_MOMENTUM and name not in SHELL_SUMS
-    ]
+    return {degree: members for degree, members in shells.items() if len(members) == 2 * degree + 1}
+
+
+def _canonical_orbital_names(orbital_names: Sequence[str]) -> list[str]:
+    return [ORBITAL_ALIASES.get(str(name), str(name)) for name in orbital_names]
+
+
+def unrotated_orbitals(orbital_names: Sequence[str]) -> list[str]:
+    """The orbitals no rotation carries, in column order: unnamed ones and partial shells."""
+    names = _canonical_orbital_names(orbital_names)
+    rotated = {i for members in _full_shells(names).values() for i in members}
+    return [name for i, name in enumerate(names) if i not in rotated and name not in SHELL_SUMS]
+
+
+def orbital_rotation(orbital_names: Sequence[str], rotation: np.ndarray) -> np.ndarray:
+    """Matrix M that takes orbital coefficients c at k to M c at the rotated k-point.
+
+    M follows from Y_i(R^-1 r) = sum_j M_ji Y_j(r) for the Cartesian rotation R. Each shell
+    rotates only when all of its real harmonics are present; ``unrotated_orbitals`` names the
+    rest, which M leaves as they are.
+    """
+    names = _canonical_orbital_names(orbital_names)
+    matrix = np.eye(len(names))
     before, after = _HARMONICS_ON_SPHERE, real_harmonics(_SPHERE_POINTS @ rotation)
-    for degree, members in shells.items():
-        if len(members) != 2 * degree + 1:
-            unrotated += [names[i] for i in members]
-            continue
+    for members in _full_shells(names).values():
         matrix[np.ix_(members, members)] = np.linalg.lstsq(
             np.stack([before[names[i]] for i in members], axis=1),
             np.stack([after[names[i]] for i in members], axis=1),
             rcond=None,
         )[0]
-    return matrix, unrotated
+    return matrix
 
 
 def atom_permutation(structure: Structure, rotation: np.ndarray) -> np.ndarray:
@@ -2219,7 +2225,8 @@ def ibz2fbz(ebs, rotations=None, kgrid_info=None, inplace=True, time_reversals=N
     # The first operation that reaches a grid point supplies its values: the identity, so each
     # irreducible point keeps its own, then the listed operations, then their time-reversed copies.
     time_reversals = np.asarray(time_reversals, dtype=bool)
-    magnetic, n_listed = bool(time_reversals.any()), len(rotations)
+    magnetic = bool(time_reversals.any())
+    n_listed = len(rotations)
     rotations = np.concatenate([np.eye(3)[np.newaxis], rotations, rotations])
     time_reversals = np.concatenate([[False], time_reversals, ~time_reversals])
     signs = np.where(time_reversals, -1.0, 1.0)
@@ -2287,7 +2294,8 @@ def _turn_projections(ebs, rotations, time_reversals, operation, lattice_steps) 
         raise ValueError("Unfolding projections of several atoms needs the structure")
 
     names = ebs.orbital_names or [f"orbital {i}" for i in range(n_orbitals)]
-    if phase is not None and (phase.value.shape[2] == 4 or orbital_rotation(names, np.eye(3))[1]):
+    unrotated = unrotated_orbitals(names)
+    if phase is not None and (phase.value.shape[2] == 4 or unrotated):
         warnings.warn(
             "projected_phase is dropped: symmetry images need collinear phases over orbitals "
             + "with real-harmonic names in full shells",
@@ -2301,13 +2309,11 @@ def _turn_projections(ebs, rotations, time_reversals, operation, lattice_steps) 
     interfering = weights is not None and phases is not None and phases.shape == weights.shape
 
     b_t = np.asarray(reciprocal_lattice).T
-    unrotated: set[str] = set()
     for index in np.unique(operation[operation != IDENTITY]):
         rows = np.flatnonzero(operation == index)
         rotation = rotations[index]
         cartesian = _nearest_orthogonal(b_t @ rotation @ np.linalg.inv(b_t))
-        orbitals, missed = orbital_rotation(names, cartesian)
-        unrotated.update(missed)
+        orbitals = orbital_rotation(names, cartesian)
         mixes = not np.allclose(orbitals, np.eye(n_orbitals))
         order = slice(None)
         if structure is not None and n_atoms > 1:
@@ -2332,17 +2338,13 @@ def _turn_projections(ebs, rotations, time_reversals, operation, lattice_steps) 
         positions = np.asarray(structure.fractional_coordinates, dtype=float)
         bloch = np.exp(-2j * np.pi * np.round(lattice_steps) @ positions.T)
         phases *= bloch[:, np.newaxis, np.newaxis, :, np.newaxis]
-    if unrotated:
+    if unrotated and np.any(operation != IDENTITY):
         warnings.warn(
             "Orbital-resolved projections at symmetry images are not rotated for the orbitals "
-            + f"{sorted(unrotated, key=_numeric_order)}; sums over each full shell stay exact",
+            + f"{unrotated}; sums over each full shell stay exact",
             UserWarning,
             stacklevel=3,
         )
-
-
-def _numeric_order(name: str) -> list[str | int]:
-    return [int(part) if part.isdigit() else part for part in re.split(r"(\d+)", name)]
 
 
 def sort_by_kpoints(ebs, inplace=True, order="F"):
