@@ -211,7 +211,7 @@ def unfold(
             bands,
             scalars_data=scalars,
             widths_data=weights if weight_mode is not UnfoldMode.COLOR else None,
-            scalars_mode="scatter" if plot_mode is UnfoldPlotMode.SACATTER else "parametric",
+            scalars_mode="scatter" if plot_mode is UnfoldPlotMode.SCATTER else "parametric",
             scalars_cmap=config.cmap,
             scalars_clim=config.clim,
             color=per_channel(config.spin_colors, n_channels) if scalars is None else None,

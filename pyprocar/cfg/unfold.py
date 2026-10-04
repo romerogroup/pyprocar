@@ -16,7 +16,7 @@ class UnfoldPlotMode(Enum):
         Represents the band structure in a simple, where the colors are the different bands.
     PARAMETRIC : str
         Represents the band structure in a parametric form, summing over the projections.
-    SACATTER : str
+    SCATTER : str
         Represents the band structure in a scatter plot, where the colors are the different bands.
     ATOMIC : str
         Represents the band structure in an atomic level plot, plots singlr kpoint bands.
@@ -32,7 +32,7 @@ class UnfoldPlotMode(Enum):
 
     PLAIN = "plain"
     PARAMETRIC = "parametric"
-    SACATTER = "scatter"
+    SCATTER = "scatter"
     ATOMIC = "atomic"
     OVERLAY = "overlay"
     OVERLAY_SPECIES = "overlay_species"
