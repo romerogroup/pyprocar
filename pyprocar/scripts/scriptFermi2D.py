@@ -13,6 +13,7 @@ from pyprocar.core import FermiSurface
 from pyprocar.plotter import FermiSlicePlotter
 from pyprocar.scripts._selection import resolve_spins, signed_clim
 from pyprocar.utils import welcome
+from pyprocar.utils.log_utils import set_verbose_level
 
 user_logger = logging.getLogger("user")
 logger = logging.getLogger(__name__)
@@ -153,6 +154,7 @@ def fermi2D(
     """
 
     mode = Fermi2DMode(mode)
+    set_verbose_level(verbose)
     user_logger.info("If you want more detailed logs, set verbose to 2 or more")
     user_logger.info("_" * 100)
 
