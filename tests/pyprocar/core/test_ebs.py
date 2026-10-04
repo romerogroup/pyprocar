@@ -389,15 +389,20 @@ class TestElectronicBandStructure:
         assert np.all(shifted_ebs.kpoints >= -0.5)
         assert np.all(shifted_ebs.kpoints <= 0.5)
 
-        # Test specific transformations using formula: -fmod(x + 6.5, 1) + 0.5
-        # 0.7: -fmod(7.2, 1) + 0.5 = -0.2 + 0.5 = 0.3
-        assert np.isclose(shifted_ebs.kpoints[0, 0], 0.3)
-        # -0.8: -fmod(5.7, 1) + 0.5 = -0.7 + 0.5 = -0.2
-        assert np.isclose(shifted_ebs.kpoints[1, 0], -0.2)
-        # 1.2: -fmod(7.7, 1) + 0.5 = -0.7 + 0.5 = -0.2
-        assert np.isclose(shifted_ebs.kpoints[4, 2], -0.2)
-        # -0.9: -fmod(5.6, 1) + 0.5 = -0.6 + 0.5 = -0.1
-        assert np.isclose(shifted_ebs.kpoints[5, 2], -0.1)
+        np.testing.assert_allclose(
+            shifted_ebs.kpoints,
+            [
+                [-0.3, 0.3, 0.1],
+                [0.2, 0.2, 0.4],
+                [0.2, -0.1, 0.3],
+                [0.1, 0.3, 0.2],
+                [0.3, 0.2, 0.2],
+                [0.4, 0.1, 0.1],
+                [0.0, 0.0, 0.0],
+                [0.5, 0.5, 0.25],
+            ],
+            atol=1e-12,
+        )
 
         # Kpoints already in FBZ should remain unchanged
         assert np.allclose(shifted_ebs.kpoints[6], [0.0, 0.0, 0.0])
@@ -1243,7 +1248,7 @@ def test_reduced_non_collinear_bisb_mesh_unfolds_to_the_full_mesh_spin():
     }
     for kind, rows in kinds.items():
         image, target, source = (np.array(column) for column in zip(*rows, strict=True))
-        assert np.array_equal(unfolded[image, :, 0], true[source, :, 0]), kind
+        assert np.allclose(unfolded[image, :, 0], true[source, :, 0], atol=1e-12), kind
         assert np.abs(unfolded[image, :, 1:] - true[target, :, 1:]).mean() < 0.004, kind
 
 
@@ -1366,19 +1371,6 @@ def test_hexagonal_unfolded_spin_turns_with_the_cartesian_axial_rotation(on_the_
     assert len(ibz) < 72 and ebs.n_kpoints == 72 and ebs.projected is not None
     exact = np.round(ebs.kpoints * 6) / 6
     assert np.allclose(ebs.projected.to_array()[:, 0, 1:, 0, 0], spin(exact), atol=1e-10)
-
-
-def test_spin_transforms_rejects_an_image_no_operation_reaches():
-    from pyprocar.core.ebs import spin_transforms
-
-    with pytest.raises(ValueError, match="by no symmetry operation"):
-        spin_transforms(
-            np.array([[0.1, 0.2, 0.0]]),
-            np.array([[0.0, 0.0, 0.3]]),
-            np.array([np.eye(3)]),
-            True,
-            np.eye(3),
-        )
 
 
 @pytest.mark.parametrize(

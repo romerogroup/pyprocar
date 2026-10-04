@@ -19,7 +19,7 @@ from pathlib import Path
 import pyprocar
 
 ROOT = Path(__file__).resolve().parent.parent
-RST_BLOCK = re.compile(r"\.\. code-block:: (?:python|ipython3?)\n((?:\n|[ \t]+.*\n)+)")
+RST_BLOCK = re.compile(r"\.\. code-block:: (?:python|ipython3?)\n((?:\n|[ \t]+.*(?:\n|\Z))+)")
 MD_BLOCK = re.compile(r"```python\n(.*?)```", re.S)
 RST_COMMENT = re.compile(r"(\s*)\.\.(?:\s+(?!\S+::|_|\[|\|).*)?")
 
@@ -118,3 +118,28 @@ def unbound_calls(root: Path) -> list[str]:
 
 def test_documented_pyprocar_calls_bind_to_the_current_signatures():
     assert unbound_calls(ROOT) == []
+
+
+def missing_ebs_members(root: Path) -> list[str]:
+    from pyprocar.core.ebs import ElectronicBandStructureMesh, ElectronicBandStructurePath
+
+    problems = []
+    for where, source in snippets(root):
+        try:
+            tree = ast.parse(source)
+        except SyntaxError:
+            continue
+        for node in ast.walk(tree):
+            if (
+                isinstance(node, ast.Attribute)
+                and isinstance(node.value, ast.Name)
+                and node.value.id == "ebs"
+                and not hasattr(ElectronicBandStructureMesh, node.attr)
+                and not hasattr(ElectronicBandStructurePath, node.attr)
+            ):
+                problems.append(f"{where}:{node.lineno}: ebs.{node.attr} does not exist")
+    return problems
+
+
+def test_documented_band_structure_members_exist():
+    assert missing_ebs_members(ROOT) == []

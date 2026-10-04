@@ -25,44 +25,56 @@ Using the ebs object, you can access various information related to the electron
 
 .. code-block:: python
 
-    ebs.kpoints # kpoints in the reduced basis
-    ebs.bands # bands in the reduced basis
-    ebs.efermi # The fermi energy
+    ebs.kpoints # kpoints, fractional on a grid and Cartesian along a path
+    ebs.bands # bands, shape (n_kpoints, n_bands, n_spin_channels)
+    ebs.fermi # The fermi energy
 
-    ebs.projected # The atomic projections array
-    ebs.projected_phase # The complex atomic projections array
+    ebs.projected # The atomic projections, shape (n_kpoints, n_bands, n_spins, n_atoms, n_orbitals)
+    ebs.projected_phase # The complex atomic projections
+    ebs.weights # The unfolding weights, shape (n_kpoints, n_bands, n_spins), when unfolded
+    ebs.orbital_names # The name of each orbital in the projections
+
+    ebs.n_kpoints # The number of k points
+    ebs.n_bands # The number of bands
+    ebs.n_atoms # The number of atoms
+    ebs.n_orbitals # The number of orbitals
+    ebs.n_spins # The number of spin projections
+    ebs.is_non_collinear # Boolean if this is a non-collinear calculation
+
+    ebs.kpoints_cartesian # The kpoints in cartesian coordinates
+
+    # A band structure along a path (ElectronicBandStructurePath) also has
     ebs.kpath # The kpath information
-    ebs.labels # The kpath labels
-    ebs.weights # The kpoint weights
+    ebs.tick_names # The labels of the high-symmetry points
 
+    # A band structure on a grid (ElectronicBandStructureMesh) also has
     ebs.n_kx # Unique kpoints along the k1 direction
     ebs.n_ky # Unique kpoints along the k2 direction
     ebs.n_kz # Unique kpoints along the k3 direction
-    ebs.nkpoints # The number of k points
-    ebs.nbands # The number of bands
-    ebs.natoms # The number of atoms
-    ebs.nprincipal # The number of the prinicipal quantum number
-    ebs.norbitals # The number of orbitals 
-    ebs.nspins # The number of spins
-
-    ebs.is_non_collinear # Boolean if this is a non-collinear calcuulation
-
-    ebs.kpoints_cartesian # The kpoints in cartesian coordinates
-    ebs.kpoints_reduced # The kpoints in reduced coordinates
-
-
-    # Sometimes having kpoint infomation in mesh grid can be useful. So the following attributes are in the form of a meshgrid
-    ebs.index_mesh # The index mesh store the kpoint index in the original kpoints list at particular grid point
-    ebs.kpoints_mesh # Kpoint mesh representation of the kpoints grid.
-    ebs.cartesian_mesh # Kpoint cartesian mesh representation of the kpoints grid.
-    ebs.bands_mesh # Bands mesh is a numpy array that stores each band in a mesh grid.
-    ebs.projected_mesh # projected mesh is a numpy array that stores each projection in a mesh grid.
-    ebs.project_phase_mesh # projected phase mesh is a numpy array that stores each projection phases in a mesh grid.
-    ebs.weights_mesh # weights mesh is a numpy array that stores each weights in a mesh grid. 
-
-    ebs.bands_gradient_mesh # Bands gradient mesh is a numpy array that stores each band gradient in a mesh grid.
-    ebs.bands_hessian_mesh # Bands hessian mesh is a numpy array that stores each band gradient in a mesh grid.
+    ebs.get_kpoints_mesh() # The kpoints as a (n_kx, n_ky, n_kz, 3) grid
+    ebs.get_property_mesh("bands") # A property, such as the bands, on that grid
 
     # Useful methods
-    ebs.ebs_sum(atoms,orbitals,spins) # Sum the atomic projections over the atoms, orbitals, spins, and prinicipal
-    ebs.ibz2fbz(rotations=rotations) # if the calculation used symmetry this method will recover the full information of the broullin zone based on the symmetry rotations
+    ebs.ebs_sum(atoms=None, orbitals=None, spins=None) # Sum the projections over atoms, orbitals and spins
+
+An ``ElectronicBandStructureMesh`` built from a calculation that used symmetry holds only the
+irreducible k-points the code computed, so it rebuilds the full grid when it is created. It
+carries each value to its images with the symmetry operations of the structure, permuting atoms,
+rotating orbitals and the non-collinear spin, and conjugating the phases under time reversal.
+Rotated orbital weights are exact for operations that only swap orbitals and for the sum over
+each full shell. An operation that mixes orbitals, such as a third turn mixing px with py, also
+needs the phases. Without ``projected_phase`` the weights mix by the squared rotation matrix
+``|M|^2``, which drops the interference between the mixed orbitals. Phases that are
+non-collinear or over orbitals without real-harmonic names are dropped with a warning.
+
+To do this by hand on an irreducible band structure, give the grid the code reduced. The symmetry
+operations default to those of ``ebs.structure``; ``rotations`` and ``time_reversals`` override
+them.
+
+.. code-block:: python
+
+    from pyprocar.core.ebs import ibz2fbz
+    from pyprocar.core.kpoints import KGRID_MODE, KGridInfo
+
+    grid = KGridInfo(kgrid=(15, 15, 15), kgrid_mode=KGRID_MODE.GAMMA, kshift=(0, 0, 0))
+    ibz2fbz(ebs, kgrid_info=grid)

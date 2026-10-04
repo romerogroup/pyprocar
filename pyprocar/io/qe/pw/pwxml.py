@@ -269,8 +269,9 @@ class PwXML:
 
     @cached_property
     def atomic_positions(self) -> np.ndarray | None:
+        """Cartesian positions in Angstrom; the xml writes them in bohr."""
         if self.atomic_sites:
-            return self.atomic_sites["positions"]
+            return np.asarray(self.atomic_sites["positions"], dtype=float) * AU_TO_ANG
         return None
 
     @cached_property
@@ -494,11 +495,19 @@ class PwXML:
         if sym_ops_match:
             sym_ops: dict[str, Any] = {
                 "rotations": [],
+                "time_reversals": [],
                 "translations": [],
                 "equivalent_atoms": [],
             }
 
             for symmetry_operation in sym_ops_match:
+                # QE lists the lattice's own symmetries too; only the crystal's are symmetries.
+                info = symmetry_operation.find("info")
+                if info is not None and (info.text or "").strip() == "lattice_symmetry":
+                    continue
+                sym_ops["time_reversals"].append(
+                    info is not None and info.get("time_reversal") == "true"
+                )
                 rotation_match = symmetry_operation.findall(".//rotation")
                 if rotation_match and rotation_match[0].text is not None:
                     rotation = np.array(rotation_match[0].text.split(), dtype=float)
@@ -525,6 +534,7 @@ class PwXML:
                     sym_ops["equivalent_atoms"].append(np.zeros(5))
 
             sym_ops["rotations"] = np.array(sym_ops["rotations"], dtype=float)
+            sym_ops["time_reversals"] = np.array(sym_ops["time_reversals"], dtype=bool)
             sym_ops["translations"] = np.array(sym_ops["translations"], dtype=float)
             return sym_ops
         return None
@@ -533,6 +543,12 @@ class PwXML:
     def rotations(self) -> np.ndarray | None:
         if self.sym_ops:
             return self.sym_ops["rotations"]
+        return None
+
+    @cached_property
+    def time_reversals(self) -> np.ndarray | None:
+        if self.sym_ops:
+            return self.sym_ops["time_reversals"]
         return None
 
     @cached_property

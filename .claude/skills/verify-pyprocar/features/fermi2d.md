@@ -8,6 +8,7 @@ A constant-energy contour on one k-plane (e.g. k_z=0), with optional projection 
 - Parametric coloring by `atoms` and `orbitals`.
 - Spin texture (`non-colinear` fixture) and Rashba splitting (`bisb_monolayer` fixture). Not driven.
 - Line and arrow styles: `plot_line_kwargs` goes to the `LineCollection` and `plot_arrows_kwargs` to `quiver`. Either can carry `cmap`, which overrides the `cmap` argument for that artist.
+- Symmetry unfolding: every fixture here is an irreducible wedge (`fermi2d/non-spin-polarized` holds 496 of the 61x61x1 points), and `ElectronicBandStructureMesh` rebuilds the full grid with `ibz2fbz`. Since #283 the images carry permuted atoms and rotated orbitals. Check it with the cubic relation P_dyz(C4 k) = P_dxz(k) on V for bands at least 10 meV from their neighbours: it holds to 1e-15 (dev: up to 0.92). A slice colored by V d_xz then lights only the two sheets at k_x = ±0.037 1/Å, the d_xz band that disperses along k_x alone; before #283 it lit the square around Γ instead. QE meshes (`data/codes/qe/7.2/SrVO3/*/fermi`) come back with `projected_phase` None and two `UserWarning`s, the dropped phases and the unrotated `orbital <i>` columns, because QE orbitals carry no names until #293. A group with QE time-reversal flags warns if plain time reversal fills grid points; on the SrVO3 spin-orbit fixture its 16 operations reach every point, so it stays silent.
 - Collinear spin selection: in `fermi2d/spin-polarized` and `fermi3d/spin-polarized` no spin-down band crosses E_F = 5.3017 (spin-down gap about 3.3 to 6.5 eV), so every sheet is spin up. `spins=[0]` matches no selection and `spins=[1]` is all zeros. That is correct, not a bug.
 
 ## How to get to it (user POV)
@@ -28,5 +29,6 @@ The proven end state (SrVO3, non-spin-polarized, 1f36aae1):
 
 These are product gaps at 1f36aae1. Record them; don't route around them.
 - **Legacy `fermi2D` is unreachable in every mode.** A string `mode="plain"` raises `AttributeError: 'str' object has no attribute 'value'` at `scripts/scriptFermi2D.py:214`. The enum `Fermi2DMode.plain` gets past that line but raises `ValueError: Unknown mode` at `:264`.
+- **`fs.get_property("projected_sum", ...)` does not reach the slice** at bf655963: `plot(scalars_name="projected_sum")` warns "Scalars name projected_sum not found in slice data" and draws uncolored lines. Attach the values first with `fs.set_scalars(name, np.asarray(prop.value))` and plot `scalars_name=name`.
 - **`FermiSlicePlotter.plot()` with no scalars draws nothing.** It returns `{}`, and the axes are blank at about ±0.05. Plain contours need a scalar today.
 - `examples/general/new_ebs_examples.py` builds `FermiSlicePlotter` without a surface and calls a nonexistent `.scatter`. The example is stale; don't copy it.

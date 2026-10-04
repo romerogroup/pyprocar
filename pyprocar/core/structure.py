@@ -35,12 +35,19 @@ class Structure:
         A (natom,3) list of fractional coordinatesd of atoms.
     lattice : list (3,3) float.
         A (3,3) matrix representing the lattice vectors.
+    rotations : (n,3,3) float, optional
+        The symmetry operations on fractional k (k' = R k).
+    time_reversals : (n,) bool, optional
+        Whether each rotation is combined with time reversal (k' = -R k), as in magnetic groups.
 
     Returns
     -------
     None.
 
     """
+
+    # Structures pickled before time_reversals existed lack the attribute.
+    _time_reversals: np.ndarray | None = None
 
     def __init__(
         self,
@@ -49,6 +56,7 @@ class Structure:
         fractional_coordinates=None,
         lattice=None,
         rotations=None,
+        time_reversals=None,
     ):
         # Validate that we have at least some data
         if atoms is None and lattice is None and fractional_coordinates is None and cartesian_coordinates is None:
@@ -103,9 +111,8 @@ class Structure:
         self._group = None
 
         # Handle rotations
-        self._rotations = rotations
-        if self._rotations is None:
-            self._rotations = np.empty(shape=(0, 3, 3))
+        self._rotations = np.empty(shape=(0, 3, 3)) if rotations is None else rotations
+        self._time_reversals = time_reversals
 
     @property
     def has_complete_data(self):
@@ -186,6 +193,13 @@ class Structure:
     @property
     def rotations(self):
         return self._rotations
+
+    @property
+    def time_reversals(self) -> np.ndarray:
+        flags = self._time_reversals
+        if flags is None:
+            return np.zeros(len(self.rotations), dtype=bool)
+        return np.asarray(flags, dtype=bool)
 
     @property
     def wyckoff_positions(self):

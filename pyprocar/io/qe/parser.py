@@ -691,6 +691,20 @@ class QEParser(BaseParser):
         return pyprocar_projections_phase
 
     @cached_property
+    def position_gauge_phase(self) -> np.ndarray | None:
+        """spd_phase in the core's convention, Bloch sums with exp(i k.(R + tau)).
+
+        QE's atomic wavefunctions carry exp(i k.R) alone, so each atom's coefficient takes the
+        factor exp(-2 pi i k.tau).
+        """
+        phase, structure, kpoints = self.spd_phase, self.structure, self.kpoints
+        if phase is None or structure is None or kpoints is None or len(kpoints) != len(phase):
+            return phase
+        tau = np.asarray(structure.fractional_coordinates, dtype=float)
+        bloch = np.exp(-2j * np.pi * np.asarray(kpoints) @ tau.T)
+        return phase * bloch[:, np.newaxis, np.newaxis, :, np.newaxis]
+
+    @cached_property
     def spd(self) -> np.ndarray | None:
         if self.spd_phase is None:
             return None
@@ -727,7 +741,7 @@ class QEParser(BaseParser):
             kpoints=self.kpoints,
             bands=self.bands,
             projected=self.spd,
-            projected_phase=self.spd_phase,
+            projected_phase=self.position_gauge_phase,
             fermi=self.fermi,
             reciprocal_lattice=self.reciprocal_lattice,
             orbital_names=orbital_names,
@@ -805,17 +819,20 @@ class QEParser(BaseParser):
             return None
 
     @cached_property
+    def symmetries_xml(self) -> PwXML | None:
+        for xml in (self.pw_xml, self.data_file_schema_xml):
+            if xml is not None and xml.rotations is not None:
+                return xml
+        user_logger.warning("No rotations found in any input or output file")
+        return None
+
+    @cached_property
     def rotations(self) -> np.ndarray | None:
-        if self.pw_xml is not None and self.pw_xml.rotations is not None:
-            return self.pw_xml.rotations
-        elif (
-            self.data_file_schema_xml is not None
-            and self.data_file_schema_xml.rotations is not None
-        ):
-            return self.data_file_schema_xml.rotations
-        else:
-            user_logger.warning("No rotations found in any input or output file")
-            return None
+        return self.symmetries_xml.rotations if self.symmetries_xml is not None else None
+
+    @cached_property
+    def time_reversals(self) -> np.ndarray | None:
+        return self.symmetries_xml.time_reversals if self.symmetries_xml is not None else None
 
     @cached_property
     def structure(self) -> Structure | None:
@@ -824,8 +841,9 @@ class QEParser(BaseParser):
         return Structure(
             atoms=self.species,
             lattice=self.direct_lattice,
-            fractional_coordinates=self.atomic_positions,
+            cartesian_coordinates=self.atomic_positions,
             rotations=self.rotations,
+            time_reversals=self.time_reversals,
         )
 
 

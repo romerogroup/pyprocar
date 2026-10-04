@@ -12,6 +12,7 @@ from __future__ import annotations
 import copy
 import itertools
 import logging
+import warnings
 from abc import ABC, abstractmethod
 from collections.abc import Iterable, Mapping, Sequence
 from functools import cached_property
@@ -24,7 +25,10 @@ import pyvista as pv
 from typing_extensions import override
 
 from pyprocar.core import kpoints
-from pyprocar.core.atomic_orbital_index import ProjectionSelectionResolver
+from pyprocar.core.atomic_orbital_index import (
+    CONVENTIONAL_CUBIC_ORBITAL_ORDER,
+    ProjectionSelectionResolver,
+)
 from pyprocar.core.brillouin_zone import BrillouinZone
 from pyprocar.core.projection import (
     NormMode,
@@ -432,9 +436,13 @@ class ElectronicBandStructure(PointSet):
             return None
 
     @property
-    def is_grid(self):
-        grid_dims = math.get_grid_dims(self.kpoints)
-        return self.n_kpoints == np.prod(grid_dims)
+    def is_grid(self) -> bool:
+        """Whether the k-points are one complete, evenly spaced grid over the reciprocal cell."""
+        wrapped = _cell_keys(self.kpoints)
+        axes = [np.unique(wrapped[:, i]) for i in range(3)]
+        evenly = all(np.allclose(np.diff(u, append=u[0] + 1), 1 / len(u), atol=1e-4) for u in axes)
+        n_cells = np.prod([len(u) for u in axes])
+        return bool(evenly and self.n_kpoints == n_cells == len(np.unique(wrapped, axis=0)))
 
     @property
     def is_non_collinear(self):
@@ -1187,11 +1195,7 @@ class ElectronicBandStructure(PointSet):
         else:
             ebs = copy.deepcopy(self)
 
-        # Old method
-        # bound_ops = -1.0 * (ebs.kpoints > 0.5) + 1.0 * (ebs.kpoints <= -0.5)
-        # new_kpoints = ebs.kpoints + bound_ops
-
-        new_kpoints = -np.fmod(ebs.kpoints + 6.5, 1) + 0.5
+        new_kpoints = kpoints.wrap_to_first_zone(ebs.kpoints)
         ebs.update_points(new_kpoints)
         return ebs
 
@@ -1662,12 +1666,7 @@ class ElectronicBandStructureMesh(
         self._kgrid_info = kgrid_info
 
         if self.n_kpoints != np.prod(self.kgrid_info.kgrid):
-            ibz2fbz(
-                self,
-                rotations=self.structure.rotations,
-                kgrid_info=self.kgrid_info,
-                inplace=True,
-            )
+            ibz2fbz(self, kgrid_info=self.kgrid_info, inplace=True)
 
         sort_by_kpoints(self, inplace=True)
 
@@ -2070,149 +2069,282 @@ class ElectronicBandStructureMesh(
         return gradients
 
 
-def with_time_reversal(rotations: npt.ArrayLike) -> np.ndarray:
-    """The rotations plus their negatives, k -> -k, unless the group already holds inversion.
+def _cell_keys(kpoints: np.ndarray) -> np.ndarray:
+    return np.round(np.mod(np.round(kpoints, 6), 1.0), 6) % 1.0
 
-    DFT codes reduce k-meshes with time reversal as well as the point group.
+
+ORBITAL_ANGULAR_MOMENTUM = {
+    name: degree
+    for degree, names in enumerate(CONVENTIONAL_CUBIC_ORBITAL_ORDER.values())
+    for name in names
+}
+IDENTITY = 0
+ORBITAL_ALIASES = {"dx2-y2": "x2-y2", "dx2": "x2-y2"}
+SHELL_SUMS = {"p", "d", "f", "tot"}
+
+
+def real_harmonics(points: np.ndarray) -> dict[str, np.ndarray]:
+    """The normalized real spherical harmonics, with VASP's signs, at unit vectors."""
+    x, y, z = points.T
+    d, f = np.sqrt(15 / np.pi), np.sqrt(35 / (2 * np.pi))
+    return {
+        "s": np.full_like(x, 0.5 / np.sqrt(np.pi)),
+        "py": np.sqrt(3 / (4 * np.pi)) * y,
+        "pz": np.sqrt(3 / (4 * np.pi)) * z,
+        "px": np.sqrt(3 / (4 * np.pi)) * x,
+        "dxy": d / 2 * x * y,
+        "dyz": d / 2 * y * z,
+        "dz2": np.sqrt(5 / np.pi) / 4 * (3 * z**2 - 1),
+        "dxz": d / 2 * x * z,
+        "x2-y2": d / 4 * (x**2 - y**2),
+        "fy3x2": f / 4 * y * (3 * x**2 - y**2),
+        "fxyz": np.sqrt(105 / np.pi) / 2 * x * y * z,
+        "fyz2": np.sqrt(21 / (2 * np.pi)) / 4 * y * (5 * z**2 - 1),
+        "fz3": np.sqrt(7 / np.pi) / 4 * z * (5 * z**2 - 3),
+        "fxz2": np.sqrt(21 / (2 * np.pi)) / 4 * x * (5 * z**2 - 1),
+        "fzx2": np.sqrt(105 / np.pi) / 4 * z * (x**2 - y**2),
+        "fx3": f / 4 * x * (x**2 - 3 * y**2),
+    }
+
+
+def _fibonacci_sphere(n: int) -> np.ndarray:
+    height = 1 - (2 * np.arange(n) + 1) / n
+    azimuth = np.pi * (3 - np.sqrt(5)) * np.arange(n)
+    radius = np.sqrt(1 - height**2)
+    return np.stack([radius * np.cos(azimuth), radius * np.sin(azimuth), height], axis=1)
+
+
+# 64 points pin down the 16 real harmonics up to l = 3.
+_SPHERE_POINTS = _fibonacci_sphere(64)
+_HARMONICS_ON_SPHERE = real_harmonics(_SPHERE_POINTS)
+
+
+def _full_shells(names: Sequence[str]) -> dict[int, list[int]]:
+    shells: dict[int, list[int]] = {}
+    for i, name in enumerate(names):
+        if name in ORBITAL_ANGULAR_MOMENTUM:
+            shells.setdefault(ORBITAL_ANGULAR_MOMENTUM[name], []).append(i)
+    return {degree: members for degree, members in shells.items() if len(members) == 2 * degree + 1}
+
+
+def _canonical_orbital_names(orbital_names: Sequence[str]) -> list[str]:
+    return [ORBITAL_ALIASES.get(str(name), str(name)) for name in orbital_names]
+
+
+def unrotated_orbitals(orbital_names: Sequence[str]) -> list[str]:
+    """The orbitals no rotation carries, in column order: unnamed ones and partial shells."""
+    names = _canonical_orbital_names(orbital_names)
+    rotated = {i for members in _full_shells(names).values() for i in members}
+    return [name for i, name in enumerate(names) if i not in rotated and name not in SHELL_SUMS]
+
+
+def orbital_rotation(orbital_names: Sequence[str], rotation: np.ndarray) -> np.ndarray:
+    """Matrix M that takes orbital coefficients c at k to M c at the rotated k-point.
+
+    M follows from Y_i(R^-1 r) = sum_j M_ji Y_j(r) for the Cartesian rotation R. Each shell
+    rotates only when all of its real harmonics are present; ``unrotated_orbitals`` names the
+    rest, which M leaves as they are.
     """
-    rotations = np.asarray(rotations)
-    if any(np.allclose(rotation, -np.eye(3)) for rotation in rotations):
-        return rotations
-    return np.concatenate([rotations, -rotations])
+    names = _canonical_orbital_names(orbital_names)
+    matrix = np.eye(len(names))
+    before, after = _HARMONICS_ON_SPHERE, real_harmonics(_SPHERE_POINTS @ rotation)
+    for members in _full_shells(names).values():
+        matrix[np.ix_(members, members)] = np.linalg.lstsq(
+            np.stack([before[names[i]] for i in members], axis=1),
+            np.stack([after[names[i]] for i in members], axis=1),
+            rcond=None,
+        )[0]
+    return matrix
 
 
-def spin_transforms(
-    images: np.ndarray,
-    sources: np.ndarray,
-    point_group: np.ndarray,
-    time_reversal: bool,
-    reciprocal_lattice: np.ndarray,
-) -> np.ndarray:
-    """Cartesian matrix that carries the spin of each source to its image, shape (n, 3, 3).
-
-    An image is matched to the first operation that maps its source onto it (modulo 1):
-    the identity, then the point group, then time reversal times the point group. A
-    rotation R of fractional k (k' = R k, reciprocal_lattice rows B, k_cart = k @ B) acts
-    on Cartesian vectors as R_c = B.T @ R @ inv(B.T). Spin is an axial vector, so it turns
-    by det(R_c) R_c, and time reversal reverses it.
-    """
-    rotations = np.concatenate([np.eye(3)[np.newaxis], point_group])
-    signs = np.ones(len(rotations))
-    if time_reversal:
-        rotations = np.concatenate([rotations, point_group])
-        signs = np.concatenate([signs, -np.ones(len(point_group))])
-    positions = signs[np.newaxis, :, np.newaxis] * np.einsum("rij,kj->kri", rotations, sources)
-    offsets = images[:, np.newaxis, :] - positions
-    offsets -= np.round(offsets)
-    reached = np.all(np.abs(offsets) < 2e-3, axis=2)
-    if not reached.any(axis=1).all():
-        raise ValueError("An unfolded k-point is reached from its source by no symmetry operation")
-    first = np.argmax(reached, axis=1)
-
-    b_t = np.asarray(reciprocal_lattice).T
-    cartesian = b_t @ rotations @ np.linalg.inv(b_t)
-    axial = (signs * np.linalg.det(cartesian))[:, np.newaxis, np.newaxis] * cartesian
-    return axial[first]
+def atom_permutation(structure: Structure, rotation: np.ndarray) -> np.ndarray:
+    """The atom each atom lands on under the operation with fractional k rotation R."""
+    positions = np.asarray(structure.fractional_coordinates, dtype=float)
+    species = np.asarray(structure.atoms)
+    real_space = np.linalg.inv(rotation).T
+    turned = positions @ real_space.T
+    same_species = species[:, np.newaxis] == species[np.newaxis, :]
+    for candidate in np.flatnonzero(species == species[0]):
+        landed = turned + positions[candidate] - turned[0]
+        offsets = landed[:, np.newaxis, :] - positions[np.newaxis, :, :]
+        matches = same_species & np.all(np.abs(offsets - np.round(offsets)) < 1e-3, axis=2)
+        targets = np.argmax(matches, axis=1)
+        if matches.any(axis=1).all() and len(np.unique(targets)) == len(targets):
+            return targets
+    raise ValueError("A symmetry operation does not map the structure onto itself")
 
 
-def ibz2fbz(ebs, rotations=None, kgrid_info=None, inplace=True, **kwargs):
-    """Applys symmetry operations to the kpoints, bands, and projections
+def ibz2fbz(ebs, rotations=None, kgrid_info=None, inplace=True, time_reversals=None, **kwargs):
+    """Rebuild the full k-grid of a symmetry-reduced calculation.
+
+    Each irreducible k-point is carried to its images by the symmetry operations, and the
+    bands, projections and phases with it: atoms are permuted, orbitals rotated, the
+    non-collinear spin turned as an axial vector, and the phase conjugated under time
+    reversal.
+
+    Every operation also enters combined with time reversal (k -> -k), but such an image only
+    fills a grid point no listed operation reaches. Time reversal is a symmetry of each
+    collinear spin channel, magnetic or not, and of non-magnetic non-collinear systems. A group
+    whose operations carry time-reversal flags (QE's magnetic groups) already lists every
+    operation with time reversal, so filling a point there warns.
+
+    Orbital weights at an image are exact for operations that only permute orbitals and for
+    every full shell's sum. Otherwise they need the interference between the mixed orbitals:
+    with collinear phases they are |M c|^2 for c = sqrt(weight) exp(i phase), and without
+    phases the weights mix by |M|^2. Phases follow VASP's convention, Bloch sums with
+    exp(i k.(R + tau)). Phases are dropped, with a warning, when they are non-collinear or
+    over orbitals the code cannot rotate, such as QE's unnamed spin-orbit (l, j, m_j) states.
 
     Parameters
     ----------
-    rotations : np.ndarray
-        The point symmetry operations of the lattice
+    rotations : np.ndarray, optional
+        Operations on fractional k (k' = R k), shape (n, 3, 3). Defaults to the structure's.
+    kgrid_info : kpoints.KGridInfo, optional
+        Keep only the images on this grid. Without it, every distinct image is kept.
+    time_reversals : np.ndarray, optional
+        Whether each rotation is combined with time reversal (k' = -R k), as QE marks some
+        operations of magnetic groups. Defaults to the structure's when the rotations do.
     """
     if not inplace:
         ebs = copy.deepcopy(ebs)
 
-    rotations = []
-    if ebs.is_grid:
-        logger.warning("ElectronicBandStructure is already in the grid, skipping ibz2fz")
+    full = ebs.n_kpoints == np.prod(kgrid_info.kgrid) if kgrid_info is not None else ebs.is_grid
+    if full:
+        logger.warning("ElectronicBandStructure is already the full grid, skipping ibz2fbz")
         return ebs
-    logger.info("Applying symmetry operations to the kpoints")
-    logger.info(f"Kgrid info: {kgrid_info}")
 
-    if len(rotations) == 0 and ebs.structure is not None:
-        rotations = ebs.structure.rotations
-    if len(rotations) == 0:
+    structure = ebs.structure
+    if rotations is None and structure is not None:
+        rotations, time_reversals = structure.rotations, structure.time_reversals
+    if rotations is None or len(rotations) == 0:
         logger.warning("No rotations provided, skipping ibz2fbz")
         return ebs
-    point_group = np.asarray(rotations)
-    rotations = with_time_reversal(point_group)
+    rotations = np.asarray(rotations, dtype=float)
+    time_reversals = np.zeros(len(rotations), bool) if time_reversals is None else time_reversals
 
-    n_kpoints = ebs.n_kpoints
-    ibz_kpoints = ebs.kpoints.copy()
-    source = np.tile(np.arange(n_kpoints), len(rotations) + 1)
+    # The first operation that reaches a grid point supplies its values: the identity, so each
+    # irreducible point keeps its own, then the listed operations, then their time-reversed copies.
+    time_reversals = np.asarray(time_reversals, dtype=bool)
+    magnetic = bool(time_reversals.any())
+    n_listed = len(rotations)
+    rotations = np.concatenate([np.eye(3)[np.newaxis], rotations, rotations])
+    time_reversals = np.concatenate([[False], time_reversals, ~time_reversals])
+    signs = np.where(time_reversals, -1.0, 1.0)
+    n_ibz = ebs.n_kpoints
+    images = np.einsum("o,oij,kj->oki", signs, rotations, ebs.kpoints).reshape(-1, 3)
 
-    # Apply rotations and copy properties
-    new_kpoints = ebs.kpoints.copy()
-    for i, rotation in enumerate(rotations):
-        start_idx = i * n_kpoints
-        end_idx = start_idx + n_kpoints
-
-        # Rotate kpoints
-        new_values = ebs.kpoints.dot(rotation.T)
-
-        new_kpoints = np.concatenate([new_kpoints, new_values], axis=0)
-        # Update properties
-        for prop_name, calc_name, gradient_order, value_array in ebs.iter_properties():
-            initial_array = value_array[:n_kpoints]
-            new_points = np.concatenate([value_array, initial_array], axis=0)
-            property = ebs.get_property(prop_name)
-            property[calc_name, gradient_order] = new_points
-
-    # Apply boundary conditions to kpoints
-    new_kpoints = -np.fmod(new_kpoints + 6.5, 1) + 0.5
-
-    #
     if kgrid_info is not None:
-        kpoints_grid_points = kpoints.get_kpoints_from_kgrid(
+        grid = kpoints.get_kpoints_from_kgrid(
             kgrid=kgrid_info.kgrid, kshift=kgrid_info.kshift, mode=kgrid_info.kgrid_mode
         )
+        n = np.asarray(kgrid_info.kgrid)
+        offset = np.mod(grid[0] * n, 1.0)
+        cells = images * n - offset
+        on_grid = np.flatnonzero(np.all(np.abs(cells - np.round(cells)) < 1e-3, axis=1))
+        image_cells = np.ravel_multi_index(np.mod(np.round(cells[on_grid]), n).astype(int).T, n)
+        grid_cells = np.ravel_multi_index(np.mod(np.round(grid * n - offset), n).astype(int).T, n)
+        row = np.empty(np.prod(n), dtype=int)
+        row[grid_cells] = np.arange(len(grid))
+        reached, first = np.unique(image_cells, return_index=True)
+        chosen = on_grid[first]
+        new_kpoints = grid[row[reached]]
+    else:
+        _, chosen = np.unique(_cell_keys(images), axis=0, return_index=True)
+        new_kpoints = kpoints.wrap_to_first_zone(images[chosen])
 
-        diff = new_kpoints[:, np.newaxis, :] - kpoints_grid_points[np.newaxis, :, :]
-        distances = np.linalg.norm(diff, axis=2)
-        nearest = np.argmin(distances, axis=1)
-        min_distances = distances.min(axis=1)
-        new_in_original_grid_indices = np.where(min_distances < 0.000001)[0]
-
-        # The exact grid points, so the unique test and the grid spacing see no float error.
-        new_kpoints = kpoints_grid_points[nearest[new_in_original_grid_indices]]
-        source = source[new_in_original_grid_indices]
-
-    _, unique_indices = np.unique(new_kpoints, axis=0, return_index=True)
-
-    new_kpoints = new_kpoints[unique_indices, ...]
-    source = source[unique_indices]
-
-    for prop_name, calc_name, gradient_order, value_array in ebs.iter_properties():
-        property = ebs.get_property(prop_name)
-        property[calc_name, gradient_order] = value_array[new_in_original_grid_indices][
-            unique_indices
-        ]
-
-    if ebs.is_non_collinear:
-        reciprocal_lattice = ebs.reciprocal_lattice
-        if reciprocal_lattice is None and ebs.structure is not None:
-            reciprocal_lattice = ebs.structure.reciprocal_lattice
-        if reciprocal_lattice is None:
-            raise ValueError("Unfolding a non-collinear spin needs a reciprocal lattice")
-        transforms = spin_transforms(
-            new_kpoints,
-            ibz_kpoints[source],
-            point_group,
-            len(rotations) > len(point_group),
-            reciprocal_lattice,
+    operation, source = np.divmod(chosen, n_ibz)
+    filled = int(np.count_nonzero(operation > n_listed))
+    if magnetic and filled:
+        warnings.warn(
+            f"{filled} k-points were filled by time reversal combined with a listed operation, "
+            + "which this magnetic group does not contain; their values may be wrong",
+            UserWarning,
+            stacklevel=2,
         )
-        projected = ebs.get_property("projected")
-        for calc_name, gradient_order, value_array in projected.iter_arrays():
-            turned = value_array.copy()
-            turned[:, :, 1:] = np.einsum("kij,kbj...->kbi...", transforms, value_array[:, :, 1:])
-            projected[calc_name, gradient_order] = turned
+    for prop_name, calc_name, gradient_order, value_array in ebs.iter_properties():
+        ebs.get_property(prop_name)[calc_name, gradient_order] = value_array[source]
 
+    _turn_projections(ebs, rotations, time_reversals, operation, new_kpoints - images[chosen])
     ebs.update_points(new_kpoints)
-    return sort_by_kpoints(ebs, inplace=inplace, **kwargs)
+    return sort_by_kpoints(ebs, inplace=True, **kwargs)
+
+
+def _nearest_orthogonal(matrix: np.ndarray) -> np.ndarray:
+    u, _, vt = np.linalg.svd(matrix)
+    return u @ vt
+
+
+def _mix_orbitals(block: np.ndarray, matrix: np.ndarray) -> np.ndarray:
+    return (block.reshape(-1, block.shape[-1]) @ matrix.T).reshape(block.shape)
+
+
+def _turn_projections(ebs, rotations, time_reversals, operation, lattice_steps) -> None:
+    """Carry the projections and phases copied from each source into its image's frame."""
+    projected, phase = ebs.projected, ebs.projected_phase
+    if projected is None and phase is None:
+        return
+    _, _, _, n_atoms, n_orbitals = (projected if projected is not None else phase).value.shape
+    structure = ebs.structure
+    reciprocal_lattice = ebs.reciprocal_lattice
+    if reciprocal_lattice is None and structure is not None:
+        reciprocal_lattice = structure.reciprocal_lattice
+    if reciprocal_lattice is None:
+        raise ValueError("Unfolding projections needs a reciprocal lattice")
+    if n_atoms > 1 and structure is None:
+        raise ValueError("Unfolding projections of several atoms needs the structure")
+
+    names = ebs.orbital_names or [f"orbital {i}" for i in range(n_orbitals)]
+    unrotated = unrotated_orbitals(names)
+    if phase is not None and (phase.value.shape[2] == 4 or unrotated):
+        warnings.warn(
+            "projected_phase is dropped: symmetry images need collinear phases over orbitals "
+            + "with real-harmonic names in full shells",
+            UserWarning,
+            stacklevel=3,
+        )
+        ebs.remove_property("projected_phase")
+        phase = None
+    weights = projected.value if projected is not None else None
+    phases = phase.value if phase is not None else None
+    interfering = weights is not None and phases is not None and phases.shape == weights.shape
+
+    b_t = np.asarray(reciprocal_lattice).T
+    for index in np.unique(operation[operation != IDENTITY]):
+        rows = np.flatnonzero(operation == index)
+        rotation = rotations[index]
+        cartesian = _nearest_orthogonal(b_t @ rotation @ np.linalg.inv(b_t))
+        orbitals = orbital_rotation(names, cartesian)
+        mixes = not np.allclose(orbitals, np.eye(n_orbitals))
+        order = slice(None)
+        if structure is not None and n_atoms > 1:
+            order = np.argsort(atom_permutation(structure, rotation))
+        source_phases = phases[rows][:, :, :, order] if phases is not None else None
+        if weights is not None:
+            block = weights[rows][:, :, :, order]
+            if mixes and interfering and source_phases is not None:
+                amplitude = np.sqrt(np.clip(block, 0, None)) * np.exp(1j * np.angle(source_phases))
+                block = np.abs(_mix_orbitals(amplitude, orbitals)) ** 2
+            elif mixes:
+                block = _mix_orbitals(block, orbitals**2)
+            if block.shape[2] == 4:
+                sign = -1.0 if time_reversals[index] else 1.0
+                spin = sign * np.linalg.det(cartesian) * cartesian
+                block[:, :, 1:] = np.einsum("ij,kbj...->kbi...", spin, block[:, :, 1:])
+            weights[rows] = block
+        if phases is not None and source_phases is not None:
+            block = source_phases.conj() if time_reversals[index] else source_phases
+            phases[rows] = _mix_orbitals(block, orbitals) if mixes else block
+    if phases is not None and structure is not None and np.any(lattice_steps):
+        positions = np.asarray(structure.fractional_coordinates, dtype=float)
+        bloch = np.exp(-2j * np.pi * np.round(lattice_steps) @ positions.T)
+        phases *= bloch[:, np.newaxis, np.newaxis, :, np.newaxis]
+    if unrotated and np.any(operation != IDENTITY):
+        warnings.warn(
+            "Orbital-resolved projections at symmetry images are not rotated for the orbitals "
+            + f"{unrotated}; sums over each full shell stay exact",
+            UserWarning,
+            stacklevel=3,
+        )
 
 
 def sort_by_kpoints(ebs, inplace=True, order="F"):
