@@ -137,14 +137,11 @@ class ElkProjections:
 
     @cached_property
     def projected(self) -> npt.NDArray[np.float64] | None:
-        """Projected array in canonical format.
-
-        Shape: (nkpoints, nbands, natoms, nprincipals, norbitals, nspin)
-        """
+        """Projected array in the core layout (nkpoints, nbands, nspin, natoms, norbitals)."""
         if not self.file_strs:
             return None
 
         by_spin = self._characters.reshape(self.natoms, self.nspin, self.nbands, self.nkpoints, -1)
         if self._task == 23:
             by_spin = np.stack([by_spin[:, s, ..., s : s + 1] for s in range(self.nspin)], axis=1)
-        return np.transpose(by_spin, (3, 2, 0, 4, 1))[:, :, :, np.newaxis]
+        return np.transpose(by_spin, (3, 2, 1, 0, 4))

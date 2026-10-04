@@ -251,7 +251,7 @@ class VaspParser(BaseParser):
             projected_phase=self.procar.projected_phase,
             fermi=self.outcar.fermi,
             reciprocal_lattice=self.outcar.reciprocal_lattice,
-            orbital_names=self.orbitals,
+            orbital_names=self._orbital_names(self.procar.projected),
             structure=self.structure,
             kpath=self.kpath,
             kgrid_info=self.kgrid_info,
@@ -302,7 +302,7 @@ class VaspParser(BaseParser):
                 total=self.total_dos,
                 fermi=self.fermi,
                 projected=self.projected_dos,
-                orbital_names=self.orbitals,
+                orbital_names=self._orbital_names(self.projected_dos),
                 structure=self.structure,
             )
         except Exception:
@@ -341,6 +341,8 @@ class VaspParser(BaseParser):
             rotations=rotations,
         )
 
-    @cached_property
-    def orbitals(self) -> list[str]:
-        return ORBITAL_ORDERING.flat_conventional
+    @staticmethod
+    def _orbital_names(projected: np.ndarray | None) -> list[str] | None:
+        if projected is None:
+            return None
+        return ORBITAL_ORDERING.flat_conventional[: projected.shape[-1]]

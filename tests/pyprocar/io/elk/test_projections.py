@@ -119,9 +119,9 @@ class TestElkProjectionsProjected(BaseTest):
             nbands=2,
             nspin=1,
         )
-        # Shape: (nkpoints, nbands, natoms, nprincipals, norbitals, nspin)
+        # Shape: (nkpoints, nbands, nspin, natoms, norbitals)
         assert proj.projected is not None
-        assert proj.projected.shape == (3, 2, 2, 1, 16, 1)
+        assert proj.projected.shape == (3, 2, 1, 2, 16)
 
     def test_projected_not_none(self):
         """Test projected is not None when data exists."""
@@ -142,7 +142,7 @@ class TestElkProjectionsProjected(BaseTest):
             nspin=1,
         )
         # First k-point, first band, first atom, first orbital should be ~0.000002
-        assert proj.projected[0, 0, 0, 0, 0, 0] == pytest.approx(0.000002, abs=1e-7)
+        assert proj.projected[0, 0, 0, 0, 0] == pytest.approx(0.000002, abs=1e-7)
 
     def test_projected_empty_when_no_files(self):
         """Test projected is None when no file contents."""

@@ -16,7 +16,12 @@ from scipy import integrate
 from scipy.interpolate import CubicSpline
 
 from pyprocar.core.atomic_orbital_index import ProjectionSelectionResolver
-from pyprocar.core.projection import NormMode, build_property, selection_resolver
+from pyprocar.core.projection import (
+    NormMode,
+    build_property,
+    check_projected_layout,
+    selection_resolver,
+)
 from pyprocar.core.projection import normalize as normalize_by_mode
 from pyprocar.core.property_store import PointSet, Property
 from pyprocar.core.serializer import get_serializer
@@ -239,6 +244,9 @@ class DensityOfStates(PointSet):
 
         if projected is not None:
             projected_array = self._validate_projected(projected)
+            check_projected_layout(
+                projected_array, orbital_names, ("n_energies", "n_spins", "n_atoms", "n_orbitals")
+            )
             self.add_property(
                 name="projected",
                 value=projected_array,

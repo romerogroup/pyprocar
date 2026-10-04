@@ -50,6 +50,26 @@ _LABELS = {
 }
 
 
+def check_projected_layout(
+    projected: npt.ArrayLike | None, orbital_names: list[str] | None, axes: tuple[str, ...]
+) -> None:
+    """Raise unless ``projected`` has ``axes`` and ``orbital_names`` names its last axis."""
+    if projected is None:
+        return
+    shape = np.shape(projected)
+    if len(shape) != len(axes):
+        raise ValueError(
+            f"projected has shape {shape}; it must have the {len(axes)} axes ({', '.join(axes)})."
+        )
+    n_orbitals = shape[-1]
+    if orbital_names is not None and len(orbital_names) != n_orbitals:
+        raise ValueError(
+            f"{len(orbital_names)} orbital_names for {n_orbitals} projected orbitals (the last axis"
+            + " of projected). Pass one name per projected orbital, for example"
+            + f" OrbitalIndexer().flat_conventional[:{n_orbitals}]."
+        )
+
+
 def normalize(
     values: npt.ArrayLike,
     mode: str | NormMode | None,

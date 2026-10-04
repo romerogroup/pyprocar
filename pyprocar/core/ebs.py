@@ -26,7 +26,12 @@ from typing_extensions import override
 from pyprocar.core import kpoints
 from pyprocar.core.atomic_orbital_index import ProjectionSelectionResolver
 from pyprocar.core.brillouin_zone import BrillouinZone
-from pyprocar.core.projection import NormMode, build_property, selection_resolver
+from pyprocar.core.projection import (
+    NormMode,
+    build_property,
+    check_projected_layout,
+    selection_resolver,
+)
 from pyprocar.core.projection import normalize as normalize_by_mode
 from pyprocar.core.property_store import PointSet, Property
 from pyprocar.core.serializer import get_serializer
@@ -167,13 +172,13 @@ class ElectronicBandStructure(PointSet):
     fermi : float
         The fermi energy
     projected : np.ndarray, optional
-        The projections array. Will have the shape (n_kpoints, n_bands, n_spins, norbitals,n_atoms), defaults to None
+        The projections array. Will have the shape (n_kpoints, n_bands, n_spins, n_atoms, n_orbitals), defaults to None
     projected_phase : np.ndarray, optional
-        The full projections array that incudes the complex part. Will have the shape (n_kpoints, n_bands, n_spins, norbitals,n_atoms), defaults to None
+        The full projections array that incudes the complex part. Will have the shape (n_kpoints, n_bands, n_spins, n_atoms, n_orbitals), defaults to None
     weights : np.ndarray, optional
         The weights of the kpoints. Will have the shape (n_kpoints, 1), defaults to None
     orbital_names : list, optional
-        The names of the orbitals. Defaults to None
+        One name per entry of the last axis of ``projected``. Defaults to None
     reciprocal_lattice : np.ndarray, optional
         The reciprocal lattice vectors as rows, shape (3, 3), in 1/Angstrom without the 2*pi
         factor (a_i . b_j = delta_ij). Defaults to None
@@ -199,6 +204,9 @@ class ElectronicBandStructure(PointSet):
         super().__init__(kpoints)
 
         logger.info("Initializing ElectronicBandStructure")
+        check_projected_layout(
+            projected, orbital_names, ("n_kpoints", "n_bands", "n_spins", "n_atoms", "n_orbitals")
+        )
 
         if bands is not None:
             self.add_property(name="bands", value=bands)

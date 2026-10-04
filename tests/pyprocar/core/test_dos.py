@@ -622,3 +622,13 @@ def test_get_property_matches_compute_on_a_mutated_deepcopy():
     assert via_get.ravel().tolist() == [3.0, 12.0]
     np.testing.assert_array_equal(via_get, clone.compute_projected_sum(atoms=[0]).value)
     assert dos.get_property("projected_sum", atoms=[0]).value.ravel().tolist() == [1.0, 4.0]
+
+
+def test_dos_rejects_orbital_names_that_do_not_match_the_projected_orbitals():
+    with pytest.raises(ValueError, match="16 orbital_names for 9 projected"):
+        DensityOfStates(
+            energies=np.linspace(-1.0, 1.0, 5),
+            total=np.ones((5, 1)),
+            projected=np.ones((5, 1, 2, 9)),
+            orbital_names=[f"o{i}" for i in range(16)],
+        )
