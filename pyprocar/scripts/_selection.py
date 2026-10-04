@@ -11,12 +11,20 @@ SHELL_LETTERS = ("s", "p", "d", "f")
 
 
 def present_shells(source) -> dict[str, list[int]]:
-    """The whole s, p, d and f shells among ``source``'s orbitals, by the names it carries."""
-    return {
+    """The s, p, d and f shells among ``source``'s orbitals, by the names it carries.
+
+    A shell is either its 2l+1 orbitals or one column named by its letter, the sum
+    that Elk's task 21 and ``pyprocar.filter(orbital_names=[...])`` write.
+    """
+    shells = {
         letter: list(indices)
         for letter, indices in orbital_shells(source.orbital_names)
         if max(indices) < source.n_orbitals
     }
+    for index, name in enumerate(source.orbital_names or ()):
+        if name in SHELL_LETTERS:
+            shells.setdefault(name, [index])
+    return {letter: shells[letter] for letter in SHELL_LETTERS if letter in shells}
 
 
 def orbital_indices(orbitals, source):
