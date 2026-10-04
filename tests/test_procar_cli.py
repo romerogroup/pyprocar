@@ -71,3 +71,57 @@ def test_fermi2D_subcommand_maps_every_option(monkeypatch: pytest.MonkeyPatch):
             "plot_arrows": False,
         }
     ]
+
+
+ORBITALS = "ion      s     py     pz     px    dxy    dyz    dz2    dxz  x2-y2    tot"
+
+
+def _two_ion_procar(weights: tuple[float, float]) -> str:
+    rows = [f"    {ion}  {w:.3f}" + "  0.000" * 8 + f"  {w:.3f}" for ion, w in enumerate(weights, 1)]
+    total = sum(weights)
+    rows.append(f"tot    {total:.3f}" + "  0.000" * 8 + f"  {total:.3f}")
+    lines = [
+        "PROCAR lm decomposed",
+        "# of k-points:  1         # of bands:   1         # of ions:    2",
+        "",
+        " k-point     1 :    0.00000000 0.00000000 0.00000000     weight = 1.00000000",
+        "",
+        "band     1 # energy  -1.00000000 # occ.  1.00000000",
+        " ",
+        ORBITALS,
+        *rows,
+        "",
+    ]
+    return "\n".join(lines) + "\n"
+
+
+@pytest.mark.parametrize("cli_atoms", [["-a", "0", "1"], ["-a", "1", "2", "--human"]])
+def test_filter_subcommand_groups_atoms(tmp_path, monkeypatch: pytest.MonkeyPatch, cli_atoms):
+    (tmp_path / "PROCAR").write_text(_two_ion_procar((0.1, 0.2)))
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(sys, "argv", ["procar.py", "filter", "PROCAR", "out", *cli_atoms])
+
+    runpy.run_path(str(PROCAR_CLI), run_name="__main__")
+
+    lines = (tmp_path / "out").read_text().splitlines()
+    assert lines[1].split() == ["#", "of", "k-points:", "1", "#", "of", "bands:", "1", "#", "of", "ions:", "1"]
+    grouped = next(line.split() for line in lines if line.split()[:1] == ["1"])
+    assert float(grouped[1]) == pytest.approx(0.1 + 0.2)
+    assert float(grouped[-1]) == pytest.approx(0.1 + 0.2)
+
+
+@pytest.mark.guards_existing_behaviour(
+    reason="#285 asked to check the cat subcommand; it works, and this run of it keeps it working"
+)
+def test_cat_subcommand_joins_procars(tmp_path, monkeypatch: pytest.MonkeyPatch):
+    (tmp_path / "PROCAR_1").write_text(_two_ion_procar((0.1, 0.2)))
+    (tmp_path / "PROCAR_2").write_text(_two_ion_procar((0.3, 0.4)))
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(sys, "argv", ["procar.py", "cat", "PROCAR_1", "PROCAR_2", "merged"])
+
+    runpy.run_path(str(PROCAR_CLI), run_name="__main__")
+
+    text = (tmp_path / "merged").read_text()
+    assert text.splitlines()[1].split()[:4] == ["#", "of", "k-points:", "2"]
+    assert text.count("k-point ") == 2
+    assert "    2  0.200" in text and "    2  0.400" in text
