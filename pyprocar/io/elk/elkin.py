@@ -14,7 +14,6 @@ from pyprocar.io.elk.geometry import ElkCell, block_lines, bool_fortran, parse_e
 from pyprocar.utils.log_utils import warn_user
 
 
-
 @dataclass(frozen=True, slots=True)
 class Plot1D:
     vertices: npt.NDArray[np.float64]

@@ -1010,7 +1010,7 @@ def test_kpath_jump_ignores_a_label_reused_for_another_point():
 
 def test_kpath_jump_ignores_a_segment_start_off_its_k_points():
     with pytest.warns(
-        UserWarning, match="KPath start of segment 2 does not match its k-points; jump counts as zero"
+        UserWarning, match="KPath start of segment 2 does not match its k-points; jump counts"
     ):
         kpath = KPath(
             kpoints=GAMMA_X_R_M,

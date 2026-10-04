@@ -24,8 +24,8 @@ from pyprocar.core import kpoints as k_utils
 from pyprocar.io.base import BaseParser
 from pyprocar.io.qe.projwfc import AtomicProjXML, ProjwfcDOS, ProjwfcIn, ProjwfcOut
 from pyprocar.io.qe.pw import PwIn, PwOut, PwXML
-from pyprocar.utils.units import AU_TO_ANG, HARTREE_TO_EV
 from pyprocar.utils.log_utils import warn_user
+from pyprocar.utils.units import AU_TO_ANG, HARTREE_TO_EV
 
 logger = logging.getLogger(__name__)
 user_logger = logging.getLogger("user")

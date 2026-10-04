@@ -44,9 +44,7 @@ def test_bandsplot_without_fermi_warns_that_the_bands_are_not_shifted(tmp_path):
     make_hexagonal_ebs_path(kpath_has_lattice=True).save(tmp_path / "ebs.pkl")
 
     with pytest.warns(UserWarning, match=r"`fermi` is not set! Set `fermi=\{value\}`") as record:
-        _, ax = pyprocar.bandsplot(
-            code="vasp", dirname=str(tmp_path), use_cache=True, show=False
-        )
+        _, ax = pyprocar.bandsplot(code="vasp", dirname=str(tmp_path), use_cache=True, show=False)
 
     assert ax.get_ylabel() == "E (eV)"
     fermi_warning = next(w for w in record if "`fermi` is not set" in str(w.message))
@@ -58,7 +56,8 @@ def test_bandsplot_without_fermi_warns_that_the_bands_are_not_shifted(tmp_path):
     "method",
     ["plot_fermi_surface", "plot_fermi_cross_section", "plot_fermi_cross_section_box_widget"],
 )
-def test_fermi_handler_without_a_crossing_raises(monkeypatch, user_output, method):
+@pytest.mark.usefixtures("user_output")
+def test_fermi_handler_without_a_crossing_raises(monkeypatch, method):
     """The user is told loudly; the "No Fermi surface found" warning after it is a guard.
 
     FermiSurface.from_ebs raises before the handler's empty-surface check can run.

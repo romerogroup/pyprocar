@@ -55,7 +55,7 @@ def loud_user_logger_calls(paths: list[Path]) -> list[str]:
             if ast.unparse(receiver) in bound or _is_user_logger_call(receiver):
                 found.append(
                     f"{_shown(path)}:{node.lineno}: user logger"
-                    f" .{node.func.attr}() is hidden at its default ERROR level; {REPLACEMENT}"
+                    + f" .{node.func.attr}() is hidden at its default ERROR level; {REPLACEMENT}"
                 )
     return found
 
@@ -78,8 +78,8 @@ def user_logger_lowered_in(paths: list[Path]) -> list[str]:
             ):
                 found.append(
                     f"{_shown(path)}:{node.lineno}: caplog.{node.func.attr}"
-                    "(..., logger='user') lowers the user logger so the test sees what a user"
-                    " does not; assert the warning with pytest.warns"
+                    + "(..., logger='user') lowers the user logger so the test sees what a user"
+                    + " does not; assert the warning with pytest.warns"
                 )
     return found
 
@@ -98,18 +98,18 @@ def _line_number(hit: str) -> int:
 
 def test_the_checks_flag_each_loud_call_and_each_lowered_level(tmp_path):
     module = tmp_path / "module.py"
-    module.write_text(
-        "import logging\n"
-        "user_logger = logging.getLogger('user')\n"
-        "user_logger.info('progress')\n"
-        "user_logger.warning('hidden')\n"
-        "logging.getLogger('user').error('hidden too')\n"
-        "logging.getLogger(__name__).warning('package log')\n"
-        "with caplog.at_level(logging.WARNING, logger='user'):\n"
-        "    pass\n"
-        "caplog.set_level(logging.INFO, logger='pyprocar')\n",
-        encoding="utf-8",
-    )
+    lines = [
+        "import logging",
+        "user_logger = logging.getLogger('user')",
+        "user_logger.info('progress')",
+        "user_logger.warning('hidden')",
+        "logging.getLogger('user').error('hidden too')",
+        "logging.getLogger(__name__).warning('package log')",
+        "with caplog.at_level(logging.WARNING, logger='user'):",
+        "    pass",
+        "caplog.set_level(logging.INFO, logger='pyprocar')",
+    ]
+    module.write_text("\n".join(lines), encoding="utf-8")
 
     loud = loud_user_logger_calls([module])
     lowered = user_logger_lowered_in([module])

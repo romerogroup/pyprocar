@@ -68,9 +68,7 @@ class SiestaParser(BaseParser):
             with_bands = [fdf for fdf in candidates if self._names_bands_file(fdf)]
             chosen = (with_bands or candidates)[0]
             if len(candidates) > 1:
-                warn_user(
-                    f"Multiple .fdf files found in {self.dirpath}, using {chosen.filepath}"
-                )
+                warn_user(f"Multiple .fdf files found in {self.dirpath}, using {chosen.filepath}")
             return chosen
 
         if isinstance(param, FDF):

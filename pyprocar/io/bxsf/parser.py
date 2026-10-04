@@ -11,8 +11,8 @@ from pyprocar.core.kpoints import KGRID_MODE, KGridInfo
 from pyprocar.io.base import BaseParser
 from pyprocar.io.bxsf.bxsf import Bxsf, BxsfWriter
 from pyprocar.io.qe.pw import PwOut
-from pyprocar.utils.units import AU_TO_ANG
 from pyprocar.utils.log_utils import warn_user
+from pyprocar.utils.units import AU_TO_ANG
 
 logger = logging.getLogger(__name__)
 

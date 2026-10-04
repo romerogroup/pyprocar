@@ -20,8 +20,8 @@ from pyprocar.io.abinit.kpoints import AbinitKpoints
 from pyprocar.io.abinit.output import AbinitOutput
 from pyprocar.io.abinit.procar import AbinitProcar
 from pyprocar.io.base import BaseParser
-from pyprocar.utils.units import HARTREE_TO_EV
 from pyprocar.utils.log_utils import warn_user
+from pyprocar.utils.units import HARTREE_TO_EV
 
 logger = logging.getLogger(__name__)
 

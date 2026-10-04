@@ -24,8 +24,8 @@ from pyprocar.scripts._selection import (
     signed_clim,
     take_channels,
 )
-from pyprocar.utils.splash import welcome
 from pyprocar.utils.log_utils import warn_user
+from pyprocar.utils.splash import welcome
 
 user_logger = logging.getLogger("user")
 logger = logging.getLogger(__name__)

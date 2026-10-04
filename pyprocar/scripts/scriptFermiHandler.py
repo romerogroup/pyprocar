@@ -248,9 +248,7 @@ class FermiHandler:
         )
 
         if fermi_surface.n_points == 0:
-            warn_user(
-                "No Fermi surface found for the given parameters. Skipping plotting."
-            )
+            warn_user("No Fermi surface found for the given parameters. Skipping plotting.")
             return None
 
         property_name = self._map_mode_to_property(
@@ -586,9 +584,7 @@ class FermiHandler:
         )
 
         if fermi_surface.n_points == 0:
-            warn_user(
-                "No Fermi surface found for the given parameters. Skipping plotting."
-            )
+            warn_user("No Fermi surface found for the given parameters. Skipping plotting.")
             return None
 
         # Determine and compute property based on mode
@@ -709,9 +705,7 @@ class FermiHandler:
         )
 
         if fermi_surface.n_points == 0:
-            warn_user(
-                "No Fermi surface found for the given parameters. Skipping plotting."
-            )
+            warn_user("No Fermi surface found for the given parameters. Skipping plotting.")
             return None
 
         # Determine and compute property based on mode
