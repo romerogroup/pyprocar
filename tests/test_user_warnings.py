@@ -4,6 +4,8 @@ from pathlib import Path
 
 import pytest
 
+from tests.utils.ast_modules import imported_from, module_name, module_parts
+
 ROOT = Path(__file__).resolve().parent.parent
 WARN_USER_HOME = ROOT / "pyprocar" / "utils" / "log_utils.py"
 USER_WARNING_HELPER = ROOT / "tests" / "utils" / "user_warning.py"
@@ -20,24 +22,6 @@ REPLACEMENT = (
 
 def _shown(path: Path) -> Path:
     return path.relative_to(ROOT) if path.is_relative_to(ROOT) else path
-
-
-def _module_parts(path: Path, root: Path) -> tuple[str, ...]:
-    return (
-        path.relative_to(root).with_suffix("").parts if path.is_relative_to(root) else (path.stem,)
-    )
-
-
-def _module_name(parts: tuple[str, ...]) -> str:
-    return ".".join(parts[:-1] if parts[-1] == "__init__" else parts)
-
-
-def _imported_from(node: ast.ImportFrom, parts: tuple[str, ...]) -> str:
-    if node.level == 0:
-        return node.module or ""
-    package = parts[:-1]
-    base = package[: len(package) - node.level + 1]
-    return ".".join((*base, *([node.module] if node.module else [])))
 
 
 class UserLoggerNames:
@@ -64,7 +48,7 @@ class UserLoggerNames:
                 for alias in node.names:
                     self.assigned[self._scope(node)].add(alias.asname or alias.name.split(".")[0])
             elif isinstance(node, ast.ImportFrom):
-                source = _imported_from(node, parts)
+                source = imported_from(node, parts)
                 for alias in node.names:
                     name = alias.asname or alias.name
                     self.assigned[self._scope(node)].add(name)
@@ -141,10 +125,10 @@ def user_logger_names(paths: list[Path], root: Path = ROOT) -> dict[Path, UserLo
     exports: dict[str, set[str]] = {}
     while True:
         names = {
-            path: UserLoggerNames(tree, _module_parts(path, root), exports)
+            path: UserLoggerNames(tree, module_parts(path, root), exports)
             for path, tree in trees.items()
         }
-        found = {_module_name(_module_parts(path, root)): n.exported for path, n in names.items()}
+        found = {module_name(module_parts(path, root)): n.exported for path, n in names.items()}
         if found == exports:
             return names
         exports = found
