@@ -1,5 +1,6 @@
 """PyVista plotter behaviour shared by FermiPlotter and BS2DPlotter."""
 
+import itertools
 import logging
 import os
 from typing import Any, cast
@@ -9,6 +10,7 @@ import numpy as np
 import pyvista as pv
 from pyvista import ColorLike
 
+from pyprocar.plotter._periodic_cut import periodic_bands, plane_orbits
 from pyprocar.plotter._series import SurfaceSeries, finite_range
 from pyprocar.plotter.fs_slice_plot import FermiSlicePlotter
 
@@ -19,6 +21,65 @@ def find_nearest(array, value):
     array = np.asarray(array)
     idx = (np.abs(array - value)).argmin()
     return idx
+
+
+SNAP_ANGLE = 3e-4
+"""Radians within which a slice normal is replaced by a low-index lattice direction.
+
+Rounding a lattice direction to 4 significant digits turns it by at most 7.4e-5 rad on
+cubic, hexagonal and fcc cells (3 digits: 7.7e-4, which random normals reach too);
+distinct directions with indices up to 4 are at least 2.4e-2 rad apart there.
+"""
+
+_DIRECTION_INDICES = np.array(
+    [
+        uvw
+        for uvw in itertools.product(range(-4, 5), repeat=3)
+        if any(uvw) and np.gcd.reduce(np.abs(uvw)) == 1
+    ]
+)
+
+
+def snap_normal(
+    normal, reciprocal_lattice: np.ndarray
+) -> tuple[np.ndarray, tuple[int, int, int] | None]:
+    """The unit normal, or the lattice direction [u v w] within SNAP_ANGLE of it.
+
+    Only along a real-space lattice vector t = u a1 + v a2 + w a3 do the plane's lattice
+    translates sit at discrete offsets: for G = m1 b1 + m2 b2 + m3 b3, n . G =
+    (u m1 + v m2 + w m3) / |t|. A normal typed with a few digits misses such a direction
+    slightly and cuts an irrational plane, where near-copies of one orbit count
+    separately. Returns the indices when the normal was changed, otherwise None.
+    """
+    normal = np.asarray(normal, dtype=np.float64) / np.linalg.norm(normal)
+    real = np.linalg.inv(np.asarray(reciprocal_lattice, dtype=np.float64)).T
+    directions = _DIRECTION_INDICES @ real
+    directions /= np.linalg.norm(directions, axis=1, keepdims=True)
+    cosines = directions @ normal
+    best = int(np.argmax(cosines))
+    sine = float(np.linalg.norm(np.cross(directions[best], normal)))
+    angle = float(np.arctan2(sine, cosines[best]))
+    if angle > SNAP_ANGLE or angle < 1e-12:
+        return normal, None
+    u, v, w = (int(i) for i in _DIRECTION_INDICES[best])
+    return directions[best], (u, v, w)
+
+
+def cross_section_areas(
+    surface: pv.DataSet, normal, origin, reciprocal_lattice: np.ndarray | None = None
+) -> tuple[list[float], int]:
+    """Areas of the closed orbits through the plane's cut of ``surface``, and its open curves.
+
+    For a FermiSurface and its ``reciprocal_lattice`` (rows are the b vectors), the orbits
+    are those of the periodic surface that meet the first zone (see ``plane_orbits``), and a
+    normal within SNAP_ANGLE of a low-index lattice direction is first replaced by it (see
+    ``snap_normal``). Otherwise they are the closed loops of the plane's cut of the mesh.
+    """
+    bands = periodic_bands(surface) if reciprocal_lattice is not None else None
+    if reciprocal_lattice is None or not bands:
+        return slice_loop_areas(cast(pv.PolyData, surface.slice(normal=normal, origin=origin)))
+    normal, _ = snap_normal(normal, reciprocal_lattice)
+    return plane_orbits(bands, reciprocal_lattice, normal, origin)
 
 
 def slice_loop_areas(slc: pv.PolyData) -> tuple[list[float], int]:
@@ -73,11 +134,12 @@ def slice_loop_areas(slc: pv.PolyData) -> tuple[list[float], int]:
     return areas, n_open
 
 
+def open_curves_note(n_open: int) -> str:
+    return f" ({n_open} open curve{'s' if n_open > 1 else ''} not counted)" if n_open else ""
+
+
 def area_text(areas: list[float], n_open: int, scale: float = 1.0) -> str:
-    text = f"Cross sectional area : {sum(areas) * scale:.4f} Ang^-2"
-    if n_open:
-        text += f" ({n_open} open curve{'s' if n_open > 1 else ''} not counted)"
-    return text
+    return f"Cross sectional area : {sum(areas) * scale:.4f} Ang^-2" + open_curves_note(n_open)
 
 
 def clip_to_zone(surface: pv.PolyData, zone: pv.PolyData) -> pv.PolyData:
@@ -111,6 +173,14 @@ class SurfacePlotter(pv.Plotter):
         self._meshes: list[pv.PolyData] = []
         self.values_dict: dict[str, np.ndarray] = {}
 
+    def add_plane_widget(self, callback, *, origin=None, bounds=None, **kwargs):
+        """Grow ``bounds`` to hold ``origin``; VTK's plane widget rejects an origin outside them."""
+        if origin is not None and bounds is not None:
+            low = np.minimum(np.asarray(bounds)[::2], origin)
+            high = np.maximum(np.asarray(bounds)[1::2], origin)
+            bounds = tuple(np.column_stack([low, high]).ravel().tolist())
+        return super().add_plane_widget(callback, origin=origin, bounds=bounds, **kwargs)
+
     def _plot_series(
         self,
         series_list: list[SurfaceSeries],
@@ -130,7 +200,7 @@ class SurfacePlotter(pv.Plotter):
         vector_norms = [
             np.linalg.norm(s.vectors, axis=-1) for s in series_list if s.vectors is not None
         ]
-        longest = max((float(n.max()) for n in vector_norms if n.size), default=0.0)
+        longest = finite_range(vector_norms)[1]
 
         meshes: dict[tuple[int, int], pv.PolyData] = {}
         for i, series in enumerate(series_list):
@@ -143,10 +213,12 @@ class SurfacePlotter(pv.Plotter):
 
             if series.vectors is not None:
                 mesh.point_data["vectors"] = series.vectors
-                mesh.set_active_vectors("vectors")
 
             if clip_to is not None:
                 mesh = clip_to_zone(mesh, clip_to)
+
+            if series.vectors is not None and "vectors" in mesh.point_data:
+                mesh.set_active_vectors("vectors")
 
             mesh_kwargs: dict[str, Any] = {
                 "cmap": scalars_cmap,
@@ -225,6 +297,15 @@ class SurfacePlotter(pv.Plotter):
         active_vectors = surface.active_vectors
         if active_vectors is None:
             return None
+        finite = np.isfinite(active_vectors).all(axis=1) & np.isfinite(surface.points).all(axis=1)
+        if not finite.any():
+            return None
+        source = surface
+        if not finite.all():
+            source = pv.PolyData(surface.points[finite])
+            for name in surface.point_data:
+                source.point_data[name] = surface.point_data[name][finite]
+            source.set_active_vectors(surface.active_vectors_name)
 
         if add_mesh_args is None:
             add_mesh_args = {}
@@ -244,7 +325,7 @@ class SurfacePlotter(pv.Plotter):
         glyph_args["orient"] = glyph_args.get("orient", vectors)
 
         if longest is None:
-            longest = float(np.linalg.norm(active_vectors, axis=1).max())
+            longest = float(np.linalg.norm(active_vectors[finite], axis=1).max())
         if length is None:
             length = self.glyph_scale
         factor = length / longest * factor
@@ -255,7 +336,7 @@ class SurfacePlotter(pv.Plotter):
         # glyph(scale=<name>) makes that array the active scalars of the mesh it runs on.
         scalars_name = surface.point_data.active_scalars_name
         vectors_name = surface.point_data.active_vectors_name
-        arrows = surface.glyph(**glyph_args)
+        arrows = source.glyph(**glyph_args)
         surface.point_data.active_scalars_name = scalars_name
         surface.point_data.active_vectors_name = vectors_name
         self.add_mesh(arrows, **add_mesh_args)

@@ -4,16 +4,21 @@ __email__ = "petavazohi@mail.wvu.edu, lllang@mix.wvu.edu"
 __date__ = "December 01, 2020"
 
 import logging
+import warnings
 from enum import Enum
 
 import matplotlib.pyplot as plt
 
 from pyprocar.core import FermiSurface
 from pyprocar.plotter import FermiSlicePlotter
+from pyprocar.scripts._selection import resolve_spins, signed_clim
 from pyprocar.utils import welcome
 
 user_logger = logging.getLogger("user")
 logger = logging.getLogger(__name__)
+
+
+SPIN_COMPONENT_LABELS = ("Total projection", "Sx projection", "Sy projection", "Sz projection")
 
 
 class Fermi2DMode(Enum):
@@ -70,8 +75,11 @@ def fermi2D(
     band_indices : list[list], optional
         Not implemented in the new version; the value is only logged.
     spins : list[int], optional
-        Spin indices to project onto in 'parametric' mode. For a non-collinear
-        calculation, 0 is the total and 1, 2, 3 are Sx, Sy, Sz.
+        For a collinear calculation, the spin channels to draw (0 up, 1 down),
+        by default both. For a non-collinear calculation, one spin component:
+        0 is the total and 1, 2, 3 are Sx, Sy, Sz. 'parametric' mode colours the
+        contours by it, and 'spin_texture' colours the contours and arrows by it
+        instead of by the spin magnitude.
     atoms : list[int], optional
         Atom indices to project onto, by default all atoms.
     orbitals : list[int], optional
@@ -138,6 +146,10 @@ def fermi2D(
     Draw the spin texture:
 
     >>> fermi2D(code='vasp', dirname='calculation_dir', mode='spin_texture')
+
+    Colour the spin-texture arrows by Sz:
+
+    >>> fermi2D(code='vasp', dirname='calculation_dir', mode='spin_texture', spins=[3])
     """
 
     mode = Fermi2DMode(mode)
@@ -180,24 +192,44 @@ def fermi2D(
 
     logger.info(f"Created Fermi surface: {fs}")
 
-    # Calculate slice properties based on mode and spin texture
-    if mode in [Fermi2DMode.plain, Fermi2DMode.plain_bands]:
+    if mode == Fermi2DMode.spin_texture and not fs.ebs.is_non_collinear:
+        raise ValueError("Spin texture is only available for non-collinear calculations")
+
+    plain = mode in [Fermi2DMode.plain, Fermi2DMode.plain_bands]
+    channels = resolve_spins(
+        fs.ebs.is_non_collinear, fs.ebs.n_spin_channels, spins, plain=plain
+    ).channels
+    keys = [key for key in fs.band_isosurfaces if key[1] in channels]
+    if len(keys) < len(fs.band_isosurfaces):
+        selected = fs.select_bands(keys)
+        assert isinstance(selected, FermiSurface)
+        fs = selected
+    if not keys:
+        warnings.warn(
+            f"No Fermi surface found: no band of spin channel(s) {channels} crosses"
+            + " the isovalue (Fermi energy + energy). Try another spin channel,"
+            + " a different energy, or check the Fermi energy.",
+            UserWarning,
+            stacklevel=2,
+        )
+
+    component = component_label = None
+    if plain or not keys:
         property_name = None
     elif mode == Fermi2DMode.parametric:
         property_name = "projected_sum"
         prop = fs.get_property(property_name, atoms=atoms, orbitals=orbitals, spins=spins)
         fs.set_values(property_name, prop.value)
-
-    elif mode == Fermi2DMode.spin_texture and fs.ebs.is_non_collinear:
+    else:
         property_name = "projected_sum_spin_texture"
         prop = fs.get_property(property_name, atoms=atoms, orbitals=orbitals)
         fs.set_values(property_name, prop.value)
-
-    elif mode == Fermi2DMode.spin_texture and not fs.ebs.is_non_collinear:
-        raise ValueError("Spin texture is only available for non-collinear calculations")
-
-    else:
-        raise ValueError(f"Unknown mode: {mode}. Please choose from {modes_txt}.")
+        if spins:
+            component_label = SPIN_COMPONENT_LABELS[spins[0]]
+            component = fs.get_property(
+                "projected_sum", atoms=atoms, orbitals=orbitals, spins=spins
+            )
+            fs.set_values("projected_sum", component.value)
 
     # Extend surface to neighboring zones if requested
     if extend_zone_directions is not None:
@@ -212,16 +244,21 @@ def fermi2D(
 
     user_logger.info(f"Creating 2D slice at k_z = {k_z_plane}")
 
-    fsplt.plot(
-        scalars_name=property_name,
-        vectors_name=property_name if mode == Fermi2DMode.spin_texture else None,
-        scalars_cmap=cmap,
-        vectors_cmap=cmap,
-        scalars_show_colorbar="single" if show_colorbar and property_name else "none",
-        plot_arrows=plot_arrows,
-        line_kwargs=plot_line_kwargs,
-        quiver_kwargs=plot_arrows_kwargs,
-    )
+    if keys:
+        fsplt.plot(
+            scalars_name=property_name if component is None else "projected_sum",
+            vectors_name=property_name if mode == Fermi2DMode.spin_texture else None,
+            scalars_cmap=cmap,
+            scalars_clim=None if component is None else signed_clim(component),
+            vectors_cmap=cmap,
+            vectors_color="magnitude" if component is None else "scalars",
+            scalars_show_colorbar="single" if show_colorbar and property_name else "none",
+            plot_arrows=plot_arrows,
+            line_kwargs=plot_line_kwargs,
+            quiver_kwargs=plot_arrows_kwargs,
+        )
+    if component_label and fsplt.colorbar is not None:
+        fsplt.colorbar.set_label(component_label)
     if savefig:
         fsplt.savefig(savefig)
         user_logger.info(f"Plot saved to {savefig}")

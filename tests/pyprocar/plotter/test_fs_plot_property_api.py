@@ -1,6 +1,5 @@
 """Tests for FermiPlotter.plot() through the rendered meshes."""
 
-import logging
 from types import SimpleNamespace
 
 import numpy as np
@@ -97,22 +96,38 @@ class TestFermiPlotterPlot:
         with pytest.raises(ValueError, match="ebs_ipr_atom has shape"):
             plotter.plot(_fermi_surface(), scalars_data=_property(ipr_atom, name="ebs_ipr_atom"))
 
+    @pytest.mark.parametrize("role", ["scalars_data", "vectors_data"])
+    @pytest.mark.parametrize(
+        ("name", "shape"),
+        [("projected", (6, 4, 2, 3, 1)), ("spin_texture", (6, 4, 2, 1, 3))],
+    )
+    def test_per_atom_and_orbital_properties_are_refused(self, plotter, role, name, shape):
+        prop = _property(np.ones(shape), name=name)
+
+        with pytest.raises(
+            ValueError, match=rf"^{name} has shape \({', '.join(map(str, shape))}\);"
+        ):
+            plotter.plot(_fermi_surface(), **{role: prop})
+
+    def test_scalar_property_given_as_vectors_is_refused(self, plotter):
+        prop = _property(np.ones((6, 4, 2)), name="projected_sum")
+
+        with pytest.raises(
+            ValueError, match=r"^projected_sum has shape \(6, 4, 2\); surface vectors"
+        ):
+            plotter.plot(_fermi_surface(), vectors_data=prop)
+
     def test_spins_limits_the_drawn_surfaces(self, plotter):
         meshes = plotter.plot(_fermi_surface(), spins=[1])
 
         assert list(meshes) == [(3, 1)]
 
-    def test_spin_without_surface_warns_and_draws_nothing(self, plotter, caplog):
-        user_logger = logging.getLogger("user")
-        user_logger.addHandler(caplog.handler)
-        try:
-            with caplog.at_level(logging.WARNING, logger="user"):
-                meshes = plotter.plot(_fermi_surface(), spins=[2])
-        finally:
-            user_logger.removeHandler(caplog.handler)
+    def test_spin_without_surface_warns_and_draws_nothing(self, plotter):
+        with pytest.warns(UserWarning) as caught:
+            meshes = plotter.plot(_fermi_surface(), spins=[2])
 
         assert meshes == {}
-        assert [r.getMessage() for r in caplog.records] == [
+        assert [str(w.message) for w in caught] == [
             "No Fermi surface found: no band of spin channel(s) [2] crosses the isovalue"
             + " (Fermi energy + fermi_shift). Try another spin channel, a different"
             + " fermi_shift, or check the Fermi energy."

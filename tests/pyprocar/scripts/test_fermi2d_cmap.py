@@ -73,3 +73,25 @@ def test_plot_arrows_kwargs_cmap_colors_the_arrows():
     arrows = _artist(ax, Quiver)
     assert arrows.get_cmap().name == "cividis"
     assert arrows.get_alpha() == 0.5
+
+
+@pytest.mark.parametrize(
+    ("spins", "value", "label"), [([1], SX, "Sx projection"), ([3], SZ, "Sz projection")]
+)
+def test_spin_texture_colours_arrows_and_contours_by_one_spin_component(spins, value, label):
+    fig, ax = pyprocar.fermi2D(
+        code="vasp", dirname="calc", mode="spin_texture", atoms=[0], spins=spins, show=False
+    )
+
+    np.testing.assert_allclose(_artist(ax, Quiver).get_array(), value)
+    np.testing.assert_allclose(_artist(ax, LineCollection).get_array(), value)
+    (colorbar,) = [a for a in fig.axes if a is not ax]
+    assert colorbar.get_ylabel() == label
+
+
+def test_spin_texture_without_spins_colours_arrows_by_the_spin_magnitude():
+    _, ax = pyprocar.fermi2D(
+        code="vasp", dirname="calc", mode="spin_texture", atoms=[0], show=False
+    )
+
+    np.testing.assert_allclose(_artist(ax, Quiver).get_array(), np.sqrt(SX**2 + SY**2 + SZ**2))

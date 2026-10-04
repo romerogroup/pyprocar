@@ -331,6 +331,7 @@ class FermiSlicePlotter:
         vectors_cmap: str = "plasma",
         vectors_clim: tuple[float, float] | None = None,
         vectors_show_colorbar: ShowColorbar | str = ShowColorbar.NONE,
+        vectors_color: Literal["magnitude", "scalars"] = "magnitude",
         plot_arrows: bool = False,
         line_kwargs: dict | None = None,
         scatter_kwargs: dict | None = None,
@@ -367,6 +368,9 @@ class FermiSlicePlotter:
             Color limits for vectors.
         vectors_show_colorbar : ShowColorbar or str
             Colorbar mode for vectors.
+        vectors_color : {"magnitude", "scalars"}
+            Colour arrows by their length, or by the scalars with the scalars'
+            cmap and limits, so contours and arrows share one colorbar.
         plot_arrows : bool
             Whether to plot vector arrows.
         line_kwargs : dict, optional
@@ -421,8 +425,13 @@ class FermiSlicePlotter:
 
         # Plot vectors
         if plot_arrows and series.vectors is not None:
+            by_scalars = vectors_color == "scalars"
             artists["vectors"] = self._add_quiver(
-                series, vectors_cmap, vectors_clim, quiver_kwargs or {}
+                series,
+                scalars_cmap if by_scalars else vectors_cmap,
+                scalars_clim if by_scalars else vectors_clim,
+                quiver_kwargs or {},
+                colors=series.scalars if by_scalars else None,
             )
 
         # Add colorbars based on ShowColorbar enum
@@ -527,13 +536,15 @@ class FermiSlicePlotter:
         cmap: str,
         clim: tuple[float, float] | None,
         quiver_kwargs: dict,
+        colors: np.ndarray | None = None,
     ):
-        """Add vector arrows."""
+        """Add vector arrows, coloured by ``colors`` or else by their length."""
         vectors = series.vectors
         if vectors is None:
             return None
 
         vector_magnitude = np.linalg.norm(vectors, axis=-1)
+        values = vector_magnitude if colors is None else np.ravel(colors)
 
         merged_kwargs = {**series.additional_kwargs, **quiver_kwargs}
         merged_kwargs.setdefault("angles", "uv")
@@ -543,7 +554,7 @@ class FermiSlicePlotter:
         if "scale" not in merged_kwargs:
             merged_kwargs["scale"] = vector_magnitude.max() * 3
 
-        vmin, vmax = clim if clim else (vector_magnitude.min(), vector_magnitude.max())
+        vmin, vmax = clim if clim else (values.min(), values.max())
         norm = Normalize(vmin=vmin, vmax=vmax)
 
         # Use first 2 components for 2D plot
@@ -555,7 +566,7 @@ class FermiSlicePlotter:
             series.points_2d[:, 1],
             u,
             v,
-            vector_magnitude,
+            values,
             cmap=merged_kwargs.pop("cmap", cmap),
             norm=merged_kwargs.pop("norm", norm),
             **merged_kwargs,
