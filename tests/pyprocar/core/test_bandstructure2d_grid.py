@@ -20,6 +20,8 @@ NEAR_SQUARE = np.array(
 )
 # c* tilted towards a* and b*, so planes at different kz sit at different (kx, ky).
 SKEWED = np.array([[0.25, 0.0, 0.0], [0.1, 0.22, 0.0], [0.03, -0.04, 0.12]])
+# SKEWED with a* tilted out of the kz = 0 plane, so a Cartesian kz plane crosses the kz layers.
+TILTED = SKEWED + [[0.0, 0.0, 0.05], [0.0, 0.0, 0.0], [0.0, 0.0, 0.0]]
 N_K, PADDING = 24, 3
 PATCH = (N_K - 1 + 2 * PADDING) / N_K
 
@@ -128,6 +130,23 @@ def test_bs2d_plane_off_the_origin_on_a_skewed_lattice_has_the_bands_of_that_pla
     assert np.isfinite(points).all()
     np.testing.assert_allclose(points[:, 2], sign * layered_band(frac), atol=1e-9)
     assert quad_area(quads) == pytest.approx(PATCH**2 * 0.25 * 0.22, rel=1e-9)
+
+
+def test_cartesian_bs2d_plane_across_the_kz_layers_covers_its_patch():
+    # kz = 0.036 keeps the plane inside the padded mesh, which spans fractional kz -3/8 to 10/8.
+    points, sheet, _, quads = bs2d_arrays(
+        TILTED, layered_band, (30, 30), True, n_kz=8, origin=(0, 0, 0.036)
+    )
+
+    k = np.column_stack([points[:, :2] / (2 * np.pi), np.full(len(points), 0.036)])
+    frac = np.linalg.solve(TILTED.T, k.T).T
+    sign = np.where(sheet == 1, 1.0, -1.0)
+    assert np.isfinite(points).all()
+    # Linear interpolation on this 24x24x8 mesh is within |f''| h^2 / 8 = 0.065 eV of the band.
+    np.testing.assert_allclose(points[:, 2], sign * layered_band(frac), atol=0.07)
+    # The in-plane fractional coordinates span the padded mesh; kz follows from them.
+    edges = TILTED[:2, :2] - np.outer(TILTED[:2, 2] / TILTED[2, 2], TILTED[2, :2])
+    assert quad_area(quads) == pytest.approx(PATCH**2 * abs(np.linalg.det(edges)), rel=1e-9)
 
 
 def test_bs2d_band_values_belong_to_their_own_surface_points():
