@@ -16,7 +16,7 @@ VERIFY_SH = Path(
 )
 WRITE_BITS = stat.S_IWUSR | stat.S_IWGRP | stat.S_IWOTH
 FAKE_ENV = """#!/bin/sh
-echo "$@" >> "{log}"
+echo "cleanup=${{HF_XET_LOG_DIR_DISABLE_CLEANUP-unset}} $@" >> "{log}"
 for last; do :; done
 case "$last" in data/*) mkdir -p "$last" && echo x > "$last/PROCAR" ;; esac
 """
@@ -200,7 +200,10 @@ def test_fetch_downloads_a_missing_fixture_by_its_literal_name_then_locks_it(har
     before = harness.locked()
 
     assert harness.verify("fetch", "data/examples/dos/new").returncode == 0
-    assert harness.env_log.read_text().split()[-1] == "data/examples/dos/new"
+    logged = harness.env_log.read_text().split()
+    assert logged[0] == "cleanup=1" and logged[-1] == "data/examples/dos/new"
+    if harness.shared_env is None:
+        assert logged[1:5] == ["run", "-q", "--locked", "-e"]
     assert harness.locked() - before == {
         f"{harness.data_rel}/examples/dos/new",
         f"{harness.data_rel}/examples/dos/new/PROCAR",
