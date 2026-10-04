@@ -16,7 +16,7 @@ def hub(tmp_path, monkeypatch):
     (shared_cache / "refs").mkdir(parents=True)
     (shared_cache / "refs" / "main").write_text("rev")
 
-    def snapshot_download(repo_id, repo_type, allow_patterns, local_dir=None):
+    def snapshot_download(*, allow_patterns, local_dir=None, **_hub_args):
         root = Path(local_dir) if local_dir else shared_cache / "snapshots" / "rev"
         root.mkdir(parents=True, exist_ok=True)
         for name, body in DATASET.items():
