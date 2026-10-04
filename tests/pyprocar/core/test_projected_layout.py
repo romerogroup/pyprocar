@@ -1,9 +1,11 @@
 import re
+from typing import cast
 
 import numpy as np
 import pytest
 
-from pyprocar.core import DensityOfStates, ElectronicBandStructure, Structure
+from pyprocar.core import DensityOfStates, ElectronicBandStructure, Structure, kpoints
+from pyprocar.core.ebs import PROJECTED_DTYPE
 
 N_K, N_BANDS, N_ATOMS, N_ORBITALS = 2, 3, 5, 9
 BAND_LAYOUT = "(n_kpoints, n_bands, n_spins, n_atoms, n_orbitals)"
@@ -22,9 +24,9 @@ def band_structure(
     projected_shape: tuple[int, ...], n_band_spins: int = 1, structure: Structure | None = None
 ) -> ElectronicBandStructure:
     return ElectronicBandStructure(
-        kpoints=np.zeros((N_K, 3)),
+        kpoints=cast(kpoints.KPOINTS_DTYPE, np.zeros((N_K, 3))),
         bands=np.zeros((N_K, N_BANDS, n_band_spins)),
-        projected=np.zeros(projected_shape),
+        projected=cast(PROJECTED_DTYPE, np.zeros(projected_shape)),
         orbital_names=[f"o{i}" for i in range(projected_shape[-1])],
         structure=structure,
     )

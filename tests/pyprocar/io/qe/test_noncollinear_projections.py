@@ -152,7 +152,7 @@ def test_spinor_projections_give_total_and_spin_per_real_orbital(
     for (band, orbital), spin in EXPECTED.items():
         expected[band, :, orbital] = spin
     np.testing.assert_allclose(projected[0, :, :, 0, :], expected, atol=1e-12)
-    assert ebs.orbital_names[:4] == ["s", "pz", "px", "py"]
+    assert ebs.orbital_names is not None and ebs.orbital_names[:4] == ["s", "pz", "px", "py"]
 
 
 QE_NONCOLLINEAR_BANDS = DATA_DIR / "codes/qe/7.2/SrVO3/non-colinear/bands"
@@ -173,7 +173,7 @@ def test_qe_spin_orbit_band_structure_matches_projwfc_weights_at_gamma() -> None
     assert ebs is not None and ebs.projected is not None
     projected = ebs.projected.to_array()
     assert projected.shape == (155, 50, 4, 5, 16)
-    assert ebs.orbital_names[4:9] == D_ORBITALS
+    assert ebs.orbital_names is not None and ebs.orbital_names[4:9] == D_ORBITALS
     v_d = dict(zip(D_ORBITALS, projected[0, :, 0, 1, 4:9].T, strict=True))
     t2g = v_d["dxz"] + v_d["dyz"] + v_d["dxy"]
     eg = v_d["dz2"] + v_d["dx2-y2"]
