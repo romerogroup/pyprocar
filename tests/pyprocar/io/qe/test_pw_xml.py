@@ -3370,7 +3370,7 @@ MAGNETIC_SYMMETRIES_PW_XML = """<?xml version="1.0" encoding="UTF-8"?>
         </rotation>
       </symmetry>
       <symmetry>
-        <info name="180 deg rotation - cart. axis [1,0,0]" time_reversal="true">crystal_symmetry</info>
+        <info name="180 deg rotation [1,0,0]" time_reversal="true">crystal_symmetry</info>
         <rotation rank="2" dims="           3           3">
    1.0 0.0 0.0
    0.0 -1.0 0.0
@@ -3378,7 +3378,7 @@ MAGNETIC_SYMMETRIES_PW_XML = """<?xml version="1.0" encoding="UTF-8"?>
         </rotation>
       </symmetry>
       <symmetry>
-        <info name=" 90 deg rotation - cart. axis [0,0,1]" time_reversal="false">lattice_symmetry</info>
+        <info name=" 90 deg rotation [0,0,1]" time_reversal="false">lattice_symmetry</info>
         <rotation rank="2" dims="           3           3">
    0.0 1.0 0.0
    -1.0 0.0 0.0
