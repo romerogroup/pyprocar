@@ -13,7 +13,7 @@ from pathlib import Path
 import numpy as np
 import pytest
 
-from pyprocar.core.ebs import ElectronicBandStructureMesh
+from pyprocar.core.ebs import ElectronicBandStructureMesh, orbital_rotation
 from pyprocar.io.qe.parser import QEParser
 from tests.pyprocar.core.test_ebs_unfold_exact_grid import CUBIC_OPERATIONS
 from tests.pyprocar.core.test_ibz2fbz import gamma_grid, gamma_info, key, single_site, wedge
@@ -142,3 +142,41 @@ def test_qe_mesh_rotates_every_orbital_and_keeps_collinear_phases(
     assert [str(w.message) for w in caught if issubclass(w.category, UserWarning)] == []
     assert (ebs.projected_phase is not None) == keeps_phase
     assert ebs.n_kpoints == 16**3
+
+
+@pytest.mark.data
+@pytest.mark.parametrize("mag", ["non-spin-polarized", "spin-polarized-colinear"])
+def test_qe_mesh_bands_are_eigenvectors_of_their_little_group(mag: str) -> None:
+    """A nondegenerate band at k is an eigenvector of each orbital rotation whose R fixes k.
+
+    Every cubic operation maps V onto itself up to a lattice vector, so lattice and Bloch factors
+    are one common phase. QE's harmonic signs break this wherever an operation mixes a signed
+    orbital with an unsigned one.
+    """
+    ebs = ElectronicBandStructureMesh.from_code(
+        "qe", str(DATA_DIR / f"codes/qe/7.2/SrVO3/{mag}/fermi")
+    )
+    assert ebs.projected_phase is not None and ebs.structure is not None
+    vanadium = [str(atom) for atom in ebs.structure.atoms].index("V")
+    phases = np.asarray(ebs.projected_phase.value)[:, :, :, vanadium]
+    gaps = np.diff(np.asarray(ebs.bands.value), axis=1)
+    lower = np.pad(gaps, ((0, 0), (1, 0), (0, 0)), constant_values=np.inf)
+    upper = np.pad(gaps, ((0, 0), (0, 1), (0, 0)), constant_values=np.inf)
+    norms = np.linalg.norm(phases, axis=-1)
+    selected = (np.minimum(lower, upper) > 1e-3) & (norms**2 > 0.05)
+
+    residuals = []
+    for rotation in CUBIC:
+        steps = ebs.kpoints @ rotation.T - ebs.kpoints
+        fixed = np.all(np.abs(steps - np.round(steps)) < 1e-6, axis=1)
+        coefficients = phases[fixed][selected[fixed]]
+        turned = coefficients @ orbital_rotation(ebs.orbital_names, rotation).T
+        overlap = np.sum(coefficients.conj() * turned, axis=-1) / np.sum(
+            np.abs(coefficients) ** 2, axis=-1
+        )
+        residual = turned - overlap[:, np.newaxis] * coefficients
+        residuals.append(np.linalg.norm(residual, axis=-1) / norms[fixed][selected[fixed]])
+    residuals = np.concatenate(residuals)
+
+    assert len(residuals) > 1000
+    assert residuals.max() < 0.05
