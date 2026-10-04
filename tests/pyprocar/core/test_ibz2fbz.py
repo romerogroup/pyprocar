@@ -1,3 +1,5 @@
+import re
+import warnings
 from typing import cast
 
 import numpy as np
@@ -484,6 +486,86 @@ def test_phases_decide_how_a_third_turn_splits_equal_px_and_py_weights():
         at = {key(k): i for i, k in enumerate(ebs.kpoints)}
         weights = ebs.projected.to_array()[at[key(image)], :, 0, 0]
         np.testing.assert_allclose(weights[:, [px, py]], expected, atol=1e-12)
+
+
+def quarter_turn_mesh(n_orbitals, phase=None):
+    grid = gamma_grid((4, 4, 1))
+    ibz = wedge(grid, np.concatenate([C4_GROUP, -C4_GROUP]))
+    return ElectronicBandStructureMesh(
+        kpoints=ibz,
+        bands=np.zeros((len(ibz), 1, 1)),
+        projected=np.full((len(ibz), 1, 1, 1, n_orbitals), 0.5),
+        fermi=0.0,
+        reciprocal_lattice=np.eye(3),
+        structure=single_site(rotations=C4_GROUP),
+        projected_phase=None if phase is None else np.full((len(ibz), 1, 1, 1, n_orbitals), phase),
+        kgrid_info=gamma_info((4, 4, 1)),
+    )
+
+
+def test_phases_over_orbitals_without_real_harmonic_names_are_dropped_with_a_warning():
+    # QE spin-orbit phases come over (l, j, m_j) states with no orbital names. Time reversal
+    # also sends m_j to -m_j there, so conjugating each coefficient in place would be wrong.
+    with pytest.warns(UserWarning, match="projected_phase is dropped"):
+        ebs = quarter_turn_mesh(2, phase=0.6 + 0.8j)
+
+    assert ebs.n_kpoints == 16
+    assert ebs.projected_phase is None
+    assert ebs.projected is not None
+    np.testing.assert_allclose(ebs.projected.to_array(), 0.5)
+
+
+def test_the_unrotated_orbital_warning_lists_the_orbitals_in_numeric_order():
+    names = ", ".join(f"'orbital {i}'" for i in range(11))
+
+    with pytest.warns(UserWarning, match=re.escape(f"[{names}]")):
+        quarter_turn_mesh(11)
+
+
+def time_reversed_wedge():
+    # The calculation reduced the 4x4x4 grid by C2z and plain time reversal, k ~ -k
+    c2z = np.diag([-1.0, -1, 1])
+    k_actions = np.array([np.eye(3), c2z, -np.eye(3), -c2z])
+    return wedge(gamma_grid((4, 4, 4)), k_actions), c2z
+
+
+def test_time_reversal_filling_points_of_a_magnetic_group_warns():
+    # Listed as the magnetic group {E, C2z with time reversal}, k -> -C2z k reaches only
+    # half of the missing points; plain time reversal, not in that group, fills the rest.
+    ibz, c2z = time_reversed_wedge()
+    structure = single_site(
+        rotations=np.array([np.eye(3), c2z]), time_reversals=np.array([False, True])
+    )
+    ebs = ElectronicBandStructure(
+        kpoints=ibz,
+        bands=np.zeros((len(ibz), 1, 1)),
+        reciprocal_lattice=cast(kpoints.RECIPROCAL_LATTICE_DTYPE, np.eye(3)),
+        structure=structure,
+    )
+
+    with pytest.warns(UserWarning, match="time reversal"):
+        ibz2fbz(ebs, kgrid_info=gamma_info((4, 4, 4)))
+
+    assert ebs.n_kpoints == 64
+
+
+@pytest.mark.guards_existing_behaviour(
+    reason="time reversal stays a silent fill-in for groups without time-reversal flags"
+)
+def test_time_reversal_filling_points_of_a_group_without_flags_does_not_warn():
+    ibz, c2z = time_reversed_wedge()
+    ebs = ElectronicBandStructure(
+        kpoints=ibz,
+        bands=np.zeros((len(ibz), 1, 1)),
+        reciprocal_lattice=cast(kpoints.RECIPROCAL_LATTICE_DTYPE, np.eye(3)),
+        structure=single_site(rotations=np.array([np.eye(3), c2z])),
+    )
+
+    with warnings.catch_warnings():
+        warnings.simplefilter("error")
+        ibz2fbz(ebs, kgrid_info=gamma_info((4, 4, 4)))
+
+    assert ebs.n_kpoints == 64
 
 
 @pytest.mark.data
