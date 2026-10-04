@@ -1,11 +1,10 @@
 # Bands along a k-path: object API (plain/parametric/scatter/quiver/overlay/flip)
 # and legacy bandsplot/bandsdosplot.
 # Fixture: data/examples/bands/non-spin-polarized
-import shutil
 
 import matplotlib.pyplot as plt
 import numpy as np
-from verify_steps import CALC, EV, REPO, finish, png, step
+from verify_steps import CALC, EV, REPO, finish, png, step, writable_copy
 
 import pyprocar
 from pyprocar.core.ebs import ElectronicBandStructurePath
@@ -103,7 +102,7 @@ for mode, kw in {
 @step("legacy_bandsdosplot")
 def _():
     dos_dir = CALC.parent / "dos_calc"
-    shutil.copytree(REPO / "data/examples/dos/non-spin-polarized", dos_dir, dirs_exist_ok=True)
+    writable_copy(REPO / "data/examples/dos/non-spin-polarized", dos_dir)
     pyprocar.bandsdosplot(
         bands_settings=dict(mode="plain", dirname=str(CALC), fermi=5.3017),
         dos_settings=dict(mode="plain", dirname=str(dos_dir), fermi=5.3017),
