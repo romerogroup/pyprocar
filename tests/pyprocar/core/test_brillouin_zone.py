@@ -391,7 +391,9 @@ def test_brillouin_zone_matches_voronoi_for_any_basis_of_the_lattice(cell, shear
     np.testing.assert_allclose(_sorted_rows(zone.points), _sorted_rows(vertices), atol=1e-9)
 
 
-@pytest.mark.parametrize("shear", [SHEARS["unsheared"], SHEARS["b2+3b1"]], ids=["unsheared", "b2+3b1"])
+@pytest.mark.parametrize(
+    "shear", [SHEARS["unsheared"], SHEARS["b2+3b1"]], ids=["unsheared", "b2+3b1"]
+)
 def test_2d_brillouin_zone_is_the_hexagonal_prism_for_any_basis(
     hexagonal_reciprocal_lattice, shear
 ):
