@@ -9,7 +9,7 @@ from pyprocar.core.ebs import (
 from pyprocar.core.fermisurface import FermiSurface
 from pyprocar.core.property_store import PointSet
 from pyprocar.utils import math
-from pyprocar.utils.physics import HBAR_EV, METER_ANGSTROM
+from pyprocar.utils.units import HBAR_EV, METER_ANGSTROM
 from tests.utils import DATA_DIR
 
 pytestmark = pytest.mark.data

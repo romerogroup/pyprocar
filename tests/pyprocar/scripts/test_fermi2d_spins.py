@@ -31,7 +31,7 @@ def spin_polarized_mesh(spin_down_scale: float | None) -> ElectronicBandStructur
         kgrid_info=KGridInfo(kgrid=(N_K, N_K, 1), kgrid_mode=KGRID_MODE.GAMMA, kshift=(0, 0, 0)),
         kpoints=kpoints,
         bands=bands,
-        projected=np.ones((len(kpoints), 1, 1, 1, 2)),
+        projected=np.ones((len(kpoints), 1, 2, 1, 1)),
         fermi=FERMI,
         reciprocal_lattice=np.eye(3),
         orbital_names=["s"],

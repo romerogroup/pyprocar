@@ -8,7 +8,7 @@ from typing import Self
 import numpy as np
 import numpy.typing as npt
 
-HARTREE_TO_EV = 27.211386245988
+from pyprocar.utils.units import HARTREE_TO_EV
 
 
 def parse_dos_block(

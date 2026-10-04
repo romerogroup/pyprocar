@@ -93,21 +93,6 @@ def call_fermi2D(args):
     )
 
 
-def call_fermi3D(args):
-    """
-    This module calls the fermi3D plotting function.
-    """
-    pyprocar.fermi3D(
-        args.procar,
-        args.outcar,
-        args.bands,
-        scale=args.scale,
-        mode=args.mode,
-        st=args.st,
-        kwargs=args.kwargs,
-    )
-
-
 def call_filter(args):
     """
     This module calls the filter function.
@@ -130,13 +115,6 @@ def call_cat(args):
     This module calls the cat function.
     """
     pyprocar.cat(inFiles=args.inFiles, outFile=args.outFile, gz=args.gz)
-
-
-def call_mergeabinit(args):
-    """
-    This module calls the mergeabinit function.
-    """
-    pyprocar.mergeabinit(args.outfile)
 
 
 def call_bandgap(args):
@@ -197,12 +175,6 @@ if __name__ == "__main__":
         parserCat.add_argument("--gz", help=phelp, action="store_true")
 
         parserCat.set_defaults(func=call_cat)
-
-        ################ mergeabinit ##################################
-
-        parsermergeabinit = subparsers.add_parser("mergeabinit", help="Merge Abinit PROCARs.")
-        parsermergeabinit.add_argument("outfile", help="Merged PROCAR")
-        parsermergeabinit.set_defaults(func=call_mergeabinit)
 
         ############### unfold #######################################
         parserunfold = subparsers.add_parser("unfold", help="Band unfolding.")
@@ -364,22 +336,6 @@ if __name__ == "__main__":
         parserFermi2D.add_argument("--noarrow", help=phelp, action="store_true")
 
         parserFermi2D.set_defaults(func=call_fermi2D)
-
-        ################ Fermi3D ##########################################
-
-        parserfermi3D = subparsers.add_parser("fermi3D", help="Plot 3D Fermi surface")
-        parserfermi3D.add_argument("procar", help="PROCAR file.")
-        parserfermi3D.add_argument("outcar", help="OUTCAR file.")
-        parserfermi3D.add_argument(
-            "bands", help="Array of bands to be included. -1 considers all.", default=-1
-        )
-        parserfermi3D.add_argument("scale", help="Interpolation factor", type=float, default=1)
-        parserfermi3D.add_argument(
-            "mode", help="Plot mode.", choices=["plain", "parametric", "external"]
-        )
-        parserfermi3D.add_argument("-st", help="Flag to set spin texture on.", action="store_true")
-        parserfermi3D.add_argument("kwargs", help="Additional arguments.", nargs="*")
-        parserfermi3D.set_defaults(func=call_fermi3D)
 
         ################# repair ##########################################
         parserrepair = subparsers.add_parser(
@@ -580,6 +536,4 @@ if __name__ == "__main__":
     else:
         print("PyProcar: A Python library for analyzing PROCAR files.\n")
         print("Usage: procar [-h]")
-        print(
-            "{cat,mergeabinit,unfold,filter,fermi2D,fermi3D,repair,generate2dkmesh,kpath,bandsplot,bandscompare}"
-        )
+        print("{cat,unfold,filter,fermi2D,repair,generate2dkmesh,kpath,bandsplot,bandscompare}")

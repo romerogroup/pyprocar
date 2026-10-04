@@ -223,7 +223,7 @@ class ProcarParser:
         The occupation numbers are discarded (are they useful?)"""
         self.log.debug("readBands")
         if not self.fileStr:
-            log.warning("You should invoke `procar.read()` instead. Returning")
+            self.log.warning("You should invoke `procar.read()` instead. Returning")
             return
 
         # finding all bands

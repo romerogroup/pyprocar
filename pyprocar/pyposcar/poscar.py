@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import argparse
 import re
+from typing import Any
 
 import numpy as np
 
@@ -60,7 +61,7 @@ class Poscar:
         self.Ntotal: int, total number of atoms in system
         self.elm: list, element of each atoms one-by-one.
         self.selective: bool, Selective dynamics?
-        self.selectFlags: None or nd.array(str), flags of selective dynamics
+        self.selectFlags: None or np.ndarray(str), flags of selective dynamics
         self.flags: dict, list of flags. Not used here just for convenience
         self.volume: float, the box product of the lattice
 
@@ -72,10 +73,10 @@ class Poscar:
         self.cpos: np.ndarray = None  # cartesian coordinates
         self.dpos: np.ndarray = None  # direct coordinates
         self.lat: np.ndarray = None  # lattice
-        self.typeSp: List[str] = None  # Name of atomic species
-        self.numberSp: nd.array = None  # Number of atoms per specie
+        self.typeSp: Any = None  # Name of atomic species
+        self.numberSp: Any = None  # Number of atoms per specie
         self.Ntotal: int = None  # Total atoms in system
-        self.elm: List[str] = None  # Element of each atoms one-by-one.
+        self.elm: Any = None  # Element of each atoms one-by-one.
         self.selective: bool = None  # Selective dynamics
         self.selectFlags: np.ndarray = None  # all the T,F from selective dynamics
         self.flags: dict = {}  # list of flags, not used here just for convenience
@@ -185,9 +186,7 @@ class Poscar:
             self.flags[i] = {}
         return
 
-    def load_from_data(
-        self, direct_positions: np.ndarray, lattice: np.ndarray, elements: List[str]
-    ):
+    def load_from_data(self, direct_positions: np.ndarray, lattice: np.ndarray, elements: Any):
         """
         It loades the Poscar class with essencial data.
 
@@ -197,7 +196,7 @@ class Poscar:
           atomic positions in direct (fractional) coordiantes. Size [Natoms:3]
         lattice : np.ndarray
           Lattice vectors [3:3], in *Angstroms*
-        elements : List[str]
+        elements : list[str]
           A list of atomic symbols, with the same order as the `direct_positions`
 
         """

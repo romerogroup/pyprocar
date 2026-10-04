@@ -276,7 +276,7 @@ def fft_interpolate_nd_3dmesh(mesh, interpolation_factor):
 
     # If this is just a 3D array, use fft_interpolate directly
     if len(scalar_dims) == 0:
-        return fft_interpolate_mesh(grid_3d, interpolation_factor)
+        return fft_interpolate_mesh(mesh, interpolation_factor)
 
     # For higher dimensional arrays, iterate through the scalar dimensions
 

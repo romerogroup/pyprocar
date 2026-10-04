@@ -280,7 +280,9 @@ class TestElkParserBands(BaseTest):
 
 
 class TestElkParserDOS(BaseTest):
-    @pytest.mark.skip(reason="ElkDOS.total shape (nspin, nenergies) doesn't match DensityOfStates expected (n_energies, n_spin)")
+    @pytest.mark.skip(
+        reason="ElkDOS.total shape (nspin, nenergies) doesn't match DensityOfStates expected (n_energies, n_spin)"
+    )
     def test_dos_type(self, dos_calc_dir):
         """Test that dos returns DensityOfStates."""
         parser = ElkParser(dos_calc_dir)
@@ -459,9 +461,7 @@ def test_molecule_positions_are_cartesian_bohr(tmp_path, filename, content):
     assert lattice is not None and fractional is not None and cartesian is not None
     assert np.allclose(lattice, np.diag([5.291772, 5.291772, 10.583544]), atol=1e-6)
     assert np.allclose(fractional, [[0.25, 0, -0.05], [0.25, 0, 0.05]])
-    assert np.allclose(
-        cartesian, [[1.322943, 0, -0.529177], [1.322943, 0, 0.529177]], atol=1e-6
-    )
+    assert np.allclose(cartesian, [[1.322943, 0, -0.529177], [1.322943, 0, 0.529177]], atol=1e-6)
 
 
 def test_ebs_kpoints_are_fractional_and_kdirect_is_gone(bands_calc_dir):
@@ -471,9 +471,7 @@ def test_ebs_kpoints_are_fractional_and_kdirect_is_gone(bands_calc_dir):
 
     assert isinstance(ebs, ElectronicBandStructurePath)
     assert np.allclose(ebs.kpath.kpoints[:2], [[0, 0, 0], [0.0625, 0, 0]])
-    assert np.allclose(
-        ebs.kpoints_cartesian[:2], [[0, 0, 0], [0.0625 * 0.260332, 0, 0]], atol=1e-7
-    )
+    assert np.allclose(ebs.kpoints_cartesian[:2], [[0, 0, 0], [0.0625 * 0.260332, 0, 0]], atol=1e-7)
 
 
 @pytest.fixture
@@ -692,9 +690,13 @@ def test_task_23_spin_characters_go_to_each_state_spin_channel(tmp_path):
     )
     assert ebs.orbital_names == ["spin"]
     ends = _first_and_last_kpoint(ebs)
-    assert ends.shape == (2, 1, 2, 1, 1, 2)
-    assert ends[0, 0, :, 0, 0, :] == pytest.approx(np.array([[0.100, 0.200], [0.300, 0.400]]))
-    assert ends[1, 0, :, 0, 0, :] == pytest.approx(np.array([[0.109, 0.209], [0.309, 0.409]]))
+    assert ends.shape == (2, 1, 2, 2, 1)
+    assert ends[0, 0, :, :, 0].transpose() == pytest.approx(
+        np.array([[0.100, 0.200], [0.300, 0.400]])
+    )
+    assert ends[1, 0, :, :, 0].transpose() == pytest.approx(
+        np.array([[0.109, 0.209], [0.309, 0.409]])
+    )
 
 
 def test_task_24_moment_character_is_read_per_atom(tmp_path):
@@ -712,7 +714,9 @@ def test_task_24_moment_character_is_read_per_atom(tmp_path):
     assert ebs is not None
     assert ebs.orbital_names == ["moment"]
     ends = _first_and_last_kpoint(ebs)
-    assert ends[0, 0, :, 0, 0, :] == pytest.approx(np.array([[0.300, -0.250], [0.050, -0.020]]))
+    assert ends[0, 0, :, :, 0].transpose() == pytest.approx(
+        np.array([[0.300, -0.250], [0.050, -0.020]])
+    )
 
 
 def test_task_21_reads_l_characters_without_the_sum_column(tmp_path):
@@ -730,8 +734,8 @@ def test_task_21_reads_l_characters_without_the_sum_column(tmp_path):
     assert ebs is not None
     assert ebs.orbital_names == ["s", "p", "d", "f"]
     ends = _first_and_last_kpoint(ebs)
-    assert ends[0, 0, 0, 0, :, 0] == pytest.approx([0.100, 0.200, 0.300, 0.000])
-    assert ends[0, 0, 1, 0, :, 0] == pytest.approx([0.010, 0.000, 0.030, 0.000])
+    assert ends[0, 0, 0, 0, :] == pytest.approx([0.100, 0.200, 0.300, 0.000])
+    assert ends[0, 0, 0, 1, :] == pytest.approx([0.010, 0.000, 0.030, 0.000])
 
 
 ELK_BANDS_SP = DATA_DIR / "codes" / "elk" / "6.3" / "SrVO3" / "spin-polarized-colinear" / "bands"
@@ -743,10 +747,10 @@ def test_real_spin_polarized_task_22_reads_the_spin_down_states():
 
     assert ebs is not None and ebs.projected is not None
     projected = ebs.projected.to_array()
-    assert projected.shape == (44, 71, 5, 1, 16, 2)
-    assert projected[0, 70, 1, 0, :, 0].sum() == pytest.approx(0.135255, abs=1e-6)
-    assert projected[0, 70, 1, 0, :, 1].sum() == pytest.approx(0.132893, abs=1e-6)
-    assert projected[0, 0, 1, 0, 0, :] == pytest.approx([0.989874, 0.989950])
+    assert projected.shape == (44, 71, 2, 5, 16)
+    assert projected[0, 70, 0, 1, :].sum() == pytest.approx(0.135255, abs=1e-6)
+    assert projected[0, 70, 1, 1, :].sum() == pytest.approx(0.132893, abs=1e-6)
+    assert projected[0, 0, :, 1, 0] == pytest.approx([0.989874, 0.989950])
     assert ebs.orbital_names is not None and len(ebs.orbital_names) == 16
 
 

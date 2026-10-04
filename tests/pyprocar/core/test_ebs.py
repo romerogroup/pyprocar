@@ -2,13 +2,13 @@ import logging
 import tempfile
 from pathlib import Path
 from types import SimpleNamespace
+from typing import cast
 
 import numpy as np
 import pytest
 import pyvista as pv
 
 from pyprocar.core import Structure, kpoints
-from pyprocar.core.atomic_orbital_index import OrbitalIndexer
 from pyprocar.core.ebs import (
     ElectronicBandStructure,
     ElectronicBandStructureMesh,
@@ -17,7 +17,7 @@ from pyprocar.core.ebs import (
 from pyprocar.core.kpoints import KGRID_MODE, KGridInfo
 from pyprocar.core.property_store import Property
 from pyprocar.utils import math
-from pyprocar.utils.physics import EV_TO_J, FREE_ELECTRON_MASS, HBAR_J, METER_ANGSTROM
+from pyprocar.utils.units import EV_TO_J, FREE_ELECTRON_MASS, HBAR_J, METER_ANGSTROM
 from tests.utils import DATA_DIR
 
 logger = logging.getLogger("pyprocar")
@@ -1098,7 +1098,7 @@ def test_unfold_weights_are_the_primitive_cell_character_of_each_band():
         bands=np.array([[[-1.0], [1.0], [2.0]]]),
         projected=np.abs(phase) ** 2,
         projected_phase=phase,
-        orbital_names=OrbitalIndexer().flat_conventional,
+        orbital_names=["s"],
         structure=structure,
     )
 
@@ -1378,4 +1378,23 @@ def test_spin_transforms_rejects_an_image_no_operation_reaches():
             np.array([np.eye(3)]),
             True,
             np.eye(3),
+        )
+
+
+@pytest.mark.parametrize(
+    ("projected_shape", "orbital_names", "message"),
+    [
+        ((2, 3, 1, 1, 9), [f"o{i}" for i in range(16)], "16 orbital_names for 9 projected"),
+        ((2, 3, 5, 1, 16, 1), [f"o{i}" for i in range(16)], "must have the 5 axes"),
+    ],
+)
+def test_band_structure_rejects_projections_its_orbital_names_do_not_describe(
+    projected_shape, orbital_names, message
+):
+    with pytest.raises(ValueError, match=message):
+        ElectronicBandStructure(
+            kpoints=cast(kpoints.KPOINTS_DTYPE, np.zeros((2, 3))),
+            bands=np.zeros((2, 3, 1)),
+            projected=np.zeros(projected_shape),
+            orbital_names=orbital_names,
         )

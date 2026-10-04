@@ -4,7 +4,7 @@ from functools import cached_property
 from pathlib import Path
 from typing import Self
 
-HARTREE_TO_EV = 27.211386245988
+from pyprocar.utils.units import HARTREE_TO_EV
 
 
 class ElkFermi:

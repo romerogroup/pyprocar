@@ -5,7 +5,8 @@ import logging
 import numpy as np
 import pytest
 
-from pyprocar.io.elk.dos import HARTREE_TO_EV, ElkDOS
+from pyprocar.io.elk.dos import ElkDOS
+from pyprocar.utils.units import HARTREE_TO_EV
 from tests.utils import BaseTest
 
 logger = logging.getLogger(__name__)

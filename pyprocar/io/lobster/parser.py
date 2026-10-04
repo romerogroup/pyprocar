@@ -17,9 +17,6 @@ from pyprocar.io.lobster.lobsterout import LobsterOut
 logger = logging.getLogger(__name__)
 user_logger = logging.getLogger("user")
 
-# Conversion constant
-HARTREE_TO_EV = 27.211386245988
-
 
 class LobsterParser(BaseParser):
     """Parser for Lobster calculations.
@@ -230,8 +227,7 @@ class LobsterParser(BaseParser):
         kpoints = fb0.kpoints.copy()
         bands = fb0.bands.copy()
 
-        # projected shape: (n_kpoints, n_bands, n_atoms, n_principals, n_orbitals, n_spins)
-        projected = np.zeros((n_kpoints, n_bands, n_ions, 1, n_orbitals, n_spins))
+        projected = np.zeros((n_kpoints, n_bands, n_spins, n_ions, n_orbitals))
 
         # Map element names to ion indices
         unique_ions = list(dict.fromkeys(ions_list))  # preserve order
@@ -261,7 +257,7 @@ class LobsterParser(BaseParser):
                 continue
 
             # Add projections
-            projected[:, :, iion, 0, iorb, :] += fb.projections
+            projected[:, :, :, iion, iorb] += fb.projections
 
         return {
             "kpoints": kpoints,
@@ -305,7 +301,7 @@ class LobsterParser(BaseParser):
             projected=data["projected"],
             fermi=fermi,
             projected_phase=None,
-            orbital_names=LOBSTER_ORBITALS[:-1],  # Exclude last orbital for compatibility
+            orbital_names=LOBSTER_ORBITALS,
             reciprocal_lattice=self.reciprocal_lattice,
         )
 
