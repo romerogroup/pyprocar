@@ -3,23 +3,46 @@ import logging
 
 import numpy as np
 import pyvista as pv
+import spglib
 from scipy.spatial import Voronoi
 
 logger = logging.getLogger(__name__)
 
 _FACE_CANDIDATES = np.array([s for s in itertools.product(range(-2, 3), repeat=3) if any(s)])
+_NEIGHBOURS = np.array(list(itertools.product(range(-1, 2), repeat=3)))
+_ORIGIN = 13
 
 
 def zone_face_steps(reciprocal_lattice: np.ndarray) -> np.ndarray:
     """Integer coefficients, in the rows of ``reciprocal_lattice``, of the lattice vectors
     whose bisector planes bound the first Brillouin zone.
 
-    A candidate is dropped when its midpoint lies on or beyond the bisector plane of another.
+    The candidates are the 5^3 block of the Delaunay-reduced basis, whatever basis is given.
+    The face vectors are the 7 pairs of an obtuse superbase and the reduced basis is 3 of
+    them, so each face vector has coefficients -2 to 2 in it. A candidate is dropped when its
+    midpoint lies on or beyond the bisector plane of another.
     """
-    zone = _FACE_CANDIDATES @ np.asarray(reciprocal_lattice, dtype=np.float64)
+    lattice = np.asarray(reciprocal_lattice, dtype=np.float64)
+    unit = lattice / abs(np.linalg.det(lattice)) ** (1 / 3)
+    reduced = spglib.delaunay_reduce(unit)
+    if reduced is None:
+        raise ValueError(f"spglib cannot Delaunay-reduce the reciprocal lattice {lattice.tolist()}")
+    candidates = _FACE_CANDIDATES @ np.rint(reduced @ np.linalg.inv(unit)).astype(int)
+    zone = candidates @ lattice
     beyond = zone @ zone.T >= (zone * zone).sum(axis=1)[:, None] * (1 - 1e-9)
     np.fill_diagonal(beyond, False)
-    return _FACE_CANDIDATES[~beyond.any(axis=0)]
+    return candidates[~beyond.any(axis=0)]
+
+
+def _wigner_seitz(reciprocal_lattice: np.ndarray) -> tuple[np.ndarray, list[list[int]]]:
+    """Voronoi vertices of the 3^3 block of lattice points plus the zone face vectors outside
+    it, and the faces of the origin's cell."""
+    lattice = np.asarray(reciprocal_lattice, dtype=np.float64)
+    faces = zone_face_steps(lattice)
+    steps = np.vstack([_NEIGHBOURS, faces[np.abs(faces).max(axis=1) > 1]])
+    brill = Voronoi(steps @ lattice)
+    cell = [brill.ridge_dict[pair] for pair in brill.ridge_dict if _ORIGIN in pair]
+    return np.array(brill.vertices, dtype=float), cell
 
 
 class BrillouinZone(pv.PolyData):
@@ -108,23 +131,7 @@ class BrillouinZone(pv.PolyData):
             Returns the wigner Seitz cell in the form of a tuple containing the verts and faces of the cell
         """
         logger.info("___Calculating Wigner Seitz cell___")
-
-        kpoints = []
-        for i in range(-1, 2):
-            for j in range(-1, 2):
-                for k in range(-1, 2):
-                    vec = i * self.reciprocal[0] + j * self.reciprocal[1] + k * self.reciprocal[2]
-                    kpoints.append(vec)
-        # print(kpoints, self.reciprocal)
-        brill = Voronoi(np.array(kpoints))
-        faces = []
-        for idict in brill.ridge_dict:
-            if idict[0] == 13 or idict[1] == 13:
-                faces.append(brill.ridge_dict[idict])
-
-        verts = brill.vertices
-
-        return np.array(verts, dtype=float), faces
+        return _wigner_seitz(self.reciprocal)
 
     def _fix_normals_direction(self):
         """
@@ -175,8 +182,9 @@ class BrillouinZone2D(pv.PolyData):
 
         verts, faces = self.wigner_seitz()
 
-        min_val = verts[:, axis].min()
-        max_val = verts[:, axis].max()
+        heights = verts[np.concatenate(faces), axis]
+        min_val = heights.min()
+        max_val = heights.max()
 
         for vert in verts:
             vert_z = vert[axis]
@@ -245,23 +253,7 @@ class BrillouinZone2D(pv.PolyData):
         Tuple(n_verts,n_faces)
             Returns the wigner Seitz cell in the form of a tuple containing the verts and faces of the cell
         """
-
-        kpoints = []
-        for i in range(-1, 2):
-            for j in range(-1, 2):
-                for k in range(-1, 2):
-                    vec = i * self.reciprocal[0] + j * self.reciprocal[1] + k * self.reciprocal[2]
-                    kpoints.append(vec)
-        # print(kpoints, self.reciprocal)
-        brill = Voronoi(np.array(kpoints))
-        faces = []
-        for idict in brill.ridge_dict:
-            if idict[0] == 13 or idict[1] == 13:
-                faces.append(brill.ridge_dict[idict])
-
-        verts = brill.vertices
-
-        return np.array(verts, dtype=float), faces
+        return _wigner_seitz(self.reciprocal)
 
     def _fix_normals_direction(self):
         """
