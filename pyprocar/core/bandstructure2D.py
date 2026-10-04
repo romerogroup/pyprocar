@@ -149,18 +149,18 @@ def compute_plane_info(
     u, v = get_orthonormal_basis(normal=normal_arr)
     plane_points = transform_points_to_uv(slice_mesh.points, u, v)
     u_limits, v_limits = find_plane_limits(plane_points)
-    u_grid, v_grid = get_uv_grid(grid_interpolation, u_limits, v_limits)
-    if not as_cartesian:
+    if as_cartesian:
+        u_grid, v_grid = get_uv_grid(grid_interpolation, u_limits, v_limits)
+    else:
         # The k-mesh is regular in fractional coordinates, so its slice is a parallelogram in
         # Cartesian space; a grid over its bounding box puts up to half the points outside the data.
-        frac_slice = ebs.to_mesh(as_cartesian=False).slice(normal=normal_arr, origin=origin_arr)
-        s_limits, t_limits = find_plane_limits(transform_points_to_uv(frac_slice.points, u, v))
+        lattice = np.asarray(ebs.reciprocal_lattice, dtype=float)
+        frac_points = slice_mesh.points @ np.linalg.inv(lattice)
+        s_limits, t_limits = find_plane_limits(transform_points_to_uv(frac_points, u, v))
         s_grid, t_grid = get_uv_grid(grid_interpolation, s_limits, t_limits)
-        offset = (
-            np.mean(frac_slice.points @ normal_arr) * normal_arr / np.dot(normal_arr, normal_arr)
-        )
+        offset = np.mean(frac_points @ normal_arr) * normal_arr / np.dot(normal_arr, normal_arr)
         frac = offset + np.stack([s_grid, t_grid], axis=-1) @ np.vstack([u, v])
-        cart = frac @ ebs.reciprocal_lattice
+        cart = frac @ lattice
         u_grid, v_grid = cart @ u, cart @ v
     uv_grid_points = get_uv_grid_points(u_grid, v_grid)
 
