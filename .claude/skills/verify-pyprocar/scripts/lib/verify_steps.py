@@ -4,7 +4,9 @@ Each @step runs isolated: a crash is recorded in summary.json (error + innermost
 and the next step still runs. finish() prints the summary and exits 1 if any step failed.
 """
 
+import importlib
 import json
+import logging
 import os
 import sys
 import traceback
@@ -13,6 +15,8 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 import numpy as np
 
+importlib.import_module("pyprocar")  # configures the "user" logger at ERROR
+logging.getLogger("user").setLevel(logging.WARNING)
 CALC, EV = Path(os.environ["CALC"]), Path(os.environ["EVIDENCE"])
 REPO = Path(os.environ["REPO"])
 SUMMARY: dict = {}
