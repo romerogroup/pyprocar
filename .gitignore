@@ -165,6 +165,7 @@ my_tests/
 /tests/data/
 /tests/data.zip
 /data
+/.tmp/
 
 reports/
 notebooks/
