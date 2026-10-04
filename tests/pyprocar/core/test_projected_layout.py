@@ -36,7 +36,11 @@ def band_structure(
     ("projected_shape", "n_band_spins", "with_structure", "expected"),
     [
         pytest.param(
-            (N_K, N_BANDS, N_ATOMS, 1, N_ORBITALS), 1, False, "(2, 3, 1|4, *, *)", id="spin-atom-swap"
+            (N_K, N_BANDS, N_ATOMS, 1, N_ORBITALS),
+            1,
+            False,
+            "(2, 3, 1|4, *, *)",
+            id="spin-atom-swap",
         ),
         pytest.param(
             (N_BANDS, N_K, 1, N_ATOMS, N_ORBITALS), 1, False, "(2, 3, 1|4, *, *)", id="k-band-swap"
@@ -72,9 +76,7 @@ def test_band_structure_rejects_a_spin_count_that_is_not_1_2_or_4():
 @pytest.mark.parametrize(
     ("n_band_spins", "n_spins"), [(1, 1), (2, 2), (4, 4), (1, 4)], ids=["1", "2", "4", "1-4"]
 )
-def test_band_structure_accepts_each_spin_layout_with_a_matching_structure(
-    n_band_spins, n_spins
-):
+def test_band_structure_accepts_each_spin_layout_with_a_matching_structure(n_band_spins, n_spins):
     ebs = band_structure((N_K, N_BANDS, n_spins, N_ATOMS, N_ORBITALS), n_band_spins, five_atoms())
 
     assert ebs.projected is not None
@@ -84,8 +86,12 @@ def test_band_structure_accepts_each_spin_layout_with_a_matching_structure(
 @pytest.mark.parametrize(
     ("total_shape", "projected_shape", "with_structure", "expected"),
     [
-        pytest.param((7, 1), (7, N_ATOMS, 1, N_ORBITALS), False, "(7, 1|4, *, *)", id="spin-atom-swap"),
-        pytest.param((7, 2), (7, 1, N_ATOMS, N_ORBITALS), False, "(7, 2, *, *)", id="spins-not-total"),
+        pytest.param(
+            (7, 1), (7, N_ATOMS, 1, N_ORBITALS), False, "(7, 1|4, *, *)", id="spin-atom-swap"
+        ),
+        pytest.param(
+            (7, 2), (7, 1, N_ATOMS, N_ORBITALS), False, "(7, 2, *, *)", id="spins-not-total"
+        ),
         pytest.param((7, 1), (6, 1, N_ATOMS, N_ORBITALS), False, "(7, 1|4, *, *)", id="energies"),
         pytest.param((7, 4), (7, 4, 2, N_ORBITALS), True, "(7, 4, 5, *)", id="atoms-not-structure"),
     ],

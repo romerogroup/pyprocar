@@ -96,7 +96,7 @@ def test_abinit_dos_names_its_orbitals_as_the_same_runs_procar_does() -> None:
 def test_elk_dos_names_its_orbitals_by_the_l_m_slots_of_elmirep() -> None:
     calc = CODES / "elk/6.3/SrVO3/non-spin-polarized/dos"
     first_atom = (calc / "ELMIREP.OUT").read_text().split("\n \n")[0]
-    expected = [f"Y{l}{m}" for l, m in re.findall(r"l =\s*(\d+), m =\s*(-?\d+)", first_atom)]
+    expected = [f"Y{ang}{m}" for ang, m in re.findall(r"l =\s*(\d+), m =\s*(-?\d+)", first_atom)]
 
     dos = get_parser("elk", calc).dos
 

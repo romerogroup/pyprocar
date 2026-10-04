@@ -124,7 +124,10 @@ def check_projected_layout(
         expected[spin_axis] = (1, 4) if n_spins == 1 else (n_spins,)
     if structure is not None:
         expected[layout.n_leading] = (structure.natoms,)
-    if any(sizes is not None and actual not in sizes for sizes, actual in zip(expected, shape)):
+    if any(
+        sizes is not None and actual not in sizes
+        for sizes, actual in zip(expected, shape, strict=True)
+    ):
         described = ", ".join("*" if s is None else "|".join(map(str, s)) for s in expected)
         sources = [] if leading_shape is None else [f"{layout.leading} of shape {leading_shape}"]
         sources += [] if structure is None else [f"a {structure.natoms}-atom structure"]

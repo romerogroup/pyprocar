@@ -112,7 +112,9 @@ def projwfc_out(states: list[str], wfcs: list[int]) -> str:
 def atomic_proj_xml(amplitudes: list[list[complex]]) -> str:
     wfcs = "".join(
         f'      <ATOMIC_WFC index="{i + 1}" spin="1">\n'
-        + "".join(f"  {complex(band[i]).real:.15f} {complex(band[i]).imag:.15f}\n" for band in amplitudes)
+        + "".join(
+            f"  {complex(band[i]).real:.15f} {complex(band[i]).imag:.15f}\n" for band in amplitudes
+        )
         + "      </ATOMIC_WFC>\n"
         for i in range(6)
     )
