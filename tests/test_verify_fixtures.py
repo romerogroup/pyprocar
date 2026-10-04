@@ -1,12 +1,3 @@
-"""``verify.sh`` locks fixtures under data/ and unlocks only its own copies.
-
-Each test runs a copy of the harness in a scratch git repo, so a chmod that escapes lands in
-the scratch tree. The env is a stub that logs its calls, so a download or a pyprocar import
-shows up in the log instead of reaching the network. The stub "downloads" a fixture by
-creating it. The victim directory outside data/ starts read-only, so a chmod that follows a
-symlink out of a fixture shows up as an unlocked victim.
-"""
-
 import os
 import re
 import shutil
@@ -20,7 +11,7 @@ import pytest
 SCRIPT = Path(".claude/skills/verify-pyprocar/scripts/verify.sh")
 VERIFY_SH = Path(__file__).resolve().parents[1] / SCRIPT
 WRITE_BITS = stat.S_IWUSR | stat.S_IWGRP | stat.S_IWOTH
-STUB = """#!/bin/sh
+FAKE_ENV = """#!/bin/sh
 echo "$@" >> "{log}"
 for last; do :; done
 case "$last" in data/*) mkdir -p "$last" && echo x > "$last/PROCAR" ;; esac
@@ -31,10 +22,8 @@ case "$last" in data/*) mkdir -p "$last" && echo x > "$last/PROCAR" ;; esac
 class Harness:
     root: Path
     repo: Path
-    data: str
-    """data/ relative to ``root``: inside the repo, or the main checkout's for a worktree."""
+    data_rel: str
     shared_env: Path | None
-    """The main checkout's env bin dir when ``repo`` is a linked worktree."""
 
     @property
     def env_log(self) -> Path:
@@ -42,7 +31,7 @@ class Harness:
 
     @property
     def data_dir(self) -> Path:
-        return self.root / self.data
+        return self.root / self.data_rel
 
     def verify(self, *args: str) -> subprocess.CompletedProcess[str]:
         env = {**os.environ, "PATH": f"{self.root / 'bin'}{os.pathsep}{os.environ['PATH']}"}
@@ -79,7 +68,7 @@ def _entries(root: Path) -> list[Path]:
 
 def _stub(path: Path, log: Path) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(STUB.format(log=log))
+    path.write_text(FAKE_ENV.format(log=log))
     path.chmod(0o755)
 
 
@@ -181,7 +170,7 @@ def test_fetch_locks_an_existing_fixture_without_the_env(harness, rel, fixture):
     before = harness.locked()
 
     assert harness.verify("fetch", rel).returncode == 0
-    assert harness.locked() - before == {f"{harness.data}/{p}" for p in fixture}
+    assert harness.locked() - before == {f"{harness.data_rel}/{p}" for p in fixture}
     assert not harness.env_log.exists()
 
 
@@ -191,7 +180,7 @@ def test_fetch_through_a_symlinked_fixture_locks_its_target_inside_data(harness)
 
     assert harness.verify("fetch", "data/examples/bands/alias").returncode == 0
     assert harness.locked() - before == {
-        f"{harness.data}/{p}" for p in ["codes", "codes/qe", "codes/qe/scf.out"]
+        f"{harness.data_rel}/{p}" for p in ["codes", "codes/qe", "codes/qe/scf.out"]
     }
 
 
@@ -203,8 +192,8 @@ def test_fetch_downloads_a_missing_fixture_by_its_literal_name_then_locks_it(har
     assert harness.verify("fetch", "data/examples/dos/new").returncode == 0
     assert harness.env_log.read_text().split()[-1] == "data/examples/dos/new"
     assert harness.locked() - before == {
-        f"{harness.data}/examples/dos/new",
-        f"{harness.data}/examples/dos/new/PROCAR",
+        f"{harness.data_rel}/examples/dos/new",
+        f"{harness.data_rel}/examples/dos/new/PROCAR",
     }
 
 
@@ -368,7 +357,9 @@ def test_doctor_counts_a_symlinked_fixture_root_by_its_target(harness):
 
 @pytest.mark.guards_existing_behaviour(reason="a lint; verify.sh on dev runs no chmod at all")
 def test_every_chmod_in_verify_sh_runs_through_find_that_skips_symlinks():
-    lines = [x.strip() for x in VERIFY_SH.read_text().splitlines() if not x.lstrip().startswith("#")]
+    lines = [
+        x.strip() for x in VERIFY_SH.read_text().splitlines() if not x.lstrip().startswith("#")
+    ]
     chmods = [x for x in lines if "chmod" in x]
 
     assert [x for x in chmods if not re.search(r'find -P "[^"]+" ! -type l -exec chmod ', x)] == []

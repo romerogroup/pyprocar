@@ -51,13 +51,9 @@ require_free() {
   done
 }
 
-# Commands that copy, chmod or remove act only on paths that canonical or fixture_path returned,
-# and chmod only through find -P ! -type l, which never follows or changes a symlink.
-NAME='[A-Za-z0-9_][A-Za-z0-9_.-]*'
+PLAIN_NAME='[A-Za-z0-9_][A-Za-z0-9_.-]*'
 
-# Print the path with every symlink resolved, keeping a missing tail as written; fail on a
-# dangling or looping symlink.
-canonical() {
+real_path() {
   local head="$1" tail=""
   while [ ! -e "$head" ]; do
     [ ! -L "$head" ] || return 1
@@ -73,15 +69,12 @@ canonical() {
   printf '%s%s\n' "$head" "$tail"
 }
 
-# A path relative to data/ is a fixture path under examples/<category>/<name> or <name>.
-fixture_rel() { case "$1/" in examples/*/*/*) ;; examples/* | verify-runs/*) return 1 ;; esac; }
+is_fixture_rel() { case "$1/" in examples/*/*/*) ;; examples/* | verify-runs/*) return 1 ;; esac; }
 
-# Print the real path of <rel>, existing or not, if that is a fixture path; fail otherwise.
-# <rel> must be data/ plus plain names, so no glob, option, . or .. reaches a command.
 fixture_path() {
   local rel="${1%/}" data real
-  [[ "$rel" =~ ^data(/$NAME)+$ ]] && data="$(canonical data)" && real="$(canonical "$rel")" || return 1
-  case "$real" in "$data"/?*) fixture_rel "${real#"$data"/}" && echo "$real" ;; *) return 1 ;; esac
+  [[ "$rel" =~ ^data(/$PLAIN_NAME)+$ ]] && data="$(real_path data)" && real="$(real_path "$rel")" || return 1
+  case "$real" in "$data"/?*) is_fixture_rel "${real#"$data"/}" && echo "$real" ;; *) return 1 ;; esac
 }
 
 writable_fixtures() {
@@ -139,7 +132,7 @@ pyprocar.download_from_hf(relpath=sys.argv[1], output_path=Path(".").resolve())'
   ;;
 run)
   name="$2" driver="$4"
-  [[ "$name" =~ ^$NAME$ ]] || { echo "refusing: run name '$name' is not one plain name" >&2; exit 2; }
+  [[ "$name" =~ ^$PLAIN_NAME$ ]] || { echo "refusing: run name '$name' is not one plain name" >&2; exit 2; }
   if ! fixture="$(fixture_path "$3")" || [ ! -d "$fixture" ]; then
     echo "refusing: $3 is not a fixture directory inside data/; get one with: verify.sh fetch <relpath>" >&2
     exit 2
@@ -171,7 +164,7 @@ run)
   exit "$code"
   ;;
 clean)
-  run="$(canonical "$2")" && runs="$(canonical "$RUNS")" && [ -d "$run" ] && [[ "${run#"$runs"/}" =~ ^$NAME$ ]] ||
+  run="$(real_path "$2")" && runs="$(real_path "$RUNS")" && [ -d "$run" ] && [[ "${run#"$runs"/}" =~ ^$PLAIN_NAME$ ]] ||
     { echo "refusing: $2 is not a run directory in $RUNS" >&2; exit 2; }
   scrub "$run"
   echo "removed scratch; evidence kept at $run/evidence"
