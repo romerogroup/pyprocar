@@ -12,6 +12,8 @@ from __future__ import annotations
 import copy
 import itertools
 import logging
+import re
+import warnings
 from abc import ABC, abstractmethod
 from collections.abc import Iterable, Mapping, Sequence
 from functools import cached_property
@@ -2175,13 +2177,17 @@ def ibz2fbz(ebs, rotations=None, kgrid_info=None, inplace=True, time_reversals=N
     reversal.
 
     Every operation also enters combined with time reversal (k -> -k), but such an image only
-    fills a grid point no listed operation reaches.
+    fills a grid point no listed operation reaches. Time reversal is a symmetry of each
+    collinear spin channel, magnetic or not, and of non-magnetic non-collinear systems. A group
+    whose operations carry time-reversal flags (QE's magnetic groups) already lists every
+    operation with time reversal, so filling a point there warns.
 
     Orbital weights at an image are exact for operations that only permute orbitals and for
     every full shell's sum. Otherwise they need the interference between the mixed orbitals:
     with collinear phases they are |M c|^2 for c = sqrt(weight) exp(i phase), and without
     phases the weights mix by |M|^2. Phases follow VASP's convention, Bloch sums with
-    exp(i k.(R + tau)).
+    exp(i k.(R + tau)). Phases are dropped, with a warning, when they are non-collinear or
+    over orbitals the code cannot rotate, such as QE's unnamed spin-orbit (l, j, m_j) states.
 
     Parameters
     ----------
@@ -2213,6 +2219,7 @@ def ibz2fbz(ebs, rotations=None, kgrid_info=None, inplace=True, time_reversals=N
     # The first operation that reaches a grid point supplies its values: the identity, so each
     # irreducible point keeps its own, then the listed operations, then their time-reversed copies.
     time_reversals = np.asarray(time_reversals, dtype=bool)
+    magnetic, n_listed = bool(time_reversals.any()), len(rotations)
     rotations = np.concatenate([np.eye(3)[np.newaxis], rotations, rotations])
     time_reversals = np.concatenate([[False], time_reversals, ~time_reversals])
     signs = np.where(time_reversals, -1.0, 1.0)
@@ -2239,6 +2246,14 @@ def ibz2fbz(ebs, rotations=None, kgrid_info=None, inplace=True, time_reversals=N
         new_kpoints = kpoints.wrap_to_first_zone(images[chosen])
 
     operation, source = np.divmod(chosen, n_ibz)
+    filled = int(np.count_nonzero(operation > n_listed))
+    if magnetic and filled:
+        warnings.warn(
+            f"{filled} k-points were filled by time reversal combined with a listed operation, "
+            + "which this magnetic group does not contain; their values may be wrong",
+            UserWarning,
+            stacklevel=2,
+        )
     for prop_name, calc_name, gradient_order, value_array in ebs.iter_properties():
         ebs.get_property(prop_name)[calc_name, gradient_order] = value_array[source]
 
@@ -2271,13 +2286,16 @@ def _turn_projections(ebs, rotations, time_reversals, operation, lattice_steps) 
     if n_atoms > 1 and structure is None:
         raise ValueError("Unfolding projections of several atoms needs the structure")
 
-    if phase is not None and phase.value.shape[2] == 4:
-        user_logger.warning(
-            "projected_phase is dropped: non-collinear phases cannot be carried to symmetry images"
+    names = ebs.orbital_names or [f"orbital {i}" for i in range(n_orbitals)]
+    if phase is not None and (phase.value.shape[2] == 4 or orbital_rotation(names, np.eye(3))[1]):
+        warnings.warn(
+            "projected_phase is dropped: symmetry images need collinear phases over orbitals "
+            + "with real-harmonic names in full shells",
+            UserWarning,
+            stacklevel=3,
         )
         ebs.remove_property("projected_phase")
         phase = None
-    names = ebs.orbital_names or [f"orbital {i}" for i in range(n_orbitals)]
     weights = projected.value if projected is not None else None
     phases = phase.value if phase is not None else None
     interfering = weights is not None and phases is not None and phases.shape == weights.shape
@@ -2315,10 +2333,16 @@ def _turn_projections(ebs, rotations, time_reversals, operation, lattice_steps) 
         bloch = np.exp(-2j * np.pi * np.round(lattice_steps) @ positions.T)
         phases *= bloch[:, np.newaxis, np.newaxis, :, np.newaxis]
     if unrotated:
-        user_logger.warning(
+        warnings.warn(
             "Orbital-resolved projections at symmetry images are not rotated for the orbitals "
-            + f"{sorted(unrotated)}; sums over each full shell stay exact"
+            + f"{sorted(unrotated, key=_numeric_order)}; sums over each full shell stay exact",
+            UserWarning,
+            stacklevel=3,
         )
+
+
+def _numeric_order(name: str) -> list[str | int]:
+    return [int(part) if part.isdigit() else part for part in re.split(r"(\d+)", name)]
 
 
 def sort_by_kpoints(ebs, inplace=True, order="F"):
