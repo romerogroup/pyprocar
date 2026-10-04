@@ -193,7 +193,8 @@ run)
   mkdir -p "$RUNS"
   require_free $(( $(du -sm "$fixture" | cut -f1) + MIN_FREE_MB ))
   run="$RUNS/$(date +%Y%m%d-%H%M%S)-$name"
-  mkdir "$run" || { echo "refusing: $run already exists; rerun to get the next second's name" >&2; exit 2; }
+  mkdir "$run" ||
+    { echo "refusing: $run already exists; rerun to get the next second's name" >&2; exit 2; }
   require_resolved_below "$run" "$RUNS"
   mkdir "$run/evidence" "$run/work" "$run/work/tmp"
   (set -C; echo $$ >"$run/.pid")
@@ -210,7 +211,8 @@ run)
   set -e
   echo "$code" >"$run/evidence/exit_code"
   # Side effects: files the run created or modified inside the calc copy.
-  (cd "$run/work/calc" && find . -newer "$run/.start" -type f) >"$run/evidence/side_effects.txt"
+  (cd "$run/work/calc" && find . -newer "$run/.start" -type f) \
+    >"$run/evidence/side_effects.txt"
   echo "run:        $run"
   echo "exit code:  $code"
   echo "evidence:"; ls -1 "$run/evidence" | sed 's/^/  /'

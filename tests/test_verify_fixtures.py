@@ -44,7 +44,8 @@ class Harness:
             cwd=self.repo,
             env=env,
             capture_output=True,
-            text=True,
+            encoding="utf-8",
+            errors="replace",
         )
 
     def install_shared_env(self) -> None:
@@ -599,9 +600,9 @@ def test_verify_sh_writes_only_on_the_lines_its_census_reviewed():
     assert writes == [
         'find -P "$2" ! -type l \\( -type d -o -links 1 \\) -exec chmod "$1" {} +',
         'rm -rf "$1/work" "$1/.start" "$1/.pid"',
-        "pyprocar.download_from_hf(relpath=sys.argv[1], output_path=Path(\".\").resolve())' \"$rel\"",
+        'pyprocar.download_from_hf(relpath=sys.argv[1], output_path=Path(".").resolve())\' "$rel"',
         'mkdir -p "$RUNS"',
-        'mkdir "$run" || { echo "refusing: $run already exists; rerun to get the next second\'s name" >&2; exit 2; }',
+        'mkdir "$run" ||',
         'mkdir "$run/evidence" "$run/work" "$run/work/tmp"',
         '(set -C; echo $$ >"$run/.pid")',
         "trap 'rm -f \"$run/.pid\"' EXIT",
@@ -610,7 +611,7 @@ def test_verify_sh_writes_only_on_the_lines_its_census_reviewed():
         'touch "$run/.start"',
         'py "$run/evidence/driver.py" >"$run/evidence/run.log" 2>&1',
         'echo "$code" >"$run/evidence/exit_code"',
-        '(cd "$run/work/calc" && find . -newer "$run/.start" -type f) >"$run/evidence/side_effects.txt"',
+        '>"$run/evidence/side_effects.txt"',
         'cp "$MAIN/pyprocar/_version.py" pyprocar/_version.py',
         'mkdir -p "$MAIN/data" .tmp',
         'ln -sfn "$MAIN/data" data',
