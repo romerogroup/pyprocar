@@ -4,8 +4,8 @@ A public signature change kept leaving its documented callers behind: notebooks 
 keywords fermi2D no longer took (#248), scripts/procar.py called fermi2D with ``outcar``
 (#257, #264) and bandsplot without ``dirname`` (#282), and handlers kept an
 ``apply_symmetry`` keyword that no longer exists. This test parses every Python snippet
-a user copies and binds each top-level ``pyprocar`` call against
-``inspect.signature``.
+a user copies, including rendered ``>>>`` examples, and binds each top-level
+``pyprocar`` call against ``inspect.signature``.
 """
 
 import ast
@@ -21,6 +21,34 @@ import pyprocar
 ROOT = Path(__file__).resolve().parent.parent
 RST_BLOCK = re.compile(r"\.\. code-block:: (?:python|ipython3?)\n((?:\n|[ \t]+.*\n)+)")
 MD_BLOCK = re.compile(r"```python\n(.*?)```", re.S)
+RST_COMMENT = re.compile(r"(\s*)\.\.(?:\s+(?!\S+::|_|\[|\|).*)?")
+
+
+def _rendered_lines(text: str) -> Iterator[tuple[int, str]]:
+    """Number each line of an rst file, leaving out ``..`` comment blocks."""
+    comment_indent: int | None = None
+    for number, line in enumerate(text.splitlines(), start=1):
+        indent = len(line) - len(line.lstrip())
+        if comment_indent is not None and (not line.strip() or indent > comment_indent):
+            continue
+        comment_indent = None
+        if match := RST_COMMENT.fullmatch(line):
+            comment_indent = len(match.group(1))
+            continue
+        yield number, line
+
+
+def _doctest_blocks(text: str) -> Iterator[tuple[int, str]]:
+    block: list[str] = []
+    start = 0
+    for number, line in [*_rendered_lines(text), (0, "")]:
+        stripped = line.lstrip()
+        if stripped.startswith((">>>", "...")):
+            start = start or number
+            block.append(stripped[4:])
+        elif block:
+            yield start, "\n".join(block)
+            block, start = [], 0
 
 
 def _notebook_snippets(path: Path) -> Iterator[tuple[str, str]]:
@@ -46,6 +74,8 @@ def snippets(root: Path) -> Iterator[tuple[str, str]]:
         for match in [*RST_BLOCK.finditer(text), *MD_BLOCK.finditer(text)]:
             line = text[: match.start()].count("\n") + 1
             yield f"{path.relative_to(root)}:{line}", textwrap.dedent(match.group(1))
+        for line, block in _doctest_blocks(text):
+            yield f"{path.relative_to(root)}:{line}", block
     for path in sorted([*root.glob("examples/**/*.ipynb"), *root.glob("docs/**/*.ipynb")]):
         for cell, source in _notebook_snippets(path):
             yield f"{path.relative_to(root)}{cell}", source
