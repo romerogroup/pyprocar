@@ -110,7 +110,7 @@ class ElkIn:
 
     @cached_property
     def lmirep(self) -> bool:
-        """Whether (l,m) characters go to the irreducible-representation basis (Elk default .true.)."""
+        """Whether (l,m) characters go to the irreducible-representation basis (default .true.)."""
         return self._logical("lmirep", True)
 
     @cached_property

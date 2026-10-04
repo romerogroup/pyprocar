@@ -157,7 +157,10 @@ _ELK_ORBITAL_NAME = re.compile(r"Y(\d)(?:-?\d+|_ir\d+)")
 
 
 def _angular_momentum(orbital_name: str) -> int | None:
-    """The l of an orbital name a parser writes (``px``, ``d_z^2``, ``x2-y2``, Elk's ``Y1-1`` or ``Y1_ir2``)."""
+    """The l of an orbital name a parser writes.
+
+    For example ``px``, ``d_z^2``, ``x2-y2``, or Elk's ``Y1-1`` and ``Y1_ir2``.
+    """
     if orbital_name == "x2-y2":
         return 2
     if elk := _ELK_ORBITAL_NAME.fullmatch(orbital_name):

@@ -6,10 +6,20 @@ ORBITALS = "ion      s     py     pz     px    dxy    dyz    dz2    dxz  x2-y2  
 
 
 def _band_block(header: str, weights: tuple[float, float]) -> list[str]:
-    rows = [f"    {ion}  {w:.3f}" + "  0.000" * 8 + f"  {w:.3f}" for ion, w in enumerate(weights, 1)]
+    rows = [
+        f"    {ion}  {w:.3f}" + "  0.000" * 8 + f"  {w:.3f}" for ion, w in enumerate(weights, 1)
+    ]
     total = sum(weights)
     rows.append(f"tot    {total:.3f}" + "  0.000" * 8 + f"  {total:.3f}")
-    return [header, "", "band     1 # energy  -1.00000000 # occ.  1.00000000", " ", ORBITALS, *rows, ""]
+    return [
+        header,
+        "",
+        "band     1 # energy  -1.00000000 # occ.  1.00000000",
+        " ",
+        ORBITALS,
+        *rows,
+        "",
+    ]
 
 
 def test_kpoint_coordinates_without_a_separating_space_are_read(tmp_path):

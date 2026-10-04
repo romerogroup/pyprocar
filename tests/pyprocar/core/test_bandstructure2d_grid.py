@@ -26,7 +26,9 @@ def two_band_mesh(lattice: np.ndarray, band) -> ElectronicBandStructureMesh:
     frac = np.stack(np.meshgrid(axis, axis, [0.0], indexing="ij"), axis=-1).reshape(-1, 3)
     energies = band(frac)
     return ElectronicBandStructureMesh(
-        kgrid_info=KGridInfo(kgrid=(N_K, N_K, 1), kgrid_mode=KGRID_MODE.GAMMA, kshift=(0.0, 0.0, 0.0)),
+        kgrid_info=KGridInfo(
+            kgrid=(N_K, N_K, 1), kgrid_mode=KGRID_MODE.GAMMA, kshift=(0.0, 0.0, 0.0)
+        ),
         kpoints=frac,
         bands=np.stack([-energies, energies], axis=1)[:, :, None],
         projected=np.ones((len(frac), 2, 1, 1, 1)),
@@ -56,7 +58,10 @@ def test_hexagonal_bs2d_surface_covers_the_k_patch_with_the_analytic_bands():
 @pytest.mark.parametrize("grid", [(30, 30), (30, 20)])
 def test_bs2d_band_values_belong_to_their_own_surface_points(grid):
     bs = BandStructure2D.from_ebs(
-        two_band_mesh(SQUARE, square_band), grid_interpolation=grid, padding=PADDING, as_cartesian=False
+        two_band_mesh(SQUARE, square_band),
+        grid_interpolation=grid,
+        padding=PADDING,
+        as_cartesian=False,
     )
 
     assert bs.n_points == 2 * grid[0] * grid[1]

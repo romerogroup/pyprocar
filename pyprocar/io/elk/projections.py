@@ -17,7 +17,7 @@ def lm_names(n_columns: int) -> list[str]:
 
 
 def irrep_names(n_columns: int) -> list[str]:
-    """Names of (l, i) columns in the irreducible-representation basis, i as ordered in ELMIREP.OUT."""
+    """Names of (l, i) irreducible-representation columns, i in ELMIREP.OUT order."""
     lmax = round(n_columns**0.5) - 1
     return [f"Y{ang}_ir{i}" for ang in range(lmax + 1) for i in range(1, 2 * ang + 2)]
 

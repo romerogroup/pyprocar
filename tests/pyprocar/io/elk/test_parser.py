@@ -798,7 +798,7 @@ def test_task_22_characters_from_elk_10_7_8_are_named_by_irreducible_representat
 
 
 @pytest.mark.guards_existing_behaviour(
-    reason="Ylm-basis runs keep the names they had; the irreducible-representation tests are the red ones"
+    reason="Ylm-basis runs keep the names they had; the irrep-basis tests are the red ones"
 )
 @pytest.mark.parametrize(
     "setup",

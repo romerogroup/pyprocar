@@ -77,7 +77,9 @@ ORBITALS = "ion      s     py     pz     px    dxy    dyz    dz2    dxz  x2-y2  
 
 
 def _two_ion_procar(weights: tuple[float, float]) -> str:
-    rows = [f"    {ion}  {w:.3f}" + "  0.000" * 8 + f"  {w:.3f}" for ion, w in enumerate(weights, 1)]
+    rows = [
+        f"    {ion}  {w:.3f}" + "  0.000" * 8 + f"  {w:.3f}" for ion, w in enumerate(weights, 1)
+    ]
     total = sum(weights)
     rows.append(f"tot    {total:.3f}" + "  0.000" * 8 + f"  {total:.3f}")
     lines = [
@@ -104,7 +106,20 @@ def test_filter_subcommand_groups_atoms(tmp_path, monkeypatch: pytest.MonkeyPatc
     runpy.run_path(str(PROCAR_CLI), run_name="__main__")
 
     lines = (tmp_path / "out").read_text().splitlines()
-    assert lines[1].split() == ["#", "of", "k-points:", "1", "#", "of", "bands:", "1", "#", "of", "ions:", "1"]
+    assert lines[1].split() == [
+        "#",
+        "of",
+        "k-points:",
+        "1",
+        "#",
+        "of",
+        "bands:",
+        "1",
+        "#",
+        "of",
+        "ions:",
+        "1",
+    ]
     grouped = next(line.split() for line in lines if line.split()[:1] == ["1"])
     assert float(grouped[1]) == pytest.approx(0.1 + 0.2)
     assert float(grouped[-1]) == pytest.approx(0.1 + 0.2)
