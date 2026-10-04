@@ -9,7 +9,7 @@ import pytest
 
 from pyprocar.core import ElectronicBandStructure
 from pyprocar.scripts import scriptAutoBandsplot
-from tests.utils import DATA_DIR
+from tests.utils import DATA_DIR, writable_copy
 
 
 class ReachedStructure(Exception):
@@ -49,7 +49,7 @@ def auto_calc(tmp_path, monkeypatch):
     if not AUTO.exists():
         pytest.skip("fixture bands/auto not downloaded")
     calc = tmp_path / "calc"
-    shutil.copytree(AUTO, calc, ignore=shutil.ignore_patterns("report.txt", "*.pkl"))
+    writable_copy(AUTO, calc, ignore=shutil.ignore_patterns("report.txt", "*.pkl"))
     cwd = tmp_path / "cwd"
     cwd.mkdir()
     monkeypatch.chdir(cwd)

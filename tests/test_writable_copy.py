@@ -60,3 +60,14 @@ def test_copy_skips_ignored_names(read_only_fixture, tmp_path):
     )
 
     assert sorted(p.name for p in dst.rglob("*")) == ["OUTCAR", "PROCAR", "sub"]
+
+
+def test_copy_of_a_read_only_file_takes_writes(read_only_fixture, tmp_path):
+    (tmp_path / "calc").mkdir()
+
+    dst = writable_copy(read_only_fixture / "PROCAR", tmp_path / "calc" / "PROCAR")
+
+    assert dst == tmp_path / "calc" / "PROCAR"
+    assert dst.read_text() == "procar"
+    dst.write_text("rewritten")
+    assert (read_only_fixture / "PROCAR").read_text() == "procar"
