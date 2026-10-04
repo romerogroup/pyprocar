@@ -290,7 +290,7 @@ def _start_steps(zone: np.ndarray, half: np.ndarray, inverse: np.ndarray) -> np.
     if max(-low.min(), high.max()) > MAX_REACH:
         raise ValueError(f"the first zone spans more than {MAX_REACH} cells of this basis")
     window = np.array(list(itertools.product(*map(range, low, high + 1))))
-    return np.vstack([_START_STEPS, window[~np.isin(_pack(0, window), _pack(0, _START_STEPS))]])
+    return np.vstack([_START_STEPS, window[np.abs(window).max(axis=1) > 2]])
 
 
 def _band_curves(

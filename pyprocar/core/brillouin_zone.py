@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 
 _FACE_CANDIDATES = np.array([s for s in itertools.product(range(-2, 3), repeat=3) if any(s)])
 _NEIGHBOURS = np.array(list(itertools.product(range(-1, 2), repeat=3)))
-_ORIGIN = 13
+_ORIGIN = len(_NEIGHBOURS) // 2
 
 
 def zone_face_steps(reciprocal_lattice: np.ndarray) -> np.ndarray:
@@ -38,8 +38,8 @@ def _wigner_seitz(reciprocal_lattice: np.ndarray) -> tuple[np.ndarray, list[list
     """Voronoi vertices of the 3^3 block of lattice points plus the zone face vectors outside
     it, and the faces of the origin's cell."""
     lattice = np.asarray(reciprocal_lattice, dtype=np.float64)
-    faces = zone_face_steps(lattice)
-    steps = np.vstack([_NEIGHBOURS, faces[np.abs(faces).max(axis=1) > 1]])
+    face_steps = zone_face_steps(lattice)
+    steps = np.vstack([_NEIGHBOURS, face_steps[np.abs(face_steps).max(axis=1) > 1]])
     brill = Voronoi(steps @ lattice)
     cell = [brill.ridge_dict[pair] for pair in brill.ridge_dict if _ORIGIN in pair]
     return np.array(brill.vertices, dtype=float), cell
