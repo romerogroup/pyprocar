@@ -149,19 +149,26 @@ def compute_plane_info(
     u, v = get_orthonormal_basis(normal=normal_arr)
     plane_points = transform_points_to_uv(slice_mesh.points, u, v)
     u_limits, v_limits = find_plane_limits(plane_points)
-    if as_cartesian:
-        u_grid, v_grid = get_uv_grid(grid_interpolation, u_limits, v_limits)
-    else:
-        # The k-mesh is regular in fractional coordinates, so its slice is a parallelogram in
-        # Cartesian space; a grid over its bounding box puts up to half the points outside the data.
-        lattice = np.asarray(ebs.reciprocal_lattice, dtype=float)
-        frac_points = slice_mesh.points @ np.linalg.inv(lattice)
-        s_limits, t_limits = find_plane_limits(transform_points_to_uv(frac_points, u, v))
-        s_grid, t_grid = get_uv_grid(grid_interpolation, s_limits, t_limits)
-        offset = np.mean(frac_points @ normal_arr) * normal_arr / np.dot(normal_arr, normal_arr)
-        frac = offset + np.stack([s_grid, t_grid], axis=-1) @ np.vstack([u, v])
-        cart = frac @ lattice
-        u_grid, v_grid = cart @ u, cart @ v
+    # The k-mesh is regular in fractional coordinates, so its slice is a parallelogram in
+    # Cartesian space; a grid over its bounding box puts up to half the points outside the data.
+    # The grid is regular in the two fractional coordinates that span the plane instead, pulled in
+    # from the edges by far more than rounding so no edge point falls outside the triangulation.
+    lattice = np.asarray(ebs.reciprocal_lattice, dtype=float)
+    frac_points = slice_mesh.points @ np.linalg.inv(lattice)
+    frac_normal = lattice @ normal_arr if as_cartesian else normal_arr.astype(float)
+    across = int(np.argmax(np.abs(frac_normal)))
+    along = [(across + 1) % 3, (across + 2) % 3]
+    limits = [
+        (low + 1e-12 * (high - low), high - 1e-12 * (high - low))
+        for low, high in zip(frac_points[:, along].min(axis=0), frac_points[:, along].max(axis=0))
+    ]
+    frac_a, frac_b = get_uv_grid(grid_interpolation, *limits)
+    frac = np.zeros((*frac_a.shape, 3))
+    frac[..., along[0]], frac[..., along[1]] = frac_a, frac_b
+    level = np.mean(frac_points @ frac_normal)
+    frac[..., across] = (level - frac @ frac_normal) / frac_normal[across]
+    cart = frac @ lattice
+    u_grid, v_grid = cart @ u, cart @ v
     uv_grid_points = get_uv_grid_points(u_grid, v_grid)
 
     return PlaneInfo(
