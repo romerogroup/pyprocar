@@ -13,7 +13,7 @@ When a reviewer corrects a mistake, fix it and add its rule here. If the rule is
 | Physical constants come from `pyprocar/utils/units.py`. | `tests/test_unit_constants.py` |
 | `pixi.toml` tasks name only defined tasks, environments and files. | `tests/test_pixi_manifest.py` |
 | Parsers hand the core projections as `(k, band, spin, atom, orbital)` for bands and `(energy, spin, atom, orbital)` for DOS, with one orbital name per orbital. | `check_projected_layout` in the `ElectronicBandStructure` and `DensityOfStates` constructors |
-| Scripts, notebooks and docs call `pyprocar.*` with its current signature. | `tests/test_documented_calls.py` |
+| Scripts, notebooks and docs call `pyprocar.*` with its current signature, and every `ebs.<member>` they name exists. | `tests/test_documented_calls.py` |
 | Tests never write `data/`; a test that reads it is marked `data`. | audit hook in `tests/conftest.py` |
 | Baseline entries in `.basedpyright/baseline.json` go only with the code they cover. | basedpyright lock mode in CI |
 | A new or changed test fails on the base code for the reason it names, and passes with the fix. A test that guards existing behaviour says so with `@pytest.mark.guards_existing_behaviour(reason="...")`. | CI job `red-green` (`.github/scripts/red_green.py`), non-blocking for now, so read its log; the verifier still judges the reason a test fails |
