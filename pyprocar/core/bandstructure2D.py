@@ -158,13 +158,11 @@ def compute_plane_info(
     frac_normal = lattice @ normal_arr if as_cartesian else normal_arr.astype(float)
     across = int(np.argmax(np.abs(frac_normal)))
     along = [(across + 1) % 3, (across + 2) % 3]
-    limits = [
-        (low + 1e-12 * (high - low), high - 1e-12 * (high - low))
-        for low, high in zip(frac_points[:, along].min(axis=0), frac_points[:, along].max(axis=0))
-    ]
-    frac_a, frac_b = get_uv_grid(grid_interpolation, *limits)
+    low, high = frac_points[:, along].min(axis=0), frac_points[:, along].max(axis=0)
+    inset = 1e-12 * (high - low)
+    frac_a, frac_b = get_uv_grid(grid_interpolation, *zip(low + inset, high - inset, strict=True))
     frac = np.zeros((*frac_a.shape, 3))
-    frac[..., along[0]], frac[..., along[1]] = frac_a, frac_b
+    frac[..., along] = np.stack([frac_a, frac_b], axis=-1)
     level = np.mean(frac_points @ frac_normal)
     frac[..., across] = (level - frac @ frac_normal) / frac_normal[across]
     cart = frac @ lattice

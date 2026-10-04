@@ -844,9 +844,7 @@ def test_task_22_characters_in_the_ylm_basis_keep_their_l_m_names(tmp_path, setu
     ],
     ids=["no-info", "no-info-task-10", "info-without-version"],
 )
-def test_task_22_basis_that_cannot_be_told_apart_keeps_l_m_names_and_warns(
-    tmp_path, setup, match
-):
+def test_task_22_basis_that_cannot_be_told_apart_keeps_l_m_names_and_warns(tmp_path, setup, match):
     calc_dir = _task_22_dir(tmp_path, **setup)
 
     with user_warning(__file__, match=match):
@@ -861,7 +859,11 @@ def test_task_22_basis_that_cannot_be_told_apart_keeps_l_m_names_and_warns(
 )
 def test_real_elk_6_3_bands_beside_a_task_10_elmirep_keep_their_l_m_names(tmp_path):
     calc_dir = tmp_path / "bands"
-    shutil.copytree(ELK_BANDS_SP, calc_dir)
+    shutil.copytree(
+        ELK_BANDS_SP,
+        calc_dir,
+        ignore=shutil.ignore_patterns("EVEC*.OUT", "STATE.OUT", "VARIABLES.OUT"),
+    )
     shutil.copy(ELK_BANDS_SP.parent / "dos" / "ELMIREP.OUT", calc_dir)
 
     with warnings.catch_warnings():

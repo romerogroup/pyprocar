@@ -266,9 +266,7 @@ class ElkParser(BaseParser):
         version = None
         if info.exists():
             with info.open(encoding="utf-8", errors="replace") as lines:
-                version = next(
-                    (m for line in lines if (m := re.search(_ELK_VERSION, line))), None
-                )
+                version = next((m for line in lines if (m := _ELK_VERSION.search(line))), None)
         if version is not None:
             return tuple(int(part) for part in version.groups()) >= (10, 7, 8)
         if (self.dirpath / "ELMIREP.OUT").exists():

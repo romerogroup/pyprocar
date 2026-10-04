@@ -16,7 +16,11 @@ HEXAGONAL = np.array(
 SQUARE = np.diag([0.25, 0.25, 0.1])
 # Monolayer BiSb's reciprocal lattice: c* is off the z axis by parts in 10^7.
 NEAR_SQUARE = np.array(
-    [[0.235005607, 0.13568153, 1.89e-07], [1.54e-07, 0.271361575, -1.35e-07], [7e-09, -5e-09, 0.061]]
+    [
+        [0.235005607, 0.13568153, 1.89e-07],
+        [1.54e-07, 0.271361575, -1.35e-07],
+        [7e-09, -5e-09, 0.061],
+    ]
 )
 # c* tilted towards a* and b*, so planes at different kz sit at different (kx, ky).
 SKEWED = np.array([[0.25, 0.0, 0.0], [0.1, 0.22, 0.0], [0.03, -0.04, 0.12]])
