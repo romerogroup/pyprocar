@@ -15424,14 +15424,6 @@
         ],
         "./tests/pyprocar/io/elk/test_bands.py": [
             {
-                "code": "reportUnusedImport",
-                "range": {
-                    "startColumn": 34,
-                    "endColumn": 47,
-                    "lineCount": 1
-                }
-            },
-            {
                 "code": "reportPrivateLocalImportUsage",
                 "range": {
                     "startColumn": 24,
