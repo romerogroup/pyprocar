@@ -43,15 +43,39 @@ def dHvA_frequency(A_max_angstrom2):
     return tesla * 1e4
 
 
+UNJOINED_NOTE = (
+    " (k-points are not a uniform 3D grid; orbits crossing the zone boundary are not joined)"
+)
+
+
 def periodic_source(surface) -> tuple[np.ndarray, list[PeriodicBand]] | None:
     """The reciprocal lattice and one period of each band of a FermiSurface, else None."""
     lattice = getattr(surface, "reciprocal_lattice", None)
     bands = periodic_bands(surface) if lattice is not None else None
-    return (np.asarray(lattice, dtype=np.float64), bands) if bands else None
+    return None if bands is None else (np.asarray(lattice, dtype=np.float64), bands)
+
+
+def unjoined_note(surface, periodic) -> str:
+    """UNJOINED_NOTE for a Fermi surface whose k-points give no periodic bands."""
+    return UNJOINED_NOTE if periodic is None and hasattr(surface, "reciprocal_lattice") else ""
+
+
+def box_half_spaces(planes: vtk.vtkPlanes) -> tuple[np.ndarray, np.ndarray]:
+    """The box widget's planes as (normals, offsets) with the box at normals @ k <= offsets."""
+    normals = np.array([planes.GetPlane(i).GetNormal() for i in range(planes.GetNumberOfPlanes())])
+    points = np.array([planes.GetPlane(i).GetOrigin() for i in range(planes.GetNumberOfPlanes())])
+    outward = np.where(((points - points.mean(axis=0)) * normals).sum(axis=1) < 0, -1.0, 1.0)
+    normals = normals * outward[:, None]
+    return normals, (normals * points).sum(axis=1)
 
 
 class FermiPlotter(SurfacePlotter):
     glyph_scale = BZ_SCALE_FACTOR
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self._slice_box: tuple[np.ndarray, np.ndarray] | None = None
+        """The box slicer's region; the area text counts only orbits that meet it."""
 
     def _to_series_list(
         self,
@@ -320,6 +344,7 @@ class FermiPlotter(SurfacePlotter):
         if add_plane_widget_args is None:
             add_plane_widget_args = {}
         add_plane_widget_args["bounds"] = surface.bounds
+        periodic = periodic_source(surface)
 
         add_surface_args["add_active_vectors"] = add_surface_args.get(
             "add_active_vectors", add_active_vectors
@@ -332,7 +357,8 @@ class FermiPlotter(SurfacePlotter):
                 add_surface_args=add_surface_args,
                 show_van_alphen_frequency=show_van_alphen_frequency,
                 show_cross_section_area=show_cross_section_area,
-                periodic=periodic_source(surface),
+                periodic=periodic,
+                note=unjoined_note(surface, periodic),
             ),
             normal=normal,
             origin=origin,
@@ -349,6 +375,7 @@ class FermiPlotter(SurfacePlotter):
         show_van_alphen_frequency=False,
         show_cross_section_area=False,
         periodic=None,
+        note="",
     ):
         if add_surface_args is None:
             add_surface_args = {}
@@ -385,7 +412,7 @@ class FermiPlotter(SurfacePlotter):
 
         if show_van_alphen_frequency or show_cross_section_area:
             areas, n_open = (
-                plane_orbits(periodic[1], periodic[0], normal, origin)
+                plane_orbits(periodic[1], periodic[0], normal, origin, box=self._slice_box)
                 if periodic is not None
                 else slice_loop_areas(cast(pv.PolyData, slc))
             )
@@ -398,6 +425,7 @@ class FermiPlotter(SurfacePlotter):
                 text = f"Van Alphen Frequency : {frequency}" + open_curves_note(n_open)
             else:
                 text = area_text(areas, n_open, scale=FS_AREA_SCALE_FACTOR)
+            text += note
             if snapped is not None:
                 text += " (normal snapped to [{} {} {}])".format(*snapped)
             self.add_text(text, name="area_text", **add_text_args)
@@ -502,6 +530,7 @@ class FermiPlotter(SurfacePlotter):
         add_text_args["color"] = add_text_args.get("color", "black")
 
         periodic = periodic_source(surface)
+        note = unjoined_note(surface, periodic)
         mesh = pv.PolyData(surface)
         mesh, algo = algorithm_to_mesh_handler(
             add_ids_algorithm(mesh, point_ids=False, cell_ids=True)
@@ -523,6 +552,7 @@ class FermiPlotter(SurfacePlotter):
                 show_van_alphen_frequency=show_van_alphen_frequency,
                 show_cross_section_area=show_cross_section_area,
                 periodic=periodic,
+                note=note,
             ),
             bounds=surface.bounds,
             use_planes=True,
@@ -538,6 +568,7 @@ class FermiPlotter(SurfacePlotter):
                 show_van_alphen_frequency=show_van_alphen_frequency,
                 show_cross_section_area=show_cross_section_area,
                 periodic=periodic,
+                note=note,
             ),
             normal=normal,
             origin=origin,
@@ -567,6 +598,7 @@ class FermiPlotter(SurfacePlotter):
         show_van_alphen_frequency=False,
         show_cross_section_area=False,
         periodic=None,
+        note="",
     ):
         bounds = []
 
@@ -577,6 +609,7 @@ class FermiPlotter(SurfacePlotter):
 
         clipper.SetBoxClip(*bounds)
         clipper.Update()
+        self._slice_box = box_half_spaces(planes)
 
         clipped = _get_output(clipper, oport=port)
 
@@ -598,6 +631,7 @@ class FermiPlotter(SurfacePlotter):
                 show_van_alphen_frequency=show_van_alphen_frequency,
                 show_cross_section_area=show_cross_section_area,
                 periodic=periodic,
+                note=note,
             )
 
     def set_scalar_bar_title(self, title: str, **kwargs) -> None:

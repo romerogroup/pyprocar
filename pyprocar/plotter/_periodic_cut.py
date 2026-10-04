@@ -24,6 +24,13 @@ from scipy.sparse.csgraph import connected_components
 MAX_REACH = 16
 """Cells from the origin within which an orbit through the zone must close."""
 
+GRID_TOLERANCE = 1e-2
+"""Grid spacings within which a k-point is taken as its uniform-grid point.
+
+k-points printed with 5 decimals stay inside it up to N = 2000 points per axis, with 4
+decimals up to N = 200. A grid stretched as k^1.05 on 16 points is 5e-2 off, and falls back.
+"""
+
 _NEAR_VERTEX = np.array(list(itertools.product(range(-1, 3), repeat=3)))
 """Steps, relative to a vertex's cell, of the translates cut next at an open curve end.
 
@@ -113,7 +120,7 @@ def periodic_bands(surface) -> list[PeriodicBand] | None:
     if (
         len(scaled) != filled.size
         or not filled.all()
-        or np.abs(scaled - shift - nearest).max() > 1e-4
+        or np.abs(scaled - shift - nearest).max() > GRID_TOLERANCE
     ):
         return None
     energies = np.asarray(ebs.get_property("bands").value)
@@ -154,14 +161,20 @@ class _BandCut:
         self.order = np.argsort(lo)
         self.lo_sorted = lo[self.order]
         self.extent = float((hi - lo).max())
+        self.margin = 1e-6 * self.extent
 
     def segments(self, steps: np.ndarray):
         """Oriented segments of the cut through the translates by ``steps`` (cells): the
-        names and positions of their two ends."""
+        names and positions of their two ends.
+
+        Candidates come from the triangle heights of the period with a margin; the cut is
+        decided by ``s``, the height of each vertex from its absolute cell, which is the same
+        float for a vertex in every triangle and translate that holds it.
+        """
         band = self.band
         t = self.d - steps @ self.w
-        start = np.searchsorted(self.lo_sorted, t - self.extent, side="left")
-        counts = np.searchsorted(self.lo_sorted, t, side="right") - start
+        start = np.searchsorted(self.lo_sorted, t - self.extent - self.margin, side="left")
+        counts = np.searchsorted(self.lo_sorted, t + self.margin, side="right") - start
         if counts.sum() == 0:
             return None
         which = np.repeat(np.arange(len(steps)), counts)
@@ -230,11 +243,11 @@ class _Curves:
     position: np.ndarray
     degree: np.ndarray
     label: np.ndarray
-    meets_zone: np.ndarray
+    meets_region: np.ndarray
     is_open: np.ndarray
 
 
-def _curves(found: list[tuple[np.ndarray, ...]], zone: np.ndarray) -> _Curves:
+def _curves(found: list[tuple[np.ndarray, ...]], region: tuple[np.ndarray, np.ndarray]) -> _Curves:
     n1, n2, q1, q2 = (np.concatenate(part) for part in zip(*found, strict=True))
     names, ids = np.unique(np.concatenate([n1, n2]), return_inverse=True)
     a, b = ids[: len(n1)], ids[len(n1) :]
@@ -246,15 +259,15 @@ def _curves(found: list[tuple[np.ndarray, ...]], zone: np.ndarray) -> _Curves:
     degree = np.bincount(np.concatenate([a, b]), minlength=n_nodes)
     graph = coo_matrix((np.ones(len(a)), (a, b)), shape=(n_nodes, n_nodes))
     n_comp, label = connected_components(graph, directed=False)
-    in_zone = ((position @ zone.T) / (zone * zone).sum(axis=1)).max(axis=1) <= 0.5 + 1e-9
-    meets_zone = np.bincount(label[(degree > 0) & in_zone], minlength=n_comp) > 0
+    inside = (position @ region[0].T <= region[1]).all(axis=1)
+    meets_region = np.bincount(label[(degree > 0) & inside], minlength=n_comp) > 0
     is_open = np.bincount(label[degree == 1], minlength=n_comp) > 0
-    return _Curves(names, a, b, q1, q2, position, degree, label, meets_zone, is_open)
+    return _Curves(names, a, b, q1, q2, position, degree, label, meets_region, is_open)
 
 
-def _band_curves(cut: _BandCut, zone: np.ndarray) -> _Curves | None:
+def _band_curves(cut: _BandCut, region: tuple[np.ndarray, np.ndarray]) -> _Curves | None:
     """Curves of the cut through the translates that can hold the zone, extended through the
-    translates at the open ends of curves that meet the zone until those close or reach
+    translates at the open ends of curves that meet the region until those close or reach
     MAX_REACH cells."""
     found: list[tuple[np.ndarray, ...]] = []
     done = np.empty(0, dtype=np.int64)
@@ -266,8 +279,8 @@ def _band_curves(cut: _BandCut, zone: np.ndarray) -> _Curves | None:
         done = np.concatenate([done, _pack(0, steps)])
         if not found:
             return None
-        curves = _curves(found, zone)
-        ends = curves.names[(curves.degree == 1) & curves.meets_zone[curves.label]]
+        curves = _curves(found, region)
+        ends = curves.names[(curves.degree == 1) & curves.meets_region[curves.label]]
         vertex_cells = cut.vertex_cells(ends)
         steps = np.unique((vertex_cells[:, None, :] - _NEAR_VERTEX).reshape(-1, 3), axis=0)
         steps = steps[np.abs(steps).max(axis=1) <= MAX_REACH]
@@ -277,34 +290,44 @@ def _band_curves(cut: _BandCut, zone: np.ndarray) -> _Curves | None:
 
 
 def plane_orbits(
-    bands: list[PeriodicBand], lattice: np.ndarray, normal, origin
+    bands: list[PeriodicBand],
+    lattice: np.ndarray,
+    normal,
+    origin,
+    box: tuple[np.ndarray, np.ndarray] | None = None,
 ) -> tuple[list[float], int]:
     """Areas of the closed orbits that meet the first zone, and the open curves that do.
 
-    Orbits that are lattice translates of one another count once.
+    With ``box`` = (normals, offsets), only orbits that also meet the box (normals @ k <=
+    offsets) count, so the count follows the drawn, box-clipped slice. Orbits that are
+    lattice translates of one another count once: their area-weighted centroids differ by
+    a lattice vector.
     """
     lattice = np.asarray(lattice, dtype=np.float64)
     normal = np.asarray(normal, dtype=np.float64) / np.linalg.norm(normal)
     d = float(np.asarray(origin, dtype=np.float64) @ normal)
     zone = _ZONE_STEPS @ lattice
+    region = (zone, (zone * zone).sum(axis=1) * (0.5 + 1e-9))
+    if box is not None:
+        region = (np.vstack([region[0], box[0]]), np.concatenate([region[1], box[1]]))
     inverse = np.linalg.inv(lattice)
     areas: list[float] = []
     n_open = 0
     for band in bands:
-        curves = _band_curves(_BandCut(band, lattice, normal, d), zone)
+        curves = _band_curves(_BandCut(band, lattice, normal, d), region)
         if curves is None:
             continue
-        n_comp = len(curves.meets_zone)
-        label, used = curves.label, curves.degree > 0
-        vector = np.zeros((n_comp, 3))
-        np.add.at(vector, label[curves.a], np.cross(curves.q1, curves.q2))
-        comp_area = 0.5 * np.abs(vector @ normal)
-        size = np.bincount(label[used], minlength=n_comp)
-        centre = np.zeros((n_comp, 3))
-        np.add.at(centre, label[used], curves.position[used])
-        centre = centre / np.maximum(size, 1)[:, None] @ inverse
+        n_comp = len(curves.meets_region)
+        label = curves.label[curves.a]
+        signed = np.cross(curves.q1, curves.q2) @ normal
+        total = np.bincount(label, weights=signed, minlength=n_comp)
+        comp_area = 0.5 * np.abs(total)
+        moment = np.zeros((n_comp, 3))
+        np.add.at(moment, label, (curves.q1 + curves.q2) * signed[:, None])
+        with np.errstate(divide="ignore", invalid="ignore"):
+            centre = moment / (3 * total[:, None]) @ inverse
         kept: list[tuple[float, np.ndarray]] = []
-        for c in np.flatnonzero(curves.meets_zone):
+        for c in np.flatnonzero(curves.meets_region):
             if curves.is_open[c]:
                 n_open += 1
                 continue
