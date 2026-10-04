@@ -21,9 +21,9 @@ from pyprocar.io.abinit.output import AbinitOutput
 from pyprocar.io.abinit.procar import AbinitProcar
 from pyprocar.io.base import BaseParser
 from pyprocar.utils.units import HARTREE_TO_EV
+from pyprocar.utils.log_utils import warn_user
 
 logger = logging.getLogger(__name__)
-user_logger = logging.getLogger("user")
 
 
 class AbinitParser(BaseParser):
@@ -75,7 +75,7 @@ class AbinitParser(BaseParser):
     def detect_files(self) -> None:
         """Auto-detect Abinit files in the directory."""
         if not self.dirpath.exists():
-            user_logger.warning(f"Directory not found: {self.dirpath}")
+            warn_user(f"Directory not found: {self.dirpath}")
             return
 
         files = list(self.dirpath.rglob("*"))
@@ -206,10 +206,10 @@ class AbinitParser(BaseParser):
     @property
     def ebs(self) -> ElectronicBandStructure | None:
         if self.abinit_procar is None or self.abinit_procar.vasp_procar is None:
-            user_logger.warning("Cannot create EBS: PROCAR not available")
+            warn_user("Cannot create EBS: PROCAR not available")
             return None
         if self.abinit_output is None:
-            user_logger.warning("Cannot create EBS: output file not available")
+            warn_user("Cannot create EBS: output file not available")
             return None
 
         procar = self.abinit_procar.vasp_procar
@@ -261,7 +261,7 @@ class AbinitParser(BaseParser):
         # Abinit writes each segment boundary once.
         segment_end_indices = np.cumsum(self.abinit_kpoints.ngrids).tolist()
         if kpoints is None or segment_end_indices[-1] != len(kpoints) - 1:
-            user_logger.warning("KPOINTS divisions do not match the PROCAR k-points")
+            warn_user("KPOINTS divisions do not match the PROCAR k-points")
             segment_end_indices = None
 
         return KPath(

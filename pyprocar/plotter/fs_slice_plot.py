@@ -17,12 +17,12 @@ from matplotlib.figure import Figure
 
 from pyprocar.core.property_store import Property
 from pyprocar.plotter._series import ShowColorbar
+from pyprocar.utils.log_utils import warn_user
 
 if TYPE_CHECKING:
     from matplotlib.quiver import Quiver
 
 logger = logging.getLogger(__name__)
-user_logger = logging.getLogger("user")
 
 
 @dataclass
@@ -186,14 +186,14 @@ class FermiSlicePlotter:
         elif scalars_name is not None and scalars_name not in slice_data.point_data:
             msg = f"Scalars name {scalars_name} not found in slice data."
             msg += f" Using active scalars ({active_scalars_name}) instead."
-            user_logger.warning(msg)
+            warn_user(msg)
 
         if vectors_name is not None and vectors_name in slice_data.point_data:
             vectors = slice_data.point_data[vectors_name]
         elif vectors_name is not None and vectors_name not in slice_data.point_data:
             msg = f"Vectors name {vectors_name} not found in slice data."
             msg += f" Using active vectors ({active_vectors_name}) instead."
-            user_logger.warning(msg)
+            warn_user(msg)
 
         return lines, points, scalars, vectors
 

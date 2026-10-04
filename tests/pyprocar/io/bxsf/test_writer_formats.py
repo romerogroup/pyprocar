@@ -9,9 +9,8 @@
   labels are the real band indices, file named ``<prefix>_fs.bxsf``.
 """
 
-import logging
 import math
-from collections.abc import Iterator, Sequence
+from collections.abc import Sequence
 from pathlib import Path
 
 import numpy as np
@@ -149,17 +148,6 @@ def _bands(ebs: ElectronicBandStructure | None) -> np.ndarray:
     return ebs.bands.value
 
 
-@pytest.fixture
-def user_warnings(
-    caplog: pytest.LogCaptureFixture,
-) -> Iterator[pytest.LogCaptureFixture]:
-    user_logger = logging.getLogger("user")
-    user_logger.addHandler(caplog.handler)
-    with caplog.at_level(logging.WARNING, logger="user"):
-        yield caplog
-    user_logger.removeHandler(caplog.handler)
-
-
 def test_wannier90_bands_load_in_ev(tmp_path: Path) -> None:
     (tmp_path / "wannier90.bxsf").write_text(
         _wannier90([_energies(-1.5, 0.25), _energies(4.0, 0.125)])
@@ -226,18 +214,16 @@ def test_from_code_finds_abinit_bxsf_file(tmp_path: Path) -> None:
     assert bands[0, 0, 0] == pytest.approx(0.25 * HARTREE_TO_EV)
 
 
-def test_qe_alat_is_not_taken_from_a_calculation_in_a_subdirectory(
-    tmp_path: Path, user_warnings: pytest.LogCaptureFixture
-) -> None:
+def test_qe_alat_is_not_taken_from_a_calculation_in_a_subdirectory(tmp_path: Path) -> None:
     (tmp_path / "Al_fs.bxsf").write_text(_qe_fs([_energies(3.0, 0.5)], first_band=2))
     (tmp_path / "other").mkdir()
     (tmp_path / "other" / "scf.out").write_text(AL_SCF_OUT.replace("7.6500", "10.0000"))
 
-    lattice = BxsfParser(tmp_path, filepaths="Al_fs.bxsf").reciprocal_lattice
+    with pytest.warns(UserWarning, match="alat was found"):
+        lattice = BxsfParser(tmp_path, filepaths="Al_fs.bxsf").reciprocal_lattice
 
     assert lattice is not None
     assert lattice[1] == pytest.approx([1.0, 1.0, 1.0])
-    assert "alat was found" in user_warnings.text
 
 
 def test_band_grid_header_tolerates_blank_and_comment_lines(tmp_path: Path) -> None:
@@ -302,28 +288,25 @@ def test_explicit_files_must_be_one_file_or_an_fs_x_spin_pair(
         BxsfParser(tmp_path, filepaths=[Path(name) for name in files])
 
 
-def test_lone_fs_x_spin_file_warns_that_its_partner_is_missing(
-    tmp_path: Path, user_warnings: pytest.LogCaptureFixture
-) -> None:
+def test_lone_fs_x_spin_file_warns_that_its_partner_is_missing(tmp_path: Path) -> None:
     (tmp_path / "Al_fsup.bxsf").write_text(_qe_fs([_energies(3.0, 0.5)], first_band=2))
 
-    bands = _bands(BxsfParser(tmp_path).ebs)
+    with pytest.warns(UserWarning, match="partner file is missing"):
+        bands = _bands(BxsfParser(tmp_path).ebs)
 
     assert bands.shape == (8, 1, 1)
-    assert "partner file is missing" in user_warnings.text
 
 
-def test_spin_pair_next_to_other_bxsf_files_warns(
-    tmp_path: Path, user_warnings: pytest.LogCaptureFixture
-) -> None:
+def test_spin_pair_next_to_other_bxsf_files_warns(tmp_path: Path) -> None:
     for name in ("Al_fs.bxsf", "Al_fsup.bxsf", "Al_fsdw.bxsf"):
         (tmp_path / name).write_text(_qe_fs([_energies(3.0, 0.5)], first_band=2))
 
-    bands = _bands(BxsfParser(tmp_path).ebs)
+    with pytest.warns(
+        UserWarning, match=r"Found several BXSF files.*reading \['Al_fsup.bxsf', 'Al_fsdw.bxsf'\]"
+    ):
+        bands = _bands(BxsfParser(tmp_path).ebs)
 
     assert bands.shape == (8, 1, 2)
-    assert "Found several BXSF files" in user_warnings.text
-    assert "reading ['Al_fsup.bxsf', 'Al_fsdw.bxsf']" in user_warnings.text
 
 
 def test_fermi_energy_accepts_a_fortran_d_exponent(tmp_path: Path) -> None:
@@ -336,17 +319,14 @@ def test_fermi_energy_accepts_a_fortran_d_exponent(tmp_path: Path) -> None:
     assert ebs.fermi == pytest.approx(7.9923)
 
 
-def test_several_bxsf_files_read_the_first_by_name_and_warn(
-    tmp_path: Path, user_warnings: pytest.LogCaptureFixture
-) -> None:
+def test_several_bxsf_files_read_the_first_by_name_and_warn(tmp_path: Path) -> None:
     (tmp_path / "b.bxsf").write_text(_qe_fs([_energies(8.0, 0.5)], first_band=1))
     (tmp_path / "a.bxsf").write_text(_qe_fs([_energies(3.0, 0.5)], first_band=1))
 
-    bands = _bands(BxsfParser(tmp_path).ebs)
+    with pytest.warns(UserWarning, match=r"Found several BXSF files.*reading \['a.bxsf'\]"):
+        bands = _bands(BxsfParser(tmp_path).ebs)
 
     assert bands[0, 0, 0] == pytest.approx(3.0)
-    assert "Found several BXSF files" in user_warnings.text
-    assert "reading ['a.bxsf']" in user_warnings.text
 
 
 def test_band_values_accept_fortran_d_exponents(tmp_path: Path) -> None:

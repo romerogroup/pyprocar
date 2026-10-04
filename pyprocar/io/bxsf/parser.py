@@ -12,9 +12,9 @@ from pyprocar.io.base import BaseParser
 from pyprocar.io.bxsf.bxsf import Bxsf, BxsfWriter
 from pyprocar.io.qe.pw import PwOut
 from pyprocar.utils.units import AU_TO_ANG
+from pyprocar.utils.log_utils import warn_user
 
 logger = logging.getLogger(__name__)
-user_logger = logging.getLogger("user")
 
 
 class BxsfParser(BaseParser):
@@ -46,7 +46,7 @@ class BxsfParser(BaseParser):
             if full_path.exists():
                 self._extractors.append(Bxsf(full_path))
             else:
-                user_logger.warning(f"BXSF file not found: {full_path}")
+                warn_user(f"BXSF file not found: {full_path}")
         _check_spin_files(self._extractors)
 
     def _find_bxsf_files(self) -> list[Path]:
@@ -59,9 +59,9 @@ class BxsfParser(BaseParser):
         )
         chosen = _qe_fs_spin_pair(found) or found[:1]
         if not found:
-            user_logger.warning(f"No in.bxsf, *.bxsf or *_BXSF file found in {self.dirpath}")
+            warn_user(f"No in.bxsf, *.bxsf or *_BXSF file found in {self.dirpath}")
         elif len(found) > len(chosen):
-            user_logger.warning(
+            warn_user(
                 f"Found several BXSF files in {self.dirpath}: {[str(p) for p in found]}; "
                 + f"reading {[str(p) for p in chosen]}. Pass filepaths to choose another."
             )
@@ -113,14 +113,14 @@ class BxsfParser(BaseParser):
             case BxsfWriter.QE_FS:
                 alat = _pw_alat_angstrom_beside(ext.filepath) if ext.filepath else None
                 if alat is None:
-                    user_logger.warning(
+                    warn_user(
                         "QE fs.x BXSF stores b in units of 2*pi/alat and no QE output with "
                         + "alat was found beside it; b is left in units of 1/alat."
                     )
                     return b
                 return b / alat
             case BxsfWriter.UNKNOWN:
-                user_logger.warning(
+                warn_user(
                     "BXSF writer not recognised; assuming b includes the 2*pi in 1/Angstrom "
                     + "(the XCrySDen and Wannier90 convention)."
                 )
@@ -130,7 +130,7 @@ class BxsfParser(BaseParser):
     def ebs(self) -> ElectronicBandStructure | None:
         """Electronic band structure (mesh-based)."""
         if not self._extractors:
-            user_logger.warning("No BXSF extractors available")
+            warn_user("No BXSF extractors available")
             return None
 
         try:
@@ -144,7 +144,7 @@ class BxsfParser(BaseParser):
                 kgrid_info=self.kgrid_info,
             )
         except Exception as e:
-            user_logger.warning(f"Error creating EBS from BXSF: {e}")
+            warn_user(f"Error creating EBS from BXSF: {e}")
             return None
 
     def _bands(self) -> np.ndarray:
@@ -185,7 +185,7 @@ def _check_spin_files(extractors: list[Bxsf]) -> None:
     if len(extractors) == 1:
         name = paths[0].name if paths else ""
         if extractors[0].writer is BxsfWriter.QE_FS and name.endswith(("up.bxsf", "dw.bxsf")):
-            user_logger.warning(
+            warn_user(
                 f"{name} holds one spin of a QE fs.x spin-polarized run, and its partner file "
                 + "is missing; reading it as a single spin channel."
             )

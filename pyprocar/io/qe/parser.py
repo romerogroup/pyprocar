@@ -25,6 +25,7 @@ from pyprocar.io.base import BaseParser
 from pyprocar.io.qe.projwfc import AtomicProjXML, ProjwfcDOS, ProjwfcIn, ProjwfcOut
 from pyprocar.io.qe.pw import PwIn, PwOut, PwXML
 from pyprocar.utils.units import AU_TO_ANG, HARTREE_TO_EV
+from pyprocar.utils.log_utils import warn_user
 
 logger = logging.getLogger(__name__)
 user_logger = logging.getLogger("user")
@@ -66,7 +67,7 @@ class QEParser(BaseParser):
     # -------- file detection --------
     def detect_files(self) -> None:
         if not self.dirpath.exists():
-            user_logger.warning(f"Directory not found: {self.dirpath}")
+            warn_user(f"Directory not found: {self.dirpath}")
             return
 
         files: list[Path] = []
@@ -217,24 +218,24 @@ class QEParser(BaseParser):
     def scf_in(self) -> PwIn | None:
         fp = self._detected.get("scf_in")
         if not fp or isinstance(fp, list):
-            user_logger.warning("SCF input not found")
+            user_logger.debug("SCF input not found")
             return None
         try:
             return PwIn(fp)
         except Exception as exc:
-            user_logger.warning(f"Error parsing SCF input: {exc}")
+            warn_user(f"Error parsing SCF input: {exc}")
             return None
 
     @cached_property
     def scf_out(self) -> PwOut | None:
         fp = self._detected.get("scf_out")
         if not fp or isinstance(fp, list):
-            user_logger.warning("SCF output not found")
+            user_logger.debug("SCF output not found")
             return None
         try:
             return PwOut(fp)
         except Exception as exc:
-            user_logger.warning(f"Error parsing SCF output: {exc}")
+            warn_user(f"Error parsing SCF output: {exc}")
             return None
 
     @cached_property
@@ -351,7 +352,7 @@ class QEParser(BaseParser):
             logger.info("Parsing alat from data_file_schema.xml")
             alat = self.data_file_schema_xml.alat
         else:
-            user_logger.warning("No alat found in scf.out or pw.xml")
+            warn_user("No alat found in scf.out or pw.xml")
             return None
         logger.debug(f"alat: {alat}")
         return alat
@@ -378,11 +379,11 @@ class QEParser(BaseParser):
             kpoints_cart = self.data_file_schema_xml.kpoints
 
         if kpoints_cart is None:
-            user_logger.warning("No kpoints found in atomic_proj.xml or projwfc.out or bands.in")
+            warn_user("No kpoints found in atomic_proj.xml or projwfc.out or bands.in")
             return None
 
         if self.alat is None or self.reciprocal_lattice is None:
-            user_logger.warning("Cannot compute kpoints without alat and reciprocal_lattice")
+            warn_user("Cannot compute kpoints without alat and reciprocal_lattice")
             return None
 
         kpoints = np.around(
@@ -628,7 +629,7 @@ class QEParser(BaseParser):
             logger.info("Parsing bands from data_file_schema.xml")
             bands = HARTREE_TO_EV * self.data_file_schema_xml.bands
         else:
-            user_logger.warning("No bands found in atomic_proj.xml or projwfc.out or pw.xml")
+            warn_user("No bands found in atomic_proj.xml or projwfc.out or pw.xml")
             return None
 
         if self.kpath is not None:
@@ -730,7 +731,7 @@ class QEParser(BaseParser):
     @cached_property
     def ebs(self) -> ElectronicBandStructure | None:
         if self.fermi is None:
-            user_logger.warning("Cannot create EBS without fermi energy")
+            warn_user("Cannot create EBS without fermi energy")
             return None
 
         # TODO: orbitals is list[dict] but get_ebs_from_data expects list[str]
@@ -762,7 +763,7 @@ class QEParser(BaseParser):
     @cached_property
     def dos(self) -> DensityOfStates | None:
         if self.projwfc_dos is None:
-            user_logger.warning("No PDOS files found for DOS construction")
+            warn_user("No PDOS files found for DOS construction")
             return None
 
         if not self.is_dos_calculation:
@@ -789,7 +790,7 @@ class QEParser(BaseParser):
         ):
             return self.data_file_schema_xml.atomic_species
         else:
-            user_logger.warning("No atomic species found in any input or output file")
+            warn_user("No atomic species found in any input or output file")
             return None
 
     @cached_property
@@ -802,7 +803,7 @@ class QEParser(BaseParser):
         ):
             return self.data_file_schema_xml.direct_lattice
         else:
-            user_logger.warning("No direct lattice found in any input or output file")
+            warn_user("No direct lattice found in any input or output file")
             return None
 
     @cached_property
@@ -815,7 +816,7 @@ class QEParser(BaseParser):
         ):
             return self.data_file_schema_xml.atomic_positions
         else:
-            user_logger.warning("No atomic positions found in any input or output file")
+            warn_user("No atomic positions found in any input or output file")
             return None
 
     @cached_property
@@ -823,7 +824,7 @@ class QEParser(BaseParser):
         for xml in (self.pw_xml, self.data_file_schema_xml):
             if xml is not None and xml.rotations is not None:
                 return xml
-        user_logger.warning("No rotations found in any input or output file")
+        user_logger.debug("No rotations found in any input or output file")
         return None
 
     @cached_property

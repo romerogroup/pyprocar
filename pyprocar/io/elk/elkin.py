@@ -1,6 +1,5 @@
 """elk.in input file parser for Elk calculations."""
 
-import logging
 from dataclasses import dataclass
 from functools import cached_property
 from itertools import takewhile
@@ -12,8 +11,8 @@ import numpy.typing as npt
 
 from pyprocar.core.kpoints import normalize_kpoint_name
 from pyprocar.io.elk.geometry import ElkCell, block_lines, bool_fortran, parse_elk_cell
+from pyprocar.utils.log_utils import warn_user
 
-user_logger = logging.getLogger("user")
 
 
 @dataclass(frozen=True, slots=True)
@@ -157,7 +156,7 @@ class ElkIn:
         """Band path vertices, total point count and vertex labels."""
         block = block_lines(self._lines, "plot1d")
         if block is None:
-            user_logger.warning(
+            warn_user(
                 "elk.in has no plot1d block; using the Elk default path (0,0,0) to (1,1,1)"
                 + " with 200 points"
             )

@@ -25,6 +25,7 @@ from pyprocar.scripts._selection import (
     take_channels,
 )
 from pyprocar.utils.splash import welcome
+from pyprocar.utils.log_utils import warn_user
 
 user_logger = logging.getLogger("user")
 logger = logging.getLogger(__name__)
@@ -211,7 +212,7 @@ def bandsplot(
         y_label = r"E - E$_F$ (eV)"
     else:
         y_label = r"E (eV)"
-        user_logger.warning(
+        warn_user(
             "`fermi` is not set! Set `fermi={value}`. The plot did not shift the bands by the Fermi energy."
         )
 

@@ -17,7 +17,7 @@ from pyprocar.core.fermisurface import FermiSurface
 from pyprocar.plotter import FermiPlotter
 from pyprocar.scripts._selection import as_clim, resolve_spins
 from pyprocar.utils import welcome
-from pyprocar.utils.log_utils import set_verbose_level
+from pyprocar.utils.log_utils import set_verbose_level, warn_user
 
 user_logger = logging.getLogger("user")
 logger = logging.getLogger(__name__)
@@ -90,7 +90,7 @@ class FermiHandler:
 
         if fermi is None:
             self.e_fermi: float = self.ebs.fermi
-            user_logger.warning(
+            user_logger.info(
                 f"Fermi Energy not set! Set `fermi={self.e_fermi}`."
                 "By default, using fermi energy found in the current directory."
             )
@@ -150,7 +150,7 @@ class FermiHandler:
         elif mode == "overlay":
             return "projected_sum"
         else:
-            user_logger.warning(f"Unknown mode: {mode}. Using plain mode.")
+            warn_user(f"Unknown mode: {mode}. Using plain mode.")
             return None
 
     def _create_fermi_surface(
@@ -248,7 +248,7 @@ class FermiHandler:
         )
 
         if fermi_surface.n_points == 0:
-            user_logger.warning(
+            warn_user(
                 "No Fermi surface found for the given parameters. Skipping plotting."
             )
             return None
@@ -300,10 +300,10 @@ class FermiHandler:
             fsplt.show()
 
         if save_gif is not None:
-            user_logger.warning("GIF saving not yet implemented in new API")
+            warn_user("GIF saving not yet implemented in new API")
 
         if save_mp4:
-            user_logger.warning("MP4 saving not yet implemented in new API")
+            warn_user("MP4 saving not yet implemented in new API")
 
         if save_3d:
             fsplt.export_data(str(save_3d))
@@ -503,7 +503,7 @@ class FermiHandler:
             logger.debug(f"Surface has {fs.n_points} points")
 
         if save_gif is None:
-            user_logger.warning("No filename provided for GIF. Setting default filename.")
+            warn_user("No filename provided for GIF. Setting default filename.")
             save_gif = "fermi_surface.gif"
 
         # Create plotter and add isovalue gif
@@ -586,7 +586,7 @@ class FermiHandler:
         )
 
         if fermi_surface.n_points == 0:
-            user_logger.warning(
+            warn_user(
                 "No Fermi surface found for the given parameters. Skipping plotting."
             )
             return None
@@ -709,7 +709,7 @@ class FermiHandler:
         )
 
         if fermi_surface.n_points == 0:
-            user_logger.warning(
+            warn_user(
                 "No Fermi surface found for the given parameters. Skipping plotting."
             )
             return None

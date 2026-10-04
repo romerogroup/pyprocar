@@ -1,5 +1,18 @@
 import logging
 import logging.config
+import os
+import warnings
+
+_PACKAGE_DIR = os.path.dirname(os.path.dirname(__file__)) + os.sep
+
+
+def warn_user(message: str) -> None:
+    """Warn the user with a UserWarning that points at their own call into pyprocar.
+
+    The "user" logger is quiet unless verbose output is on, so a message the user must
+    see or act on goes here instead.
+    """
+    warnings.warn(message, UserWarning, skip_file_prefixes=(_PACKAGE_DIR,))
 
 
 def set_verbose_level(verbose: int):

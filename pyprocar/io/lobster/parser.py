@@ -13,9 +13,9 @@ from pyprocar.io.base import BaseParser
 from pyprocar.io.lobster.doscar_lobster import LOBSTER_ORBITALS, DoscarLobster
 from pyprocar.io.lobster.fatband import Fatband
 from pyprocar.io.lobster.lobsterout import LobsterOut
+from pyprocar.utils.log_utils import warn_user
 
 logger = logging.getLogger(__name__)
-user_logger = logging.getLogger("user")
 
 
 class LobsterParser(BaseParser):
@@ -76,7 +76,7 @@ class LobsterParser(BaseParser):
             if filepath.exists():
                 return extractor_class(filepath)
             else:
-                user_logger.warning(f"{extractor_class.__name__} file not found: {filepath}")
+                warn_user(f"{extractor_class.__name__} file not found: {filepath}")
                 return None
         return None
 
@@ -321,5 +321,5 @@ class LobsterParser(BaseParser):
             )
 
         except Exception as e:
-            user_logger.warning(f"Error creating DOS from DOSCAR.lobster: {e}")
+            warn_user(f"Error creating DOS from DOSCAR.lobster: {e}")
             return None
