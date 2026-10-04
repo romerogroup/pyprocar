@@ -24,7 +24,8 @@ $H run utilities data/examples/bands/non-spin-polarized .claude/skills/verify-py
 
 The driver `chdir`s into `CALC` so every output lands in the calc copy and shows up in `side_effects.txt`. Nothing should appear in the repo root.
 
-The proven end state (SrVO3, non-spin-polarized, 1f36aae1, driven 2026-10-02):
+The proven end state (SrVO3, non-spin-polarized, d6d4aaa7, driven 2026-10-04):
+- `bandgap`: returns 0.0 eV, as it should for metallic SrVO3.
 - `kpath`: a 23-line `KPOINTS_pyprocar`, `40 ! Grid points`, `Line_mode`, with the cubic path Γ–X–M–Γ–R–X | R–M.
 - `filter_bands` with `bands=[1,5]`: the header reads `# of bands: 5`, and the file shrinks from 2,404,492 to 602,689 bytes.
 - `repair`: 2,363,890 bytes, with a valid `PROCAR lm decomposed` header.
@@ -34,5 +35,4 @@ The proven end state (SrVO3, non-spin-polarized, 1f36aae1, driven 2026-10-02):
 
 ## Gotchas
 
-- **`bandgap` crashes** at 1f36aae1, with `TypeError: unsupported operand type(s) for -: 'Property' and 'float'` at `scripts/scriptBandGap.py:44`. `np.array(ebs.bands)` wraps the `Property` object instead of its values. This is a product gap.
 - `generate2dkmesh` writes to the CWD with no path argument. Run it from a scratch dir, never from the repo root.

@@ -21,14 +21,14 @@ Plot total and projected DOS versus energy. The `dos-rewrite` branch is rebuildi
 $H run dos data/examples/dos/non-spin-polarized .claude/skills/verify-pyprocar/scripts/examples/dos.py
 ```
 
-The proven end state (SrVO3, non-spin-polarized, 1f36aae1):
+The proven end state (SrVO3, non-spin-polarized, d6d4aaa7):
 - `obj_total`: `total_shape` is `[6000, 1]` and `total_max` is 62.91. The energy range is about `[-31.1, 12.6]` eV, already Fermi-shifted. The PNG shows a non-zero curve with peaks near -29, -13 and 0 eV.
 - `obj_total_colored_by_projection`: `proj_le_total` is true, with 1 colored collection plus a colorbar axis.
 - `obj_vertical_projected_legend`: the legend reads `Total`, `O_{2-4}-(p)`.
 - `obj_new_files_in_calc` is `[]`. `from_code` writes `dos.pkl` only when `use_cache=True`.
+- `legacy_dosplot_plain` and `legacy_dosplot_parametric`: xlim `[-6, 4]`, with 3 and 2 lines. The driver does not run the other seven modes.
+- `side_effects.txt` is empty.
 
 ## Gotchas
 
-- **Legacy `dosplot` crashes in every mode** at 1f36aae1, with `AttributeError: property 'energies' of 'DensityOfStates' object has no setter` at `scripts/scriptDosplot.py:338`. This is a product gap.
-- Before that crash, legacy `dosplot` with the default `use_cache=False` **deletes and rewrites** the calc dir's `dos.pkl` and `structure.pkl`. They show up in `side_effects.txt`. This is one reason the harness works on a copy.
 - The fixture ships `dos.pkl`, `structure.pkl` and PDFs from old runs. Ignore them; they are not evidence.

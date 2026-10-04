@@ -23,16 +23,29 @@ def _():
     }
 
 
+@step("obj_slice_scalars_data_property")
+def _():
+    prop = fs.get_property("projected_sum", atoms=[1], orbitals=[4, 5, 6, 7, 8], spins=[0])
+    p = FermiSlicePlotter(fs, normal=np.array([0, 0, 1]), origin=np.zeros(3))
+    lc = p.plot(scalars_data=prop)["scalars"]
+    colored = lc.get_array() is not None
+    out = {"n_segments": len(lc.get_segments()), "colored": colored}
+    out["png"] = png("obj_slice_scalars_data", p.fig)
+    assert colored, f"scalars_data=Property drew uncolored lines: {out}"
+    return out
+
+
 @step("obj_slice_projected")
 def _():
-    fs.get_property("projected_sum", atoms=[1], orbitals=[4, 5, 6, 7, 8], spins=[0])
+    prop = fs.get_property("projected_sum", atoms=[1], orbitals=[4, 5, 6, 7, 8], spins=[0])
+    fs.set_values("projected_sum", prop.value)
     p = FermiSlicePlotter(fs, normal=np.array([0, 0, 1]), origin=np.zeros(3))
     lc = p.plot(scalars_name="projected_sum")["scalars"]
-    return {
-        "n_segments": len(lc.get_segments()),
-        "colored": lc.get_array() is not None,
-        "png": png("obj_slice_projected", p.fig),
-    }
+    colored = lc.get_array() is not None
+    out = {"n_segments": len(lc.get_segments()), "colored": colored, "n_axes": len(p.fig.axes)}
+    out["png"] = png("obj_slice_projected", p.fig)
+    assert colored, f"slice drew uncolored lines: {out}"
+    return out
 
 
 for label, mode, kw in [

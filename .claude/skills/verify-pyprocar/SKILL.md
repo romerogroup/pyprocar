@@ -112,7 +112,7 @@ Headless rules:
 Evidence lives at `data/verify-runs/<run>/evidence/` and survives cleanup. That directory is gitignored via `/data`. A proof includes:
 - **The rendered image.** Open it with the Read tool and look at it. Check for correct k-path labels, sensible energy window and non-empty curves. A blank axes still has a nonzero PNG size.
 - **`summary.json` with numbers that tie the image to the data.** Examples: array shapes, number of plotted artists, axis limits, tick labels, and projection sums.
-- **`side_effects.txt`.** Since #245, `from_code` and the legacy plotting functions write nothing into the calc dir without `use_cache=True`; the bands, dos, fermi2d and bs2d drivers listed nothing at e9599a2f. An `ebs.pkl` or any other file listed there is a regression. Only the file utilities write files, as `features/utilities.md` documents.
+- **`side_effects.txt`.** Since #245, `from_code` and the legacy plotting functions write nothing into the calc dir without `use_cache=True`; the bands, dos, fermi3d, fermi2d and bs2d drivers listed nothing at d6d4aaa7. An `ebs.pkl` or any other file listed there is a regression. Only the file utilities write files, as `features/utilities.md` documents.
 - **Exit code and `run.log`**, including warnings.
 
 Proof standards:
@@ -141,8 +141,9 @@ This removes the `work/` copy of every run that started more than `hours` ago, f
 - `scripts/examples/bands_plain.py`: the minimal single-call template, which exits 0. Copy it for a one-off driver.
 - `scripts/examples/{bands,dos,fermi3d,fermi2d,bs2d,parsers,utilities}.py`: full per-feature drivers. Run them as shown under Drive.
 - `scripts/lib/verify_steps.py`: `step`, `png`, `distinct_colors` and `finish` for multi-step drivers. It is importable because the harness puts `scripts/lib` on `PYTHONPATH`.
+- `scripts/lib/references/`: independent references (unfolding weights, reduced spin mesh, tiled cut orbits), each with an analytic `validate()` and a `ref_*.py` driver. Compare against one of these before you write your own; `features/README.md` lists them.
 
-Known repo issues that affect verification (as of dev @ e9599a2f):
+Known repo issues that affect verification (as of dev @ d6d4aaa7):
 - `pyprocar.download_from_hf(relpath, output_path=".")` crashes when given a str; it needs a `Path`. The harness passes a `Path`.
 
 A PR that changes a documented side effect updates this skill in the same PR. basedpyright type-checks `scripts/`, so a PR that breaks a driver's import or call fails CI's typecheck job until it fixes the driver.

@@ -19,7 +19,7 @@ The layer that turns raw DFT output directories into canonical objects. Every pl
 $H run parsers data/examples/bands/non-spin-polarized .claude/skills/verify-pyprocar/scripts/examples/parsers.py
 ```
 
-The proven end state (1f36aae1; `vasp` and `qe` re-driven at e9599a2f):
+The proven end state (1f36aae1; `vasp` and `qe` re-driven at d6d4aaa7):
 - `vasp` (SrVO3 bands): `bands_shape` is `[200, 20, 1]`, ticks are `Γ X M Γ R X`, species are `O Sr V`, and `ebs_fermi` is 4.9992.
   - That 4.9992 is the nscf vasprun value. It is not the SCF value 5.3017 that the examples pass as `fermi=`, so object-API plots are shifted by 4.9992.
 - `qe` (`data/codes/qe/7.2/SrVO3/non-spin-polarized/bands`): `bands_shape` is `[155, 25, 1]`, ticks are `Γ X M Γ R X`, and `ebs_fermi` is 12.5491.
