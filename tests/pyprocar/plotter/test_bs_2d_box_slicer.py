@@ -42,3 +42,54 @@ def test_box_slicer_saves_the_3d_view_and_the_2d_slice(tmp_path):
         image = plt.imread(path)[..., :3]
         assert np.count_nonzero(image.min(axis=-1) < 0.5) > minimum
     plotter.close()
+
+
+def test_box_slicer_accepts_an_origin_outside_the_energy_range():
+    sphere = pv.Sphere(radius=0.5)
+    sphere.point_data["energy"] = sphere.points[:, 2]
+    plotter = BS2DPlotter(SimpleNamespace(), off_screen=True)
+
+    plotter.add_box_slicer(sphere, normal=(0, 0, 1), origin=(0, 0, 2.0), cross_section_area=True)
+
+    assert plotter.plane_widgets[0].GetOrigin() == (0.0, 0.0, 2.0)
+    assert "slice" not in plotter.actors
+    plotter.close()
+
+
+def test_moving_the_plane_to_an_empty_cut_clears_the_previous_area():
+    sphere = pv.Sphere(radius=0.5)
+    sphere.point_data["energy"] = sphere.points[:, 2]
+    plotter = BS2DPlotter(SimpleNamespace(), off_screen=True)
+    plotter.add_box_slicer(sphere, normal=(0, 0, 1), origin=(0, 0, 0), cross_section_area=True)
+    widget = plotter.plane_widgets[0]
+
+    widget.SetOrigin(0.0, 0.0, 0.52)
+    widget.InvokeEvent("EndInteractionEvent")
+
+    assert widget.GetOrigin()[2] > 0.5
+    text = cast(pv.CornerAnnotation, plotter.actors["area_text"]).GetText(2)
+    assert text == "Cross sectional area : 0.0000 Ang^-2"
+    assert "slice" not in plotter.actors
+    plotter.close()
+
+
+def test_slice_updates_keep_the_surface_arrows():
+    sphere = pv.Sphere(radius=0.5, theta_resolution=30, phi_resolution=30)
+    sphere.point_data["energy"] = sphere.points[:, 2]
+    sphere.point_data["velocity"] = np.tile([1.0, 0.0, 0.0], (sphere.n_points, 1))
+    sphere.set_active_scalars("energy")
+    sphere.set_active_vectors("velocity")
+    plotter = BS2DPlotter(SimpleNamespace(), off_screen=True)
+    plotter.add_surface(sphere, add_active_vectors=True)
+    surface_arrows = plotter.actors["vectors"]
+
+    plotter.add_box_slicer(sphere, normal=(0, 0, 1), origin=(0, 0, 2.0), add_active_vectors=True)
+    after_empty_cut = plotter.actors.get("vectors")
+    widget = plotter.plane_widgets[0]
+    widget.SetOrigin(0.0, 0.0, 0.0)
+    widget.InvokeEvent("EndInteractionEvent")
+
+    assert after_empty_cut is surface_arrows
+    assert plotter.actors["vectors"] is surface_arrows
+    assert "slice_vectors" in plotter.actors
+    plotter.close()

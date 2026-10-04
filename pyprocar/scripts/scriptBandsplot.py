@@ -13,7 +13,7 @@ import numpy as np
 from pyprocar.cfg import ConfigFactory, ConfigManager
 from pyprocar.cfg.band_structure import BandStructureConfig
 from pyprocar.cfg.base import PlotType
-from pyprocar.core import ElectronicBandStructurePath, Structure
+from pyprocar.core import ElectronicBandStructureMesh, ElectronicBandStructurePath, Structure
 from pyprocar.core.property_store import Property
 from pyprocar.plotter.bs_plot import BandStructurePlotter
 from pyprocar.scripts._selection import (
@@ -186,10 +186,19 @@ def bandsplot(
 
     plot_mode = BandStructureMode.from_str(mode)
 
-    ebs = cast(
-        ElectronicBandStructurePath,
-        ElectronicBandStructurePath.from_code(code, dirname, use_cache=use_cache),
-    )
+    loaded = ElectronicBandStructurePath.from_code(code, dirname, use_cache=use_cache)
+    if plot_mode != BandStructureMode.ATOMIC and not isinstance(
+        loaded, ElectronicBandStructurePath
+    ):
+        kind = (
+            "a k-point mesh" if isinstance(loaded, ElectronicBandStructureMesh) else "a k-point set"
+        )
+        raise ValueError(
+            f"{dirname} is {kind}, not a band structure along a k-path. bandsplot needs a"
+            + " band-structure run (line-mode KPOINTS); plot a k-point mesh with fermi2D,"
+            + " fermi3D or BandStructure2DHandler."
+        )
+    ebs = cast(ElectronicBandStructurePath, loaded)
 
     codes_with_scf_fermi = ["qe", "elk", "abinit"]
     if code in codes_with_scf_fermi and fermi is None:

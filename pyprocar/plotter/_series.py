@@ -200,15 +200,22 @@ def surface_series(
     """
     scalars = scalars_data.to_array() if scalars_data is not None else None
     scalars_label = scalars_data.label if scalars_data else None
-    if scalars is not None and scalars.ndim == 4:
-        if scalars_data.name not in VECTOR_PROPERTIES:
-            raise ValueError(
-                f"{scalars_data.name} has shape {scalars.shape}; surface scalars need one value "
-                + "per point, band and spin. Select a component, or sum the last axis first."
-            )
+    if scalars is not None and scalars.ndim == 4 and scalars_data.name in VECTOR_PROPERTIES:
         scalars = np.linalg.norm(scalars, axis=-1)
         scalars_label = f"|{scalars_label}|"
+    elif scalars is not None and scalars.ndim > 3:
+        raise ValueError(
+            f"{scalars_data.name} has shape {scalars.shape}; surface scalars need one value "
+            + "per point, band and spin. Select a component, or sum the extra axes first"
+            + " (projected_sum sums atoms and orbitals)."
+        )
     vectors = vectors_data.to_array() if vectors_data is not None else None
+    if vectors is not None and (vectors.ndim > 4 or vectors.shape[-1] != 3):
+        raise ValueError(
+            f"{vectors_data.name} has shape {vectors.shape}; surface vectors need three "
+            + "Cartesian components per point, band and spin"
+            + " (projected_sum_spin_texture sums atoms and orbitals)."
+        )
     return [
         SurfaceSeries(
             mesh=surface,

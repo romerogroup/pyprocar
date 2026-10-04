@@ -1,4 +1,5 @@
 import logging
+import warnings
 from functools import partial
 from typing import cast
 
@@ -11,18 +12,20 @@ from pyvista.plotting.utilities.algorithms import (
     algorithm_to_mesh_handler,
     set_algorithm_input,
 )
+from scipy.constants import elementary_charge, hbar
 
 from pyprocar.plotter._series import SurfaceSeries, surface_series
 from pyprocar.plotter._surface_plot import (
     SurfacePlotter,
     area_text,
+    cross_section_areas,
     find_nearest,
     normalize_to_range,
-    slice_loop_areas,
+    open_curves_note,
+    snap_normal,
 )
 
 logger = logging.getLogger(__name__)
-user_logger = logging.getLogger("user")
 
 
 BZ_SCALE_FACTOR = 0.01
@@ -34,12 +37,9 @@ FS_AREA_SCALE_FACTOR = (2 * np.pi) ** 2
 
 
 def dHvA_frequency(A_max_angstrom2):
-    hbar = 1.0546e-27  # erg·s
-    e = 4.768e-10  # statcoulombs
-    c = 3.0e10  # cm/s
-    A_max_cm2 = A_max_angstrom2 * 1e16  # cm^-2
-    F_max_theory = (hbar * A_max_cm2 * c) / (2 * np.pi * e)  # Gauss
-    return F_max_theory
+    """Onsager frequency F = hbar A / (2 pi e), in gauss, of an orbit of area A in 1/Angstrom^2."""
+    tesla = hbar * A_max_angstrom2 * 1e20 / (2 * np.pi * elementary_charge)
+    return tesla * 1e4
 
 
 class FermiPlotter(SurfacePlotter):
@@ -145,10 +145,12 @@ class FermiPlotter(SurfacePlotter):
         if spins is not None:
             series_list = [s for s in series_list if s.spin_index in spins]
             if not series_list:
-                user_logger.warning(
+                warnings.warn(
                     f"No Fermi surface found: no band of spin channel(s) {list(spins)} crosses"
                     + " the isovalue (Fermi energy + fermi_shift). Try another spin channel,"
-                    + " a different fermi_shift, or check the Fermi energy."
+                    + " a different fermi_shift, or check the Fermi energy.",
+                    UserWarning,
+                    stacklevel=2,
                 )
 
         if show_brillouin_zone:
@@ -322,6 +324,7 @@ class FermiPlotter(SurfacePlotter):
                 add_surface_args=add_surface_args,
                 show_van_alphen_frequency=show_van_alphen_frequency,
                 show_cross_section_area=show_cross_section_area,
+                reciprocal_lattice=getattr(surface, "reciprocal_lattice", None),
             ),
             normal=normal,
             origin=origin,
@@ -337,6 +340,7 @@ class FermiPlotter(SurfacePlotter):
         add_text_args=None,
         show_van_alphen_frequency=False,
         show_cross_section_area=False,
+        reciprocal_lattice=None,
     ):
         if add_surface_args is None:
             add_surface_args = {}
@@ -346,35 +350,43 @@ class FermiPlotter(SurfacePlotter):
 
         add_text_args = add_text_args or {}
 
-        slc = mesh.slice(normal=normal, origin=origin)
-        active_vector_name = slc.active_vectors_name
-
-        is_empty_slice = slc.n_points == 0
-        if is_empty_slice:
-            return None
-
-        if active_vector_name:
-            add_surface_args["add_active_vectors"] = add_surface_args.get(
-                "add_active_vectors", True
-            )
-            add_surface_args["add_texture_args"] = add_surface_args.get("add_texture_args", {})
-            add_surface_args["add_texture_args"]["name"] = "vectors"
-            slc.set_active_vectors(active_vector_name)
-
-        self.add_surface(slc, name="slice", **add_surface_args)
-
         if show_van_alphen_frequency and show_cross_section_area:
             raise ValueError(
                 "show_van_alphen_frequency and show_cross_section_area cannot be True at the same time"
             )
 
+        slc = mesh.slice(normal=normal, origin=origin)
+        active_vector_name = slc.active_vectors_name
+
+        is_empty_slice = slc.n_points == 0
+        if is_empty_slice:
+            self.renderer.remove_actor("slice")
+            self.renderer.remove_actor("slice_vectors")
+        else:
+            if active_vector_name:
+                add_surface_args["add_active_vectors"] = add_surface_args.get(
+                    "add_active_vectors", True
+                )
+                add_surface_args["add_texture_args"] = add_surface_args.get("add_texture_args", {})
+                add_surface_args["add_texture_args"]["name"] = "slice_vectors"
+                slc.set_active_vectors(active_vector_name)
+            self.add_surface(cast(pv.PolyData, slc), name="slice", **add_surface_args)
+
         if show_van_alphen_frequency or show_cross_section_area:
-            areas, n_open = slice_loop_areas(cast(pv.PolyData, slc))
+            areas, n_open = cross_section_areas(mesh, normal, origin, reciprocal_lattice)
             if show_van_alphen_frequency:
-                largest = max(areas, default=0.0) * FS_AREA_SCALE_FACTOR
-                text = f"Van Alphen Frequency : {dHvA_frequency(largest):.4f} Gauss"
+                frequency = (
+                    f"{dHvA_frequency(max(areas) * FS_AREA_SCALE_FACTOR):.4f} Gauss"
+                    if areas
+                    else "no closed orbit through this cut"
+                )
+                text = f"Van Alphen Frequency : {frequency}" + open_curves_note(n_open)
             else:
                 text = area_text(areas, n_open, scale=FS_AREA_SCALE_FACTOR)
+            if reciprocal_lattice is not None:
+                _, snapped = snap_normal(normal, reciprocal_lattice)
+                if snapped is not None:
+                    text += " (normal snapped to [{} {} {}])".format(*snapped)
             self.add_text(text, name="area_text", **add_text_args)
 
         return slc
@@ -464,7 +476,7 @@ class FermiPlotter(SurfacePlotter):
             add_plane_widget_args = {}
 
         add_surface_args["add_texture_args"] = add_surface_args.get("add_texture_args", {})
-        add_surface_args["add_texture_args"]["name"] = "vectors"
+        add_surface_args["add_texture_args"]["name"] = "slice_vectors"
 
         add_surface_args["add_active_vectors"] = add_surface_args.get(
             "add_active_vectors", add_active_vectors
@@ -476,7 +488,7 @@ class FermiPlotter(SurfacePlotter):
 
         add_text_args["color"] = add_text_args.get("color", "black")
 
-        # Initialize clipper for surface
+        reciprocal_lattice = getattr(surface, "reciprocal_lattice", None)
         mesh = pv.PolyData(surface)
         mesh, algo = algorithm_to_mesh_handler(
             add_ids_algorithm(mesh, point_ids=False, cell_ids=True)
@@ -497,6 +509,7 @@ class FermiPlotter(SurfacePlotter):
                 add_text_args=add_text_args,
                 show_van_alphen_frequency=show_van_alphen_frequency,
                 show_cross_section_area=show_cross_section_area,
+                reciprocal_lattice=reciprocal_lattice,
             ),
             bounds=surface.bounds,
             use_planes=True,
@@ -511,6 +524,7 @@ class FermiPlotter(SurfacePlotter):
                 add_text_args=add_text_args,
                 show_van_alphen_frequency=show_van_alphen_frequency,
                 show_cross_section_area=show_cross_section_area,
+                reciprocal_lattice=reciprocal_lattice,
             ),
             normal=normal,
             origin=origin,
@@ -539,6 +553,7 @@ class FermiPlotter(SurfacePlotter):
         add_text_args=None,
         show_van_alphen_frequency=False,
         show_cross_section_area=False,
+        reciprocal_lattice=None,
     ):
         bounds = []
 
@@ -569,6 +584,7 @@ class FermiPlotter(SurfacePlotter):
                 add_text_args=add_text_args,
                 show_van_alphen_frequency=show_van_alphen_frequency,
                 show_cross_section_area=show_cross_section_area,
+                reciprocal_lattice=reciprocal_lattice,
             )
 
     def set_scalar_bar_title(self, title: str, **kwargs) -> None:

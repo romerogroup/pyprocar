@@ -1,6 +1,7 @@
 """Tests for BS2DPlotter.plot() through the rendered meshes."""
 
 from types import SimpleNamespace
+from typing import cast
 
 import numpy as np
 import pytest
@@ -70,6 +71,38 @@ class TestBS2DPlotterPlot:
 
         assert plotter.actors["vectors_1_0"].mapper.dataset.bounds[5] == pytest.approx(0.0)
         assert plotter.actors["vectors_2_0"].mapper.dataset.bounds[5] == pytest.approx(3.0)
+
+    def test_arrows_skip_points_where_the_band_has_no_velocity(self, plotter):
+        vectors = VECTORS.copy()
+        vectors[1] = np.nan
+
+        plotter.plot(vectors_data=_property(vectors))
+
+        arrows = plotter.actors["vectors_2_0"].mapper.dataset
+        assert np.isfinite(arrows.points).all()
+        assert arrows.bounds[5] == pytest.approx(3.0)
+        assert np.isfinite(plotter.actors["vectors_1_0"].mapper.dataset.points).all()
+
+    def test_arrows_survive_clipping_to_the_zone(self):
+        bs2d = _bandstructure2d()
+        bs2d.points = np.array([[0.0, 0.0, -1.0], [0.0, 0.0, 2.0]])
+        square = np.array([[1.0, 0.0, 0.0], [-1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, -1.0, 0.0]])
+        zone = SimpleNamespace(face_normals=square, centers=2 * square)
+
+        def get_2d_brillouin_zone(e_min: float, e_max: float) -> SimpleNamespace:
+            assert e_min < e_max
+            return zone
+
+        bs2d.get_2d_brillouin_zone = get_2d_brillouin_zone
+        plotter = BS2DPlotter(bs2d, off_screen=True)
+
+        plotter.plot(
+            vectors_data=_property(VECTORS), show_brillouin_zone=False, clip_brillouin_zone=True
+        )
+
+        arrows = cast(pv.Actor, plotter.actors["vectors_2_0"]).mapper.dataset
+        assert arrows.bounds[5] == pytest.approx(3.0)
+        plotter.close()
 
     def test_band_surfaces_keep_their_scalars_when_arrows_are_added(self, plotter):
         meshes = plotter.plot(scalars_data="band_speed", vectors_data=_property(VECTORS))

@@ -1,5 +1,6 @@
 """PyVista plotter behaviour shared by FermiPlotter and BS2DPlotter."""
 
+import itertools
 import logging
 import os
 from typing import Any, cast
@@ -21,8 +22,97 @@ def find_nearest(array, value):
     return idx
 
 
+MATCH_TOL = 1e-5
+"""Fractional distance within which two curve ends are the same point."""
+
+SNAP_ANGLE = 3e-4
+"""Radians within which a slice normal is replaced by a low-index lattice direction.
+
+Rounding a lattice direction to 4 significant digits turns it by at most 7.4e-5 rad on
+cubic, hexagonal and fcc cells (3 digits: 7.7e-4, which random normals reach too);
+distinct directions with indices up to 4 are at least 2.4e-2 rad apart there.
+"""
+
+_DIRECTION_INDICES = np.array(
+    [
+        uvw
+        for uvw in itertools.product(range(-4, 5), repeat=3)
+        if any(uvw) and np.gcd.reduce(np.abs(uvw)) == 1
+    ]
+)
+
+
+def snap_normal(
+    normal, reciprocal_lattice: np.ndarray
+) -> tuple[np.ndarray, tuple[int, int, int] | None]:
+    """The unit normal, or the lattice direction [u v w] within SNAP_ANGLE of it.
+
+    Only along a real-space lattice vector t = u a1 + v a2 + w a3 do the plane's lattice
+    translates sit at discrete offsets: for G = m1 b1 + m2 b2 + m3 b3, n . G =
+    (u m1 + v m2 + w m3) / |t|. A normal typed with a few digits misses such a direction
+    slightly and cuts an irrational plane, where near-copies of one orbit count
+    separately. Returns the indices when the normal was changed, otherwise None.
+    """
+    normal = np.asarray(normal, dtype=np.float64) / np.linalg.norm(normal)
+    real = np.linalg.inv(np.asarray(reciprocal_lattice, dtype=np.float64)).T
+    directions = _DIRECTION_INDICES @ real
+    directions /= np.linalg.norm(directions, axis=1, keepdims=True)
+    cosines = directions @ normal
+    best = int(np.argmax(cosines))
+    angle = float(np.arccos(min(cosines[best], 1.0)))
+    if angle > SNAP_ANGLE or angle < 1e-12:
+        return normal, None
+    u, v, w = (int(i) for i in _DIRECTION_INDICES[best])
+    return directions[best], (u, v, w)
+
+
 def slice_loop_areas(slc: pv.PolyData) -> tuple[list[float], int]:
-    """Areas of the closed loops in a planar slice, and the number of open curves.
+    """Areas of the closed loops in a planar slice, and the number of open curves."""
+    areas, chains, n_branched = slice_loops(slc)
+    return areas, n_branched + len(chains)
+
+
+def cross_section_areas(
+    mesh: pv.DataSet, normal, origin, reciprocal_lattice: np.ndarray | None = None
+) -> tuple[list[float], int]:
+    """Areas of the closed orbits through the plane's cut of ``mesh``, and its open curves.
+
+    With ``reciprocal_lattice`` (rows are the b vectors), ``mesh`` is one period of a
+    periodic surface, such as a Fermi surface clipped to the first zone. A curve that
+    leaves the cut is followed through the cuts of the plane's lattice translates, and it
+    is a closed orbit when it comes back with no net translation. Orbits of the plane
+    that never pass through this cut are not counted. A normal within SNAP_ANGLE of a
+    low-index lattice direction is first replaced by it (see ``snap_normal``).
+    """
+    normal = np.asarray(normal, dtype=np.float64) / np.linalg.norm(normal)
+    if reciprocal_lattice is not None:
+        normal, _ = snap_normal(normal, reciprocal_lattice)
+    origin = np.asarray(origin, dtype=np.float64)
+    areas, chains, n_open = slice_loops(cast(pv.PolyData, mesh.slice(normal=normal, origin=origin)))
+    if reciprocal_lattice is None or not chains:
+        return areas, n_open + len(chains)
+    lattice = np.asarray(reciprocal_lattice, dtype=np.float64)
+    heights = np.asarray(mesh.points, dtype=np.float64) @ normal
+    steps = np.stack(np.meshgrid(*[np.arange(-3, 4)] * 3, indexing="ij"), axis=-1).reshape(-1, 3)
+    shifts = steps @ lattice
+    offsets = (origin - shifts) @ normal
+    tol = 1e-3 * float(np.linalg.norm(lattice, axis=1).min())
+    same_plane = 1e-6 * tol
+    crossing = (offsets >= heights.min() - tol) & (offsets <= heights.max() + tol)
+    other = crossing & (np.abs(offsets - origin @ normal) > same_plane)
+    _, first = np.unique(np.round(offsets[other] / same_plane), return_index=True)
+    pieces = []
+    for shift in shifts[other][first]:
+        _, cut_chains, _ = slice_loops(
+            cast(pv.PolyData, mesh.slice(normal=normal, origin=origin - shift))
+        )
+        pieces += [chain + shift for chain in cut_chains]
+    orbit_areas, n_unjoined = join_across_zone(chains + pieces, lattice, n_seeds=len(chains))
+    return areas + orbit_areas, n_open + n_unjoined
+
+
+def slice_loops(slc: pv.PolyData) -> tuple[list[float], list[np.ndarray], int]:
+    """Closed-loop areas, open chains (ordered points) and branched curves of a slice.
 
     Segments that touch a non-finite point are dropped first, so a curve broken by
     NaN energies counts as open.
@@ -38,7 +128,7 @@ def slice_loop_areas(slc: pv.PolyData) -> tuple[list[float], int]:
     points = np.asarray(slc.points, dtype=np.float64)
     lines = lines[np.isfinite(points[lines]).all(axis=(1, 2))]
     if len(lines) == 0:
-        return [], 0
+        return [], [], 0
     unique_points, merged = np.unique(np.round(points, 9), axis=0, return_inverse=True)
     lines = merged.reshape(-1)[lines]
     neighbours: dict[int, list[int]] = {}
@@ -47,6 +137,7 @@ def slice_loop_areas(slc: pv.PolyData) -> tuple[list[float], int]:
         neighbours.setdefault(b, []).append(a)
 
     areas: list[float] = []
+    chains: list[np.ndarray] = []
     n_open = 0
     seen: set[int] = set()
     for start in neighbours:
@@ -59,25 +150,85 @@ def slice_loop_areas(slc: pv.PolyData) -> tuple[list[float], int]:
                 if nxt not in seen:
                     seen.add(nxt)
                     component.append(nxt)
-        if any(len(neighbours[node]) != 2 for node in component):
+        if any(len(neighbours[node]) > 2 for node in component):
             n_open += 1
             continue
-        loop = [start, neighbours[start][0]]
-        while len(loop) < len(component):
-            a, b = neighbours[loop[-1]]
-            loop.append(b if a == loop[-2] else a)
-        corners = unique_points[loop]
-        areas.append(
-            0.5 * float(np.linalg.norm(np.cross(corners, np.roll(corners, -1, axis=0)).sum(axis=0)))
-        )
+        ends = [node for node in component if len(neighbours[node]) == 1]
+        path = [ends[0] if ends else start]
+        path.append(neighbours[path[0]][0])
+        while len(path) < len(component):
+            a, b = neighbours[path[-1]]
+            path.append(b if a == path[-2] else a)
+        if ends:
+            chains.append(unique_points[path])
+        else:
+            areas.append(polygon_area(unique_points[path]))
+    return areas, chains, n_open
+
+
+def polygon_area(corners: np.ndarray) -> float:
+    return 0.5 * float(np.linalg.norm(np.cross(corners, np.roll(corners, -1, axis=0)).sum(axis=0)))
+
+
+def join_across_zone(
+    chains: list[np.ndarray], reciprocal_lattice: np.ndarray, n_seeds: int | None = None
+) -> tuple[list[float], int]:
+    """Join open chains whose ends coincide, or coincide modulo a reciprocal lattice vector.
+
+    Walks start from the first ``n_seeds`` chains (all by default); the other chains only
+    complete them. An end continues into an end at the same point when there is one, and
+    otherwise into the closest end modulo a lattice vector. An orbit is closed when the
+    walk returns to its first chain with no net lattice translation. Returns the closed
+    orbits' areas and the number of curves left open: chains with an end that matches
+    nothing, and orbits that run through the zone.
+    """
+    ends = np.array([chain[i] for chain in chains for i in (0, -1)])
+    frac = ends @ np.linalg.inv(reciprocal_lattice)
+    partner: dict[int, tuple[int, np.ndarray]] = {}
+    for a in range(len(ends)):
+        shift = frac - frac[a]
+        whole = np.rint(shift)
+        residual = np.abs(shift - whole).max(axis=1)
+        residual[a] = np.inf
+        close = residual < MATCH_TOL
+        coincident = close & ~whole.any(axis=1)
+        pool = coincident if coincident.any() else close
+        if pool.any():
+            best = int(np.argmin(np.where(pool, residual, np.inf)))
+            partner[a] = (best, whole[best] @ reciprocal_lattice)
+
+    areas: list[float] = []
+    n_open = 0
+    done: set[int] = set()
+    for first in range(len(chains) if n_seeds is None else n_seeds):
+        if first in done:
+            continue
+        entry, offset, pieces = 2 * first, np.zeros(3), []
+        while True:
+            done.add(entry // 2)
+            forward = entry % 2 == 0
+            pieces.append(chains[entry // 2][:: 1 if forward else -1] + offset)
+            leave = entry + 1 if forward else entry - 1
+            if leave not in partner:
+                n_open += 1
+                break
+            entry, lattice_vector = partner[leave]
+            offset = offset - lattice_vector
+            if entry // 2 in done:
+                if entry == 2 * first and np.allclose(offset, 0.0):
+                    areas.append(polygon_area(np.concatenate(pieces)))
+                else:
+                    n_open += 1
+                break
     return areas, n_open
 
 
+def open_curves_note(n_open: int) -> str:
+    return f" ({n_open} open curve{'s' if n_open > 1 else ''} not counted)" if n_open else ""
+
+
 def area_text(areas: list[float], n_open: int, scale: float = 1.0) -> str:
-    text = f"Cross sectional area : {sum(areas) * scale:.4f} Ang^-2"
-    if n_open:
-        text += f" ({n_open} open curve{'s' if n_open > 1 else ''} not counted)"
-    return text
+    return f"Cross sectional area : {sum(areas) * scale:.4f} Ang^-2" + open_curves_note(n_open)
 
 
 def clip_to_zone(surface: pv.PolyData, zone: pv.PolyData) -> pv.PolyData:
@@ -111,6 +262,14 @@ class SurfacePlotter(pv.Plotter):
         self._meshes: list[pv.PolyData] = []
         self.values_dict: dict[str, np.ndarray] = {}
 
+    def add_plane_widget(self, callback, *, origin=None, bounds=None, **kwargs):
+        """Grow ``bounds`` to hold ``origin``; VTK's plane widget rejects an origin outside them."""
+        if origin is not None and bounds is not None:
+            low = np.minimum(np.asarray(bounds)[::2], origin)
+            high = np.maximum(np.asarray(bounds)[1::2], origin)
+            bounds = tuple(np.column_stack([low, high]).ravel().tolist())
+        return super().add_plane_widget(callback, origin=origin, bounds=bounds, **kwargs)
+
     def _plot_series(
         self,
         series_list: list[SurfaceSeries],
@@ -130,7 +289,7 @@ class SurfacePlotter(pv.Plotter):
         vector_norms = [
             np.linalg.norm(s.vectors, axis=-1) for s in series_list if s.vectors is not None
         ]
-        longest = max((float(n.max()) for n in vector_norms if n.size), default=0.0)
+        longest = finite_range(vector_norms)[1]
 
         meshes: dict[tuple[int, int], pv.PolyData] = {}
         for i, series in enumerate(series_list):
@@ -143,10 +302,12 @@ class SurfacePlotter(pv.Plotter):
 
             if series.vectors is not None:
                 mesh.point_data["vectors"] = series.vectors
-                mesh.set_active_vectors("vectors")
 
             if clip_to is not None:
                 mesh = clip_to_zone(mesh, clip_to)
+
+            if series.vectors is not None and "vectors" in mesh.point_data:
+                mesh.set_active_vectors("vectors")
 
             mesh_kwargs: dict[str, Any] = {
                 "cmap": scalars_cmap,
@@ -225,6 +386,15 @@ class SurfacePlotter(pv.Plotter):
         active_vectors = surface.active_vectors
         if active_vectors is None:
             return None
+        finite = np.isfinite(active_vectors).all(axis=1) & np.isfinite(surface.points).all(axis=1)
+        if not finite.any():
+            return None
+        source = surface
+        if not finite.all():
+            source = pv.PolyData(surface.points[finite])
+            for name in surface.point_data:
+                source.point_data[name] = surface.point_data[name][finite]
+            source.set_active_vectors(surface.active_vectors_name)
 
         if add_mesh_args is None:
             add_mesh_args = {}
@@ -244,7 +414,7 @@ class SurfacePlotter(pv.Plotter):
         glyph_args["orient"] = glyph_args.get("orient", vectors)
 
         if longest is None:
-            longest = float(np.linalg.norm(active_vectors, axis=1).max())
+            longest = float(np.linalg.norm(active_vectors[finite], axis=1).max())
         if length is None:
             length = self.glyph_scale
         factor = length / longest * factor
@@ -255,7 +425,7 @@ class SurfacePlotter(pv.Plotter):
         # glyph(scale=<name>) makes that array the active scalars of the mesh it runs on.
         scalars_name = surface.point_data.active_scalars_name
         vectors_name = surface.point_data.active_vectors_name
-        arrows = surface.glyph(**glyph_args)
+        arrows = source.glyph(**glyph_args)
         surface.point_data.active_scalars_name = scalars_name
         surface.point_data.active_vectors_name = vectors_name
         self.add_mesh(arrows, **add_mesh_args)
