@@ -126,7 +126,7 @@ class TestFermiPlotterPlot:
 
     @pytest.mark.guards_existing_behaviour(
         reason="#281 used stacklevel=2, which already names this file one frame up;"
-        " this pins the line through warn_user"
+        + " this pins the line through warn_user"
     )
     def test_spin_without_surface_warns_and_draws_nothing(self, plotter):
         message = (
