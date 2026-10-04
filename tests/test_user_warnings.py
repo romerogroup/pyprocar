@@ -35,8 +35,8 @@ class UserLoggerNames:
     """The expressions that hold the `user` logger in one module."""
 
     def __init__(self, tree: ast.Module, parts: tuple[str, ...], exports: dict[str, set[str]]):
-        self.tree = tree
-        self.get_logger = {"getLogger"}
+        self.tree: ast.Module = tree
+        self.get_logger: set[str] = {"getLogger"}
         self.bound: set[str] = set()
         for node in ast.walk(tree):
             if isinstance(node, ast.ImportFrom):
@@ -46,12 +46,13 @@ class UserLoggerNames:
                         self.get_logger.add(alias.asname or alias.name)
                     elif alias.name in exports.get(source, set()):
                         self.bound.add(alias.asname or alias.name)
-        while self._bind_assignments(tree):
+        while self._bind_assignments():
             pass
 
-    def _bind_assignments(self, tree: ast.Module) -> bool:
+    def _bind_assignments(self) -> bool:
         before = len(self.bound)
-        for node in ast.walk(tree):
+        for node in ast.walk(self.tree):
+            pairs: list[tuple[ast.expr, ast.expr]]
             if isinstance(node, ast.Assign):
                 pairs = [(target, node.value) for target in node.targets]
             elif isinstance(node, ast.AnnAssign | ast.NamedExpr) and node.value is not None:
