@@ -1,9 +1,12 @@
+import subprocess
+import sys
+
 import numpy as np
-import pytest
 
 from pyprocar.core.bandstructure2D import BandStructure2D
 from pyprocar.core.ebs import ElectronicBandStructureMesh
 from pyprocar.core.kpoints import KGRID_MODE, KGridInfo
+from tests.utils import ROOT_DIR
 
 # Graphene's reciprocal lattice (1/Angstrom, rows): a1* and a2* are 60 degrees apart.
 HEXAGONAL = np.array(
@@ -62,9 +65,24 @@ def test_hexagonal_bs2d_surface_covers_the_k_patch_with_the_analytic_bands():
     np.testing.assert_allclose(points[:, 2], sign * tight_binding_graphene(frac), atol=1e-9)
 
 
-@pytest.mark.parametrize("grid", [(30, 30), (30, 20)])
-def test_bs2d_band_values_belong_to_their_own_surface_points(grid):
-    points, _, band_values = bs2d_arrays(SQUARE, square_band, grid)
+def test_bs2d_band_values_belong_to_their_own_surface_points():
+    points, _, band_values = bs2d_arrays(SQUARE, square_band, (30, 30))
 
-    assert len(points) == 2 * grid[0] * grid[1]
     np.testing.assert_array_equal(band_values, points[:, 2])
+
+
+def test_bs2d_on_a_non_square_grid_builds_every_point():
+    # Before #285 a non-square grid gave VTK a grid of the wrong size and crashed the
+    # interpreter, so the build runs in its own process.
+    script = (
+        "import numpy as np\n"
+        "import tests.pyprocar.core.test_bandstructure2d_grid as t\n"
+        "points, _, values = t.bs2d_arrays(t.SQUARE, t.square_band, (30, 20))\n"
+        "print(len(points), int(np.sum(values != points[:, 2])))\n"
+    )
+    run = subprocess.run(
+        [sys.executable, "-c", script], cwd=ROOT_DIR, capture_output=True, text=True, timeout=300
+    )
+
+    assert run.returncode == 0, run.stderr[-2000:]
+    assert run.stdout.split() == [str(2 * 30 * 20), "0"]
