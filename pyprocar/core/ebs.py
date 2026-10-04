@@ -2073,7 +2073,13 @@ ORBITAL_ANGULAR_MOMENTUM = {
     for name in names
 }
 IDENTITY = 0
-ORBITAL_ALIASES = {"dx2-y2": "x2-y2", "dx2": "x2-y2"}
+ORBITAL_ALIASES = {
+    "dx2-y2": "x2-y2",
+    "dx2": "x2-y2",
+    "fzx2-zy2": "fzx2",
+    "fx3-3xy2": "fx3",
+    "f3yx2-y3": "fy3x2",
+}
 SHELL_SUMS = {"p", "d", "f", "tot"}
 
 
