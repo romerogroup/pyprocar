@@ -38,31 +38,33 @@ def two_band_mesh(lattice: np.ndarray, band) -> ElectronicBandStructureMesh:
     )
 
 
-def test_hexagonal_bs2d_surface_covers_the_k_patch_with_the_analytic_bands():
-    grid = N_K + 2 * PADDING
+def bs2d_arrays(lattice: np.ndarray, band, grid: tuple[int, int]):
+    """Points, sheet index and band values as plain arrays, so no VTK object outlives the call."""
     bs = BandStructure2D.from_ebs(
-        two_band_mesh(HEXAGONAL, tight_binding_graphene),
-        grid_interpolation=(grid, grid),
-        padding=PADDING,
-        as_cartesian=False,
+        two_band_mesh(lattice, band), grid_interpolation=grid, padding=PADDING, as_cartesian=False
+    )
+    return (
+        np.array(bs.points),
+        np.array(bs.point_data["spin_band_index"]),
+        np.array(bs.get_property("bands").value),
     )
 
-    frac = np.column_stack([bs.points[:, :2] / (2 * np.pi), np.zeros(bs.n_points)]) @ np.linalg.inv(
+
+def test_hexagonal_bs2d_surface_covers_the_k_patch_with_the_analytic_bands():
+    grid = N_K + 2 * PADDING
+    points, sheet, _ = bs2d_arrays(HEXAGONAL, tight_binding_graphene, (grid, grid))
+
+    frac = np.column_stack([points[:, :2] / (2 * np.pi), np.zeros(len(points))]) @ np.linalg.inv(
         HEXAGONAL
     )
-    sign = np.where(bs.point_data["spin_band_index"] == 1, 1.0, -1.0)
-    assert np.isfinite(bs.points).all()
-    np.testing.assert_allclose(bs.points[:, 2], sign * tight_binding_graphene(frac), atol=1e-9)
+    sign = np.where(sheet == 1, 1.0, -1.0)
+    assert np.isfinite(points).all()
+    np.testing.assert_allclose(points[:, 2], sign * tight_binding_graphene(frac), atol=1e-9)
 
 
 @pytest.mark.parametrize("grid", [(30, 30), (30, 20)])
 def test_bs2d_band_values_belong_to_their_own_surface_points(grid):
-    bs = BandStructure2D.from_ebs(
-        two_band_mesh(SQUARE, square_band),
-        grid_interpolation=grid,
-        padding=PADDING,
-        as_cartesian=False,
-    )
+    points, _, band_values = bs2d_arrays(SQUARE, square_band, grid)
 
-    assert bs.n_points == 2 * grid[0] * grid[1]
-    np.testing.assert_array_equal(bs.get_property("bands").value, bs.points[:, 2])
+    assert len(points) == 2 * grid[0] * grid[1]
+    np.testing.assert_array_equal(band_values, points[:, 2])
