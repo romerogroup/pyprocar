@@ -1,3 +1,4 @@
+from collections.abc import Callable
 from types import SimpleNamespace
 from typing import cast
 
@@ -11,7 +12,11 @@ from pyprocar.core.fermisurface import FermiSurface
 from pyprocar.core.kpoints import KGRID_MODE, KGridInfo
 from pyprocar.plotter._surface_plot import cross_section_areas, snap_normal
 from pyprocar.plotter.bs_2d_plot import BS2DPlotter
-from pyprocar.plotter.fs_plot import FS_AREA_SCALE_FACTOR, FermiPlotter, dHvA_frequency
+from pyprocar.plotter.fs_plot import (
+    FS_AREA_SCALE_FACTOR,
+    FermiPlotter,
+    dHvA_frequency,
+)
 from tests.utils import DATA_DIR
 
 RADIUS = 0.3
@@ -153,8 +158,19 @@ def test_saved_slice_draws_the_active_vectors_as_arrows(tmp_path):
     plotter.close()
 
 
-def _periodic_surface(energy) -> FermiSurface:
-    """The E_F = 0.1 surface of ``energy(k)`` on a 16^3 cubic mesh with B = I."""
+def _same(k: np.ndarray) -> np.ndarray:
+    return k
+
+
+def _periodic_surface(
+    energy: Callable[[np.ndarray], np.ndarray],
+    reciprocal_lattice: np.ndarray | None = None,
+    stored_kpoints: Callable[[np.ndarray], np.ndarray] = _same,
+) -> FermiSurface:
+    """The E_F = 0.1 surface of ``energy(k)`` on a 16^3 mesh, B = I unless given.
+
+    ``stored_kpoints`` maps the grid k-points to the ones the band structure records.
+    """
     n = 16
     frac = np.arange(n) / n
     kpoints = np.stack(np.meshgrid(frac, frac, frac, indexing="ij"), axis=-1).reshape(-1, 3)
@@ -162,11 +178,11 @@ def _periodic_surface(energy) -> FermiSurface:
     return FermiSurface.from_ebs(
         ElectronicBandStructureMesh(
             kgrid_info=KGridInfo(kgrid=(n, n, n), kgrid_mode=KGRID_MODE.GAMMA, kshift=(0, 0, 0)),
-            kpoints=kpoints,
+            kpoints=stored_kpoints(kpoints),
             bands=energies[..., np.newaxis],
             projected=np.ones((len(kpoints), 2, 1, 1, 1)),
             fermi=0.1,
-            reciprocal_lattice=np.eye(3),
+            reciprocal_lattice=np.eye(3) if reciprocal_lattice is None else reciprocal_lattice,
             orbital_names=["s"],
         )
     )
@@ -306,6 +322,126 @@ def test_drawn_slice_uses_the_snapped_normal():
     plotter.close()
 
     np.testing.assert_allclose(np.asarray(points) @ (np.ones(3) / np.sqrt(3)), 0.0, atol=1e-6)
+
+
+def _sum_of_cosines(k: np.ndarray) -> np.ndarray:
+    return 0.1 - 0.3 * np.cos(2 * np.pi * k).sum(axis=1)
+
+
+def test_plane_tangent_to_the_surface_at_a_translate_closes_its_orbit():
+    """E = 0.1 - 0.3 sum cos(2 pi k), normal (1, 1, 1), through a mesh vertex one zone over,
+    where a translate of the plane touches the surface at its highest point. Marching the
+    same grid over 7^3 periods and slicing it with VTK gives one closed 0.7253 orbit; the
+    analytic band gives 0.7261."""
+    origin = (-0.5, 0.1875, 0.14229804277420044)
+
+    areas, n_open = cross_section_areas(
+        _periodic_surface(_sum_of_cosines), np.ones(3) / np.sqrt(3), origin, np.eye(3)
+    )
+
+    assert n_open == 0
+    assert np.asarray(areas) == pytest.approx([0.7253], rel=1e-3)
+
+
+def test_fcc_plane_through_grid_lines_counts_its_orbit_once():
+    """The plane through Gamma normal to a3 of an fcc cell holds grid lines of the k mesh,
+    so its cut passes through mesh vertices. Lattice translates of the orbit then have
+    different node sets but the same area-weighted centroid modulo a lattice vector; the
+    plane 1e-10 above cuts no vertex and gives the same single orbit."""
+    fcc = np.array([[-1, 1, 1], [1, -1, 1], [1, 1, -1]]) / 4.08
+    surface = _periodic_surface(lambda k: _sum_of_cosines(k) + 0.05, fcc)
+    normal = np.linalg.inv(fcc).T[2]
+    normal /= np.linalg.norm(normal)
+
+    areas, n_open = cross_section_areas(surface, normal, (0, 0, 0), fcc)
+    above, _ = cross_section_areas(surface, normal, 1e-10 * normal, fcc)
+
+    assert n_open == 0
+    assert len(areas) == len(above) == 1
+    assert areas[0] == pytest.approx(above[0], rel=1e-8)
+
+
+def test_orbit_reaching_five_cells_from_the_zone_closes():
+    """|n_z| = 0.06 stretches the ellipse around each M cylinder to 10.5 cells. The
+    verifier's reference (marching cubes translated 16 cells, sliced by VTK) finds two
+    closed orbits of 5.1506; analytic pi 0.1 / |n_z| = 5.212."""
+    normal = np.array([0.6027597240921518, -0.7956428358016405, 0.06027597240921519])
+
+    areas, n_open = cross_section_areas(
+        _periodic_surface(_cylinder_around_m), normal, (0.5, 0.5, 0), np.eye(3)
+    )
+
+    assert n_open == 0
+    assert np.asarray(areas) == pytest.approx([5.1506, 5.1506], rel=1e-4)
+
+
+def _sphere_and_cylinder(k: np.ndarray) -> np.ndarray:
+    """A sphere of radius 0.2 around Gamma and a cylinder of radius sqrt(0.1) around M."""
+    to_gamma = (k + 0.5) % 1.0 - 0.5
+    to_m = k[:, :2] % 1.0 - 0.5
+    return 0.1 * np.minimum((to_gamma**2).sum(axis=1) / 0.04, (to_m**2).sum(axis=1) / 0.1)
+
+
+def _text_in_box(half_width: float, **flags: bool) -> tuple[str, int]:
+    """Widget text and drawn slice size at kz = 0 with the box at |kx|, |ky| <= half_width."""
+    surface = _periodic_surface(_sphere_and_cylinder)
+    plotter = FermiPlotter(off_screen=True)
+    plotter.add_box_slicer(surface, normal=(0, 0, 1), origin=(0, 0, 0), **flags)
+    box = plotter.box_widgets[0]
+    box.SetPlaceFactor(1.0)
+    box.PlaceWidget([-half_width, half_width, -half_width, half_width, -0.5, 0.5])
+    box.InvokeEvent("EndInteractionEvent")
+    text = _area_text(plotter)
+    slc = plotter.actors.get("slice")
+    n_points = cast(pv.Actor, slc).mapper.dataset.n_points if slc is not None else 0
+    plotter.close()
+    return text, n_points
+
+
+def test_box_around_nothing_counts_no_orbit():
+    text, n_points = _text_in_box(0.1, show_cross_section_area=True)
+
+    assert n_points == 0
+    assert text == "Cross sectional area : 0.0000 Ang^-2"
+
+
+def test_box_around_the_smaller_orbit_gives_its_frequency():
+    """The full box holds both orbits and the text gives the cylinder's frequency; a box
+    at |kx|, |ky| <= 0.25 holds the sphere's circle (radius 0.2) and none of the cylinder's
+    (0.39 from Gamma at the closest), so it gives the sphere's."""
+    full = _slice_text(_periodic_surface(_sphere_and_cylinder), show_van_alphen_frequency=True)
+    boxed, n_points = _text_in_box(0.25, show_van_alphen_frequency=True)
+
+    assert n_points > 0
+    assert _number(full) == pytest.approx(
+        dHvA_frequency(np.pi * 0.1 * FS_AREA_SCALE_FACTOR), rel=0.03
+    )
+    assert _number(boxed) == pytest.approx(
+        dHvA_frequency(np.pi * 0.04 * FS_AREA_SCALE_FACTOR), rel=0.03
+    )
+
+
+def test_kpoints_off_a_uniform_grid_say_orbits_are_not_joined():
+    stretched = _periodic_surface(
+        _cylinder_around_m,
+        stored_kpoints=lambda k: np.column_stack([k[:, 0] ** 1.05, k[:, 1], k[:, 2]]),
+    )
+
+    text = _slice_text(stretched, show_cross_section_area=True)
+
+    assert text.endswith(
+        " (4 open curves not counted) (k-points are not a uniform 3D grid;"
+        + " orbits crossing the zone boundary are not joined)"
+    )
+
+
+def test_kpoints_printed_with_3_decimals_still_join():
+    rounded = _periodic_surface(_cylinder_around_m, stored_kpoints=lambda k: np.round(k, 3))
+
+    text = _slice_text(rounded, show_cross_section_area=True)
+
+    assert text == _slice_text(_periodic_surface(_cylinder_around_m), show_cross_section_area=True)
+    assert _number(text) == pytest.approx(np.pi * 0.1 * FS_AREA_SCALE_FACTOR, rel=0.02)
 
 
 def test_sheets_that_run_through_the_zone_stay_open():
@@ -469,6 +605,21 @@ def test_srvo3_widget_does_not_say_it_snapped_an_exact_113_normal():
     text = _slice_text(_srvo3_band_16(), normal=(1, 1, 3), show_cross_section_area=True)
 
     assert text.endswith(" Ang^-2")
+
+
+@pytest.mark.data
+def test_gold_plane_through_grid_lines_counts_its_orbit_once():
+    """(0.5, -0.2887, -0.8165) snaps to [1 0 -1]; the plane through Gamma then holds grid
+    lines along b2. The orbit is 1.7729 Ang^-2, the same as 1e-9 off the plane."""
+    fs = FermiSurface.from_code(
+        code="vasp", dirpath=DATA_DIR / "examples/fermi3d/van-alphen", fermi=8.5642
+    )
+    band_5 = fs.select_bands([(5, 0)])
+    assert isinstance(band_5, FermiSurface)
+
+    text = _slice_text(band_5, normal=(0.5, -0.2887, -0.8165), show_cross_section_area=True)
+
+    assert text == "Cross sectional area : 1.7729 Ang^-2 (normal snapped to [1 0 -1])"
 
 
 @pytest.mark.data
