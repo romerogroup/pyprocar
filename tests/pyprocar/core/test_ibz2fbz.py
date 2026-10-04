@@ -366,6 +366,38 @@ def test_a_quarter_turn_carries_the_px_phase_to_py():
     np.testing.assert_allclose(image, expected, atol=1e-12)
 
 
+def test_a_phase_moved_by_a_reciprocal_lattice_vector_turns_by_the_atom_position():
+    # VASP's phases use Bloch sums with exp(i k.(R + tau)), so c(k + G) = exp(-2 pi i G.tau) c(k).
+    # The quarter turn sends (1/4, 1/2, 0) to (-1/2, 1/4, 0), stored as (1/2, 1/4, 0), so
+    # G = (1, 0, 0), and the atom at (1/2, 1/2, 0) turns the coefficient by exp(-i pi) = -1.
+    grid = gamma_grid((4, 4, 1))
+    source = [0.25, 0.5, 0]
+    ibz = wedge(grid, np.concatenate([C4_GROUP, -C4_GROUP]), first=source)
+    phase = np.full((len(ibz), 1, 1, 1, 1), 0.6 + 0.8j)
+    structure = Structure(
+        atoms=["X"], fractional_coordinates=[[0.5, 0.5, 0]], lattice=np.eye(3), rotations=C4_GROUP
+    )
+    ebs = ElectronicBandStructureMesh(
+        kpoints=ibz,
+        bands=np.zeros((len(ibz), 1, 1)),
+        projected=np.abs(phase) ** 2,
+        projected_phase=phase,
+        orbital_names=["s"],
+        fermi=0.0,
+        reciprocal_lattice=np.eye(3),
+        structure=structure,
+        kgrid_info=gamma_info((4, 4, 1)),
+    )
+
+    assert ebs.projected_phase is not None
+    phase_at = {
+        key(k): complex(ebs.projected_phase.to_array()[i, 0, 0, 0, 0])
+        for i, k in enumerate(ebs.kpoints)
+    }
+    assert phase_at[key(source)] == pytest.approx(0.6 + 0.8j)
+    assert phase_at[key([0.5, 0.25, 0])] == pytest.approx(-0.6 - 0.8j)
+
+
 def test_phases_decide_how_a_third_turn_splits_equal_px_and_py_weights():
     # (px + py)/sqrt(2) and (px + i py)/sqrt(2) have the same weights, 1/2 and 1/2, but a 120
     # degree turn sends the first to (1 + sqrt(3)/2)/2 px and the second to 1/2 px.
