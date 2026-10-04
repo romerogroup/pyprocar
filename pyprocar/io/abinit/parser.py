@@ -255,7 +255,7 @@ class AbinitParser(BaseParser):
         if projected is None or self.abinit_output is None or self.abinit_output.nspinor != 2:
             return projected
         if self.abinit_output.nspden != 1:
-            user_logger.warning(
+            warn_user(
                 "Abinit's DOS_AT files hold no magnetization components, so the projected DOS"
                 + f" of this nspden = {self.abinit_output.nspden} spinor run is the total only."
             )

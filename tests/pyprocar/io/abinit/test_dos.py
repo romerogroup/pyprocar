@@ -5,6 +5,7 @@ import pytest
 
 from tests.pyprocar.io.abinit import ABINIT_DATA_DIR, CALC_TYPES
 from tests.utils import BaseTest
+from tests.utils.user_warning import user_warning
 
 pytestmark = pytest.mark.data
 
@@ -167,21 +168,15 @@ def test_non_magnetic_spinor_dos_has_total_and_zero_spin_channels():
     assert np.all(projected[:, 1:] == 0.0)
 
 
-def test_magnetic_spinor_dos_keeps_only_the_total_and_says_why(tmp_path, caplog):
+def test_magnetic_spinor_dos_keeps_only_the_total_and_says_why(tmp_path):
     for name in NCL_DOS_FILES:
         (tmp_path / name).write_bytes((NCL_DOS / name).read_bytes())
     out = tmp_path / "abinit.out"
     out.write_text(out.read_text().replace("nspden =       1", "nspden =       4"))
     from pyprocar.io import get_parser
 
-    user_logger = logging.getLogger("user")
-    user_logger.addHandler(caplog.handler)
-    try:
-        with caplog.at_level(logging.WARNING, logger="user"):
-            dos = get_parser("abinit", tmp_path).dos
-    finally:
-        user_logger.removeHandler(caplog.handler)
+    with user_warning(__file__, match="hold no magnetization components"):
+        dos = get_parser("abinit", tmp_path).dos
 
     assert dos is not None and dos.projected is not None
     assert dos.projected.to_array().shape == (9401, 1, 1, 9)
-    assert "hold no magnetization components" in caplog.text

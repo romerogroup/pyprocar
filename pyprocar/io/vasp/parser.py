@@ -1,5 +1,4 @@
 import logging
-import warnings
 from functools import cached_property
 from pathlib import Path
 from typing import overload
@@ -16,6 +15,7 @@ from pyprocar.io.vasp.outcar import Outcar
 from pyprocar.io.vasp.poscar import Poscar
 from pyprocar.io.vasp.procar import Procar
 from pyprocar.io.vasp.vasprun import VaspXML
+from pyprocar.utils.log_utils import warn_user
 
 logger = logging.getLogger(__name__)
 
@@ -249,11 +249,10 @@ class VaspParser(BaseParser):
         atom_groups = None
         if structure is not None and self.procar.n_atoms != structure.natoms:
             atom_groups = self.procar.n_atoms
-            warnings.warn(
+            warn_user(
                 f"The PROCAR has {atom_groups} ion rows and the structure {structure.natoms}"
                 + " atoms, so each row is a group of atoms written by pyprocar.filter. Atom"
-                + " index i selects the i-th group, and species selections raise.",
-                stacklevel=2,
+                + " index i selects the i-th group, and species selections raise."
             )
 
         return get_ebs_from_data(
