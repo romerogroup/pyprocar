@@ -11,7 +11,7 @@ Each feature has a reusable driver in `scripts/examples/<feature>.py`. It runs e
 | 3D Fermi surface | [fermi3d.md](fermi3d.md) | `fermi3d.py` / `data/examples/fermi3d/non-spin-polarized` | Object API works; legacy `FermiHandler` parametric/fermi_speed work, plain crashes |
 | 2D Fermi slice | [fermi2d.md](fermi2d.md) | `fermi2d.py` / `data/examples/fermi2d/non-spin-polarized` | `FermiSlicePlotter` with scalars works, without scalars draws nothing; legacy `fermi2D` unreachable in every mode |
 | 2D band structure surface | [bs2d.md](bs2d.md) | `bs2d.py` / `data/examples/bands/2d-bands` | Object API works; legacy `BandStructure2DHandler` crashes |
-| Code parsers (VASP, QE, Elk, Abinit, Siesta, Lobster, BXSF, FRMSF, DFTB+) | [parsers.md](parsers.md) | `parsers.py` / `data/examples/bands/non-spin-polarized` + `data/codes/qe` | VASP, QE and Elk bands proven; others not driven |
+| Code parsers (VASP, QE, Elk, Abinit, Siesta, Lobster, BXSF, FRMSF) | [parsers.md](parsers.md) | `parsers.py` / `data/examples/bands/non-spin-polarized` + `data/codes/qe` | VASP, QE and Elk bands proven; others not driven |
 | File utilities (`bandgap`, `kpath`, `filter`, `repair`, `cat`, `generate2dkmesh`) | [utilities.md](utilities.md) | `utilities.py` / `data/examples/bands/non-spin-polarized` | `kpath`/`filter`/`repair`/`cat`/`generate2dkmesh` work; `bandgap` crashes |
 
 Update the Status column whenever a run changes what is known.
