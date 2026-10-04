@@ -7,6 +7,7 @@ of an orbital-filtered PROCAR is the sum of its group of orbital columns.
 
 import shutil
 from pathlib import Path
+from typing import Any
 
 import matplotlib
 
@@ -68,22 +69,24 @@ def test_atom_filtered_procar_plots_each_group_of_atoms(tmp_path: Path) -> None:
     calc = _filtered_calc(tmp_path, atoms=[[0], [1], [2, 3, 4]])
     unfiltered = _projected(_ebs(CALC))
 
-    _, ax = pyprocar.bandsplot(code="vasp", dirname=calc, mode="plain", fermi=FERMI, show=False)
+    _, ax = pyprocar.bandsplot(
+        code="vasp", dirname=str(calc), mode="plain", fermi=FERMI, show=False
+    )
     assert len([line for line in ax.lines if len(line.get_xdata()) == 200]) == 20
 
     _, ax = pyprocar.bandsplot(
-        code="vasp", dirname=calc, mode="parametric", fermi=FERMI, atoms=[2], show=False
+        code="vasp", dirname=str(calc), mode="parametric", fermi=FERMI, atoms=[2], show=False
     )
     assert len([c for c in ax.collections if isinstance(c, LineCollection)]) == 20
 
     ebs = _ebs(calc)
     np.testing.assert_allclose(
-        _sum(ebs, atoms=[2])[..., 0], unfiltered[..., 0, 2:5, :].sum(axis=(-1, -2)), atol=2e-3
+        _sum(ebs, atoms=[2])[..., 0], unfiltered[..., 0, 2:5, :].sum(axis=(-1, -2)), atol=1e-9
     )
     np.testing.assert_allclose(
         _sum(ebs, orbitals=[4, 5, 6, 7, 8])[..., 0],
         unfiltered[..., 0, :, 4:9].sum(axis=(-1, -2)),
-        atol=5e-3,
+        atol=1e-9,
     )
 
 
@@ -102,9 +105,12 @@ def test_atom_filtered_procar_refuses_species_selections(tmp_path: Path) -> None
     calc = _filtered_calc(tmp_path, atoms=[[0, 1], [2, 3, 4]])
 
     with pytest.raises(ValueError, match="filtered by atoms"):
-        pyprocar.bandsplot(code="vasp", dirname=calc, mode="overlay_species", show=False)
+        pyprocar.bandsplot(code="vasp", dirname=str(calc), mode="overlay_species", show=False)
+    oxygen: Any = ["O"]
     with pytest.raises(ValueError, match="filtered by atoms"):
-        pyprocar.bandsplot(code="vasp", dirname=calc, mode="parametric", atoms=["O"], show=False)
+        pyprocar.bandsplot(
+            code="vasp", dirname=str(calc), mode="parametric", atoms=oxygen, show=False
+        )
 
 
 def test_orbital_filtered_procar_labels_each_column_by_its_header_name(tmp_path: Path) -> None:
@@ -112,7 +118,7 @@ def test_orbital_filtered_procar_labels_each_column_by_its_header_name(tmp_path:
     unfiltered = _projected(_ebs(CALC))
 
     _, ax = pyprocar.bandsplot(
-        code="vasp", dirname=calc, mode="parametric", atoms=[1], orbitals=[1], show=False
+        code="vasp", dirname=str(calc), mode="parametric", atoms=[1], orbitals=[1], show=False
     )
     assert len([c for c in ax.collections if isinstance(c, LineCollection)]) == 20
 
@@ -123,7 +129,7 @@ def test_orbital_filtered_procar_labels_each_column_by_its_header_name(tmp_path:
     assert s_column.metadata["orbital_label"] == "o0"
     assert p_column.metadata["orbital_label"] == "o1"
     np.testing.assert_allclose(
-        np.asarray(p_column.value)[..., 0], unfiltered[..., 0, 1, 1:4].sum(axis=-1), atol=2e-3
+        np.asarray(p_column.value)[..., 0], unfiltered[..., 0, 1, 1:4].sum(axis=-1), atol=1e-9
     )
 
 
@@ -135,8 +141,9 @@ def test_selecting_one_orbital_by_name_raises_whichever_name_the_header_uses(
     calc = _copy_calc(tmp_path)
     procar = calc / "PROCAR"
     procar.write_text(procar.read_text().replace("x2-y2", header_name))
+    by_name: Any = [selected]
 
     with pytest.raises(ValueError, match=r"orbitals takes orbital indices or the shell names"):
         pyprocar.bandsplot(
-            code="vasp", dirname=calc, mode="parametric", orbitals=[selected], show=False
+            code="vasp", dirname=str(calc), mode="parametric", orbitals=by_name, show=False
         )

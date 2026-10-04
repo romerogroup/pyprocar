@@ -83,6 +83,7 @@ def get_ebs_from_data(
     structure: Structure | None = None,
     kpath: kpoints.KPath = None,
     kgrid_info: kpoints.KGridInfo | None = None,
+    atom_groups: int | None = None,
     **kwargs,
 ):
     ebs_args = {
@@ -95,6 +96,7 @@ def get_ebs_from_data(
         "reciprocal_lattice": reciprocal_lattice,
         "orbital_names": orbital_names,
         "structure": structure,
+        "atom_groups": atom_groups,
     }
 
     # grid_dims = mathematics.get_grid_dims(kpoints)
@@ -189,9 +191,14 @@ class ElectronicBandStructure(PointSet):
         factor (a_i . b_j = delta_ij). Defaults to None
     shifted_to_fermi : bool, optional
          Boolean to determine if the fermi energy is shifted, defaults to False
+    atom_groups : int, optional
+        The number of rows of the atom axis of ``projected`` when each row is a group of
+        the structure's atoms, as in a PROCAR filtered by atoms. Atom indices then select
+        groups, and species selections raise. Defaults to None, one row per atom
     """
 
     _mesh: pv.PolyData | pv.StructuredGrid | pv.PointSet | None = None
+    _atom_groups: int | None = None
 
     def __init__(
         self,
@@ -205,11 +212,14 @@ class ElectronicBandStructure(PointSet):
         reciprocal_lattice: kpoints.RECIPROCAL_LATTICE_DTYPE | None = None,
         shifted_to_fermi: bool = False,
         structure: Structure | None = None,
+        atom_groups: int | None = None,
     ):
         super().__init__(kpoints)
 
         logger.info("Initializing ElectronicBandStructure")
-        check_projected_layout(projected, orbital_names, BAND_PROJECTIONS, bands, structure)
+        check_projected_layout(
+            projected, orbital_names, BAND_PROJECTIONS, bands, structure, atom_groups
+        )
 
         if bands is not None:
             self.add_property(name="bands", value=bands)
@@ -225,6 +235,7 @@ class ElectronicBandStructure(PointSet):
         self._reciprocal_lattice = reciprocal_lattice
         self._shifted_to_fermi = shifted_to_fermi
         self._structure = structure
+        self._atom_groups = atom_groups
 
         logger.info("___ElectronicBandStructure initialization complete___")
 
@@ -322,6 +333,10 @@ class ElectronicBandStructure(PointSet):
     @property
     def structure(self):
         return self._structure
+
+    @property
+    def atom_groups(self) -> int | None:
+        return self._atom_groups
 
     @property
     def n_kpoints(self):

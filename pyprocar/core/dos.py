@@ -202,6 +202,8 @@ def _units_divide(u_input: str, u_norm: str | None) -> str:
 class DensityOfStates(PointSet):
     """Data-centric representation of a density of states calculation."""
 
+    atom_groups: int | None = None
+
     def __init__(
         self,
         energies: npt.ArrayLike,

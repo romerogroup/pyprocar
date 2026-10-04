@@ -90,12 +90,14 @@ def check_projected_layout(
     layout: ProjectedLayout,
     leading: npt.ArrayLike | None = None,
     structure: HasAtoms | None = None,
+    atom_groups: int | None = None,
 ) -> None:
     """Raise unless ``projected`` is in ``layout`` and agrees with the data it belongs to.
 
     Its leading axes must equal the shape of ``leading`` (the bands or the total
-    DOS), its atom axis must equal ``structure.natoms``, it must have 1, 2 or 4
-    spin channels, and ``orbital_names`` must name its last axis.
+    DOS), its atom axis must equal ``atom_groups`` when the rows are groups of
+    atoms and ``structure.natoms`` otherwise, it must have 1, 2 or 4 spin
+    channels, and ``orbital_names`` must name its last axis.
     """
     if projected is None:
         return
@@ -122,15 +124,20 @@ def check_projected_layout(
     if leading_shape is not None:
         expected[: layout.n_leading] = [(size,) for size in leading_shape]
         expected[spin_axis] = (1, 4) if n_spins == 1 else (n_spins,)
-    if structure is not None:
-        expected[layout.n_leading] = (structure.natoms,)
+    atoms: tuple[int, str] | None = None
+    if atom_groups is not None:
+        atoms = (atom_groups, f"{atom_groups} atom groups")
+    elif structure is not None:
+        atoms = (structure.natoms, f"a {structure.natoms}-atom structure")
+    if atoms is not None:
+        expected[layout.n_leading] = (atoms[0],)
     if any(
         sizes is not None and actual not in sizes
         for sizes, actual in zip(expected, shape, strict=True)
     ):
         described = ", ".join("*" if s is None else "|".join(map(str, s)) for s in expected)
         sources = [] if leading_shape is None else [f"{layout.leading} of shape {leading_shape}"]
-        sources += [] if structure is None else [f"a {structure.natoms}-atom structure"]
+        sources += [] if atoms is None else [atoms[1]]
         raise ValueError(
             f"projected has shape {shape}; the layout {layout} expects ({described}) from"
             + f" {' and '.join(sources)}. Its spin channels match those of {layout.leading},"
@@ -177,11 +184,15 @@ class ProjectionSource(Protocol):
     def orbital_names(self) -> list[str] | None: ...
     @property
     def is_non_collinear(self) -> bool: ...
+    @property
+    def atom_groups(self) -> int | None: ...
 
 
 def selection_resolver(source: ProjectionSource) -> ProjectionSelectionResolver:
     atom_indexer = (
-        None if source.structure is None else AtomIndexer.from_structure(source.structure)
+        None
+        if source.structure is None or source.atom_groups is not None
+        else AtomIndexer.from_structure(source.structure)
     )
     label_builder = ProjectionLabelBuilder(
         atom_indexer=atom_indexer,

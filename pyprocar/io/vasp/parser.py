@@ -1,4 +1,5 @@
 import logging
+import warnings
 from functools import cached_property
 from pathlib import Path
 from typing import overload
@@ -244,6 +245,17 @@ class VaspParser(BaseParser):
             )
             return None
 
+        structure = self.structure
+        atom_groups = None
+        if structure is not None and self.procar.n_atoms != structure.natoms:
+            atom_groups = self.procar.n_atoms
+            warnings.warn(
+                f"The PROCAR has {atom_groups} ion rows and the structure {structure.natoms}"
+                + " atoms, so each row is a group of atoms written by pyprocar.filter. Atom"
+                + " index i selects the i-th group, and species selections raise.",
+                stacklevel=2,
+            )
+
         return get_ebs_from_data(
             kpoints=self.procar.kpoints,
             bands=self.procar.bands,
@@ -252,9 +264,10 @@ class VaspParser(BaseParser):
             fermi=self.outcar.fermi,
             reciprocal_lattice=self.outcar.reciprocal_lattice,
             orbital_names=self.procar.orbital_names,
-            structure=self.structure,
+            structure=structure,
             kpath=self.kpath,
             kgrid_info=self.kgrid_info,
+            atom_groups=atom_groups,
         )
 
     @cached_property

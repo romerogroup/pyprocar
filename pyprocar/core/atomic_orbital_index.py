@@ -151,6 +151,43 @@ LEGACY_ORBITAL_NAMES: dict[str, int | list[int]] = {
 }
 
 
+_SHELL_LETTERS = "spdf"
+_LETTER_ORBITAL_NAME = re.compile(r"\d*([spdf])[_xyz0-9^()\- ]*")
+_ELK_ORBITAL_NAME = re.compile(r"Y(\d)-?\d+")
+
+
+def _angular_momentum(orbital_name: str) -> int | None:
+    """The l of an orbital name a parser writes (``px``, ``d_z^2``, ``x2-y2``, Elk's ``Y1-1``)."""
+    if orbital_name == "x2-y2":
+        return 2
+    if elk := _ELK_ORBITAL_NAME.fullmatch(orbital_name):
+        return int(elk[1])
+    if letter := _LETTER_ORBITAL_NAME.fullmatch(orbital_name):
+        return _SHELL_LETTERS.index(letter[1])
+    return None
+
+
+def orbital_shells(orbital_names: Sequence[str] | None) -> tuple[tuple[str, tuple[int, ...]], ...]:
+    """The whole s, p, d and f shells among the orbitals, as (letter, orbital indices).
+
+    Without names the slots of the conventional table stand. With names, shell l is
+    the 2l+1 orbitals whose names have angular momentum l, so a filtered PROCAR's
+    ``o0`` or a spin-orbit ``l1_j1.5_m0.5`` state is in no shell.
+    """
+    if not orbital_names:
+        return PRIMARY_ORBITAL_GROUPS
+    by_l: dict[int, list[int]] = {}
+    for index, name in enumerate(orbital_names):
+        ang = _angular_momentum(name)
+        if ang is not None:
+            by_l.setdefault(ang, []).append(index)
+    return tuple(
+        (letter, tuple(by_l[ang]))
+        for ang, letter in enumerate(_SHELL_LETTERS)
+        if len(by_l.get(ang, ())) == 2 * ang + 1
+    )
+
+
 def _normalize_indices(indices: Iterable[int] | None) -> list[int]:
     if indices is None:
         return []
@@ -309,7 +346,7 @@ class OrbitalIndexer:
         remaining = set(normalized)
         tokens: list[str] = []
         if prefer_groups:
-            for group_name, group_indices in PRIMARY_ORBITAL_GROUPS:
+            for group_name, group_indices in orbital_shells(orbital_names):
                 group_set = set(group_indices)
                 if group_set and group_set <= remaining:
                     tokens.append(group_name)
@@ -910,15 +947,11 @@ class ProjectionSelectionResolver:
             atoms_set = set()
             for specie in species_list:
                 atoms_set.update(self._atoms_for_species(specie))
-        elif atoms_set is None:
-            if self.atom_indexer is None:
-                raise ValueError(
-                    "Atom indexer is required when atoms and species selections are omitted"
-                )
+        elif atoms_set is None and self.atom_indexer is not None:
             species_map = self.atom_indexer.species_atom_map()
             species_list = list(species_map.keys())
             atoms_set = {idx for indices in species_map.values() for idx in indices}
-        else:
+        elif atoms_set is not None:
             species_list = self._species_from_atoms(sorted(atoms_set))
 
         atoms_tuple = tuple(sorted(atoms_set)) if atoms_set is not None else tuple()
@@ -990,7 +1023,11 @@ class ProjectionSelectionResolver:
 
     def _atoms_for_species(self, specie: str) -> tuple[int, ...]:
         if self.atom_indexer is None:
-            raise ValueError("Species selections require atom indexing information")
+            raise ValueError(
+                f"Cannot select species {specie!r}: the projections name no species per atom row,"
+                + " because there is no structure or because each row is a group of atoms"
+                + " (a PROCAR filtered by atoms). Select rows by index with atoms=[...]."
+            )
         mapping = self.atom_indexer.species_atom_map([specie])
         if specie not in mapping:
             raise ValueError(f"Species '{specie}' not found in atom index")
