@@ -39,5 +39,6 @@ The proven end state (SrVO3, non-spin-polarized, d6d4aaa7):
 ## Gotchas
 
 - `FermiHandler` re-parses from `dirname` on every `plot_fermi_surface` call, so the calc dir must still exist at plot time.
+- Since #286 the drawn zone (`BrillouinZone`, `BrillouinZone2D`) and the cross-section zone come from the Delaunay-reduced basis. A sheared reciprocal basis of the same lattice, such as b2' = b2 + 3 b1, gives the zone of volume |det B|, and its cross-section orbits differ from the reduced cell's only by the coarser marching-cubes mesh of the sheared grid. The drawn Fermi surface on a sheared basis is still incomplete: `ebs.pad` adds `padding` grid points in fractional coordinates, which do not cover the zone, so pieces are missing or `from_ebs` raises `Surface is empty after clipping`.
 - Offscreen VTK works here, but it prints a `vtkEGLRenderWindow ... OpenGL 3.2` WARN line. Ignore it. Check the screenshot is not blank: about 1 distinct color means blank.
 - `FermiPlotter` subclasses `pv.Plotter`, so pass `off_screen=True` to it. `PYVISTA_OFF_SCREEN=true` is set by the harness as a backstop.
