@@ -17,24 +17,14 @@ from tests.pyprocar.core.test_fermisurface_noncollinear import sphere_mesh
 from tests.pyprocar.scripts.test_fermi2d_spins import spin_polarized_mesh
 
 
-class _Messages(logging.Handler):
-    def __init__(self) -> None:
-        super().__init__()
-        self.messages: list[str] = []
-
-    def emit(self, record: logging.LogRecord) -> None:
-        self.messages.append(record.getMessage())
-
-
 @pytest.fixture
-def user_output():
+def user_output(caplog):
     """What the user logger emits, at whatever level the code under test leaves it."""
     loggers = [logging.getLogger("user"), logging.getLogger("pyprocar")]
     levels = [logger.level for logger in loggers]
-    handler = _Messages()
-    loggers[0].addHandler(handler)
-    yield handler.messages
-    loggers[0].removeHandler(handler)
+    loggers[0].addHandler(caplog.handler)
+    yield caplog
+    loggers[0].removeHandler(caplog.handler)
     for logger, level in zip(loggers, levels, strict=True):
         logger.setLevel(level)
     plt.close("all")
@@ -79,9 +69,9 @@ def test_fermi2d_honours_its_verbose_argument(tmp_path, user_output):
     spin_polarized_mesh(2.0).save(tmp_path / "ebs.pkl")
 
     pyprocar.fermi2D(code="vasp", dirname=str(tmp_path), use_cache=True, show=False, verbose=0)
-    silent = list(user_output)
+    silent = user_output.messages
     pyprocar.fermi2D(code="vasp", dirname=str(tmp_path), use_cache=True, show=False, verbose=1)
 
     assert silent == []
-    assert "### Parameters ###" in user_output
-    assert "k_z_plane       : 0.0" in user_output
+    assert "### Parameters ###" in user_output.messages
+    assert "k_z_plane       : 0.0" in user_output.messages

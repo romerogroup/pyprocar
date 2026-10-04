@@ -30,28 +30,6 @@ def set_verbose_level(verbose: int):
         package_logger.setLevel(logging.DEBUG)
 
 
-class UserFriendlyFormatter(logging.Formatter):
-    """Custom formatter that makes warnings and errors more noticeable to users"""
-
-    # ANSI color codes for terminal output
-    YELLOW = "\033[93m"  # Warning
-    RED = "\033[91m"  # Error/Critical
-    BOLD = "\033[1m"  # Bold text
-    RESET = "\033[0m"  # Reset formatting
-
-    def format(self, record):
-        # Default format for regular messages
-        self._style._fmt = "%(message)s"
-
-        # Special formatting for warnings and errors
-        if record.levelno >= logging.ERROR:
-            self._style._fmt = f"{self.RED}{self.BOLD}ERROR: %(message)s{self.RESET}"
-        elif record.levelno >= logging.WARNING:
-            self._style._fmt = f"{self.YELLOW}{self.BOLD}WARNING: %(message)s{self.RESET}"
-
-        return super().format(record)
-
-
 logging_config = {
     "version": 1,
     "disable_existing_loggers": False,
@@ -60,9 +38,7 @@ logging_config = {
             "format": "[%(levelname)s] %(asctime)s - %(name)s[%(lineno)d][%(funcName)s] - %(message)s",
             "datefmt": "%Y-%m-%d %H:%M:%S",
         },
-        "user": {
-            "()": UserFriendlyFormatter,
-        },
+        "user": {"format": "%(message)s"},
     },
     "handlers": {
         "console": {
