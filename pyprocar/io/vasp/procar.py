@@ -69,39 +69,16 @@ class Procar(Mapping[str, Any]):
             return ""
         return self.filepath.name
 
-    @property
+    @cached_property
     def orbital_names(self) -> list[str]:
-        return [
-            "s",
-            "py",
-            "pz",
-            "px",
-            "dxy",
-            "dyz",
-            "dz2",
-            "dxz",
-            "x2-y2",
-            "fy3x2",
-            "fxyz",
-            "fyz2",
-            "fz3",
-            "fxz2",
-            "fzx2",
-            "fx3",
-            "tot",
-        ]
+        """The orbital columns the PROCAR header names, between "ion" and "tot".
 
-    @property
-    def orbital_names_old(self) -> list[str]:
-        return ["s", "py", "pz", "px", "dxy", "dyz", "dz2", "dxz", "dx2", "tot"]
-
-    @property
-    def orbital_names_short(self) -> list[str]:
-        return ["s", "p", "d", "f", "tot"]
-
-    @property
-    def labels(self) -> list[str]:
-        return self.orbital_names_old[:-1]
+        A PROCAR that pyprocar.filter rewrote names its summed columns o0, o1, ...
+        """
+        header = re.search(r"^ion(.+)tot\s*$", self.file_str, re.MULTILINE)
+        if header is None:
+            raise ValueError("No 'ion ... tot' orbital header found in the PROCAR file")
+        return header.group(1).split()
 
     @cached_property
     def n_kpoints(self) -> int:
@@ -280,30 +257,7 @@ class Procar(Mapping[str, Any]):
 
         """
 
-        # finding all orbital headers
-        header_lines = re.findall(r"(ion.+tot)", self.file_str)
-
-        # testing if the orbital names are known (the standard ones)
-        orbital_in_procar = header_lines[0].split()
-        n_spd_columns = len(orbital_in_procar)
-
-        # only the first 'size' orbital
-        standard_orbitals = self.orbital_names[: n_spd_columns - 1] + self.orbital_names[-1:]
-        standard_orbitals_short = (
-            self.orbital_names_short[: n_spd_columns - 1] + self.orbital_names_short[-1:]
-        )
-        standard_orbitals_old = self.orbital_names_old[: n_spd_columns - 1] + [
-            self.orbital_names_old[-1:]
-        ]
-        if (
-            orbital_in_procar != standard_orbitals
-            and orbital_in_procar != standard_orbitals_short
-            and orbital_in_procar != standard_orbitals_old
-        ):
-            logger.warning(
-                f"{n_spd_columns} orbitals. (Some of) "
-                + "They are unknow (if you did 'filter' them it is OK)."
-            )
+        n_spd_columns = len(self.orbital_names) + 2
 
         # VASP writes no "tot" row for a single ion; Abinit writes one anyway
         has_tot_row = self.n_atoms > 1 or re.search(r"^\s*tot\s", self.file_str, re.M) is not None
@@ -377,31 +331,6 @@ class Procar(Mapping[str, Any]):
         """
         Helped method to parse the projection phases
         """
-        # finding all orbital headers
-        header_lines = re.findall(r"(ion.+tot)", self.file_str)
-
-        # testing if the orbital names are known (the standard ones)
-        orbital_in_procar = header_lines[0].split()
-        n_spd_columns = len(orbital_in_procar)
-
-        # only the first 'size' orbital
-        standard_orbitals = self.orbital_names[: n_spd_columns - 1] + self.orbital_names[-1:]
-        standard_orbitals_short = (
-            self.orbital_names_short[: n_spd_columns - 1] + self.orbital_names_short[-1:]
-        )
-        standard_orbitals_old = self.orbital_names_old[: n_spd_columns - 1] + [
-            self.orbital_names_old[-1:]
-        ]
-        if (
-            orbital_in_procar != standard_orbitals
-            and orbital_in_procar != standard_orbitals_short
-            and orbital_in_procar != standard_orbitals_old
-        ):
-            logger.warning(
-                f"{n_spd_columns} orbitals. (Some of) "
-                + "They are unknow (if you did 'filter' them it is OK)."
-            )
-
         # Vasp format different for 1 atom
         n_spd_rows = self.n_atoms + 1
         # n_projection_rows = self.n_atoms + 1

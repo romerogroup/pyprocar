@@ -223,7 +223,7 @@ class AbinitParser(BaseParser):
             projected=procar._spd2projected(procar.spd),
             fermi=self.abinit_output.fermi,
             projected_phase=projected_phase,
-            orbital_names=procar.orbital_names_old[:-1],
+            orbital_names=procar.orbital_names,
             reciprocal_lattice=self.abinit_output.reclat,
             structure=self.structure,
             kpath=self.kpath,  # pyright: ignore[reportArgumentType]
@@ -238,6 +238,7 @@ class AbinitParser(BaseParser):
             total=self.abinit_dos.dos_total,
             fermi=self.abinit_dos.fermi,
             projected=self.abinit_dos.projected,
+            orbital_names=self.abinit_dos.orbital_names,
         )
 
     @property

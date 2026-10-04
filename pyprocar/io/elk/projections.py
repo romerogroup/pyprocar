@@ -11,14 +11,14 @@ import numpy.typing as npt
 _L_NAMES = ["s", "p", "d", "f", "g", "h"]
 
 
-def _lm_names(n_columns: int) -> list[str]:
+def lm_names(n_columns: int) -> list[str]:
     lmax = round(n_columns**0.5) - 1
     return [f"Y{ang}{m}" for ang in range(lmax + 1) for m in range(-ang, ang + 1)]
 
 
 _LAYOUTS: dict[int, tuple[slice, Callable[[int], list[str]]]] = {
     21: (slice(1, None), lambda n: _L_NAMES[:n]),
-    22: (slice(None), _lm_names),
+    22: (slice(None), lm_names),
     23: (slice(None), lambda _: ["spin"]),
     24: (slice(-1, None), lambda _: ["moment"]),
 }

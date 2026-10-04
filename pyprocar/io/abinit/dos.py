@@ -3,6 +3,7 @@
 import logging
 import re
 from functools import cached_property
+from itertools import takewhile
 from pathlib import Path
 
 import numpy as np
@@ -13,6 +14,18 @@ logger = logging.getLogger(__name__)
 
 # DOS_AT columns: energy, l=0..4 DOS, l=0..4 integrated DOS, then lm-resolved DOS from lm=0 0.
 _LM_COLUMNS = slice(11, 20)
+# Abinit's real spherical harmonics (l, m), named as its own PROCAR header names them.
+_LM_NAMES = {
+    (0, 0): "s",
+    (1, -1): "py",
+    (1, 0): "pz",
+    (1, 1): "px",
+    (2, -2): "dxy",
+    (2, -1): "dyz",
+    (2, 0): "dz2",
+    (2, 1): "dxz",
+    (2, 2): "dx2",
+}
 
 
 def _read_dos_file(text: str) -> tuple[np.ndarray, float]:
@@ -85,6 +98,17 @@ class AbinitDOS:
     def fermi(self) -> float:
         """Fermi energy in eV."""
         return self._total_dos_data[1]
+
+    @cached_property
+    def orbital_names(self) -> list[str] | None:
+        """Names of the lm columns that ``projected`` keeps, read from the DOS_AT header."""
+        if not self.projected_dos_filepaths:
+            return None
+        with self.projected_dos_filepaths[0].open() as file:
+            header = "".join(takewhile(lambda line: line.startswith("#"), file))
+        lms = re.findall(r"lm=\s*(\d)\s*(-?\d)", header)
+        n_lm = _LM_COLUMNS.stop - _LM_COLUMNS.start
+        return [_LM_NAMES[(int(l), int(m))] for l, m in lms[:n_lm]]
 
     @cached_property
     def projected(self) -> np.ndarray | None:

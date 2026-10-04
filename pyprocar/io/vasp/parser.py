@@ -251,7 +251,7 @@ class VaspParser(BaseParser):
             projected_phase=self.procar.projected_phase,
             fermi=self.outcar.fermi,
             reciprocal_lattice=self.outcar.reciprocal_lattice,
-            orbital_names=self._orbital_names(self.procar.projected),
+            orbital_names=self.procar.orbital_names,
             structure=self.structure,
             kpath=self.kpath,
             kgrid_info=self.kgrid_info,
