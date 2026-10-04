@@ -6,8 +6,7 @@ import pytest
 from tests.utils import writable_copy
 
 pytestmark = pytest.mark.guards_existing_behaviour(
-    reason="tests the tests/utils helper itself; red_green copies the branch's tests/ into the "
-    "base tree, so the helper exists there too"
+    reason="tests the tests/utils helper itself, which red_green's base run takes from the branch"
 )
 
 WRITE_BITS = stat.S_IWUSR | stat.S_IWGRP | stat.S_IWOTH
