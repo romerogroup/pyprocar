@@ -110,3 +110,32 @@ def test_dos_names_the_expected_layout_for_misordered_projections(
 
     assert DOS_LAYOUT in str(error.value)
     assert expected in str(error.value)
+
+
+def grouped_band_structure(projected: np.ndarray, atom_groups: int) -> ElectronicBandStructure:
+    return ElectronicBandStructure(
+        kpoints=cast(kpoints.KPOINTS_DTYPE, np.zeros((N_K, 3))),
+        bands=np.zeros((N_K, N_BANDS, 1)),
+        projected=cast(PROJECTED_DTYPE, projected),
+        orbital_names=[f"o{i}" for i in range(projected.shape[-1])],
+        structure=five_atoms(),
+        atom_groups=atom_groups,
+    )
+
+
+def test_band_structure_of_atom_groups_selects_each_group_row():
+    rows = np.arange(3.0).reshape(1, 1, 1, 3, 1) * np.ones((N_K, N_BANDS, 1, 3, N_ORBITALS))
+
+    ebs = grouped_band_structure(rows, atom_groups=3)
+
+    np.testing.assert_allclose(ebs.compute_projected_sum(atoms=[2]).value, 2.0 * N_ORBITALS)
+    np.testing.assert_allclose(ebs.compute_projected_sum(orbitals=[0]).value, 0.0 + 1.0 + 2.0)
+
+
+def test_band_structure_of_atom_groups_checks_the_atom_axis_against_the_group_count():
+    with pytest.raises(ValueError) as error:
+        grouped_band_structure(np.zeros((N_K, N_BANDS, 1, N_ORBITALS, 3)), atom_groups=3)
+
+    assert BAND_LAYOUT in str(error.value)
+    assert "(2, 3, 1|4, 3, *)" in str(error.value)
+    assert "3 atom groups" in str(error.value)
