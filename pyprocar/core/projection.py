@@ -186,6 +186,8 @@ class ProjectionSource(Protocol):
     def is_non_collinear(self) -> bool: ...
     @property
     def atom_groups(self) -> int | None: ...
+    @property
+    def n_atoms(self) -> int: ...
 
 
 def selection_resolver(source: ProjectionSource) -> ProjectionSelectionResolver:
@@ -201,6 +203,7 @@ def selection_resolver(source: ProjectionSource) -> ProjectionSelectionResolver:
     )
     return ProjectionSelectionResolver(
         label_builder=label_builder,
+        n_atom_rows=source.n_atoms,
         orbital_names=source.orbital_names,
         is_non_colinear=source.is_non_collinear,
     )
@@ -306,7 +309,7 @@ def _selection_metadata(
         label_latex.append(f"${body_latex}{suffix_latex}$")
 
     return {
-        "atoms": list(selection.atoms) if len(selection.atoms) > 0 else None,
+        "atoms": list(selection.atoms),
         "orbitals": list(selection.orbitals) if selection.orbitals is not None else None,
         "spins": list(selection.spins) if selection.spins is not None else None,
         "species": list(selection.species) if len(selection.species) > 0 else None,

@@ -875,11 +875,13 @@ class ProjectionSelectionResolver:
         self,
         *,
         label_builder: ProjectionLabelBuilder,
+        n_atom_rows: int,
         orbital_names: Sequence[str] | None = None,
         is_non_colinear: bool = False,
     ) -> None:
         self.label_builder = label_builder
         self.atom_indexer = label_builder.atom_indexer
+        self.n_atom_rows = n_atom_rows
         self.orbital_names = orbital_names
         self.is_non_colinear = is_non_colinear
 
@@ -950,11 +952,13 @@ class ProjectionSelectionResolver:
         elif atoms_set is not None:
             species_list = self._species_from_atoms(sorted(atoms_set))
         elif self.atom_indexer is not None:
-            species_map = self.atom_indexer.species_atom_map()
-            species_list = list(species_map.keys())
-            atoms_set = {idx for indices in species_map.values() for idx in indices}
+            species_list = list(self.atom_indexer.species_atom_map().keys())
 
-        atoms_tuple = tuple(sorted(atoms_set)) if atoms_set is not None else tuple()
+        atoms_tuple = (
+            tuple(sorted(atoms_set)) if atoms_set is not None else tuple(range(self.n_atom_rows))
+        )
+        if not atoms_tuple:
+            raise ValueError("The selection names no atoms; select at least one atom or species")
         orbitals_tuple = (
             tuple(sorted(orbitals_set))
             if orbitals_set is not None and len(orbitals_set) > 0
@@ -964,7 +968,7 @@ class ProjectionSelectionResolver:
         species_tuple = tuple(species_list) if species_list is not None else tuple()
 
         labels = self.label_builder.build_components(
-            atoms=atoms_tuple if atoms_tuple else None,
+            atoms=atoms_tuple,
             orbitals=orbitals_tuple,
             spins=spins_tuple,
             species=species_tuple,

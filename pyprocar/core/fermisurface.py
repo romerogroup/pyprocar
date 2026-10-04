@@ -317,7 +317,7 @@ class FermiSurface(pv.PolyData):
                 species_orbital_map=species_orbital_map,
                 atoms_orbital_map=atoms_orbital_map,
             )
-            atoms_list = list(selection.atoms) if selection.atoms else None
+            atoms_list = list(selection.atoms)
             orbitals_list = list(selection.orbitals) if selection.orbitals else None
             spins_list = list(selection.spins) if selection.spins else None
         else:

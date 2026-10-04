@@ -101,6 +101,7 @@ def test_build_property_selection_labels():
         orbital_names=["s", "p"],
         is_non_collinear=False,
         atom_groups=None,
+        n_atoms=2,
     )
     selection = selection_resolver(source).resolve(atoms=[1], orbitals=[0], spins=[1])
     owner = _Owner(points=np.zeros((1, 3)))
