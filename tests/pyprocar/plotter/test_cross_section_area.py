@@ -1,3 +1,4 @@
+import itertools
 from collections.abc import Callable
 from types import SimpleNamespace
 from typing import cast
@@ -6,10 +7,12 @@ import numpy as np
 import pytest
 import pyvista as pv
 from matplotlib.quiver import Quiver
+from vtkmodules.vtkCommonTransforms import vtkTransform
 
 from pyprocar.core.ebs import ElectronicBandStructureMesh
 from pyprocar.core.fermisurface import FermiSurface
 from pyprocar.core.kpoints import KGRID_MODE, KGridInfo
+from pyprocar.plotter._periodic_cut import _BandCut, periodic_bands
 from pyprocar.plotter._surface_plot import cross_section_areas, snap_normal
 from pyprocar.plotter.bs_2d_plot import BS2DPlotter
 from pyprocar.plotter.fs_plot import (
@@ -382,14 +385,29 @@ def _sphere_and_cylinder(k: np.ndarray) -> np.ndarray:
     return 0.1 * np.minimum((to_gamma**2).sum(axis=1) / 0.04, (to_m**2).sum(axis=1) / 0.1)
 
 
-def _text_in_box(half_width: float, **flags: bool) -> tuple[str, int]:
-    """Widget text and drawn slice size at kz = 0 with the box at |kx|, |ky| <= half_width."""
+def _text_in_box(
+    half_width: float,
+    kz: float = 0.0,
+    scale: tuple[float, float, float] | None = None,
+    angle: float = 0.0,
+    centre: tuple[float, float, float] = (0, 0, 0),
+    **flags: bool,
+) -> tuple[str, int]:
+    """Widget text and drawn slice size at kz for the box [-1, 1]^3 scaled (by default to
+    |kx|, |ky| <= half_width, |kz| <= 0.5), turned by ``angle`` degrees about z and moved to
+    ``centre``."""
     surface = _periodic_surface(_sphere_and_cylinder)
     plotter = FermiPlotter(off_screen=True)
-    plotter.add_box_slicer(surface, normal=(0, 0, 1), origin=(0, 0, 0), **flags)
+    plotter.add_box_slicer(surface, normal=(0, 0, 1), origin=(0, 0, kz), **flags)
     box = plotter.box_widgets[0]
     box.SetPlaceFactor(1.0)
-    box.PlaceWidget([-half_width, half_width, -half_width, half_width, -0.5, 0.5])
+    box.PlaceWidget([-1, 1, -1, 1, -1, 1])
+    transform = vtkTransform()
+    transform.PostMultiply()
+    transform.Scale(*(scale or (half_width, half_width, 0.5)))
+    transform.RotateZ(angle)
+    transform.Translate(*centre)
+    box.SetTransform(transform)
     box.InvokeEvent("EndInteractionEvent")
     text = _area_text(plotter)
     slc = plotter.actors.get("slice")
@@ -419,6 +437,72 @@ def test_box_around_the_smaller_orbit_gives_its_frequency():
     assert _number(boxed) == pytest.approx(
         dHvA_frequency(np.pi * 0.04 * FS_AREA_SCALE_FACTOR), rel=0.03
     )
+
+
+def test_box_holding_a_short_arc_of_an_orbit_counts_it():
+    """The turned box holds the cylinder's arc and, in one corner, a 0.027 arc of the
+    sphere's circle with no mesh vertex cut inside the box; both orbits are drawn and count,
+    as with the full box."""
+    full = _slice_text(
+        _periodic_surface(_sphere_and_cylinder),
+        origin=(0, 0, -0.003),
+        show_cross_section_area=True,
+    )
+
+    boxed, n_points = _text_in_box(
+        0.0,
+        kz=-0.003,
+        scale=(0.146, 0.121, 0.6),
+        angle=79.1,
+        centre=(0.26, -0.247, 0),
+        show_cross_section_area=True,
+    )
+
+    assert n_points > 0
+    assert boxed == full
+
+
+def test_thin_slab_through_an_orbit_counts_it():
+    """The slab |kx - 0.09| <= 0.004 at kz = 0.03 holds two arcs of the sphere's circle,
+    0.019 long in all, between two cut points; the text is that circle's area."""
+    areas, _ = cross_section_areas(
+        _periodic_surface(_sphere_and_cylinder), (0, 0, 1), (0, 0, 0.03), np.eye(3)
+    )
+
+    text, n_points = _text_in_box(
+        0.0,
+        kz=0.03,
+        scale=(0.004, 0.6, 0.6),
+        centre=(0.09, 0, 0),
+        show_cross_section_area=True,
+    )
+
+    assert n_points > 0
+    assert text == f"Cross sectional area : {min(areas) * FS_AREA_SCALE_FACTOR:.4f} Ang^-2"
+
+
+@pytest.mark.parametrize("uvw", [(0, 0, 1), (1, 1, 1)])
+def test_cut_through_mesh_vertices_keeps_every_straddling_triangle(uvw):
+    """Planes along [u v w] of an fcc cell through mesh vertices: each triangle with vertices
+    on both sides of the plane in a translate gives one segment, though the period's
+    triangle heights, which pick the candidates, round differently from its own."""
+    fcc = np.array([[-1, 1, 1], [1, -1, 1], [1, 1, -1]]) / 4.08
+    bands = periodic_bands(_periodic_surface(lambda k: _sum_of_cosines(k) + 0.05, fcc))
+    assert bands
+    band = bands[0]
+    normal = np.asarray(uvw, dtype=np.float64) @ np.linalg.inv(fcc).T
+    normal /= np.linalg.norm(normal)
+    steps = np.array(list(itertools.product(range(-2, 3), repeat=3)))
+
+    for vertex in range(0, len(band.canon), len(band.canon) // 16):
+        d = float(band.canon[vertex] @ fcc @ normal)
+        cut = _BandCut(band, fcc, normal, d)
+        s = cut.heights[band.tri_cls] + (band.tri_off[None] + steps[:, None, None]) @ cut.w - d
+        straddling = int(((s > 0).any(axis=2) & ~(s > 0).all(axis=2)).sum())
+        segments = cut.segments(steps)
+
+        assert segments is not None
+        assert len(segments[0]) == straddling
 
 
 def test_kpoints_off_a_uniform_grid_say_orbits_are_not_joined():
