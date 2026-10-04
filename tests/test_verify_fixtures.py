@@ -482,9 +482,6 @@ def test_a_data_link_to_a_copy_outside_the_main_checkout_is_refused(harness):
     _refuses_everything(harness)
 
 
-@pytest.mark.guards_existing_behaviour(
-    reason="dev accepts this spelling too; the stricter data-root check must keep accepting it"
-)
 def test_a_worktree_data_link_spelled_with_a_leading_double_slash_still_locks(harness):
     if harness.shared_env is None:
         pytest.skip(
@@ -553,7 +550,6 @@ def test_no_command_changes_anything_outside_data(harness):
     assert _outside(harness, *allowed) == before
 
 
-@pytest.mark.guards_existing_behaviour(reason="a lint; verify.sh on dev runs no chmod at all")
 def test_verify_sh_changes_modes_only_in_chmod_below_data():
     lines = [x.strip() for x in VERIFY_SH.read_text().splitlines()]
     mode_changes = [

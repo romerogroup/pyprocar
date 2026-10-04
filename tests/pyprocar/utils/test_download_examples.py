@@ -46,8 +46,9 @@ def test_download_from_hf_fetches_only_the_archive_named_exactly(hub):
 def test_download_from_hf_refuses_a_prefix_without_downloading(hub):
     out, downloaded = hub
 
-    with pytest.raises(FileNotFoundError, match=r"data/c\.zip is not in the"):
+    with pytest.raises(FileNotFoundError) as refused:
         download_examples.download_from_hf("data/c", output_path=out)
 
     assert downloaded == []
+    assert str(refused.value) == "data/c.zip is not in the lllangWV/pyprocar_test_data dataset"
     assert not (out / "data").exists()
