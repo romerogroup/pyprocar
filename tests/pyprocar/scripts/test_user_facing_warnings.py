@@ -1,5 +1,3 @@
-"""The one-call functions show their warnings and progress in a default call (#284)."""
-
 import logging
 
 import matplotlib
@@ -18,8 +16,7 @@ from tests.pyprocar.scripts.test_fermi2d_spins import spin_polarized_mesh
 
 
 @pytest.fixture
-def user_output(caplog):
-    """What the user logger emits, at whatever level the code under test leaves it."""
+def live_user_log(caplog):
     loggers = [logging.getLogger("user"), logging.getLogger("pyprocar")]
     levels = [logger.level for logger in loggers]
     loggers[0].addHandler(caplog.handler)
@@ -46,32 +43,28 @@ def test_bandsplot_without_fermi_warns_that_the_bands_are_not_shifted(tmp_path):
     "method",
     ["plot_fermi_surface", "plot_fermi_cross_section", "plot_fermi_cross_section_box_widget"],
 )
-@pytest.mark.usefixtures("user_output")
+@pytest.mark.usefixtures("live_user_log")
 def test_fermi_handler_without_a_crossing_raises(monkeypatch, method):
-    """The user is told loudly; the "No Fermi surface found" warning after it is a guard.
-
-    FermiSurface.from_ebs raises before the handler's empty-surface check can run.
-    """
     ebs = sphere_mesh(1, np.full((2, 1, 2, 1), 0.5))
 
     def from_code(_cls: type[ElectronicBandStructureMesh], *_args: object, **_kwargs: object):
         return ebs
 
     monkeypatch.setattr(ElectronicBandStructureMesh, "from_code", classmethod(from_code))
-    # Band 0 spans 0 to 0.75 eV and band 1 sits at 5 eV, so nothing crosses 50 eV.
-    handler = pyprocar.FermiHandler(code="vasp", dirname="calc", fermi=50.0)
+    above_every_band = 50.0
+    handler = pyprocar.FermiHandler(code="vasp", dirname="calc", fermi=above_every_band)
 
     with pytest.raises(ValueError, match="No Fermi surfaces were generated"):
         getattr(handler, method)(mode="plain", show=False)
 
 
-def test_fermi2d_honours_its_verbose_argument(tmp_path, user_output):
+def test_fermi2d_honours_its_verbose_argument(tmp_path, live_user_log):
     spin_polarized_mesh(2.0).save(tmp_path / "ebs.pkl")
 
     pyprocar.fermi2D(code="vasp", dirname=str(tmp_path), use_cache=True, show=False, verbose=0)
-    silent = user_output.messages
+    silent = live_user_log.messages
     pyprocar.fermi2D(code="vasp", dirname=str(tmp_path), use_cache=True, show=False, verbose=1)
 
     assert silent == []
-    assert "### Parameters ###" in user_output.messages
-    assert "k_z_plane       : 0.0" in user_output.messages
+    assert "### Parameters ###" in live_user_log.messages
+    assert "k_z_plane       : 0.0" in live_user_log.messages

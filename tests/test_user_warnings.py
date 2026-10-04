@@ -1,12 +1,3 @@
-"""A message the user must see goes through warnings.warn, never the "user" logger.
-
-The "user" logger is set to ERROR on import, so ``user_logger.warning(...)`` prints
-nothing in a default call (#284): bandsplot's "fermi is not set" and FermiHandler's
-"No Fermi surface found" were invisible unless something first lowered the level. The
-logger carries only verbose progress (info and debug). Tests see a warning with
-``pytest.warns``; a test that lowers the user logger to see one hides this defect.
-"""
-
 import ast
 from pathlib import Path
 
