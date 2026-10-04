@@ -25,13 +25,13 @@ Using the ebs object, you can access various information related to the electron
 
 .. code-block:: python
 
-    ebs.kpoints # kpoints in the reduced basis
+    ebs.kpoints # kpoints, fractional on a grid and Cartesian along a path
     ebs.bands # bands, shape (n_kpoints, n_bands, n_spin_channels)
     ebs.fermi # The fermi energy
 
     ebs.projected # The atomic projections, shape (n_kpoints, n_bands, n_spins, n_atoms, n_orbitals)
     ebs.projected_phase # The complex atomic projections
-    ebs.weights # The kpoint weights
+    ebs.weights # The unfolding weights, shape (n_kpoints, n_bands, n_spins), when unfolded
     ebs.orbital_names # The name of each orbital in the projections
 
     ebs.n_kpoints # The number of k points
@@ -60,8 +60,14 @@ Using the ebs object, you can access various information related to the electron
 An ``ElectronicBandStructureMesh`` built from a calculation that used symmetry holds only the
 irreducible k-points the code computed, so it rebuilds the full grid when it is created. It
 carries each value to its images with the symmetry operations of the structure, permuting atoms,
-rotating orbitals and the non-collinear spin, and conjugating the phases under time reversal. To
-do this by hand on an irreducible band structure, give the grid the code reduced. The symmetry
+rotating orbitals and the non-collinear spin, and conjugating the phases under time reversal.
+Rotated orbital weights are exact for operations that only swap orbitals and for the sum over
+each full shell. An operation that mixes orbitals, such as a third turn mixing px with py, also
+needs the phases. Without ``projected_phase`` the weights mix by the squared rotation matrix
+``|M|^2``, which drops the interference between the mixed orbitals. Phases that are
+non-collinear or over orbitals without real-harmonic names are dropped with a warning.
+
+To do this by hand on an irreducible band structure, give the grid the code reduced. The symmetry
 operations default to those of ``ebs.structure``; ``rotations`` and ``time_reversals`` override
 them.
 
