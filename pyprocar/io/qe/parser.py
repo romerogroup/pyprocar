@@ -691,6 +691,20 @@ class QEParser(BaseParser):
         return pyprocar_projections_phase
 
     @cached_property
+    def position_gauge_phase(self) -> np.ndarray | None:
+        """spd_phase in the core's convention, Bloch sums with exp(i k.(R + tau)).
+
+        QE's atomic wavefunctions carry exp(i k.R) alone, so each atom's coefficient takes the
+        factor exp(-2 pi i k.tau).
+        """
+        phase, structure, kpoints = self.spd_phase, self.structure, self.kpoints
+        if phase is None or structure is None or kpoints is None or len(kpoints) != len(phase):
+            return phase
+        tau = np.asarray(structure.fractional_coordinates, dtype=float)
+        bloch = np.exp(-2j * np.pi * np.asarray(kpoints) @ tau.T)
+        return phase * bloch[:, np.newaxis, np.newaxis, :, np.newaxis]
+
+    @cached_property
     def spd(self) -> np.ndarray | None:
         if self.spd_phase is None:
             return None
@@ -727,7 +741,7 @@ class QEParser(BaseParser):
             kpoints=self.kpoints,
             bands=self.bands,
             projected=self.spd,
-            projected_phase=self.spd_phase,
+            projected_phase=self.position_gauge_phase,
             fermi=self.fermi,
             reciprocal_lattice=self.reciprocal_lattice,
             orbital_names=orbital_names,
