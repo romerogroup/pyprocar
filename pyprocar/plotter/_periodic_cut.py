@@ -20,6 +20,7 @@ import numpy as np
 import pyvista as pv
 from scipy.sparse import coo_matrix
 from scipy.sparse.csgraph import connected_components
+from scipy.spatial import HalfspaceIntersection
 
 from pyprocar.core.brillouin_zone import zone_face_steps
 
@@ -279,13 +280,27 @@ def _curves(found: list[tuple[np.ndarray, ...]]) -> _Curves:
     return _Curves(names, a, b, q1, q2, degree, label, meets_region, is_open)
 
 
-def _band_curves(cut: _BandCut, region: tuple[np.ndarray, np.ndarray]) -> _Curves | None:
-    """Curves of the cut through the translates that can hold the zone, extended through the
-    translates at the open ends of curves that meet the region until those close or reach
-    MAX_REACH cells."""
+def _start_steps(zone: np.ndarray, half: np.ndarray, inverse: np.ndarray) -> np.ndarray:
+    """_START_STEPS, then the other translates whose period meets the zone's bounding box in
+    fractional coordinates, which a sheared basis stretches beyond two cells."""
+    halfspaces = np.column_stack([zone, -half])
+    corners = HalfspaceIntersection(halfspaces, np.zeros(3)).intersections @ inverse
+    low = np.floor(corners.min(axis=0)).astype(int) - 1
+    high = np.floor(corners.max(axis=0)).astype(int)
+    if max(-low.min(), high.max()) > MAX_REACH:
+        raise ValueError(f"the first zone spans more than {MAX_REACH} cells of this basis")
+    window = np.array(list(itertools.product(*map(range, low, high + 1))))
+    return np.vstack([_START_STEPS, window[~np.isin(_pack(0, window), _pack(0, _START_STEPS))]])
+
+
+def _band_curves(
+    cut: _BandCut, region: tuple[np.ndarray, np.ndarray], start: np.ndarray
+) -> _Curves | None:
+    """Curves of the cut through the ``start`` translates, extended through the translates at
+    the open ends of curves that meet the region until those close or reach MAX_REACH cells."""
     found: list[tuple[np.ndarray, ...]] = []
     done = np.empty(0, dtype=np.int64)
-    steps = _START_STEPS
+    steps = start
     while True:
         pieces = cut.segments(steps)
         if pieces is not None:
@@ -321,14 +336,16 @@ def plane_orbits(
     normal = np.asarray(normal, dtype=np.float64) / np.linalg.norm(normal)
     d = float(np.asarray(origin, dtype=np.float64) @ normal)
     zone = zone_face_steps(lattice) @ lattice
-    region = (zone, 0.5 * (zone * zone).sum(axis=1) * (1 + 2e-9))
+    half = 0.5 * (zone * zone).sum(axis=1)
+    region = (zone, half * (1 + 2e-9))
     if box is not None:
         region = (np.vstack([region[0], box[0]]), np.concatenate([region[1], box[1]]))
     inverse = np.linalg.inv(lattice)
+    start = _start_steps(zone, half, inverse)
     areas: list[float] = []
     n_open = 0
     for band in bands:
-        curves = _band_curves(_BandCut(band, lattice, normal, d), region)
+        curves = _band_curves(_BandCut(band, lattice, normal, d), region, start)
         if curves is None:
             continue
         n_comp = len(curves.meets_region)
