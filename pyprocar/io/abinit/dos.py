@@ -108,7 +108,7 @@ class AbinitDOS:
             header = "".join(takewhile(lambda line: line.startswith("#"), file))
         lms = re.findall(r"lm=\s*(\d)\s*(-?\d)", header)
         n_lm = _LM_COLUMNS.stop - _LM_COLUMNS.start
-        return [_LM_NAMES[(int(l), int(m))] for l, m in lms[:n_lm]]
+        return [_LM_NAMES[(int(ang), int(m))] for ang, m in lms[:n_lm]]
 
     @cached_property
     def projected(self) -> np.ndarray | None:
