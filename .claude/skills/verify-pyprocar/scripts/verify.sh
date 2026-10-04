@@ -128,7 +128,7 @@ worktree-setup)
   mkdir -p "$MAIN/data" .tmp
   ln -sfn "$MAIN/data" data
   cmp -s "$MAIN/pixi.lock" pixi.lock ||
-    echo "warning: pixi.lock differs from $MAIN/pixi.lock, so the shared env may not match this branch" >&2
+    echo "warning: pixi.lock differs from $MAIN/pixi.lock; the shared env may not match this branch, so CI is the final gate" >&2
   echo "ready: data -> $MAIN/data, pyprocar/_version.py copied, env $SHARED_ENV"
   ;;
 exec)
