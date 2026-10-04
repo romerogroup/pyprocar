@@ -32,7 +32,7 @@ AREA_TOLERANCE = 1e-4
 """Ang^-2, 2 pi included. The text rounds to 4 decimals (5e-5)."""
 FREQUENCY_TOLERANCE = 1e-5
 """Relative. The frequency text keeps every digit of the largest area. pyprocar's energies are
-5e-7 eV off EIGENVAL's, which moves the mesh vertices: measured 1.1e-6."""
+5e-7 eV off EIGENVAL's, which moves the mesh vertices: measured 1.5e-6."""
 SNAP_ANGLE = 3e-4
 """Radians, the documented snap_normal rule: a normal this close to a real-space lattice
 direction [u v w] with |indices| <= 4 becomes that direction."""

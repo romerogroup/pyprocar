@@ -16,7 +16,7 @@ Build isosurfaces of E(k)=E_F on a full k-mesh inside the Brillouin zone. They c
   ```
   - The reference unfolds EIGENVAL with the 48 lattice operations, marches one period, slices its translates within 8 or 16 cells, and counts each closed loop through the first zone once per lattice translation.
   - `validate()` reproduces pi r^2 / cos t for tilted cylinder cuts (one ellipse 3.7 cells long) and pi (r^2 - d^2) for spheres on an fcc lattice within 1.0% at N = 32. One sphere cut lies near the X face of the fcc zone, outside the unit cube, so it fails a zone test that uses fractional G. It rejects the untiled single cell.
-  - At d6d4aaa7 all 25 cuts agree, with areas equal to the 4 printed decimals and frequencies within 1.1e-6 relative. They include the belly 4.1375 Ang^-2 on [111] through Γ, the neck 0.1025 Ang^-2 on [111] through L, the dog's bone 1.7003 Ang^-2 on [110] (4 translates counted once), and one random cut with 2 open curves.
+  - At 5884b801 all 25 cuts agree, with areas equal to the 4 printed decimals and frequencies within 1.5e-6 relative. They include the belly 4.1375 Ang^-2 on [111] through Γ, the neck 0.1025 Ang^-2 on [111] through L, the dog's bone 1.7003 Ang^-2 on [110] (4 translates counted once), and one random cut with 2 open curves.
   - A normal built exactly from the POSCAR lattice also prints `(normal snapped to [u v w])`, because pyprocar's reciprocal lattice is 4.6e-10 off POSCAR's. The areas are unaffected.
 
 ## How to get to it (user POV)

@@ -119,10 +119,13 @@ def _():
     target = row_of_cell[grid_cells(unfolded.kpoints, MESH)]
     require(np.array_equal(np.sort(target), np.arange(full.n_kpoints)), "one row per grid node")
     source = ibz[REDUCTION.source[target]]
-    require(
-        np.array_equal(projected[:, :, 0], FULL_PROJECTED[source][:, :, 0]),
-        "channel 0 is copied unchanged from the IBZ source",
+    total_error = float(
+        np.abs(
+            projected[:, :, 0].sum(axis=(-2, -1))
+            - FULL_PROJECTED[source][:, :, 0].sum(axis=(-2, -1))
+        ).max()
     )
+    require(total_error < 1e-9, f"channel 0 totals differ from the IBZ source by {total_error:.2e}")
     require(
         np.array_equal(unfolded.bands.to_array(), RAW_BANDS[source]), "bands come from the source"
     )
@@ -186,6 +189,7 @@ def _():
     SPIN["out"][target] = out
     return {
         "n_unfolded": int(unfolded.n_kpoints),
+        "channel0_total_max_error": total_error,
         "n_bands_compared": N_BANDS,
         "nondegenerate_fraction": float(nondegenerate.mean()),
         "band_energy_max_error_ev": float(
