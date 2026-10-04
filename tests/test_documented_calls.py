@@ -47,7 +47,7 @@ def _doctest_blocks(text: str) -> Iterator[tuple[int, str]]:
             start = start or number
             block.append(stripped[4:])
         elif block:
-            yield start, "\n".join(block)
+            yield start, textwrap.dedent("\n".join(block))
             block, start = [], 0
 
 
@@ -86,7 +86,9 @@ def unbound_calls(root: Path) -> list[str]:
     for where, source in snippets(root):
         try:
             tree = ast.parse(source)
-        except SyntaxError:
+        except SyntaxError as error:
+            if "pyprocar." in source:
+                problems.append(f"{where}: cannot parse a snippet that calls pyprocar: {error}")
             continue
         for node in ast.walk(tree):
             if not (

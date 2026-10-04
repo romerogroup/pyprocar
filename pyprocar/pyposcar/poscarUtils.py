@@ -93,7 +93,7 @@ class poscar_modify:
     remove(self, atoms, human)        # removes a list of `atoms`
     add(element, position, cartesian) # add a single atom with  `element` at `position`
     shift(amount, cartesian)          # shift all the positions by `amount`
-    scale_lattice(factor, cartesian)  # scale the lattice by `factor`. are `cartesian` fixed?
+    scale_lattice(factor, keep_cartesian)  # scale the lattice by `factor`. are `cartesian` fixed?
 
     """
 
