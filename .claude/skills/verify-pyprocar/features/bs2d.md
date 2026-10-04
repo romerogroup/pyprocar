@@ -21,13 +21,11 @@ $H run bs2d data/examples/bands/2d-bands .claude/skills/verify-pyprocar/scripts/
 
 The fixture dir holds `graphene/` (Fermi -0.795606) and `bisb_monolayer/`. The driver uses `graphene/`.
 
-The proven end state (1f36aae1):
-- `obj_surface`: `n_points` is 800 at a 20×20 grid, with about 900 distinct colors. The screenshot shows two separated sheets (π and π*). They are jagged at this coarse grid.
-- `side_effects.txt` lists `./graphene/ebs.pkl`.
+The proven end state (d6d4aaa7):
+- `obj_surface`: `n_points` is 800 at a 20×20 grid, with about 8.9k distinct colors. The screenshot shows two separated sheets (π and π*) colored by energy from -6.5 to 4.9 eV. They are jagged at this coarse grid.
+- `legacy_handler_plain` and `legacy_handler_plain_notebook_kwargs`: about 1.2k distinct colors each. The screenshot shows the two sheets inside the hexagonal BZ prism with an `E - E_F (eV)` axis.
+- `side_effects.txt` is empty.
 
 ## Gotchas
 
-- **Legacy `BandStructure2DHandler.plot_band_structure` crashes** at 1f36aae1. This is a product gap.
-  - With plain kwargs it raises `PyVistaAttributeError: Attribute 'brillouin_zone' does not exist ... 'BS2DPlotter'` at `plotter/bs_2d_plot.py:364`.
-  - With the notebook's kwargs (`add_fermi_plane`, `fermi_plane_size`, `energy_lim`) it raises `TypeError: Plotter.__init__() got an unexpected keyword argument` at `bs_2d_plot.py:76`.
-- `BS2DPlotter.plot(show_brillouin_zone=True)` hits the same `brillouin_zone` attribute error. Pass `False`.
+- `BS2DPlotter.plot(show_brillouin_zone=True)` raised `PyVistaAttributeError: Attribute 'brillouin_zone' does not exist` at 1f36aae1. The legacy handler draws the zone at d6d4aaa7, but the driver passes `False`, so that call is not re-driven.
