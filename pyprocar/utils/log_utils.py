@@ -4,6 +4,7 @@ import os
 import sys
 import sysconfig
 import warnings
+from types import FrameType
 
 _PACKAGE_DIR = os.path.dirname(os.path.dirname(__file__)) + os.sep
 _STDLIB_DIRS = tuple({os.path.join(sysconfig.get_path(k), "") for k in ("stdlib", "platstdlib")})
@@ -11,16 +12,25 @@ _SITE_DIRS = tuple({os.path.join(sysconfig.get_path(k), "") for k in ("purelib",
 
 
 def _is_library_file(filename: str) -> bool:
-    if filename.startswith((_PACKAGE_DIR, "<frozen ")):
+    if filename.startswith((_PACKAGE_DIR, "<frozen ", "<string>")):
         return True
     return filename.startswith(_STDLIB_DIRS) and not filename.startswith(_SITE_DIRS)
 
 
 def warn_user(message: str) -> None:
     frame = sys._getframe(1)
-    while frame.f_back is not None and _is_library_file(frame.f_code.co_filename):
+    nearest_outside: FrameType | None = None
+    while _is_library_file(filename := frame.f_code.co_filename):
+        if nearest_outside is None and not filename.startswith((_PACKAGE_DIR, "<")):
+            nearest_outside = frame
+        if frame.f_back is None:
+            # A thread's stack holds no caller frame; name the line that called into pyprocar.
+            frame = nearest_outside or frame
+            break
         frame = frame.f_back
     module_globals = frame.f_globals
+    # No module_globals: CPython would load the source through __spec__.loader, which
+    # IPython's namespace and a script's __main__ lack (ValueError, DeprecationWarning).
     warnings.warn_explicit(
         message,
         UserWarning,
@@ -28,7 +38,6 @@ def warn_user(message: str) -> None:
         frame.f_lineno,
         module=module_globals.get("__name__", "<string>"),
         registry=module_globals.setdefault("__warningregistry__", {}),
-        module_globals=module_globals,
     )
 
 
