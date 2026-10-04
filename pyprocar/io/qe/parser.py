@@ -791,6 +791,7 @@ class QEParser(BaseParser):
             fermi=self.fermi,
             projected=self.projwfc_dos.projected_dos,
             orbital_names=self.projwfc_dos.orbital_names,
+            structure=self.structure,
         )
 
     @cached_property

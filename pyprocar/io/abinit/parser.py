@@ -239,6 +239,7 @@ class AbinitParser(BaseParser):
             fermi=self.abinit_dos.fermi,
             projected=self._projected_dos,
             orbital_names=self.abinit_dos.orbital_names,
+            structure=self.structure,
         )
 
     @property
@@ -259,7 +260,7 @@ class AbinitParser(BaseParser):
                 + f" of this nspden = {self.abinit_output.nspden} spinor run is the total only."
             )
             return projected
-        return np.concatenate([projected, np.zeros_like(projected).repeat(3, axis=1)], axis=1)
+        return np.pad(projected, ((0, 0), (0, 3), (0, 0), (0, 0)))
 
     @property
     def structure(self) -> Structure | None:

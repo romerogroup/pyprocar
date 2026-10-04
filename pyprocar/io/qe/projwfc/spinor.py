@@ -17,7 +17,7 @@ from typing import Self
 import numpy as np
 import numpy.typing as npt
 
-N_ORBITALS = 16
+from pyprocar.io.qe.projwfc.projwfc_out import ORBITAL_NAMES
 
 
 @dataclass(frozen=True, slots=True)
@@ -139,15 +139,19 @@ def spinor_projections(
     """
     states = [SpinorState.from_record(record) for record in records]
     n_kpoints, n_bands, _ = amplitudes.shape
-    projected = np.zeros((n_kpoints, n_bands, 4, n_atoms, N_ORBITALS))
+    projected = np.zeros((n_kpoints, n_bands, 4, n_atoms, len(ORBITAL_NAMES)))
     for shell in _shells(states):
         ang, atom = states[shell[0]].ang, states[shell[0]].atom - 1
         basis = np.array([states[i].in_real_harmonics() for i in shell])
-        components = np.einsum("kbs,smt->kbmt", amplitudes[..., shell], basis)
+        components = (amplitudes[..., shell] @ basis.reshape(len(shell), -1)).reshape(
+            n_kpoints, n_bands, 2 * ang + 1, 2
+        )
         up, down = components[..., 0], components[..., 1]
+        up2, down2 = up.real**2 + up.imag**2, down.real**2 + down.imag**2
         up_down = np.conj(up) * down
-        density = np.abs(up) ** 2 + np.abs(down) ** 2
-        sz = np.abs(up) ** 2 - np.abs(down) ** 2
-        spin = np.stack([density, 2 * up_down.real, 2 * up_down.imag, sz], axis=2)
-        projected[:, :, :, atom, ang * ang : (ang + 1) ** 2] += spin
+        out = projected[:, :, :, atom, ang * ang : (ang + 1) ** 2]
+        out[:, :, 0] += up2 + down2
+        out[:, :, 1] += 2 * up_down.real
+        out[:, :, 2] += 2 * up_down.imag
+        out[:, :, 3] += up2 - down2
     return projected

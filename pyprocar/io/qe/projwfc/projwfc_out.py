@@ -252,7 +252,7 @@ class ProjwfcOut:
 
     @cached_property
     def orbital_names(self) -> list[str]:
-        return ORBITAL_NAMES[: self.n_orbitals]
+        return list(ORBITAL_NAMES)
 
     @cached_property
     def n_orbitals(self) -> int:

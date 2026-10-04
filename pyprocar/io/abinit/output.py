@@ -90,14 +90,14 @@ class AbinitOutput(Mapping[str, Any]):
     @cached_property
     def nspinor(self) -> int:
         """Spinor components per wavefunction: 2 for a non-collinear run."""
-        match = re.findall(r"nspinor\s*=\s*(\d)", self.file_str)
-        return int(match[0]) if match else 1
+        match = re.search(r"nspinor\s*=\s*(\d)", self.file_str)
+        return int(match.group(1)) if match else 1
 
     @cached_property
     def nspden(self) -> int:
         """Density components: 4 when a non-collinear run carries a magnetization."""
-        match = re.findall(r"nspden\s*=\s*(\d)", self.file_str)
-        return int(match[0]) if match else 1
+        match = re.search(r"nspden\s*=\s*(\d)", self.file_str)
+        return int(match.group(1)) if match else 1
 
     @cached_property
     def reclat(self) -> np.ndarray:

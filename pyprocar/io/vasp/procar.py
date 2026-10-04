@@ -200,22 +200,7 @@ class Procar(Mapping[str, Any]):
 
     @cached_property
     def n_orbitals(self) -> int:
-        """Get the number of orbitals from the first orbital header"""
-        orbital_headers = re.findall(r"ion(.+)", self.file_str)
-        if len(orbital_headers) == 0:
-            raise ValueError("No orbital headers found in PROCAR file")
-
-        # Look for a header with "tot" in it (the regular projection header)
-        # Phase headers don't have "tot"
-        for header in orbital_headers:
-            found_orbs = header.split()
-            if "tot" in found_orbs:
-                # Subtract 1 for "tot" column
-                return len(found_orbs) - 1
-
-        # If no header with "tot" found, use the first header
-        found_orbs = orbital_headers[0].split()
-        return len(found_orbs)
+        return len(self.orbital_names)
 
     @cached_property
     def spd(self) -> np.ndarray | None:
@@ -257,7 +242,7 @@ class Procar(Mapping[str, Any]):
 
         """
 
-        n_spd_columns = len(self.orbital_names) + 2
+        n_spd_columns = self.n_orbitals + 2
 
         # VASP writes no "tot" row for a single ion; Abinit writes one anyway
         has_tot_row = self.n_atoms > 1 or re.search(r"^\s*tot\s", self.file_str, re.M) is not None

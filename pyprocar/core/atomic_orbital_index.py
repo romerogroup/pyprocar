@@ -304,7 +304,7 @@ class OrbitalIndexer:
             return []
 
         if is_non_colinear and (orbital_names is None or len(orbital_names) == 0):
-            return [self._format_soc_label(idx) for idx in normalized]
+            return [self.soc_label(idx) for idx in normalized]
 
         remaining = set(normalized)
         tokens: list[str] = []
@@ -406,7 +406,7 @@ class OrbitalIndexer:
                 mapping[i] = list_b.index(orb)
         return mapping
 
-    def _format_soc_label(self, index: int) -> str:
+    def soc_label(self, index: int) -> str:
         if 0 <= index < len(self.flat_soc_order):
             entry = self.flat_soc_order[index]
             l = entry.get("l")

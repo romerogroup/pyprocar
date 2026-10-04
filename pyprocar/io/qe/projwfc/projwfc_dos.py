@@ -439,8 +439,5 @@ class ProjwfcDOS:
     def orbital_names(self) -> list[str]:
         """projwfc.x's (l, m) labels, or l, j and m_j for the spin-orbit states."""
         if not self.is_non_colinear:
-            return ORBITAL_NAMES[: self.n_orbitals]
-        return [
-            f"{'spdf'[int(orbital['l'])]}_j{orbital['j']:g}_mj{orbital['m_j']:g}"
-            for orbital in self.orbitals
-        ]
+            return list(ORBITAL_NAMES)
+        return [ORBITAL_ORDERING.soc_label(index) for index in range(self.n_orbitals)]
