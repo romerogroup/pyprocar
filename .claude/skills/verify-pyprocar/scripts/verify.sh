@@ -12,7 +12,6 @@ set -euo pipefail
 REPO="$(git -C "$(dirname "${BASH_SOURCE[0]}")" rev-parse --show-toplevel)"
 MAIN="$(dirname "$(git -C "$REPO" rev-parse --path-format=absolute --git-common-dir)")"
 SHARED_ENV="$MAIN/.pixi/envs/dev/bin"
-RUNS="$REPO/data/verify-runs"
 abs() { (cd "$(dirname "$1")" && echo "$PWD/$(basename "$1")"); }
 [ "${1:-}" = run ] && [ $# -ge 4 ] && set -- "$1" "$2" "$3" "$(abs "$4")"
 cd "$REPO"
@@ -53,41 +52,86 @@ require_free() {
 
 PLAIN_NAME='[A-Za-z0-9_][A-Za-z0-9_.-]*'
 
+physical_dir() {
+  local dir
+  dir="$(CDPATH='' cd -P -- "$1" 2>/dev/null && pwd -P)" && [[ "$dir" =~ ^/+(.*)$ ]] || return 1
+  printf '/%s\n' "${BASH_REMATCH[1]}"
+}
+
 real_path() {
-  local head="$1" tail=""
+  local head="$1" tail="" name="" dir out
   while [ ! -e "$head" ]; do
     [ ! -L "$head" ] || return 1
     tail="/${head##*/}$tail" head="$(dirname "$head")"
   done
-  if [ -d "$head" ]; then
-    head="$(CDPATH='' cd -P -- "$head" && pwd)"
-  elif [ -L "$head" ] || [ -n "$tail" ]; then
-    return 1
-  else
-    head="$(CDPATH='' cd -P -- "$(dirname "$head")" && pwd)/${head##*/}"
+  if [ ! -d "$head" ]; then
+    { [ -L "$head" ] || [ -n "$tail" ]; } && return 1
+    name="/${head##*/}" head="$(dirname "$head")"
   fi
-  printf '%s%s\n' "$head" "$tail"
+  dir="$(physical_dir "$head")" || return 1
+  out="${dir%/}$name$tail"
+  printf '%s\n' "${out:-/}"
+}
+
+is_below() {
+  local child="$1" parent="$2" c p
+  [[ "$child" =~ ^(/[^/]+)+$ && "$parent" =~ ^(/[^/]+)+$ ]] || return 1
+  while [ -n "$parent" ]; do
+    p="${parent#/}" c="${child#/}"
+    [ "${p%%/*}" = "${c%%/*}" ] || return 1
+    parent="${p#"${p%%/*}"}" child="${c#"${c%%/*}"}"
+  done
+  [ -n "$child" ]
+}
+
+DATA="" RUNS=""
+require_data() {
+  local main
+  if main="$(physical_dir "$MAIN")" && DATA="$(real_path data)" && [ "$DATA" = "${main%/}/data" ] &&
+    RUNS="$(real_path "$DATA/verify-runs")" && [ "$RUNS" = "$DATA/verify-runs" ]; then
+    return 0
+  fi
+  DATA="" RUNS=""
+  echo "refusing: $REPO/data must be the directory $MAIN/data, or in a linked worktree a symlink to it" \
+    "(run: verify.sh worktree-setup), and data/verify-runs a directory in it" >&2
+  return 2
 }
 
 is_fixture_rel() { case "$1/" in examples/*/*/*) ;; examples/* | verify-runs/*) return 1 ;; esac; }
 
 fixture_path() {
-  local rel="${1%/}" data real
-  [[ "$rel" =~ ^data(/$PLAIN_NAME)+$ ]] && data="$(real_path data)" && real="$(real_path "$rel")" || return 1
-  case "$real" in "$data"/?*) is_fixture_rel "${real#"$data"/}" && echo "$real" ;; *) return 1 ;; esac
+  local rel="${1%/}" real
+  [[ "$rel" =~ ^data(/$PLAIN_NAME)+$ ]] && real="$(real_path "$rel")" && is_below "$real" "$DATA" &&
+    is_fixture_rel "${real#"$DATA"/}" && echo "$real"
 }
 
-writable_fixtures() {
+chmod_below_data() {
+  local mode="$1" real
+  if ! real="$(real_path "$2")" || [ "$real" != "$2" ] || ! is_below "$real" "$DATA"; then
+    echo "refusing: $2 is not a resolved path below $DATA" >&2
+    exit 2
+  fi
+  find -P "$real" ! -type l \( -type d -o -links 1 \) -exec chmod "$mode" {} +
+}
+
+hard_linked() { find -P "$1" ! -type l ! -type d -links +1; }
+
+fixture_report() {
   local d real
+  shopt -s nullglob dotglob
   for d in data/examples/*/* data/*; do
+    is_fixture_rel "${d#data/}" || continue
     if real="$(fixture_path "$d")"; then
-      find -P "$real" ! -type l \( -perm -200 -o -perm -020 -o -perm -002 \)
+      find -P "$real" ! -type l \( -perm -200 -o -perm -020 -o -perm -002 \) | sed 's/^/writable /'
+    else
+      printf 'unlockable %s\n' "$d"
     fi
-  done | sort -u
+  done | LC_ALL=C sort -u
+  shopt -u nullglob dotglob
 }
 
 scrub() {
-  [ ! -d "$1/work" ] || find -P "$1/work" ! -type l -exec chmod u+w {} +
+  [ ! -d "$1/work" ] || [ -L "$1/work" ] || chmod_below_data u+w "$1/work"
   rm -rf "$1/work" "$1/.start" "$1/.pid"
 }
 
@@ -104,16 +148,26 @@ print("pyprocar:", pyprocar.__version__, "from", pyprocar.__file__)
 print("pyvista: ", pyvista.__version__, "vtk", vtk.vtkVersion.GetVTKVersion())
 '
   echo "fixtures:"; ls -d data/examples/*/* 2>/dev/null | sed 's/^/  /' || echo "  (none; run: verify.sh fetch <relpath>)"
-  writable="$(writable_fixtures)"
+  require_data || exit 0
+  report="$(fixture_report)"
+  writable="$(printf '%s\n' "$report" | sed -n 's/^writable //p')"
+  unlockable="$(printf '%s\n' "$report" | sed -n 's/^unlockable //p')"
   n="$(printf '%s' "$writable" | grep -c . || true)"
   echo "writable fixture paths: $n"
   if [ "$n" -gt 0 ]; then
     printf '%s\n' "$writable" | sed -n '1,5s/^/  /p'
     echo "  lock each fixture with: verify.sh fetch <relpath>"
   fi
+  n="$(printf '%s' "$unlockable" | grep -c . || true)"
+  echo "unlockable fixture roots: $n"
+  if [ "$n" -gt 0 ]; then
+    printf '%s\n' "$unlockable" | sed 's/^/  /'
+    echo "  fetch refuses these: rename each to plain names inside data/, or remove it"
+  fi
   ;;
 fetch)
   shift
+  require_data
   for rel in "$@"; do
     rel="${rel%/}"
     if ! [[ "$rel" =~ ^data/(examples/[^/]+/)?[^/]+$ ]] || ! real="$(fixture_path "$rel")"; then
@@ -122,16 +176,20 @@ fetch)
     fi
     if [ ! -e "$real" ]; then
       ! in_worktree || require_shared_env
-      py -W ignore -c 'import sys; from pathlib import Path; import pyprocar
+      mkdir -p "$RUNS"
+      HF_HUB_CACHE="$RUNS/hf-cache" py -W ignore -c 'import sys; from pathlib import Path; import pyprocar
 pyprocar.download_from_hf(relpath=sys.argv[1], output_path=Path(".").resolve())' "$rel"
       real="$(fixture_path "$rel")" && [ -e "$real" ] || { echo "the download did not create $rel" >&2; exit 1; }
     fi
-    find -P "$real" ! -type l -exec chmod a-w {} +
+    chmod_below_data a-w "$real"
     echo "read-only: $rel"
+    linked="$(hard_linked "$real")"
+    [ -z "$linked" ] || printf 'left writable, hard-linked (another link may be outside data/):\n%s\n' "$linked" >&2
   done
   ;;
 run)
   name="$2" driver="$4"
+  require_data
   [[ "$name" =~ ^$PLAIN_NAME$ ]] || { echo "refusing: run name '$name' is not one plain name" >&2; exit 2; }
   if ! fixture="$(fixture_path "$3")" || [ ! -d "$fixture" ]; then
     echo "refusing: $3 is not a fixture directory inside data/; get one with: verify.sh fetch <relpath>" >&2
@@ -145,7 +203,7 @@ run)
   echo $$ >"$run/.pid"
   trap 'rm -f "$run/.pid"' EXIT
   cp -RL --reflink=auto "$fixture" "$run/work/calc"
-  find -P "$run/work/calc" ! -type l -exec chmod u+w {} +
+  chmod_below_data u+w "$run/work/calc"
   cp "$driver" "$run/evidence/driver.py"
   touch "$run/.start"
   set +e
@@ -164,13 +222,15 @@ run)
   exit "$code"
   ;;
 clean)
-  run="$(real_path "$2")" && runs="$(real_path "$RUNS")" && [ -d "$run" ] && [[ "${run#"$runs"/}" =~ ^$PLAIN_NAME$ ]] ||
+  require_data
+  run="$(real_path "$2")" && is_below "$run" "$RUNS" && [ -d "$run" ] && [[ "${run#"$RUNS"/}" =~ ^$PLAIN_NAME$ ]] ||
     { echo "refusing: $2 is not a run directory in $RUNS" >&2; exit 2; }
   scrub "$run"
   echo "removed scratch; evidence kept at $run/evidence"
   ;;
 gc)
   hours="$(whole_number "gc hours" "${2:-24}")"
+  require_data
   [ -d "$RUNS" ] || exit 0
   find "$RUNS" -mindepth 2 -maxdepth 2 -name work -type d -mmin +$((hours * 60)) -print0 |
     while IFS= read -r -d '' work; do

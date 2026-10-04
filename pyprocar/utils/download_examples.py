@@ -149,14 +149,15 @@ def download_test_data(relpath: str, output_path: str | Path = ".", force: bool 
     # Ensure the output directory exists - this is critical for Jupyter notebooks
     output_path.mkdir(parents=True, exist_ok=True)
 
-    pattern = relpath + "*"
-
+    archive = f"{relpath}.zip"
     download_dirpath = snapshot_download(
         repo_id=REPO_ID,
         repo_type=REPO_TYPE,
-        allow_patterns=[pattern],
+        allow_patterns=[archive],
     )
     download_path = Path(download_dirpath)
+    if not (download_path / archive).is_file():
+        raise FileNotFoundError(f"{archive} is not in the {REPO_ID} dataset")
     data_dir = download_path / "data"
 
     dataset_cache_dir = download_path.parent.parent
@@ -171,11 +172,6 @@ def download_test_data(relpath: str, output_path: str | Path = ".", force: bool 
     uncompress_dirpath(full_data_path.with_suffix(".zip"))
 
     os.remove(full_data_path.with_suffix(".zip"))
-
-    # Handle cache directory cleanup more safely
-    cache_dir = output_path / ".cache"
-    if cache_dir.exists():
-        shutil.rmtree(cache_dir)
 
     return full_data_path
 
