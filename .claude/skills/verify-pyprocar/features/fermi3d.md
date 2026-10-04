@@ -35,6 +35,7 @@ The proven end state (SrVO3, non-spin-polarized, d6d4aaa7):
 - `obj_scalars_projected_sum`: about 16.6k distinct colors.
 - `legacy_handler_plain`: about 290 distinct colors, a single-color set of cylinders along the axes inside the BZ. `legacy_handler_parametric` and `legacy_handler_fermi_speed`: more than 16k distinct colors each.
 - `side_effects.txt` is empty.
+- Peak memory (#305): `ebs.pad` drops `projected_phase`, which nothing reads on a padded mesh. `FermiSurface.from_code("qe", data/codes/qe/7.2/SrVO3/spin-polarized-colinear/fermi)` peaks at 3.8 GiB (`ru_maxrss`); padding the kept QE phases took it to 9.2 GiB.
 
 ## Gotchas
 

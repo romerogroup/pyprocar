@@ -1808,11 +1808,17 @@ class ElectronicBandStructureMesh(
         return property_mesh
 
     def pad(self, padding=10, order="F", inplace=True):
+        """Wrap the grid by ``padding`` k-points in each direction with more than one point.
+
+        ``projected_phase`` is dropped: phases with exp(i k.(R + tau)) Bloch sums are not
+        periodic in k, so copies at k + G would be wrong.
+        """
         logger.info(f"Padding kpoints by {padding} in all directions")
         if inplace:
             ebs = self
         else:
             ebs = copy.deepcopy(self)
+        ebs.remove_property("projected_phase")
 
         padding_dims = []
         for i, n in enumerate(ebs.kgrid):
@@ -2073,7 +2079,13 @@ ORBITAL_ANGULAR_MOMENTUM = {
     for name in names
 }
 IDENTITY = 0
-ORBITAL_ALIASES = {"dx2-y2": "x2-y2", "dx2": "x2-y2"}
+ORBITAL_ALIASES = {
+    "dx2-y2": "x2-y2",
+    "dx2": "x2-y2",
+    "fzx2-zy2": "fzx2",
+    "fx3-3xy2": "fx3",
+    "f3yx2-y3": "fy3x2",
+}
 SHELL_SUMS = {"p", "d", "f", "tot"}
 
 

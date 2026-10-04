@@ -32,6 +32,15 @@ logger = logging.getLogger(__name__)
 user_logger = logging.getLogger("user")
 
 
+def _core_harmonic_signs(orbitals: list[dict[str, int]]) -> np.ndarray:
+    """The sign that writes a coefficient over QE's real harmonic over the core's.
+
+    QE's real harmonics (upflib/ylmr2.f90) carry the Condon-Shortley sign (-1)^m, where projwfc.x's
+    m = 1, 2, 3, ... is |m| = 0, 1, 1, 2, 2, ...; the core's harmonics carry no such sign.
+    """
+    return np.array([(-1.0) ** (orbital["m"] // 2) for orbital in orbitals])
+
+
 class QEParser(BaseParser):
     """Auto-detects Quantum ESPRESSO files in a directory and exposes
     lazy parser properties and computed objects (EBS, DOS, Structure).
@@ -688,17 +697,23 @@ class QEParser(BaseParser):
 
     @cached_property
     def position_gauge_phase(self) -> np.ndarray | None:
-        """spd_phase in the core's convention, Bloch sums with exp(i k.(R + tau)).
+        """spd_phase in the core's convention: its real harmonics, and Bloch sums with
+        exp(i k.(R + tau)).
 
         QE's atomic wavefunctions carry exp(i k.R) alone, so each atom's coefficient takes the
         factor exp(-2 pi i k.tau).
         """
         phase, structure, kpoints = self.spd_phase, self.structure, self.kpoints
-        if phase is None or structure is None or kpoints is None or len(kpoints) != len(phase):
-            return phase
-        tau = np.asarray(structure.fractional_coordinates, dtype=float)
-        bloch = np.exp(-2j * np.pi * np.asarray(kpoints) @ tau.T)
-        return phase * bloch[:, np.newaxis, np.newaxis, :, np.newaxis]
+        if phase is None:
+            return None
+        factor = np.ones(phase.shape[-1])
+        if self.projwfc_out is not None:
+            factor = _core_harmonic_signs(self.projwfc_out.orbitals)
+        if structure is not None and kpoints is not None and len(kpoints) == len(phase):
+            tau = np.asarray(structure.fractional_coordinates, dtype=float)
+            bloch = np.exp(-2j * np.pi * np.asarray(kpoints) @ tau.T)
+            factor = bloch[:, np.newaxis, np.newaxis, :, np.newaxis] * factor
+        return phase * factor
 
     @cached_property
     def spd(self) -> np.ndarray | None:
