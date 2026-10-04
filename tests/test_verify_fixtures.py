@@ -15,8 +15,10 @@ VERIFY_SH = Path(
     os.environ.get("VERIFY_SH_UNDER_TEST") or Path(__file__).resolve().parents[1] / SCRIPT
 )
 WRITE_BITS = stat.S_IWUSR | stat.S_IWGRP | stat.S_IWOTH
+STUB_LOGGED_ENV = {"HF_XET_LOG_DIR_DISABLE_CLEANUP", "PYTHONDONTWRITEBYTECODE"}
 FAKE_ENV = """#!/bin/sh
-echo "cleanup=${{HF_XET_LOG_DIR_DISABLE_CLEANUP-unset}} $@" >> "{log}"
+echo "cleanup=${{HF_XET_LOG_DIR_DISABLE_CLEANUP-unset}}" \\
+  "bytecode=${{PYTHONDONTWRITEBYTECODE-unset}}" "$@" >> "{log}"
 for last; do :; done
 case "$last" in data/*) mkdir -p "$last" && echo x > "$last/PROCAR" ;; esac
 """
@@ -38,7 +40,8 @@ class Harness:
         return self.root / self.data_rel
 
     def verify(self, *args: str) -> subprocess.CompletedProcess[str]:
-        env = {**os.environ, "PATH": f"{self.root / 'bin'}{os.pathsep}{os.environ['PATH']}"}
+        env = {k: v for k, v in os.environ.items() if k not in STUB_LOGGED_ENV}
+        env["PATH"] = f"{self.root / 'bin'}{os.pathsep}{os.environ['PATH']}"
         return subprocess.run(
             ["bash", str(self.repo / SCRIPT), *args],
             cwd=self.repo,
@@ -201,9 +204,9 @@ def test_fetch_downloads_a_missing_fixture_by_its_literal_name_then_locks_it(har
 
     assert harness.verify("fetch", "data/examples/dos/new").returncode == 0
     logged = harness.env_log.read_text().split()
-    assert logged[0] == "cleanup=1" and logged[-1] == "data/examples/dos/new"
+    assert logged[:2] == ["cleanup=1", "bytecode=1"] and logged[-1] == "data/examples/dos/new"
     if harness.shared_env is None:
-        assert logged[1:5] == ["run", "-q", "--locked", "-e"]
+        assert logged[2:6] == ["run", "-q", "--locked", "-e"]
     assert harness.locked() - before == {
         f"{harness.data_rel}/examples/dos/new",
         f"{harness.data_rel}/examples/dos/new/PROCAR",

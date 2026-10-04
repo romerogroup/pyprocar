@@ -21,7 +21,7 @@ in_worktree() { [ "$REPO" != "$MAIN" ]; }
 shared_env() {
   PATH="$SHARED_ENV:$PATH" PYTHONPATH="$REPO${PYTHONPATH:+:$PYTHONPATH}" PYTHONDONTWRITEBYTECODE=1 "$@"
 }
-py() { if in_worktree; then shared_env python "$@"; else pixi run -q --locked -e default python "$@"; fi; }
+py() { if in_worktree; then shared_env python "$@"; else PYTHONDONTWRITEBYTECODE=1 pixi run -q --locked -e default python "$@"; fi; }
 require_shared_env() {
   [ -x "$SHARED_ENV/python" ] || { echo "missing $SHARED_ENV/python; run 'pixi install -e dev' in $MAIN" >&2; exit 2; }
 }
