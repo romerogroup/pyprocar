@@ -17,7 +17,7 @@ from pyprocar.core.ebs import (
 from pyprocar.core.kpoints import KGRID_MODE, KGridInfo
 from pyprocar.core.property_store import Property
 from pyprocar.utils import math
-from pyprocar.utils.physics import EV_TO_J, FREE_ELECTRON_MASS, HBAR_J, METER_ANGSTROM
+from pyprocar.utils.units import EV_TO_J, FREE_ELECTRON_MASS, HBAR_J, METER_ANGSTROM
 from tests.utils import DATA_DIR
 
 logger = logging.getLogger("pyprocar")

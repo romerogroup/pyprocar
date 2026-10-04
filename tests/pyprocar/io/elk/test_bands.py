@@ -5,7 +5,7 @@ import logging
 import numpy as np
 import pytest
 
-from pyprocar.io.elk.bands import HARTREE_TO_EV, ElkBands
+from pyprocar.io.elk.bands import ElkBands
 from tests.utils import BaseTest
 
 logger = logging.getLogger(__name__)

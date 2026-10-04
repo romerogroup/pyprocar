@@ -11,7 +11,7 @@ import numpy as np
 
 from pyprocar.core import Structure
 from pyprocar.utils import elements
-from pyprocar.utils.units import AU_TO_ANG
+from pyprocar.utils.units import AU_TO_ANG, HARTREE_TO_EV
 
 logger = logging.getLogger(__name__)
 
@@ -71,7 +71,7 @@ class AbinitOutput(Mapping[str, Any]):
         )
         if match_ha:
             fermi_ha = float(match_ha[0])
-            return 27.211396641308 * fermi_ha  # Hartree to eV
+            return HARTREE_TO_EV * fermi_ha
         
         # Fallback to old regex without units
         match = re.findall(
@@ -79,7 +79,7 @@ class AbinitOutput(Mapping[str, Any]):
             self.file_str
         )
         fermi_ha = float(match[0])
-        return 27.211396641308 * fermi_ha  # Hartree to eV
+        return HARTREE_TO_EV * fermi_ha
 
     @cached_property
     def nspin(self) -> int:
@@ -116,7 +116,7 @@ class AbinitOutput(Mapping[str, Any]):
         """Direct lattice vectors in Angstrom."""
         # acell in Bohr
         acell = re.findall(r"acell\s*([+-.0-9E\s]*)", self.file_str)[-1].split()
-        acell = np.array([float(x) for x in acell]) * 0.529177  # Bohr to Angstrom
+        acell = np.array([float(x) for x in acell]) * AU_TO_ANG
 
         # rprim
         rprim_block = re.findall(r"rprim\s*([+-.0-9E\s]*)", self.file_str)[-1].split()

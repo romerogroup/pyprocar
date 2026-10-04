@@ -4,7 +4,8 @@ import logging
 
 import pytest
 
-from pyprocar.io.elk.fermi import HARTREE_TO_EV, ElkFermi
+from pyprocar.io.elk.fermi import ElkFermi
+from pyprocar.utils.units import HARTREE_TO_EV
 from tests.utils import BaseTest
 
 logger = logging.getLogger(__name__)

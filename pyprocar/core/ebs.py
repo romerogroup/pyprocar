@@ -31,7 +31,7 @@ from pyprocar.core.projection import normalize as normalize_by_mode
 from pyprocar.core.property_store import PointSet, Property
 from pyprocar.core.serializer import get_serializer
 from pyprocar.core.structure import Structure
-from pyprocar.utils import math, np_utils, physics
+from pyprocar.utils import math, np_utils, physics, units
 from pyprocar.utils.info import orbital_names
 from pyprocar.utils.unfolder import Unfolder
 
@@ -1371,7 +1371,7 @@ class ElectronicBandStructurePath(
                 axis=0,
                 edge_order=2,
             )
-        gradients = gradients * physics.METER_ANGSTROM
+        gradients = gradients * units.METER_ANGSTROM
         return gradients
 
     # ------------------------------------------------------------------
@@ -2055,7 +2055,7 @@ class ElectronicBandStructureMesh(
             val_mesh, self.reciprocal_lattice, spacing=self.kgrid_spacing
         )
         # reciprocal_lattice has no 2*pi, so this gives dE/d(k/2pi); the 2*pi makes it dE/dk.
-        gradients_mesh *= physics.METER_ANGSTROM / (2 * np.pi)
+        gradients_mesh *= units.METER_ANGSTROM / (2 * np.pi)
 
         gradients = math.mesh_to_array(mesh=gradients_mesh, **kwargs)
 

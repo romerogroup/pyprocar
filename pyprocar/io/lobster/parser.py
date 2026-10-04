@@ -17,9 +17,6 @@ from pyprocar.io.lobster.lobsterout import LobsterOut
 logger = logging.getLogger(__name__)
 user_logger = logging.getLogger("user")
 
-# Conversion constant
-HARTREE_TO_EV = 27.211386245988
-
 
 class LobsterParser(BaseParser):
     """Parser for Lobster calculations.
