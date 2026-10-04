@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import logging
+import os
 
 import numpy as np
 
@@ -20,7 +21,14 @@ except:
 
 
 class AutoBandsPlot:
-    def __init__(self, code="vasp", dirname=".", fermi: int = None, use_cache=False):
+    def __init__(
+        self,
+        code="vasp",
+        dirname=".",
+        fermi: int = None,
+        use_cache=False,
+        report: str | os.PathLike | None = None,
+    ):
         self.parser = get_parser(code, dirname)
         self.code = code
         self.ebs = ElectronicBandStructure.from_code(code, dirname, use_cache=use_cache)
@@ -84,7 +92,8 @@ class AutoBandsPlot:
         print(self.defect_clim)
         print(self.cluster_clim)
 
-        self.write_report(verbosity=False, filename="report.txt")
+        if report is not None:
+            self.write_report(verbosity=False, filename=report)
 
         self.plot()
 
@@ -128,7 +137,7 @@ class AutoBandsPlot:
         if emax > self.eBoundaries[1]:
             emax = self.eBoundaries[1]
         # print('(with delta) emin, emax', emin, emax)
-        return emin, emax
+        return float(emin), float(emax)
 
     def get_energy_boundaries(self):
         # what are the maximum energies for each kpoint?
@@ -308,7 +317,7 @@ class AutoBandsPlot:
         # print('defect_states', defect_states)
         return defect_states
 
-    def write_report(self, verbosity=False, filename="report.txt"):
+    def write_report(self, filename: str | os.PathLike, verbosity=False):
         f = open(filename, "w")
         f.write("code = " + self.code + "\n")
         if self.ispin == 2:
@@ -338,7 +347,7 @@ class AutoBandsPlot:
                     f.write("[kpoint index, band_index]\n")
                     f.write(str(states_up) + "\n\n")
                 else:
-                    states_up = sorted(set(states_up[:, 1]))
+                    states_up = sorted(set(states_up[:, 1].tolist()))
                     f.write("band_indexes " + str(states_up) + "\n\n")
             if self.ispin == 2:
                 states_down = self.defect_states[i][0]
@@ -348,7 +357,7 @@ class AutoBandsPlot:
                         f.write("[kpoint index, band_index]\n")
                         f.write(str(states_down) + "\n\n")
                     else:
-                        states_down = sorted(set(states_down[:, 1]))
+                        states_down = sorted(set(states_down[:, 1].tolist()))
                         f.write("band_indexes " + str(states_down) + "\n\n")
         f.write("----\n\n")
 
@@ -361,7 +370,7 @@ class AutoBandsPlot:
                     f.write("[kpoint index, band_index]\n")
                     f.write(str(states_up) + "\n\n")
                 else:
-                    states_up = sorted(set(states_up[:, 1]))
+                    states_up = sorted(set(states_up[:, 1].tolist()))
                     f.write("band_indexes " + str(states_up) + "\n\n")
             if self.ispin == 2:
                 states_down = self.cluster_states[i][0]
@@ -371,7 +380,7 @@ class AutoBandsPlot:
                         f.write("[kpoint index, band_index]\n")
                         f.write(str(states_down) + "\n\n")
                     else:
-                        states_down = sorted(set(states_down[:, 1]))
+                        states_down = sorted(set(states_down[:, 1].tolist()))
                         f.write("band_indexes " + str(states_down) + "\n\n")
         f.write("----\n\n")
 
@@ -455,5 +464,16 @@ class AutoBandsPlot:
             )
 
 
-def autobandsplot(code="vasp", dirname=".", fermi: int = None, use_cache=False):
-    a = AutoBandsPlot(code=code, dirname=dirname, fermi=fermi, use_cache=use_cache)
+def autobandsplot(
+    code="vasp",
+    dirname=".",
+    fermi: int = None,
+    use_cache=False,
+    report: str | os.PathLike | None = None,
+):
+    """Find defects, clusters and their localized states, and plot the bands that show them.
+
+    ``report`` is the path of a text file for the analysis report. With the
+    default ``None`` no file is written.
+    """
+    a = AutoBandsPlot(code=code, dirname=dirname, fermi=fermi, use_cache=use_cache, report=report)

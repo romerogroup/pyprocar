@@ -105,7 +105,7 @@ Headless rules:
 - PyVista: `pv.Plotter(off_screen=True)` + `screenshot(EVIDENCE/...)`. It works on this machine. The `vtkEGLRenderWindow ... OpenGL 3.2` WARN line is noise. A blank screenshot has about 1 distinct color; `distinct_colors()` checks for that.
 - Warnings: pyprocar reports what a user must see as a `UserWarning` (the `user` logger carries only `verbose` progress). `verify_steps` records each step's warnings under `"warnings"` in `summary.json`. A driver without it wraps the call in `warnings.catch_warnings(record=True)` with `warnings.simplefilter("always")` before it claims that a warning did or did not fire, because Python prints a repeated warning only once.
 - Fermi surfaces: run one build at a time. A VASP fixture load peaks near 8.7 GB RSS, and parallel builds were OOM-killed (exit 137).
-- `autobandsplot` writes `report.txt` into the cwd, which `$H run` sets to the repo root. Call `os.chdir(CALC)` first.
+- `autobandsplot` writes its analysis report only to the path given as `report=`; pass a path inside `EVIDENCE`.
 
 ## Evidence
 
