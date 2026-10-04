@@ -3352,3 +3352,57 @@ def test_symmetry_flags_contains_no_t_rev(input_parser: PwXML) -> None:
 def test_symmetry_flags_no_t_rev_is_correct(input_parser: PwXML) -> None:
     """Test that no_t_rev value is correct."""
     assert input_parser.symmetry_flags["no_t_rev"] is False
+
+
+MAGNETIC_SYMMETRIES_PW_XML = """<?xml version="1.0" encoding="UTF-8"?>
+<qes:espresso xmlns:qes="http://www.quantum-espresso.org/ns/qes/qes-1.0">
+  <output>
+    <symmetries>
+      <nsym>2</nsym>
+      <nrot>3</nrot>
+      <space_group>0</space_group>
+      <symmetry>
+        <info name="identity" time_reversal="false">crystal_symmetry</info>
+        <rotation rank="2" dims="           3           3">
+   1.0 0.0 0.0
+   0.0 1.0 0.0
+   0.0 0.0 1.0
+        </rotation>
+      </symmetry>
+      <symmetry>
+        <info name="180 deg rotation - cart. axis [1,0,0]" time_reversal="true">crystal_symmetry</info>
+        <rotation rank="2" dims="           3           3">
+   1.0 0.0 0.0
+   0.0 -1.0 0.0
+   0.0 0.0 -1.0
+        </rotation>
+      </symmetry>
+      <symmetry>
+        <info name=" 90 deg rotation - cart. axis [0,0,1]" time_reversal="false">lattice_symmetry</info>
+        <rotation rank="2" dims="           3           3">
+   0.0 1.0 0.0
+   -1.0 0.0 0.0
+   0.0 0.0 1.0
+        </rotation>
+      </symmetry>
+    </symmetries>
+  </output>
+</qes:espresso>
+"""
+
+
+def test_only_crystal_symmetries_are_rotations_and_each_keeps_its_time_reversal_flag(
+    tmp_path: Path,
+) -> None:
+    filepath = tmp_path / "magnetic.xml"
+    filepath.write_text(MAGNETIC_SYMMETRIES_PW_XML)
+
+    parser = PwXML(filepath=filepath)
+
+    assert parser.rotations is not None
+    assert parser.rotations.tolist() == [
+        [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]],
+        [[1.0, 0.0, 0.0], [0.0, -1.0, 0.0], [0.0, 0.0, -1.0]],
+    ]
+    assert parser.time_reversals is not None
+    assert parser.time_reversals.tolist() == [False, True]
