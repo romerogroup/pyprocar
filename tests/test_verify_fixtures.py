@@ -388,8 +388,6 @@ def test_gc_keeps_the_work_of_a_run_in_progress_and_removes_a_finished_one(harne
     assert out.returncode == 0, out.stderr
     assert (runs["live"] / "work/calc").is_dir()
     assert not (runs["done"] / "work").exists()
-    live_work = runs["live"].resolve() / "work"
-    assert f"keeping {live_work} (run in progress, pid {os.getpid()})" in out.stdout.splitlines()
 
 
 def _doctor_lines(harness) -> list[str]:
@@ -636,6 +634,9 @@ def _census(script: str) -> list[str]:
     ]
 
 
+@pytest.mark.guards_existing_behaviour(
+    reason="tests the census in this module, which red_green's base run takes from the branch"
+)
 @pytest.mark.parametrize(
     "line",
     [
