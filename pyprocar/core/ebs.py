@@ -1808,11 +1808,17 @@ class ElectronicBandStructureMesh(
         return property_mesh
 
     def pad(self, padding=10, order="F", inplace=True):
+        """Wrap the grid by ``padding`` k-points in each direction with more than one point.
+
+        ``projected_phase`` is dropped: phases with exp(i k.(R + tau)) Bloch sums are not
+        periodic in k, so copies at k + G would be wrong.
+        """
         logger.info(f"Padding kpoints by {padding} in all directions")
         if inplace:
             ebs = self
         else:
             ebs = copy.deepcopy(self)
+        ebs.remove_property("projected_phase")
 
         padding_dims = []
         for i, n in enumerate(ebs.kgrid):
