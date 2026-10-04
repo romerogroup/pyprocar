@@ -70,7 +70,8 @@ def snippets(root: Path) -> Iterator[tuple[str, str]]:
     for path in sorted([*root.glob("scripts/**/*.py"), *root.glob("examples/**/*.py")]):
         yield str(path.relative_to(root)), path.read_text(encoding="utf-8")
     for path in sorted([*root.glob("docs/**/*.rst"), root / "README.md"]):
-        text = path.read_text(encoding="utf-8")
+        # The newline lets a code block that ends the file keep its last line.
+        text = path.read_text(encoding="utf-8") + "\n"
         for match in [*RST_BLOCK.finditer(text), *MD_BLOCK.finditer(text)]:
             line = text[: match.start()].count("\n") + 1
             yield f"{path.relative_to(root)}:{line}", textwrap.dedent(match.group(1))
@@ -118,3 +119,29 @@ def unbound_calls(root: Path) -> list[str]:
 
 def test_documented_pyprocar_calls_bind_to_the_current_signatures():
     assert unbound_calls(ROOT) == []
+
+
+def missing_ebs_members(root: Path) -> list[str]:
+    from pyprocar.core.ebs import ElectronicBandStructureMesh, ElectronicBandStructurePath
+
+    problems = []
+    for where, source in snippets(root):
+        try:
+            tree = ast.parse(source)
+        except SyntaxError:
+            continue
+        for node in ast.walk(tree):
+            if (
+                isinstance(node, ast.Attribute)
+                and isinstance(node.value, ast.Name)
+                and node.value.id == "ebs"
+                and not hasattr(ElectronicBandStructureMesh, node.attr)
+                and not hasattr(ElectronicBandStructurePath, node.attr)
+            ):
+                problems.append(f"{where}:{node.lineno}: ebs.{node.attr} does not exist")
+    return problems
+
+
+def test_documented_band_structure_members_exist():
+    """The user guide once listed ebs.ibz2fbz, ebs.efermi and other missing names (#283)."""
+    assert missing_ebs_members(ROOT) == []
