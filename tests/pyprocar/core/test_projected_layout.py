@@ -73,6 +73,9 @@ def test_band_structure_rejects_a_spin_count_that_is_not_1_2_or_4():
         band_structure((N_K, N_BANDS, 3, N_ATOMS, N_ORBITALS), n_band_spins=3)
 
 
+@pytest.mark.guards_existing_behaviour(
+    reason="every valid spin layout loads on the base; the stronger check must keep accepting them"
+)
 @pytest.mark.parametrize(
     ("n_band_spins", "n_spins"), [(1, 1), (2, 2), (4, 4), (1, 4)], ids=["1", "2", "4", "1-4"]
 )
