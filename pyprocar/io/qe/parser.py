@@ -805,17 +805,20 @@ class QEParser(BaseParser):
             return None
 
     @cached_property
+    def symmetries_xml(self) -> PwXML | None:
+        for xml in (self.pw_xml, self.data_file_schema_xml):
+            if xml is not None and xml.rotations is not None:
+                return xml
+        user_logger.warning("No rotations found in any input or output file")
+        return None
+
+    @cached_property
     def rotations(self) -> np.ndarray | None:
-        if self.pw_xml is not None and self.pw_xml.rotations is not None:
-            return self.pw_xml.rotations
-        elif (
-            self.data_file_schema_xml is not None
-            and self.data_file_schema_xml.rotations is not None
-        ):
-            return self.data_file_schema_xml.rotations
-        else:
-            user_logger.warning("No rotations found in any input or output file")
-            return None
+        return self.symmetries_xml.rotations if self.symmetries_xml is not None else None
+
+    @cached_property
+    def time_reversals(self) -> np.ndarray | None:
+        return self.symmetries_xml.time_reversals if self.symmetries_xml is not None else None
 
     @cached_property
     def structure(self) -> Structure | None:
@@ -826,6 +829,7 @@ class QEParser(BaseParser):
             lattice=self.direct_lattice,
             fractional_coordinates=self.atomic_positions,
             rotations=self.rotations,
+            time_reversals=self.time_reversals,
         )
 
 

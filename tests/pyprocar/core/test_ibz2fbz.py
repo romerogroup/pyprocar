@@ -414,7 +414,8 @@ def test_reduced_bisb_orbital_weights_and_spin_follow_each_rotation():
     # group and k ~ -k, unfold, and compare each image with the full mesh, bands 0-59.
     full = get_ebs_from_code("vasp", str(DATA_DIR / "examples" / "fermi2d" / "bisb_monolayer"))
     structure = full.structure
-    assert structure is not None and full.bands is not None and full.projected is not None
+    assert isinstance(full, ElectronicBandStructureMesh) and structure is not None
+    assert full.bands is not None and full.projected is not None
     full_projected = full.projected.to_array()
     cell = (structure.lattice, structure.fractional_coordinates, structure.atomic_numbers)
     rotations = np.array([w.T for w in spglib.get_symmetry(cell, symprec=1e-3)["rotations"]])
