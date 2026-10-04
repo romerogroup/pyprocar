@@ -332,6 +332,7 @@ def test_the_check_flags_each_way_a_test_can_copy_a_fixture(tmp_path):
             "    return dst",
             "def other(dst):",
             '    shutil.copytree(DATA_DIR / "x", dst)',
+            '    writable_copy(DATA_DIR / "y", dst)',
         ],
     )
     package = _write(
