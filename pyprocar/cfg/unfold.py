@@ -65,7 +65,7 @@ class UnfoldingConfig(BandStructureConfig):
 
     Parameters
     ----------
-    color: str, optional (default 'black')
+    color: str, optional (default '#eeeeee')
         Sets the overall color for plot lines.
 
     Plot Appearance
@@ -109,7 +109,7 @@ class UnfoldingConfig(BandStructureConfig):
     clim: Tuple[float], optional
         Color scale limits for the color bar.
     opacity: List[float], optional
-        Opacities for the plot lines, default is [1.0, 1.0].
+        Opacities for the plot lines, default is [0.3, 0.3].
     plot_color_bar: bool, optional (default True)
         If true, a color bar will be shown on the plot.
 

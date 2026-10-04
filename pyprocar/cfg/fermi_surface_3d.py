@@ -49,10 +49,10 @@ class FermiSurface3DConfig(BaseConfig):
 
     Parameters
     ----------
-    mode : FermiSurfaceMode, optional (default `FermiSurfaceMode.PLAIN`)
+    mode : FermiSurfaceMode, optional
         Defines the mode of the Fermi surface representation. Options are:
-        `PLAIN`, `PARAMETRIC`, and `SPIN_TEXTURE`.
-    property : FermiSurfaceProperty, optional (default `FermiSurfaceProperty.FERMI_SPEED`)
+        `PLAIN` (the default), `PARAMETRIC`, and `SPIN_TEXTURE`.
+    property : FermiSurfaceProperty, optional (default None)
 
     Plot Appearance
     ---------------
@@ -87,7 +87,7 @@ class FermiSurface3DConfig(BaseConfig):
     texture_color : Optional[str], optional
         Specific color for the texture if not using a colormap, default is None.
     texture_size : float, optional
-        Size of the texture elements, default is 0.1.
+        Size of the texture elements, default is 0.05.
     texture_scale : bool, optional
         Flag to determine if texture scaling is applied, default is False.
     texture_opacity : float, optional
@@ -98,8 +98,6 @@ class FermiSurface3DConfig(BaseConfig):
 
     Axes and Labels
     ---------------
-    add_axes : bool, optional
-        Flag to determine if axes are added to the plot, default is True.
     x_axes_label : str, optional
         Label for the x-axis, default is "Kx".
     y_axes_label : str, optional
@@ -148,7 +146,7 @@ class FermiSurface3DConfig(BaseConfig):
         The accuracy of the projections. Options are 'high' and 'normal'.
     interpolation_factor : int, optional (default 1)
         The interpolation factor to use for the Fermi surface.
-    max_distance : float, optional (default 0.2)
+    max_distance : float, optional (default 0.3)
         The maximum distance to keep points from the isosurface centers.
 
     Cross section Settings
@@ -166,17 +164,6 @@ class FermiSurface3DConfig(BaseConfig):
         Style of the iso-value slider.
     isoslider_color : str, optional (default 'black')
         Color of the iso-value slider.
-
-    Miscellaneous
-    -------------
-    orbit_gif_n_points : int, optional
-        Number of points to interpolate for creating orbit GIF animations, default is 36.
-    orbit_gif_step : float, optional
-        Step size between points in the orbit GIF animation, default is 0.05.
-    orbit_mp4_n_points : int, optional
-        Number of points to interpolate for creating orbit MP4 animations, default is 36.
-    orbit_mp4_step : float, optional
-        Step size between points in the orbit MP4 animation, default is 0.05.
 
     Methods
     -------

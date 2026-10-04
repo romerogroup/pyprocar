@@ -1,34 +1,29 @@
 .. _cfg-index:
 
+Configuration
+=============
 
+Each plotting function reads its default options from a configuration class in ``pyprocar/cfg/``.
+Pass an option as a keyword argument to override it, for example
+``pyprocar.bandsplot(..., fermi_color="red")``. Set ``print_plot_opts=True`` to print the options
+and their current values.
 
-Configuration Files
-===================
+- ``pyprocar/cfg/band_structure.py`` : ``BandStructureConfig``, the options of ``pyprocar.bandsplot``
 
-The configuration files in ``pyprocar/cfg/`` help customize the plotting options for our code base. Each YAML file contains settings related to plotting properties.
+- ``pyprocar/cfg/band_structure_2d.py`` : ``Bandstructure2DConfig``, the options of ``pyprocar.BandStructure2DHandler``
 
-Below are descriptions for some of the keys you might find in these files.
-cfg
-===================================
+- ``pyprocar/cfg/dos.py`` : ``DensityOfStatesConfig``, the options of ``pyprocar.dosplot``
 
-This chapter is intended to describe data types that are used to assist in the processing of the electronic structure
+- ``pyprocar/cfg/unfold.py`` : ``UnfoldingConfig``, the options of ``pyprocar.unfold``
 
-PyProcar has the following data types:
-
-- ``pyprocar/cfg/band_structure.yml``  : Controls the plotting options for the band structure plots
-
-- ``pyprocar/cfg/band_structure_2d.yml`` : Controls the plotting options for the band structure 2d plots
-
-- ``pyprocar/cfg/dos.yml`` : Controls the plotting options for the density of states plots
-
-- ``pyprocar/cfg/fermi_surface_3d.yml`` : Controls the plotting options for the fermi surface 3d plots
+- ``pyprocar/cfg/fermi_surface_3d.py`` : ``FermiSurface3DConfig``, the options of ``pyprocar.FermiHandler``
 
 - ``fermi_surface_2d`` : The plotting options of ``pyprocar.fermi2D``, which takes them as keyword arguments
 
 
 .. toctree::
    :maxdepth: 1
-   
+
    band_structure
    band_structure_2d
    dos
