@@ -393,6 +393,30 @@ def test_sheared_basis_counts_only_the_orbit_in_the_first_zone(normal, height):
     assert np.asarray(areas) == pytest.approx([np.pi * (0.1 - height**2)], rel=0.04)
 
 
+def test_sheared_basis_finds_the_orbit_at_a_zone_corner_six_cells_out():
+    """b2 = (3, 1, 0), b3 = (-2, 2, 1) span the cubic lattice. The zone corner R = (0.5,
+    0.5, -0.5) is the point (-5, 1.5, -0.5) of this basis. A plane 0.05 from R cuts the
+    pocket |k - R|^2 = 0.02 in an orbit of area pi (0.02 - 0.05^2), and the sphere
+    |k|^2 = 0.1 around Gamma at distance D in an orbit of area pi (0.1 - D^2)."""
+    basis = np.array([[1.0, 0.0, 0.0], [3.0, 1.0, 0.0], [-2.0, 2.0, 1.0]])
+    normal = np.array([0.3971, 0.5523, 0.7330]) / np.linalg.norm([0.3971, 0.5523, 0.7330])
+    origin = np.array([0.5, 0.5, -0.5]) + 0.05 * normal
+
+    def sphere_and_pocket(k: np.ndarray) -> np.ndarray:
+        cart = k @ basis
+        to_gamma = np.sum(((cart + 0.5) % 1.0 - 0.5) ** 2, axis=1)
+        return np.minimum(to_gamma, 5 * np.sum((cart % 1.0 - 0.5) ** 2, axis=1))
+
+    surface = _periodic_surface(sphere_and_pocket, basis, kgrid=(16, 64, 48))
+
+    areas, n_open = cross_section_areas(surface, normal, origin, basis)
+
+    assert n_open == 0
+    assert np.sort(areas) == pytest.approx(
+        [np.pi * (0.02 - 0.05**2), np.pi * (0.1 - (origin @ normal) ** 2)], rel=0.08
+    )
+
+
 def test_orbit_reaching_five_cells_from_the_zone_closes():
     """|n_z| = 0.06 stretches the ellipse around each M cylinder to 10.5 cells. The
     verifier's reference (marching cubes translated 16 cells, sliced by VTK) finds two
