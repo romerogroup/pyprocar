@@ -174,6 +174,34 @@ def test_a_shell_name_selects_the_columns_its_header_names(tmp_path: Path) -> No
     np.testing.assert_array_equal(colors(p_shell), colors([0, 1, 2]))
 
 
+def test_a_shell_name_selects_the_column_named_by_its_letter(tmp_path: Path) -> None:
+    calc = _filtered_calc(
+        tmp_path, orbitals=[[0], [1, 2, 3], [4, 5, 6, 7, 8]], orbital_names=["s", "p", "d"]
+    )
+    d_shell: Any = ["d"]
+
+    def colors(orbitals) -> np.ndarray:
+        _, ax = pyprocar.bandsplot(
+            code="vasp",
+            dirname=str(calc),
+            mode="parametric",
+            atoms=[1],
+            orbitals=orbitals,
+            show=False,
+        )
+        return np.concatenate(
+            [np.asarray(c.get_array()) for c in ax.collections if isinstance(c, LineCollection)]
+        )
+
+    np.testing.assert_array_equal(colors(d_shell), colors([2]))
+    _, ax = pyprocar.bandsplot(
+        code="vasp", dirname=str(calc), mode="overlay_orbitals", atoms=[1], show=False
+    )
+    legend = ax.get_legend()
+    assert legend is not None
+    assert [t.get_text() for t in legend.get_texts()] == ["s", "p", "d"]
+
+
 def test_a_shell_name_raises_when_the_header_names_no_such_shell(tmp_path: Path) -> None:
     calc = _filtered_calc(tmp_path, orbitals=[[0], [1, 2, 3]])
     p_shell: Any = ["p"]
