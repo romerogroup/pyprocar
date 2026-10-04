@@ -30,6 +30,7 @@ from pyprocar.core.atomic_orbital_index import (
 )
 from pyprocar.core.brillouin_zone import BrillouinZone
 from pyprocar.core.projection import (
+    BAND_PROJECTIONS,
     NormMode,
     build_property,
     check_projected_layout,
@@ -208,9 +209,7 @@ class ElectronicBandStructure(PointSet):
         super().__init__(kpoints)
 
         logger.info("Initializing ElectronicBandStructure")
-        check_projected_layout(
-            projected, orbital_names, ("n_kpoints", "n_bands", "n_spins", "n_atoms", "n_orbitals")
-        )
+        check_projected_layout(projected, orbital_names, BAND_PROJECTIONS, bands, structure)
 
         if bands is not None:
             self.add_property(name="bands", value=bands)
