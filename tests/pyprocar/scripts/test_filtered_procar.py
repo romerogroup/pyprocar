@@ -229,7 +229,8 @@ def test_fermi2d_refuses_to_unfold_an_atom_filtered_irreducible_procar(tmp_path:
     calc.mkdir()
     for name in ("PROCAR", "OUTCAR", "POSCAR", "KPOINTS", "vasprun.xml", "IBZKPT"):
         shutil.copy(FERMI2D_CALC / name, calc / name)
-    pyprocar.filter(str(calc / "PROCAR"), str(calc / "PROCAR-filtered"), atoms=[[2], [3, 4]])
+    groups: Any = [[2], [3, 4]]
+    pyprocar.filter(str(calc / "PROCAR"), str(calc / "PROCAR-filtered"), atoms=groups)
     (calc / "PROCAR-filtered").replace(calc / "PROCAR")
 
     with pytest.raises(ValueError, match="filtered by atoms"):

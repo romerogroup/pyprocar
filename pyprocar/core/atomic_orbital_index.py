@@ -881,7 +881,7 @@ class ProjectionSelectionResolver:
     ) -> None:
         self.label_builder = label_builder
         self.atom_indexer = label_builder.atom_indexer
-        self.n_atom_rows = n_atom_rows
+        self.n_atom_rows: int = n_atom_rows
         self.orbital_names = orbital_names
         self.is_non_colinear = is_non_colinear
 
