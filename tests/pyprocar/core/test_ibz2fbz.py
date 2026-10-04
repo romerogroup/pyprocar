@@ -231,6 +231,46 @@ def test_symmetry_images_swap_the_atoms_the_operation_swaps():
     np.testing.assert_allclose(ebs.projected.to_array()[:, 0, 0, :, 0], weights(exact), atol=1e-12)
 
 
+def test_symmetry_images_cycle_the_three_oxygens_the_way_the_third_turn_does():
+    # C3 about [111] sends (x, y, z) to (z, x, y): the O at (1/2, 1/2, 0) lands on the one at
+    # (0, 1/2, 1/2), that one on (1/2, 0, 1/2), and that one back on (1/2, 1/2, 0).
+    c3 = np.array([[0.0, 0, 1], [1, 0, 0], [0, 1, 0]])
+    structure = Structure(
+        atoms=["O", "O", "O"],
+        fractional_coordinates=[[0.5, 0.5, 0], [0.5, 0, 0.5], [0, 0.5, 0.5]],
+        lattice=np.eye(3),
+        rotations=np.array([np.eye(3), c3, c3 @ c3]),
+    )
+    turns = [np.eye(3), c3, c3 @ c3]
+    k_actions = np.array([sign * turn for sign in (1, -1) for turn in turns])
+    lands_on = [0, 2, 1, 0, 2, 1]
+
+    def weights(k):
+        """P(g k, g a) = P(k, a): site a sums the field at g^-1 k over the g taking site 0 to a."""
+        k = np.atleast_2d(k)
+        result = np.zeros((len(k), 3))
+        for m, site in zip(k_actions, lands_on, strict=True):
+            result[:, site] += asymmetric_field(k @ np.linalg.inv(m).T) + 2
+        return result
+
+    grid = gamma_grid((4, 4, 4))
+    ibz = wedge(grid, k_actions)
+    ebs = ElectronicBandStructureMesh(
+        kpoints=ibz,
+        bands=np.zeros((len(ibz), 1, 1)),
+        projected=weights(ibz).reshape(-1, 1, 1, 3, 1),
+        orbital_names=["s"],
+        fermi=0.0,
+        reciprocal_lattice=np.eye(3),
+        structure=structure,
+        kgrid_info=gamma_info((4, 4, 4)),
+    )
+
+    assert ebs.n_kpoints == 64 and ebs.projected is not None
+    exact = np.round(ebs.kpoints * 4) / 4
+    np.testing.assert_allclose(ebs.projected.to_array()[:, 0, 0, :, 0], weights(exact), atol=1e-12)
+
+
 def pure_orbital_projections(n_kpoints, orbitals):
     """Band i is the pure real orbital orbitals[i] at every k-point."""
     projected = np.zeros((n_kpoints, len(orbitals), 1, 1, len(VASP_ORBITALS)))
@@ -372,14 +412,19 @@ def test_a_quarter_turn_carries_the_px_phase_to_py():
 
 def test_a_phase_moved_by_a_reciprocal_lattice_vector_turns_by_the_atom_position():
     # VASP's phases use Bloch sums with exp(i k.(R + tau)), so c(k + G) = exp(-2 pi i G.tau) c(k).
-    # The quarter turn sends (1/4, 1/2, 0) to (-1/2, 1/4, 0), stored as (1/2, 1/4, 0), so
-    # G = (1, 0, 0), and the atom at (1/2, 1/2, 0) turns the coefficient by exp(-i pi) = -1.
-    grid = gamma_grid((4, 4, 1))
-    source = [0.25, 0.5, 0]
-    ibz = wedge(grid, np.concatenate([C4_GROUP, -C4_GROUP]), first=source)
+    # The third turns send (1/6, 1/2, 0) to (-2/3, 1/6, 0) and (1/2, -2/3, 0), stored as
+    # (1/3, 1/6, 0) and (1/2, 1/3, 0), so G = (1, 0, 0) and (0, 1, 0). The atom sits at the
+    # threefold site (1/3, 2/3, 0): G.tau is 1/3 and 2/3, which tell exp(-2 pi i) from exp(+2 pi i).
+    _, rotations, reciprocal_lattice = hexagonal_c3()
+    grid = gamma_grid((6, 6, 1))
+    source = [1 / 6, 1 / 2, 0]
+    ibz = wedge(grid, np.concatenate([rotations, -rotations]), first=source)
     phase = np.full((len(ibz), 1, 1, 1, 1), 0.6 + 0.8j)
     structure = Structure(
-        atoms=["X"], fractional_coordinates=[[0.5, 0.5, 0]], lattice=np.eye(3), rotations=C4_GROUP
+        atoms=["X"],
+        fractional_coordinates=[[1 / 3, 2 / 3, 0]],
+        lattice=HEXAGONAL,
+        rotations=rotations,
     )
     ebs = ElectronicBandStructureMesh(
         kpoints=ibz,
@@ -388,9 +433,9 @@ def test_a_phase_moved_by_a_reciprocal_lattice_vector_turns_by_the_atom_position
         projected_phase=phase,
         orbital_names=["s"],
         fermi=0.0,
-        reciprocal_lattice=np.eye(3),
+        reciprocal_lattice=reciprocal_lattice,
         structure=structure,
-        kgrid_info=gamma_info((4, 4, 1)),
+        kgrid_info=gamma_info((6, 6, 1)),
     )
 
     assert ebs.projected_phase is not None
@@ -399,7 +444,8 @@ def test_a_phase_moved_by_a_reciprocal_lattice_vector_turns_by_the_atom_position
         for i, k in enumerate(ebs.kpoints)
     }
     assert phase_at[key(source)] == pytest.approx(0.6 + 0.8j)
-    assert phase_at[key([0.5, 0.25, 0])] == pytest.approx(-0.6 - 0.8j)
+    assert phase_at[key([1 / 3, 1 / 6, 0])] == pytest.approx(np.exp(-2j * np.pi / 3) * (0.6 + 0.8j))
+    assert phase_at[key([1 / 2, 1 / 3, 0])] == pytest.approx(np.exp(-4j * np.pi / 3) * (0.6 + 0.8j))
 
 
 def test_phases_decide_how_a_third_turn_splits_equal_px_and_py_weights():
