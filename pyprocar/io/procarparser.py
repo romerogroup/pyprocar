@@ -150,12 +150,13 @@ class ProcarParser:
             return
 
         # finding all the K-points headers
-        self.kpoints = re.findall(r"k-point\s+\d+\s*:\s+([-.\d\s]+)", self.fileStr)
+        # Fixed-width columns: a minus sign can follow the previous number without a space.
+        self.kpoints = re.findall(
+            r"k-point\s+\d+\s*:\s*(-?\d+\.\d+)\s*(-?\d+\.\d+)\s*(-?\d+\.\d+)", self.fileStr
+        )
         self.log.debug(str(len(self.kpoints)) + " K-point headers found")
         self.log.debug("The first match found is: " + str(self.kpoints[0]))
 
-        # trying to build an array
-        self.kpoints = [x.split() for x in self.kpoints]
         try:
             self.kpoints = np.array(self.kpoints, dtype=float)
         except ValueError:
