@@ -269,8 +269,9 @@ class PwXML:
 
     @cached_property
     def atomic_positions(self) -> np.ndarray | None:
+        """Cartesian positions in Angstrom; the xml writes them in bohr."""
         if self.atomic_sites:
-            return self.atomic_sites["positions"]
+            return np.asarray(self.atomic_sites["positions"], dtype=float) * AU_TO_ANG
         return None
 
     @cached_property

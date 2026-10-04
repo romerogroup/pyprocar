@@ -827,9 +827,7 @@ class QEParser(BaseParser):
         return Structure(
             atoms=self.species,
             lattice=self.direct_lattice,
-            cartesian_coordinates=None
-            if self.atomic_positions is None
-            else self.atomic_positions * AU_TO_ANG,
+            cartesian_coordinates=self.atomic_positions,
             rotations=self.rotations,
             time_reversals=self.time_reversals,
         )
