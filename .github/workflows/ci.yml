@@ -34,6 +34,8 @@ jobs:
           locked: true
       - name: ruff check (fails on new violations in changed files)
         run: pixi run --locked -e lint python .github/scripts/ruff_new_violations.py check "$BASE"
+      - name: ruff check (undefined names and removed NumPy API, whole repo, zero allowed)
+        run: pixi run --locked -e lint ruff check --config .config/.ruff.toml --select F821,F822,F823,NPY201 .
 
   format:
     # One-time exemption: merging dos-rewrite into dev (#237) adds ~245 files the gate would treat as all-new.
