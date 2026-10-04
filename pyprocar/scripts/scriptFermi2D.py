@@ -4,7 +4,6 @@ __email__ = "petavazohi@mail.wvu.edu, lllang@mix.wvu.edu"
 __date__ = "December 01, 2020"
 
 import logging
-import warnings
 from enum import Enum
 
 import matplotlib.pyplot as plt
@@ -13,6 +12,7 @@ from pyprocar.core import FermiSurface
 from pyprocar.plotter import FermiSlicePlotter
 from pyprocar.scripts._selection import resolve_spins, signed_clim
 from pyprocar.utils import welcome
+from pyprocar.utils.log_utils import set_verbose_level, warn_user
 
 user_logger = logging.getLogger("user")
 logger = logging.getLogger(__name__)
@@ -153,6 +153,7 @@ def fermi2D(
     """
 
     mode = Fermi2DMode(mode)
+    set_verbose_level(verbose)
     user_logger.info("If you want more detailed logs, set verbose to 2 or more")
     user_logger.info("_" * 100)
 
@@ -205,12 +206,10 @@ def fermi2D(
         assert isinstance(selected, FermiSurface)
         fs = selected
     if not keys:
-        warnings.warn(
+        warn_user(
             f"No Fermi surface found: no band of spin channel(s) {channels} crosses"
             + " the isovalue (Fermi energy + energy). Try another spin channel,"
-            + " a different energy, or check the Fermi energy.",
-            UserWarning,
-            stacklevel=2,
+            + " a different energy, or check the Fermi energy."
         )
 
     component = component_label = None

@@ -8,6 +8,7 @@ import pytest
 from pyprocar.core import Structure, kpoints
 from pyprocar.core.ebs import ElectronicBandStructure, ElectronicBandStructureMesh, ibz2fbz
 from pyprocar.core.kpoints import KGRID_MODE, KGridInfo
+from tests.utils.user_warning import user_warning
 
 C4 = np.array([[0, -1, 0], [1, 0, 0], [0, 0, 1]], dtype=float)
 C4_GROUP = np.array([np.linalg.matrix_power(C4, n) for n in range(4)])
@@ -485,7 +486,7 @@ def quarter_turn_mesh(n_orbitals, phase=None):
 def test_phases_over_orbitals_without_real_harmonic_names_are_dropped_with_a_warning():
     # QE spin-orbit phases come over (l, j, m_j) states with no orbital names. Time reversal
     # also sends m_j to -m_j there, so conjugating each coefficient in place would be wrong.
-    with pytest.warns(UserWarning, match="projected_phase is dropped"):
+    with user_warning(__file__, match="projected_phase is dropped"):
         ebs = quarter_turn_mesh(2, phase=0.6 + 0.8j)
 
     assert ebs.n_kpoints == 16
@@ -497,7 +498,7 @@ def test_phases_over_orbitals_without_real_harmonic_names_are_dropped_with_a_war
 def test_the_unrotated_orbital_warning_lists_the_orbitals_in_numeric_order():
     names = ", ".join(f"'orbital {i}'" for i in range(11))
 
-    with pytest.warns(UserWarning, match=re.escape(f"[{names}]")):
+    with user_warning(__file__, match=re.escape(f"[{names}]")):
         quarter_turn_mesh(11)
 
 
@@ -513,12 +514,16 @@ def time_reversed_ebs(time_reversals=None):
     )
 
 
+@pytest.mark.guards_existing_behaviour(
+    reason="#299's stacklevel=2 names this file when the test calls ibz2fbz directly;"
+    + " this pins the line through warn_user"
+)
 def test_time_reversal_filling_points_of_a_magnetic_group_warns():
     # Listed as the magnetic group {E, C2z with time reversal}, k -> -C2z k reaches only
     # half of the missing points; plain time reversal, not in that group, fills the rest.
     ebs = time_reversed_ebs(time_reversals=np.array([False, True]))
 
-    with pytest.warns(UserWarning, match="time reversal"):
+    with user_warning(__file__, match="time reversal"):
         ibz2fbz(ebs, kgrid_info=gamma_info((4, 4, 4)))
 
     assert ebs.n_kpoints == 64

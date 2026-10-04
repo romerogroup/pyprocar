@@ -15,9 +15,9 @@ import pyvista as pv
 
 from pyprocar.core.brillouin_zone import BrillouinZone
 from pyprocar.utils import math, np_utils
+from pyprocar.utils.log_utils import warn_user
 
 logger = logging.getLogger(__name__)
-user_logger = logging.getLogger("user")
 
 KPOINTS_DTYPE = np.ndarray[tuple[int, Literal[3]], np.dtype[np_utils.FLOAT_DTYPE]]
 RECIPROCAL_LATTICE_DTYPE = np.ndarray[tuple[Literal[3], Literal[3]], np.dtype[np_utils.FLOAT_DTYPE]]
@@ -297,11 +297,9 @@ class KPath:
                 f"segment_start_kpoints has {n_starts} rows for {n_names} segment names"
             )
         if len(segment_names) != self.n_segments:
-            user_logger.warning(
-                "KPath got %d segment names for %d segments in the k-points; ticks use %d",
-                len(segment_names),
-                self.n_segments,
-                min(len(segment_names), self.n_segments),
+            warn_user(
+                f"KPath got {len(segment_names)} segment names for {self.n_segments} segments"
+                + f" in the k-points; ticks use {min(len(segment_names), self.n_segments)}"
             )
             segment_start_kpoints = None
         self._jump_start_kpoints: dict[int, np.ndarray] = self._get_jump_start_kpoints(
@@ -566,9 +564,9 @@ class KPath:
             if len(segment) > 1:
                 candidates.append(2 * segment[0] - segment[1])
             if not any(np.allclose(start, c, atol=1e-4) for c in candidates):
-                user_logger.warning(
-                    "KPath start of segment %d does not match its k-points; jump counts as zero",
-                    isegment + 1,
+                warn_user(
+                    f"KPath start of segment {isegment + 1} does not match its k-points;"
+                    + " jump counts as zero"
                 )
                 continue
             jump_starts[jump_index] = start

@@ -10,6 +10,7 @@ from pyprocar.core.ebs import ElectronicBandStructure, ElectronicBandStructurePa
 from pyprocar.core.kpoints import KPath
 from pyprocar.io.elk import ElkParser
 from tests.utils import DATA_DIR, BaseTest
+from tests.utils.user_warning import user_warning
 
 logger = logging.getLogger(__name__)
 
@@ -474,15 +475,6 @@ def test_ebs_kpoints_are_fractional_and_kdirect_is_gone(bands_calc_dir):
     assert np.allclose(ebs.kpoints_cartesian[:2], [[0, 0, 0], [0.0625 * 0.260332, 0, 0]], atol=1e-7)
 
 
-@pytest.fixture
-def user_warnings(caplog: pytest.LogCaptureFixture):
-    user_logger = logging.getLogger("user")
-    user_logger.addHandler(caplog.handler)
-    with caplog.at_level(logging.WARNING, logger="user"):
-        yield caplog
-    user_logger.removeHandler(caplog.handler)
-
-
 @pytest.mark.parametrize(
     ("task", "files"),
     [
@@ -555,21 +547,20 @@ def test_inline_comments_on_keyword_lines_are_ignored(tmp_path):
     assert parser.elkin.high_symmetry_points.tolist() == [[0, 0, 0], [0.5, 0, 0], [0.5, 0.0625, 0]]
 
 
-def test_missing_plot1d_uses_the_elk_default_path_and_warns(tmp_path, user_warnings):
+def test_missing_plot1d_uses_the_elk_default_path_and_warns(tmp_path):
     (tmp_path / "elk.in").write_text(ELKIN_BANDS.split("plot1d")[0])
-    elkin = ElkParser(tmp_path).elkin
+    with user_warning(__file__, match="elk.in has no plot1d block"):
+        elkin = ElkParser(tmp_path).elkin
+        assert elkin is not None
+        assert elkin.nkpoints == 200
 
-    assert elkin is not None
-    assert elkin.nkpoints == 200
     assert elkin.high_symmetry_points.tolist() == [[0, 0, 0], [1, 1, 1]]
-    assert "plot1d" in user_warnings.text
 
 
-def test_structure_from_elk_in_warns_that_geometry_out_is_missing(tmp_path, user_warnings):
+def test_structure_from_elk_in_warns_that_geometry_out_is_missing(tmp_path):
     (tmp_path / "elk.in").write_text(ELKIN_BANDS)
-    assert ElkParser(tmp_path).structure is not None
-
-    assert "GEOMETRY.OUT" in user_warnings.text
+    with user_warning(__file__, match="No GEOMETRY.OUT in"):
+        assert ElkParser(tmp_path).structure is not None
 
 
 def test_band_path_repeats_each_inner_vertex_so_kpath_finds_every_segment(bands_calc_dir):
@@ -592,7 +583,7 @@ def _band_dir(tmp_path, task, files):
     return tmp_path
 
 
-def test_band_file_follows_the_elk_in_task_and_warns_about_the_other(tmp_path, user_warnings):
+def test_band_file_follows_the_elk_in_task_and_warns_about_the_other(tmp_path):
     stale = BAND_OUT.replace("-2.401220419", "-9.000000000")
     calc_dir = _band_dir(
         tmp_path,
@@ -603,11 +594,11 @@ def test_band_file_follows_the_elk_in_task_and_warns_about_the_other(tmp_path, u
             "BAND_S02_A0001.OUT": BAND_S02_A0001,
         },
     )
-    ebs = ElkParser(calc_dir).ebs
+    with user_warning(__file__, match="Both BAND.OUT and BAND_S01_A0001.OUT are in"):
+        ebs = ElkParser(calc_dir).ebs
 
     assert isinstance(ebs, ElectronicBandStructurePath) and ebs.bands is not None
     assert ebs.bands.to_array()[0, 0, 0] == pytest.approx(-56.582434, abs=1e-5)
-    assert "BAND.OUT" in user_warnings.text
 
 
 def test_vertex_labels_keep_latex_that_kpath_does_not_alias(tmp_path):
@@ -754,16 +745,16 @@ def test_real_spin_polarized_task_22_reads_the_spin_down_states():
     assert ebs.orbital_names is not None and len(ebs.orbital_names) == 16
 
 
-def test_task_20_reads_bands_from_band_s_files_without_their_characters(tmp_path, user_warnings):
+def test_task_20_reads_bands_from_band_s_files_without_their_characters(tmp_path):
     calc_dir = _band_dir(
         tmp_path, "20", {"BAND_S01_A0001.OUT": BAND_S01_A0001, "BAND_S02_A0001.OUT": BAND_S02_A0001}
     )
 
-    ebs = ElkParser(calc_dir).ebs
+    with user_warning(__file__, match="elk.in lists no task 21 to 24"):
+        ebs = ElkParser(calc_dir).ebs
+        assert isinstance(ebs, ElectronicBandStructurePath) and ebs.bands is not None
+        assert ebs.projected is None
 
-    assert isinstance(ebs, ElectronicBandStructurePath) and ebs.bands is not None
     assert ebs.bands.to_array()[0, 0, 0] == pytest.approx(
         (-2.401220419 + 0.3218543102) * 27.211386245988
     )
-    assert ebs.projected is None
-    assert "no task 21 to 24" in user_warnings.text

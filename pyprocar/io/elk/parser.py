@@ -16,9 +16,9 @@ from pyprocar.io.elk.elkin import ElkIn
 from pyprocar.io.elk.fermi import ElkFermi
 from pyprocar.io.elk.geometry import ElkGeometry
 from pyprocar.io.elk.projections import ElkProjections
+from pyprocar.utils.log_utils import warn_user
 
 logger = logging.getLogger(__name__)
-user_logger = logging.getLogger("user")
 
 
 class ElkParser(BaseParser):
@@ -188,7 +188,7 @@ class ElkParser(BaseParser):
         preferred, other = (band_out, band_s) if 20 in tasks else (band_s, band_out)
         bands_path = preferred if preferred.exists() else other
         if band_out.exists() and band_s.exists() and not (20 in tasks and tasks & {21, 22}):
-            user_logger.warning(
+            warn_user(
                 f"Both BAND.OUT and BAND_S01_A0001.OUT are in {self.dirpath};"
                 + f" reading {bands_path.name}, which the elk.in tasks write"
             )
@@ -233,7 +233,7 @@ class ElkParser(BaseParser):
         # bandstr.f90 gives tasks 21-24 the same file names, so the last one in elk.in wrote them.
         character_tasks = [t for t in self._elkin.tasks if t in (21, 22, 23, 24)]
         if not character_tasks:
-            user_logger.warning(
+            warn_user(
                 "elk.in lists no task 21 to 24, so the band characters in the BAND_S files"
                 + " are not read"
             )
@@ -270,7 +270,7 @@ class ElkParser(BaseParser):
                 fractional_coordinates=self._geometry.fractional_coordinates,
             )
         if self._elkin is not None:
-            user_logger.warning(
+            warn_user(
                 f"No GEOMETRY.OUT in {self.dirpath}; reading the structure from elk.in"
             )
             return Structure(

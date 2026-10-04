@@ -12,7 +12,6 @@ from __future__ import annotations
 import copy
 import itertools
 import logging
-import warnings
 from abc import ABC, abstractmethod
 from collections.abc import Iterable, Mapping, Sequence
 from functools import cached_property
@@ -42,6 +41,7 @@ from pyprocar.core.serializer import get_serializer
 from pyprocar.core.structure import Structure
 from pyprocar.utils import math, np_utils, physics, units
 from pyprocar.utils.info import orbital_names
+from pyprocar.utils.log_utils import warn_user
 from pyprocar.utils.unfolder import Unfolder
 
 pv.global_theme.allow_empty_mesh = True
@@ -2255,11 +2255,9 @@ def ibz2fbz(ebs, rotations=None, kgrid_info=None, inplace=True, time_reversals=N
     operation, source = np.divmod(chosen, n_ibz)
     filled = int(np.count_nonzero(operation > n_listed))
     if magnetic and filled:
-        warnings.warn(
+        warn_user(
             f"{filled} k-points were filled by time reversal combined with a listed operation, "
-            + "which this magnetic group does not contain; their values may be wrong",
-            UserWarning,
-            stacklevel=2,
+            + "which this magnetic group does not contain; their values may be wrong"
         )
     for prop_name, calc_name, gradient_order, value_array in ebs.iter_properties():
         ebs.get_property(prop_name)[calc_name, gradient_order] = value_array[source]
@@ -2296,11 +2294,9 @@ def _turn_projections(ebs, rotations, time_reversals, operation, lattice_steps) 
     names = ebs.orbital_names or [f"orbital {i}" for i in range(n_orbitals)]
     unrotated = unrotated_orbitals(names)
     if phase is not None and (phase.value.shape[2] == 4 or unrotated):
-        warnings.warn(
+        warn_user(
             "projected_phase is dropped: symmetry images need collinear phases over orbitals "
-            + "with real-harmonic names in full shells",
-            UserWarning,
-            stacklevel=3,
+            + "with real-harmonic names in full shells"
         )
         ebs.remove_property("projected_phase")
         phase = None
@@ -2339,11 +2335,9 @@ def _turn_projections(ebs, rotations, time_reversals, operation, lattice_steps) 
         bloch = np.exp(-2j * np.pi * np.round(lattice_steps) @ positions.T)
         phases *= bloch[:, np.newaxis, np.newaxis, :, np.newaxis]
     if unrotated and np.any(operation != IDENTITY):
-        warnings.warn(
+        warn_user(
             "Orbital-resolved projections at symmetry images are not rotated for the orbitals "
-            + f"{unrotated}; sums over each full shell stay exact",
-            UserWarning,
-            stacklevel=3,
+            + f"{unrotated}; sums over each full shell stay exact"
         )
 
 

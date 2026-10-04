@@ -1,5 +1,4 @@
 import logging
-import warnings
 from functools import partial
 from typing import cast
 
@@ -25,6 +24,7 @@ from pyprocar.plotter._surface_plot import (
     slice_loop_areas,
     snap_normal,
 )
+from pyprocar.utils.log_utils import warn_user
 
 logger = logging.getLogger(__name__)
 
@@ -177,12 +177,10 @@ class FermiPlotter(SurfacePlotter):
         if spins is not None:
             series_list = [s for s in series_list if s.spin_index in spins]
             if not series_list:
-                warnings.warn(
+                warn_user(
                     f"No Fermi surface found: no band of spin channel(s) {list(spins)} crosses"
                     + " the isovalue (Fermi energy + fermi_shift). Try another spin channel,"
-                    + " a different fermi_shift, or check the Fermi energy.",
-                    UserWarning,
-                    stacklevel=2,
+                    + " a different fermi_shift, or check the Fermi energy."
                 )
 
         if show_brillouin_zone:

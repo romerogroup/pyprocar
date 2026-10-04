@@ -5,7 +5,6 @@ This module contains unit tests for k-point generation functions,
 coordinate transformation utilities, and the KPath class.
 """
 
-import logging
 
 import numpy as np
 import pytest
@@ -23,6 +22,7 @@ from pyprocar.core.kpoints import (
     reduced_to_cartesian,
     sort_kpoints,
 )
+from tests.utils.user_warning import user_warning
 
 # =============================================================================
 # Fixtures
@@ -960,30 +960,20 @@ def test_kpath_distances_default_to_cartesian():
     )
 
 
-@pytest.fixture
-def user_warnings(caplog):
-    """Capture warnings on the non-propagating "user" logger."""
-    user_logger = logging.getLogger("user")
-    user_logger.addHandler(caplog.handler)
-    with caplog.at_level(logging.WARNING, logger="user"):
-        yield caplog
-    user_logger.removeHandler(caplog.handler)
-
-
-def test_kpath_with_fewer_names_than_segments_warns_and_labels_what_it_can(user_warnings):
+def test_kpath_with_fewer_names_than_segments_warns_and_labels_what_it_can():
     gamma_x = np.linspace([0, 0, 0], [0.5, 0, 0], 5)
     r_m = np.linspace([0.5, 0.5, 0.5], [0.5, 0.5, 0], 5)
     kpoints = np.vstack([gamma_x, r_m])
 
-    kpath = KPath(
-        kpoints=kpoints,
-        segment_names=[("G", "X")],
-        special_kpoint_map={"G": kpoints[0], "X": kpoints[4]},
-    )
+    with user_warning(
+        __file__, match="KPath got 1 segment names for 2 segments in the k-points; ticks use 1"
+    ):
+        kpath = KPath(
+            kpoints=kpoints,
+            segment_names=[("G", "X")],
+            special_kpoint_map={"G": kpoints[0], "X": kpoints[4]},
+        )
 
-    assert "KPath got 1 segment names for 2 segments in the k-points; ticks use 1" in (
-        user_warnings.text
-    )
     assert list(zip(kpath.tick_positions, kpath.tick_names, strict=True)) == [(0, "Γ"), (4, "X")]
 
 
@@ -1019,18 +1009,19 @@ def test_kpath_jump_ignores_a_label_reused_for_another_point():
     assert tick_x == pytest.approx([0.0, 0.5, 1.0])
 
 
-def test_kpath_jump_ignores_a_segment_start_off_its_k_points(user_warnings):
-    kpath = KPath(
-        kpoints=GAMMA_X_R_M,
-        segment_names=[("G", "X"), ("R", "M")],
-        reciprocal_lattice=np.eye(3),
-        segment_start_kpoints=np.array([G_POINT, np.array([-0.5, 0.5, 0.5])]),
-    )
+def test_kpath_jump_ignores_a_segment_start_off_its_k_points():
+    with user_warning(
+        __file__, match="KPath start of segment 2 does not match its k-points; jump counts"
+    ):
+        kpath = KPath(
+            kpoints=GAMMA_X_R_M,
+            segment_names=[("G", "X"), ("R", "M")],
+            reciprocal_lattice=np.eye(3),
+            segment_start_kpoints=np.array([G_POINT, np.array([-0.5, 0.5, 0.5])]),
+        )
+        k_distances = kpath.k_distances
 
-    assert "KPath start of segment 2 does not match its k-points; jump counts as zero" in (
-        user_warnings.text
-    )
-    assert kpath.k_distances[-1] == pytest.approx(1.0)
+    assert k_distances[-1] == pytest.approx(1.0)
 
 
 def test_kpath_rejects_segment_start_kpoints_with_the_wrong_row_count():

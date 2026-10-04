@@ -13,6 +13,7 @@ from pyprocar.core.kpoints import normalize_kpoint_name
 from pyprocar.io.base import BaseParser
 from pyprocar.io.siesta.bands import Bands
 from pyprocar.io.siesta.fdf import FDF
+from pyprocar.utils.log_utils import warn_user
 
 logger = logging.getLogger(__name__)
 user_logger = logging.getLogger("user")
@@ -61,15 +62,13 @@ class SiestaParser(BaseParser):
                 fdf for fdf in candidates if fdf.filepath and fdf.filepath.name not in targets
             ]
             if not candidates:
-                user_logger.warning(f"No .fdf file found in {self.dirpath}")
+                warn_user(f"No .fdf file found in {self.dirpath}")
                 return None
             # Prefer the input whose SystemLabel names a .bands file here.
             with_bands = [fdf for fdf in candidates if self._names_bands_file(fdf)]
             chosen = (with_bands or candidates)[0]
             if len(candidates) > 1:
-                user_logger.warning(
-                    f"Multiple .fdf files found in {self.dirpath}, using {chosen.filepath}"
-                )
+                warn_user(f"Multiple .fdf files found in {self.dirpath}, using {chosen.filepath}")
             return chosen
 
         if isinstance(param, FDF):
@@ -79,7 +78,7 @@ class SiestaParser(BaseParser):
         if filepath.exists():
             return FDF(filepath)
 
-        user_logger.warning(f"FDF file not found: {filepath}")
+        warn_user(f"FDF file not found: {filepath}")
         return None
 
     def _names_bands_file(self, fdf: FDF) -> bool:
@@ -99,7 +98,7 @@ class SiestaParser(BaseParser):
             filepath = self.dirpath / Path(param)
             if filepath.exists():
                 return Bands(filepath)
-            user_logger.warning(f"Bands file not found: {filepath}")
+            warn_user(f"Bands file not found: {filepath}")
             return None
 
         # Auto-detect using SystemLabel from FDF
@@ -110,9 +109,9 @@ class SiestaParser(BaseParser):
             bands_path = self.dirpath / f"{self._fdf.system_label}.bands"
             if bands_path.exists():
                 return Bands(bands_path)
-            user_logger.warning(f"Bands file not found: {bands_path}")
+            user_logger.debug(f"Bands file not found: {bands_path}")
         except Exception as e:
-            user_logger.warning(f"Error detecting bands file: {e}")
+            warn_user(f"Error detecting bands file: {e}")
 
         return None
 
@@ -148,7 +147,7 @@ class SiestaParser(BaseParser):
                 cartesian_coordinates=self._fdf.cartesian_positions,
             )
         except Exception as e:
-            user_logger.warning(f"Error creating structure: {e}")
+            warn_user(f"Error creating structure: {e}")
             return None
 
     @property
@@ -200,18 +199,18 @@ class SiestaParser(BaseParser):
                 discontinuity_threshold=np.inf,
             )
         except Exception as e:
-            user_logger.warning(f"Error creating kpath: {e}")
+            warn_user(f"Error creating kpath: {e}")
             return None
 
     @property
     def ebs(self) -> ElectronicBandStructure | None:
         """Electronic band structure."""
         if self._bands is None:
-            user_logger.warning("No bands file available for EBS")
+            warn_user("No bands file available for EBS")
             return None
 
         if self.fermi is None:
-            user_logger.warning("No Fermi energy available for EBS")
+            warn_user("No Fermi energy available for EBS")
             return None
 
         try:
@@ -233,7 +232,7 @@ class SiestaParser(BaseParser):
 
             return get_ebs_from_data(**ebs_kwargs)
         except Exception as e:
-            user_logger.warning(f"Error creating EBS: {e}")
+            warn_user(f"Error creating EBS: {e}")
             return None
 
     @property

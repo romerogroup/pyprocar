@@ -13,6 +13,7 @@ from pyprocar.io.base import BaseParser
 from pyprocar.io.lobster.doscar_lobster import LOBSTER_ORBITALS, DoscarLobster
 from pyprocar.io.lobster.fatband import Fatband
 from pyprocar.io.lobster.lobsterout import LobsterOut
+from pyprocar.utils.log_utils import warn_user
 
 logger = logging.getLogger(__name__)
 user_logger = logging.getLogger("user")
@@ -76,7 +77,7 @@ class LobsterParser(BaseParser):
             if filepath.exists():
                 return extractor_class(filepath)
             else:
-                user_logger.warning(f"{extractor_class.__name__} file not found: {filepath}")
+                user_logger.debug(f"{extractor_class.__name__} file not found: {filepath}")
                 return None
         return None
 
@@ -287,6 +288,7 @@ class LobsterParser(BaseParser):
     def ebs(self) -> ElectronicBandStructure | None:
         """Electronic band structure from FATBAND files."""
         if self._aggregated_bands is None:
+            warn_user(f"No lobsterout with FATBAND files in {self.dirpath}; ebs is None")
             return None
 
         data = self._aggregated_bands
@@ -309,6 +311,7 @@ class LobsterParser(BaseParser):
     def dos(self) -> DensityOfStates | None:
         """Density of states from DOSCAR.lobster."""
         if self._doscar is None:
+            warn_user(f"No DOSCAR.lobster in {self.dirpath}; dos is None")
             return None
 
         fermi = self.fermi if self.fermi is not None else 0.0
@@ -321,5 +324,5 @@ class LobsterParser(BaseParser):
             )
 
         except Exception as e:
-            user_logger.warning(f"Error creating DOS from DOSCAR.lobster: {e}")
+            warn_user(f"Error creating DOS from DOSCAR.lobster: {e}")
             return None

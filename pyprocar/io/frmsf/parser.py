@@ -10,9 +10,9 @@ from pyprocar.core.ebs import ElectronicBandStructure, get_ebs_from_data
 from pyprocar.core.kpoints import KGRID_MODE, KGridInfo
 from pyprocar.io.base import BaseParser
 from pyprocar.io.frmsf.frmsf import Frmsf
+from pyprocar.utils.log_utils import warn_user
 
 logger = logging.getLogger(__name__)
-user_logger = logging.getLogger("user")
 
 
 class FrmsfParser(BaseParser):
@@ -46,7 +46,7 @@ class FrmsfParser(BaseParser):
         if filepath.exists():
             return Frmsf(filepath)
 
-        user_logger.warning(f"FrmSrf file not found: {filepath}")
+        warn_user(f"FrmSrf file not found: {filepath}")
         return None
 
     @classmethod
@@ -90,7 +90,7 @@ class FrmsfParser(BaseParser):
     def ebs(self) -> ElectronicBandStructure | None:
         """Electronic band structure (mesh-based)."""
         if self._frmsf is None:
-            user_logger.warning("No FrmSrf extractor available")
+            warn_user("No FrmSrf extractor available")
             return None
 
         try:
@@ -108,5 +108,5 @@ class FrmsfParser(BaseParser):
                 kgrid_info=self.kgrid_info,
             )
         except Exception as e:
-            user_logger.warning(f"Error creating EBS from FrmSrf: {e}")
+            warn_user(f"Error creating EBS from FrmSrf: {e}")
             return None

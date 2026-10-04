@@ -1,7 +1,8 @@
 import copy
-import warnings
 
 import numpy as np
+
+from pyprocar.utils.log_utils import warn_user
 
 from .db import DB
 from .latticeUtils import Neighbors
@@ -276,7 +277,7 @@ class Clusters:
             from collections import Counter
 
             print("missing atoms usage", Counter(missing_used))
-            warnings.warn(
+            warn_user(
                 "At least one atom was replaced twice (or more times)"
                 " by an H. Check wether this makes sense"
             )

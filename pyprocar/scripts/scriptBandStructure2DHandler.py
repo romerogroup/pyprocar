@@ -17,7 +17,7 @@ from pyprocar.core import BandStructure2D, ElectronicBandStructureMesh
 from pyprocar.plotter import BS2DPlotter
 from pyprocar.scripts._selection import as_clim
 from pyprocar.utils import welcome
-from pyprocar.utils.log_utils import set_verbose_level
+from pyprocar.utils.log_utils import set_verbose_level, warn_user
 
 user_logger = logging.getLogger("user")
 logger = logging.getLogger(__name__)
@@ -181,7 +181,7 @@ class BandStructure2DHandler:
         user_logger.info("_" * 100)
 
         if self.fermi_message:
-            user_logger.info(self.fermi_message)
+            warn_user(self.fermi_message)
 
         if bands is not None:
             ebs = self.ebs.reduce_bands_by_index(bands, inplace=False)

@@ -25,7 +25,7 @@ from pyprocar.scripts._selection import (
     signed_clim,
     take_channels,
 )
-from pyprocar.utils.log_utils import set_verbose_level
+from pyprocar.utils.log_utils import set_verbose_level, warn_user
 from pyprocar.utils.splash import welcome
 
 user_logger = logging.getLogger("user")
@@ -318,7 +318,7 @@ def dosplot(
         energy_label = r"Energy - E$_F$ (eV)"
     else:
         energy_label = r"Energy (eV)"
-        user_logger.warning(
+        warn_user(
             "`fermi` is not set! Set `fermi={value}`. The plot did not shift the energy by the Fermi energy."
         )
 

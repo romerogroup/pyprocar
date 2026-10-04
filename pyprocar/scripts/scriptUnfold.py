@@ -17,7 +17,7 @@ from pyprocar.scripts._selection import (
     resolve_spins,
     take_channels,
 )
-from pyprocar.utils.log_utils import set_verbose_level
+from pyprocar.utils.log_utils import set_verbose_level, warn_user
 from pyprocar.utils.splash import welcome
 
 user_logger = logging.getLogger("user")
@@ -169,7 +169,7 @@ def unfold(
         y_label = r"E - E$_F$ (eV)"
     else:
         y_label = r"E (eV)"
-        user_logger.warning(
+        warn_user(
             "`fermi` is not set! Set `fermi={value}`. The plot did not shift the bands by the Fermi energy."
         )
 

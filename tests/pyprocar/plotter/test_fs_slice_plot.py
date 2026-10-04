@@ -13,7 +13,10 @@ matplotlib.use("Agg")
 
 import matplotlib.pyplot as plt
 import numpy as np
+import pytest
 import pyvista as pv
+
+from tests.utils.user_warning import user_warning
 
 # ------------------------------------------------------------------
 # FermiSliceSeries Tests (can use direct dataclass creation)
@@ -408,3 +411,21 @@ class TestShowColorbarEnum:
 
         result = ShowColorbar.from_string(ShowColorbar.SINGLE)
         assert result == ShowColorbar.SINGLE
+
+
+@pytest.mark.parametrize(
+    ("scalars_name", "vectors_name", "message"),
+    [
+        ("spin_texture", None, "Scalars name spin_texture not found"),
+        (None, "spin_texture", "Vectors name spin_texture not found"),
+    ],
+)
+def test_plot_warns_when_the_named_field_is_missing(scalars_name, vectors_name, message):
+    from pyprocar.plotter.fs_slice_plot import FermiSlicePlotter
+
+    sphere = pv.Sphere()
+    assert sphere.active_scalars_name is None and sphere.active_vectors_name is None
+
+    with user_warning(__file__, match=message):
+        FermiSlicePlotter(sphere).plot(scalars_name=scalars_name, vectors_name=vectors_name)
+    plt.close("all")

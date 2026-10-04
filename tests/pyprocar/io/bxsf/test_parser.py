@@ -1,7 +1,5 @@
 """Tests for BXSF parser."""
 
-import logging
-from collections.abc import Iterator
 from pathlib import Path
 
 import numpy as np
@@ -10,6 +8,7 @@ import pytest
 from pyprocar.core.ebs import ElectronicBandStructureMesh
 from pyprocar.core.kpoints import KGRID_MODE
 from pyprocar.io.bxsf import BxsfParser
+from tests.utils.user_warning import user_warning
 
 BXSF_STR = """\
 BEGIN_INFO
@@ -180,18 +179,6 @@ AL_SCF_OUT = """\
 """
 
 
-@pytest.fixture
-def user_warnings(
-    caplog: pytest.LogCaptureFixture,
-) -> Iterator[pytest.LogCaptureFixture]:
-    """Capture warnings on the non-propagating "user" logger."""
-    user_logger = logging.getLogger("user")
-    user_logger.addHandler(caplog.handler)
-    with caplog.at_level(logging.WARNING, logger="user"):
-        yield caplog
-    user_logger.removeHandler(caplog.handler)
-
-
 def _bxsf(header: str, vectors: str) -> str:
     return header + GRID_BLOCK.format(vectors=vectors) + FOOTER
 
@@ -210,15 +197,13 @@ def test_qe_fs_bxsf_scales_b_by_the_alat_of_the_calculation_beside_it(
     assert np.allclose(lattice, expected, atol=1e-4)
 
 
-def test_qe_fs_bxsf_without_alat_keeps_b_in_units_of_one_over_alat(
-    user_warnings: pytest.LogCaptureFixture,
-) -> None:
+def test_qe_fs_bxsf_without_alat_keeps_b_in_units_of_one_over_alat() -> None:
     """With no QE output to supply alat, b stays as written and the user is warned."""
-    lattice = BxsfParser.from_str(_bxsf(QE_FS_HEADER, AL_FS_VECTORS)).reciprocal_lattice
+    with user_warning(__file__, match="alat was found"):
+        lattice = BxsfParser.from_str(_bxsf(QE_FS_HEADER, AL_FS_VECTORS)).reciprocal_lattice
 
     assert lattice is not None
     assert np.allclose(lattice, [[-1, -1, 1], [1, 1, 1], [-1, 1, -1]])
-    assert "alat was found" in user_warnings.text
 
 
 def test_abinit_bxsf_keeps_b_as_written() -> None:
@@ -257,15 +242,13 @@ def test_wannier90_bxsf_drops_the_two_pi() -> None:
     assert np.allclose(lattice, np.eye(3) * 0.25)
 
 
-def test_unknown_writer_assumes_the_two_pi_and_warns(
-    user_warnings: pytest.LogCaptureFixture,
-) -> None:
+def test_unknown_writer_assumes_the_two_pi_and_warns() -> None:
     """A file with no writer signature is read in the XCrySDen/Wannier90 convention."""
     b = 2 * np.pi / 4
     vectors = f"    {b} 0.0 0.0\n    0.0 {b} 0.0\n    0.0 0.0 {b}\n"
     unknown_bxsf = BXSF_STR.replace("    1.0 0.0 0.0\n    0.0 1.0 0.0\n    0.0 0.0 1.0\n", vectors)
-    lattice = BxsfParser.from_str(unknown_bxsf).reciprocal_lattice
+    with user_warning(__file__, match="writer not recognised"):
+        lattice = BxsfParser.from_str(unknown_bxsf).reciprocal_lattice
 
     assert lattice is not None
     assert np.allclose(lattice, np.eye(3) * 0.25)
-    assert "writer not recognised" in user_warnings.text
