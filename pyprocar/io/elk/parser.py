@@ -1,6 +1,7 @@
 """Elk DFT code parser orchestrator."""
 
 import logging
+import re
 from functools import cached_property
 from pathlib import Path
 
@@ -246,7 +247,36 @@ class ElkParser(BaseParser):
             nspin=self.nspin,
             natoms=len(filepaths),
             task=task,
+            irrep_basis=task == 22 and self._task_22_irrep_basis(),
         )
+
+    def _task_22_irrep_basis(self) -> bool:
+        """Whether task 22 wrote its (l,m) characters in the irreducible-representation basis.
+
+        Elk 10.7.8 and later do so unless elk.in sets lmirep to .false.; they also write
+        ELMIREP.OUT, which task 10 writes in every version.
+        """
+        if self._elkin is None or not self._elkin.lmirep:
+            return False
+        info = self.dirpath / "INFO.OUT"
+        version = (
+            re.search(r"Elk code version (\d+)\.(\d+)\.(\d+)", info.read_text())
+            if info.exists()
+            else None
+        )
+        if version is not None:
+            return tuple(int(part) for part in version.groups()) >= (10, 7, 8)
+        if not (self.dirpath / "ELMIREP.OUT").exists():
+            return False
+        if 10 not in self._elkin.tasks:
+            return True
+        warn_user(
+            f"{self.dirpath} has ELMIREP.OUT, which task 10 or task 22 of Elk 10.7.8 and later"
+            + " writes, and no INFO.OUT with the Elk version, so pyprocar cannot tell whether the"
+            + " task-22 band characters are in the irreducible-representation basis. They are"
+            + " named by their Ylm slots; add INFO.OUT to name them by the basis Elk used."
+        )
+        return False
 
     # DOS parser (lazy initialization)
 

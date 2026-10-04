@@ -106,6 +106,13 @@ class ElkIn:
         return bool(rows) and bool_fortran(rows[0][0])
 
     @cached_property
+    def lmirep(self) -> bool:
+        """Whether (l,m) characters go to the irreducible-representation basis (Elk default .true.)."""
+        block = block_lines(self._lines, "lmirep")
+        rows = [line.split() for line in block or [] if line.strip()]
+        return not rows or bool_fortran(rows[0][0])
+
+    @cached_property
     def nspin(self) -> int:
         """Number of spin channels (1 or 2)."""
         return 2 if self.spinpol else 1
