@@ -13,6 +13,7 @@ matplotlib.use("Agg")
 
 import matplotlib.pyplot as plt
 import numpy as np
+import pytest
 import pyvista as pv
 
 # ------------------------------------------------------------------
@@ -408,3 +409,15 @@ class TestShowColorbarEnum:
 
         result = ShowColorbar.from_string(ShowColorbar.SINGLE)
         assert result == ShowColorbar.SINGLE
+
+
+@pytest.mark.parametrize("field", ["scalars", "vectors"])
+def test_plot_warns_when_the_named_field_is_missing(field):
+    from pyprocar.plotter.fs_slice_plot import FermiSlicePlotter
+
+    sphere = pv.Sphere()
+    assert sphere.active_scalars_name is None and sphere.active_vectors_name is None
+
+    with pytest.warns(UserWarning, match=f"{field.title()} name spin_texture not found"):
+        FermiSlicePlotter(sphere).plot(**{f"{field}_name": "spin_texture"})
+    plt.close("all")
