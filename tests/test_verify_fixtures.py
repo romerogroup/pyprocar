@@ -368,6 +368,27 @@ def test_gc_removes_read_only_work_and_never_unlocks_a_fixture_it_links_to(harne
     assert (harness.data_dir / "examples/bands/x/PROCAR").read_text() == "x"
 
 
+@pytest.mark.guards_existing_behaviour(reason="origin/dev's gc already keeps a run whose pid is alive")
+def test_gc_keeps_the_work_of_a_run_in_progress_and_removes_a_finished_one(harness):
+    finished = subprocess.Popen(["true"])
+    finished.wait()
+    runs = {}
+    for name, pid in (("live", os.getpid()), ("done", finished.pid)):
+        runs[name] = _run_dir(harness, name)
+        (runs[name] / "work/calc").mkdir(parents=True)
+        (runs[name] / ".pid").write_text(str(pid))
+        hour_ago = (runs[name] / "work").stat().st_mtime - 3600
+        os.utime(runs[name] / "work", (hour_ago, hour_ago))
+
+    out = harness.verify("gc", "0")
+
+    assert out.returncode == 0, out.stderr
+    assert (runs["live"] / "work/calc").is_dir()
+    assert not (runs["done"] / "work").exists()
+    live_work = runs["live"].resolve() / "work"
+    assert f"keeping {live_work} (run in progress, pid {os.getpid()})" in out.stdout.splitlines()
+
+
 def _doctor_lines(harness) -> list[str]:
     _prime(harness)
     out = harness.verify("doctor")
