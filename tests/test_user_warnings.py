@@ -273,7 +273,30 @@ def test_the_checks_flag_each_loud_call_and_each_lowered_level(tmp_path):
             "first, second = logging.getLogger('user'), logging.getLogger('pyprocar')",
             "first.warning('tuple target')",
             "second.warning('package log')",
+            "def local_scope():",
+            "    user_logger = logging.getLogger(__name__)",
+            "    user_logger.warning('function-local package log')",
+            "def module_scope():",
+            "    user_logger.warning('module-level user logger in a function')",
+            "class Holder:",
+            "    def __init__(self):",
+            "        self.log = logging.getLogger('user')",
+            "    def run(self):",
+            "        self.log.error('user logger on self')",
+            "class Other:",
+            "    def __init__(self):",
+            "        self.log = logging.getLogger(__name__)",
+            "    def run(self):",
+            "        self.log.error('package log on self in another class')",
+            "from pkg import reexported",
+            "reexported.warning('re-exported through a package __init__')",
+            "lambda user_logger: user_logger.warning('lambda argument')",
         ],
+    )
+    (tmp_path / "pkg").mkdir()
+    package = _write(tmp_path / "pkg" / "__init__.py", ["from .impl import reexported"])
+    impl = _write(
+        tmp_path / "pkg" / "impl.py", ["import logging", "reexported = logging.getLogger('user')"]
     )
     test_module = _write(
         tmp_path / "test_module.py",
@@ -301,13 +324,19 @@ def test_the_checks_flag_each_loud_call_and_each_lowered_level(tmp_path):
             "warnings.warn('no stacklevel')",
             "w('imported warn')",
             "warnings.catch_warnings()",
+            "import warnings as wm",
+            "wm.warn('aliased module')",
+            "warnings.warn_explicit('explicit', UserWarning, 'f.py', 1)",
+            "from warnings import warn_explicit",
+            "warn_explicit('imported explicit', UserWarning, 'f.py', 1)",
+            "wm.simplefilter('ignore')",
         ],
     )
 
-    loud = loud_user_logger_calls([exporter, module], root=tmp_path)
+    loud = loud_user_logger_calls([exporter, module, package, impl], root=tmp_path)
 
-    assert _line_numbers(loud) == [6, 7, 10, 11, 12, 14, 15, 16, 18, 20]
+    assert _line_numbers(loud) == [6, 7, 10, 11, 12, 14, 15, 16, 18, 20, 26, 31, 38]
     assert "warnings.warn" in loud[0]
     assert _line_numbers(user_logger_lowered_in([test_module], root=tmp_path)) == [3, 6, 8]
     assert _line_numbers(bare_user_warning_asserts([test_module])) == [10]
-    assert _line_numbers(raw_warnings_warn_calls([raw])) == [3, 4]
+    assert _line_numbers(raw_warnings_warn_calls([raw])) == [3, 4, 7, 8, 10]
