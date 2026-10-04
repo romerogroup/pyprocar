@@ -1,6 +1,14 @@
 
 ___
 
+# Unreleased
+
+##### Breaking changes
+- `pyprocar.autobandsplot` no longer writes `report.txt` into the working directory. It writes the analysis report only to the path given as `report=` (for example `report="report.txt"`); with the default `report=None` it writes no file.
+- The scatter plot mode member is now spelled `SCATTER` in `BandStructureMode` and `UnfoldPlotMode`. The old `SACATTER` spelling still works as a deprecated alias of the same value, and `mode="scatter"` is unchanged.
+
+___
+
 # v6.5.0 (06-20-2025)
 
 ##### Bugs
