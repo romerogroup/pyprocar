@@ -99,14 +99,14 @@ def call_filter(args):
     """
 
     pyprocar.filter(
-        args.infile,
-        args.outfile,
+        args.inFile,
+        args.outFile,
         atoms=args.atoms,
         orbitals=args.orbitals,
         orbital_names=args.orbital_names,
         bands=args.bands,
         spin=args.spin,
-        human_atoms=args.human_atoms,
+        human_atoms=args.human,
     )
 
 

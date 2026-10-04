@@ -149,11 +149,24 @@ def compute_plane_info(
     u, v = get_orthonormal_basis(normal=normal_arr)
     plane_points = transform_points_to_uv(slice_mesh.points, u, v)
     u_limits, v_limits = find_plane_limits(plane_points)
-    u_grid, v_grid = get_uv_grid(
-        grid_interpolation=grid_interpolation,
-        u_limits=u_limits,
-        v_limits=v_limits,
-    )
+    # The k-mesh is regular in fractional coordinates, so its slice is a parallelogram in
+    # Cartesian space; a grid over its bounding box puts up to half the points outside the data.
+    # The grid is regular in the two fractional coordinates that span the plane instead, pulled in
+    # from the edges by far more than rounding so no edge point falls outside the triangulation.
+    lattice = np.asarray(ebs.reciprocal_lattice, dtype=float)
+    frac_points = slice_mesh.points @ np.linalg.inv(lattice)
+    frac_normal = lattice @ normal_arr if as_cartesian else normal_arr.astype(float)
+    across = int(np.argmax(np.abs(frac_normal)))
+    along = [(across + 1) % 3, (across + 2) % 3]
+    low, high = frac_points[:, along].min(axis=0), frac_points[:, along].max(axis=0)
+    inset = 1e-12 * (high - low)
+    frac_a, frac_b = get_uv_grid(grid_interpolation, *zip(low + inset, high - inset, strict=True))
+    frac = np.zeros((*frac_a.shape, 3))
+    frac[..., along] = np.stack([frac_a, frac_b], axis=-1)
+    level = np.mean(frac_points @ frac_normal)
+    frac[..., across] = (level - frac @ frac_normal) / frac_normal[across]
+    cart = frac @ lattice
+    u_grid, v_grid = cart @ u, cart @ v
     uv_grid_points = get_uv_grid_points(u_grid, v_grid)
 
     return PlaneInfo(
@@ -192,20 +205,13 @@ def _generate_single_band_surface(
     pv.PolyData
         Surface mesh with z-values set to energy
     """
-    n_grid_points = u_grid.size
-    surface_points = np.zeros((n_grid_points, 3))
-    surface_points[:, 0] = u_grid.ravel()
-    surface_points[:, 1] = v_grid.ravel()
-    surface_points[:, 2] = scalars
-
-    grid = pv.StructuredGrid()
-    grid.points = surface_points
-    grid.dimensions = (u_grid.shape[0], v_grid.shape[0], 1)
-    unstructured = grid.cast_to_unstructured_grid()
-    surface = unstructured.extract_surface()
-    if not isinstance(surface, pv.PolyData):
-        raise TypeError(f"Expected PolyData, got {type(surface)}")
-    return surface
+    surface_points = np.column_stack([u_grid.ravel(), v_grid.ravel(), scalars])
+    index = np.arange(u_grid.size).reshape(u_grid.shape)
+    quads = np.stack(
+        [index[:-1, :-1], index[1:, :-1], index[1:, 1:], index[:-1, 1:]], axis=-1
+    ).reshape(-1, 4)
+    faces = np.column_stack([np.full(len(quads), 4), quads]).ravel()
+    return pv.PolyData(surface_points, faces)
 
 
 def _merge_band_surfaces(

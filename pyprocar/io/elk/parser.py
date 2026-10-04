@@ -1,6 +1,7 @@
 """Elk DFT code parser orchestrator."""
 
 import logging
+import re
 from functools import cached_property
 from pathlib import Path
 
@@ -17,6 +18,9 @@ from pyprocar.io.elk.fermi import ElkFermi
 from pyprocar.io.elk.geometry import ElkGeometry
 from pyprocar.io.elk.projections import ElkProjections
 from pyprocar.utils.log_utils import warn_user
+
+# Elk 6 writes "Elk version 6.3.02 started"; later versions write "Elk code version 11.2.3".
+_ELK_VERSION = re.compile(r"Elk (?:code )?version (\d+)\.(\d+)\.(\d+)")
 
 logger = logging.getLogger(__name__)
 
@@ -246,7 +250,35 @@ class ElkParser(BaseParser):
             nspin=self.nspin,
             natoms=len(filepaths),
             task=task,
+            irrep_basis=task == 22 and self._task_22_irrep_basis(),
         )
+
+    def _task_22_irrep_basis(self) -> bool:
+        """Whether task 22 wrote its (l,m) characters in the irreducible-representation basis.
+
+        Elk 10.7.8 and later do so unless elk.in sets lmirep to .false. Without the version from
+        INFO.OUT the basis is unknown: task 22 of those versions writes ELMIREP.OUT, but task 10
+        of every version does too, so the characters keep their Ylm slot names.
+        """
+        if self._elkin is None or not self._elkin.lmirep:
+            return False
+        info = self.dirpath / "INFO.OUT"
+        version = None
+        if info.exists():
+            with info.open(encoding="utf-8", errors="replace") as lines:
+                version = next((m for line in lines if (m := _ELK_VERSION.search(line))), None)
+        if version is not None:
+            return tuple(int(part) for part in version.groups()) >= (10, 7, 8)
+        if (self.dirpath / "ELMIREP.OUT").exists():
+            missing = "INFO.OUT names no Elk version" if info.exists() else "there is no INFO.OUT"
+            warn_user(
+                f"{self.dirpath} has ELMIREP.OUT, which task 10 of any Elk version or task 22 of"
+                + f" Elk 10.7.8 and later writes, and {missing}, so pyprocar cannot tell whether"
+                + " the task-22 band characters are in the irreducible-representation basis. They"
+                + " are named by their Ylm slots; add the INFO.OUT of the run to name them by the"
+                + " basis Elk used."
+            )
+        return False
 
     # DOS parser (lazy initialization)
 

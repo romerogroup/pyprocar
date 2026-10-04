@@ -46,7 +46,7 @@ The proven end state (SrVO3, non-spin-polarized, d6d4aaa7) is:
 ## Gotchas
 
 These crash at d6d4aaa7. They are product gaps: record them as failures, and don't route around them.
-- **Object `plot_overlay`**: `AttributeError: 'Property' object has no attribute 'ndim'` at `plotter/bs_plot.py:986`. The legacy `overlay_species` mode works.
+- **Object `plot_overlay`**: `AttributeError: 'Property' object has no attribute 'ndim'` at `plotter/bs_plot.py:986` when given `ebs.bands`; pass `np.asarray(ebs.bands.value)`. The legacy `overlay_species` mode works. `build_overlay_orbitals_weights` and `build_overlay_weights({'V': ['d']})` work since #285 and take the shells from the orbital names: on SrVO3 O atoms 2-4 give s 473.483, p 1153.606 and d 0.0, equal to `compute_projected_sum` over the same orbitals.
 - **`plot(..., vectors_data=..., vectors_mode="quiver")`**, as written in `new_bands_examples.py`: `vectors_mode` falls through to `Line2D.set()` and raises `AttributeError`. Use `plot_quiver` instead.
 
 Other notes:

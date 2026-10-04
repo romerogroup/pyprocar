@@ -16,6 +16,12 @@ def lm_names(n_columns: int) -> list[str]:
     return [f"Y{ang}{m}" for ang in range(lmax + 1) for m in range(-ang, ang + 1)]
 
 
+def irrep_names(n_columns: int) -> list[str]:
+    """Names of (l, i) irreducible-representation columns, i in ELMIREP.OUT order."""
+    lmax = round(n_columns**0.5) - 1
+    return [f"Y{ang}_ir{i}" for ang in range(lmax + 1) for i in range(1, 2 * ang + 2)]
+
+
 _LAYOUTS: dict[int, tuple[slice, Callable[[int], list[str]]]] = {
     21: (slice(1, None), lambda n: _L_NAMES[:n]),
     22: (slice(None), lm_names),
@@ -32,7 +38,9 @@ class ElkProjections:
     distance and the energy. The columns after them depend on the task:
 
     - 21: the sum over l, then the l = 0..lmaxdb characters
-    - 22: the (l,m) characters, l = 0..lmaxdb and m = -l..l
+    - 22: the (l,m) characters, l = 0..lmaxdb and m = -l..l; with ``irrep_basis``
+      the 2l+1 columns of each l are the site's irreducible-representation basis
+      functions instead, which Elk 10.7.8 and later write unless lmirep is .false.
     - 23: the spin-up and spin-down characters (spin-polarized runs only)
     - 24: the moment character, m_z for a collinear run
 
@@ -55,6 +63,9 @@ class ElkProjections:
         Number of atoms
     task : int
         The Elk task, 21 to 24, that wrote the files
+    irrep_basis : bool
+        Whether task 22 wrote the characters in the irreducible-representation basis;
+        only the parser's task-22 check sets it
     """
 
     def __init__(
@@ -66,7 +77,9 @@ class ElkProjections:
         nspin: int = 1,
         natoms: int = 0,
         task: int = 22,
+        irrep_basis: bool = False,
     ):
+        self._irrep_basis: bool = irrep_basis
         self._filepaths: list[Path] = filepaths or []
         self._file_strs: list[str] = file_strs or []
         self._nkpoints: int = nkpoints
@@ -133,7 +146,10 @@ class ElkProjections:
     @cached_property
     def orbital_names(self) -> list[str]:
         """Names of the orbital axis of ``projected`` for this task."""
-        return _LAYOUTS[self._task][1](self._characters.shape[-1])
+        n_columns = self._characters.shape[-1]
+        if self._irrep_basis:
+            return irrep_names(n_columns)
+        return _LAYOUTS[self._task][1](n_columns)
 
     @cached_property
     def projected(self) -> npt.NDArray[np.float64] | None:

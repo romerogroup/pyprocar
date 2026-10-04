@@ -16,8 +16,10 @@ class UnfoldPlotMode(Enum):
         Represents the band structure in a simple, where the colors are the different bands.
     PARAMETRIC : str
         Represents the band structure in a parametric form, summing over the projections.
-    SACATTER : str
+    SCATTER : str
         Represents the band structure in a scatter plot, where the colors are the different bands.
+    SACATTER : str
+        Deprecated alias of SCATTER, the misspelled name earlier releases used.
     ATOMIC : str
         Represents the band structure in an atomic level plot, plots singlr kpoint bands.
     OVERLAY : str
@@ -32,11 +34,12 @@ class UnfoldPlotMode(Enum):
 
     PLAIN = "plain"
     PARAMETRIC = "parametric"
-    SACATTER = "scatter"
+    SCATTER = "scatter"
     ATOMIC = "atomic"
     OVERLAY = "overlay"
     OVERLAY_SPECIES = "overlay_species"
     OVERLAY_ORBITALS = "overlay_orbitals"
+    SACATTER = "scatter"
 
 
 class UnfoldMode(Enum):
@@ -65,7 +68,7 @@ class UnfoldingConfig(BandStructureConfig):
 
     Parameters
     ----------
-    color: str, optional (default 'black')
+    color: str, optional (default '#eeeeee')
         Sets the overall color for plot lines.
 
     Plot Appearance
@@ -109,7 +112,7 @@ class UnfoldingConfig(BandStructureConfig):
     clim: Tuple[float], optional
         Color scale limits for the color bar.
     opacity: List[float], optional
-        Opacities for the plot lines, default is [1.0, 1.0].
+        Opacities for the plot lines, default is [0.3, 0.3].
     plot_color_bar: bool, optional (default True)
         If true, a color bar will be shown on the plot.
 

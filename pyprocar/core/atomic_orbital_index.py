@@ -151,19 +151,22 @@ LEGACY_ORBITAL_NAMES: dict[str, int | list[int]] = {
 }
 
 
-_SHELL_LETTERS = "spdf"
+SHELL_LETTERS = ("s", "p", "d", "f")
 _LETTER_ORBITAL_NAME = re.compile(r"\d*([spdf])[_xyz0-9^()\- ]*")
-_ELK_ORBITAL_NAME = re.compile(r"Y(\d)-?\d+")
+_ELK_ORBITAL_NAME = re.compile(r"Y(\d)(?:-?\d+|_ir\d+)")
 
 
 def _angular_momentum(orbital_name: str) -> int | None:
-    """The l of an orbital name a parser writes (``px``, ``d_z^2``, ``x2-y2``, Elk's ``Y1-1``)."""
+    """The l of an orbital name a parser writes.
+
+    For example ``px``, ``d_z^2``, ``x2-y2``, or Elk's ``Y1-1`` and ``Y1_ir2``.
+    """
     if orbital_name == "x2-y2":
         return 2
     if elk := _ELK_ORBITAL_NAME.fullmatch(orbital_name):
         return int(elk[1])
     if letter := _LETTER_ORBITAL_NAME.fullmatch(orbital_name):
-        return _SHELL_LETTERS.index(letter[1])
+        return SHELL_LETTERS.index(letter[1])
     return None
 
 
@@ -183,9 +186,51 @@ def orbital_shells(orbital_names: Sequence[str] | None) -> tuple[tuple[str, tupl
             by_l.setdefault(ang, []).append(index)
     return tuple(
         (letter, tuple(by_l[ang]))
-        for ang, letter in enumerate(_SHELL_LETTERS)
+        for ang, letter in enumerate(SHELL_LETTERS)
         if len(by_l.get(ang, ())) == 2 * ang + 1
     )
+
+
+def present_shells(source) -> dict[str, list[int]]:
+    """The s, p, d and f shells among ``source``'s orbitals, by the names it carries.
+
+    A shell is either its 2l+1 orbitals or one column named by its letter, the sum
+    that Elk's task 21 and ``pyprocar.filter(orbital_names=[...])`` write.
+    """
+    shells = {
+        letter: list(indices)
+        for letter, indices in orbital_shells(source.orbital_names)
+        if max(indices) < source.n_orbitals
+    }
+    for index, name in enumerate(source.orbital_names or ()):
+        if name in SHELL_LETTERS:
+            shells.setdefault(name, [index])
+    return {letter: shells[letter] for letter in SHELL_LETTERS if letter in shells}
+
+
+def orbital_indices(orbitals, source):
+    """Resolve shell names (s, p, d, f) to the orbitals of ``source``; indices pass through."""
+    if orbitals is None or len(orbitals) == 0:
+        return orbitals
+    shells = present_shells(source)
+    indices = []
+    for orbital in orbitals:
+        if not isinstance(orbital, str):
+            indices.append(orbital)
+        elif orbital in shells:
+            indices.extend(shells[orbital])
+        elif orbital in SHELL_LETTERS:
+            raise ValueError(
+                f"orbitals names the {orbital} shell, but the orbitals {source.orbital_names}"
+                + f" hold no whole {orbital} shell. Select orbitals by index."
+            )
+        else:
+            raise ValueError(
+                f"orbitals takes orbital indices or the shell names {', '.join(SHELL_LETTERS)},"
+                + f" not {orbital!r}. Select one orbital by its index, its position in the"
+                + " orbital names, for example 8 for d x2-y2 in VASP's order."
+            )
+    return indices
 
 
 def _normalize_indices(indices: Iterable[int] | None) -> list[int]:
@@ -1082,6 +1127,10 @@ class ProjectionSelectionResolver:
 
 
 __all__ = [
+    "SHELL_LETTERS",
+    "orbital_indices",
+    "orbital_shells",
+    "present_shells",
     "AZIMUTHAL_ORBITAL_ORDER",
     "CONVENTIONAL_CUBIC_ORBITAL_ORDER",
     "NONCOLINEAR_AZIMUTHAL_ORBITAL_ORDER",

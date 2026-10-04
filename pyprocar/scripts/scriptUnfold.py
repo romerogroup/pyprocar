@@ -7,12 +7,12 @@ import numpy as np
 from pyprocar.cfg import ConfigFactory, ConfigManager, PlotType
 from pyprocar.cfg.unfold import UnfoldingConfig, UnfoldMode, UnfoldPlotMode
 from pyprocar.core import ElectronicBandStructurePath, Structure
+from pyprocar.core.atomic_orbital_index import orbital_indices
 from pyprocar.core.projection import selection_resolver
 from pyprocar.core.property_store import Property
 from pyprocar.plotter.bs_plot import BandStructurePlotter
 from pyprocar.scripts._selection import (
     as_lim,
-    orbital_indices,
     per_channel,
     projection_components,
     resolve_spins,
@@ -211,7 +211,7 @@ def unfold(
             bands,
             scalars_data=scalars,
             widths_data=weights if weight_mode is not UnfoldMode.COLOR else None,
-            scalars_mode="scatter" if plot_mode is UnfoldPlotMode.SACATTER else "parametric",
+            scalars_mode="scatter" if plot_mode is UnfoldPlotMode.SCATTER else "parametric",
             scalars_cmap=config.cmap,
             scalars_clim=config.clim,
             color=per_channel(config.spin_colors, n_channels) if scalars is None else None,

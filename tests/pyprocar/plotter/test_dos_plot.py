@@ -273,6 +273,24 @@ def test_vertical_orientation_swaps_axes():
     plt.close(plotter.fig)
 
 
+def test_vertical_spin_polarized_total_labels_and_flips_each_channel():
+    energies = np.linspace(-1.0, 1.0, 5)
+    up = np.array([0.1, 0.2, 0.3, 0.4, 0.5])
+    down = np.array([0.3, 0.4, 0.5, 0.6, 0.7])
+    dos = DensityOfStates(energies=energies, total=np.stack([up, down], axis=1))
+
+    plotter = DOSPlotter(orientation="vertical")
+    plotter.plot(dos.total)
+
+    lines = _data_lines(plotter.ax)
+    assert [line.get_label() for line in lines] == ["$Total - \\uparrow$", "$Total - \\downarrow$"]
+    np.testing.assert_allclose(lines[0].get_xdata(), up)
+    np.testing.assert_allclose(lines[1].get_xdata(), -down)
+    for line in lines:
+        np.testing.assert_allclose(line.get_ydata(), energies)
+    plt.close(plotter.fig)
+
+
 # ------------------------------------------------------------------
 # Phase 2: Initialization Tests
 # ------------------------------------------------------------------

@@ -50,8 +50,6 @@ class FermiSurface2DConfig(BaseConfig):
     ----------
     add_axes_labels : bool
         Flag to determine if axes labels should be added, default is True.
-    add_legend : bool
-        Flag to determine if a legend should be added, default is False.
     plot_color_bar : bool
         Flag to determine if a color bar should be plotted, default is False.
     cmap : str

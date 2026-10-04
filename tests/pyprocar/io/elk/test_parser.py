@@ -1,11 +1,14 @@
 """Tests for ElkParser integration."""
 
 import logging
+import shutil
+import warnings
 
 import numpy as np
 import pytest
 
 from pyprocar.core import DensityOfStates, Structure
+from pyprocar.core.atomic_orbital_index import orbital_shells
 from pyprocar.core.ebs import ElectronicBandStructure, ElectronicBandStructurePath
 from pyprocar.core.kpoints import KPath
 from pyprocar.io.elk import ElkParser
@@ -758,3 +761,113 @@ def test_task_20_reads_bands_from_band_s_files_without_their_characters(tmp_path
     assert ebs.bands.to_array()[0, 0, 0] == pytest.approx(
         (-2.401220419 + 0.3218543102) * 27.211386245988
     )
+
+
+YLM_NAMES = [f"Y{ang}{m}" for ang in range(4) for m in range(-ang, ang + 1)]
+IRREP_NAMES = [f"Y{ang}_ir{i}" for ang in range(4) for i in range(1, 2 * ang + 2)]
+ELMIREP_OUT = "\nSpecies :    1 (Sr), atom :    1\n l =  0, m =  0, lm=   1 :    528.0\n"
+
+
+def elk_11_info(version):
+    """The INFO.OUT header that writeinfo.f90 of Elk 11.2.3 writes."""
+    label = f"Elk code version {version}"
+    rule = "─" * (len(label) + 2)
+    return f"\n┌{rule}┐\n│ {label} │\n└{rule}┘\n"
+
+
+ELK_6_3_INFO = (
+    "+----------------------------+\r\n| Elk version 6.3.02 started |\r\n"
+    "+----------------------------+\r\n"
+)
+
+
+def _task_22_dir(tmp_path, info=None, elmirep=False, extra_elkin="", tasks="  0\n  22\n"):
+    calc_dir = _band_dir(
+        tmp_path, "22", {"BAND_S01_A0001.OUT": BAND_S01_A0001, "BAND_S02_A0001.OUT": BAND_S02_A0001}
+    )
+    (calc_dir / "elk.in").write_text(ELKIN_BANDS.replace("  0\n  22\n", tasks) + extra_elkin)
+    if info is not None:
+        (calc_dir / "INFO.OUT").write_text(info, encoding="utf-8")
+    if elmirep:
+        (calc_dir / "ELMIREP.OUT").write_text(ELMIREP_OUT)
+    return calc_dir
+
+
+@pytest.mark.parametrize(
+    "setup",
+    [
+        {"info": elk_11_info("10.7.8")},
+        {"info": elk_11_info("11.2.3"), "elmirep": True},
+    ],
+    ids=["10.7.8", "11.2.3"],
+)
+def test_task_22_characters_from_elk_10_7_8_are_named_by_irreducible_representation(
+    tmp_path, setup
+):
+    ebs = ElkParser(_task_22_dir(tmp_path, **setup)).ebs
+
+    assert ebs is not None
+    assert ebs.orbital_names == IRREP_NAMES
+    assert [letter for letter, _ in orbital_shells(ebs.orbital_names)] == ["s", "p", "d", "f"]
+
+
+@pytest.mark.guards_existing_behaviour(
+    reason="Ylm-basis runs keep the names they had; the irrep-basis tests are the red ones"
+)
+@pytest.mark.parametrize(
+    "setup",
+    [
+        {"info": elk_11_info("10.7.8"), "extra_elkin": "\nlmirep\n  .false.\n"},
+        {"info": elk_11_info("10.7.7")},
+        {"info": ELK_6_3_INFO, "elmirep": True},
+        {},
+    ],
+    ids=["lmirep-false", "10.7.7", "6.3-with-task-10-elmirep", "no-version-no-elmirep"],
+)
+def test_task_22_characters_in_the_ylm_basis_keep_their_l_m_names(tmp_path, setup):
+    calc_dir = _task_22_dir(tmp_path, **setup)
+
+    with warnings.catch_warnings():
+        warnings.filterwarnings("error", message=".*INFO.OUT")
+        ebs = ElkParser(calc_dir).ebs
+
+    assert ebs is not None
+    assert ebs.orbital_names == YLM_NAMES
+
+
+@pytest.mark.parametrize(
+    ("setup", "match"),
+    [
+        ({"elmirep": True}, "no INFO.OUT"),
+        ({"elmirep": True, "tasks": "  0\n  10\n  22\n"}, "no INFO.OUT"),
+        ({"elmirep": True, "info": "\n| Ground-state run |\n"}, "INFO.OUT names no Elk version"),
+    ],
+    ids=["no-info", "no-info-task-10", "info-without-version"],
+)
+def test_task_22_basis_that_cannot_be_told_apart_keeps_l_m_names_and_warns(tmp_path, setup, match):
+    calc_dir = _task_22_dir(tmp_path, **setup)
+
+    with user_warning(__file__, match=match):
+        ebs = ElkParser(calc_dir).ebs
+        assert ebs is not None
+        assert ebs.orbital_names == YLM_NAMES
+
+
+@pytest.mark.data
+@pytest.mark.guards_existing_behaviour(
+    reason="Elk 6.3 always wrote Ylm characters; #285's first head renamed them by irrep"
+)
+def test_real_elk_6_3_bands_beside_a_task_10_elmirep_keep_their_l_m_names(tmp_path):
+    calc_dir = tmp_path / "bands"
+    shutil.copytree(
+        ELK_BANDS_SP,
+        calc_dir,
+        ignore=shutil.ignore_patterns("EVEC*.OUT", "STATE.OUT", "VARIABLES.OUT"),
+    )
+    shutil.copy(ELK_BANDS_SP.parent / "dos" / "ELMIREP.OUT", calc_dir)
+
+    with warnings.catch_warnings():
+        warnings.filterwarnings("error", message=".*INFO.OUT")
+        ebs = ElectronicBandStructurePath.from_code("elk", calc_dir)
+
+    assert ebs.orbital_names == YLM_NAMES

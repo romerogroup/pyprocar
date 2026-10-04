@@ -25,6 +25,7 @@ The proven end state (SrVO3, non-spin-polarized, d6d4aaa7):
 - `obj_total`: `total_shape` is `[6000, 1]` and `total_max` is 62.91. The energy range is about `[-31.1, 12.6]` eV, already Fermi-shifted. The PNG shows a non-zero curve with peaks near -29, -13 and 0 eV.
 - `obj_total_colored_by_projection`: `proj_le_total` is true, with 1 colored collection plus a colorbar axis.
 - `obj_vertical_projected_legend`: the legend reads `Total`, `O_{2-4}-(p)`.
+- Vertical spin-polarized total (#285, `test_vertical_spin_polarized_total_labels_and_flips_each_channel`): on `data/examples/dos/spin-polarized`, `dosplot(orientation='vertical')` and the DOS panel of `bandsdosplot` label the channels `Total - ↑` and `Total - ↓` and mirror the down channel to negative DOS. Before #285 both read `Total - ↑` and the down channel was not mirrored.
 - `obj_new_files_in_calc` is `[]`. `from_code` writes `dos.pkl` only when `use_cache=True`.
 - `legacy_dosplot_plain` and `legacy_dosplot_parametric`: xlim `[-6, 4]`, with 3 and 2 lines. The driver does not run the other seven modes.
 - `side_effects.txt` is empty.

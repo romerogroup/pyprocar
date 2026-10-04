@@ -98,12 +98,20 @@ class ElkIn:
         """Check if this is a band structure calculation (tasks 20 to 24)."""
         return any(t in self.tasks for t in [20, 21, 22, 23, 24])
 
+    def _logical(self, key: str, default: bool) -> bool:
+        block = block_lines(self._lines, key)
+        rows = [line.split() for line in block or [] if line.strip()]
+        return bool_fortran(rows[0][0]) if rows else default
+
     @cached_property
     def spinpol(self) -> bool:
         """Spin polarization flag."""
-        block = block_lines(self._lines, "spinpol")
-        rows = [line.split() for line in block or [] if line.strip()]
-        return bool(rows) and bool_fortran(rows[0][0])
+        return self._logical("spinpol", False)
+
+    @cached_property
+    def lmirep(self) -> bool:
+        """Whether (l,m) characters go to the irreducible-representation basis (default .true.)."""
+        return self._logical("lmirep", True)
 
     @cached_property
     def nspin(self) -> int:

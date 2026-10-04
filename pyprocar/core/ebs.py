@@ -27,6 +27,8 @@ from pyprocar.core import kpoints
 from pyprocar.core.atomic_orbital_index import (
     CONVENTIONAL_CUBIC_ORBITAL_ORDER,
     ProjectionSelectionResolver,
+    orbital_indices,
+    present_shells,
 )
 from pyprocar.core.brillouin_zone import BrillouinZone
 from pyprocar.core.projection import (
@@ -41,7 +43,6 @@ from pyprocar.core.property_store import PointSet, Property
 from pyprocar.core.serializer import get_serializer
 from pyprocar.core.structure import Structure
 from pyprocar.utils import math, np_utils, physics, units
-from pyprocar.utils.info import orbital_names
 from pyprocar.utils.log_utils import warn_user
 from pyprocar.utils.unfolder import Unfolder
 
@@ -1481,30 +1482,17 @@ class ElectronicBandStructurePath(
         list[Property]
             List of Property objects, one per orbital group
         """
-        properties: list[Property] = []
-
-        # orbital_names dict maps "s" -> [0], "p" -> [1,2,3], etc.
-        orbital_groups = ["s", "p", "d", "f"]
-
-        for orb_name in orbital_groups:
-            if orb_name == "f" and self.n_orbitals <= 9:
-                continue
-
-            orb_indices = orbital_names.get(orb_name)
-            if orb_indices is None:
-                continue
-
-            prop = self.compute_projected_sum(
+        return [
+            self.compute_projected_sum(
                 atoms=atoms,
-                orbitals=orb_indices,
+                orbitals=indices,
                 spins=spins,
                 norm_mode=norm_mode,
-                label=orb_name,
-                name=f"overlay_orbital_{orb_name}",
+                label=letter,
+                name=f"overlay_orbital_{letter}",
             )
-            properties.append(prop)
-
-        return properties
+            for letter, indices in present_shells(self).items()
+        ]
 
     def build_overlay_weights(
         self,
@@ -1546,15 +1534,7 @@ class ElectronicBandStructurePath(
 
         for mapping in items_iter:
             for species_name, orbital_spec in mapping.items():
-                # Resolve orbital names to indices if needed
-                if len(orbital_spec) > 0 and isinstance(orbital_spec[0], str):
-                    resolved_orbitals: list[int] = []
-                    for orb_token in orbital_spec:
-                        orb_indices = orbital_names.get(orb_token, [])
-                        resolved_orbitals.extend(orb_indices)
-                    orbitals = resolved_orbitals
-                else:
-                    orbitals = [int(x) for x in orbital_spec]
+                orbitals = [int(index) for index in orbital_indices(orbital_spec, self)]
 
                 # Use species_orbital_map for proper label generation
                 species_orbital_map = {species_name: orbitals}

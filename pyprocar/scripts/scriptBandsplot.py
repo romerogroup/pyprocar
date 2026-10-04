@@ -14,11 +14,11 @@ from pyprocar.cfg import ConfigFactory, ConfigManager
 from pyprocar.cfg.band_structure import BandStructureConfig
 from pyprocar.cfg.base import PlotType
 from pyprocar.core import ElectronicBandStructureMesh, ElectronicBandStructurePath
+from pyprocar.core.atomic_orbital_index import orbital_indices
 from pyprocar.core.projection import selection_resolver
 from pyprocar.core.property_store import Property
 from pyprocar.plotter.bs_plot import BandStructurePlotter
 from pyprocar.scripts._selection import (
-    orbital_indices,
     per_channel,
     projection_components,
     resolve_spins,
@@ -42,8 +42,10 @@ class BandStructureMode(Enum):
         Represents the band structure in a simple, where the colors are the different bands.
     PARAMETRIC : str
         Represents the band structure in a parametric form, summing over the projections.
-    SACATTER : str
+    SCATTER : str
         Represents the band structure in a scatter plot, where the colors are the different bands.
+    SACATTER : str
+        Deprecated alias of SCATTER, the misspelled name earlier releases used.
     ATOMIC : str
         Represents the band structure in an atomic level plot, plots singlr kpoint bands.
     OVERLAY : str
@@ -58,12 +60,13 @@ class BandStructureMode(Enum):
 
     PLAIN = "plain"
     PARAMETRIC = "parametric"
-    SACATTER = "scatter"
+    SCATTER = "scatter"
     ATOMIC = "atomic"
     OVERLAY = "overlay"
     OVERLAY_SPECIES = "overlay_species"
     OVERLAY_ORBITALS = "overlay_orbitals"
     IPR = "ipr"
+    SACATTER = "scatter"
 
     @classmethod
     def from_str(cls, mode: str):
@@ -303,7 +306,7 @@ def bandsplot(
             plotter.plot(
                 bands,
                 scalars_data=scalars,
-                scalars_mode="scatter" if plot_mode == BandStructureMode.SACATTER else "parametric",
+                scalars_mode="scatter" if plot_mode == BandStructureMode.SCATTER else "parametric",
                 scalars_cmap=config.cmap,
                 scalars_clim=user_clim
                 or signed_clim(scalars)

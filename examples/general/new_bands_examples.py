@@ -140,8 +140,8 @@ test_bsplot_parametric(ebs)
 # Tests using specialized methods (quiver, overlay)
 test_bsplot_quiver(ebs)
 test_bsplot_overlay_species(ebs)
-test_bsplot_overlay_orbitals(ebs)  # Bug in build_overlay_orbitals_weights
-test_bsplot_overlay_generic(ebs)  # Bug in build_overlay_weights
+test_bsplot_overlay_orbitals(ebs)
+test_bsplot_overlay_generic(ebs)
 test_bsplot_multi_method_call(ebs)
 
 print(f"Time taken: {time.time() - start_time} seconds")

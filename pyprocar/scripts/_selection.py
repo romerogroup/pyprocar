@@ -4,52 +4,8 @@ from typing import NamedTuple
 
 import numpy as np
 
-from pyprocar.core.atomic_orbital_index import orbital_shells
+from pyprocar.core.atomic_orbital_index import orbital_indices, present_shells
 from pyprocar.core.property_store import Property
-
-SHELL_LETTERS = ("s", "p", "d", "f")
-
-
-def present_shells(source) -> dict[str, list[int]]:
-    """The s, p, d and f shells among ``source``'s orbitals, by the names it carries.
-
-    A shell is either its 2l+1 orbitals or one column named by its letter, the sum
-    that Elk's task 21 and ``pyprocar.filter(orbital_names=[...])`` write.
-    """
-    shells = {
-        letter: list(indices)
-        for letter, indices in orbital_shells(source.orbital_names)
-        if max(indices) < source.n_orbitals
-    }
-    for index, name in enumerate(source.orbital_names or ()):
-        if name in SHELL_LETTERS:
-            shells.setdefault(name, [index])
-    return {letter: shells[letter] for letter in SHELL_LETTERS if letter in shells}
-
-
-def orbital_indices(orbitals, source):
-    """Resolve shell names (s, p, d, f) to the orbitals of ``source``; indices pass through."""
-    if orbitals is None or len(orbitals) == 0:
-        return orbitals
-    shells = present_shells(source)
-    indices = []
-    for orbital in orbitals:
-        if not isinstance(orbital, str):
-            indices.append(orbital)
-        elif orbital in shells:
-            indices.extend(shells[orbital])
-        elif orbital in SHELL_LETTERS:
-            raise ValueError(
-                f"orbitals names the {orbital} shell, but the orbitals {source.orbital_names}"
-                + f" hold no whole {orbital} shell. Select orbitals by index."
-            )
-        else:
-            raise ValueError(
-                f"orbitals takes orbital indices or the shell names {', '.join(SHELL_LETTERS)},"
-                + f" not {orbital!r}. Select one orbital by its index, its position in the"
-                + " orbital names, for example 8 for d x2-y2 in VASP's order."
-            )
-    return indices
 
 
 class SpinSelection(NamedTuple):

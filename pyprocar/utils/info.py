@@ -1,12 +1,3 @@
-from pyprocar.core.atomic_orbital_index import (
-    ORBITAL_INDEX_LABEL_MAP,
-    OrbitalIndexer,
-)
-
-orbital_index_name_map = ORBITAL_INDEX_LABEL_MAP
-OrbitalOrdering = OrbitalIndexer
-orbital_names = OrbitalOrdering().flat_conventional
-
 elements = {
     "H": 1,
     "He": 2,

@@ -2,7 +2,6 @@ fermi surface 2d plotting Options
 =====================================================
 
 :func:`pyprocar.fermi2D` takes its plotting options as keyword arguments.
-It does not read ``pyprocar/cfg/fermi_surface_2d.yml``.
 
 mode
 ----
