@@ -37,7 +37,9 @@ def close_figures():
 
 def _copy_calc(tmp_path: Path) -> Path:
     dst = tmp_path / "calc"
-    shutil.copytree(CALC, dst, ignore=shutil.ignore_patterns("*.pkl", "CHG*", "WAVECAR", "*.h5"))
+    dst.mkdir()
+    for name in ("PROCAR", "OUTCAR", "POSCAR", "KPOINTS"):
+        shutil.copy(CALC / name, dst / name)
     return dst
 
 
@@ -54,8 +56,9 @@ def _ebs(calc: Path) -> ElectronicBandStructure:
     return ebs
 
 
-def _projected(ebs: ElectronicBandStructure) -> np.ndarray:
-    projected = ebs.projected
+@pytest.fixture(scope="module")
+def unfiltered() -> np.ndarray:
+    projected = _ebs(CALC).projected
     assert projected is not None
     return np.asarray(projected.value)
 
@@ -65,9 +68,10 @@ def _sum(ebs: ElectronicBandStructure, **selection) -> np.ndarray:
     return np.asarray(prop.value)
 
 
-def test_atom_filtered_procar_plots_each_group_of_atoms(tmp_path: Path) -> None:
+def test_atom_filtered_procar_plots_each_group_of_atoms(
+    tmp_path: Path, unfiltered: np.ndarray
+) -> None:
     calc = _filtered_calc(tmp_path, atoms=[[0], [1], [2, 3, 4]])
-    unfiltered = _projected(_ebs(CALC))
 
     _, ax = pyprocar.bandsplot(
         code="vasp", dirname=str(calc), mode="plain", fermi=FERMI, show=False
@@ -113,9 +117,10 @@ def test_atom_filtered_procar_refuses_species_selections(tmp_path: Path) -> None
         )
 
 
-def test_orbital_filtered_procar_labels_each_column_by_its_header_name(tmp_path: Path) -> None:
+def test_orbital_filtered_procar_labels_each_column_by_its_header_name(
+    tmp_path: Path, unfiltered: np.ndarray
+) -> None:
     calc = _filtered_calc(tmp_path, orbitals=[[0], [1, 2, 3]])
-    unfiltered = _projected(_ebs(CALC))
 
     _, ax = pyprocar.bandsplot(
         code="vasp", dirname=str(calc), mode="parametric", atoms=[1], orbitals=[1], show=False
@@ -146,4 +151,34 @@ def test_selecting_one_orbital_by_name_raises_whichever_name_the_header_uses(
     with pytest.raises(ValueError, match=r"orbitals takes orbital indices or the shell names"):
         pyprocar.bandsplot(
             code="vasp", dirname=str(calc), mode="parametric", orbitals=by_name, show=False
+        )
+
+
+def test_a_shell_name_selects_the_columns_its_header_names(tmp_path: Path) -> None:
+    calc = _filtered_calc(tmp_path, orbitals=[[1], [2], [3]], orbital_names=["py", "pz", "px"])
+    p_shell: Any = ["p"]
+
+    def colors(orbitals) -> np.ndarray:
+        _, ax = pyprocar.bandsplot(
+            code="vasp",
+            dirname=str(calc),
+            mode="parametric",
+            atoms=[1],
+            orbitals=orbitals,
+            show=False,
+        )
+        return np.concatenate(
+            [np.asarray(c.get_array()) for c in ax.collections if isinstance(c, LineCollection)]
+        )
+
+    np.testing.assert_array_equal(colors(p_shell), colors([0, 1, 2]))
+
+
+def test_a_shell_name_raises_when_the_header_names_no_such_shell(tmp_path: Path) -> None:
+    calc = _filtered_calc(tmp_path, orbitals=[[0], [1, 2, 3]])
+    p_shell: Any = ["p"]
+
+    with pytest.raises(ValueError, match="hold no whole p shell"):
+        pyprocar.bandsplot(
+            code="vasp", dirname=str(calc), mode="parametric", orbitals=p_shell, show=False
         )
