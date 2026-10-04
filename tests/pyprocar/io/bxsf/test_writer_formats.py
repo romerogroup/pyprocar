@@ -18,6 +18,7 @@ import pytest
 
 from pyprocar.core.ebs import ElectronicBandStructure, ElectronicBandStructureMesh
 from pyprocar.io.bxsf import BxsfParser
+from tests.utils.user_warning import user_warning
 
 HARTREE_TO_EV = 27.211386245988
 
@@ -219,7 +220,7 @@ def test_qe_alat_is_not_taken_from_a_calculation_in_a_subdirectory(tmp_path: Pat
     (tmp_path / "other").mkdir()
     (tmp_path / "other" / "scf.out").write_text(AL_SCF_OUT.replace("7.6500", "10.0000"))
 
-    with pytest.warns(UserWarning, match="alat was found"):
+    with user_warning(__file__, match="alat was found"):
         lattice = BxsfParser(tmp_path, filepaths="Al_fs.bxsf").reciprocal_lattice
 
     assert lattice is not None
@@ -291,7 +292,7 @@ def test_explicit_files_must_be_one_file_or_an_fs_x_spin_pair(
 def test_lone_fs_x_spin_file_warns_that_its_partner_is_missing(tmp_path: Path) -> None:
     (tmp_path / "Al_fsup.bxsf").write_text(_qe_fs([_energies(3.0, 0.5)], first_band=2))
 
-    with pytest.warns(UserWarning, match="partner file is missing"):
+    with user_warning(__file__, match="partner file is missing"):
         bands = _bands(BxsfParser(tmp_path).ebs)
 
     assert bands.shape == (8, 1, 1)
@@ -301,8 +302,8 @@ def test_spin_pair_next_to_other_bxsf_files_warns(tmp_path: Path) -> None:
     for name in ("Al_fs.bxsf", "Al_fsup.bxsf", "Al_fsdw.bxsf"):
         (tmp_path / name).write_text(_qe_fs([_energies(3.0, 0.5)], first_band=2))
 
-    with pytest.warns(
-        UserWarning, match=r"Found several BXSF files.*reading \['Al_fsup.bxsf', 'Al_fsdw.bxsf'\]"
+    with user_warning(
+        __file__, match=r"Found several BXSF files.*reading \['Al_fsup.bxsf', 'Al_fsdw.bxsf'\]"
     ):
         bands = _bands(BxsfParser(tmp_path).ebs)
 
@@ -323,7 +324,7 @@ def test_several_bxsf_files_read_the_first_by_name_and_warn(tmp_path: Path) -> N
     (tmp_path / "b.bxsf").write_text(_qe_fs([_energies(8.0, 0.5)], first_band=1))
     (tmp_path / "a.bxsf").write_text(_qe_fs([_energies(3.0, 0.5)], first_band=1))
 
-    with pytest.warns(UserWarning, match=r"Found several BXSF files.*reading \['a.bxsf'\]"):
+    with user_warning(__file__, match=r"Found several BXSF files.*reading \['a.bxsf'\]"):
         bands = _bands(BxsfParser(tmp_path).ebs)
 
     assert bands[0, 0, 0] == pytest.approx(3.0)

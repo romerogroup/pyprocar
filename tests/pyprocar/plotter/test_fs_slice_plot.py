@@ -16,6 +16,8 @@ import numpy as np
 import pytest
 import pyvista as pv
 
+from tests.utils.user_warning import user_warning
+
 # ------------------------------------------------------------------
 # FermiSliceSeries Tests (can use direct dataclass creation)
 # ------------------------------------------------------------------
@@ -424,6 +426,6 @@ def test_plot_warns_when_the_named_field_is_missing(scalars_name, vectors_name, 
     sphere = pv.Sphere()
     assert sphere.active_scalars_name is None and sphere.active_vectors_name is None
 
-    with pytest.warns(UserWarning, match=message):
+    with user_warning(__file__, match=message):
         FermiSlicePlotter(sphere).plot(scalars_name=scalars_name, vectors_name=vectors_name)
     plt.close("all")

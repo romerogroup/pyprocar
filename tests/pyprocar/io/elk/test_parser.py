@@ -10,6 +10,7 @@ from pyprocar.core.ebs import ElectronicBandStructure, ElectronicBandStructurePa
 from pyprocar.core.kpoints import KPath
 from pyprocar.io.elk import ElkParser
 from tests.utils import DATA_DIR, BaseTest
+from tests.utils.user_warning import user_warning
 
 logger = logging.getLogger(__name__)
 
@@ -548,7 +549,7 @@ def test_inline_comments_on_keyword_lines_are_ignored(tmp_path):
 
 def test_missing_plot1d_uses_the_elk_default_path_and_warns(tmp_path):
     (tmp_path / "elk.in").write_text(ELKIN_BANDS.split("plot1d")[0])
-    with pytest.warns(UserWarning, match="elk.in has no plot1d block"):
+    with user_warning(__file__, match="elk.in has no plot1d block"):
         elkin = ElkParser(tmp_path).elkin
         assert elkin is not None
         assert elkin.nkpoints == 200
@@ -558,7 +559,7 @@ def test_missing_plot1d_uses_the_elk_default_path_and_warns(tmp_path):
 
 def test_structure_from_elk_in_warns_that_geometry_out_is_missing(tmp_path):
     (tmp_path / "elk.in").write_text(ELKIN_BANDS)
-    with pytest.warns(UserWarning, match="No GEOMETRY.OUT in"):
+    with user_warning(__file__, match="No GEOMETRY.OUT in"):
         assert ElkParser(tmp_path).structure is not None
 
 
@@ -593,7 +594,7 @@ def test_band_file_follows_the_elk_in_task_and_warns_about_the_other(tmp_path):
             "BAND_S02_A0001.OUT": BAND_S02_A0001,
         },
     )
-    with pytest.warns(UserWarning, match="Both BAND.OUT and BAND_S01_A0001.OUT are in"):
+    with user_warning(__file__, match="Both BAND.OUT and BAND_S01_A0001.OUT are in"):
         ebs = ElkParser(calc_dir).ebs
 
     assert isinstance(ebs, ElectronicBandStructurePath) and ebs.bands is not None
@@ -749,7 +750,7 @@ def test_task_20_reads_bands_from_band_s_files_without_their_characters(tmp_path
         tmp_path, "20", {"BAND_S01_A0001.OUT": BAND_S01_A0001, "BAND_S02_A0001.OUT": BAND_S02_A0001}
     )
 
-    with pytest.warns(UserWarning, match="elk.in lists no task 21 to 24"):
+    with user_warning(__file__, match="elk.in lists no task 21 to 24"):
         ebs = ElkParser(calc_dir).ebs
         assert isinstance(ebs, ElectronicBandStructurePath) and ebs.bands is not None
         assert ebs.projected is None

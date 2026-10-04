@@ -8,6 +8,7 @@ import pytest
 from pyprocar.core.ebs import ElectronicBandStructureMesh
 from pyprocar.core.kpoints import KGRID_MODE
 from pyprocar.io.bxsf import BxsfParser
+from tests.utils.user_warning import user_warning
 
 BXSF_STR = """\
 BEGIN_INFO
@@ -198,7 +199,7 @@ def test_qe_fs_bxsf_scales_b_by_the_alat_of_the_calculation_beside_it(
 
 def test_qe_fs_bxsf_without_alat_keeps_b_in_units_of_one_over_alat() -> None:
     """With no QE output to supply alat, b stays as written and the user is warned."""
-    with pytest.warns(UserWarning, match="alat was found"):
+    with user_warning(__file__, match="alat was found"):
         lattice = BxsfParser.from_str(_bxsf(QE_FS_HEADER, AL_FS_VECTORS)).reciprocal_lattice
 
     assert lattice is not None
@@ -246,7 +247,7 @@ def test_unknown_writer_assumes_the_two_pi_and_warns() -> None:
     b = 2 * np.pi / 4
     vectors = f"    {b} 0.0 0.0\n    0.0 {b} 0.0\n    0.0 0.0 {b}\n"
     unknown_bxsf = BXSF_STR.replace("    1.0 0.0 0.0\n    0.0 1.0 0.0\n    0.0 0.0 1.0\n", vectors)
-    with pytest.warns(UserWarning, match="writer not recognised"):
+    with user_warning(__file__, match="writer not recognised"):
         lattice = BxsfParser.from_str(unknown_bxsf).reciprocal_lattice
 
     assert lattice is not None

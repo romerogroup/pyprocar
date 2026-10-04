@@ -22,6 +22,7 @@ from pyprocar.core.kpoints import (
     reduced_to_cartesian,
     sort_kpoints,
 )
+from tests.utils.user_warning import user_warning
 
 # =============================================================================
 # Fixtures
@@ -964,8 +965,8 @@ def test_kpath_with_fewer_names_than_segments_warns_and_labels_what_it_can():
     r_m = np.linspace([0.5, 0.5, 0.5], [0.5, 0.5, 0], 5)
     kpoints = np.vstack([gamma_x, r_m])
 
-    with pytest.warns(
-        UserWarning, match="KPath got 1 segment names for 2 segments in the k-points; ticks use 1"
+    with user_warning(
+        __file__, match="KPath got 1 segment names for 2 segments in the k-points; ticks use 1"
     ):
         kpath = KPath(
             kpoints=kpoints,
@@ -1009,8 +1010,8 @@ def test_kpath_jump_ignores_a_label_reused_for_another_point():
 
 
 def test_kpath_jump_ignores_a_segment_start_off_its_k_points():
-    with pytest.warns(
-        UserWarning, match="KPath start of segment 2 does not match its k-points; jump counts"
+    with user_warning(
+        __file__, match="KPath start of segment 2 does not match its k-points; jump counts"
     ):
         kpath = KPath(
             kpoints=GAMMA_X_R_M,

@@ -1,5 +1,6 @@
 """Tests for FermiPlotter.plot() through the rendered meshes."""
 
+import re
 from types import SimpleNamespace
 
 import numpy as np
@@ -7,6 +8,7 @@ import pytest
 import pyvista as pv
 
 from pyprocar.plotter.fs_plot import FermiPlotter
+from tests.utils.user_warning import user_warning
 
 TRIANGLE_FACES = [3, 0, 1, 2]
 
@@ -123,15 +125,16 @@ class TestFermiPlotterPlot:
         assert list(meshes) == [(3, 1)]
 
     def test_spin_without_surface_warns_and_draws_nothing(self, plotter):
-        with pytest.warns(UserWarning) as caught:
-            meshes = plotter.plot(_fermi_surface(), spins=[2])
-
-        assert meshes == {}
-        assert [str(w.message) for w in caught] == [
+        message = (
             "No Fermi surface found: no band of spin channel(s) [2] crosses the isovalue"
             + " (Fermi energy + fermi_shift). Try another spin channel, a different"
             + " fermi_shift, or check the Fermi energy."
-        ]
+        )
+        with user_warning(__file__, match=re.escape(message)) as caught:
+            meshes = plotter.plot(_fermi_surface(), spins=[2])
+
+        assert meshes == {}
+        assert [str(w.message) for w in caught] == [message]
 
     def test_scalars_resolve_by_name(self, plotter):
         fs = _fermi_surface({"projected_sum": _property(SCALARS)})
