@@ -93,7 +93,7 @@ class poscar_modify:
     remove(self, atoms, human)        # removes a list of `atoms`
     add(element, position, cartesian) # add a single atom with  `element` at `position`
     shift(amount, cartesian)          # shift all the positions by `amount`
-    scale_lattice(factor, cartesian)  # scale the lattice by `factor`. are `cartesian` fixed?
+    scale_lattice(factor, keep_cartesian)  # scale the lattice by `factor`. are `cartesian` fixed?
 
     """
 
@@ -576,7 +576,7 @@ def p_atoms_f(args):
         if len(position) != 3:
             raise RuntimeError("the --add parameter has a wrong format, " + args.add)
         position = np.array(position, dtype=float)
-        Modifier.add(element=element, position=position, cartesian=args.cartesian)
+        Modifier.add(element=element, position=position, cartesian=args.cart)
 
     # Now we are done with all modifications
 
@@ -629,7 +629,7 @@ def p_lattice_f(args):
 
     factor = args.factor * scale
     # Now changing the lattice vectors
-    Modifier.scale_lattice(factor=factor, cartesian=args.cart)
+    Modifier.scale_lattice(factor=factor, keep_cartesian=args.cart)
     # and writing
     Modifier.write(args.output, cartesian=args.sc, xyz=args.xyz)
     return

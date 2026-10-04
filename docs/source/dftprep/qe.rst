@@ -47,7 +47,7 @@ _______________________________________________
 3. Run ``pw.x`` on your ``nscf.in`` file. 
 4. Run ``projwfc.x`` on your ``kpdos.in`` file (Make sure kresolveddos=.true.). 
 5. Make sure to copy the atomic_proj.xml file that is found in the .save directory into the main directory
-6. Run pyprocar.fermi3D
+6. Run ``pyprocar.FermiHandler``
 
 
 K-Points Format

@@ -82,7 +82,7 @@ an isosurfcace which is handled by the class
 This function requires a list of kpoints and the eigen-values of the
 energy for a specific band. However one does not have to be concerned
 about the specifics of different layers and just use the
-pyprocar.fermi3D function to generate the fermi surface.
+pyprocar.FermiHandler class to generate the fermi surface.
 This work would not have been possible without the amazing packages, `pyvista_doc
 <https://docs.pyvista.org/>`_ and `trimesh_doc
 <https://github.com/mikedh/trimesh>`_.

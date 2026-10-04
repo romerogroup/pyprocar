@@ -37,7 +37,7 @@ To use Pyprocar with Lobster, one has to run various calculations in independent
 1. Create a directory called ``fermi``.
 2. Run ``pw.x`` on your ``scf.in`` file. 
 3. Run ``lobster.x`` on ``lobsterin`` file in same directory.
-4. Run pyprocar.fermi3D
+4. Run ``pyprocar.FermiHandler``
 
 **KPOINTS**
 

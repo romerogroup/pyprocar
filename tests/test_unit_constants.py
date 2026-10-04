@@ -1,10 +1,10 @@
-"""Physical constants live in pyprocar/utils/units.py and nowhere else.
+"""Physical constants live in pyprocar/utils/units.py, taken from scipy.constants.
 
 A hand-typed copy drifts: dHvA_frequency used e = 4.768e-10 statC (0.74% low),
 AbinitOutput converted Hartree with 27.211396641308 and Bohr with 0.529177, and
 four modules redefined HARTREE_TO_EV. This test fails on any numeric literal, or
 constant-only expression such as ``1.602 * 10 ** (-19)``, close to a known constant
-outside units.py, and names the constant to import instead.
+anywhere in pyprocar/ or scripts/, units.py included, and names the constant to use.
 """
 
 import ast
@@ -15,7 +15,6 @@ from pathlib import Path
 from scipy import constants
 
 ROOT = Path(__file__).resolve().parent.parent
-UNITS = ROOT / "pyprocar" / "utils" / "units.py"
 
 HARTREE_EV = constants.physical_constants["Hartree energy in eV"][0]
 BOHR_ANGSTROM = constants.physical_constants["Bohr radius"][0] / constants.angstrom
@@ -79,5 +78,5 @@ def hand_typed_constants(paths: list[Path]) -> list[str]:
 
 
 def test_physical_constants_come_from_units_module():
-    paths = sorted(p for p in (ROOT / "pyprocar").rglob("*.py") if p != UNITS)
+    paths = sorted([*(ROOT / "pyprocar").rglob("*.py"), *(ROOT / "scripts").rglob("*.py")])
     assert hand_typed_constants(paths) == []

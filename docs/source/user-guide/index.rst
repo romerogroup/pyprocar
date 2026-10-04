@@ -90,7 +90,7 @@ The PyProcar workflow consists of three main components:
 - **pyprocar.bandsplot()**: Creates band structure plots with optional projections
 - **pyprocar.dosplot()**: Generates density of states plots with various styling options  
 - **pyprocar.fermi2D()**: Produces 2D Fermi surface cross-sections
-- **pyprocar.fermi3D()**: Creates interactive 3D Fermi surface visualizations
+- **pyprocar.FermiHandler**: Creates interactive 3D Fermi surface visualizations
 - **pyprocar.bandsdosplot()**: Combines band structure and DOS in a single figure
 - **pyprocar.unfold()**: Visualizes unfolded band structures for supercells
 - **pyprocar.filter()**: Applies filtering to electronic structure data
