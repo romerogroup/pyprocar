@@ -2148,11 +2148,10 @@ def orbital_rotation(
     return matrix, unrotated
 
 
-def atom_permutation(structure: Structure, rotation: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
-    """Where the operation with fractional k rotation R sends each atom.
+def atom_permutation(structure: Structure, rotation: np.ndarray) -> np.ndarray:
+    """The atom each atom lands on under the operation with fractional k rotation R.
 
-    In fractional real-space coordinates the operation is x -> W x + t with W = R^-T. Returns
-    the index of the atom each atom lands on and the lattice vector it lands off by.
+    In fractional real-space coordinates the operation is x -> W x + t with W = R^-T.
     """
     positions = np.asarray(structure.fractional_coordinates, dtype=float)
     species = np.asarray(structure.atoms)
@@ -2164,7 +2163,7 @@ def atom_permutation(structure: Structure, rotation: np.ndarray) -> tuple[np.nda
         matches = same_species & np.all(np.abs(offsets - np.round(offsets)) < 1e-3, axis=2)
         targets = np.argmax(matches, axis=1)
         if matches.any(axis=1).all() and len(np.unique(targets)) == len(targets):
-            return targets, np.round(offsets[np.arange(len(targets)), targets])
+            return targets
     raise ValueError("A symmetry operation does not map the structure onto itself")
 
 
@@ -2238,7 +2237,7 @@ def ibz2fbz(ebs, rotations=None, kgrid_info=None, inplace=True, time_reversals=N
     for prop_name, calc_name, gradient_order, value_array in ebs.iter_properties():
         ebs.get_property(prop_name)[calc_name, gradient_order] = value_array[source]
 
-    _turn_projections(ebs, rotations, time_reversals, operation, new_kpoints)
+    _turn_projections(ebs, rotations, time_reversals, operation, new_kpoints - images[chosen])
     ebs.update_points(new_kpoints)
     return sort_by_kpoints(ebs, inplace=True, **kwargs)
 
@@ -2248,12 +2247,17 @@ def _mix_orbitals(block: np.ndarray, matrix: np.ndarray) -> np.ndarray:
     return (block.reshape(-1, block.shape[-1]) @ matrix.T).reshape(block.shape)
 
 
-def _turn_projections(ebs, rotations, time_reversals, operation, new_kpoints) -> None:
+def _turn_projections(ebs, rotations, time_reversals, operation, lattice_steps) -> None:
     """Carry the projections and phases copied from each source into its image's frame.
 
     Without phases an image's orbital weights are the source's mixed by |M|^2, exact when M
     only permutes orbitals and for every full shell's sum. With collinear phases they are
     |M c|^2 for c = sqrt(weight) exp(i phase), which keeps the interference between orbitals.
+
+    The phases follow VASP's convention, Bloch sums of orbitals with exp(i k.(R + tau)). An
+    operation carries the coefficients unchanged apart from M, the atom permutation and
+    conjugation under time reversal; moving the image R k onto its grid point R k + G then
+    multiplies the coefficient of the atom at tau by exp(-2 pi i G.tau).
     """
     projected, phase = ebs.projected, ebs.projected_phase
     if projected is None and phase is None:
@@ -2292,11 +2296,8 @@ def _turn_projections(ebs, rotations, time_reversals, operation, new_kpoints) ->
         unrotated.update(missed)
         mixes = not np.allclose(orbitals, np.eye(n_orbitals))
         order = slice(None)
-        shifts = np.zeros((n_atoms, 3))
         if structure is not None and n_atoms > 1:
-            targets, shifts = atom_permutation(structure, rotation)
-            order = np.argsort(targets)
-            shifts = shifts[order]
+            order = np.argsort(atom_permutation(structure, rotation))
         source_phases = phases[rows][:, :, :, order] if phases is not None else None
         if weights is not None:
             block = weights[rows][:, :, :, order]
@@ -2312,10 +2313,11 @@ def _turn_projections(ebs, rotations, time_reversals, operation, new_kpoints) ->
             weights[rows] = block
         if phases is not None and source_phases is not None:
             block = source_phases.conj() if time_reversals[index] else source_phases
-            if shifts.any():
-                bloch = np.exp(-2j * np.pi * new_kpoints[rows] @ shifts.T)
-                block *= bloch[:, np.newaxis, np.newaxis, :, np.newaxis]
             phases[rows] = _mix_orbitals(block, orbitals) if mixes else block
+    if phases is not None and structure is not None and np.any(lattice_steps):
+        positions = np.asarray(structure.fractional_coordinates, dtype=float)
+        bloch = np.exp(-2j * np.pi * np.round(lattice_steps) @ positions.T)
+        phases *= bloch[:, np.newaxis, np.newaxis, :, np.newaxis]
     if unrotated:
         user_logger.warning(
             "Orbital-resolved projections at symmetry images are not rotated for the orbitals "
