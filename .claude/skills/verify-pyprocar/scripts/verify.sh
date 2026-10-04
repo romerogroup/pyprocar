@@ -21,7 +21,7 @@ in_worktree() { [ "$REPO" != "$MAIN" ]; }
 shared_env() {
   PATH="$SHARED_ENV:$PATH" PYTHONPATH="$REPO${PYTHONPATH:+:$PYTHONPATH}" PYTHONDONTWRITEBYTECODE=1 "$@"
 }
-py() { if in_worktree; then shared_env python "$@"; else pixi run -q -e default python "$@"; fi; }
+py() { if in_worktree; then shared_env python "$@"; else pixi run -q --locked -e default python "$@"; fi; }
 require_shared_env() {
   [ -x "$SHARED_ENV/python" ] || { echo "missing $SHARED_ENV/python; run 'pixi install -e dev' in $MAIN" >&2; exit 2; }
 }
@@ -145,7 +145,7 @@ live() { [ -f "$1/.pid" ] && ps -p "$(cat "$1/.pid")" >/dev/null 2>&1; }
 case "${1:-}" in
 doctor)
   echo "branch:  $(git rev-parse --abbrev-ref HEAD) @ $(git rev-parse --short HEAD)"
-  echo "dirty:   $(git status --porcelain --untracked-files=no | wc -l) tracked file(s) modified"
+  echo "dirty:   $(GIT_OPTIONAL_LOCKS=0 git status --porcelain --untracked-files=no | wc -l) tracked file(s) modified"
   py -W ignore -c '
 import sys, pyprocar, matplotlib, pyvista, vtk
 print("python: ", sys.version.split()[0])
@@ -171,7 +171,7 @@ fetch)
     fi
     if [ ! -e "$real" ]; then
       ! in_worktree || require_shared_env
-      py -W ignore -c 'import sys; from pathlib import Path; import pyprocar
+      HF_XET_LOG_DIR_DISABLE_CLEANUP=1 py -W ignore -c 'import sys; from pathlib import Path; import pyprocar
 pyprocar.download_from_hf(relpath=sys.argv[1], output_path=Path(".").resolve())' "$rel"
       real="$(fixture_path "$rel")" && [ -e "$real" ] || { echo "the download did not create $rel" >&2; exit 1; }
     fi
