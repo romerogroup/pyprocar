@@ -29,6 +29,8 @@ Other codes are already extracted under `data/codes/`: `qe/7.2/SrVO3`, `elk/6.3/
 
 Run the gates with the commands in `.github/workflows/ci.yml`, as written, with `pixi run --locked -e <env>` replaced by `$H exec` and `"$BASE"` by `origin/dev`. In the main checkout `$H exec` is `pixi run -q --locked -e dev`; in a linked worktree it uses the main checkout's env (see below). The pixi `typecheck` task runs the same type check. The `test` task also runs the tests marked `data`, and the `lint` task applies `ruff --fix` to every file, so neither is a CI gate.
 
+`$H exec python .github/scripts/red_green.py origin/dev` is the `red-green` job: it fails on each added or changed test that passes on the base code without `@pytest.mark.guards_existing_behaviour(reason="...")`.
+
 `--locked` fails when `pixi.lock` does not match `pixi.toml`, in CI and locally. After you edit `pixi.toml`, run `pixi lock` and commit `pixi.lock` with it.
 
 Run env binaries through `$H exec`. Called by path, without its env's `bin/` on `PATH`, `.pixi/envs/dev/bin/basedpyright` reports phantom errors that CI does not.

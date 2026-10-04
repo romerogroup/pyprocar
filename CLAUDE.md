@@ -16,7 +16,7 @@ When a reviewer corrects a mistake, fix it and add its rule here. If the rule is
 | Scripts, notebooks and docs call `pyprocar.*` with its current signature. | `tests/test_documented_calls.py` |
 | Tests never write `data/`; a test that reads it is marked `data`. | audit hook in `tests/conftest.py` |
 | Baseline entries in `.basedpyright/baseline.json` go only with the code they cover. | basedpyright lock mode in CI |
-| A new test fails on the base library for the reason it names, and passes with the fix. | nothing; the verifier's red/green lane |
+| A new or changed test fails on the base code for the reason it names, and passes with the fix. A test that guards existing behaviour says so with `@pytest.mark.guards_existing_behaviour(reason="...")`. | CI job `red-green` (`.github/scripts/red_green.py`), non-blocking for now, so read its log; the verifier still judges the reason a test fails |
 | Expected values come from an independent source (formula, manual, other code path), never from the code under test. | nothing; review |
 | A fix covers every sibling with the same defect: grep for the pattern across handlers, classes and parsers. | nothing; review |
 | Units convert once, at the parser boundary. The core holds eV, Angstrom, and 1/Angstrom reciprocal lattices without 2 pi in the row convention (`frac @ B`). | nothing; review |
