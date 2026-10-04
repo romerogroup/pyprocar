@@ -10,7 +10,7 @@
       "**/_version.py"
     ],
     "pythonPlatform": "All",
-    "pythonVersion": "3.13",
+    "pythonVersion": "3.12",
     "reportAny": false,
     "reportExplicitAny": false,
     "reportMissingTypeStubs": true,

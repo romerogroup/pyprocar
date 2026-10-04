@@ -67,7 +67,7 @@ pyprocar = { path = "." }
 # Default dependencies
 [dependencies]
 git = ">=2.51.0,<3"
-python = ">=3.10,<3.14"
+python = ">=3.12,<3.14"
 
 [tasks]
 bump = "tbump --only-patch $RELEASE_VERSION --config $PIXI_PROJECT_ROOT/.config/tbump.toml"
