@@ -1,5 +1,6 @@
 import os
 import shutil
+import tempfile
 import zipfile
 from pathlib import Path
 
@@ -149,29 +150,22 @@ def download_test_data(relpath: str, output_path: str | Path = ".", force: bool 
     # Ensure the output directory exists - this is critical for Jupyter notebooks
     output_path.mkdir(parents=True, exist_ok=True)
 
-    archive = f"{relpath}.zip"
-    download_dirpath = snapshot_download(
-        repo_id=REPO_ID,
-        repo_type=REPO_TYPE,
-        allow_patterns=[archive],
-    )
-    download_path = Path(download_dirpath)
-    if not (download_path / archive).is_file():
-        raise FileNotFoundError(f"{archive} is not in the {REPO_ID} dataset")
-    data_dir = download_path / "data"
+    archive = output_path / f"{relpath}.zip"
+    archive.parent.mkdir(parents=True, exist_ok=True)
+    with tempfile.TemporaryDirectory(dir=archive.parent) as staging:
+        snapshot_download(
+            repo_id=REPO_ID,
+            repo_type=REPO_TYPE,
+            allow_patterns=[f"{relpath}.zip"],
+            local_dir=staging,
+        )
+        downloaded = Path(staging) / f"{relpath}.zip"
+        if not downloaded.is_file():
+            raise FileNotFoundError(f"{relpath}.zip is not in the {REPO_ID} dataset")
+        downloaded.replace(archive)
 
-    dataset_cache_dir = download_path.parent.parent
-
-    shutil.copytree(data_dir, output_path / "data", dirs_exist_ok=True)
-    shutil.rmtree(dataset_cache_dir)
-
-    data_dir = output_path / "data"
-    # print(data_dir)
-    # uncompress_test_data(data_dir)
-
-    uncompress_dirpath(full_data_path.with_suffix(".zip"))
-
-    os.remove(full_data_path.with_suffix(".zip"))
+    uncompress_dirpath(archive)
+    archive.unlink()
 
     return full_data_path
 
