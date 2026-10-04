@@ -371,7 +371,7 @@ def test_gc_removes_read_only_work_and_never_unlocks_a_fixture_it_links_to(harne
     assert (harness.data_dir / "examples/bands/x/PROCAR").read_text() == "x"
 
 
-@pytest.mark.guards_existing_behaviour(reason="origin/dev's gc already keeps a run whose pid is alive")
+@pytest.mark.guards_existing_behaviour(reason="dev's gc already keeps a run whose pid is alive")
 def test_gc_keeps_the_work_of_a_run_in_progress_and_removes_a_finished_one(harness):
     finished = subprocess.Popen(["true"])
     finished.wait()
@@ -606,22 +606,74 @@ def test_no_command_changes_anything_outside_data(harness):
 
 WRITING_COMMAND = (
     r"\b(chmod|chown|chgrp|chattr|setfacl|rm|rmdir|unlink|mv|shred|cp|ln|mkdir|touch|tee|truncate"
-    r"|dd|rsync|mktemp|mkfifo|mknod|download_from_hf)\b|\binstall\s+-\w*m|-delete\b"
+    r"|dd|rsync|mktemp|mkfifo|mknod|install|tar|unzip|download_from_hf)\b|-delete\b"
+    r"|\b(sed|perl)\b[^|;]*\s(-[A-Za-z]*i|--in-place)"
 )
-FILE_REDIRECT = r"(?<![0-9&<])>>?(?![&>])(?!\s*/dev/null)"
+FILE_REDIRECT = r"(&|\d+|\{\w+\})?(>>|>\||<>|>)(?![>|])(?!\s*/dev/null\b)(?!&(\d+|-))"
 QUOTED = r""""(?:[^"\\]|\\.)*"|'[^']*'"""
+LONE_EXPANSION = r'"\$(\w+|\{\w+\}|[@*])"'
+VARIABLE_COMMAND = (
+    r"(^|[;&|({!`]|\$\(|\b(then|do|else|exec|eval|xargs|command|env|nohup|time|sudo)\s)"
+    r"\s*(\w+=\S*\s+)*\"?\$(\{|\w|[@*])"
+)
+
+
+def _command_words(line: str) -> str:
+    blanked = re.sub(QUOTED, lambda m: m[0] if re.fullmatch(LONE_EXPANSION, m[0]) else "''", line)
+    return re.sub(r"\[\[.*?\]\]", "", blanked)
+
+
+def _census(script: str) -> list[str]:
+    return [
+        x
+        for x in (line.strip() for line in script.splitlines())
+        if not x.startswith("#")
+        and (
+            re.search(WRITING_COMMAND, x)
+            or re.search(VARIABLE_COMMAND, _command_words(x))
+            or re.search(FILE_REDIRECT, re.sub(QUOTED, "", x))
+        )
+    ]
+
+
+@pytest.mark.parametrize(
+    "line",
+    [
+        'exec 3>"$f"',
+        '2>"$f" true',
+        'echo x 1>"$f"',
+        'echo x &>"$f"',
+        'echo x >&"$f"',
+        'echo x >|"$f"',
+        'exec {fd}>>"$f"',
+        'sed -i "s/a/b/" "$f"',
+        'sed --in-place "s/a/b/" "$f"',
+        'perl -pi -e "s/a/b/" "$f"',
+        'install "$f" "$g"',
+        'tar -xf "$f"',
+        'unzip -o "$f"',
+        '$w "$f"',
+        '"$w" "$f"',
+        'X=1 "${w}" "$f"',
+        'true && "$@"',
+    ],
+)
+def test_the_census_flags_each_way_a_line_can_write(line):
+    script = VERIFY_SH.read_text()
+    harmless = 'echo "a > b" >&2 2>/dev/null; exec 3>&-; cmd 2>&1 >>/dev/null; x="$y"'
+
+    assert _census(f"{script}\n{harmless}") == _census(script)
+    assert _census(f"{script}\n{line}") == [*_census(script), line]
 
 
 def test_verify_sh_writes_only_on_the_lines_its_census_reviewed():
-    lines = [x.strip() for x in VERIFY_SH.read_text().splitlines()]
-    writes = [
-        x
-        for x in lines
-        if not x.startswith("#")
-        and (re.search(WRITING_COMMAND, x) or re.search(FILE_REDIRECT, re.sub(QUOTED, "", x)))
-    ]
+    writes = _census(VERIFY_SH.read_text())
 
     assert writes == [
+        'PATH="$SHARED_ENV:$PATH" PYTHONPATH="$REPO${PYTHONPATH:+:$PYTHONPATH}" '
+        + 'PYTHONDONTWRITEBYTECODE=1 "$@"',
+        '[ -x "$SHARED_ENV/python" ] || { echo "missing $SHARED_ENV/python; '
+        + "run 'pixi install -e dev' in $MAIN\" >&2; exit 2; }",
         'find -P "$2" ! -type l \\( -type d -o -links 1 \\) -exec chmod "$1" {} +',
         'rm -rf "$1/work" "$1/.start" "$1/.pid"',
         'pyprocar.download_from_hf(relpath=sys.argv[1], output_path=Path(".").resolve())\' "$rel"',
@@ -636,6 +688,8 @@ def test_verify_sh_writes_only_on_the_lines_its_census_reviewed():
         'py "$run/evidence/driver.py" >"$run/evidence/run.log" 2>&1',
         'echo "$code" >"$run/evidence/exit_code"',
         '>"$run/evidence/side_effects.txt"',
+        '{ echo "missing $MAIN/pyprocar/_version.py; '
+        + "run 'pixi install -e dev' in $MAIN\" >&2; exit 2; }",
         'cp "$MAIN/pyprocar/_version.py" pyprocar/_version.py',
         'mkdir -p "$MAIN/data" .tmp',
         'ln -sfn "$MAIN/data" data',
