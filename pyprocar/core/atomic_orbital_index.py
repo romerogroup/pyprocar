@@ -959,6 +959,8 @@ class ProjectionSelectionResolver:
         )
         if not atoms_tuple:
             raise ValueError("The selection names no atoms; select at least one atom or species")
+        if spins_set is not None and not spins_set:
+            raise ValueError("The selection names no spins; omit spins to select every channel")
         orbitals_tuple = (
             tuple(sorted(orbitals_set))
             if orbitals_set is not None and len(orbitals_set) > 0
