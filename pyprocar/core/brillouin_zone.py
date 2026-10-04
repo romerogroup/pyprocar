@@ -35,14 +35,14 @@ def zone_face_steps(reciprocal_lattice: np.ndarray) -> np.ndarray:
 
 
 def _wigner_seitz(reciprocal_lattice: np.ndarray) -> tuple[np.ndarray, list[list[int]]]:
-    """Voronoi vertices of the 3^3 block of lattice points plus the zone face vectors outside
-    it, and the faces of the origin's cell."""
+    """Vertices and faces of the origin's Voronoi cell."""
     lattice = np.asarray(reciprocal_lattice, dtype=np.float64)
     face_steps = zone_face_steps(lattice)
     steps = np.vstack([_NEIGHBOURS, face_steps[np.abs(face_steps).max(axis=1) > 1]])
     brill = Voronoi(steps @ lattice)
     cell = [brill.ridge_dict[pair] for pair in brill.ridge_dict if _ORIGIN in pair]
-    return np.array(brill.vertices, dtype=float), cell
+    used = np.unique(np.concatenate(cell))
+    return brill.vertices[used], [np.searchsorted(used, face).tolist() for face in cell]
 
 
 class BrillouinZone(pv.PolyData):
@@ -182,9 +182,8 @@ class BrillouinZone2D(pv.PolyData):
 
         verts, faces = self.wigner_seitz()
 
-        heights = verts[np.concatenate(faces), axis]
-        min_val = heights.min()
-        max_val = heights.max()
+        min_val = verts[:, axis].min()
+        max_val = verts[:, axis].max()
 
         for vert in verts:
             vert_z = vert[axis]
