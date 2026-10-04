@@ -195,9 +195,8 @@ run)
   run="$RUNS/$(date +%Y%m%d-%H%M%S)-$name"
   mkdir "$run" || { echo "refusing: $run already exists; rerun to get the next second's name" >&2; exit 2; }
   require_resolved_below "$run" "$RUNS"
-  set -C
   mkdir "$run/evidence" "$run/work" "$run/work/tmp"
-  echo $$ >"$run/.pid"
+  (set -C; echo $$ >"$run/.pid")
   trap 'rm -f "$run/.pid"' EXIT
   cp -RL --reflink=auto "$fixture" "$run/work/calc"
   chmod_below_data u+w "$run/work/calc"

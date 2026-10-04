@@ -4,7 +4,6 @@ import re
 import shutil
 import stat
 import subprocess
-import time
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -271,31 +270,30 @@ def test_run_refuses_a_name_that_is_not_one_plain_component(harness, name):
     assert sorted(p.name for p in (harness.data_dir / "verify-runs").iterdir()) == ["run1"]
 
 
-def _plant_next_runs(harness, how: str) -> None:
-    now = time.time()
-    for second in range(-1, 30):
-        stamp = time.strftime("%Y%m%d-%H%M%S", time.localtime(now + second))
-        victim = harness.root / "outside/runs" / stamp
-        (victim / "work/calc/x").mkdir(parents=True)
-        (victim / "work/calc/x/PROCAR").write_text("victim")
-        (victim / "evidence").mkdir()
-        (victim / ".pid").write_text("1")
-        run = harness.data_dir / "verify-runs" / f"{stamp}-probe"
-        if how == "run_dir_link":
-            run.symlink_to(victim)
-            continue
-        run.mkdir()
-        if how != "run_dir":
-            (run / how).symlink_to(victim / how)
+def _plant_the_next_run(harness, how: str) -> None:
+    (harness.root / "bin/date").write_text("#!/bin/sh\necho 20260101-000000\n")
+    (harness.root / "bin/date").chmod(0o755)
+    run = harness.data_dir / "verify-runs/20260101-000000-probe"
+    victim = harness.root / "outside/runs/victim"
+    (victim / "work/calc/x").mkdir(parents=True)
+    (victim / "work/calc/x/PROCAR").write_text("victim")
+    (victim / "evidence").mkdir()
+    (victim / ".pid").write_text("1")
+    if how == "run_dir_link":
+        run.symlink_to(victim)
+        return
+    run.mkdir()
+    if how != "run_dir":
+        (run / how).symlink_to(victim / how)
 
 
 @pytest.mark.parametrize("how", ["run_dir_link", "run_dir", "work", ".pid", "evidence"])
 def test_run_refuses_a_run_dir_that_already_exists_and_changes_nothing(harness, how):
-    _plant_next_runs(harness, how)
+    _plant_the_next_run(harness, how)
     _prime(harness)
     before = _snapshot(harness)
 
-    out = harness.verify("run", "probe", "data/examples/bands/x", str(harness.root / "driver.py"))
+    out = _run(harness, "data/examples/bands/x")
 
     assert out.returncode == 2, out.stderr
     assert not harness.env_log.exists()
@@ -605,7 +603,7 @@ def test_verify_sh_writes_only_on_the_lines_its_census_reviewed():
         'mkdir -p "$RUNS"',
         'mkdir "$run" || { echo "refusing: $run already exists; rerun to get the next second\'s name" >&2; exit 2; }',
         'mkdir "$run/evidence" "$run/work" "$run/work/tmp"',
-        'echo $$ >"$run/.pid"',
+        '(set -C; echo $$ >"$run/.pid")',
         "trap 'rm -f \"$run/.pid\"' EXIT",
         'cp -RL --reflink=auto "$fixture" "$run/work/calc"',
         'cp "$driver" "$run/evidence/driver.py"',
