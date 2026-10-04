@@ -12,7 +12,7 @@ G = CALC / "graphene"
 
 @step("obj_surface")
 def _():
-    bs = BandStructure2D.from_code(code="vasp", dirpath=G, grid_interpolation=(20, 20))
+    bs = BandStructure2D.from_code(code="vasp", dirpath=str(G), grid_interpolation=(20, 20))
     p = BS2DPlotter(bs, off_screen=True)
     p.plot(scalars_data="bands", show_brillouin_zone=False)
     out = EV / "obj_bs2d.png"

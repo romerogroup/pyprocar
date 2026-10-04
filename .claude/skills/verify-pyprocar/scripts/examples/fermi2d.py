@@ -1,6 +1,7 @@
 # 2D Fermi slice: object API (FermiSlicePlotter slices internally)
 # and legacy fermi2D (str and enum modes).
 # Fixture: data/examples/fermi2d/non-spin-polarized
+import numpy as np
 from verify_steps import CALC, EV, finish, png, step
 
 import pyprocar
@@ -13,7 +14,7 @@ fs = FermiSurface.from_code(code="vasp", dirpath=CALC, fermi=5.3017)
 
 @step("obj_slice_no_scalars")
 def _():
-    p = FermiSlicePlotter(fs, normal=(0, 0, 1), origin=(0, 0, 0))
+    p = FermiSlicePlotter(fs, normal=np.array([0, 0, 1]), origin=np.zeros(3))
     arts = p.plot()
     return {
         "artist_keys": list(arts),
@@ -25,7 +26,7 @@ def _():
 @step("obj_slice_projected")
 def _():
     fs.get_property("projected_sum", atoms=[1], orbitals=[4, 5, 6, 7, 8], spins=[0])
-    p = FermiSlicePlotter(fs, normal=(0, 0, 1), origin=(0, 0, 0))
+    p = FermiSlicePlotter(fs, normal=np.array([0, 0, 1]), origin=np.zeros(3))
     lc = p.plot(scalars_name="projected_sum")["scalars"]
     return {
         "n_segments": len(lc.get_segments()),
@@ -42,15 +43,15 @@ for label, mode, kw in [
 
     @step(f"legacy_fermi2D_{label}")
     def _(label=label, mode=mode, kw=kw):
-        fig, ax = pyprocar.fermi2D(
+        _, ax = pyprocar.fermi2D(
             code="vasp",
-            dirname=CALC,
+            dirname=str(CALC),
             mode=mode,
             fermi=5.3017,
             energy=0.0,
             k_z_plane=0.0,
             show=False,
-            savefig=EV / f"legacy_{label}.png",
+            savefig=str(EV / f"legacy_{label}.png"),
             **kw,
         )
         return {"n_coll": len(ax.collections)}

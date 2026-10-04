@@ -11,7 +11,9 @@ import pyprocar
 from pyprocar.core.ebs import ElectronicBandStructurePath
 from pyprocar.plotter.bs_plot import BandStructurePlotter as P
 
-ebs = ElectronicBandStructurePath.from_code(code="vasp", dirpath=CALC)
+loaded = ElectronicBandStructurePath.from_code(code="vasp", dirpath=str(CALC))
+assert isinstance(loaded, ElectronicBandStructurePath)
+ebs: ElectronicBandStructurePath = loaded
 w = ebs.compute_projected_sum(atoms=[1], orbitals=[4, 5, 6, 7, 8])
 
 
@@ -47,6 +49,7 @@ def _():
 @step("obj_quiver_plot_quiver")
 def _():
     v = ebs.get_property("bands_velocity")
+    assert ebs.bands is not None and v is not None
     P().plot_quiver(ebs.kpath, ebs.bands.to_array(), np.asarray(v.to_array()))
     return {**facts(), "png": png("obj_quiver")}
 
@@ -61,7 +64,10 @@ def _():
 def _():
     props = ebs.build_overlay_species_weights(orbitals=[4, 5, 6, 7, 8])
     P().plot_overlay(
-        ebs.kpath, ebs.bands, [p.to_array() for p in props], labels=[p.label for p in props]
+        ebs.kpath,
+        ebs.bands,  # pyright: ignore[reportArgumentType]  # the call new_bands_examples.py makes
+        [p.to_array() for p in props],
+        labels=[p.label or "" for p in props],
     )
     return {**facts(), "png": png("obj_overlay_species")}
 
@@ -81,14 +87,14 @@ for mode, kw in {
 
     @step(f"legacy_bandsplot_{mode}")
     def _(mode=mode, kw=kw):
-        fig, ax = pyprocar.bandsplot(
+        _, ax = pyprocar.bandsplot(
             code="vasp",
-            dirname=CALC,
+            dirname=str(CALC),
             mode=mode,
             fermi=5.3017,
             elimit=[-5, 5],
             show=False,
-            savefig=EV / f"legacy_{mode}.png",
+            savefig=str(EV / f"legacy_{mode}.png"),
             **kw,
         )
         return {"n_lines": len(ax.lines), "n_coll": len(ax.collections)}
