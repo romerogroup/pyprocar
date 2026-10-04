@@ -1,4 +1,5 @@
 import ast
+from collections import defaultdict
 from pathlib import Path
 
 import pytest
@@ -6,6 +7,7 @@ import pytest
 ROOT = Path(__file__).resolve().parent.parent
 WARN_USER_HOME = ROOT / "pyprocar" / "utils" / "log_utils.py"
 USER_WARNING_HELPER = ROOT / "tests" / "utils" / "user_warning.py"
+WARN_FUNCTIONS = {"warn", "warn_explicit"}
 LOUD_METHODS = {"warning", "warn", "error", "critical", "exception", "fatal"}
 LOUD_LEVEL_NAMES = {"WARN", "WARNING", "ERROR", "CRITICAL", "FATAL"}
 LOWEST_LOUD_LEVEL = 30
@@ -25,6 +27,10 @@ def _module_parts(path: Path, root: Path) -> tuple[str, ...]:
     )
 
 
+def _module_name(parts: tuple[str, ...]) -> str:
+    return ".".join(parts[:-1] if parts[-1] == "__init__" else parts)
+
+
 def _imported_from(node: ast.ImportFrom, parts: tuple[str, ...]) -> str:
     if node.level == 0:
         return node.module or ""
@@ -34,25 +40,59 @@ def _imported_from(node: ast.ImportFrom, parts: tuple[str, ...]) -> str:
 
 
 class UserLoggerNames:
-    """The expressions that hold the `user` logger in one module."""
+    """The expressions that hold the `user` logger in one module, by scope.
+
+    A name binds in its function (or the module), as Python scopes it; an attribute
+    target such as `self.log` binds in its class.
+    """
 
     def __init__(self, tree: ast.Module, parts: tuple[str, ...], exports: dict[str, set[str]]):
         self.tree: ast.Module = tree
+        self.parent: dict[ast.AST, ast.AST] = {
+            child: node for node in ast.walk(tree) for child in ast.iter_child_nodes(node)
+        }
         self.get_logger: set[str] = {"getLogger"}
-        self.bound: set[str] = set()
+        self.assigned: defaultdict[ast.AST, set[str]] = defaultdict(set)
+        self.bound: defaultdict[ast.AST, set[str]] = defaultdict(set)
         for node in ast.walk(tree):
-            if isinstance(node, ast.ImportFrom):
+            if isinstance(node, ast.Name) and isinstance(node.ctx, ast.Store):
+                self.assigned[self._scope(node)].add(node.id)
+            elif isinstance(node, ast.arg):
+                self.assigned[self._scope(node)].add(node.arg)
+            elif isinstance(node, ast.Import):
+                for alias in node.names:
+                    self.assigned[self._scope(node)].add(alias.asname or alias.name.split(".")[0])
+            elif isinstance(node, ast.ImportFrom):
                 source = _imported_from(node, parts)
                 for alias in node.names:
+                    name = alias.asname or alias.name
+                    self.assigned[self._scope(node)].add(name)
                     if source == "logging" and alias.name == "getLogger":
-                        self.get_logger.add(alias.asname or alias.name)
+                        self.get_logger.add(name)
                     elif alias.name in exports.get(source, set()):
-                        self.bound.add(alias.asname or alias.name)
+                        self.bound[self._scope(node)].add(name)
         while self._bind_assignments():
             pass
 
+    def _scope(self, node: ast.AST) -> ast.AST:
+        node = self.parent[node]
+        while not isinstance(node, ast.Module | ast.FunctionDef | ast.AsyncFunctionDef | ast.Lambda):
+            node = self.parent[node]
+        return node
+
+    def _owner(self, node: ast.AST) -> ast.AST:
+        while not isinstance(node, ast.Module | ast.ClassDef):
+            node = self.parent[node]
+        return node
+
+    def _bind(self, target: ast.expr) -> None:
+        if isinstance(target, ast.Name):
+            self.bound[self._scope(target)].add(target.id)
+        else:
+            self.bound[self._owner(target)].add(ast.unparse(target))
+
     def _bind_assignments(self) -> bool:
-        before = len(self.bound)
+        before = sum(len(names) for names in self.bound.values())
         for node in ast.walk(self.tree):
             pairs: list[tuple[ast.expr, ast.expr]]
             if isinstance(node, ast.Assign):
@@ -65,14 +105,25 @@ class UserLoggerNames:
                 if isinstance(target, ast.Tuple) and isinstance(value, ast.Tuple):
                     pairs.extend(zip(target.elts, value.elts, strict=False))
                 elif self.holds(value):
-                    self.bound.add(ast.unparse(target))
-        return len(self.bound) > before
+                    self._bind(target)
+        return sum(len(names) for names in self.bound.values()) > before
+
+    def _name_holds(self, name: str, scope: ast.AST) -> bool:
+        while name not in self.assigned[scope] and name not in self.bound[scope]:
+            if isinstance(scope, ast.Module):
+                return False
+            scope = self._scope(scope)
+        return name in self.bound[scope]
+
+    @property
+    def exported(self) -> set[str]:
+        return {name for name in self.bound[self.tree] if name.isidentifier()}
 
     def holds(self, node: ast.expr) -> bool:
-        if ast.unparse(node) in self.bound:
-            return True
+        if isinstance(node, ast.Name):
+            return self._name_holds(node.id, self._scope(node))
         if not isinstance(node, ast.Call):
-            return False
+            return ast.unparse(node) in self.bound[self._owner(node)]
         func = node.func
         name = func.attr if isinstance(func, ast.Attribute) else getattr(func, "id", None)
         named = [*node.args[:1], *(kw.value for kw in node.keywords if kw.arg == "name")]
@@ -92,10 +143,7 @@ def user_logger_names(paths: list[Path], root: Path = ROOT) -> dict[Path, UserLo
             path: UserLoggerNames(tree, _module_parts(path, root), exports)
             for path, tree in trees.items()
         }
-        found = {
-            ".".join(_module_parts(path, root)): {name for name in n.bound if name.isidentifier()}
-            for path, n in names.items()
-        }
+        found = {_module_name(_module_parts(path, root)): n.exported for path, n in names.items()}
         if found == exports:
             return names
         exports = found
@@ -140,21 +188,32 @@ def raw_warnings_warn_calls(paths: list[Path]) -> list[str]:
     found = []
     for path in paths:
         tree = ast.parse(path.read_text(encoding="utf-8"), str(path))
-        warn_names = {
+        imports = [node for node in ast.walk(tree) if isinstance(node, ast.Import | ast.ImportFrom)]
+        modules = {
             alias.asname or alias.name
-            for node in ast.walk(tree)
+            for node in imports
+            if isinstance(node, ast.Import)
+            for alias in node.names
+            if alias.name == "warnings"
+        }
+        functions = {
+            alias.asname or alias.name
+            for node in imports
             if isinstance(node, ast.ImportFrom) and node.module == "warnings"
             for alias in node.names
-            if alias.name == "warn"
+            if alias.name in WARN_FUNCTIONS
         }
         for node in ast.walk(tree):
-            if isinstance(node, ast.Call) and (
-                ast.unparse(node.func) == "warnings.warn"
-                or (isinstance(node.func, ast.Name) and node.func.id in warn_names)
+            func = node.func if isinstance(node, ast.Call) else None
+            if (isinstance(func, ast.Name) and func.id in functions) or (
+                isinstance(func, ast.Attribute)
+                and func.attr in WARN_FUNCTIONS
+                and isinstance(func.value, ast.Name)
+                and func.value.id in modules
             ):
                 found.append(
-                    f"{_shown(path)}:{node.lineno}: warnings.warn names a pyprocar line"
-                    + " unless its stacklevel is exact at every depth; call"
+                    f"{_shown(path)}:{node.lineno}: {ast.unparse(func)} from the warnings module"
+                    + " names a pyprocar line unless its location is right at every depth; call"
                     + " pyprocar.utils.log_utils.warn_user, which names the user's line"
                 )
     return found
