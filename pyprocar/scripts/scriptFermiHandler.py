@@ -64,13 +64,12 @@ class FermiHandler:
             the directory name where the calculation is, by default ""
         fermi : float, optional
             The fermi energy. This will overide the default fermi value used found in the given directory, by default None
-        repair : bool, optional
-            Boolean to repair the PROCAR file, by default False
-        apply_symmetry : bool, optional
-            Boolean to apply symmetry to the fermi sruface.
-            This is used when only symmetry reduced kpoints used in the calculation, by default True
         use_cache : bool, optional
-            Boolean to use cached Pickle files, by default True
+            Boolean to use cached Pickle files, by default False
+        ebs_filename : str, optional
+            Name of the cached band structure file, by default "ebs.pkl"
+        verbose : int, optional
+            Verbosity level, by default 1
         """
 
         set_verbose_level(verbose)
