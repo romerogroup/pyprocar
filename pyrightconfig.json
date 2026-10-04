@@ -6,10 +6,7 @@
       "**/*.ipynb",
       "**/docs_hooks.py",
       "docs/",
-      "sphinx/",
       "examples/",
-      ".github/",
-      "data/",
       "**/_version.py"
     ],
     "pythonPlatform": "All",

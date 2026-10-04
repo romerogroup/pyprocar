@@ -44,12 +44,15 @@ $H worktree-setup
 It copies `_version.py` from the main checkout and links `data` to the main checkout's `data/` with `ln -sfn` (a rerun is safe). After that, `$H exec`, `doctor`, `fetch` and `run` use the main checkout's `.pixi/envs/dev` with this worktree first on `PYTHONPATH`, and `$H exec` sets `PYTHONDONTWRITEBYTECODE=1` and `TMPDIR=.tmp`. They exit 2 when that env is missing. `worktree-setup` then prints at most one lock warning, and each asks for one action:
 - "this branch changes pixi.lock or pixi.toml relative to origin/dev": the shared env does not match the branch. Run the gates with `pixi run --locked` in this worktree and accept the build.
 - "the main checkout's pixi.lock differs from this branch's": the main checkout is on another branch. Keep using `$H exec`, and treat CI as the final gate if a local result disagrees with it.
+- "no merge base with origin/dev": run `git fetch origin dev` and rerun `$H worktree-setup`.
+
+In every worktree:
 
 - `data/` is shared and holds `.py` files. Give pytest an explicit test path, so it never collects them, and `-p no:cacheprovider`. Write under `data/` only through `$H fetch`, which adds fixtures to the shared cache, and `$H run`, which works on a per-run copy in `data/verify-runs/`.
 - The `data`-marked tests take 10-12 minutes per checkout. Run the modules for the packages you touch in the background, at your head and at `origin/dev`, so a new failure stands apart from an old one.
 - CI has no `data/`. The conftest guard fails an unmarked test that opens or lists `data/`, but a read at import or collection time escapes it: it passes locally and fails in CI. Mark every test that needs a fixture `data`.
 - CI runs the lint and format gates on the PR merged into `dev`. Judge `ruff_new_violations.py` on your head merged with current `origin/dev` (in a detached scratch worktree), because on a head behind `dev` it also flags files that only `dev` changed.
-- basedpyright runs in lock mode against `.basedpyright/baseline.json`: a new error or warning fails, and so does a baseline entry whose diagnostic is gone. When your change deletes or rewrites code that has baseline entries, delete exactly those entries in their own commit. Never add or regenerate entries. basedpyright checks only the paths in the `include` list of `pyrightconfig.json`, minus hidden directories below them, so add a new top-level Python directory to that list.
+- basedpyright runs in lock mode against `.basedpyright/baseline.json`: a new error or warning fails, and so does a baseline entry whose diagnostic is gone. When your change deletes or rewrites code that has baseline entries, delete exactly those entries in their own commit. Never add or regenerate entries. basedpyright checks only the paths in the `include` list of `pyrightconfig.json`, minus hidden directories below them, so add a new top-level Python directory or root-level `.py` file to that list.
 
 ## Doctor
 
