@@ -23,9 +23,17 @@ There is nothing to keep alive. "Launch" means the env and fixtures exist:
 $H fetch data/examples/bands/non-spin-polarized     # idempotent; ~20-35 MB each, into ./data (gitignored)
 ```
 
-`fetch` downloads a missing fixture, then makes it read-only, so a stray write into a fixture fails with `PermissionError` whatever the code path. Rerun it on an existing fixture to lock it; that needs no download and no env, in a linked worktree too. It takes a fixture root, `data/examples/<category>/<name>` or `data/<name>`, spelled in plain names (letters, digits, `_`, `.` and `-`), and refuses a path whose real location is not a fixture inside `data/`. A download fetches exactly `<relpath>.zip` from the dataset into a staging dir next to the fixture, so a misspelt or partial name fails without downloading, and the shared Hugging Face cache is left alone. A file with a second hard link stays writable, because its other link may be outside `data/`; `fetch` names each one on stderr. Code that must write next to a fixture works on a writable copy: `$H run` makes one, drivers call `writable_copy` from `verify_steps`, and tests call `writable_copy` from `tests.utils`.
+`fetch` downloads a missing fixture, then makes it read-only, so a stray write into a fixture fails with `PermissionError` whatever the code path. Rerun it on an existing fixture to lock it; that needs no download and no env, in a linked worktree too. It takes a fixture root, `data/examples/<category>/<name>` or `data/<name>`, spelled in plain names (letters, digits, `_`, `.` and `-`, not starting with `.` or `-`), and refuses a path whose real location is not a fixture inside `data/`. A download fetches exactly `<relpath>.zip` from the dataset into a staging dir next to the fixture, so a misspelt or partial name fails without downloading. The download still writes one file to the shared Hugging Face cache, `<HF cache>/datasets--lllangWV--pyprocar_test_data/refs/main`, because `huggingface_hub` records the dataset's commit there even with `local_dir`. A file with a second hard link stays writable, because its other link may be outside `data/`; `fetch` names each one on stderr. Code that must write next to a fixture works on a writable copy: `$H run` makes one, drivers call `writable_copy` from `verify_steps`, and tests call `writable_copy` from `tests.utils`.
 
-`doctor`, `fetch`, `run`, `clean` and `gc` act only inside the data root, and exit 2 unless `data` resolves to the main checkout's `data/` directory: the directory itself in the main checkout, a symlink to it in a linked worktree (`$H worktree-setup` makes it). `data/verify-runs` must be a directory in it, not a symlink. A `data` symlink in the main checkout, for example to another disk, is refused. Every chmod and delete stays strictly below the data root and never follows a symlink.
+To refresh a locked fixture, the operator unlocks it from the main checkout's root, removes it, and fetches it again:
+
+```bash
+find -P data/examples/<category>/<name> ! -type l -exec chmod u+w {} +   # the inverse of the lock
+rm -rf data/examples/<category>/<name>
+$H fetch data/examples/<category>/<name>
+```
+
+`doctor`, `fetch`, `run`, `clean` and `gc` act only inside the data root (apart from that Hugging Face ref), and exit 2 unless `data` resolves to the main checkout's `data/` directory: the directory itself in the main checkout, a symlink to it in a linked worktree (`$H worktree-setup` makes it). `data/verify-runs` must be a directory in it, not a symlink. A `data` symlink in the main checkout, for example to another disk, is refused. Every chmod and delete stays strictly below the data root and never follows a symlink. `run` writes only into a run dir it has just created.
 
 Fixture relpaths (HF dataset `lllangWV/pyprocar_test_data`): `data/examples/{bands,dos,fermi3d,fermi2d}/{non-spin-polarized,spin-polarized,non-colinear}`, plus `bands/{atomic_levels,auto,compare_bands,ipr,unfolding,2d-bands}`, `fermi2d/bisb_monolayer`, `fermi3d/van-alphen`. All are VASP; Fermi energy for the SrVO3 sets is `5.3017`.
 
@@ -76,7 +84,7 @@ $H run <name> <fixture-relpath> <driver.py>
 ```
 
 What the harness does:
-1. Creates `data/verify-runs/<timestamp>-<name>/`.
+1. Creates a new `data/verify-runs/<timestamp>-<name>/`. It refuses (exit 2) when anything already has that name, such as a second run with the same name in the same second, so rerun it.
 2. Copies the fixture to `work/calc`, following symlinks (a reflink copy where the filesystem supports it), makes the copy writable, and copies the driver to `evidence/driver.py`. `<name>` is one plain name, and the fixture must resolve to a fixture directory inside `data/`.
 3. Runs the driver with `TMPDIR=work/tmp`, `CALC=<calc copy>`, `EVIDENCE=<evidence dir>`, `REPO=<repo root>`, `MPLBACKEND=Agg`, `PYVISTA_OFF_SCREEN=true`, and `scripts/lib` on `PYTHONPATH`. pytest puts its `--basetemp` root under `TMPDIR`, so a driver that starts pytest also writes under the run.
 4. Records the exit code, `run.log` (stdout+stderr), and `side_effects.txt`, which lists files created or modified inside the calc copy.
