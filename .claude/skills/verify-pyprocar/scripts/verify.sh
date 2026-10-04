@@ -91,7 +91,6 @@ require_data() {
     RUNS="$(real_path "$DATA/verify-runs")" && [ "$RUNS" = "$DATA/verify-runs" ]; then
     return 0
   fi
-  DATA="" RUNS=""
   echo "refusing: $REPO/data must be the directory $MAIN/data, or in a linked worktree a symlink to it" \
     "(run: verify.sh worktree-setup), and data/verify-runs a directory in it" >&2
   return 2
@@ -105,19 +104,18 @@ fixture_path() {
     is_fixture_rel "${real#"$DATA"/}" && echo "$real"
 }
 
-chmod_below_data() {
-  local mode="$1" real
-  if ! real="$(real_path "$2")" || [ "$real" != "$2" ] || ! is_below "$real" "$DATA"; then
-    echo "refusing: $2 is not a resolved path below $DATA" >&2
-    exit 2
-  fi
-  find -P "$real" ! -type l \( -type d -o -links 1 \) -exec chmod "$mode" {} +
+require_resolved_below() {
+  local real
+  real="$(real_path "$1")" && [ "$real" = "$1" ] && is_below "$real" "$2" ||
+    { echo "refusing: $1 is not a resolved path below $2" >&2; exit 2; }
 }
 
-hard_linked() { find -P "$1" ! -type l ! -type d -links +1; }
+chmod_below_data() {
+  require_resolved_below "$2" "$DATA"
+  find -P "$2" ! -type l \( -type d -o -links 1 \) -exec chmod "$1" {} +
+}
 
-fixture_report() {
-  local d real
+fixture_report() (
   shopt -s nullglob dotglob
   for d in data/examples/*/* data/*; do
     is_fixture_rel "${d#data/}" || continue
@@ -127,10 +125,17 @@ fixture_report() {
       printf 'unlockable %s\n' "$d"
     fi
   done | LC_ALL=C sort -u
-  shopt -u nullglob dotglob
+)
+
+print_list() {
+  local label="$1" lines="$2" limit="$3" hint="$4" n
+  n="$(printf '%s' "$lines" | grep -c . || true)"
+  echo "$label: $n"
+  [ "$n" -eq 0 ] || { printf '%s\n' "$lines" | sed -n "1,${limit}s/^/  /p"; echo "  $hint"; }
 }
 
 scrub() {
+  require_resolved_below "$1" "$RUNS"
   [ ! -d "$1/work" ] || [ -L "$1/work" ] || chmod_below_data u+w "$1/work"
   rm -rf "$1/work" "$1/.start" "$1/.pid"
 }
@@ -150,20 +155,10 @@ print("pyvista: ", pyvista.__version__, "vtk", vtk.vtkVersion.GetVTKVersion())
   echo "fixtures:"; ls -d data/examples/*/* 2>/dev/null | sed 's/^/  /' || echo "  (none; run: verify.sh fetch <relpath>)"
   require_data || exit 0
   report="$(fixture_report)"
-  writable="$(printf '%s\n' "$report" | sed -n 's/^writable //p')"
-  unlockable="$(printf '%s\n' "$report" | sed -n 's/^unlockable //p')"
-  n="$(printf '%s' "$writable" | grep -c . || true)"
-  echo "writable fixture paths: $n"
-  if [ "$n" -gt 0 ]; then
-    printf '%s\n' "$writable" | sed -n '1,5s/^/  /p'
-    echo "  lock each fixture with: verify.sh fetch <relpath>"
-  fi
-  n="$(printf '%s' "$unlockable" | grep -c . || true)"
-  echo "unlockable fixture roots: $n"
-  if [ "$n" -gt 0 ]; then
-    printf '%s\n' "$unlockable" | sed 's/^/  /'
-    echo "  fetch refuses these: rename each to plain names inside data/, or remove it"
-  fi
+  print_list "writable fixture paths" "$(printf '%s\n' "$report" | sed -n 's/^writable //p')" 5 \
+    "lock each fixture with: verify.sh fetch <relpath>"
+  print_list "unlockable fixture roots" "$(printf '%s\n' "$report" | sed -n 's/^unlockable //p')" '$' \
+    "fetch refuses these: rename each to plain names inside data/, or remove it"
   ;;
 fetch)
   shift
@@ -176,14 +171,13 @@ fetch)
     fi
     if [ ! -e "$real" ]; then
       ! in_worktree || require_shared_env
-      mkdir -p "$RUNS"
-      HF_HUB_CACHE="$RUNS/hf-cache" py -W ignore -c 'import sys; from pathlib import Path; import pyprocar
+      py -W ignore -c 'import sys; from pathlib import Path; import pyprocar
 pyprocar.download_from_hf(relpath=sys.argv[1], output_path=Path(".").resolve())' "$rel"
       real="$(fixture_path "$rel")" && [ -e "$real" ] || { echo "the download did not create $rel" >&2; exit 1; }
     fi
     chmod_below_data a-w "$real"
     echo "read-only: $rel"
-    linked="$(hard_linked "$real")"
+    linked="$(find -P "$real" ! -type l ! -type d -links +1)"
     [ -z "$linked" ] || printf 'left writable, hard-linked (another link may be outside data/):\n%s\n' "$linked" >&2
   done
   ;;

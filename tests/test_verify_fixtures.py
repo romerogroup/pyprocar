@@ -10,12 +10,12 @@ from pathlib import Path
 import pytest
 
 SCRIPT = Path(".claude/skills/verify-pyprocar/scripts/verify.sh")
+# VERIFY_SH_UNDER_TEST runs the suite against another copy of verify.sh, such as a mutant.
 VERIFY_SH = Path(
     os.environ.get("VERIFY_SH_UNDER_TEST") or Path(__file__).resolve().parents[1] / SCRIPT
 )
 WRITE_BITS = stat.S_IWUSR | stat.S_IWGRP | stat.S_IWOTH
 FAKE_ENV = """#!/bin/sh
-echo "hf-cache=${{HF_HUB_CACHE:-}}" >> "{log}"
 echo "$@" >> "{log}"
 for last; do :; done
 case "$last" in data/*) mkdir -p "$last" && echo x > "$last/PROCAR" ;; esac
@@ -195,14 +195,11 @@ def test_fetch_through_a_symlinked_fixture_locks_its_target_inside_data(harness)
 
 
 def test_fetch_downloads_a_missing_fixture_by_its_literal_name_then_locks_it(harness):
-    if harness.shared_env is not None:
-        harness.install_shared_env()
+    _prime(harness)
     before = harness.locked()
 
     assert harness.verify("fetch", "data/examples/dos/new").returncode == 0
-    log = harness.env_log.read_text()
-    assert log.split()[-1] == "data/examples/dos/new"
-    assert log.startswith(f"hf-cache={os.path.realpath(harness.data_dir)}/verify-runs/hf-cache\n")
+    assert harness.env_log.read_text().split()[-1] == "data/examples/dos/new"
     assert harness.locked() - before == {
         f"{harness.data_rel}/examples/dos/new",
         f"{harness.data_rel}/examples/dos/new/PROCAR",
@@ -219,12 +216,15 @@ def test_fetch_in_a_worktree_without_the_env_refuses_only_a_download(harness):
     assert harness.verify("fetch", "data/codes").returncode == 0
 
 
-def _run(harness, fixture, name="probe"):
+def _prime(harness) -> None:
     if harness.shared_env is not None:
         harness.install_shared_env()
-    driver = harness.root / "driver.py"
-    driver.write_text("print('probe')\n")
-    return harness.verify("run", name, fixture, str(driver))
+    (harness.root / "driver.py").write_text("print('probe')\n")
+
+
+def _run(harness, fixture, name="probe"):
+    _prime(harness)
+    return harness.verify("run", name, fixture, str(harness.root / "driver.py"))
 
 
 def _calc(harness) -> Path:
@@ -338,8 +338,7 @@ def test_gc_removes_read_only_work_and_never_unlocks_a_fixture_it_links_to(harne
 
 
 def _doctor_lines(harness) -> list[str]:
-    if harness.shared_env is not None:
-        harness.install_shared_env()
+    _prime(harness)
     out = harness.verify("doctor")
     assert out.returncode == 0, out.stderr
     return out.stdout.splitlines()
@@ -404,7 +403,7 @@ def _snapshot(harness, *allowed: Path) -> dict[str, tuple[int, str]]:
             if path in skip or path.name == ".git":
                 continue
             mode = path.lstat().st_mode
-            if path.is_symlink():
+            if stat.S_ISLNK(mode):
                 body = os.readlink(path)
             elif stat.S_ISREG(mode) and os.access(path, os.R_OK):
                 body = hashlib.sha256(path.read_bytes()).hexdigest()
@@ -425,12 +424,6 @@ def _relink_data(harness, target: Path | str) -> None:
     else:
         data.rename(harness.root / "data-moved")
     data.symlink_to(target)
-
-
-def _prime(harness) -> None:
-    if harness.shared_env is not None:
-        harness.install_shared_env()
-    (harness.root / "driver.py").write_text("print('probe')\n")
 
 
 REFUSING_EVERY_COMMAND = [
@@ -550,15 +543,13 @@ def test_no_command_changes_anything_outside_data(harness):
     assert _outside(harness, *allowed) == before
 
 
-def test_verify_sh_changes_modes_only_in_chmod_below_data():
+def test_verify_sh_changes_modes_and_deletes_only_in_its_guarded_helpers():
     lines = [x.strip() for x in VERIFY_SH.read_text().splitlines()]
-    mode_changes = [
-        x
-        for x in lines
-        if re.search(r"\b(chmod|chown|chgrp|chattr|setfacl)\b|\binstall\s+-\w*m", x)
-        and not x.startswith("#")
-    ]
+    pattern = r"\b(chmod|chown|chgrp|chattr|setfacl|rm|rmdir|unlink|mv|shred)\b|\binstall\s+-\w*m"
+    changes = [x for x in lines if re.search(pattern, x) and not x.startswith("#")]
 
-    assert mode_changes == [
-        'find -P "$real" ! -type l \\( -type d -o -links 1 \\) -exec chmod "$mode" {} +'
+    assert changes == [
+        'find -P "$2" ! -type l \\( -type d -o -links 1 \\) -exec chmod "$1" {} +',
+        'rm -rf "$1/work" "$1/.start" "$1/.pid"',
+        "trap 'rm -f \"$run/.pid\"' EXIT",
     ]
