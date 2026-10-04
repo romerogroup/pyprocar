@@ -631,16 +631,20 @@ WRITING_COMMAND = (
 )
 FILE_REDIRECT = r"(&|\d+|\{\w+\})?(>>|>\||<>|>)(?![>|])(?!\s*/dev/null\b)(?!&(\d+|-))"
 QUOTED = r""""(?:[^"\\]|\\.)*"|'[^']*'"""
-LONE_EXPANSION = r'"\$(\w+|\{\w+\}|[@*])"'
+LONE_EXPANSION = r'"\$(\w+|\{(\w+(\[[@*]\])?|[@*])\}|[@*])"'
 VARIABLE_COMMAND = (
-    r"(^|[;&|({!`]|\$\(|\b(then|do|else|exec|eval|xargs|command|env|nohup|time|sudo)\s)"
+    r"(^|[;&|({!`]|\$\(|\b(if|elif|while|until|then|do|else|exec|eval|xargs|command|env|nohup"
+    r"|time|sudo)\s)"
     r"\s*(\w+=\S*\s+)*\"?\$(\{|\w|[@*])"
 )
 
 
+TESTS_AND_ARITHMETIC = r"\[\[.*?\]\]|\$?\(\(.*?\)\)"
+
+
 def _command_words(line: str) -> str:
     blanked = re.sub(QUOTED, lambda m: m[0] if re.fullmatch(LONE_EXPANSION, m[0]) else "''", line)
-    return re.sub(r"\[\[.*?\]\]", "", blanked)
+    return re.sub(TESTS_AND_ARITHMETIC, "", blanked)
 
 
 def _census(script: str) -> list[str]:
@@ -651,7 +655,7 @@ def _census(script: str) -> list[str]:
         and (
             re.search(WRITING_COMMAND, x)
             or re.search(VARIABLE_COMMAND, _command_words(x))
-            or re.search(FILE_REDIRECT, re.sub(QUOTED, "", x))
+            or re.search(FILE_REDIRECT, re.sub(TESTS_AND_ARITHMETIC, "", re.sub(QUOTED, "", x)))
         )
     ]
 
@@ -679,11 +683,22 @@ def _census(script: str) -> list[str]:
         '"$w" "$f"',
         'X=1 "${w}" "$f"',
         'true && "$@"',
+        '"${cmd[@]}" "$f"',
+        'X=1 "${@}"',
+        'if "$w"; then :; fi',
+        'while "$w"; do :; done',
+        '[[ -n "$a" ]] >"$f"',
     ],
 )
 def test_the_census_flags_each_way_a_line_can_write(line):
     script = VERIFY_SH.read_text()
-    harmless = 'echo "a > b" >&2 2>/dev/null; exec 3>&-; cmd 2>&1 >>/dev/null; x="$y"'
+    harmless = "\n".join(
+        [
+            'echo "a > b" >&2 2>/dev/null; exec 3>&-; cmd 2>&1 >>/dev/null; x="$y"',
+            '[[ "$a" > "$b" ]] && echo $((a > b)); (( a > b )) || true',
+            'if [[ -n "$w" ]]; then echo "${cmd[@]}"; fi',
+        ]
+    )
 
     assert _census(f"{script}\n{harmless}") == _census(script)
     assert _census(f"{script}\n{line}") == [*_census(script), line]
