@@ -124,6 +124,10 @@ class TestFermiPlotterPlot:
 
         assert list(meshes) == [(3, 1)]
 
+    @pytest.mark.guards_existing_behaviour(
+        reason="#281 used stacklevel=2, which already names this file one frame up;"
+        " this pins the line through warn_user"
+    )
     def test_spin_without_surface_warns_and_draws_nothing(self, plotter):
         message = (
             "No Fermi surface found: no band of spin channel(s) [2] crosses the isovalue"

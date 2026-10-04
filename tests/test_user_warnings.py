@@ -1,6 +1,8 @@
 import ast
 from pathlib import Path
 
+import pytest
+
 ROOT = Path(__file__).resolve().parent.parent
 WARN_USER_HOME = ROOT / "pyprocar" / "utils" / "log_utils.py"
 USER_WARNING_HELPER = ROOT / "tests" / "utils" / "user_warning.py"
@@ -217,10 +219,16 @@ def test_library_warns_only_through_warn_user():
     assert raw_warnings_warn_calls([p for p in _library_files() if p != WARN_USER_HOME]) == []
 
 
+@pytest.mark.guards_existing_behaviour(
+    reason="it scans tests/, which this PR already converts; the self-test proves each form fails"
+)
 def test_tests_never_lower_the_user_logger_to_see_a_warning():
     assert user_logger_lowered_in(_test_files()) == []
 
 
+@pytest.mark.guards_existing_behaviour(
+    reason="it scans tests/, which this PR already converts; the self-test proves each form fails"
+)
 def test_tests_check_where_each_user_warning_points():
     assert bare_user_warning_asserts([p for p in _test_files() if p != USER_WARNING_HELPER]) == []
 
@@ -234,6 +242,9 @@ def _write(path: Path, lines: list[str]) -> Path:
     return path
 
 
+@pytest.mark.guards_existing_behaviour(
+    reason="it runs the checks on synthetic files and never imports pyprocar"
+)
 def test_the_checks_flag_each_loud_call_and_each_lowered_level(tmp_path):
     exporter = _write(
         tmp_path / "loggers.py", ["import logging", "shared = logging.getLogger('user')"]

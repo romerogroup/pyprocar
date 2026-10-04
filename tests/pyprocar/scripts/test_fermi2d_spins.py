@@ -65,6 +65,10 @@ def test_fermi2d_draws_both_channels_by_default(tmp_path):
     assert np.isclose(radii, np.sqrt(FERMI / 2), atol=0.02).any()
 
 
+@pytest.mark.guards_existing_behaviour(
+    reason="#281 used stacklevel=2, which already names this file one frame up;"
+    " this pins the line through warn_user"
+)
 def test_fermi2d_spin_channel_without_a_crossing_warns_and_draws_nothing(tmp_path):
     with user_warning(__file__, match=r"no band of spin channel\(s\) \[1\] crosses"):
         radii = contour_radii(tmp_path, None, [1])

@@ -77,6 +77,10 @@ def test_band_structure_2d_without_fermi_warns_that_the_bands_are_not_shifted(mo
     ["plot_fermi_surface", "plot_fermi_cross_section", "plot_fermi_cross_section_box_widget"],
 )
 @pytest.mark.usefixtures("live_user_log")
+@pytest.mark.guards_existing_behaviour(
+    reason="FermiSurface.from_ebs raises before the no-surface warning, which no"
+    " public call reaches; this pins the loud error"
+)
 def test_fermi_handler_without_a_crossing_raises(monkeypatch, method):
     ebs = sphere_mesh(1, np.full((2, 1, 2, 1), 0.5))
 
