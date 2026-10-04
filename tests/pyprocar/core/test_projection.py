@@ -89,7 +89,7 @@ def test_build_property_rejects_disallowed_mode():
 
 
 @pytest.mark.guards_existing_behaviour(
-    reason="the labels are unchanged; the source only gains the atom_groups and n_atoms the resolver reads"
+    reason="the labels are unchanged; the source only gains atom_groups and n_atoms"
 )
 def test_build_property_selection_labels():
     structure = Structure(
