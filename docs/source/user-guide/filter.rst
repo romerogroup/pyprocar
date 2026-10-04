@@ -70,7 +70,7 @@ writes 3 rows: Sr, V, and the sum of the three O atoms. To plot the new file, re
 - Atom index ``i`` selects the ``i``-th group, so ``atoms=[2]`` selects the three O atoms. Plots label a selection by its group indices, not by a species.
 - A plot with no ``atoms`` sums every group.
 - A selection by species raises an error, because a group can hold atoms of several species. This includes ``atoms=['O']`` and the ``overlay_species`` mode. Select groups by index instead.
-- The lattice and the symmetry operations still come from the POSCAR and the OUTCAR, so Fermi surfaces unfold as before.
+- A Fermi surface or other k-point mesh needs the full k grid. Unfolding the irreducible k-points moves atoms between rows, and the filtered file does not say which atoms a row holds, so PyProcar raises an error. Filter the PROCAR of a calculation on the full k grid (``ISYM = -1``), or plot the unfiltered PROCAR and select atoms there.
 
 PyProcar cannot detect a filtered PROCAR that has exactly as many rows as the POSCAR has atoms. It then labels each row with the species of the POSCAR atom at the same index.
 

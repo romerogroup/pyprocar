@@ -2304,6 +2304,13 @@ def _turn_projections(ebs, rotations, time_reversals, operation, lattice_steps) 
         raise ValueError("Unfolding projections needs a reciprocal lattice")
     if n_atoms > 1 and structure is None:
         raise ValueError("Unfolding projections of several atoms needs the structure")
+    if ebs.atom_groups is not None and np.any(operation != IDENTITY):
+        raise ValueError(
+            "A PROCAR filtered by atoms cannot be unfolded from the irreducible k-points: "
+            + "symmetry operations move atoms between its rows, and the file does not say which "
+            + "atoms each row holds. Filter the PROCAR of a full k-grid calculation (ISYM = -1), "
+            + "or select atoms in the plot of the unfiltered PROCAR."
+        )
 
     names = ebs.orbital_names or [f"orbital {i}" for i in range(n_orbitals)]
     unrotated = unrotated_orbitals(names)
