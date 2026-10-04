@@ -666,3 +666,8 @@ def test_magnetization_without_structure_or_atoms_sums_every_atom_row() -> None:
     assert isinstance(prop, Property)
     # (1 - 0.5) * (1 + 2) * (2 + 3 + 4) on each energy
     np.testing.assert_allclose(np.asarray(prop.value).ravel(), [13.5, 13.5, 13.5])
+
+
+def test_an_empty_atom_selection_raises_instead_of_summing_nothing() -> None:
+    with pytest.raises(ValueError, match="names no atoms"):
+        _structureless_dos(n_spins=1).compute_projected_sum(atoms=[], orbitals=[0])
