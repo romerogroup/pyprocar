@@ -4,6 +4,7 @@ import re
 import shutil
 import stat
 import subprocess
+import time
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -270,6 +271,37 @@ def test_run_refuses_a_name_that_is_not_one_plain_component(harness, name):
     assert sorted(p.name for p in (harness.data_dir / "verify-runs").iterdir()) == ["run1"]
 
 
+def _plant_next_runs(harness, how: str) -> None:
+    now = time.time()
+    for second in range(-1, 30):
+        stamp = time.strftime("%Y%m%d-%H%M%S", time.localtime(now + second))
+        victim = harness.root / "outside/runs" / stamp
+        (victim / "work/calc/x").mkdir(parents=True)
+        (victim / "work/calc/x/PROCAR").write_text("victim")
+        (victim / "evidence").mkdir()
+        (victim / ".pid").write_text("1")
+        run = harness.data_dir / "verify-runs" / f"{stamp}-probe"
+        if how == "run_dir_link":
+            run.symlink_to(victim)
+            continue
+        run.mkdir()
+        if how != "run_dir":
+            (run / how).symlink_to(victim / how)
+
+
+@pytest.mark.parametrize("how", ["run_dir_link", "run_dir", "work", ".pid", "evidence"])
+def test_run_refuses_a_run_dir_that_already_exists_and_changes_nothing(harness, how):
+    _plant_next_runs(harness, how)
+    _prime(harness)
+    before = _snapshot(harness)
+
+    out = harness.verify("run", "probe", "data/examples/bands/x", str(harness.root / "driver.py"))
+
+    assert out.returncode == 2, out.stderr
+    assert not harness.env_log.exists()
+    assert _snapshot(harness) == before
+
+
 def _run_dir(harness, name: str) -> Path:
     run = harness.data_dir / "verify-runs" / name
     (run / "evidence").mkdir(parents=True)
@@ -444,7 +476,7 @@ def _refuses_everything(harness, *extra: tuple[str, ...]) -> None:
         out = harness.verify(*(a.format(root=harness.root) for a in args))
         assert out.returncode == 2, (args, out.stderr)
     assert not harness.env_log.exists()
-    assert harness.verify("doctor").returncode == 0
+    assert harness.verify("doctor").returncode == 2
     assert _snapshot(harness) == before
 
 
@@ -524,7 +556,8 @@ def test_no_command_changes_anything_outside_data(harness):
     allowed: tuple[str, ...] = ()
     if harness.shared_env is not None:
         (harness.root / "repo/pyprocar").mkdir()
-        (harness.root / "repo/pyprocar/_version.py").write_text("x")
+        (harness.root / "repo/pyprocar/_version.py").write_text("version")
+        (harness.repo / "pyprocar").mkdir()
         allowed = ("pyprocar", ".tmp", "data")
     _prime(harness)
     before = _outside(harness, *allowed)
@@ -538,9 +571,14 @@ def test_no_command_changes_anything_outside_data(harness):
         harness.verify("clean", str(run))
     harness.verify("gc", "0")
     harness.verify("doctor")
-    harness.verify("worktree-setup")
+    setup = harness.verify("worktree-setup")
 
     assert _outside(harness, *allowed) == before
+    if harness.shared_env is not None:
+        assert setup.returncode == 0, setup.stderr
+        assert (harness.repo / "pyprocar/_version.py").read_text() == "version"
+        assert os.readlink(harness.repo / "data") == str(harness.data_dir)
+        assert (harness.repo / ".tmp").is_dir()
 
 
 def test_verify_sh_changes_modes_and_deletes_only_in_its_guarded_helpers():
