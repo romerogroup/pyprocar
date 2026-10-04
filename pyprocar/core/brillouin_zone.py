@@ -1,5 +1,6 @@
 import itertools
 import logging
+import warnings
 
 import numpy as np
 import pyvista as pv
@@ -24,7 +25,11 @@ def zone_face_steps(reciprocal_lattice: np.ndarray) -> np.ndarray:
     """
     lattice = np.asarray(reciprocal_lattice, dtype=np.float64)
     unit = lattice / abs(np.linalg.det(lattice)) ** (1 / 3)
-    reduced = spglib.delaunay_reduce(unit)
+    with warnings.catch_warnings():
+        # spglib warns on every call while its process-wide OLD_ERROR_HANDLING is on; the
+        # None return below is the error check it asks for.
+        warnings.filterwarnings("ignore", "Set OLD_ERROR_HANDLING", DeprecationWarning)
+        reduced = spglib.delaunay_reduce(unit)
     if reduced is None:
         raise ValueError(f"spglib cannot Delaunay-reduce the reciprocal lattice {lattice.tolist()}")
     candidates = _FACE_CANDIDATES @ np.rint(reduced @ np.linalg.inv(unit)).astype(int)

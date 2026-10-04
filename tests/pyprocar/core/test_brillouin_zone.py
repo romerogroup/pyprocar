@@ -6,6 +6,7 @@ and BrillouinZone2D classes.
 """
 
 import itertools
+import warnings
 
 import numpy as np
 import pytest
@@ -411,3 +412,12 @@ def test_2d_brillouin_zone_is_the_hexagonal_prism_for_any_basis(
     assert np.linalg.norm(zone.points[:, :2], axis=1) == pytest.approx(
         np.full(zone.n_points, np.linalg.norm(b1) / np.sqrt(3)), rel=1e-9
     )
+
+
+def test_building_a_zone_emits_no_warnings():
+    lattice = np.array([[1.0, 0.0, 0.0], [3.0, 1.0, 0.0], [-2.0, 2.0, 1.0]])
+    with warnings.catch_warnings(record=True) as record:
+        warnings.simplefilter("always")
+        BrillouinZone(lattice)
+
+    assert [str(w.message) for w in record] == []
