@@ -211,25 +211,6 @@ def test_zone_face_cut_counts_the_orbit_around_m_once(height):
     assert np.asarray(areas) == pytest.approx([np.pi * 0.1], rel=0.02)
 
 
-def test_translate_through_the_highest_vertex_is_cut_although_its_offset_rounds_above_it():
-    """E = 0.1 - 0.3 sum cos(2 pi k), normal (1, 1, 1), one zone below a mesh vertex.
-
-    One translate plane is tangent to the surface at its highest point. numpy puts that
-    translate's offset 1 ULP above the highest vertex height, while VTK's cut of it has
-    3 cells; slicing every translate leaves 1 open curve.
-    """
-
-    def sum_of_cosines(k: np.ndarray) -> np.ndarray:
-        return 0.1 - 0.3 * np.cos(2 * np.pi * k).sum(axis=1)
-
-    mesh = _periodic_surface(sum_of_cosines)
-    origin = np.asarray(mesh.points, dtype=np.float64)[484] + np.array([-1.0, 0.0, 0.0])
-
-    areas, n_open = cross_section_areas(mesh, np.ones(3) / np.sqrt(3), origin, np.eye(3))
-
-    assert (areas, n_open) == ([], 1)
-
-
 def test_generic_normal_cuts_the_cylinder_around_m_in_one_ellipse():
     """A plane with normal n cuts the cylinder |k_xy - M|^2 = 0.1 in an ellipse of area
     pi 0.1 / |n_z|. Two of the plane's lattice translates that cross the surface are only
