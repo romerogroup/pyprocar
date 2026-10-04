@@ -377,6 +377,16 @@ def test_parser_handles_nonexistent_directory(tmp_path: Path) -> None:
     assert summary["parsers"]["scf_in"] is False
 
 
+def test_structure_reads_the_bohr_cartesian_positions_as_fractions_of_the_cell(
+    xml_parser: QEParser,
+) -> None:
+    # QE's xml writes atomic positions in Cartesian bohr, like the cell vectors
+    structure = xml_parser.structure
+
+    assert structure is not None and structure.fractional_coordinates is not None
+    np.testing.assert_allclose(structure.fractional_coordinates[1], [2.565 / 5.43] * 3)
+
+
 def test_structure_is_none_when_lattice_is_missing(tmp_path: Path) -> None:
     parser = QEParser(tmp_path)
     parser.__dict__["species"] = ["Sr", "V", "O", "O", "O"]
