@@ -414,6 +414,9 @@ def test_2d_brillouin_zone_is_the_hexagonal_prism_for_any_basis(
     )
 
 
+@pytest.mark.guards_existing_behaviour(
+    reason="dev builds the zone without spglib; this guards the delaunay_reduce call this PR adds"
+)
 def test_building_a_zone_emits_no_warnings():
     lattice = np.array([[1.0, 0.0, 0.0], [3.0, 1.0, 0.0], [-2.0, 2.0, 1.0]])
     with warnings.catch_warnings(record=True) as record:
