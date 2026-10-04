@@ -385,7 +385,7 @@ def test_brillouin_zone_matches_voronoi_for_any_basis_of_the_lattice(cell, shear
     basis = shear @ cell
     _, vertices = _voronoi_reference(cell)
 
-    zone = BrillouinZone(basis).clean()
+    zone = BrillouinZone(basis)
 
     assert ConvexHull(zone.points).volume == pytest.approx(abs(np.linalg.det(cell)), rel=1e-9)
     np.testing.assert_allclose(_sorted_rows(zone.points), _sorted_rows(vertices), atol=1e-9)

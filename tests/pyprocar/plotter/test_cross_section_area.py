@@ -170,17 +170,18 @@ def _periodic_surface(
     reciprocal_lattice: np.ndarray | None = None,
     stored_kpoints: Callable[[np.ndarray], np.ndarray] = _same,
     kgrid: tuple[int, int, int] = (16, 16, 16),
+    kshift: tuple[float, float, float] = (0, 0, 0),
 ) -> FermiSurface:
     """The E_F = 0.1 surface of ``energy(k)`` on a 16^3 mesh, B = I unless given.
 
     ``stored_kpoints`` maps the grid k-points to the ones the band structure records.
     """
-    axes = [np.arange(n) / n for n in kgrid]
+    axes = [(np.arange(n) + shift) / n for n, shift in zip(kgrid, kshift, strict=True)]
     kpoints = np.stack(np.meshgrid(*axes, indexing="ij"), axis=-1).reshape(-1, 3)
     energies = np.stack([energy(kpoints), np.full(len(kpoints), 5.0)], axis=1)
     return FermiSurface.from_ebs(
         ElectronicBandStructureMesh(
-            kgrid_info=KGridInfo(kgrid=kgrid, kgrid_mode=KGRID_MODE.GAMMA, kshift=(0, 0, 0)),
+            kgrid_info=KGridInfo(kgrid=kgrid, kgrid_mode=KGRID_MODE.GAMMA, kshift=kshift),
             kpoints=stored_kpoints(kpoints),
             bands=energies[..., np.newaxis],
             projected=np.ones((len(kpoints), 2, 1, 1, 1)),
@@ -415,6 +416,30 @@ def test_sheared_basis_finds_the_orbit_at_a_zone_corner_six_cells_out():
     assert np.sort(areas) == pytest.approx(
         [np.pi * (0.02 - 0.05**2), np.pi * (0.1 - (origin @ normal) ** 2)], rel=0.08
     )
+
+
+def test_shifted_grid_finds_the_line_through_a_zone_corner_below_the_start_cells():
+    """The triclinic zone's corner V = (0.245642, 0.17609, -0.640012) lies at -1.939 b1 of the
+    basis below. On a grid shifted half a spacing along b1, each translate of the period
+    starts 0.125 b1 above an integer, so the plane 0.005 inside V meets the zone only in the
+    translate three cells down. The level set f2 = f2(V) is a lattice plane through V that
+    cuts the plane in one open line."""
+    cell = np.array([[1.0, 0.1, 0.05], [0.3, 1.2, 0.0], [0.2, 0.35, 0.8]])
+    basis = np.array([[-1, 0, 0], [0, -1, 0], [2, 0, 1]]) @ cell
+    corner = np.array([0.245642, 0.17609, -0.640012])
+    f2 = (corner @ np.linalg.inv(basis))[1]
+    normal = corner / np.linalg.norm(corner) + np.array([0.05, -0.03, 0.02])
+    normal /= np.linalg.norm(normal)
+    surface = _periodic_surface(
+        lambda k: 0.1 + np.sin(2 * np.pi * k[:, 1]) - np.sin(2 * np.pi * f2),
+        basis,
+        kgrid=(4, 24, 24),
+        kshift=(0.5, 0, 0),
+    )
+
+    areas, n_open = cross_section_areas(surface, normal, corner - 0.005 * normal, basis)
+
+    assert (areas, n_open) == ([], 1)
 
 
 def test_orbit_reaching_five_cells_from_the_zone_closes():
