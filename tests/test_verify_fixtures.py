@@ -80,8 +80,10 @@ def _stub(path: Path, log: Path) -> None:
     path.chmod(0o755)
 
 
-def _git(*args: str | Path) -> None:
-    subprocess.run(["git", *map(str, args)], check=True, capture_output=True)
+def _git(*args: str | Path) -> str:
+    return subprocess.run(
+        ["git", *map(str, args)], check=True, capture_output=True, encoding="utf-8"
+    ).stdout
 
 
 @pytest.fixture(params=["data_in_repo", "worktree"])
@@ -430,6 +432,23 @@ def test_doctor_counts_a_symlinked_fixture_root_by_its_target(harness):
     harness.lock("codes")
 
     assert _doctor_count(harness) == 2
+
+
+def test_doctor_leaves_a_stale_git_index_alone(harness):
+    if harness.shared_env is None:
+        _git("-C", harness.repo, "add", SCRIPT)
+        _git("-C", harness.repo, "-c", "user.name=t", "-c", "user.email=t@t", "commit", "-qm", "i")
+    index = harness.repo / _git("-C", harness.repo, "rev-parse", "--git-path", "index").strip()
+    script = harness.repo / SCRIPT
+    os.utime(script, (script.stat().st_atime, script.stat().st_mtime + 10))
+    before = index.read_bytes()
+
+    _doctor_lines(harness)
+    after_doctor = index.read_bytes()
+    _git("-C", harness.repo, "status", "--porcelain")
+
+    assert after_doctor == before
+    assert index.read_bytes() != before
 
 
 def test_doctor_lists_the_fixture_roots_that_fetch_refuses_to_lock(harness):
