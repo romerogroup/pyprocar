@@ -23,6 +23,10 @@ shared_env() {
   PATH="$SHARED_ENV:$PATH" PYTHONPATH="$REPO${PYTHONPATH:+:$PYTHONPATH}" PYTHONDONTWRITEBYTECODE=1 "$@"
 }
 py() { if in_worktree; then shared_env python "$@"; else pixi run -q -e default python "$@"; fi; }
+require_shared_env() {
+  [ -x "$SHARED_ENV/python" ] || { echo "missing $SHARED_ENV/python; run 'pixi install -e dev' in $MAIN" >&2; exit 2; }
+}
+case "${1:-}" in doctor | fetch | run | exec | worktree-setup) ! in_worktree || require_shared_env ;; esac
 
 whole_number() {
   [[ "$2" =~ ^[0-9]+$ ]] || { echo "$1 must be a whole number, got '$2'" >&2; exit 2; }
@@ -118,17 +122,22 @@ gc)
   ;;
 worktree-setup)
   in_worktree || { echo "refusing: $REPO is the main checkout; run this in a linked worktree" >&2; exit 2; }
-  for need in "$SHARED_ENV/python" "$MAIN/pyprocar/_version.py"; do
-    [ -e "$need" ] || { echo "missing $need; run 'pixi install -e dev' in $MAIN" >&2; exit 2; }
-  done
+  [ -e "$MAIN/pyprocar/_version.py" ] ||
+    { echo "missing $MAIN/pyprocar/_version.py; run 'pixi install -e dev' in $MAIN" >&2; exit 2; }
   if [ -e data ] && [ ! -L data ]; then
     echo "refusing: $REPO/data is a real directory; move it out of the way and rerun" >&2; exit 2
   fi
   cp "$MAIN/pyprocar/_version.py" pyprocar/_version.py
   mkdir -p "$MAIN/data" .tmp
   ln -sfn "$MAIN/data" data
-  cmp -s "$MAIN/pixi.lock" pixi.lock ||
-    echo "warning: pixi.lock differs from $MAIN/pixi.lock; the shared env may not match this branch, so CI is the final gate" >&2
+  base="$(git merge-base HEAD origin/dev 2>/dev/null || true)"
+  if [ -z "$base" ]; then
+    echo "warning: no merge base with origin/dev; run 'git fetch origin dev' to check pixi.lock" >&2
+  elif ! git diff --quiet "$base" -- pixi.lock pixi.toml; then
+    echo "warning: this branch changes pixi.lock or pixi.toml relative to origin/dev; the shared env does not match it, so build this worktree's own env with 'pixi run --locked'" >&2
+  elif ! cmp -s "$MAIN/pixi.lock" pixi.lock; then
+    echo "warning: the main checkout's pixi.lock differs from this branch's, which matches origin/dev; local gates may drift, so CI is the final gate" >&2
+  fi
   echo "ready: data -> $MAIN/data, pyprocar/_version.py copied, env $SHARED_ENV"
   ;;
 exec)

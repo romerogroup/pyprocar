@@ -27,11 +27,11 @@ Fixture relpaths (HF dataset `lllangWV/pyprocar_test_data`): `data/examples/{ban
 
 Other codes are already extracted under `data/codes/`: `qe/7.2/SrVO3`, `elk/6.3/SrVO3` and `vasp/6.4/SrVO3` (spin variants), and `abinit/9.6/Fe`. Siesta has no fixture; its tests build synthetic dirs. `features/parsers.md` lists the proven end states. For an independent reference from another code, run it with `pixi exec -s qe` (or `-s abinit`, `-s gfortran`), and keep its inputs and outputs outside any worktree, because `git worktree remove --force` deletes them.
 
-Run the gates with the commands in `.github/workflows/ci.yml`, as written, with `pixi run --locked -e <env>` replaced by `$H exec` and `"$BASE"` by `origin/dev`. In the main checkout `$H exec` is `pixi run -q --locked -e dev`; in a linked worktree it uses the main checkout's env (see below). `pixi run -e dev typecheck` is the same type check. The `test` task also runs the tests marked `data`, and the `lint` task applies `ruff --fix` to every file, so neither is a CI gate.
+Run the gates with the commands in `.github/workflows/ci.yml`, as written, with `pixi run --locked -e <env>` replaced by `$H exec` and `"$BASE"` by `origin/dev`. In the main checkout `$H exec` is `pixi run -q --locked -e dev`; in a linked worktree it uses the main checkout's env (see below). The pixi `typecheck` task runs the same type check. The `test` task also runs the tests marked `data`, and the `lint` task applies `ruff --fix` to every file, so neither is a CI gate.
 
 `--locked` fails when `pixi.lock` does not match `pixi.toml`, in CI and locally. After you edit `pixi.toml`, run `pixi lock` and commit `pixi.lock` with it.
 
-Run env binaries through `$H exec` or `pixi run`. Called by path, without its env's `bin/` on `PATH`, `.pixi/envs/dev/bin/basedpyright` reports phantom errors that CI does not.
+Run env binaries through `$H exec`. Called by path, without its env's `bin/` on `PATH`, `.pixi/envs/dev/bin/basedpyright` reports phantom errors that CI does not.
 
 ### Agents in worktrees
 
@@ -41,13 +41,15 @@ Several agents may work in separate git worktrees at once. A fresh worktree lack
 $H worktree-setup
 ```
 
-It copies `_version.py` from the main checkout, links `data` to the main checkout's `data/` with `ln -sfn` (a rerun is safe), and warns when this branch's `pixi.lock` differs from the main checkout's. After that, `$H exec`, `doctor`, `fetch` and `run` use the main checkout's `.pixi/envs/dev` with this worktree first on `PYTHONPATH`, and `$H exec` sets `PYTHONDONTWRITEBYTECODE=1` and `TMPDIR=.tmp`. A branch that changes `pixi.lock` needs its own env: run `pixi run --locked` in that worktree and accept the build.
+It copies `_version.py` from the main checkout and links `data` to the main checkout's `data/` with `ln -sfn` (a rerun is safe). After that, `$H exec`, `doctor`, `fetch` and `run` use the main checkout's `.pixi/envs/dev` with this worktree first on `PYTHONPATH`, and `$H exec` sets `PYTHONDONTWRITEBYTECODE=1` and `TMPDIR=.tmp`. They exit 2 when that env is missing. `worktree-setup` then prints at most one lock warning, and each asks for one action:
+- "this branch changes pixi.lock or pixi.toml relative to origin/dev": the shared env does not match the branch. Run the gates with `pixi run --locked` in this worktree and accept the build.
+- "the main checkout's pixi.lock differs from this branch's": the main checkout is on another branch. Keep using `$H exec`, and treat CI as the final gate if a local result disagrees with it.
 
-- `data/` is shared and holds `.py` files. Give pytest an explicit test path, so it never collects them, and `-p no:cacheprovider`. Write under `data/` only through `$H run`, which works on a per-run copy in `data/verify-runs/`.
+- `data/` is shared and holds `.py` files. Give pytest an explicit test path, so it never collects them, and `-p no:cacheprovider`. Write under `data/` only through `$H fetch`, which adds fixtures to the shared cache, and `$H run`, which works on a per-run copy in `data/verify-runs/`.
 - The `data`-marked tests take 10-12 minutes per checkout. Run the modules for the packages you touch in the background, at your head and at `origin/dev`, so a new failure stands apart from an old one.
 - CI has no `data/`. The conftest guard fails an unmarked test that opens or lists `data/`, but a read at import or collection time escapes it: it passes locally and fails in CI. Mark every test that needs a fixture `data`.
 - CI runs the lint and format gates on the PR merged into `dev`. Judge `ruff_new_violations.py` on your head merged with current `origin/dev` (in a detached scratch worktree), because on a head behind `dev` it also flags files that only `dev` changed.
-- basedpyright runs in lock mode against `.basedpyright/baseline.json`: a new error or warning fails, and so does a baseline entry whose diagnostic is gone. When your change deletes or rewrites code that has baseline entries, delete exactly those entries in their own commit. Never add or regenerate entries.
+- basedpyright runs in lock mode against `.basedpyright/baseline.json`: a new error or warning fails, and so does a baseline entry whose diagnostic is gone. When your change deletes or rewrites code that has baseline entries, delete exactly those entries in their own commit. Never add or regenerate entries. basedpyright checks only the paths in the `include` list of `pyrightconfig.json`, minus hidden directories below them, so add a new top-level Python directory to that list.
 
 ## Doctor
 
@@ -69,7 +71,7 @@ What the harness does:
 3. Runs the driver with `TMPDIR=work/tmp`, `CALC=<calc copy>`, `EVIDENCE=<evidence dir>`, `REPO=<repo root>`, `MPLBACKEND=Agg`, `PYVISTA_OFF_SCREEN=true`, and `scripts/lib` on `PYTHONPATH`. pytest puts its `--basetemp` root under `TMPDIR`, so a driver that starts pytest also writes under the run.
 4. Records the exit code, `run.log` (stdout+stderr), and `side_effects.txt`, which lists files created or modified inside the calc copy.
 
-Before step 1, the harness exits 3 when `data/verify-runs/` or `$TMPDIR` (default `/tmp`) has less free space than the fixture size plus `VERIFY_MIN_FREE_MB` (default 2048). The message prints the free space. The harness exits with the driver's exit code. Runs are isolated per directory, so parallel runs are safe.
+Before step 1, the harness exits 3 when `data/verify-runs/` or `$TMPDIR` (default `/tmp`) has less free space than the fixture size plus `VERIFY_MIN_FREE_MB` (default 2048). The message prints the free space. The harness exits with the driver's exit code. Runs are isolated per directory, so parallel runs are safe, except Fermi-surface builds (see Headless rules).
 
 Every worktree's `data` links to the one shared `data/`. Run every sweep through `$H run` so it works on the per-run `work/calc` copy, never on the shared fixtures. The library has written into its input directory before (`ebs.pkl` caches, a merged Abinit `PROCAR`, both stopped in #245). Keep temp files off the shared tmpfs `/tmp`; the harness does this, and outside it set `TMPDIR` (or pytest `--basetemp`) to a dir under your run.
 
