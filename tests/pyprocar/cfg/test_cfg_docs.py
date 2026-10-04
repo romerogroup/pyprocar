@@ -26,7 +26,7 @@ CONFIGS = {
 
 DOCUMENTED_DEFAULT = re.compile(
     r"^\s*(?P<name>\w+)\s*:[^\n]*\(default (?P<inline>[^\n]+)\)\s*$"
-    r"|^\s*(?P<name2>\w+)\s*:[^\n]*\n[^\n]*default is (?P<prose>[^\n]+?)\.?\s*$",
+    + r"|^\s*(?P<name2>\w+)\s*:[^\n]*\n[^\n]*default is (?P<prose>[^\n]+?)\.?\s*$",
     re.MULTILINE,
 )
 

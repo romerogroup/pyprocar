@@ -1,4 +1,6 @@
-from pyprocar.io import ProcarParser
+import numpy as np
+
+from pyprocar.io.procarparser import ProcarParser
 
 ORBITALS = "ion      s     py     pz     px    dxy    dyz    dz2    dxz  x2-y2    tot"
 
@@ -27,5 +29,5 @@ def test_kpoint_coordinates_without_a_separating_space_are_read(tmp_path):
     procar = ProcarParser()
     procar.readFile(str(path))
 
-    assert procar.kpoints.tolist() == [[0.0, 0.0, 0.0], [0.5, -0.25, 0.0]]
-    assert procar.spd[1, 0, 0, :, 1].tolist() == [0.3, 0.4, 0.7]
+    assert np.asarray(procar.kpoints).tolist() == [[0.0, 0.0, 0.0], [0.5, -0.25, 0.0]]
+    assert np.asarray(procar.spd)[1, 0, 0, :, 1].tolist() == [0.3, 0.4, 0.7]

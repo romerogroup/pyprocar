@@ -25,7 +25,7 @@ class AutoBandsPlot:
         self,
         code="vasp",
         dirname=".",
-        fermi: int = None,
+        fermi: float | None = None,
         use_cache=False,
         report: str | os.PathLike | None = None,
     ):
@@ -137,7 +137,7 @@ class AutoBandsPlot:
         if emax > self.eBoundaries[1]:
             emax = self.eBoundaries[1]
         # print('(with delta) emin, emax', emin, emax)
-        return float(emin), float(emax)
+        return emin, emax
 
     def get_energy_boundaries(self):
         # what are the maximum energies for each kpoint?
@@ -324,7 +324,7 @@ class AutoBandsPlot:
             f.write("Spin polarized (collinear) = Yes\n")
         else:
             f.write("Spin polarized (collinear) = No\n")
-        f.write("Energy window (guessed): " + str(self.eLim) + "\n")
+        f.write("Energy window (guessed): " + str(tuple(float(e) for e in self.eLim)) + "\n")
         f.write("-----\n\n")
         f.write("Defects?\n")
         for i in range(len(self.defects)):
@@ -467,7 +467,7 @@ class AutoBandsPlot:
 def autobandsplot(
     code="vasp",
     dirname=".",
-    fermi: int = None,
+    fermi: float | None = None,
     use_cache=False,
     report: str | os.PathLike | None = None,
 ):
