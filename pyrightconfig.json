@@ -1,6 +1,7 @@
 {
     "allowedUntypedLibraries": ["pdal", "open3d", "laspy", "ykkpc"],
-    "exclude": ["**/node_modules", "**/__pycache__", "**/.git", "**/.pixi", "**/.venv", "**/.tmp", ".claude/worktrees"],
+    "include": ["pyprocar", "tests", "scripts", "docs", "examples", "setup.py", ".claude/skills"],
+    "exclude": ["**/node_modules", "**/__pycache__", "**/?*/.*"],
     "ignore": [
       "**/*.ipynb",
       "**/docs_hooks.py",
