@@ -22,7 +22,8 @@ $H run bs2d data/examples/bands/2d-bands .claude/skills/verify-pyprocar/scripts/
 The fixture dir holds `graphene/` (Fermi -0.795606) and `bisb_monolayer/`. The driver uses `graphene/`.
 
 The proven end state (d6d4aaa7):
-- `obj_surface`: `n_points` is 800 at a 20×20 grid, with about 8.9k distinct colors. The screenshot shows two separated sheets (π and π*) colored by energy from -6.5 to 4.9 eV. They are jagged at this coarse grid.
+- `obj_surface`: `n_points` is 800 at a 20×20 grid, with about 8.9k distinct colors. The screenshot shows two separated sheets (π and π*) colored by energy from -6.5 to 4.9 eV.
+- Grid coverage (#285, `tests/pyprocar/core/test_bandstructure2d_grid.py`): with `as_cartesian=False` (what `from_code` uses) the uv grid is regular in fractional coordinates, so no point falls outside graphene's rhombic k-patch. Before #285, 440 of 800 points (20×20) and 8280 of 16200 (90×90) were NaN, and the apparent Dirac gap was 1.22 and 0.267 eV. Now no point is NaN, and at 90×90, where every vertex is a DFT k-point, the gap is 2.511e-5 eV, the EIGENVAL value at K. Each band value stays on its own point: `bs.get_property('bands').value` equals `bs.points[:, 2]`. The ripples left on the upper sheet are real crossings with the σ and 2.2 eV bands, because bands are indexed by sorted energy.
 - `legacy_handler_plain` and `legacy_handler_plain_notebook_kwargs`: about 1.2k distinct colors each. The screenshot shows the two sheets inside the hexagonal BZ prism with an `E - E_F (eV)` axis.
 - `side_effects.txt` is empty.
 

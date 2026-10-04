@@ -7,6 +7,7 @@ The layer that turns raw DFT output directories into canonical objects. Every pl
 - Codes: `get_parser` accepts exactly `vasp`, `qe`, `elk`, `abinit`, `siesta`, `lobster`, `bxsf` and `frmsf`; any other string raises `ValueError: Invalid code`. Adapters live in `pyprocar/io/<code>/`.
 - Products: `get_parser(code, dirpath)` returns a `BaseParser` with `.ebs`, `.dos`, `.structure`, `.kpath` and `.reciprocal_lattice`. The driver reads the Fermi energy from `p.ebs.fermi`.
 - Elk: bands from `BAND.OUT` (task 20) or `BAND_S01_A0001.OUT` (tasks 21 and 22) plus `BANDLINES.OUT`, the Fermi level from `FERMI.OUT` or `EFERMI.OUT`, `elk.in` plot1d paths, and `GEOMETRY.OUT`. Elk never writes `BANDS.OUT`.
+- Elk task-22 orbital names (#285): Elk 10.7.8 and later write task 22's characters in each site's irreducible-representation basis unless `lmirep` is `.false.` (release notes, `bandstr.f90`). The parser reads the version from `INFO.OUT` (`Elk code version x.y.z`) and names those columns `Y{l}_ir{i}`, the i-th basis function of l in `ELMIREP.OUT` order; Ylm runs keep `Y{l}{m}`. Without `INFO.OUT`, an `ELMIREP.OUT` from a run with no task 10 marks the irrep basis, and one that also lists task 10 warns. Elk DOS (task 10) columns are also in that basis whenever `lmirep` is on, but they keep the `Y{l}{m}` slot names #298 gave them.
 
 ## How to get to it (user POV)
 
