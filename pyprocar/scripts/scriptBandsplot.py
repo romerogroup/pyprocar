@@ -14,11 +14,11 @@ from pyprocar.cfg import ConfigFactory, ConfigManager
 from pyprocar.cfg.band_structure import BandStructureConfig
 from pyprocar.cfg.base import PlotType
 from pyprocar.core import ElectronicBandStructureMesh, ElectronicBandStructurePath
+from pyprocar.core.atomic_orbital_index import orbital_indices
 from pyprocar.core.projection import selection_resolver
 from pyprocar.core.property_store import Property
 from pyprocar.plotter.bs_plot import BandStructurePlotter
 from pyprocar.scripts._selection import (
-    orbital_indices,
     per_channel,
     projection_components,
     resolve_spins,

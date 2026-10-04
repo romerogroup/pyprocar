@@ -27,7 +27,8 @@ from pyprocar.core import kpoints
 from pyprocar.core.atomic_orbital_index import (
     CONVENTIONAL_CUBIC_ORBITAL_ORDER,
     ProjectionSelectionResolver,
-    orbital_shells,
+    orbital_indices,
+    present_shells,
 )
 from pyprocar.core.brillouin_zone import BrillouinZone
 from pyprocar.core.projection import (
@@ -1490,15 +1491,8 @@ class ElectronicBandStructurePath(
                 label=letter,
                 name=f"overlay_orbital_{letter}",
             )
-            for letter, indices in self._shells().items()
+            for letter, indices in present_shells(self).items()
         ]
-
-    def _shells(self) -> dict[str, list[int]]:
-        return {
-            letter: list(indices)
-            for letter, indices in orbital_shells(self.orbital_names)
-            if max(indices) < self.n_orbitals
-        }
 
     def build_overlay_weights(
         self,
@@ -1540,18 +1534,7 @@ class ElectronicBandStructurePath(
 
         for mapping in items_iter:
             for species_name, orbital_spec in mapping.items():
-                # Resolve orbital names to indices if needed
-                if len(orbital_spec) > 0 and isinstance(orbital_spec[0], str):
-                    shells = self._shells()
-                    missing = [token for token in orbital_spec if token not in shells]
-                    if missing:
-                        raise ValueError(
-                            f"{missing} name no whole shell of the orbitals {self.orbital_names}; "
-                            f"the shells present are {list(shells)}"
-                        )
-                    orbitals = [index for token in orbital_spec for index in shells[token]]
-                else:
-                    orbitals = [int(x) for x in orbital_spec]
+                orbitals = [int(index) for index in orbital_indices(orbital_spec, self)]
 
                 # Use species_orbital_map for proper label generation
                 species_orbital_map = {species_name: orbitals}
