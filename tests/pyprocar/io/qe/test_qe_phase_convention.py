@@ -156,11 +156,18 @@ def test_qe_mesh_bands_are_eigenvectors_of_their_little_group(mag: str) -> None:
     ebs = ElectronicBandStructureMesh.from_code(
         "qe", str(DATA_DIR / f"codes/qe/7.2/SrVO3/{mag}/fermi")
     )
-    assert ebs.projected_phase is not None and ebs.structure is not None
-    vanadium = [str(atom) for atom in ebs.structure.atoms].index("V")
-    phases = np.asarray(ebs.projected_phase.value)[:, :, :, vanadium]
+    phase, bands, structure, names = (
+        ebs.projected_phase,
+        ebs.bands,
+        ebs.structure,
+        ebs.orbital_names,
+    )
+    assert phase is not None and bands is not None and structure is not None
+    assert structure.atoms is not None and names is not None
+    vanadium = [str(atom) for atom in structure.atoms].index("V")
+    phases = np.asarray(phase.value)[:, :, :, vanadium]
     gaps = np.pad(
-        np.diff(np.asarray(ebs.bands.value), axis=1),
+        np.diff(np.asarray(bands.value), axis=1),
         ((0, 0), (1, 1), (0, 0)),
         constant_values=np.inf,
     )
@@ -173,7 +180,7 @@ def test_qe_mesh_bands_are_eigenvectors_of_their_little_group(mag: str) -> None:
         fixed = np.all(np.abs(steps - np.round(steps)) < 1e-6, axis=1)
         mask = selected & fixed[:, np.newaxis, np.newaxis]
         coefficients, norm = phases[mask], norms[mask]
-        turned = coefficients @ orbital_rotation(ebs.orbital_names, rotation).T
+        turned = coefficients @ orbital_rotation(names, rotation).T
         overlap = np.sum(coefficients.conj() * turned, axis=-1) / norm**2
         residual = turned - overlap[:, np.newaxis] * coefficients
         residuals.append(np.linalg.norm(residual, axis=-1) / norm)
