@@ -393,7 +393,8 @@ def test_ebs_phases_use_bloch_sums_over_atom_positions(
     from pyprocar.core import Structure
 
     parser = QEParser(tmp_path)
-    monkeypatch.setattr(QEParser, "kpoints", property(lambda _: np.array([[0.0, 0, 0], [0.5, 0, 0]])))
+    kpoints = np.array([[0.0, 0, 0], [0.5, 0, 0]])
+    monkeypatch.setattr(QEParser, "kpoints", property(lambda _: kpoints))
     parser.__dict__["spd_phase"] = np.full((2, 1, 1, 2, 1), 0.6 + 0.8j)
     parser.__dict__["structure"] = Structure(
         atoms=["A", "B"], fractional_coordinates=[[0, 0, 0], [0.5, 0, 0]], lattice=np.eye(3)
