@@ -386,6 +386,33 @@ def test_structure_reads_the_bohr_cartesian_positions_as_fractions_of_the_cell(
     np.testing.assert_allclose(structure.fractional_coordinates[1], [2.565 / 5.43] * 3)
 
 
+def test_ebs_phases_use_bloch_sums_over_atom_positions(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    # QE's coefficient c(k) becomes exp(-2 pi i k.tau) c(k), the convention of VASP's phases
+    from pyprocar.core import Structure
+
+    parser = QEParser(tmp_path)
+    monkeypatch.setattr(QEParser, "kpoints", property(lambda _: np.array([[0.0, 0, 0], [0.5, 0, 0]])))
+    parser.__dict__["spd_phase"] = np.full((2, 1, 1, 2, 1), 0.6 + 0.8j)
+    parser.__dict__["structure"] = Structure(
+        atoms=["A", "B"], fractional_coordinates=[[0, 0, 0], [0.5, 0, 0]], lattice=np.eye(3)
+    )
+    parser.__dict__["fermi"] = 0.0
+    parser.__dict__["bands"] = np.zeros((2, 1, 1))
+    parser.__dict__["spd"] = np.ones((2, 1, 1, 2, 1))
+    parser.__dict__["kpath"] = None
+    parser.__dict__["kgrid_info"] = None
+
+    ebs = parser.ebs
+
+    assert ebs is not None and ebs.projected_phase is not None
+    np.testing.assert_allclose(
+        ebs.projected_phase.to_array()[:, 0, 0, :, 0],
+        [[0.6 + 0.8j, 0.6 + 0.8j], [0.6 + 0.8j, -1j * (0.6 + 0.8j)]],
+    )
+
+
 def test_structure_is_none_when_lattice_is_missing(tmp_path: Path) -> None:
     parser = QEParser(tmp_path)
     parser.__dict__["species"] = ["Sr", "V", "O", "O", "O"]
