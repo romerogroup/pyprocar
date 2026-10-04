@@ -6,6 +6,7 @@ import numpy as np
 import pytest
 
 from pyprocar.core import DensityOfStates, Structure
+from pyprocar.core.atomic_orbital_index import orbital_shells
 from pyprocar.core.ebs import ElectronicBandStructure, ElectronicBandStructurePath
 from pyprocar.core.kpoints import KPath
 from pyprocar.io.elk import ElkParser
@@ -758,3 +759,67 @@ def test_task_20_reads_bands_from_band_s_files_without_their_characters(tmp_path
     assert ebs.bands.to_array()[0, 0, 0] == pytest.approx(
         (-2.401220419 + 0.3218543102) * 27.211386245988
     )
+
+
+YLM_NAMES = [f"Y{ang}{m}" for ang in range(4) for m in range(-ang, ang + 1)]
+IRREP_NAMES = [f"Y{ang}_ir{i}" for ang in range(4) for i in range(1, 2 * ang + 2)]
+ELMIREP_OUT = "\nSpecies :    1 (Sr), atom :    1\n l =  0, m =  0, lm=   1 :    528.0\n"
+
+
+def _task_22_dir(tmp_path, info_version=None, elmirep=False, extra_elkin="", tasks="  0\n  22\n"):
+    calc_dir = _band_dir(
+        tmp_path, "22", {"BAND_S01_A0001.OUT": BAND_S01_A0001, "BAND_S02_A0001.OUT": BAND_S02_A0001}
+    )
+    (calc_dir / "elk.in").write_text(ELKIN_BANDS.replace("  0\n  22\n", tasks) + extra_elkin)
+    if info_version is not None:
+        (calc_dir / "INFO.OUT").write_text(f"\nElk code version {info_version} started\n")
+    if elmirep:
+        (calc_dir / "ELMIREP.OUT").write_text(ELMIREP_OUT)
+    return calc_dir
+
+
+@pytest.mark.parametrize(
+    "setup",
+    [
+        {"info_version": "10.7.8"},
+        {"info_version": "11.2.3", "elmirep": True},
+        {"elmirep": True},
+    ],
+    ids=["10.7.8", "11.2.3", "elmirep-from-task-22"],
+)
+def test_task_22_characters_from_elk_10_7_8_are_named_by_irreducible_representation(
+    tmp_path, setup
+):
+    ebs = ElkParser(_task_22_dir(tmp_path, **setup)).ebs
+
+    assert ebs is not None
+    assert ebs.orbital_names == IRREP_NAMES
+    assert [letter for letter, _ in orbital_shells(ebs.orbital_names)] == ["s", "p", "d", "f"]
+
+
+@pytest.mark.guards_existing_behaviour(
+    reason="Ylm-basis runs keep the names they had; the irreducible-representation tests are the red ones"
+)
+@pytest.mark.parametrize(
+    "setup",
+    [
+        {"info_version": "10.7.8", "extra_elkin": "\nlmirep\n  .false.\n"},
+        {"info_version": "10.7.7"},
+        {},
+    ],
+    ids=["lmirep-false", "10.7.7", "no-version-no-elmirep"],
+)
+def test_task_22_characters_in_the_ylm_basis_keep_their_l_m_names(tmp_path, setup):
+    ebs = ElkParser(_task_22_dir(tmp_path, **setup)).ebs
+
+    assert ebs is not None
+    assert ebs.orbital_names == YLM_NAMES
+
+
+def test_task_22_basis_that_cannot_be_told_apart_warns(tmp_path):
+    calc_dir = _task_22_dir(tmp_path, elmirep=True, tasks="  0\n  10\n  22\n")
+
+    with user_warning(__file__, match="irreducible-representation basis"):
+        ebs = ElkParser(calc_dir).ebs
+        assert ebs is not None
+        assert ebs.orbital_names == YLM_NAMES
