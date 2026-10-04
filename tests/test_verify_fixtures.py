@@ -581,13 +581,40 @@ def test_no_command_changes_anything_outside_data(harness):
         assert (harness.repo / ".tmp").is_dir()
 
 
-def test_verify_sh_changes_modes_and_deletes_only_in_its_guarded_helpers():
-    lines = [x.strip() for x in VERIFY_SH.read_text().splitlines()]
-    pattern = r"\b(chmod|chown|chgrp|chattr|setfacl|rm|rmdir|unlink|mv|shred)\b|\binstall\s+-\w*m"
-    changes = [x for x in lines if re.search(pattern, x) and not x.startswith("#")]
+WRITING_COMMAND = (
+    r"\b(chmod|chown|chgrp|chattr|setfacl|rm|rmdir|unlink|mv|shred|cp|ln|mkdir|touch|tee|truncate"
+    r"|dd|rsync|mktemp|mkfifo|mknod|download_from_hf)\b|\binstall\s+-\w*m|-delete\b"
+)
+FILE_REDIRECT = r"(?<![0-9&<])>>?(?![&>])(?!\s*/dev/null)"
+QUOTED = r""""(?:[^"\\]|\\.)*"|'[^']*'"""
 
-    assert changes == [
+
+def test_verify_sh_writes_only_on_the_lines_its_census_reviewed():
+    lines = [x.strip() for x in VERIFY_SH.read_text().splitlines()]
+    writes = [
+        x
+        for x in lines
+        if not x.startswith("#")
+        and (re.search(WRITING_COMMAND, x) or re.search(FILE_REDIRECT, re.sub(QUOTED, "", x)))
+    ]
+
+    assert writes == [
         'find -P "$2" ! -type l \\( -type d -o -links 1 \\) -exec chmod "$1" {} +',
         'rm -rf "$1/work" "$1/.start" "$1/.pid"',
+        "pyprocar.download_from_hf(relpath=sys.argv[1], output_path=Path(\".\").resolve())' \"$rel\"",
+        'mkdir -p "$RUNS"',
+        'mkdir "$run" || { echo "refusing: $run already exists; rerun to get the next second\'s name" >&2; exit 2; }',
+        'mkdir "$run/evidence" "$run/work" "$run/work/tmp"',
+        'echo $$ >"$run/.pid"',
         "trap 'rm -f \"$run/.pid\"' EXIT",
+        'cp -RL --reflink=auto "$fixture" "$run/work/calc"',
+        'cp "$driver" "$run/evidence/driver.py"',
+        'touch "$run/.start"',
+        'py "$run/evidence/driver.py" >"$run/evidence/run.log" 2>&1',
+        'echo "$code" >"$run/evidence/exit_code"',
+        '(cd "$run/work/calc" && find . -newer "$run/.start" -type f) >"$run/evidence/side_effects.txt"',
+        'cp "$MAIN/pyprocar/_version.py" pyprocar/_version.py',
+        'mkdir -p "$MAIN/data" .tmp',
+        'ln -sfn "$MAIN/data" data',
+        "mkdir -p .tmp",
     ]

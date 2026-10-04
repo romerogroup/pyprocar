@@ -153,7 +153,7 @@ print("pyprocar:", pyprocar.__version__, "from", pyprocar.__file__)
 print("pyvista: ", pyvista.__version__, "vtk", vtk.vtkVersion.GetVTKVersion())
 '
   echo "fixtures:"; ls -d data/examples/*/* 2>/dev/null | sed 's/^/  /' || echo "  (none; run: verify.sh fetch <relpath>)"
-  require_data || exit 0
+  require_data
   report="$(fixture_report)"
   print_list "writable fixture paths" "$(printf '%s\n' "$report" | sed -n 's/^writable //p')" 5 \
     "lock each fixture with: verify.sh fetch <relpath>"
@@ -193,7 +193,10 @@ run)
   mkdir -p "$RUNS"
   require_free $(( $(du -sm "$fixture" | cut -f1) + MIN_FREE_MB ))
   run="$RUNS/$(date +%Y%m%d-%H%M%S)-$name"
-  mkdir -p "$run/evidence" "$run/work/tmp"
+  mkdir "$run" || { echo "refusing: $run already exists; rerun to get the next second's name" >&2; exit 2; }
+  require_resolved_below "$run" "$RUNS"
+  set -C
+  mkdir "$run/evidence" "$run/work" "$run/work/tmp"
   echo $$ >"$run/.pid"
   trap 'rm -f "$run/.pid"' EXIT
   cp -RL --reflink=auto "$fixture" "$run/work/calc"
