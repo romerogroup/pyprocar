@@ -155,10 +155,11 @@ def test_a_warning_through_fermi_handler_names_the_callers_line(handler):  # noq
     assert [w.lineno for w in record] == [line]
 
 
-def test_a_warning_from_generated_code_names_the_callers_line(tmp_path, monkeypatch):
-    library = tmp_path / "warn_user_library"
-    library.mkdir()
-    (library / "points.py").write_text(
+@pytest.fixture
+def library(tmp_path, monkeypatch):
+    package = tmp_path / "warn_user_library"
+    package.mkdir()
+    (package / "points.py").write_text(
         "import dataclasses\n"
         "from pyprocar.utils.log_utils import warn_user\n"
         "@dataclasses.dataclass\n"
@@ -167,13 +168,28 @@ def test_a_warning_from_generated_code_names_the_callers_line(tmp_path, monkeypa
         "    def __post_init__(self):\n"
         "        warn_user('a warning from __post_init__')\n"
     )
-    monkeypatch.setattr(log_utils, "_PACKAGE_DIR", str(library) + os.sep)
+    (package / "on_import.py").write_text(
+        "from pyprocar.utils.log_utils import warn_user\nwarn_user('a warning on import')\n"
+    )
+    monkeypatch.setattr(log_utils, "_PACKAGE_DIR", str(package) + os.sep)
     monkeypatch.syspath_prepend(str(tmp_path))
-    point = importlib.import_module("warn_user_library.points").Point
+    return package.name
+
+
+def test_a_warning_from_generated_code_names_the_callers_line(library):
+    point = importlib.import_module(f"{library}.points").Point
 
     with user_warning(__file__, match="a warning from __post_init__") as record:
         line = _next_line()
         point(1)
+
+    assert [w.lineno for w in record] == [line]
+
+
+def test_a_warning_while_a_module_imports_names_the_import_line(library):
+    with user_warning(__file__, match="a warning on import") as record:
+        line = _next_line()
+        importlib.import_module(f"{library}.on_import")
 
     assert [w.lineno for w in record] == [line]
 
