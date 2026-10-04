@@ -6,7 +6,7 @@ Build isosurfaces of E(k)=E_F on a full k-mesh inside the Brillouin zone. They c
 
 - Plain surface with the BZ: `FermiPlotter.plot(fs, show_brillouin_zone=True)`. It returns a dict of meshes keyed by `(band, spin)`.
 - Scalar coloring: compute the scalar first with `fs.get_property("projected_sum", atoms=, orbitals=, spins=)`, then pass `scalars_data="projected_sum"`, or pass a `Property`.
-- Vector arrows (spin texture): `vectors_data=...`. Use the `non-colinear` fixture. Not driven.
+- Vector arrows (spin texture): `vectors_data=...`. Use the `non-colinear` fixture. `vectors_data="fermi_velocity"` was driven on `van-alphen` (#286): the longest arrow is 0.1 times the zone's largest extent, 0.0509 of 0.5086 1/A. The arrow actors are named `vectors_<band>_<spin>`.
 - Band selection: `fs.select_bands([(band, spin), ...])` returns a new surface with only those sheets. On `fermi3d/non-spin-polarized` at E_F = 5.3017, `select_bands([(17, 0)])` keeps the 270 points of band 17, and its V d `projected_sum` spans about 0.794 to 0.803. `select_bands([])` gives an empty surface whose projections have shape `(0, n_bands, n_spins)`.
 - Box and plane widgets: `FermiHandler.plot_fermi_cross_section_box_widget(mode=..., show=False, off_screen=True)`, or `FermiPlotter.add_box_slicer(fs, show_cross_section_area=True)`. The cross-section text is the `area_text` actor; read it with `p.actors["area_text"].GetText(2)`. `save_2d=` writes a screenshot of the 3D view (the handler then renders off screen and does not show), and `save_2d_slice=` writes the cross section as a matplotlib plot through `FermiPlotter.save_slice_2d`.
 - Isovalue GIF: `add_isovalue_gif(e_surfaces, save_gif, ...)`. Not driven.
@@ -39,5 +39,6 @@ The proven end state (SrVO3, non-spin-polarized, d6d4aaa7):
 ## Gotchas
 
 - `FermiHandler` re-parses from `dirname` on every `plot_fermi_surface` call, so the calc dir must still exist at plot time.
+- Since #286 the drawn zone (`BrillouinZone`, `BrillouinZone2D`) and the cross-section zone come from the Delaunay-reduced basis. A sheared reciprocal basis of the same lattice, such as b2' = b2 + 3 b1, gives the zone of volume |det B|, and `BrillouinZone.points` holds only the zone's vertices. Its cross-section orbits grow up to 16 cells of the given basis, so an orbit near that limit on a heavily sheared basis can come back as an open curve where the reduced basis closes it, as on dev (#302). They also differ from the reduced cell's by the marching-cubes mesh of the sheared grid, which on a coarse DFT grid can be large (Au with b2 + 3 b1 gave 0.41 against 0.55) and adds orbits below 1e-3. The drawn Fermi surface on a sheared basis is still incomplete: `ebs.pad` adds `padding` grid points in fractional coordinates, which do not cover the zone, so pieces are missing or `from_ebs` raises `Surface is empty after clipping`.
 - Offscreen VTK works here, but it prints a `vtkEGLRenderWindow ... OpenGL 3.2` WARN line. Ignore it. Check the screenshot is not blank: about 1 distinct color means blank.
 - `FermiPlotter` subclasses `pv.Plotter`, so pass `off_screen=True` to it. `PYVISTA_OFF_SCREEN=true` is set by the harness as a backstop.

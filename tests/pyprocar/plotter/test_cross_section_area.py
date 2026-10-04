@@ -169,18 +169,19 @@ def _periodic_surface(
     energy: Callable[[np.ndarray], np.ndarray],
     reciprocal_lattice: np.ndarray | None = None,
     stored_kpoints: Callable[[np.ndarray], np.ndarray] = _same,
+    kgrid: tuple[int, int, int] = (16, 16, 16),
+    kshift: tuple[float, float, float] = (0, 0, 0),
 ) -> FermiSurface:
     """The E_F = 0.1 surface of ``energy(k)`` on a 16^3 mesh, B = I unless given.
 
     ``stored_kpoints`` maps the grid k-points to the ones the band structure records.
     """
-    n = 16
-    frac = np.arange(n) / n
-    kpoints = np.stack(np.meshgrid(frac, frac, frac, indexing="ij"), axis=-1).reshape(-1, 3)
+    axes = [(np.arange(n) + shift) / n for n, shift in zip(kgrid, kshift, strict=True)]
+    kpoints = np.stack(np.meshgrid(*axes, indexing="ij"), axis=-1).reshape(-1, 3)
     energies = np.stack([energy(kpoints), np.full(len(kpoints), 5.0)], axis=1)
     return FermiSurface.from_ebs(
         ElectronicBandStructureMesh(
-            kgrid_info=KGridInfo(kgrid=(n, n, n), kgrid_mode=KGRID_MODE.GAMMA, kshift=(0, 0, 0)),
+            kgrid_info=KGridInfo(kgrid=kgrid, kgrid_mode=KGRID_MODE.GAMMA, kshift=kshift),
             kpoints=stored_kpoints(kpoints),
             bands=energies[..., np.newaxis],
             projected=np.ones((len(kpoints), 2, 1, 1, 1)),
@@ -362,6 +363,83 @@ def test_fcc_plane_through_grid_lines_counts_its_orbit_once():
     assert n_open == 0
     assert len(areas) == len(above) == 1
     assert areas[0] == pytest.approx(above[0], rel=1e-8)
+
+
+SHEARED_CUBIC = np.array([[1.0, 0.0, 0.0], [3.0, 1.0, 0.0], [0.0, 0.0, 1.0]])
+
+
+@pytest.mark.parametrize(
+    ("normal", "height"),
+    [
+        ((0.4728, 0.1555, 0.8673), -0.1247),
+        ((0.0788, -0.2114, 0.9742), 0.1563),
+        ((-0.8043, 0.0128, 0.594), -0.0483),
+    ],
+)
+def test_sheared_basis_counts_only_the_orbit_in_the_first_zone(normal, height):
+    """b1 = (1, 0, 0), b2 = (3, 1, 0), b3 = (0, 0, 1) span the cubic lattice, whose first
+    zone is the unit cube around Gamma. The sphere |k|^2 = 0.1 around Gamma lies inside it,
+    so a plane at distance d from Gamma cuts one orbit of area pi (0.1 - d^2); the spheres
+    around the other lattice points lie outside the zone."""
+    normal = np.asarray(normal) / np.linalg.norm(normal)
+    surface = _periodic_surface(
+        lambda k: np.sum(((k @ SHEARED_CUBIC + 0.5) % 1.0 - 0.5) ** 2, axis=1),
+        SHEARED_CUBIC,
+        kgrid=(16, 48, 16),
+    )
+
+    areas, n_open = cross_section_areas(surface, normal, height * normal, SHEARED_CUBIC)
+
+    assert n_open == 0
+    assert np.asarray(areas) == pytest.approx([np.pi * (0.1 - height**2)], rel=0.04)
+
+
+def test_sheared_basis_finds_the_orbit_at_a_zone_corner_six_cells_out():
+    """b2 = (3, 1, 0), b3 = (-2, 2, 1) span the cubic lattice. The zone corner R = (0.5,
+    0.5, -0.5) is the point (-5, 1.5, -0.5) of this basis. A plane 0.05 from R cuts the
+    pocket |k - R|^2 = 0.02 in an orbit of area pi (0.02 - 0.05^2), and the sphere
+    |k|^2 = 0.1 around Gamma at distance D in an orbit of area pi (0.1 - D^2)."""
+    basis = np.array([[1.0, 0.0, 0.0], [3.0, 1.0, 0.0], [-2.0, 2.0, 1.0]])
+    normal = np.array([0.3971, 0.5523, 0.7330]) / np.linalg.norm([0.3971, 0.5523, 0.7330])
+    origin = np.array([0.5, 0.5, -0.5]) + 0.05 * normal
+
+    def sphere_and_pocket(k: np.ndarray) -> np.ndarray:
+        cart = k @ basis
+        to_gamma = np.sum(((cart + 0.5) % 1.0 - 0.5) ** 2, axis=1)
+        return np.minimum(to_gamma, 5 * np.sum((cart % 1.0 - 0.5) ** 2, axis=1))
+
+    surface = _periodic_surface(sphere_and_pocket, basis, kgrid=(16, 64, 48))
+
+    areas, n_open = cross_section_areas(surface, normal, origin, basis)
+
+    assert n_open == 0
+    assert np.sort(areas) == pytest.approx(
+        [np.pi * (0.02 - 0.05**2), np.pi * (0.1 - (origin @ normal) ** 2)], rel=0.08
+    )
+
+
+def test_shifted_grid_finds_the_line_through_a_zone_corner_below_the_start_cells():
+    """The triclinic zone's corner V = (0.245642, 0.17609, -0.640012) lies at -1.939 b1 of the
+    basis below. On a grid shifted half a spacing along b1, each translate of the period
+    starts 0.125 b1 above an integer, so the plane 0.005 inside V meets the zone only in the
+    translate three cells down. The level set f2 = f2(V) is a lattice plane through V that
+    cuts the plane in one open line."""
+    cell = np.array([[1.0, 0.1, 0.05], [0.3, 1.2, 0.0], [0.2, 0.35, 0.8]])
+    basis = np.array([[-1, 0, 0], [0, -1, 0], [2, 0, 1]]) @ cell
+    corner = np.array([0.245642, 0.17609, -0.640012])
+    f2 = (corner @ np.linalg.inv(basis))[1]
+    normal = corner / np.linalg.norm(corner) + np.array([0.05, -0.03, 0.02])
+    normal /= np.linalg.norm(normal)
+    surface = _periodic_surface(
+        lambda k: 0.1 + np.sin(2 * np.pi * k[:, 1]) - np.sin(2 * np.pi * f2),
+        basis,
+        kgrid=(4, 24, 24),
+        kshift=(0.5, 0, 0),
+    )
+
+    areas, n_open = cross_section_areas(surface, normal, corner - 0.005 * normal, basis)
+
+    assert (areas, n_open) == ([], 1)
 
 
 def test_orbit_reaching_five_cells_from_the_zone_closes():

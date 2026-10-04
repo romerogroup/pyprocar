@@ -7,6 +7,7 @@ import numpy as np
 import pytest
 import pyvista as pv
 
+from pyprocar.core.brillouin_zone import BrillouinZone
 from pyprocar.plotter.fs_plot import FermiPlotter
 from tests.utils.user_warning import user_warning
 
@@ -191,6 +192,26 @@ class TestFermiPlotterPlot:
 
         assert plotter.actors["vectors_0_0"].mapper.dataset.bounds[5] == pytest.approx(0.4)
         assert plotter.actors["vectors_3_1"].mapper.dataset.bounds[5] == pytest.approx(1.2)
+
+    @pytest.mark.parametrize(
+        ("reciprocal_lattice", "extent"),
+        [
+            pytest.param(np.eye(3), 1.0, id="cubic"),
+            pytest.param(np.array([[1.0, 0, 0], [3, 1, 0], [-2, 2, 1]]), 1.0, id="sheared-cubic"),
+            pytest.param(np.array([[-1.0, 1, 1], [1, -1, 1], [1, 1, -1]]), 2.0, id="fcc"),
+        ],
+    )
+    def test_longest_arrow_is_a_tenth_of_the_brillouin_zone_extent(
+        self, plotter, reciprocal_lattice, extent
+    ):
+        """The cubic zone is the unit cube in any basis of the lattice; the fcc zone is the
+        truncated octahedron with square faces at k_x = +-1."""
+        fs = _fermi_surface()
+        fs.brillouin_zone = BrillouinZone(reciprocal_lattice)
+
+        plotter.plot(fs, vectors_data=_property(VECTORS))
+
+        assert plotter.actors["vectors_0_0"].mapper.dataset.bounds[5] == pytest.approx(0.1 * extent)
 
     def test_records_points_scalars_and_vectors_per_surface(self, plotter):
         plotter.plot(
