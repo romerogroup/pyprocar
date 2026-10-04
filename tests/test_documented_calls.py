@@ -19,7 +19,7 @@ from pathlib import Path
 import pyprocar
 
 ROOT = Path(__file__).resolve().parent.parent
-RST_BLOCK = re.compile(r"\.\. code-block:: (?:python|ipython3?)\n((?:\n|[ \t]+.*\n)+)")
+RST_BLOCK = re.compile(r"\.\. code-block:: (?:python|ipython3?)\n((?:\n|[ \t]+.*(?:\n|\Z))+)")
 MD_BLOCK = re.compile(r"```python\n(.*?)```", re.S)
 RST_COMMENT = re.compile(r"(\s*)\.\.(?:\s+(?!\S+::|_|\[|\|).*)?")
 
@@ -70,8 +70,7 @@ def snippets(root: Path) -> Iterator[tuple[str, str]]:
     for path in sorted([*root.glob("scripts/**/*.py"), *root.glob("examples/**/*.py")]):
         yield str(path.relative_to(root)), path.read_text(encoding="utf-8")
     for path in sorted([*root.glob("docs/**/*.rst"), root / "README.md"]):
-        # The newline lets a code block that ends the file keep its last line.
-        text = path.read_text(encoding="utf-8") + "\n"
+        text = path.read_text(encoding="utf-8")
         for match in [*RST_BLOCK.finditer(text), *MD_BLOCK.finditer(text)]:
             line = text[: match.start()].count("\n") + 1
             yield f"{path.relative_to(root)}:{line}", textwrap.dedent(match.group(1))
@@ -143,5 +142,4 @@ def missing_ebs_members(root: Path) -> list[str]:
 
 
 def test_documented_band_structure_members_exist():
-    """The user guide once listed ebs.ibz2fbz, ebs.efermi and other missing names (#283)."""
     assert missing_ebs_members(ROOT) == []

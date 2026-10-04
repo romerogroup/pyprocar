@@ -2069,16 +2069,15 @@ class ElectronicBandStructureMesh(
 
 
 def _cell_keys(kpoints: np.ndarray) -> np.ndarray:
-    """Fractional k folded into [0, 1) and rounded, so equal points compare equal."""
     return np.round(np.mod(np.round(kpoints, 6), 1.0), 6) % 1.0
 
 
-# The angular momentum of each real orbital, by the parsers' names; aliases map onto them.
-ORBITAL_DEGREE = {
+ORBITAL_ANGULAR_MOMENTUM = {
     name: degree
     for degree, names in enumerate(CONVENTIONAL_CUBIC_ORBITAL_ORDER.values())
     for name in names
 }
+IDENTITY = 0
 ORBITAL_ALIASES = {"dx2-y2": "x2-y2", "dx2": "x2-y2"}
 SHELL_SUMS = {"p", "d", "f", "tot"}
 
@@ -2107,15 +2106,15 @@ def real_harmonics(points: np.ndarray) -> dict[str, np.ndarray]:
     }
 
 
-def _sphere_points(n: int = 64) -> np.ndarray:
-    """Fibonacci points on the unit sphere, enough to pin down harmonics up to l = 3."""
+def _fibonacci_sphere(n: int) -> np.ndarray:
     height = 1 - (2 * np.arange(n) + 1) / n
     azimuth = np.pi * (3 - np.sqrt(5)) * np.arange(n)
     radius = np.sqrt(1 - height**2)
     return np.stack([radius * np.cos(azimuth), radius * np.sin(azimuth), height], axis=1)
 
 
-_SPHERE_POINTS = _sphere_points()
+# 64 points pin down the 16 real harmonics up to l = 3.
+_SPHERE_POINTS = _fibonacci_sphere(64)
 _HARMONICS_ON_SPHERE = real_harmonics(_SPHERE_POINTS)
 
 
@@ -2132,9 +2131,11 @@ def orbital_rotation(
     matrix = np.eye(len(names))
     shells: dict[int, list[int]] = {}
     for i, name in enumerate(names):
-        if name in ORBITAL_DEGREE:
-            shells.setdefault(ORBITAL_DEGREE[name], []).append(i)
-    unrotated = [name for name in names if name not in ORBITAL_DEGREE and name not in SHELL_SUMS]
+        if name in ORBITAL_ANGULAR_MOMENTUM:
+            shells.setdefault(ORBITAL_ANGULAR_MOMENTUM[name], []).append(i)
+    unrotated = [
+        name for name in names if name not in ORBITAL_ANGULAR_MOMENTUM and name not in SHELL_SUMS
+    ]
     before, after = _HARMONICS_ON_SPHERE, real_harmonics(_SPHERE_POINTS @ rotation)
     for degree, members in shells.items():
         if len(members) != 2 * degree + 1:
@@ -2149,13 +2150,11 @@ def orbital_rotation(
 
 
 def atom_permutation(structure: Structure, rotation: np.ndarray) -> np.ndarray:
-    """The atom each atom lands on under the operation with fractional k rotation R.
-
-    In fractional real-space coordinates the operation is x -> W x + t with W = R^-T.
-    """
+    """The atom each atom lands on under the operation with fractional k rotation R."""
     positions = np.asarray(structure.fractional_coordinates, dtype=float)
     species = np.asarray(structure.atoms)
-    turned = positions @ np.linalg.inv(rotation)
+    real_space = np.linalg.inv(rotation).T
+    turned = positions @ real_space.T
     same_species = species[:, np.newaxis] == species[np.newaxis, :]
     for candidate in np.flatnonzero(species == species[0]):
         landed = turned + positions[candidate] - turned[0]
@@ -2176,8 +2175,13 @@ def ibz2fbz(ebs, rotations=None, kgrid_info=None, inplace=True, time_reversals=N
     reversal.
 
     Every operation also enters combined with time reversal (k -> -k), but such an image only
-    fills a grid point no listed operation reaches. A magnetic group whose code reduced the
-    mesh without time reversal is therefore unfolded by its own operations.
+    fills a grid point no listed operation reaches.
+
+    Orbital weights at an image are exact for operations that only permute orbitals and for
+    every full shell's sum. Otherwise they need the interference between the mixed orbitals:
+    with collinear phases they are |M c|^2 for c = sqrt(weight) exp(i phase), and without
+    phases the weights mix by |M|^2. Phases follow VASP's convention, Bloch sums with
+    exp(i k.(R + tau)).
 
     Parameters
     ----------
@@ -2206,7 +2210,8 @@ def ibz2fbz(ebs, rotations=None, kgrid_info=None, inplace=True, time_reversals=N
     rotations = np.asarray(rotations, dtype=float)
     time_reversals = np.zeros(len(rotations), bool) if time_reversals is None else time_reversals
 
-    # The identity leads, so each irreducible point keeps its own values.
+    # The first operation that reaches a grid point supplies its values: the identity, so each
+    # irreducible point keeps its own, then the listed operations, then their time-reversed copies.
     time_reversals = np.asarray(time_reversals, dtype=bool)
     rotations = np.concatenate([np.eye(3)[np.newaxis], rotations, rotations])
     time_reversals = np.concatenate([[False], time_reversals, ~time_reversals])
@@ -2242,23 +2247,17 @@ def ibz2fbz(ebs, rotations=None, kgrid_info=None, inplace=True, time_reversals=N
     return sort_by_kpoints(ebs, inplace=True, **kwargs)
 
 
+def _nearest_orthogonal(matrix: np.ndarray) -> np.ndarray:
+    u, _, vt = np.linalg.svd(matrix)
+    return u @ vt
+
+
 def _mix_orbitals(block: np.ndarray, matrix: np.ndarray) -> np.ndarray:
-    """block[..., m] -> sum_n matrix[m, n] block[..., n], as one matrix product."""
     return (block.reshape(-1, block.shape[-1]) @ matrix.T).reshape(block.shape)
 
 
 def _turn_projections(ebs, rotations, time_reversals, operation, lattice_steps) -> None:
-    """Carry the projections and phases copied from each source into its image's frame.
-
-    Without phases an image's orbital weights are the source's mixed by |M|^2, exact when M
-    only permutes orbitals and for every full shell's sum. With collinear phases they are
-    |M c|^2 for c = sqrt(weight) exp(i phase), which keeps the interference between orbitals.
-
-    The phases follow VASP's convention, Bloch sums of orbitals with exp(i k.(R + tau)). An
-    operation carries the coefficients unchanged apart from M, the atom permutation and
-    conjugation under time reversal; moving the image R k onto its grid point R k + G then
-    multiplies the coefficient of the atom at tau by exp(-2 pi i G.tau).
-    """
+    """Carry the projections and phases copied from each source into its image's frame."""
     projected, phase = ebs.projected, ebs.projected_phase
     if projected is None and phase is None:
         return
@@ -2285,13 +2284,10 @@ def _turn_projections(ebs, rotations, time_reversals, operation, lattice_steps) 
 
     b_t = np.asarray(reciprocal_lattice).T
     unrotated: set[str] = set()
-    # Operation 0 is the identity: the irreducible points keep their values untouched.
-    for index in np.unique(operation[operation > 0]):
+    for index in np.unique(operation[operation != IDENTITY]):
         rows = np.flatnonzero(operation == index)
         rotation = rotations[index]
-        # The nearest orthogonal matrix, so rounding in the lattice cannot rescale weights or spin.
-        u, _, vt = np.linalg.svd(b_t @ rotation @ np.linalg.inv(b_t))
-        cartesian = u @ vt
+        cartesian = _nearest_orthogonal(b_t @ rotation @ np.linalg.inv(b_t))
         orbitals, missed = orbital_rotation(names, cartesian)
         unrotated.update(missed)
         mixes = not np.allclose(orbitals, np.eye(n_orbitals))

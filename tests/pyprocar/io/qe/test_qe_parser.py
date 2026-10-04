@@ -380,7 +380,6 @@ def test_parser_handles_nonexistent_directory(tmp_path: Path) -> None:
 def test_structure_reads_the_bohr_cartesian_positions_as_fractions_of_the_cell(
     xml_parser: QEParser,
 ) -> None:
-    # QE's xml writes atomic positions in Cartesian bohr, like the cell vectors
     structure = xml_parser.structure
 
     assert structure is not None and structure.fractional_coordinates is not None

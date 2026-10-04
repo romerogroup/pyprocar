@@ -36,8 +36,7 @@ def wedge(grid, k_actions, first=()):
     return np.array(kept)
 
 
-def v(k):
-    """A periodic function of fractional k with no symmetry at all."""
+def asymmetric_field(k):
     x, y, z = 2 * np.pi * np.atleast_2d(k).T
     odd = np.sin(x + 2 * y + 3 * z) + 0.3 * np.sin(z) + 0.2 * np.sin(y)
     even = 0.5 * np.cos(2 * x - z) + 0.4 * np.cos(x + 3 * y - z) + 0.25 * np.cos(3 * x + y + 2 * z)
@@ -45,9 +44,9 @@ def v(k):
 
 
 def invariant(k, k_actions):
-    """sum over g of v(g^-1 k): invariant under the group the matrices form, and nothing else."""
+    """sum over g of asymmetric_field(g^-1 k): invariant under that group and no other."""
     k = np.atleast_2d(k)
-    return np.sum([v(k @ np.linalg.inv(m).T) for m in k_actions], axis=0)
+    return np.sum([asymmetric_field(k @ np.linalg.inv(m).T) for m in k_actions], axis=0)
 
 
 def band_values(ebs):
@@ -105,7 +104,6 @@ def test_ibz2fbz_without_a_kgrid_keeps_every_distinct_image():
 
 
 def test_a_magnetic_group_without_inversion_puts_each_value_at_its_own_image():
-    # C4 alone: no inversion, and time reversal is broken, so E(-k) != E(k)
     grid = gamma_grid((4, 4, 4))
     ibz = wedge(grid, C4_GROUP)
     bands = invariant(ibz, C4_GROUP)
@@ -140,7 +138,14 @@ def test_an_operation_combined_with_time_reversal_sends_k_to_minus_rk_and_flips_
         total = np.zeros((len(k), 3))
         for r, s, m in zip(rotations, signs, k_actions, strict=True):
             source = k @ np.linalg.inv(m).T
-            field = np.stack([v(source), v(source + 0.1), v(source + 0.2)], axis=-1)
+            field = np.stack(
+                [
+                    asymmetric_field(source),
+                    asymmetric_field(source + 0.1),
+                    asymmetric_field(source + 0.2),
+                ],
+                axis=-1,
+            )
             total += field @ (s * np.linalg.det(r) * r).T
         return total
 
@@ -201,11 +206,11 @@ def test_symmetry_images_swap_the_atoms_the_operation_swaps():
     swaps = np.array([False, True, False, True])
 
     def weights(k):
-        """P(g k, g a) = P(k, a): site a sums v(g^-1 k) over the g that bring site 0 to a."""
+        """P(g k, g a) = P(k, a): site a sums the field at g^-1 k over the g taking site 0 to a."""
         k = np.atleast_2d(k)
         result = np.zeros((len(k), 2))
         for m, swap in zip(k_actions, swaps, strict=True):
-            result[:, int(swap)] += v(k @ np.linalg.inv(m).T) + 2
+            result[:, int(swap)] += asymmetric_field(k @ np.linalg.inv(m).T) + 2
         return result
 
     grid = gamma_grid((4, 4, 4))
@@ -313,7 +318,6 @@ def test_a_third_turn_splits_a_pure_px_state_a_quarter_px_and_three_quarters_py(
 
 
 def test_time_reversal_conjugates_the_projection_phase():
-    # The 3x3x1 grid reduced by k ~ -k alone
     t = 1 / 3
     ibz = np.array([[0, 0, 0], [t, 0, 0], [0, t, 0], [t, t, 0], [t, -t, 0]])
     phase = (1.0 + 1j * np.arange(5)).reshape(5, 1, 1, 1, 1)

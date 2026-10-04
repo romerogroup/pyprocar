@@ -389,7 +389,6 @@ class TestElectronicBandStructure:
         assert np.all(shifted_ebs.kpoints >= -0.5)
         assert np.all(shifted_ebs.kpoints <= 0.5)
 
-        # Each k moves by a reciprocal lattice vector into (-1/2, 1/2]; it is not negated
         np.testing.assert_allclose(
             shifted_ebs.kpoints,
             [
