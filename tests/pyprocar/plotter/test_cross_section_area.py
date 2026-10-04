@@ -9,7 +9,7 @@ from matplotlib.quiver import Quiver
 from pyprocar.core.ebs import ElectronicBandStructureMesh
 from pyprocar.core.fermisurface import FermiSurface
 from pyprocar.core.kpoints import KGRID_MODE, KGridInfo
-from pyprocar.plotter._surface_plot import cross_section_areas
+from pyprocar.plotter._surface_plot import cross_section_areas, snap_normal
 from pyprocar.plotter.bs_2d_plot import BS2DPlotter
 from pyprocar.plotter.fs_plot import FS_AREA_SCALE_FACTOR, FermiPlotter, dHvA_frequency
 from tests.utils import DATA_DIR
@@ -195,12 +195,9 @@ def test_orbit_around_the_zone_corner_closes_across_the_zone_boundary():
 
 
 @pytest.mark.parametrize("height", [0.5, 0.5 - 1e-4, -0.5 + 1e-4])
-def test_zone_face_cut_joins_its_four_corner_arcs_into_one_orbit(height):
-    """The cut cylinder around M reaches the plane as four arcs, one per zone corner.
-
-    Following one arc across the zone boundary visits all four, so the orbit is counted
-    once: one area pi 0.1, not four.
-    """
+def test_zone_face_cut_counts_the_orbit_around_m_once(height):
+    """The orbit around M meets the zone at all four corners; its lattice translates are
+    one orbit, so the cut has one area pi 0.1, not four."""
 
     def cylinder_around_m(k):
         to_m = k[:, :2] % 1.0 - 0.5
@@ -282,6 +279,54 @@ def test_widget_says_when_it_snapped_the_normal():
     assert _number(snapped) == pytest.approx(_number(exact), rel=1e-6)
 
 
+def _saddle_band(k: np.ndarray) -> np.ndarray:
+    """Pockets around M that nearly touch at the zone-face saddle X: E(X) = E_F + 1e-6."""
+    c = np.cos(2 * np.pi * k)
+    return 0.1 + c[:, 0] + c[:, 1] + 0.3 * c[:, 0] * c[:, 1] + 0.3 + 1e-6
+
+
+@pytest.mark.parametrize("height", [0.0, 0.123])
+def test_pockets_that_nearly_touch_at_a_saddle_stay_separate_orbits(height):
+    """The pocket around M has area 0.4376 (a contour of the analytic band on a 2001^2
+    grid); the 16^3 mesh gives it within 2%. Joining the near-touching arcs of
+    neighbouring pockets instead encloses the complement, 1 - 0.4332."""
+    areas, n_open = cross_section_areas(
+        _periodic_surface(_saddle_band), (0, 0, 1), (0, 0, height), np.eye(3)
+    )
+
+    assert n_open == 0
+    assert np.asarray(areas) == pytest.approx([0.4376], rel=0.02)
+
+
+@pytest.mark.parametrize(
+    "normal", [(1, 2, 2), (2, 2, 1), (1, 1, 3), (3, 2, 4), (1, 1, 1), (0, 0, 1)]
+)
+def test_exact_lattice_normals_are_not_reported_as_snapped(normal):
+    assert snap_normal(normal, np.eye(3))[1] is None
+
+
+def test_exact_hexagonal_lattice_direction_is_not_reported_as_snapped():
+    real = np.array([[2.46, 0, 0], [-1.23, 2.46 * np.sqrt(3) / 2, 0], [0, 0, 6.7]])
+    reciprocal = np.linalg.inv(real).T
+
+    for uvw in [(1, 1, 3), (2, -1, 3), (1, 0, 0)]:
+        assert snap_normal(np.asarray(uvw, float) @ real, reciprocal)[1] is None
+
+
+def test_drawn_slice_uses_the_snapped_normal():
+    plotter = FermiPlotter(off_screen=True)
+    plotter.add_box_slicer(
+        _periodic_surface(_cylinder_around_m),
+        normal=ROUNDED_111,
+        origin=(0, 0, 0),
+        show_cross_section_area=True,
+    )
+    points = cast(pv.Actor, plotter.actors["slice"]).mapper.dataset.points
+    plotter.close()
+
+    np.testing.assert_allclose(np.asarray(points) @ (np.ones(3) / np.sqrt(3)), 0.0, atol=1e-6)
+
+
 def test_sheets_that_run_through_the_zone_stay_open():
     def planes_at_ky(k):
         to_gamma = (k[:, 1] + 0.5) % 1.0 - 0.5
@@ -352,7 +397,7 @@ def test_srvo3_band_16_offset_oblique_cut_finds_both_orbits():
         ((0.3, 0.7, 1), (0.016287, 0.038004, 0.054292), 0.12629),
     ],
 )
-def test_srvo3_band_16_orbit_through_a_translate_at_the_surface_edge_closes(normal, origin, area):
+def test_srvo3_band_16_orbits_cut_near_the_band_edge_close(normal, origin, area):
     """Each orbit passes through a lattice translate of the plane that cuts band 16 near its
     lowest or highest point along the normal.
 
@@ -396,6 +441,72 @@ def test_srvo3_band_16_random_normal_cut_closes_its_orbit():
 
     assert text.endswith(" Ang^-2")
     assert _number(text) == pytest.approx(0.2223563 * (2 * np.pi) ** 2, rel=0.01)
+
+
+def _srvo3_band_16() -> FermiSurface:
+    fs = FermiSurface.from_code(
+        code="vasp", dirpath=DATA_DIR / "examples/fermi3d/non-spin-polarized"
+    )
+    band_16 = fs.select_bands([(16, 0)])
+    assert isinstance(band_16, FermiSurface)
+    return band_16
+
+
+@pytest.mark.data
+def test_srvo3_band_16_orbit_around_m_just_before_its_lifshitz_transition():
+    """At kz = 0.2195874 b + 1e-7 b the four arcs around M are still separate chains,
+    7.6e-6 apart at their closest ends. The orbit around M is 0.049788 1/A^2 (the
+    verifier's value 1e-7 b below); the orbit past the transition is 0.017799."""
+    b = 1 / 3.84652
+    band_16 = _srvo3_band_16()
+
+    areas, n_open = cross_section_areas(
+        band_16, (0, 0, 1), (0, 0, (0.2195874 + 1e-7) * b), np.asarray(band_16.reciprocal_lattice)
+    )
+
+    assert n_open == 0
+    assert np.asarray(areas) == pytest.approx([0.049788], rel=1e-3)
+
+
+@pytest.mark.data
+def test_srvo3_band_16_orbit_reaching_beyond_three_cells_closes():
+    """The verifier's periodic reference (marching cubes translated 8-16 cells and sliced)
+    finds one closed orbit of 0.234877 1/A^2; it reaches |k_frac| = 3.56."""
+    normal = np.array([-0.273430119292263, 0.46320150330093784, -0.8430185865113354])
+    band_16 = _srvo3_band_16()
+
+    areas, n_open = cross_section_areas(
+        band_16, normal, 0.04380787311312917 * normal, np.asarray(band_16.reciprocal_lattice)
+    )
+
+    assert n_open == 0
+    assert np.asarray(areas) == pytest.approx([0.234877], rel=1e-3)
+
+
+@pytest.mark.data
+def test_srvo3_widget_does_not_say_it_snapped_an_exact_113_normal():
+    text = _slice_text(_srvo3_band_16(), normal=(1, 1, 3), show_cross_section_area=True)
+
+    assert text.endswith(" Ang^-2")
+
+
+@pytest.mark.data
+def test_gold_open_orbits_near_110_stay_open():
+    """3.5e-4 rad off [1 1 0], so not snapped. The verifier's periodic reference finds no
+    closed orbit and 2 open orbits, still open 16 cells out."""
+    fs = FermiSurface.from_code(
+        code="vasp", dirpath=DATA_DIR / "examples/fermi3d/van-alphen", fermi=8.5642
+    )
+    band_5 = fs.select_bands([(5, 0)])
+    assert isinstance(band_5, FermiSurface)
+    normal = (0.866160402193743, 0.499766053396325, 0.00022258534303450556)
+    origin = (-0.08530200352847554, -0.04924913473746253, 0.0)
+
+    areas, n_open = cross_section_areas(
+        band_5, normal, origin, np.asarray(band_5.reciprocal_lattice)
+    )
+
+    assert (areas, n_open) == ([], 2)
 
 
 @pytest.mark.data
