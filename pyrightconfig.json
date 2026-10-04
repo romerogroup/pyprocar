@@ -1,5 +1,6 @@
 {
     "allowedUntypedLibraries": ["pdal", "open3d", "laspy", "ykkpc"],
+    "exclude": ["**/node_modules", "**/__pycache__", "**/.git", "**/.pixi", "**/.venv", "**/.tmp", ".claude/worktrees"],
     "ignore": [
       "**/*.ipynb",
       "**/docs_hooks.py",
@@ -30,6 +31,10 @@
     "reportUnknownParameterType": false,
     "reportUnknownVariableType": false,
     "executionEnvironments": [
+      {
+        "root": ".claude/skills/verify-pyprocar/scripts",
+        "extraPaths": [".", ".claude/skills/verify-pyprocar/scripts/lib"]
+      },
       {
         "root": "docs",
         "reportMissingImports": false,
