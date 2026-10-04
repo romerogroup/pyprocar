@@ -24,6 +24,8 @@ In the same way to plot the projection of total :math:`p`-orbitals use ``orbital
 
 Each new column is named by ``orbital_names``, which defaults to ``o0``, ``o1``, and so on. PyProcar reads these names from the header of the new file, so plots label the columns ``o0`` and ``o1``. In the new file, orbital index ``i`` selects the ``i``-th column, so ``orbitals=[1]`` selects the :math:`p` sum of the example above. Pass ``orbital_names=['s','p']`` to label the columns ``s`` and ``p``.
 
+A shell name such as ``orbitals=['p']`` selects the columns whose names make up the whole :math:`p` shell, for example ``py``, ``pz`` and ``px``. Columns named ``o0``, ``o1`` or ``p`` make up no shell, so select them by index.
+
 ===================================
 To filter selected :math:`k`-points
 ===================================

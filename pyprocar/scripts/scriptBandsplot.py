@@ -231,7 +231,7 @@ def bandsplot(
     if atoms is not None and isinstance(atoms[0], str):
         species = [str(name) for name in atoms]
         atoms = list(selection_resolver(ebs).resolve(species=species).atoms)
-    orbitals = orbital_indices(orbitals)
+    orbitals = orbital_indices(orbitals, ebs)
 
     user_clim = config.clim if "clim" in kwargs else None
 

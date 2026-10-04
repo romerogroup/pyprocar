@@ -4,25 +4,40 @@ from typing import NamedTuple
 
 import numpy as np
 
-from pyprocar.core.atomic_orbital_index import PRIMARY_ORBITAL_GROUPS
+from pyprocar.core.atomic_orbital_index import orbital_shells
 from pyprocar.core.property_store import Property
 
-ORBITAL_GROUPS = {name: list(indices) for name, indices in PRIMARY_ORBITAL_GROUPS}
+SHELL_LETTERS = ("s", "p", "d", "f")
 
 
-def orbital_indices(orbitals):
-    """Resolve orbital group names ("s", "p", "d", "f") to indices; indices pass through."""
+def present_shells(source) -> dict[str, list[int]]:
+    """The whole s, p, d and f shells among ``source``'s orbitals, by the names it carries."""
+    return {
+        letter: list(indices)
+        for letter, indices in orbital_shells(source.orbital_names)
+        if max(indices) < source.n_orbitals
+    }
+
+
+def orbital_indices(orbitals, source):
+    """Resolve shell names (s, p, d, f) to the orbitals of ``source``; indices pass through."""
     if orbitals is None or len(orbitals) == 0:
         return orbitals
+    shells = present_shells(source)
     indices = []
     for orbital in orbitals:
         if not isinstance(orbital, str):
             indices.append(orbital)
-        elif orbital in ORBITAL_GROUPS:
-            indices.extend(ORBITAL_GROUPS[orbital])
+        elif orbital in shells:
+            indices.extend(shells[orbital])
+        elif orbital in SHELL_LETTERS:
+            raise ValueError(
+                f"orbitals names the {orbital} shell, but the orbitals {source.orbital_names}"
+                + f" hold no whole {orbital} shell. Select orbitals by index."
+            )
         else:
             raise ValueError(
-                f"orbitals takes orbital indices or the shell names {', '.join(ORBITAL_GROUPS)},"
+                f"orbitals takes orbital indices or the shell names {', '.join(SHELL_LETTERS)},"
                 + f" not {orbital!r}. Select one orbital by its index, its position in the"
                 + " orbital names, for example 8 for d x2-y2 in VASP's order."
             )
@@ -73,12 +88,16 @@ def projection_components(source, kind: str, atoms=None, orbitals=None, items=No
     if kind == "species":
         selections = [(s, {"species": [s], "orbitals": orbitals}) for s in source.structure.species]
     elif kind == "orbitals":
-        groups = ["s", "p", "d", "f"] if source.n_orbitals > 9 else ["s", "p", "d"]
-        selections = [(g, {"atoms": atoms, "orbitals": ORBITAL_GROUPS[g]}) for g in groups]
+        shells = present_shells(source)
+        if not shells:
+            raise ValueError(
+                f"The orbitals {source.orbital_names} hold no whole s, p, d or f shell to overlay."
+            )
+        selections = [(g, {"atoms": atoms, "orbitals": shells[g]}) for g in shells]
     else:
         mappings = [items] if isinstance(items, dict) else list(items or [])
         selections = [
-            (s, {"species": [s], "orbitals": orbital_indices(orbs)})
+            (s, {"species": [s], "orbitals": orbital_indices(orbs, source)})
             for mapping in mappings
             for s, orbs in mapping.items()
         ]

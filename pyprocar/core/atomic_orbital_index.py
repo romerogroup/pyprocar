@@ -947,12 +947,12 @@ class ProjectionSelectionResolver:
             atoms_set = set()
             for specie in species_list:
                 atoms_set.update(self._atoms_for_species(specie))
-        elif atoms_set is None and self.atom_indexer is not None:
+        elif atoms_set is not None:
+            species_list = self._species_from_atoms(sorted(atoms_set))
+        elif self.atom_indexer is not None:
             species_map = self.atom_indexer.species_atom_map()
             species_list = list(species_map.keys())
             atoms_set = {idx for indices in species_map.values() for idx in indices}
-        elif atoms_set is not None:
-            species_list = self._species_from_atoms(sorted(atoms_set))
 
         atoms_tuple = tuple(sorted(atoms_set)) if atoms_set is not None else tuple()
         orbitals_tuple = (

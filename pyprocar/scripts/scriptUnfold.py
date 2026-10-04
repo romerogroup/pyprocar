@@ -7,6 +7,7 @@ import numpy as np
 from pyprocar.cfg import ConfigFactory, ConfigManager, PlotType
 from pyprocar.cfg.unfold import UnfoldingConfig, UnfoldMode, UnfoldPlotMode
 from pyprocar.core import ElectronicBandStructurePath, Structure
+from pyprocar.core.projection import selection_resolver
 from pyprocar.core.property_store import Property
 from pyprocar.plotter.bs_plot import BandStructurePlotter
 from pyprocar.scripts._selection import (
@@ -182,9 +183,9 @@ def unfold(
     weights = take_channels(cast(Property, ebs.weights), channels)
 
     if atoms is not None and isinstance(atoms[0], str):
-        species = set(atoms)
-        atoms = [i for i, name in enumerate(np.asarray(structure.atoms)) if name in species]
-    orbitals = orbital_indices(orbitals)
+        species = [str(name) for name in atoms]
+        atoms = list(selection_resolver(ebs).resolve(species=species).atoms)
+    orbitals = orbital_indices(orbitals, ebs)
 
     plotter = BandStructurePlotter(ax=ax)
     linestyle = per_channel(config.linestyle, n_channels)

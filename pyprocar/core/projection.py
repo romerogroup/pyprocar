@@ -124,20 +124,20 @@ def check_projected_layout(
     if leading_shape is not None:
         expected[: layout.n_leading] = [(size,) for size in leading_shape]
         expected[spin_axis] = (1, 4) if n_spins == 1 else (n_spins,)
-    atoms: tuple[int, str] | None = None
     if atom_groups is not None:
-        atoms = (atom_groups, f"{atom_groups} atom groups")
+        expected[layout.n_leading] = (atom_groups,)
     elif structure is not None:
-        atoms = (structure.natoms, f"a {structure.natoms}-atom structure")
-    if atoms is not None:
-        expected[layout.n_leading] = (atoms[0],)
+        expected[layout.n_leading] = (structure.natoms,)
     if any(
         sizes is not None and actual not in sizes
         for sizes, actual in zip(expected, shape, strict=True)
     ):
         described = ", ".join("*" if s is None else "|".join(map(str, s)) for s in expected)
         sources = [] if leading_shape is None else [f"{layout.leading} of shape {leading_shape}"]
-        sources += [] if atoms is None else [atoms[1]]
+        if atom_groups is not None:
+            sources.append(f"{atom_groups} atom groups")
+        elif structure is not None:
+            sources.append(f"a {structure.natoms}-atom structure")
         raise ValueError(
             f"projected has shape {shape}; the layout {layout} expects ({described}) from"
             + f" {' and '.join(sources)}. Its spin channels match those of {layout.leading},"
