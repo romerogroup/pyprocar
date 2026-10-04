@@ -53,7 +53,7 @@ def generate_gamma_centered_kpoints(
     meshgrid = np.array(np.meshgrid(kx_vals, ky_vals, kz_vals, indexing="ij"))
     move_axis = np.swapaxes(meshgrid, 0, -1)
     grid_points = move_axis.reshape(-1, 3)
-    fbz_points = -np.fmod(grid_points + 6.5, 1) + 0.5
+    fbz_points = grid_points - np.ceil(grid_points - 0.5)
     sorted_kpoints = sort_kpoints(fbz_points, order="F")
 
     return sorted_kpoints

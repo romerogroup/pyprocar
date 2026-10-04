@@ -1191,11 +1191,7 @@ class ElectronicBandStructure(PointSet):
         else:
             ebs = copy.deepcopy(self)
 
-        # Old method
-        # bound_ops = -1.0 * (ebs.kpoints > 0.5) + 1.0 * (ebs.kpoints <= -0.5)
-        # new_kpoints = ebs.kpoints + bound_ops
-
-        new_kpoints = -np.fmod(ebs.kpoints + 6.5, 1) + 0.5
+        new_kpoints = ebs.kpoints - np.ceil(ebs.kpoints - 0.5)
         ebs.update_points(new_kpoints)
         return ebs
 
