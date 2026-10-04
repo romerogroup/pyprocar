@@ -151,13 +151,12 @@ class DOSPlotter:
     ):
         scalars_mode = ScalarsMode.from_string(scalars_mode)
 
-        x, y = self.orient_data(point_data.points, point_data.to_array())
-        y = _as_channels(y)
-        n_channels = y.shape[2]
+        values = _as_channels(point_data.to_array())
+        n_channels = values.shape[2]
         channel_labels = point_data.metadata.get("label")
         series_list = line_series(
-            x,
-            y,
+            point_data.points,
+            values,
             _as_channels(scalars_data.to_array()) if scalars_data is not None else None,
             _as_channels(vectors_data.to_array()) if vectors_data is not None else None,
             channel_mode,
@@ -186,8 +185,9 @@ class DOSPlotter:
         xlim = (0, 0)
         ylim = (0, 0)
         for i_channel, series in enumerate(series_list):
-            xlim = (min(xlim[0], series.x.min()), max(xlim[1], series.x.max()))
-            ylim = (min(ylim[0], series.y.min()), max(ylim[1], series.y.max()))
+            x, y = self.orient_data(series.x, series.y)
+            xlim = (min(xlim[0], x.min()), max(xlim[1], x.max()))
+            ylim = (min(ylim[0], y.min()), max(ylim[1], y.max()))
 
             if plot_kwargs is not None:
                 plot_kwargs_channel = plot_kwargs[i_channel]
@@ -195,8 +195,8 @@ class DOSPlotter:
                 plot_kwargs_channel = {}
 
             add_scalar_args = {
-                "x": series.x,
-                "y": series.y,
+                "x": x,
+                "y": y,
                 "scalars": series.scalars,
                 "label": scalars_data.label if scalars_data else None,
                 "clim": clim_s[i_channel],
@@ -205,14 +205,14 @@ class DOSPlotter:
             }
             add_scalar_args.update(plot_kwargs_channel)
             add_line_args = {
-                "x": series.x,
-                "y": series.y,
+                "x": x,
+                "y": y,
                 "label": series.label,
             }
             add_line_args.update(plot_kwargs_channel)
             add_vectors_args = {
-                "x": series.x,
-                "y": series.y,
+                "x": x,
+                "y": y,
                 "vectors": series.vectors,
                 "label": vectors_data.label if vectors_data else None,
                 "clim": clim_v[i_channel],
