@@ -2273,6 +2273,18 @@ def ibz2fbz(ebs, rotations=None, kgrid_info=None, inplace=True, time_reversals=N
             f"{filled} k-points were filled by time reversal combined with a listed operation, "
             + "which this magnetic group does not contain; their values may be wrong"
         )
+    if ebs.atom_groups is not None and structure is not None:
+        unmoved = np.arange(len(structure.atoms))
+        if any(
+            np.any(atom_permutation(structure, rotations[index]) != unmoved)
+            for index in np.unique(operation[operation != IDENTITY])
+        ):
+            raise ValueError(
+                "A PROCAR filtered by atoms cannot be unfolded from the irreducible k-points: "
+                + "symmetry operations move atoms between its rows, and the file does not say "
+                + "which atoms each row holds. Filter the PROCAR of a full k-grid calculation "
+                + "(ISYM = -1), or select atoms in the plot of the unfiltered PROCAR."
+            )
     for prop_name, calc_name, gradient_order, value_array in ebs.iter_properties():
         ebs.get_property(prop_name)[calc_name, gradient_order] = value_array[source]
 
@@ -2304,13 +2316,6 @@ def _turn_projections(ebs, rotations, time_reversals, operation, lattice_steps) 
         raise ValueError("Unfolding projections needs a reciprocal lattice")
     if n_atoms > 1 and structure is None:
         raise ValueError("Unfolding projections of several atoms needs the structure")
-    if ebs.atom_groups is not None and np.any(operation != IDENTITY):
-        raise ValueError(
-            "A PROCAR filtered by atoms cannot be unfolded from the irreducible k-points: "
-            + "symmetry operations move atoms between its rows, and the file does not say which "
-            + "atoms each row holds. Filter the PROCAR of a full k-grid calculation (ISYM = -1), "
-            + "or select atoms in the plot of the unfiltered PROCAR."
-        )
 
     names = ebs.orbital_names or [f"orbital {i}" for i in range(n_orbitals)]
     unrotated = unrotated_orbitals(names)

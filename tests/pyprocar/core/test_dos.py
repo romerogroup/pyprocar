@@ -4,6 +4,7 @@ import pytest
 from pyprocar.core.dos import DensityOfStates
 from pyprocar.core.property_store import Property
 from pyprocar.core.structure import Structure
+from tests.pyprocar.core.test_ibz2fbz import VASP_ORBITALS
 from tests.utils import DATA_DIR
 
 
@@ -632,9 +633,6 @@ def test_dos_rejects_orbital_names_that_do_not_match_the_projected_orbitals():
             projected=np.ones((5, 1, 2, 9)),
             orbital_names=[f"o{i}" for i in range(16)],
         )
-
-
-VASP_ORBITALS = ["s", "py", "pz", "px", "dxy", "dyz", "dz2", "dxz", "x2-y2"]
 
 
 def _structureless_dos(n_spins: int) -> DensityOfStates:

@@ -36,16 +36,18 @@ def close_figures():
     plt.close("all")
 
 
-def _copy_calc(tmp_path: Path) -> Path:
+def _copy_calc(tmp_path: Path, src: Path = CALC, extra: tuple[str, ...] = ()) -> Path:
     dst = tmp_path / "calc"
     dst.mkdir()
-    for name in ("PROCAR", "OUTCAR", "POSCAR", "KPOINTS"):
-        shutil.copy(CALC / name, dst / name)
+    for name in ("PROCAR", "OUTCAR", "POSCAR", "KPOINTS", *extra):
+        shutil.copy(src / name, dst / name)
     return dst
 
 
-def _filtered_calc(tmp_path: Path, **selection) -> Path:
-    calc = _copy_calc(tmp_path)
+def _filtered_calc(
+    tmp_path: Path, src: Path = CALC, extra: tuple[str, ...] = (), **selection
+) -> Path:
+    calc = _copy_calc(tmp_path, src, extra)
     pyprocar.filter(str(calc / "PROCAR"), str(calc / "PROCAR-filtered"), **selection)
     (calc / "PROCAR-filtered").replace(calc / "PROCAR")
     return calc
@@ -225,13 +227,7 @@ def test_part_of_a_shell_is_not_that_shell(tmp_path: Path) -> None:
 
 def test_fermi2d_refuses_to_unfold_an_atom_filtered_irreducible_procar(tmp_path: Path) -> None:
     """A symmetry operation moves O atoms between rows the filtered file no longer names."""
-    calc = tmp_path / "calc"
-    calc.mkdir()
-    for name in ("PROCAR", "OUTCAR", "POSCAR", "KPOINTS", "vasprun.xml", "IBZKPT"):
-        shutil.copy(FERMI2D_CALC / name, calc / name)
-    groups: Any = [[2], [3, 4]]
-    pyprocar.filter(str(calc / "PROCAR"), str(calc / "PROCAR-filtered"), atoms=groups)
-    (calc / "PROCAR-filtered").replace(calc / "PROCAR")
+    calc = _filtered_calc(tmp_path, FERMI2D_CALC, ("vasprun.xml", "IBZKPT"), atoms=[[2], [3, 4]])
 
     with pytest.raises(ValueError, match="filtered by atoms"):
         pyprocar.fermi2D(
