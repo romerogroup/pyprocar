@@ -5,10 +5,10 @@
 fails with ``PermissionError`` on a locked fixture. CI has no fixtures and never
 runs the ``data`` tests, so this check reads the source instead.
 
-A fixture path is an expression built from ``DATA_DIR`` or from the repo root
-(``__file__`` or ``ROOT_DIR``) joined with ``"data"``, or from a name, attribute, default, argument, return value, pytest
-fixture or ``parametrize`` value that holds one. The result of ``writable_copy`` is
-a writable copy, not a fixture path.
+A fixture path is an expression built from ``DATA_DIR``, from the repo root
+(``__file__`` or ``ROOT_DIR``) joined with ``"data"``, or from a name, attribute,
+default, argument, return value, pytest fixture or ``parametrize`` value that holds
+one. The result of ``writable_copy`` is a writable copy, not a fixture path.
 """
 
 import ast
@@ -31,6 +31,7 @@ COPIES = {
 }
 SHELLS = {("os", "system"), ("os", "popen"), *(("subprocess", f) for f in COPIES["subprocess"])}
 SHELL_COPIES = {"cp", "rsync"}
+HARDLINK = ("pathlib", "hardlink_to")
 REPO_ROOTS = {"__file__", "ROOT_DIR"}
 
 type Function = ast.FunctionDef | ast.AsyncFunctionDef | ast.Lambda
@@ -51,11 +52,6 @@ def _is_repo_data(node: ast.AST) -> bool:
         and (right.value == "data" or right.value.startswith("data/"))
         and any(isinstance(n, ast.Name) and n.id in REPO_ROOTS for n in ast.walk(node.left))
     )
-
-
-def _params(function: Function) -> list[ast.arg]:
-    args = function.args
-    return [*args.posonlyargs, *args.args, *args.kwonlyargs]
 
 
 def _shell_program(node: ast.expr) -> str | None:
@@ -128,19 +124,19 @@ class FixturePaths:
         scope = self._scope(node)
         return None if isinstance(scope, ast.Module) else scope
 
-    def _bind(self, target: ast.expr, scope: ast.AST | None = None) -> None:
+    def _bind(self, target: ast.expr) -> None:
         if isinstance(target, ast.Name):
-            self.bound[scope or self._scope(target)].add(target.id)
+            self.bound[self._scope(target)].add(target.id)
         elif isinstance(target, ast.Starred):
-            self._bind(target.value, scope)
+            self._bind(target.value)
         elif isinstance(target, ast.Tuple | ast.List):
             for element in target.elts:
-                self._bind(element, scope)
+                self._bind(element)
         elif isinstance(target, ast.Attribute):
             self.attributes.add(ast.unparse(target))
 
-    def _bind_param(self, function: Function, name: str) -> None:
-        self.bound[function].add(name)
+    def _size(self) -> tuple[int, int, int]:
+        return sum(map(len, self.bound.values())), len(self.attributes), len(self.returning)
 
     def _flows(self, node: ast.AST) -> Iterator[tuple[ast.expr, ast.expr | None]]:
         """Yield (source, target) pairs; a None target is a value the function returns."""
@@ -156,7 +152,7 @@ class FixturePaths:
             yield node.value, None
 
     def _bind_once(self) -> bool:
-        before = (sum(map(len, self.bound.values())), len(self.attributes), len(self.returning))
+        before = self._size()
         for node in ast.walk(self.tree):
             for source, target in self._flows(node):
                 if not self.holds(source):
@@ -169,11 +165,7 @@ class FixturePaths:
                 self._bind_defaults(node)
             if isinstance(node, ast.Call):
                 self._bind_arguments(node)
-        return (
-            sum(map(len, self.bound.values())),
-            len(self.attributes),
-            len(self.returning),
-        ) > before
+        return self._size() > before
 
     def _bind_defaults(self, function: Function) -> None:
         args = function.args
@@ -184,7 +176,7 @@ class FixturePaths:
         ]
         for arg, default in defaults:
             if default is not None and self.holds(default):
-                self._bind_param(function, arg.arg)
+                self.bound[function].add(arg.arg)
         if isinstance(function, ast.Lambda):
             return
         for decorator in function.decorator_list:
@@ -198,7 +190,7 @@ class FixturePaths:
                 and self.holds(values)
             ):
                 for name in names.value.split(","):
-                    self._bind_param(function, name.strip())
+                    self.bound[function].add(name.strip())
         if function.name in self.returning and any(
             "fixture" in ast.unparse(d) for d in function.decorator_list
         ):
@@ -208,13 +200,13 @@ class FixturePaths:
         if not isinstance(call.func, ast.Name) or call.func.id not in self.functions:
             return
         function = self.functions[call.func.id]
-        params = _params(function)
-        for param, arg in zip(params, call.args, strict=False):
+        positional = [*function.args.posonlyargs, *function.args.args]
+        for param, arg in zip(positional, call.args, strict=False):
             if self.holds(arg):
-                self._bind_param(function, param.arg)
+                self.bound[function].add(param.arg)
         for keyword in call.keywords:
             if keyword.arg is not None and self.holds(keyword.value):
-                self._bind_param(function, keyword.arg)
+                self.bound[function].add(keyword.arg)
 
     def _name_holds(self, name: str, scope: ast.AST) -> bool:
         while name not in self.assigned[scope] and name not in self.bound[scope]:
@@ -258,7 +250,7 @@ class FixturePaths:
         else:
             found = None
         if isinstance(func, ast.Attribute) and func.attr == "hardlink_to":
-            return ("pathlib", "hardlink_to")
+            return HARDLINK
         if found in SHELLS and not (node.args and _shell_program(node.args[0]) in SHELL_COPIES):
             return None
         return found
@@ -290,7 +282,7 @@ def raw_fixture_copies(paths: list[Path], root: Path = ROOT, helper: Path = HELP
             if path == helper and getattr(function, "name", None) == SAFE_COPY:
                 continue
             values = [*node.args, *(k.value for k in node.keywords)]
-            if isinstance(node.func, ast.Attribute) and call[1] == "hardlink_to":
+            if call == HARDLINK and isinstance(node.func, ast.Attribute):
                 values.append(node.func.value)
             if held := [v for v in values if names.holds(v)]:
                 found.append(
