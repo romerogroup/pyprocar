@@ -5,6 +5,8 @@ import re
 
 import numpy as np
 
+from pyprocar.utils.units import AU_TO_ANG
+
 
 class DFTB_evec:
     def __init__(self, filename, verbose):  # , normalize=False):
@@ -352,8 +354,7 @@ class DFTB_utils:
         lat = re.findall(r"-?\d+\.\d+", lat)
         lat = np.array(lat, dtype=float)
         lat.shape = (3, 3)
-        # Bohr to Angstroms
-        lat = lat * 0.529177249
+        lat = lat * AU_TO_ANG
         return lat
 
     def writeOutcar(self):

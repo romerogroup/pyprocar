@@ -1,13 +1,13 @@
 from scipy import constants
 
-AU_TO_ANG = 0.52917721067121  # bohr/ang
+AU_TO_ANG = constants.physical_constants["Bohr radius"][0] / constants.angstrom  # bohr/ang
 ANG_TO_AU = 1.0 / AU_TO_ANG  # ang/bohr
 
 
-HARTREE_TO_EV = 27.211386245988  # eV/Hartree
+HARTREE_TO_EV = constants.physical_constants["Hartree energy in eV"][0]  # eV/Hartree
 EV_TO_HARTREE = 1.0 / HARTREE_TO_EV  # Hartree/eV
 
-RYDBERG_TO_EV = 13.6057039763
+RYDBERG_TO_EV = constants.physical_constants["Rydberg constant times hc in eV"][0]
 
 # Band gradients reach these constants in eV*m with angular k (k = 2*pi*f.b). reciprocal_lattice
 # stores b without the 2*pi, so gradient code must restore it before dividing by hbar.

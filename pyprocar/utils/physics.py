@@ -4,6 +4,7 @@ import numpy as np
 
 from pyprocar.utils import np_utils
 from pyprocar.utils.units import EV_TO_J, FREE_ELECTRON_MASS, HBAR_EV, HBAR_J
+from pyprocar.utils.units import METER_ANGSTROM as METER_ANGSTROM
 
 
 def calculate_avg_inv_effective_mass(
