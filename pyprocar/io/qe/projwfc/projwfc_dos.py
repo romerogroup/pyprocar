@@ -14,6 +14,7 @@ import numpy as np
 import pandas as pd  # pyright: ignore[reportMissingTypeStubs]
 
 from pyprocar.core.atomic_orbital_index import OrbitalIndexer
+from pyprocar.io.qe.projwfc.projwfc_out import ORBITAL_NAMES
 
 logger = logging.getLogger(__name__)
 user_logger = logging.getLogger("user")
@@ -433,3 +434,13 @@ class ProjwfcDOS:
     @cached_property
     def n_orbitals(self) -> int:
         return len(self.orbitals)
+
+    @cached_property
+    def orbital_names(self) -> list[str]:
+        """projwfc.x's (l, m) labels, or l, j and m_j for the spin-orbit states."""
+        if not self.is_non_colinear:
+            return ORBITAL_NAMES[: self.n_orbitals]
+        return [
+            f"{'spdf'[int(orbital['l'])]}_j{orbital['j']:g}_mj{orbital['m_j']:g}"
+            for orbital in self.orbitals
+        ]
