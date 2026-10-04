@@ -156,8 +156,11 @@ def compute_plane_info(
         frac_slice = ebs.to_mesh(as_cartesian=False).slice(normal=normal_arr, origin=origin_arr)
         s_limits, t_limits = find_plane_limits(transform_points_to_uv(frac_slice.points, u, v))
         s_grid, t_grid = get_uv_grid(grid_interpolation, s_limits, t_limits)
-        offset = np.mean(frac_slice.points @ normal_arr) * normal_arr / np.dot(normal_arr, normal_arr)
-        cart = (offset + np.stack([s_grid, t_grid], axis=-1) @ np.vstack([u, v])) @ ebs.reciprocal_lattice
+        offset = (
+            np.mean(frac_slice.points @ normal_arr) * normal_arr / np.dot(normal_arr, normal_arr)
+        )
+        frac = offset + np.stack([s_grid, t_grid], axis=-1) @ np.vstack([u, v])
+        cart = frac @ ebs.reciprocal_lattice
         u_grid, v_grid = cart @ u, cart @ v
     uv_grid_points = get_uv_grid_points(u_grid, v_grid)
 
