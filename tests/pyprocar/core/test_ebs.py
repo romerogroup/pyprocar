@@ -389,15 +389,21 @@ class TestElectronicBandStructure:
         assert np.all(shifted_ebs.kpoints >= -0.5)
         assert np.all(shifted_ebs.kpoints <= 0.5)
 
-        # Test specific transformations using formula: -fmod(x + 6.5, 1) + 0.5
-        # 0.7: -fmod(7.2, 1) + 0.5 = -0.2 + 0.5 = 0.3
-        assert np.isclose(shifted_ebs.kpoints[0, 0], 0.3)
-        # -0.8: -fmod(5.7, 1) + 0.5 = -0.7 + 0.5 = -0.2
-        assert np.isclose(shifted_ebs.kpoints[1, 0], -0.2)
-        # 1.2: -fmod(7.7, 1) + 0.5 = -0.7 + 0.5 = -0.2
-        assert np.isclose(shifted_ebs.kpoints[4, 2], -0.2)
-        # -0.9: -fmod(5.6, 1) + 0.5 = -0.6 + 0.5 = -0.1
-        assert np.isclose(shifted_ebs.kpoints[5, 2], -0.1)
+        # Each k moves by a reciprocal lattice vector into (-1/2, 1/2]; it is not negated
+        np.testing.assert_allclose(
+            shifted_ebs.kpoints,
+            [
+                [-0.3, 0.3, 0.1],
+                [0.2, 0.2, 0.4],
+                [0.2, -0.1, 0.3],
+                [0.1, 0.3, 0.2],
+                [0.3, 0.2, 0.2],
+                [0.4, 0.1, 0.1],
+                [0.0, 0.0, 0.0],
+                [0.5, 0.5, 0.25],
+            ],
+            atol=1e-12,
+        )
 
         # Kpoints already in FBZ should remain unchanged
         assert np.allclose(shifted_ebs.kpoints[6], [0.0, 0.0, 0.0])
