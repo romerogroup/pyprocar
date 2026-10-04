@@ -4,19 +4,16 @@ Each @step runs isolated: a crash is recorded in summary.json (error + innermost
 and the next step still runs. finish() prints the summary and exits 1 if any step failed.
 """
 
-import importlib
 import json
-import logging
 import os
 import sys
 import traceback
+import warnings
 from pathlib import Path
 
 import matplotlib.pyplot as plt
 import numpy as np
 
-importlib.import_module("pyprocar")  # configures the "user" logger at ERROR
-logging.getLogger("user").setLevel(logging.WARNING)
 CALC, EV = Path(os.environ["CALC"]), Path(os.environ["EVIDENCE"])
 REPO = Path(os.environ["REPO"])
 SUMMARY: dict = {}
@@ -28,16 +25,21 @@ def _write():
 
 def step(name):
     def deco(fn):
-        try:
-            SUMMARY[name] = {"ok": True, **(fn() or {})}
-        except Exception as e:
-            frames = traceback.extract_tb(e.__traceback__)
-            own = [f for f in frames if "/pyprocar/pyprocar/" in f.filename] or frames
-            SUMMARY[name] = {
-                "ok": False,
-                "error": f"{type(e).__name__}: {e}"[:300],
-                "where": f"{own[-1].filename.split('/pyprocar/')[-1]}:{own[-1].lineno}",
-            }
+        with warnings.catch_warnings(record=True) as caught:
+            warnings.simplefilter("always", UserWarning)
+            try:
+                SUMMARY[name] = {"ok": True, **(fn() or {})}
+            except Exception as e:
+                frames = traceback.extract_tb(e.__traceback__)
+                own = [f for f in frames if "/pyprocar/pyprocar/" in f.filename] or frames
+                SUMMARY[name] = {
+                    "ok": False,
+                    "error": f"{type(e).__name__}: {e}"[:300],
+                    "where": f"{own[-1].filename.split('/pyprocar/')[-1]}:{own[-1].lineno}",
+                }
+        user_warnings = [str(w.message) for w in caught if issubclass(w.category, UserWarning)]
+        if user_warnings:
+            SUMMARY[name]["warnings"] = user_warnings
         plt.close("all")
         _write()
         return fn
