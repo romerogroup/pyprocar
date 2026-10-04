@@ -12,9 +12,21 @@ ORBITAL_GROUPS = {name: list(indices) for name, indices in PRIMARY_ORBITAL_GROUP
 
 def orbital_indices(orbitals):
     """Resolve orbital group names ("s", "p", "d", "f") to indices; indices pass through."""
-    if orbitals is None or len(orbitals) == 0 or not isinstance(orbitals[0], str):
+    if orbitals is None or len(orbitals) == 0:
         return orbitals
-    return [i for name in orbitals for i in ORBITAL_GROUPS[name]]
+    indices = []
+    for orbital in orbitals:
+        if not isinstance(orbital, str):
+            indices.append(orbital)
+        elif orbital in ORBITAL_GROUPS:
+            indices.extend(ORBITAL_GROUPS[orbital])
+        else:
+            raise ValueError(
+                f"orbitals takes orbital indices or the shell names {', '.join(ORBITAL_GROUPS)},"
+                + f" not {orbital!r}. Select one orbital by its index, its position in the"
+                + " orbital names, for example 8 for d x2-y2 in VASP's order."
+            )
+    return indices
 
 
 class SpinSelection(NamedTuple):
