@@ -514,6 +514,10 @@ def time_reversed_ebs(time_reversals=None):
     )
 
 
+@pytest.mark.guards_existing_behaviour(
+    reason="#299's stacklevel=2 names this file when the test calls ibz2fbz directly;"
+    + " this pins the line through warn_user"
+)
 def test_time_reversal_filling_points_of_a_magnetic_group_warns():
     # Listed as the magnetic group {E, C2z with time reversal}, k -> -C2z k reaches only
     # half of the missing points; plain time reversal, not in that group, fills the rest.

@@ -8,6 +8,7 @@ ROOT = Path(__file__).resolve().parent.parent
 WARN_USER_HOME = ROOT / "pyprocar" / "utils" / "log_utils.py"
 USER_WARNING_HELPER = ROOT / "tests" / "utils" / "user_warning.py"
 WARN_FUNCTIONS = {"warn", "warn_explicit"}
+SCOPES = (ast.Module, ast.FunctionDef, ast.AsyncFunctionDef, ast.Lambda)
 LOUD_METHODS = {"warning", "warn", "error", "critical", "exception", "fatal"}
 LOUD_LEVEL_NAMES = {"WARN", "WARNING", "ERROR", "CRITICAL", "FATAL"}
 LOWEST_LOUD_LEVEL = 30
@@ -76,7 +77,7 @@ class UserLoggerNames:
 
     def _scope(self, node: ast.AST) -> ast.AST:
         node = self.parent[node]
-        while not isinstance(node, ast.Module | ast.FunctionDef | ast.AsyncFunctionDef | ast.Lambda):
+        while not isinstance(node, SCOPES):
             node = self.parent[node]
         return node
 
@@ -204,7 +205,9 @@ def raw_warnings_warn_calls(paths: list[Path]) -> list[str]:
             if alias.name in WARN_FUNCTIONS
         }
         for node in ast.walk(tree):
-            func = node.func if isinstance(node, ast.Call) else None
+            if not isinstance(node, ast.Call):
+                continue
+            func = node.func
             if (isinstance(func, ast.Name) and func.id in functions) or (
                 isinstance(func, ast.Attribute)
                 and func.attr in WARN_FUNCTIONS
