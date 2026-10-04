@@ -28,7 +28,8 @@ GRID_TOLERANCE = 1e-2
 """Grid spacings within which a k-point is taken as its uniform-grid point.
 
 k-points printed with 5 decimals stay inside it up to N = 2000 points per axis, with 4
-decimals up to N = 200. A grid stretched as k^1.05 on 16 points is 5e-2 off, and falls back.
+decimals up to N = 200. A grid stretched as k^1.05 on 16 points is 0.29 off, and falls back.
+Accepted k-points are treated as their exact grid points, as the drawn surface treats them.
 """
 
 _NEAR_VERTEX = np.array(list(itertools.product(range(-1, 3), repeat=3)))
@@ -240,29 +241,41 @@ class _Curves:
     b: np.ndarray
     q1: np.ndarray
     q2: np.ndarray
-    position: np.ndarray
     degree: np.ndarray
     label: np.ndarray
     meets_region: np.ndarray
     is_open: np.ndarray
 
 
-def _curves(found: list[tuple[np.ndarray, ...]], region: tuple[np.ndarray, np.ndarray]) -> _Curves:
-    n1, n2, q1, q2 = (np.concatenate(part) for part in zip(*found, strict=True))
+def _meets(q1: np.ndarray, q2: np.ndarray, region: tuple[np.ndarray, np.ndarray]) -> np.ndarray:
+    """Whether each segment q1 q2 has a point in the region normals @ k <= offsets.
+
+    The segment is clipped by each half-space in turn (Liang-Barsky): it meets the region
+    when it enters every half-space before it leaves any.
+    """
+    f1 = q1 @ region[0].T - region[1]
+    f2 = q2 @ region[0].T - region[1]
+    with np.errstate(divide="ignore", invalid="ignore"):
+        t = f1 / (f1 - f2)
+    enter = np.where((f1 > 0) & (f2 <= 0), t, 0.0).max(axis=1)
+    leave = np.where((f1 <= 0) & (f2 > 0), t, 1.0).min(axis=1)
+    return ~((f1 > 0) & (f2 > 0)).any(axis=1) & (enter <= leave)
+
+
+def _curves(found: list[tuple[np.ndarray, ...]]) -> _Curves:
+    """Join the found segments (end names, end points, whether each meets the region)."""
+    n1, n2, q1, q2, inside = (np.concatenate(part) for part in zip(*found, strict=True))
     names, ids = np.unique(np.concatenate([n1, n2]), return_inverse=True)
     a, b = ids[: len(n1)], ids[len(n1) :]
     real = a != b
-    a, b, q1, q2 = a[real], b[real], q1[real], q2[real]
+    a, b, q1, q2, inside = a[real], b[real], q1[real], q2[real], inside[real]
     n_nodes = len(names)
-    position = np.zeros((n_nodes, 3))
-    position[a], position[b] = q1, q2
     degree = np.bincount(np.concatenate([a, b]), minlength=n_nodes)
     graph = coo_matrix((np.ones(len(a)), (a, b)), shape=(n_nodes, n_nodes))
     n_comp, label = connected_components(graph, directed=False)
-    inside = (position @ region[0].T <= region[1]).all(axis=1)
-    meets_region = np.bincount(label[(degree > 0) & inside], minlength=n_comp) > 0
+    meets_region = np.bincount(label[a[inside]], minlength=n_comp) > 0
     is_open = np.bincount(label[degree == 1], minlength=n_comp) > 0
-    return _Curves(names, a, b, q1, q2, position, degree, label, meets_region, is_open)
+    return _Curves(names, a, b, q1, q2, degree, label, meets_region, is_open)
 
 
 def _band_curves(cut: _BandCut, region: tuple[np.ndarray, np.ndarray]) -> _Curves | None:
@@ -275,11 +288,11 @@ def _band_curves(cut: _BandCut, region: tuple[np.ndarray, np.ndarray]) -> _Curve
     while True:
         pieces = cut.segments(steps)
         if pieces is not None:
-            found.append(pieces)
+            found.append((*pieces, _meets(pieces[2], pieces[3], region)))
         done = np.concatenate([done, _pack(0, steps)])
         if not found:
             return None
-        curves = _curves(found, region)
+        curves = _curves(found)
         ends = curves.names[(curves.degree == 1) & curves.meets_region[curves.label]]
         vertex_cells = cut.vertex_cells(ends)
         steps = np.unique((vertex_cells[:, None, :] - _NEAR_VERTEX).reshape(-1, 3), axis=0)
@@ -307,7 +320,11 @@ def plane_orbits(
     normal = np.asarray(normal, dtype=np.float64) / np.linalg.norm(normal)
     d = float(np.asarray(origin, dtype=np.float64) @ normal)
     zone = _ZONE_STEPS @ lattice
-    region = (zone, (zone * zone).sum(axis=1) * (0.5 + 1e-9))
+    half = 0.5 * (zone * zone).sum(axis=1)
+    beyond = zone @ zone.T >= 2 * half[:, None] * (1 - 1e-9)
+    np.fill_diagonal(beyond, False)
+    faces = ~beyond.any(axis=0)
+    region = (zone[faces], half[faces] * (1 + 2e-9))
     if box is not None:
         region = (np.vstack([region[0], box[0]]), np.concatenate([region[1], box[1]]))
     inverse = np.linalg.inv(lattice)
