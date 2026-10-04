@@ -1,3 +1,4 @@
+import hashlib
 import os
 import re
 import shutil
@@ -9,9 +10,12 @@ from pathlib import Path
 import pytest
 
 SCRIPT = Path(".claude/skills/verify-pyprocar/scripts/verify.sh")
-VERIFY_SH = Path(__file__).resolve().parents[1] / SCRIPT
+VERIFY_SH = Path(
+    os.environ.get("VERIFY_SH_UNDER_TEST") or Path(__file__).resolve().parents[1] / SCRIPT
+)
 WRITE_BITS = stat.S_IWUSR | stat.S_IWGRP | stat.S_IWOTH
 FAKE_ENV = """#!/bin/sh
+echo "hf-cache=${{HF_HUB_CACHE:-}}" >> "{log}"
 echo "$@" >> "{log}"
 for last; do :; done
 case "$last" in data/*) mkdir -p "$last" && echo x > "$last/PROCAR" ;; esac
@@ -76,7 +80,7 @@ def _git(*args: str | Path) -> None:
     subprocess.run(["git", *map(str, args)], check=True, capture_output=True)
 
 
-@pytest.fixture(params=["data_in_repo", "data_linked", "worktree"])
+@pytest.fixture(params=["data_in_repo", "worktree"])
 def harness(tmp_path, request):
     main = tmp_path / "repo"
     (main / SCRIPT).parent.mkdir(parents=True)
@@ -84,9 +88,6 @@ def harness(tmp_path, request):
     _git("init", "-q", main)
     data = main / "data"
     repo, shared_env = main, None
-    if request.param == "data_linked":
-        data = tmp_path / "shared" / "data"
-        (main / "data").symlink_to(data)
     if request.param == "worktree":
         _git("-C", main, "add", SCRIPT)
         _git("-C", main, "-c", "user.name=t", "-c", "user.email=t@t", "commit", "-qm", "init")
@@ -100,8 +101,12 @@ def harness(tmp_path, request):
     victim = tmp_path / "victim"
     victim.mkdir()
     (victim / "f").write_text("x")
+    for rel in OUTSIDE:
+        (tmp_path / "outside" / rel).parent.mkdir(parents=True, exist_ok=True)
+        (tmp_path / "outside" / rel).write_text("x")
     (data / "escape").symlink_to(os.path.relpath(victim, data))
     (data / "runs").symlink_to("verify-runs")
+    (data / "self").symlink_to(".")
     (data / "examples/bands/x/outside").symlink_to(victim)
     (data / "examples/bands/dangling").symlink_to(victim / "missing")
     (data / "examples/bands/loop").symlink_to("loop")
@@ -109,9 +114,13 @@ def harness(tmp_path, request):
     _stub(tmp_path / "bin" / "pixi", harness.env_log)
     for p in _entries(victim):
         p.chmod(p.stat().st_mode & ~WRITE_BITS)
+    (tmp_path / "outside/unenterable").chmod(0)
     yield harness
     for p in _entries(tmp_path):
-        p.chmod(p.lstat().st_mode | stat.S_IWUSR)
+        p.chmod(p.lstat().st_mode | stat.S_IRWXU)
+
+
+OUTSIDE = ("home/f", "tmp/runs/x/work/f", "tmp/runs/x/evidence/log", "unenterable/f")
 
 
 REFUSED = [
@@ -135,6 +144,7 @@ REFUSED = [
     "data/escape",
     "data/runs",
     "data/runs/run1",
+    "data/self",
     "data/*",
     "data/examples/bands/*",
     "data/examples/*/x",
@@ -190,7 +200,9 @@ def test_fetch_downloads_a_missing_fixture_by_its_literal_name_then_locks_it(har
     before = harness.locked()
 
     assert harness.verify("fetch", "data/examples/dos/new").returncode == 0
-    assert harness.env_log.read_text().split()[-1] == "data/examples/dos/new"
+    log = harness.env_log.read_text()
+    assert log.split()[-1] == "data/examples/dos/new"
+    assert log.startswith(f"hf-cache={os.path.realpath(harness.data_dir)}/verify-runs/hf-cache\n")
     assert harness.locked() - before == {
         f"{harness.data_rel}/examples/dos/new",
         f"{harness.data_rel}/examples/dos/new/PROCAR",
@@ -325,13 +337,23 @@ def test_gc_removes_read_only_work_and_never_unlocks_a_fixture_it_links_to(harne
     assert (harness.data_dir / "examples/bands/x/PROCAR").read_text() == "x"
 
 
-def _doctor_count(harness) -> int:
+def _doctor_lines(harness) -> list[str]:
     if harness.shared_env is not None:
         harness.install_shared_env()
     out = harness.verify("doctor")
     assert out.returncode == 0, out.stderr
-    (line,) = [x for x in out.stdout.splitlines() if x.startswith("writable fixture paths:")]
+    return out.stdout.splitlines()
+
+
+def _doctor_count(harness) -> int:
+    (line,) = [x for x in _doctor_lines(harness) if x.startswith("writable fixture paths:")]
     return int(line.split(":")[1])
+
+
+def _unlockable(harness) -> list[str]:
+    lines = _doctor_lines(harness)
+    (i,) = [n for n, x in enumerate(lines) if x.startswith("unlockable fixture roots:")]
+    return [x.strip() for x in lines[i + 1 : i + 1 + int(lines[i].split(":")[1])]]
 
 
 def test_doctor_counts_each_writable_fixture_path_once(harness):
@@ -355,11 +377,192 @@ def test_doctor_counts_a_symlinked_fixture_root_by_its_target(harness):
     assert _doctor_count(harness) == 2
 
 
-@pytest.mark.guards_existing_behaviour(reason="a lint; verify.sh on dev runs no chmod at all")
-def test_every_chmod_in_verify_sh_runs_through_find_that_skips_symlinks():
-    lines = [
-        x.strip() for x in VERIFY_SH.read_text().splitlines() if not x.lstrip().startswith("#")
-    ]
-    chmods = [x for x in lines if "chmod" in x]
+def test_doctor_lists_the_fixture_roots_that_fetch_refuses_to_lock(harness):
+    for name in (".hidden", "two words"):
+        (harness.data_dir / name).mkdir()
+        (harness.data_dir / name / "f").write_text("x")
 
-    assert [x for x in chmods if not re.search(r'find -P "[^"]+" ! -type l -exec chmod ', x)] == []
+    assert _unlockable(harness) == [
+        "data/.hidden",
+        "data/escape",
+        "data/examples/bands/dangling",
+        "data/examples/bands/loop",
+        "data/runs",
+        "data/self",
+        "data/two words",
+    ]
+    assert harness.verify("fetch", "data/.hidden").returncode == 2
+    assert harness.verify("fetch", "data/two words").returncode == 2
+
+
+def _snapshot(harness, *allowed: Path) -> dict[str, tuple[int, str]]:
+    skip = {harness.env_log, *allowed}
+    snap: dict[str, tuple[int, str]] = {}
+    for top, dirs, files in os.walk(harness.root):
+        dirs[:] = [d for d in dirs if Path(top, d) not in skip and d != ".git"]
+        for path in (Path(top, name) for name in [*dirs, *files]):
+            if path in skip or path.name == ".git":
+                continue
+            mode = path.lstat().st_mode
+            if path.is_symlink():
+                body = os.readlink(path)
+            elif stat.S_ISREG(mode) and os.access(path, os.R_OK):
+                body = hashlib.sha256(path.read_bytes()).hexdigest()
+            else:
+                body = ""
+            snap[path.relative_to(harness.root).as_posix()] = (stat.S_IMODE(mode), body)
+    return snap
+
+
+def _outside(harness, *allowed: str) -> dict[str, tuple[int, str]]:
+    return _snapshot(harness, harness.data_dir, *(harness.repo / a for a in allowed))
+
+
+def _relink_data(harness, target: Path | str) -> None:
+    data = harness.repo / "data"
+    if data.is_symlink():
+        data.unlink()
+    else:
+        data.rename(harness.root / "data-moved")
+    data.symlink_to(target)
+
+
+def _prime(harness) -> None:
+    if harness.shared_env is not None:
+        harness.install_shared_env()
+    (harness.root / "driver.py").write_text("print('probe')\n")
+
+
+REFUSING_EVERY_COMMAND = [
+    ("fetch", "data/pyprocar-288-absent"),
+    ("fetch", "data/codes"),
+    ("fetch", "data/examples/bands/x"),
+    ("run", "probe", "data/examples/bands/x", "{root}/driver.py"),
+    ("clean", "data/verify-runs/run1"),
+    ("gc", "0"),
+]
+
+
+def _refuses_everything(harness, *extra: tuple[str, ...]) -> None:
+    _prime(harness)
+    before = _snapshot(harness)
+
+    for args in [*REFUSING_EVERY_COMMAND, *extra]:
+        out = harness.verify(*(a.format(root=harness.root) for a in args))
+        assert out.returncode == 2, (args, out.stderr)
+    assert not harness.env_log.exists()
+    assert harness.verify("doctor").returncode == 0
+    assert _snapshot(harness) == before
+
+
+@pytest.mark.skipif(os.geteuid() == 0, reason="root enters any directory")
+@pytest.mark.parametrize("how", ["data_dir_unenterable", "data_links_to_an_unenterable_dir"])
+def test_an_unenterable_data_root_refuses_every_command(harness, how):
+    assert not any(
+        Path("/", n).exists() for n in ("pyprocar-288-absent", "codes", "examples", "verify-runs")
+    )
+    if how == "data_dir_unenterable":
+        harness.data_dir.chmod(0)
+    else:
+        _relink_data(harness, harness.root / "outside/unenterable")
+
+    _refuses_everything(harness)
+
+
+def test_a_data_root_at_the_top_of_the_tree_refuses_every_command(harness):
+    _relink_data(harness, harness.root)
+
+    _refuses_everything(harness, ("fetch", "data/outside"), ("fetch", "data/repo"))
+
+
+def test_a_data_link_to_a_copy_outside_the_main_checkout_is_refused(harness):
+    shutil.copytree(harness.data_dir, harness.root / "outside/data", symlinks=True)
+    _relink_data(harness, harness.root / "outside/data")
+
+    _refuses_everything(harness)
+
+
+@pytest.mark.guards_existing_behaviour(
+    reason="dev accepts this spelling too; the stricter data-root check must keep accepting it"
+)
+def test_a_worktree_data_link_spelled_with_a_leading_double_slash_still_locks(harness):
+    if harness.shared_env is None:
+        pytest.skip(
+            "a main checkout's data/ is a directory, so only a worktree link has a spelling"
+        )
+    _relink_data(harness, f"/{harness.data_dir}")
+    before = harness.locked()
+
+    assert harness.verify("fetch", "data/codes").returncode == 0
+    assert harness.locked() - before == {
+        f"{harness.data_rel}/{p}" for p in ["codes", "codes/qe", "codes/qe/scf.out"]
+    }
+
+
+def test_a_verify_runs_link_out_of_data_is_never_followed(harness):
+    shutil.rmtree(harness.data_dir / "verify-runs")
+    (harness.data_dir / "verify-runs").symlink_to(harness.root / "outside/tmp/runs")
+    (harness.root / "outside/tmp/runs/x/work").chmod(0o555)
+    _prime(harness)
+    before = _snapshot(harness)
+
+    assert harness.verify("clean", "data/verify-runs/x").returncode == 2
+    assert _run(harness, "data/examples/bands/x").returncode == 2
+    assert harness.verify("gc", "0").returncode == 2
+    assert _snapshot(harness) == before
+
+
+def test_fetch_leaves_a_hard_link_to_a_file_outside_data_writable(harness):
+    os.link(harness.root / "outside/home/f", harness.data_dir / "codes/qe/hard")
+    harness.lock("examples/bands/x")
+    before = _outside(harness)
+
+    out = harness.verify("fetch", "data/codes")
+
+    assert out.returncode == 0
+    assert _outside(harness) == before
+    assert out.stderr.splitlines()[-1] == f"{harness.root}/{harness.data_rel}/codes/qe/hard"
+    assert not (harness.data_dir / "codes/qe/scf.out").stat().st_mode & WRITE_BITS
+    assert _doctor_count(harness) == 1
+
+
+def test_no_command_changes_anything_outside_data(harness):
+    os.link(harness.root / "outside/home/f", harness.data_dir / "codes/qe/hard")
+    (harness.data_dir / "verify-runs/run1/work").symlink_to(harness.root / "outside/tmp")
+    (harness.data_dir / "examples/bands/alias").symlink_to("../../codes")
+    (harness.data_dir / ".hidden").mkdir()
+    allowed: tuple[str, ...] = ()
+    if harness.shared_env is not None:
+        (harness.root / "repo/pyprocar").mkdir()
+        (harness.root / "repo/pyprocar/_version.py").write_text("x")
+        allowed = ("pyprocar", ".tmp", "data")
+    _prime(harness)
+    before = _outside(harness, *allowed)
+
+    fetched = ["data/codes", "data/examples/bands/alias", "data/examples/dos/new", "data/.hidden"]
+    for rel in [*REFUSED, *fetched]:
+        harness.verify("fetch", rel.format(repo=harness.repo))
+    for fixture in ["data/examples/bands/x", "data/escape", "{root}/outside/home", "data/runs"]:
+        _run(harness, fixture.format(root=harness.root))
+    for run in [*(harness.data_dir / "verify-runs").iterdir(), harness.root / "outside/tmp/runs/x"]:
+        harness.verify("clean", str(run))
+    harness.verify("gc", "0")
+    harness.verify("doctor")
+    harness.verify("worktree-setup")
+
+    assert _outside(harness, *allowed) == before
+
+
+@pytest.mark.guards_existing_behaviour(reason="a lint; verify.sh on dev runs no chmod at all")
+def test_verify_sh_changes_modes_only_in_chmod_below_data():
+    lines = [x.strip() for x in VERIFY_SH.read_text().splitlines()]
+    mode_changes = [
+        x
+        for x in lines
+        if re.search(r"\b(chmod|chown|chgrp|chattr|setfacl)\b|\binstall\s+-\w*m", x)
+        and not x.startswith("#")
+    ]
+
+    assert mode_changes == [
+        'find -P "$real" ! -type l \\( -type d -o -links 1 \\) -exec chmod "$mode" {} +'
+    ]
