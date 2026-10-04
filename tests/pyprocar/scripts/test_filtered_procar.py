@@ -26,6 +26,7 @@ from tests.utils import DATA_DIR
 pytestmark = pytest.mark.data
 
 CALC = DATA_DIR / "examples/bands/non-spin-polarized"
+FERMI2D_CALC = DATA_DIR / "examples/fermi2d/non-spin-polarized"
 FERMI = 5.3017
 
 
@@ -209,4 +210,29 @@ def test_a_shell_name_raises_when_the_header_names_no_such_shell(tmp_path: Path)
     with pytest.raises(ValueError, match="hold no whole p shell"):
         pyprocar.bandsplot(
             code="vasp", dirname=str(calc), mode="parametric", orbitals=p_shell, show=False
+        )
+
+
+def test_part_of_a_shell_is_not_that_shell(tmp_path: Path) -> None:
+    calc = _filtered_calc(tmp_path, orbitals=[[0], [1], [2]], orbital_names=["s", "py", "pz"])
+    p_shell: Any = ["p"]
+
+    with pytest.raises(ValueError, match="hold no whole p shell"):
+        pyprocar.bandsplot(
+            code="vasp", dirname=str(calc), mode="parametric", orbitals=p_shell, show=False
+        )
+
+
+def test_fermi2d_refuses_to_unfold_an_atom_filtered_irreducible_procar(tmp_path: Path) -> None:
+    """A symmetry operation moves O atoms between rows the filtered file no longer names."""
+    calc = tmp_path / "calc"
+    calc.mkdir()
+    for name in ("PROCAR", "OUTCAR", "POSCAR", "KPOINTS", "vasprun.xml", "IBZKPT"):
+        shutil.copy(FERMI2D_CALC / name, calc / name)
+    pyprocar.filter(str(calc / "PROCAR"), str(calc / "PROCAR-filtered"), atoms=[[2], [3, 4]])
+    (calc / "PROCAR-filtered").replace(calc / "PROCAR")
+
+    with pytest.raises(ValueError, match="filtered by atoms"):
+        pyprocar.fermi2D(
+            code="vasp", dirname=str(calc), mode="plain", fermi=FERMI, k_z_plane=0.0, show=False
         )

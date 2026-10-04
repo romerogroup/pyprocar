@@ -66,3 +66,10 @@ def test_label_uses_the_parser_names_when_they_are_not_a_whole_shell(
 )
 def test_label_uses_the_shell_letter_for_a_whole_shell(orbital_names, orbitals, expected) -> None:
     assert orbital_label(orbital_names, orbitals) == expected
+
+
+@pytest.mark.guards_existing_behaviour(
+    reason="the fixed table never called py and pz a p shell; orbital_shells must not either"
+)
+def test_two_of_three_p_orbitals_are_not_labelled_p() -> None:
+    assert orbital_label(["s", "py", "pz"], [1, 2]) == "py,pz"

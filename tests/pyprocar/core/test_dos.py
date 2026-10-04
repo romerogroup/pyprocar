@@ -632,3 +632,37 @@ def test_dos_rejects_orbital_names_that_do_not_match_the_projected_orbitals():
             projected=np.ones((5, 1, 2, 9)),
             orbital_names=[f"o{i}" for i in range(16)],
         )
+
+
+VASP_ORBITALS = ["s", "py", "pz", "px", "dxy", "dyz", "dz2", "dxz", "x2-y2"]
+
+
+def _structureless_dos(n_spins: int) -> DensityOfStates:
+    """Weight (atom + 1) * (orbital + 1) on two atoms, halved in the spin-down channel."""
+    energies = np.linspace(-1.0, 1.0, 3)
+    spin_scale = np.array([1.0, 0.5])[:n_spins]
+    projected = np.einsum("s,a,o->sao", spin_scale, np.arange(1.0, 3.0), np.arange(1.0, 10.0))
+    return DensityOfStates(
+        energies=energies,
+        total=np.ones((3, n_spins)),
+        projected=np.broadcast_to(projected, (3, *projected.shape)).copy(),
+        orbital_names=VASP_ORBITALS,
+    )
+
+
+def test_projected_sum_without_structure_or_atoms_sums_every_atom_row() -> None:
+    d_shell = [4, 5, 6, 7, 8]
+
+    prop = _structureless_dos(n_spins=1).compute_projected_sum(orbitals=d_shell)
+
+    assert isinstance(prop, Property)
+    # (1 + 2) * (5 + 6 + 7 + 8 + 9) on each energy
+    np.testing.assert_allclose(np.asarray(prop.value).ravel(), [105.0, 105.0, 105.0])
+
+
+def test_magnetization_without_structure_or_atoms_sums_every_atom_row() -> None:
+    prop = _structureless_dos(n_spins=2).compute_magnetization(orbitals=[1, 2, 3])
+
+    assert isinstance(prop, Property)
+    # (1 - 0.5) * (1 + 2) * (2 + 3 + 4) on each energy
+    np.testing.assert_allclose(np.asarray(prop.value).ravel(), [13.5, 13.5, 13.5])
