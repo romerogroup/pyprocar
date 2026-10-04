@@ -21,6 +21,8 @@ import pyvista as pv
 from scipy.sparse import coo_matrix
 from scipy.sparse.csgraph import connected_components
 
+from pyprocar.core.brillouin_zone import zone_face_steps
+
 MAX_REACH = 16
 """Cells from the origin within which an orbit through the zone must close."""
 
@@ -38,7 +40,6 @@ _NEAR_VERTEX = np.array(list(itertools.product(range(-1, 3), repeat=3)))
 The triangles at the vertex are in the translates 0 or 1 below; one more on each side
 lets a curve grow two cells per round (0.6 s instead of 1.2 s on Au at 60^3)."""
 _START_STEPS = np.array(list(itertools.product(range(-2, 3), repeat=3)))
-_ZONE_STEPS = np.array([s for s in itertools.product(range(-2, 3), repeat=3) if any(s)], float)
 _SLOTS = ((0, 1), (1, 2), (2, 0))
 _PACK = 64
 _PACK_OFFSET = 32
@@ -319,12 +320,8 @@ def plane_orbits(
     lattice = np.asarray(lattice, dtype=np.float64)
     normal = np.asarray(normal, dtype=np.float64) / np.linalg.norm(normal)
     d = float(np.asarray(origin, dtype=np.float64) @ normal)
-    zone = _ZONE_STEPS @ lattice
-    half = 0.5 * (zone * zone).sum(axis=1)
-    beyond = zone @ zone.T >= 2 * half[:, None] * (1 - 1e-9)
-    np.fill_diagonal(beyond, False)
-    faces = ~beyond.any(axis=0)
-    region = (zone[faces], half[faces] * (1 + 2e-9))
+    zone = zone_face_steps(lattice) @ lattice
+    region = (zone, 0.5 * (zone * zone).sum(axis=1) * (1 + 2e-9))
     if box is not None:
         region = (np.vstack([region[0], box[0]]), np.concatenate([region[1], box[1]]))
     inverse = np.linalg.inv(lattice)

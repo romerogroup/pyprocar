@@ -1,3 +1,4 @@
+import itertools
 import logging
 
 import numpy as np
@@ -5,6 +6,20 @@ import pyvista as pv
 from scipy.spatial import Voronoi
 
 logger = logging.getLogger(__name__)
+
+_FACE_CANDIDATES = np.array([s for s in itertools.product(range(-2, 3), repeat=3) if any(s)])
+
+
+def zone_face_steps(reciprocal_lattice: np.ndarray) -> np.ndarray:
+    """Integer coefficients, in the rows of ``reciprocal_lattice``, of the lattice vectors
+    whose bisector planes bound the first Brillouin zone.
+
+    A candidate is dropped when its midpoint lies on or beyond the bisector plane of another.
+    """
+    zone = _FACE_CANDIDATES @ np.asarray(reciprocal_lattice, dtype=np.float64)
+    beyond = zone @ zone.T >= (zone * zone).sum(axis=1)[:, None] * (1 - 1e-9)
+    np.fill_diagonal(beyond, False)
+    return _FACE_CANDIDATES[~beyond.any(axis=0)]
 
 
 class BrillouinZone(pv.PolyData):
