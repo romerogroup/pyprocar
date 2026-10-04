@@ -669,3 +669,8 @@ def test_magnetization_without_structure_or_atoms_sums_every_atom_row() -> None:
 def test_an_empty_atom_selection_raises_instead_of_summing_nothing() -> None:
     with pytest.raises(ValueError, match="names no atoms"):
         _structureless_dos(n_spins=1).compute_projected_sum(atoms=[], orbitals=[0])
+
+
+def test_an_empty_spin_selection_raises_instead_of_summing_nothing() -> None:
+    with pytest.raises(ValueError, match="names no spins"):
+        _structureless_dos(n_spins=2).compute_projected_sum(atoms=[0], spins=[])
