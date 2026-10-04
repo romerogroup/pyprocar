@@ -24,3 +24,7 @@ def test_every_tool_checks_the_declared_python_floor():
     ruff_floor = "py" + major_minor.replace(".", "")
     assert ruff == ruff_floor, f".config/.ruff.toml target-version {ruff!r} != {requires}"
     assert pyright == major_minor, f"pyrightconfig.json pythonVersion {pyright!r} != {requires}"
+    docs = re.search(
+        r'^\s+python: "(3\.\d+)"', (ROOT / ".readthedocs.yaml").read_text(encoding="utf-8"), re.M
+    )
+    assert docs and docs.group(1) == major_minor, f".readthedocs.yaml build python != {requires}"

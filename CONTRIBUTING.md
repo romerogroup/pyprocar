@@ -77,7 +77,7 @@ venv\Scripts/activate.bat
 
 ##### conda
 ```bash
-conda create -n pyprocar python=3.10
+conda create -n pyprocar python=3.12
 conda activate pyprocar
 ```
 
