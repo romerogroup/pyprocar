@@ -402,3 +402,53 @@ def test_phases_decide_how_a_third_turn_splits_equal_px_and_py_weights():
         at = {key(k): i for i, k in enumerate(ebs.kpoints)}
         weights = ebs.projected.to_array()[at[key(image)], :, 0, 0]
         np.testing.assert_allclose(weights[:, [px, py]], expected, atol=1e-12)
+
+
+@pytest.mark.data
+def test_reduced_bisb_orbital_weights_and_spin_follow_each_rotation():
+    spglib = pytest.importorskip("spglib")
+    from pyprocar.core.ebs import get_ebs_from_code, get_ebs_from_data
+    from tests.utils import DATA_DIR
+
+    # The full 60x60x1 non-collinear mesh (ISYM=-1) is the truth. Reduce it under the point
+    # group and k ~ -k, unfold, and compare each image with the full mesh, bands 0-59.
+    full = get_ebs_from_code("vasp", str(DATA_DIR / "examples" / "fermi2d" / "bisb_monolayer"))
+    structure = full.structure
+    assert structure is not None and full.bands is not None and full.projected is not None
+    full_projected = full.projected.to_array()
+    cell = (structure.lattice, structure.fractional_coordinates, structure.atomic_numbers)
+    rotations = np.array([w.T for w in spglib.get_symmetry(cell, symprec=1e-3)["rotations"]])
+    structure._rotations = rotations.astype(float)
+    full_keys = [key(np.round(k, 4)) for k in full.kpoints]
+    kept, seen = [], set()
+    for i, k in enumerate(full.kpoints):
+        if full_keys[i] not in seen:
+            kept.append(i)
+            seen.update(key(np.round(s * (r @ k), 4)) for r in rotations for s in (1, -1))
+    reduced = get_ebs_from_data(
+        kpoints=full.kpoints[kept],
+        bands=full.bands.to_array()[kept],
+        projected=full_projected[kept],
+        fermi=full.fermi,
+        reciprocal_lattice=full.reciprocal_lattice,
+        orbital_names=full.orbital_names,
+        structure=structure,
+        kgrid_info=full.kgrid_info,
+    )
+    assert reduced.projected is not None and reduced.n_kpoints == 3600
+    index = {k: i for i, k in enumerate(full_keys)}
+    target = [index[key(np.round(k, 4))] for k in reduced.kpoints]
+    unfolded, true = reduced.projected.to_array()[:, :60], full_projected[target, :60]
+
+    # Rotations by 120 degrees mix px with py and dxy with dx2-y2. Weights alone fix an image
+    # only up to the interference between the mixed orbitals, which LORBIT=11 does not keep.
+    # Unmixed, the mean errors are 0.0037 (weights) and 0.0049 (spin); mixed, 0.0013 and 0.0024.
+    weight_error = np.abs(unfolded[:, :, 0] - true[:, :, 0]).mean()
+    spin_error = np.abs(unfolded[:, :, 1:] - true[:, :, 1:]).mean()
+    assert weight_error < 0.0025
+    assert spin_error < 0.0035
+    for columns in ([1, 2, 3], [4, 5, 6, 7, 8]):
+        shell_error = np.abs(
+            unfolded[:, :, 0][..., columns].sum(-1) - true[:, :, 0][..., columns].sum(-1)
+        )
+        assert shell_error.mean() < 4e-4
