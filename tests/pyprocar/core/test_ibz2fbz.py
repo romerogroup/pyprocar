@@ -1,6 +1,7 @@
 from typing import cast
 
 import numpy as np
+import pytest
 
 from pyprocar.core import Structure, kpoints
 from pyprocar.core.ebs import ElectronicBandStructure, ElectronicBandStructureMesh, ibz2fbz
@@ -189,10 +190,10 @@ def test_is_grid_is_false_for_an_ibz_whose_coordinates_form_a_smaller_grid():
 
 
 def test_symmetry_images_swap_the_atoms_the_operation_swaps():
-    # C2z maps the site (1/4, 0, 0) onto (3/4, 0, 0) and back
+    # C2z maps the site (0.2, 0.1, 0) onto (0.8, 0.9, 0) and back
     structure = Structure(
         atoms=["X", "X"],
-        fractional_coordinates=[[0.25, 0, 0], [0.75, 0, 0]],
+        fractional_coordinates=[[0.2, 0.1, 0], [0.8, 0.9, 0]],
         lattice=np.eye(3),
         rotations=np.array([np.eye(3), np.diag([-1.0, -1, 1])]),
     )
@@ -333,9 +334,11 @@ def test_time_reversal_conjugates_the_projection_phase():
         key(k): complex(ebs.projected_phase.to_array()[i, 0, 0, 0, 0])
         for i, k in enumerate(ebs.kpoints)
     }
-    assert phase_at[key([t, 0, 0])] == 1 + 1j and phase_at[key([-t, 0, 0])] == 1 - 1j
-    assert phase_at[key([t, -t, 0])] == 1 + 4j and phase_at[key([-t, t, 0])] == 1 - 4j
-    assert phase_at[key([0, 0, 0])] == 1
+    assert phase_at[key([t, 0, 0])] == pytest.approx(1 + 1j)
+    assert phase_at[key([-t, 0, 0])] == pytest.approx(1 - 1j)
+    assert phase_at[key([t, -t, 0])] == pytest.approx(1 + 4j)
+    assert phase_at[key([-t, t, 0])] == pytest.approx(1 - 4j)
+    assert phase_at[key([0, 0, 0])] == pytest.approx(1)
 
 
 def test_a_quarter_turn_carries_the_px_phase_to_py():
@@ -358,6 +361,44 @@ def test_a_quarter_turn_carries_the_px_phase_to_py():
     assert ebs.projected_phase is not None
     at = {key(k): i for i, k in enumerate(ebs.kpoints)}
     image = ebs.projected_phase.to_array()[at[key([0, 0.25, 0])], 0, 0, 0]
-    assert {VASP_ORBITALS[i]: complex(c) for i, c in enumerate(image) if abs(c) > 1e-12} == {
-        "py": 0.6 + 0.8j
-    }
+    expected = np.zeros(len(VASP_ORBITALS), dtype=complex)
+    expected[VASP_ORBITALS.index("py")] = 0.6 + 0.8j
+    np.testing.assert_allclose(image, expected, atol=1e-12)
+
+
+def test_phases_decide_how_a_third_turn_splits_equal_px_and_py_weights():
+    # (px + py)/sqrt(2) and (px + i py)/sqrt(2) have the same weights, 1/2 and 1/2, but a 120
+    # degree turn sends the first to (1 + sqrt(3)/2)/2 px and the second to 1/2 px.
+    turn, rotations, reciprocal_lattice = hexagonal_c3()
+    grid = gamma_grid((6, 6, 1))
+    source = np.array([1 / 6, 0, 0])
+    ibz = wedge(grid, np.concatenate([rotations, -rotations]), first=source)
+    phase = np.zeros((len(ibz), 2, 1, 1, len(VASP_ORBITALS)), dtype=complex)
+    phase[:, :, 0, 0, VASP_ORBITALS.index("px")] = 1 / np.sqrt(2)
+    phase[:, 0, 0, 0, VASP_ORBITALS.index("py")] = 1 / np.sqrt(2)
+    phase[:, 1, 0, 0, VASP_ORBITALS.index("py")] = 1j / np.sqrt(2)
+
+    def unfold(projected_phase):
+        return ElectronicBandStructureMesh(
+            kpoints=ibz,
+            bands=np.zeros((len(ibz), 2, 1)),
+            projected=np.abs(phase) ** 2,
+            projected_phase=projected_phase,
+            orbital_names=VASP_ORBITALS,
+            fermi=0.0,
+            reciprocal_lattice=reciprocal_lattice,
+            structure=single_site(lattice=HEXAGONAL, rotations=rotations),
+            kgrid_info=gamma_info((6, 6, 1)),
+        )
+
+    image = np.linalg.solve(reciprocal_lattice.T, turn @ (source @ reciprocal_lattice))
+    px, py = VASP_ORBITALS.index("px"), VASP_ORBITALS.index("py")
+    for projected_phase, expected in [
+        (phase, [[(2 + np.sqrt(3)) / 4, (2 - np.sqrt(3)) / 4], [0.5, 0.5]]),
+        (None, [[0.5, 0.5], [0.5, 0.5]]),
+    ]:
+        ebs = unfold(projected_phase)
+        assert ebs.projected is not None
+        at = {key(k): i for i, k in enumerate(ebs.kpoints)}
+        weights = ebs.projected.to_array()[at[key(image)], :, 0, 0]
+        np.testing.assert_allclose(weights[:, [px, py]], expected, atol=1e-12)
