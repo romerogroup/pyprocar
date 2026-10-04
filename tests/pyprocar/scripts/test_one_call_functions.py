@@ -24,7 +24,7 @@ from pyprocar.core import (
     FermiSurface,
 )
 from pyprocar.core.property_store import Property
-from tests.utils import DATA_DIR, ROOT_DIR
+from tests.utils import DATA_DIR, ROOT_DIR, writable_copy
 
 FERMI = 5.3017
 V_ATOM = [1]
@@ -37,7 +37,7 @@ def _calc(tmp_path, relpath):
     if not src.exists():
         pytest.skip(f"fixture {relpath} not downloaded")
     dst = tmp_path / "calc"
-    shutil.copytree(src, dst, ignore=shutil.ignore_patterns("*.pkl", "CHG*", "WAVECAR", "*.pdf"))
+    writable_copy(src, dst, ignore=shutil.ignore_patterns("*.pkl", "CHG*", "WAVECAR", "*.pdf"))
     return dst
 
 
