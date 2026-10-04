@@ -1390,3 +1390,52 @@ def test_band_structure_rejects_projections_its_orbital_names_do_not_describe(
             projected=np.zeros(projected_shape),
             orbital_names=orbital_names,
         )
+
+
+VASP_SPD_NAMES = ["s", "py", "pz", "px", "dxy", "dyz", "dz2", "dxz", "x2-y2"]
+
+
+def make_fe_o_ebs_path(orbital_names: list[str]) -> ElectronicBandStructurePath:
+    """One k-point and band; projection (atom, orbital) = 10 * (atom + 1) + orbital."""
+    n_orbitals = len(orbital_names)
+    values = 10.0 * np.arange(1, 3)[:, None] + np.arange(n_orbitals)[None, :]
+    frac = np.zeros((1, 3))
+    return ElectronicBandStructurePath(
+        kpoints=frac,
+        bands=np.zeros((1, 1, 1)),
+        projected=values.reshape(1, 1, 1, 2, n_orbitals),
+        orbital_names=orbital_names,
+        reciprocal_lattice=np.eye(3) / 3.0,
+        structure=Structure(
+            atoms=["Fe", "O"],
+            fractional_coordinates=[[0.0, 0.0, 0.0], [0.5, 0.5, 0.5]],
+            lattice=np.eye(3) * 3.0,
+        ),
+        kpath=kpoints.KPath(
+            kpoints=frac,
+            n_grids=[1],
+            segment_names=[("G", "G")],
+            reciprocal_lattice=np.eye(3) / 3.0,
+        ),
+    )
+
+
+@pytest.mark.parametrize(
+    ("orbital_names", "expected"),
+    [
+        (VASP_SPD_NAMES, {"s": 10 + 20, "p": 36 + 66, "d": 80 + 130}),
+        (VASP_SPD_NAMES[:4], {"s": 10 + 20, "p": 36 + 66}),
+    ],
+)
+def test_overlay_orbital_weights_sum_each_shell_the_orbital_names_hold(orbital_names, expected):
+    weights = make_fe_o_ebs_path(orbital_names).build_overlay_orbitals_weights()
+
+    assert {w.label: float(np.asarray(w.value).sum()) for w in weights} == expected
+
+
+def test_overlay_weights_resolve_shell_letters_per_species():
+    weights = make_fe_o_ebs_path(VASP_SPD_NAMES).build_overlay_weights(
+        {"Fe": ["d"], "O": ["s", "p"]}
+    )
+
+    assert [float(np.asarray(w.value).sum()) for w in weights] == [10 * 5 + 30, 20 + 66]
