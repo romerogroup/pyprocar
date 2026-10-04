@@ -13,7 +13,7 @@ permissions:
   contents: read
 
 env:
-  # Lint and format judge only what this PR (or push) changed.
+  # Lint, format and red-green judge only what this PR (or push) changed.
   # A pull_request checkout is the merge commit, so HEAD^1 is the base it merged into.
   BASE: ${{ github.event_name == 'pull_request' && 'HEAD^1' || github.event.before }}
 
@@ -85,3 +85,19 @@ jobs:
           cache: false
       - name: pytest (quick set, tests marked data need DFT fixtures)
         run: pixi run --locked -e dev pytest tests -c .config/.pytest.toml --rootdir . -n auto -m "not data"
+
+  red-green:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: prefix-dev/setup-pixi@v0.10.2
+        with:
+          pixi-version: v0.81.0
+          environments: dev
+          locked: true
+      - name: red/green (added or changed tests that pass on the base code, unless marked guards_existing_behaviour)
+        continue-on-error: true
+        run: pixi run --locked -e dev python .github/scripts/red_green.py "$BASE"

@@ -168,6 +168,10 @@ for _name, _guarded in _GUARDED.items():
 
 def pytest_configure(config: pytest.Config) -> None:
     config.addinivalue_line("markers", "data: needs DFT fixtures from data/")
+    config.addinivalue_line(
+        "markers",
+        "guards_existing_behaviour(reason): passes on the base code on purpose (red_green.py)",
+    )
 
 
 @pytest.hookimpl(wrapper=True)
