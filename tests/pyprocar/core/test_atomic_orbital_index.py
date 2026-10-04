@@ -92,6 +92,7 @@ def test_projection_selection_resolver_resolves_species_selection():
     )
     resolver = ProjectionSelectionResolver(
         label_builder=builder,
+        n_atom_rows=10,
         orbital_names=["s", "p_y", "p_z", "p_x", "d_{xy}", "d_{yz}", "d_{z^2}", "d_{xz}"],
         is_non_colinear=False,
     )
@@ -119,6 +120,7 @@ def test_projection_selection_resolver_species_orbital_map():
     )
     resolver = ProjectionSelectionResolver(
         label_builder=builder,
+        n_atom_rows=5,
         orbital_names=None,
         is_non_colinear=False,
     )
@@ -141,6 +143,7 @@ def test_projection_selection_resolver_defaults_to_all_atoms():
     )
     resolver = ProjectionSelectionResolver(
         label_builder=builder,
+        n_atom_rows=5,
         orbital_names=None,
         is_non_colinear=False,
     )

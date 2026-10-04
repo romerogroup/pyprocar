@@ -8,6 +8,7 @@ from typing import Self
 import numpy as np
 import numpy.typing as npt
 
+from pyprocar.io.elk.projections import lm_names
 from pyprocar.utils.units import HARTREE_TO_EV
 
 
@@ -158,6 +159,11 @@ class ElkDOS:
                     result[(spc, atm)][i] = dos
 
         return result
+
+    @cached_property
+    def orbital_names(self) -> list[str]:
+        """Each PDOS block's (l, m) slot, in the basis Elk writes to ELMIREP.OUT."""
+        return lm_names(self.N_ORBITALS)
 
     @cached_property
     def natoms(self) -> int:

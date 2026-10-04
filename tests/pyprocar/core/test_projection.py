@@ -88,6 +88,9 @@ def test_build_property_rejects_disallowed_mode():
         )
 
 
+@pytest.mark.guards_existing_behaviour(
+    reason="the labels are unchanged; the source only gains atom_groups and n_atoms"
+)
 def test_build_property_selection_labels():
     structure = Structure(
         atoms=["Sr", "V"], fractional_coordinates=[[0, 0, 0], [0.5, 0.5, 0.5]], lattice=np.eye(3)
@@ -97,6 +100,8 @@ def test_build_property_selection_labels():
         spin_projection_names=["Spin-up", "Spin-down"],
         orbital_names=["s", "p"],
         is_non_collinear=False,
+        atom_groups=None,
+        n_atoms=2,
     )
     selection = selection_resolver(source).resolve(atoms=[1], orbitals=[0], spins=[1])
     owner = _Owner(points=np.zeros((1, 3)))

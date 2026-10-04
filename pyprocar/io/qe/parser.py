@@ -23,6 +23,7 @@ from pyprocar.core import (
 from pyprocar.core import kpoints as k_utils
 from pyprocar.io.base import BaseParser
 from pyprocar.io.qe.projwfc import AtomicProjXML, ProjwfcDOS, ProjwfcIn, ProjwfcOut
+from pyprocar.io.qe.projwfc.spinor import spinor_projections
 from pyprocar.io.qe.pw import PwIn, PwOut, PwXML
 from pyprocar.utils.log_utils import warn_user
 from pyprocar.utils.units import AU_TO_ANG, HARTREE_TO_EV
@@ -640,7 +641,12 @@ class QEParser(BaseParser):
 
     @cached_property
     def spd_phase(self) -> np.ndarray | None:
-        if self.atomic_proj_xml is None or self.projwfc_out is None:
+        """Complex projections of a collinear run; a spinor run has no single phase per orbital."""
+        if (
+            self.atomic_proj_xml is None
+            or self.projwfc_out is None
+            or self.projwfc_out.is_non_colinear
+        ):
             return None
         logger.info("Parsing spd phase from atomic_proj.xml and projwfc.out")
 
@@ -667,18 +673,7 @@ class QEParser(BaseParser):
 
         for state_num, wfc_info in wfc_mapping.items():
             atm_num = wfc_info["atm_num"]
-            orbital_l = wfc_info["l"]
-            j = wfc_info["j"]
-            m_j = wfc_info["m_j"]
-            m = wfc_info["m"]
-
-            orbital_dict = (
-                {"l": orbital_l, "j": j, "m_j": m_j}
-                if m_j is not None
-                else {"l": orbital_l, "m": m}
-            )
-
-            i_orbital = orbitals.index(orbital_dict)
+            i_orbital = orbitals.index({"l": wfc_info["l"], "m": wfc_info["m"]})
             i_atom = atm_num - 1
             i_state = state_num - 1
             pyprocar_projections_phase[..., i_atom, i_orbital] += projections[..., i_state]
@@ -707,6 +702,8 @@ class QEParser(BaseParser):
 
     @cached_property
     def spd(self) -> np.ndarray | None:
+        if self.projwfc_out is not None and self.projwfc_out.is_non_colinear:
+            return self._spinor_spd
         if self.spd_phase is None:
             return None
         logger.info("Parsing spd from spd phase")
@@ -717,6 +714,25 @@ class QEParser(BaseParser):
             spd = k_utils.insert_continuous_points(spd, self.kticks)
         logger.debug(f"Spd: {spd.shape}")
         return spd
+
+    @cached_property
+    def _spinor_spd(self) -> np.ndarray | None:
+        """Total, Sx, Sy and Sz per (l, m) orbital from the spinor projections."""
+        if self.atomic_proj_xml is None or self.atomic_proj_xml.projections is None:
+            return None
+        assert self.projwfc_out is not None and self.projwfc_out.n_atoms is not None
+        spd = spinor_projections(
+            self.atomic_proj_xml.projections[:, :, 0, :],
+            self.projwfc_out.atm_wfcs,
+            self.projwfc_out.n_atoms,
+        )
+        if self.kpath is not None:
+            spd = k_utils.insert_continuous_points(spd, self.kticks)
+        return spd
+
+    @cached_property
+    def orbital_names(self) -> list[str] | None:
+        return None if self.projwfc_out is None else self.projwfc_out.orbital_names
 
     @cached_property
     def orbitals(self) -> list[dict[str, int | float]] | None:
@@ -734,10 +750,6 @@ class QEParser(BaseParser):
             warn_user("Cannot create EBS without fermi energy")
             return None
 
-        # TODO: orbitals is list[dict] but get_ebs_from_data expects list[str]
-        # Need to convert quantum numbers to orbital names
-        orbital_names: list[str] | None = None
-
         return get_ebs_from_data(
             kpoints=self.kpoints,
             bands=self.bands,
@@ -745,7 +757,7 @@ class QEParser(BaseParser):
             projected_phase=self.position_gauge_phase,
             fermi=self.fermi,
             reciprocal_lattice=self.reciprocal_lattice,
-            orbital_names=orbital_names,
+            orbital_names=self.orbital_names,
             structure=self.structure,
             kpath=self.kpath,  # pyright: ignore[reportArgumentType]
             kgrid_info=self.kgrid_info,
@@ -778,6 +790,8 @@ class QEParser(BaseParser):
             total=total_dos,
             fermi=self.fermi,
             projected=self.projwfc_dos.projected_dos,
+            orbital_names=self.projwfc_dos.orbital_names,
+            structure=self.structure,
         )
 
     @cached_property

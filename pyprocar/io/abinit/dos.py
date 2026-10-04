@@ -13,6 +13,9 @@ logger = logging.getLogger(__name__)
 
 # DOS_AT columns: energy, l=0..4 DOS, l=0..4 integrated DOS, then lm-resolved DOS from lm=0 0.
 _LM_COLUMNS = slice(11, 20)
+# Those columns are lm = 0 0, 1 -1, ..., 2 2 in Abinit's real spherical harmonics, named
+# as Abinit's own PROCAR header names them.
+_LM_NAMES = ["s", "py", "pz", "px", "dxy", "dyz", "dz2", "dxz", "dx2"]
 
 
 def _read_dos_file(text: str) -> tuple[np.ndarray, float]:
@@ -85,6 +88,11 @@ class AbinitDOS:
     def fermi(self) -> float:
         """Fermi energy in eV."""
         return self._total_dos_data[1]
+
+    @cached_property
+    def orbital_names(self) -> list[str] | None:
+        """Names of the lm columns that ``projected`` keeps."""
+        return list(_LM_NAMES) if self.projected_dos_filepaths else None
 
     @cached_property
     def projected(self) -> np.ndarray | None:

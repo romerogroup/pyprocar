@@ -22,6 +22,10 @@ If you want to select only :math:`p_x` orbitals, just use ``orbitals=[[3]]``.
 
 In the same way to plot the projection of total :math:`p`-orbitals use ``orbitals=[[1,2,3]]``  (i.e. :math:`px+py+pz`). Same goes for other orbitals.
 
+Each new column is named by ``orbital_names``, which defaults to ``o0``, ``o1``, and so on. PyProcar reads these names from the header of the new file, so plots label the columns ``o0`` and ``o1``. In the new file, orbital index ``i`` selects the ``i``-th column, so ``orbitals=[1]`` selects the :math:`p` sum of the example above. Pass ``orbital_names=['s','p']`` to label the columns ``s`` and ``p``.
+
+A shell name such as ``orbitals=['p']`` selects the column named ``p``, or the columns whose names make up the whole :math:`p` shell, for example ``py``, ``pz`` and ``px``. Columns named ``o0`` and ``o1`` make up no shell, so select them by index.
+
 ===================================
 To filter selected :math:`k`-points
 ===================================
@@ -56,6 +60,19 @@ Usage::
 	pyprocar.filter(‘PROCAR’,’PROCAR-filter_ATOMS’, atoms=[[0]])
 
 PyProcar counts each row of ions in PROCAR file starting from 0. Keep in mind: ``atoms=0`` does not define the atom_type, rather it defines only the first ion in the POSCAR. So if you have more than one ion of the same element, use ``atoms = [[0,1,2,3,...]]``.
+
+Each group in ``atoms`` becomes one row of the new PROCAR, the sum of the rows of its atoms. For a SrVO3 calculation with the POSCAR order Sr, V, O, O, O::
+
+	pyprocar.filter('PROCAR','PROCAR-filtered_atoms', atoms=[[0],[1],[2,3,4]])
+
+writes 3 rows: Sr, V, and the sum of the three O atoms. To plot the new file, rename it to ``PROCAR`` in the calculation directory. When the PROCAR has fewer or more rows than the POSCAR has atoms, PyProcar warns that the PROCAR was filtered by atoms and treats each row as a group:
+
+- Atom index ``i`` selects the ``i``-th group, so ``atoms=[2]`` selects the three O atoms. Plots label a selection by its group indices, not by a species.
+- A plot with no ``atoms`` sums every group.
+- A selection by species raises an error, because a group can hold atoms of several species. This includes ``atoms=['O']`` and the ``overlay_species`` mode. Select groups by index instead.
+- A Fermi surface or other k-point mesh needs the full k grid. Unfolding the irreducible k-points moves atoms between rows, and the filtered file does not say which atoms a row holds, so PyProcar raises an error. Filter the PROCAR of a calculation on the full k grid (``ISYM = -1``), or plot the unfiltered PROCAR and select atoms there.
+
+PyProcar cannot detect a filtered PROCAR that has exactly as many rows as the POSCAR has atoms. It then labels each row with the species of the POSCAR atom at the same index.
 
 .. automodule:: pyprocar.scripts.scriptFilter
 	:members:

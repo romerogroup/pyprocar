@@ -23,6 +23,14 @@ COORDS_PATTERN = rf"\s*({FLOAT_PATTERN})\s*({FLOAT_PATTERN})\s*({FLOAT_PATTERN})
 
 ORBITAL_ORDERING = OrbitalIndexer()
 
+# The l and m labels projwfc.x prints (print_lowdin), in its real-harmonic order m = 1..2l+1.
+ORBITAL_NAMES = [
+    "s",
+    *("pz", "px", "py"),
+    *("dz2", "dxz", "dyz", "dx2-y2", "dxy"),
+    *("fz3", "fxz2", "fyz2", "fzx2-zy2", "fxyz", "fx3-3xy2", "f3yx2-y3"),
+]
+
 
 def convert_lorbnum_to_letter(lorbnum):
     """A helper method to convert the lorb number to the letter format
@@ -104,9 +112,10 @@ class ProjwfcOut:
 
     @cached_property
     def is_non_colinear(self) -> bool:
+        """Whether the states are spinors: |l j m_j> with spin-orbit, |l m s_z> without."""
         if self.atm_wfcs:
             atm_wfc = self.atm_wfcs[0]
-            return atm_wfc["j"] is not None
+            return atm_wfc["j"] is not None or atm_wfc["s_z"] is not None
         return False
 
     @cached_property
@@ -145,13 +154,14 @@ class ProjwfcOut:
     def atm_wfcs(self):
         state_pattern = re.compile(
             r"""^\s*state\s+\#\s*(?P<state_num>\d+):\s*
-                atom\s+(?P<atom_num>\d+)\s*\((?P<element>[A-Za-z]+)\s*\),\s*
+                atom\s+(?P<atom_num>\d+)\s*\((?P<element>[^\s)]+)\s*\),\s*
                 wfc\s+(?P<wfc_num>\d+)\s*
                 \(
                 l\s*=\s*(?P<l>\d+)
                 (?:\s+j\s*=\s*(?P<j>[-+]?\d+(?:\.\d+)?))?
                 (?:\s+m_j\s*=\s*(?P<mj>[-+]?\d+(?:\.\d+)?))?
                 (?:\s+m\s*=\s*(?P<m>[-+]?\d+(?:\.\d+)?))?
+                (?:\s+s_z\s*=\s*(?P<s_z>[-+]?\d+(?:\.\d+)?))?
                 \)
             """,
             re.VERBOSE | re.MULTILINE,
@@ -169,6 +179,7 @@ class ProjwfcOut:
                     "j": float(match.group("j")) if match.group("j") else None,
                     "m_j": float(match.group("mj")) if match.group("mj") else None,
                     "m": int(match.group("m")) if match.group("m") else None,
+                    "s_z": float(match.group("s_z")) if match.group("s_z") else None,
                 }
             )
 
@@ -235,19 +246,13 @@ class ProjwfcOut:
         return n_atoms
 
     @cached_property
-    def non_colinear_orbitals(self):
-        return ORBITAL_ORDERING.flat_soc_order
-
-    @cached_property
-    def colinear_orbitals(self):
+    def orbitals(self):
+        """The (l, m) orbitals pyprocar projects onto; spinor states map onto them too."""
         return ORBITAL_ORDERING.az_to_lm_records
 
     @cached_property
-    def orbitals(self):
-        if self.is_non_colinear:
-            return self.non_colinear_orbitals
-        else:
-            return self.colinear_orbitals
+    def orbital_names(self) -> list[str]:
+        return list(ORBITAL_NAMES)
 
     @cached_property
     def n_orbitals(self) -> int:

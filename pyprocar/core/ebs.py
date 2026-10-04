@@ -30,6 +30,7 @@ from pyprocar.core.atomic_orbital_index import (
 )
 from pyprocar.core.brillouin_zone import BrillouinZone
 from pyprocar.core.projection import (
+    BAND_PROJECTIONS,
     NormMode,
     build_property,
     check_projected_layout,
@@ -82,6 +83,7 @@ def get_ebs_from_data(
     structure: Structure | None = None,
     kpath: kpoints.KPath = None,
     kgrid_info: kpoints.KGridInfo | None = None,
+    atom_groups: int | None = None,
     **kwargs,
 ):
     ebs_args = {
@@ -94,6 +96,7 @@ def get_ebs_from_data(
         "reciprocal_lattice": reciprocal_lattice,
         "orbital_names": orbital_names,
         "structure": structure,
+        "atom_groups": atom_groups,
     }
 
     # grid_dims = mathematics.get_grid_dims(kpoints)
@@ -188,9 +191,14 @@ class ElectronicBandStructure(PointSet):
         factor (a_i . b_j = delta_ij). Defaults to None
     shifted_to_fermi : bool, optional
          Boolean to determine if the fermi energy is shifted, defaults to False
+    atom_groups : int, optional
+        The number of rows of the atom axis of ``projected`` when each row is a group of
+        the structure's atoms, as in a PROCAR filtered by atoms. Atom indices then select
+        groups, and species selections raise. Defaults to None, one row per atom
     """
 
     _mesh: pv.PolyData | pv.StructuredGrid | pv.PointSet | None = None
+    _atom_groups: int | None = None
 
     def __init__(
         self,
@@ -204,12 +212,13 @@ class ElectronicBandStructure(PointSet):
         reciprocal_lattice: kpoints.RECIPROCAL_LATTICE_DTYPE | None = None,
         shifted_to_fermi: bool = False,
         structure: Structure | None = None,
+        atom_groups: int | None = None,
     ):
         super().__init__(kpoints)
 
         logger.info("Initializing ElectronicBandStructure")
         check_projected_layout(
-            projected, orbital_names, ("n_kpoints", "n_bands", "n_spins", "n_atoms", "n_orbitals")
+            projected, orbital_names, BAND_PROJECTIONS, bands, structure, atom_groups
         )
 
         if bands is not None:
@@ -226,6 +235,7 @@ class ElectronicBandStructure(PointSet):
         self._reciprocal_lattice = reciprocal_lattice
         self._shifted_to_fermi = shifted_to_fermi
         self._structure = structure
+        self._atom_groups = atom_groups
 
         logger.info("___ElectronicBandStructure initialization complete___")
 
@@ -323,6 +333,10 @@ class ElectronicBandStructure(PointSet):
     @property
     def structure(self):
         return self._structure
+
+    @property
+    def atom_groups(self) -> int | None:
+        return self._atom_groups
 
     @property
     def n_kpoints(self):
@@ -800,7 +814,7 @@ class ElectronicBandStructure(PointSet):
                 species_orbital_map=species_orbital_map,
                 atoms_orbital_map=atoms_orbital_map,
             )
-            atoms_list = list(selection.atoms) if selection.atoms else None
+            atoms_list = list(selection.atoms)
             orbitals_list = list(selection.orbitals) if selection.orbitals else None
             spins_list = list(selection.spins) if selection.spins else None
 
@@ -921,7 +935,7 @@ class ElectronicBandStructure(PointSet):
                 spins=None,  # All spin components needed for texture
                 species=species,
             )
-            atom_list = list(selection.atoms) if selection.atoms else None
+            atom_list = list(selection.atoms)
             orbital_list = list(selection.orbitals) if selection.orbitals else None
 
         # Use all atoms/orbitals if none specified
@@ -2259,6 +2273,18 @@ def ibz2fbz(ebs, rotations=None, kgrid_info=None, inplace=True, time_reversals=N
             f"{filled} k-points were filled by time reversal combined with a listed operation, "
             + "which this magnetic group does not contain; their values may be wrong"
         )
+    if ebs.atom_groups is not None and structure is not None:
+        unmoved = np.arange(len(structure.atoms))
+        if any(
+            np.any(atom_permutation(structure, rotations[index]) != unmoved)
+            for index in np.unique(operation[operation != IDENTITY])
+        ):
+            raise ValueError(
+                "A PROCAR filtered by atoms cannot be unfolded from the irreducible k-points: "
+                + "symmetry operations move atoms between its rows, and the file does not say "
+                + "which atoms each row holds. Filter the PROCAR of a full k-grid calculation "
+                + "(ISYM = -1), or select atoms in the plot of the unfiltered PROCAR."
+            )
     for prop_name, calc_name, gradient_order, value_array in ebs.iter_properties():
         ebs.get_property(prop_name)[calc_name, gradient_order] = value_array[source]
 

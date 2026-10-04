@@ -1,6 +1,7 @@
 from __future__ import annotations
 
-from collections.abc import Callable, Mapping
+from collections.abc import Callable, Mapping, Sequence
+from dataclasses import dataclass
 from enum import Enum
 from typing import Any, Protocol
 
@@ -50,16 +51,98 @@ _LABELS = {
 }
 
 
+@dataclass(frozen=True, slots=True)
+class ProjectedLayout:
+    """The axes of a projection array and the array its leading axes repeat.
+
+    The leading axes run up to and including ``n_spins``. A non-collinear
+    calculation has 4 projection channels (total, Sx, Sy, Sz) and either 4 or 1
+    channels in the leading array: the VASP and Abinit parsers repeat each
+    eigenvalue 4 times, the QE parser keeps one.
+    """
+
+    axes: tuple[str, ...]
+    leading: str
+
+    @property
+    def n_leading(self) -> int:
+        return self.axes.index("n_spins") + 1
+
+    def __str__(self) -> str:
+        return f"({', '.join(self.axes)})"
+
+
+BAND_PROJECTIONS = ProjectedLayout(
+    ("n_kpoints", "n_bands", "n_spins", "n_atoms", "n_orbitals"), "bands"
+)
+DOS_PROJECTIONS = ProjectedLayout(("n_energies", "n_spins", "n_atoms", "n_orbitals"), "total")
+SPIN_CHANNELS = (1, 2, 4)
+
+
+class HasAtoms(Protocol):
+    @property
+    def natoms(self) -> int: ...
+
+
 def check_projected_layout(
-    projected: npt.ArrayLike | None, orbital_names: list[str] | None, axes: tuple[str, ...]
+    projected: npt.ArrayLike | None,
+    orbital_names: Sequence[str] | None,
+    layout: ProjectedLayout,
+    leading: npt.ArrayLike | None = None,
+    structure: HasAtoms | None = None,
+    atom_groups: int | None = None,
 ) -> None:
-    """Raise unless ``projected`` has ``axes`` and ``orbital_names`` names its last axis."""
+    """Raise unless ``projected`` is in ``layout`` and agrees with the data it belongs to.
+
+    Its leading axes must equal the shape of ``leading`` (the bands or the total
+    DOS), its atom axis must equal ``atom_groups`` when the rows are groups of
+    atoms and ``structure.natoms`` otherwise, it must have 1, 2 or 4 spin
+    channels, and ``orbital_names`` must name its last axis.
+    """
     if projected is None:
         return
     shape = np.shape(projected)
-    if len(shape) != len(axes):
+    if len(shape) != len(layout.axes):
         raise ValueError(
-            f"projected has shape {shape}; it must have the {len(axes)} axes ({', '.join(axes)})."
+            f"projected has shape {shape}; it must have the {len(layout.axes)} axes {layout}."
+        )
+    leading_shape = None if leading is None else np.shape(leading)
+    if leading_shape is not None and len(leading_shape) != layout.n_leading:
+        raise ValueError(
+            f"{layout.leading} has shape {leading_shape}; it must have the axes"
+            + f" ({', '.join(layout.axes[: layout.n_leading])})."
+        )
+    spin_axis = layout.n_leading - 1
+    n_spins = (shape if leading_shape is None else leading_shape)[spin_axis]
+    if n_spins not in SPIN_CHANNELS:
+        raise ValueError(
+            f"{'projected' if leading_shape is None else layout.leading} has {n_spins} spin"
+            + f" channels; a calculation has 1, 2 or 4 spin channels, not {n_spins}"
+            + " (non-polarized, collinear up and down, or non-collinear total, Sx, Sy, Sz)."
+        )
+    expected: list[tuple[int, ...] | None] = [None] * len(layout.axes)
+    if leading_shape is not None:
+        expected[: layout.n_leading] = [(size,) for size in leading_shape]
+        expected[spin_axis] = (1, 4) if n_spins == 1 else (n_spins,)
+    if atom_groups is not None:
+        expected[layout.n_leading] = (atom_groups,)
+    elif structure is not None:
+        expected[layout.n_leading] = (structure.natoms,)
+    if any(
+        sizes is not None and actual not in sizes
+        for sizes, actual in zip(expected, shape, strict=True)
+    ):
+        described = ", ".join("*" if s is None else "|".join(map(str, s)) for s in expected)
+        sources = [] if leading_shape is None else [f"{layout.leading} of shape {leading_shape}"]
+        if atom_groups is not None:
+            sources.append(f"{atom_groups} atom groups")
+        elif structure is not None:
+            sources.append(f"a {structure.natoms}-atom structure")
+        raise ValueError(
+            f"projected has shape {shape}; the layout {layout} expects ({described}) from"
+            + f" {' and '.join(sources)}. Its spin channels match those of {layout.leading},"
+            + " except that non-collinear projections (total, Sx, Sy, Sz) may go with one"
+            + f" {layout.leading} channel."
         )
     n_orbitals = shape[-1]
     if orbital_names is not None and len(orbital_names) != n_orbitals:
@@ -101,11 +184,17 @@ class ProjectionSource(Protocol):
     def orbital_names(self) -> list[str] | None: ...
     @property
     def is_non_collinear(self) -> bool: ...
+    @property
+    def atom_groups(self) -> int | None: ...
+    @property
+    def n_atoms(self) -> int: ...
 
 
 def selection_resolver(source: ProjectionSource) -> ProjectionSelectionResolver:
     atom_indexer = (
-        None if source.structure is None else AtomIndexer.from_structure(source.structure)
+        None
+        if source.structure is None or source.atom_groups is not None
+        else AtomIndexer.from_structure(source.structure)
     )
     label_builder = ProjectionLabelBuilder(
         atom_indexer=atom_indexer,
@@ -114,6 +203,7 @@ def selection_resolver(source: ProjectionSource) -> ProjectionSelectionResolver:
     )
     return ProjectionSelectionResolver(
         label_builder=label_builder,
+        n_atom_rows=source.n_atoms,
         orbital_names=source.orbital_names,
         is_non_colinear=source.is_non_collinear,
     )
@@ -219,7 +309,7 @@ def _selection_metadata(
         label_latex.append(f"${body_latex}{suffix_latex}$")
 
     return {
-        "atoms": list(selection.atoms) if len(selection.atoms) > 0 else None,
+        "atoms": list(selection.atoms),
         "orbitals": list(selection.orbitals) if selection.orbitals is not None else None,
         "spins": list(selection.spins) if selection.spins is not None else None,
         "species": list(selection.species) if len(selection.species) > 0 else None,

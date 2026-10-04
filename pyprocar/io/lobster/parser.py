@@ -320,6 +320,7 @@ class LobsterParser(BaseParser):
                 energies=self._doscar.energies + fermi,
                 total=self._doscar.total_dos,
                 projected=self._doscar.projected_dos,
+                orbital_names=self._doscar.orbital_labels,
                 fermi=fermi,
             )
 

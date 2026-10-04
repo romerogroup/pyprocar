@@ -223,7 +223,7 @@ class AbinitParser(BaseParser):
             projected=procar._spd2projected(procar.spd),
             fermi=self.abinit_output.fermi,
             projected_phase=projected_phase,
-            orbital_names=procar.orbital_names_old[:-1],
+            orbital_names=procar.orbital_names,
             reciprocal_lattice=self.abinit_output.reclat,
             structure=self.structure,
             kpath=self.kpath,  # pyright: ignore[reportArgumentType]
@@ -237,8 +237,30 @@ class AbinitParser(BaseParser):
             energies=self.abinit_dos.energies,
             total=self.abinit_dos.dos_total,
             fermi=self.abinit_dos.fermi,
-            projected=self.abinit_dos.projected,
+            projected=self._projected_dos,
+            orbital_names=self.abinit_dos.orbital_names,
+            structure=self.structure,
         )
+
+    @property
+    def _projected_dos(self) -> np.ndarray | None:
+        """The DOS_AT projections, as total, Sx, Sy, Sz for a non-magnetic spinor run.
+
+        Abinit's DOS_AT files hold no magnetization components. With nspden = 1 the
+        density carries no magnetization, time reversal pairs every state with one of
+        opposite spin, and the spin-resolved DOS is zero.
+        """
+        assert self.abinit_dos is not None
+        projected = self.abinit_dos.projected
+        if projected is None or self.abinit_output is None or self.abinit_output.nspinor != 2:
+            return projected
+        if self.abinit_output.nspden != 1:
+            warn_user(
+                "Abinit's DOS_AT files hold no magnetization components, so the projected DOS"
+                + f" of this nspden = {self.abinit_output.nspden} spinor run is the total only."
+            )
+            return projected
+        return np.pad(projected, ((0, 0), (0, 3), (0, 0), (0, 0)))
 
     @property
     def structure(self) -> Structure | None:

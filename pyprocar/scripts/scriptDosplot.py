@@ -299,13 +299,13 @@ def dosplot(
             user_logger.info(f"{key} : {value}")
     user_logger.info("_" * 100)
 
-    orbitals = orbital_indices(orbitals)
     if mode not in DOS_MODES:
         raise ValueError(f"The mode needs to be one of {DOS_MODES}, got {mode!r}")
 
     if dirname is None:
         raise ValueError("dirname is required")
     dos = DensityOfStates.from_code(code, dirname, use_cache=use_cache)
+    orbitals = orbital_indices(orbitals, dos)
 
     codes_with_scf_fermi = ["qe", "elk", "abinit"]
     if code in codes_with_scf_fermi and fermi is None:

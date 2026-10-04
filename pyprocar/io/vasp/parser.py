@@ -15,6 +15,7 @@ from pyprocar.io.vasp.outcar import Outcar
 from pyprocar.io.vasp.poscar import Poscar
 from pyprocar.io.vasp.procar import Procar
 from pyprocar.io.vasp.vasprun import VaspXML
+from pyprocar.utils.log_utils import warn_user
 
 logger = logging.getLogger(__name__)
 
@@ -244,6 +245,16 @@ class VaspParser(BaseParser):
             )
             return None
 
+        structure = self.structure
+        atom_groups = None
+        if structure is not None and self.procar.n_atoms != structure.natoms:
+            atom_groups = self.procar.n_atoms
+            warn_user(
+                f"The PROCAR has {atom_groups} ion rows and the structure {structure.natoms}"
+                + " atoms, so each row is a group of atoms written by pyprocar.filter. Atom"
+                + " index i selects the i-th group, and species selections raise."
+            )
+
         return get_ebs_from_data(
             kpoints=self.procar.kpoints,
             bands=self.procar.bands,
@@ -251,10 +262,11 @@ class VaspParser(BaseParser):
             projected_phase=self.procar.projected_phase,
             fermi=self.outcar.fermi,
             reciprocal_lattice=self.outcar.reciprocal_lattice,
-            orbital_names=self._orbital_names(self.procar.projected),
-            structure=self.structure,
+            orbital_names=self.procar.orbital_names,
+            structure=structure,
             kpath=self.kpath,
             kgrid_info=self.kgrid_info,
+            atom_groups=atom_groups,
         )
 
     @cached_property

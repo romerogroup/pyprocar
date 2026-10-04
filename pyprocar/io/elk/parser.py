@@ -378,6 +378,8 @@ class ElkParser(BaseParser):
             total=total,
             fermi=self.fermi,
             projected=self._dos_parser.projected,
+            orbital_names=self._dos_parser.orbital_names,
+            structure=self.structure,
         )
 
     @property

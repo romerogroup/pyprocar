@@ -5,6 +5,7 @@ import pytest
 
 from tests.pyprocar.io.abinit import ABINIT_DATA_DIR, CALC_TYPES
 from tests.utils import BaseTest
+from tests.utils.user_warning import user_warning
 
 pytestmark = pytest.mark.data
 
@@ -141,3 +142,41 @@ def test_dosplot_puts_abinit_fermi_at_zero():
     plt.close(fig)
     assert energies.min() == pytest.approx(-88.9908960598)
     assert energies.max() == pytest.approx(90.6042531638)
+
+
+NCL_DOS = ABINIT_DATA_DIR / "non-colinear" / "dos"
+NCL_DOS_FILES = ("abinit.out", "abinito_DOS_TOTAL", "abinito_DOS_AT0001")
+
+
+def test_non_magnetic_spinor_dos_has_total_and_zero_spin_channels():
+    """abinit.in sets nspinor 2 and nspden 1, so the run carries no magnetization.
+
+    The l = 0, 1, 2 columns (2 to 4) of abinito_DOS_AT0001 integrate to 21.833
+    electrons by the trapezoid rule on the file's own energy grid.
+    """
+    from pyprocar.io import get_parser
+
+    dos = get_parser("abinit", NCL_DOS).dos
+
+    assert dos is not None and dos.projected is not None
+    projected = dos.projected.to_array()
+    assert projected.shape == (9401, 4, 1, 9)
+    assert dos.is_non_collinear
+    assert np.trapezoid(projected[:, 0].sum(axis=(1, 2)), dos.energies) == pytest.approx(
+        21.833, abs=0.005
+    )
+    assert np.all(projected[:, 1:] == 0.0)
+
+
+def test_magnetic_spinor_dos_keeps_only_the_total_and_says_why(tmp_path):
+    for name in NCL_DOS_FILES:
+        (tmp_path / name).write_bytes((NCL_DOS / name).read_bytes())
+    out = tmp_path / "abinit.out"
+    out.write_text(out.read_text().replace("nspden =       1", "nspden =       4"))
+    from pyprocar.io import get_parser
+
+    with user_warning(__file__, match="hold no magnetization components"):
+        dos = get_parser("abinit", tmp_path).dos
+
+    assert dos is not None and dos.projected is not None
+    assert dos.projected.to_array().shape == (9401, 1, 1, 9)

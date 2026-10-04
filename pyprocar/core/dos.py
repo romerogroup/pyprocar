@@ -17,6 +17,7 @@ from scipy.interpolate import CubicSpline
 
 from pyprocar.core.atomic_orbital_index import ProjectionSelectionResolver
 from pyprocar.core.projection import (
+    DOS_PROJECTIONS,
     NormMode,
     build_property,
     check_projected_layout,
@@ -201,6 +202,8 @@ def _units_divide(u_input: str, u_norm: str | None) -> str:
 class DensityOfStates(PointSet):
     """Data-centric representation of a density of states calculation."""
 
+    atom_groups: int | None = None
+
     def __init__(
         self,
         energies: npt.ArrayLike,
@@ -245,7 +248,7 @@ class DensityOfStates(PointSet):
         if projected is not None:
             projected_array = self._validate_projected(projected)
             check_projected_layout(
-                projected_array, orbital_names, ("n_energies", "n_spins", "n_atoms", "n_orbitals")
+                projected_array, orbital_names, DOS_PROJECTIONS, total_array, structure
             )
             self.add_property(
                 name="projected",
@@ -1583,14 +1586,6 @@ class DensityOfStates(PointSet):
 
         if projected_array.ndim == 3:
             projected_array = projected_array[:, np.newaxis, :, :]
-
-        if projected_array.ndim != 4:
-            raise ValueError(
-                "Projected DOS must have shape (n_energies, n_spins, n_atoms, n_orbitals)"
-            )
-
-        if projected_array.shape[0] != self.n_energies:
-            raise ValueError("Projected DOS must align with the energy grid")
 
         return projected_array
 

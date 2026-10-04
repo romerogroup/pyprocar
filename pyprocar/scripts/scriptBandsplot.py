@@ -13,7 +13,8 @@ import numpy as np
 from pyprocar.cfg import ConfigFactory, ConfigManager
 from pyprocar.cfg.band_structure import BandStructureConfig
 from pyprocar.cfg.base import PlotType
-from pyprocar.core import ElectronicBandStructureMesh, ElectronicBandStructurePath, Structure
+from pyprocar.core import ElectronicBandStructureMesh, ElectronicBandStructurePath
+from pyprocar.core.projection import selection_resolver
 from pyprocar.core.property_store import Property
 from pyprocar.plotter.bs_plot import BandStructurePlotter
 from pyprocar.scripts._selection import (
@@ -228,10 +229,9 @@ def bandsplot(
         channels = projection_spins = [0]
 
     if atoms is not None and isinstance(atoms[0], str):
-        species = set(atoms)
-        names = np.asarray(cast(Structure, ebs.structure).atoms)
-        atoms = [i for i, name in enumerate(names) if name in species]
-    orbitals = orbital_indices(orbitals)
+        species = [str(name) for name in atoms]
+        atoms = list(selection_resolver(ebs).resolve(species=species).atoms)
+    orbitals = orbital_indices(orbitals, ebs)
 
     user_clim = config.clim if "clim" in kwargs else None
 
