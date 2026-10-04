@@ -159,23 +159,24 @@ def test_qe_mesh_bands_are_eigenvectors_of_their_little_group(mag: str) -> None:
     assert ebs.projected_phase is not None and ebs.structure is not None
     vanadium = [str(atom) for atom in ebs.structure.atoms].index("V")
     phases = np.asarray(ebs.projected_phase.value)[:, :, :, vanadium]
-    gaps = np.diff(np.asarray(ebs.bands.value), axis=1)
-    lower = np.pad(gaps, ((0, 0), (1, 0), (0, 0)), constant_values=np.inf)
-    upper = np.pad(gaps, ((0, 0), (0, 1), (0, 0)), constant_values=np.inf)
+    gaps = np.pad(
+        np.diff(np.asarray(ebs.bands.value), axis=1),
+        ((0, 0), (1, 1), (0, 0)),
+        constant_values=np.inf,
+    )
     norms = np.linalg.norm(phases, axis=-1)
-    selected = (np.minimum(lower, upper) > 1e-3) & (norms**2 > 0.05)
+    selected = (np.minimum(gaps[:, :-1], gaps[:, 1:]) > 1e-3) & (norms**2 > 0.05)
 
     residuals = []
     for rotation in CUBIC:
         steps = ebs.kpoints @ rotation.T - ebs.kpoints
         fixed = np.all(np.abs(steps - np.round(steps)) < 1e-6, axis=1)
-        coefficients = phases[fixed][selected[fixed]]
+        mask = selected & fixed[:, np.newaxis, np.newaxis]
+        coefficients, norm = phases[mask], norms[mask]
         turned = coefficients @ orbital_rotation(ebs.orbital_names, rotation).T
-        overlap = np.sum(coefficients.conj() * turned, axis=-1) / np.sum(
-            np.abs(coefficients) ** 2, axis=-1
-        )
+        overlap = np.sum(coefficients.conj() * turned, axis=-1) / norm**2
         residual = turned - overlap[:, np.newaxis] * coefficients
-        residuals.append(np.linalg.norm(residual, axis=-1) / norms[fixed][selected[fixed]])
+        residuals.append(np.linalg.norm(residual, axis=-1) / norm)
     residuals = np.concatenate(residuals)
 
     assert len(residuals) > 1000

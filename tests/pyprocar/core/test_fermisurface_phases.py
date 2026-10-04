@@ -2,21 +2,14 @@ import numpy as np
 
 from pyprocar.core.ebs import ElectronicBandStructureMesh
 from pyprocar.core.fermisurface import FermiSurface
-from pyprocar.core.kpoints import KGRID_MODE, KGridInfo
-
-N_K = 10
-PADDING = 2
+from tests.pyprocar.core.test_fermisurface_without_projections import N_K, _sphere_energies
+from tests.pyprocar.core.test_ibz2fbz import gamma_info
 
 
 def test_fermi_surface_pads_the_projections_but_not_the_phases() -> None:
-    frac = np.arange(N_K) / N_K
-    kpoints = np.stack(np.meshgrid(frac, frac, frac, indexing="ij"), axis=-1).reshape(-1, 3)
-    centred = (kpoints + 0.5) % 1.0 - 0.5
-    energies = np.sum(centred**2, axis=1) - 0.1
+    kpoints, energies = _sphere_energies()
     ebs = ElectronicBandStructureMesh(
-        kgrid_info=KGridInfo(
-            kgrid=(N_K, N_K, N_K), kgrid_mode=KGRID_MODE.GAMMA, kshift=(0.0, 0.0, 0.0)
-        ),
+        kgrid_info=gamma_info((N_K, N_K, N_K)),
         kpoints=kpoints,
         bands=energies.reshape(-1, 1, 1),
         projected=np.ones((len(kpoints), 1, 1, 1, 1)),
@@ -26,7 +19,7 @@ def test_fermi_surface_pads_the_projections_but_not_the_phases() -> None:
         reciprocal_lattice=np.eye(3),
     )
 
-    fs = FermiSurface.from_ebs(ebs, padding=PADDING)
+    fs = FermiSurface.from_ebs(ebs, padding=2)
 
     assert fs.ebs.projected_phase is None
     assert fs.ebs.projected is not None
