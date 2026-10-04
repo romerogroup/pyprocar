@@ -44,6 +44,8 @@ class BandStructureMode(Enum):
         Represents the band structure in a parametric form, summing over the projections.
     SCATTER : str
         Represents the band structure in a scatter plot, where the colors are the different bands.
+    SACATTER : str
+        Deprecated alias of SCATTER, the misspelled name earlier releases used.
     ATOMIC : str
         Represents the band structure in an atomic level plot, plots singlr kpoint bands.
     OVERLAY : str
@@ -64,6 +66,7 @@ class BandStructureMode(Enum):
     OVERLAY_SPECIES = "overlay_species"
     OVERLAY_ORBITALS = "overlay_orbitals"
     IPR = "ipr"
+    SACATTER = "scatter"
 
     @classmethod
     def from_str(cls, mode: str):
