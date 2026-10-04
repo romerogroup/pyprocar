@@ -2272,8 +2272,11 @@ def _turn_projections(ebs, rotations, time_reversals, operation, new_kpoints) ->
     for index in np.unique(operation[operation > 0]):
         rows = operation == index
         rotation = rotations[index]
-        cartesian = b_t @ rotation @ np.linalg.inv(b_t)
+        # The nearest orthogonal matrix, so rounding in the lattice cannot rescale weights or spin.
+        u, _, vt = np.linalg.svd(b_t @ rotation @ np.linalg.inv(b_t))
+        cartesian = u @ vt
         orbitals, missed = orbital_rotation(names, cartesian)
+        mixes = not np.allclose(orbitals, np.eye(n_orbitals))
         unrotated.update(missed)
         if structure is not None and n_atoms > 1:
             targets, shifts = atom_permutation(structure, rotation)
@@ -2282,11 +2285,11 @@ def _turn_projections(ebs, rotations, time_reversals, operation, new_kpoints) ->
         order = np.argsort(targets)
         if weights is not None:
             block = weights[rows][:, :, :, order]
-            if phases is not None and phases.shape == weights.shape:
+            if mixes and phases is not None and phases.shape == weights.shape:
                 angle = np.angle(phases[rows][:, :, :, order])
                 amplitude = np.sqrt(np.clip(block, 0, None)) * np.exp(1j * angle)
                 block = np.abs(amplitude @ orbitals.T) ** 2
-            else:
+            elif mixes:
                 block = block @ (orbitals**2).T
             if block.shape[2] == 4:
                 sign = -1.0 if time_reversals[index] else 1.0
@@ -2297,7 +2300,7 @@ def _turn_projections(ebs, rotations, time_reversals, operation, new_kpoints) ->
             bloch = np.exp(-2j * np.pi * new_kpoints[rows] @ shifts[order].T)
             block = phases[rows].conj() if time_reversals[index] else phases[rows]
             block = block[:, :, :, order] * bloch[:, np.newaxis, np.newaxis, :, np.newaxis]
-            phases[rows] = block @ orbitals.T
+            phases[rows] = block @ orbitals.T if mixes else block
     if projected is not None:
         projected["value"] = weights
     if phase is not None:
