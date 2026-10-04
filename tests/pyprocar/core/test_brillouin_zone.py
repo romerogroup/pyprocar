@@ -5,8 +5,11 @@ This module contains unit tests for the BrillouinZone
 and BrillouinZone2D classes.
 """
 
+import itertools
+
 import numpy as np
 import pytest
+from scipy.spatial import ConvexHull, Voronoi
 
 from pyprocar.core.brillouin_zone import BrillouinZone, BrillouinZone2D
 
@@ -332,3 +335,77 @@ class TestBrillouinZone2D:
             )
             assert bz2d.n_cells > 0
             assert bz2d.n_points > 0
+
+
+MONOCLINIC = np.array([[1.0, 0.0, 0.0], [0.0, 1.3, 0.0], [0.4, 0.0, 0.9]])
+TRICLINIC = np.array([[1.0, 0.1, 0.05], [0.3, 1.2, 0.0], [0.2, 0.35, 0.8]])
+SHEARS = {
+    "unsheared": np.eye(3, dtype=int),
+    "b2+3b1": np.array([[1, 0, 0], [3, 1, 0], [0, 0, 1]]),
+    "b2+3b1,b3-2b1+2b2": np.array([[1, 0, 0], [3, 1, 0], [-2, 2, 1]]),
+}
+SHEARED_CELLS = [
+    pytest.param(cell, shear, id=f"{name}-{shear_name}")
+    for name, cell in [("monoclinic", MONOCLINIC), ("triclinic", TRICLINIC)]
+    for shear_name, shear in SHEARS.items()
+]
+
+
+def _voronoi_reference(cell: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+    """Face vectors and vertices of the Voronoi cell of the origin among the 7^3 block of
+    lattice points of ``cell``, from scipy.spatial.Voronoi."""
+    steps = np.array(list(itertools.product(range(-3, 4), repeat=3)))
+    origin = len(steps) // 2
+    voronoi = Voronoi(steps @ cell)
+    pairs = voronoi.ridge_points[(voronoi.ridge_points == origin).any(axis=1)]
+    neighbours = pairs.sum(axis=1) - origin
+    vertices = voronoi.vertices[voronoi.regions[voronoi.point_region[origin]]]
+    return voronoi.points[neighbours], vertices
+
+
+def _sorted_rows(points: np.ndarray) -> np.ndarray:
+    rounded = np.round(points, 9) + 0.0
+    return rounded[np.lexsort(rounded.T[::-1])]
+
+
+@pytest.mark.parametrize(("cell", "shear"), SHEARED_CELLS)
+def test_zone_faces_match_voronoi_for_any_basis_of_the_lattice(cell, shear):
+    from pyprocar.core.brillouin_zone import zone_face_steps
+
+    basis = shear @ cell
+    faces, _ = _voronoi_reference(cell)
+
+    found = zone_face_steps(basis) @ basis
+
+    np.testing.assert_allclose(_sorted_rows(found), _sorted_rows(faces), atol=1e-9)
+
+
+@pytest.mark.parametrize(("cell", "shear"), SHEARED_CELLS)
+def test_brillouin_zone_matches_voronoi_for_any_basis_of_the_lattice(cell, shear):
+    basis = shear @ cell
+    _, vertices = _voronoi_reference(cell)
+
+    zone = BrillouinZone(basis).clean()
+
+    assert ConvexHull(zone.points).volume == pytest.approx(abs(np.linalg.det(cell)), rel=1e-9)
+    np.testing.assert_allclose(_sorted_rows(zone.points), _sorted_rows(vertices), atol=1e-9)
+
+
+@pytest.mark.parametrize("shear", [SHEARS["unsheared"], SHEARS["b2+3b1"]], ids=["unsheared", "b2+3b1"])
+def test_2d_brillouin_zone_is_the_hexagonal_prism_for_any_basis(
+    hexagonal_reciprocal_lattice, shear
+):
+    """The zone of a hexagonal reciprocal lattice with |b1| = |b2| = b is a regular hexagon
+    of circumradius b / sqrt(3) and area |b1 x b2|; BrillouinZone2D stretches it from
+    e_min to e_max."""
+    b1, b2, _ = hexagonal_reciprocal_lattice
+
+    zone = BrillouinZone2D(
+        e_min=-1.0, e_max=1.0, reciprocal_lattice=shear @ hexagonal_reciprocal_lattice
+    ).clean()
+
+    hexagon = np.linalg.norm(np.cross(b1, b2))
+    assert ConvexHull(zone.points).volume == pytest.approx(2.0 * hexagon, rel=1e-9)
+    assert np.linalg.norm(zone.points[:, :2], axis=1) == pytest.approx(
+        np.full(zone.n_points, np.linalg.norm(b1) / np.sqrt(3)), rel=1e-9
+    )

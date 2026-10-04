@@ -169,18 +169,18 @@ def _periodic_surface(
     energy: Callable[[np.ndarray], np.ndarray],
     reciprocal_lattice: np.ndarray | None = None,
     stored_kpoints: Callable[[np.ndarray], np.ndarray] = _same,
+    kgrid: tuple[int, int, int] = (16, 16, 16),
 ) -> FermiSurface:
     """The E_F = 0.1 surface of ``energy(k)`` on a 16^3 mesh, B = I unless given.
 
     ``stored_kpoints`` maps the grid k-points to the ones the band structure records.
     """
-    n = 16
-    frac = np.arange(n) / n
-    kpoints = np.stack(np.meshgrid(frac, frac, frac, indexing="ij"), axis=-1).reshape(-1, 3)
+    axes = [np.arange(n) / n for n in kgrid]
+    kpoints = np.stack(np.meshgrid(*axes, indexing="ij"), axis=-1).reshape(-1, 3)
     energies = np.stack([energy(kpoints), np.full(len(kpoints), 5.0)], axis=1)
     return FermiSurface.from_ebs(
         ElectronicBandStructureMesh(
-            kgrid_info=KGridInfo(kgrid=(n, n, n), kgrid_mode=KGRID_MODE.GAMMA, kshift=(0, 0, 0)),
+            kgrid_info=KGridInfo(kgrid=kgrid, kgrid_mode=KGRID_MODE.GAMMA, kshift=(0, 0, 0)),
             kpoints=stored_kpoints(kpoints),
             bands=energies[..., np.newaxis],
             projected=np.ones((len(kpoints), 2, 1, 1, 1)),
@@ -362,6 +362,35 @@ def test_fcc_plane_through_grid_lines_counts_its_orbit_once():
     assert n_open == 0
     assert len(areas) == len(above) == 1
     assert areas[0] == pytest.approx(above[0], rel=1e-8)
+
+
+SHEARED_CUBIC = np.array([[1.0, 0.0, 0.0], [3.0, 1.0, 0.0], [0.0, 0.0, 1.0]])
+
+
+@pytest.mark.parametrize(
+    ("normal", "height"),
+    [
+        ((0.4728, 0.1555, 0.8673), -0.1247),
+        ((0.0788, -0.2114, 0.9742), 0.1563),
+        ((-0.8043, 0.0128, 0.594), -0.0483),
+    ],
+)
+def test_sheared_basis_counts_only_the_orbit_in_the_first_zone(normal, height):
+    """b1 = (1, 0, 0), b2 = (3, 1, 0), b3 = (0, 0, 1) span the cubic lattice, whose first
+    zone is the unit cube around Gamma. The sphere |k|^2 = 0.1 around Gamma lies inside it,
+    so a plane at distance d from Gamma cuts one orbit of area pi (0.1 - d^2); the spheres
+    around the other lattice points lie outside the zone."""
+    normal = np.asarray(normal) / np.linalg.norm(normal)
+    surface = _periodic_surface(
+        lambda k: np.sum(((k @ SHEARED_CUBIC + 0.5) % 1.0 - 0.5) ** 2, axis=1),
+        SHEARED_CUBIC,
+        kgrid=(16, 48, 16),
+    )
+
+    areas, n_open = cross_section_areas(surface, normal, height * normal, SHEARED_CUBIC)
+
+    assert n_open == 0
+    assert np.asarray(areas) == pytest.approx([np.pi * (0.1 - height**2)], rel=0.04)
 
 
 def test_orbit_reaching_five_cells_from_the_zone_closes():
