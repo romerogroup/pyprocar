@@ -858,9 +858,10 @@ def test_task_22_basis_that_cannot_be_told_apart_keeps_l_m_names_and_warns(tmp_p
     reason="Elk 6.3 always wrote Ylm characters; #285's first head renamed them by irrep"
 )
 def test_real_elk_6_3_bands_beside_a_task_10_elmirep_keep_their_l_m_names(tmp_path):
-    calc_dir = writable_copy(
+    calc_dir = tmp_path / "bands"
+    writable_copy(
         ELK_BANDS_SP,
-        tmp_path / "bands",
+        calc_dir,
         ignore=shutil.ignore_patterns("EVEC*.OUT", "STATE.OUT", "VARIABLES.OUT"),
     )
     writable_copy(ELK_BANDS_SP.parent / "dos" / "ELMIREP.OUT", calc_dir / "ELMIREP.OUT")

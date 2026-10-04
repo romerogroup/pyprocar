@@ -23,7 +23,8 @@ from tests.utils.ast_modules import imported_from, module_name, module_parts
 ROOT = Path(__file__).resolve().parent.parent
 HELPER = ROOT / "tests" / "utils" / "__init__.py"
 SAFE_COPY = "writable_copy"
-SCOPES = (ast.Module, ast.FunctionDef, ast.AsyncFunctionDef, ast.Lambda)
+FUNCTIONS = (ast.FunctionDef, ast.AsyncFunctionDef, ast.Lambda)
+SCOPES = (ast.Module, *FUNCTIONS)
 COPIES = {
     "shutil": {"copy", "copy2", "copyfile", "copytree", "copymode", "copystat"},
     "os": {"link", "system", "popen"},
@@ -122,7 +123,7 @@ class FixturePaths:
 
     def function_of(self, node: ast.AST) -> Function | None:
         scope = self._scope(node)
-        return None if isinstance(scope, ast.Module) else scope
+        return scope if isinstance(scope, FUNCTIONS) else None
 
     def _bind(self, target: ast.expr) -> None:
         if isinstance(target, ast.Name):
@@ -412,8 +413,8 @@ def test_the_check_flags_each_way_a_test_can_copy_a_fixture(tmp_path):
         [
             "import shutil",
             "from tests.utils import DATA_DIR",
-            'ELK_BANDS_SP = DATA_DIR / "codes" / "elk" / "6.3" / "SrVO3" / "spin-polarized-colinear"'
-            + ' / "bands"',
+            'ELK_BANDS_SP = DATA_DIR / "codes" / "elk" / "6.3" / "SrVO3"'
+            + ' / "spin-polarized-colinear" / "bands"',
             "def test_real_elk_6_3_bands_beside_a_task_10_elmirep_keep_their_l_m_names(tmp_path):",
             '    calc_dir = tmp_path / "bands"',
             "    shutil.copytree(",
@@ -432,7 +433,8 @@ def test_the_check_flags_each_way_a_test_can_copy_a_fixture(tmp_path):
             "from tests.utils import DATA_DIR",
             'CALC = DATA_DIR / "examples/bands/non-spin-polarized"',
             'FERMI2D_CALC = DATA_DIR / "examples/fermi2d/non-spin-polarized"',
-            "def _copy_calc(tmp_path: Path, src: Path = CALC, extra: tuple[str, ...] = ()) -> Path:",
+            "def _copy_calc(tmp_path: Path, src: Path = CALC, extra: tuple[str, ...] = ())"
+            + " -> Path:",
             '    dst = tmp_path / "calc"',
             "    dst.mkdir()",
             '    for name in ("PROCAR", "OUTCAR", "POSCAR", "KPOINTS", *extra):',
