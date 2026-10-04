@@ -5,15 +5,28 @@
 #   verify.sh run <name> <fixture-relpath> <driver.py>
 #   verify.sh clean <run-dir>
 #   verify.sh gc [hours]                    remove work/ of runs older than hours (default 24)
+#   verify.sh worktree-setup                link data/, copy _version.py into a linked worktree
+#   verify.sh exec <cmd>...                 run a command (a CI gate) in the project env
 set -euo pipefail
 
 REPO="$(git -C "$(dirname "${BASH_SOURCE[0]}")" rev-parse --show-toplevel)"
+MAIN="$(dirname "$(git -C "$REPO" rev-parse --path-format=absolute --git-common-dir)")"
+SHARED_ENV="$MAIN/.pixi/envs/dev/bin"
 RUNS="$REPO/data/verify-runs"
 abs() { (cd "$(dirname "$1")" && echo "$PWD/$(basename "$1")"); }
 [ "${1:-}" = run ] && [ $# -ge 4 ] && set -- "$1" "$2" "$3" "$(abs "$4")"
 cd "$REPO"
 
-py() { pixi run -q -e default python "$@"; }
+# A linked worktree borrows the main checkout's env, because pixi would build a multi-GB env per worktree.
+in_worktree() { [ "$REPO" != "$MAIN" ]; }
+shared_env() {
+  PATH="$SHARED_ENV:$PATH" PYTHONPATH="$REPO${PYTHONPATH:+:$PYTHONPATH}" PYTHONDONTWRITEBYTECODE=1 "$@"
+}
+py() { if in_worktree; then shared_env python "$@"; else pixi run -q -e default python "$@"; fi; }
+require_shared_env() {
+  [ -x "$SHARED_ENV/python" ] || { echo "missing $SHARED_ENV/python; run 'pixi install -e dev' in $MAIN" >&2; exit 2; }
+}
+case "${1:-}" in doctor | fetch | run | exec | worktree-setup) ! in_worktree || require_shared_env ;; esac
 
 whole_number() {
   [[ "$2" =~ ^[0-9]+$ ]] || { echo "$1 must be a whole number, got '$2'" >&2; exit 2; }
@@ -77,7 +90,7 @@ run)
   set +e
   TMPDIR="$run/work/tmp" CALC="$run/work/calc" EVIDENCE="$run/evidence" REPO="$REPO" MPLBACKEND=Agg PYVISTA_OFF_SCREEN=true \
     PYTHONPATH="$REPO/.claude/skills/verify-pyprocar/scripts/lib${PYTHONPATH:+:$PYTHONPATH}" \
-    pixi run -q -e default python "$run/evidence/driver.py" >"$run/evidence/run.log" 2>&1
+    py "$run/evidence/driver.py" >"$run/evidence/run.log" 2>&1
   code=$?
   set -e
   echo "$code" >"$run/evidence/exit_code"
@@ -107,6 +120,35 @@ gc)
     done
   echo "free under $RUNS: $(free_mb "$RUNS") MB"
   ;;
+worktree-setup)
+  in_worktree || { echo "refusing: $REPO is the main checkout; run this in a linked worktree" >&2; exit 2; }
+  [ -e "$MAIN/pyprocar/_version.py" ] ||
+    { echo "missing $MAIN/pyprocar/_version.py; run 'pixi install -e dev' in $MAIN" >&2; exit 2; }
+  if [ -e data ] && [ ! -L data ]; then
+    echo "refusing: $REPO/data is a real directory; move it out of the way and rerun" >&2; exit 2
+  fi
+  cp "$MAIN/pyprocar/_version.py" pyprocar/_version.py
+  mkdir -p "$MAIN/data" .tmp
+  ln -sfn "$MAIN/data" data
+  base="$(git merge-base HEAD origin/dev 2>/dev/null || true)"
+  if [ -z "$base" ]; then
+    echo "warning: no merge base with origin/dev; run 'git fetch origin dev' to check pixi.lock" >&2
+  elif ! git diff --quiet "$base" -- pixi.lock pixi.toml; then
+    echo "warning: this branch changes pixi.lock or pixi.toml relative to origin/dev; the shared env does not match it, so build this worktree's own env with 'pixi run --locked'" >&2
+  elif ! cmp -s "$MAIN/pixi.lock" pixi.lock; then
+    echo "warning: the main checkout's pixi.lock differs from this branch's, which matches origin/dev; local gates may drift, so CI is the final gate" >&2
+  fi
+  echo "ready: data -> $MAIN/data, pyprocar/_version.py copied, env $SHARED_ENV"
+  ;;
+exec)
+  shift
+  if in_worktree; then
+    mkdir -p .tmp
+    TMPDIR="$REPO/.tmp" shared_env "$@"
+  else
+    PYTHONDONTWRITEBYTECODE=1 pixi run -q --locked -e dev "$@"
+  fi
+  ;;
 *)
-  sed -n '2,7p' "${BASH_SOURCE[0]}"; exit 2 ;;
+  sed -n '2,9p' "${BASH_SOURCE[0]}"; exit 2 ;;
 esac

@@ -1,10 +1,10 @@
-# Parser layer: Parser(code, dirpath) on the VASP bands fixture
+# Parser layer: get_parser(code, dirpath) on the VASP bands fixture
 # and on the local QE fixture in data/codes.
-# Fixture: data/examples/bands/non-spin-polarized (QE dir is read in place; Parser writes nothing)
+# Fixture: data/examples/bands/non-spin-polarized (QE dir is read in place; parsers write nothing)
 import numpy as np
 from verify_steps import CALC, REPO, finish, step
 
-from pyprocar.io import Parser
+from pyprocar.io import get_parser
 
 
 def facts(p):
@@ -19,13 +19,13 @@ def facts(p):
 
 @step("vasp")
 def _():
-    return facts(Parser(code="vasp", dirpath=CALC))
+    return facts(get_parser(code="vasp", dirpath=CALC))
 
 
 @step("qe")
 def _():
     return facts(
-        Parser(code="qe", dirpath=REPO / "data/codes/qe/7.2/SrVO3/non-spin-polarized/bands")
+        get_parser(code="qe", dirpath=REPO / "data/codes/qe/7.2/SrVO3/non-spin-polarized/bands")
     )
 
 

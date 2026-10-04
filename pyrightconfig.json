@@ -1,13 +1,12 @@
 {
     "allowedUntypedLibraries": ["pdal", "open3d", "laspy", "ykkpc"],
+    "include": ["pyprocar", "tests", "scripts", "docs", "examples", "setup.py", ".claude/skills"],
+    "exclude": ["**/node_modules", "**/__pycache__", "**/?*/.*"],
     "ignore": [
       "**/*.ipynb",
       "**/docs_hooks.py",
       "docs/",
-      "sphinx/",
       "examples/",
-      ".github/",
-      "data/",
       "**/_version.py"
     ],
     "pythonPlatform": "All",
@@ -30,6 +29,10 @@
     "reportUnknownParameterType": false,
     "reportUnknownVariableType": false,
     "executionEnvironments": [
+      {
+        "root": ".claude/skills/verify-pyprocar/scripts",
+        "extraPaths": [".", ".claude/skills/verify-pyprocar/scripts/lib"]
+      },
       {
         "root": "docs",
         "reportMissingImports": false,
