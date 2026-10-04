@@ -19,6 +19,8 @@ from pyprocar.io.elk.geometry import ElkGeometry
 from pyprocar.io.elk.projections import ElkProjections
 from pyprocar.utils.log_utils import warn_user
 
+_ELK_VERSION = re.compile(r"Elk code version (\d+)\.(\d+)\.(\d+)")
+
 logger = logging.getLogger(__name__)
 
 
@@ -259,11 +261,12 @@ class ElkParser(BaseParser):
         if self._elkin is None or not self._elkin.lmirep:
             return False
         info = self.dirpath / "INFO.OUT"
-        version = (
-            re.search(r"Elk code version (\d+)\.(\d+)\.(\d+)", info.read_text())
-            if info.exists()
-            else None
-        )
+        version = None
+        if info.exists():
+            with info.open() as lines:
+                version = next(
+                    (m for line in lines if (m := re.search(_ELK_VERSION, line))), None
+                )
         if version is not None:
             return tuple(int(part) for part in version.groups()) >= (10, 7, 8)
         if not (self.dirpath / "ELMIREP.OUT").exists():

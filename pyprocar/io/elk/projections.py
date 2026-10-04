@@ -64,7 +64,8 @@ class ElkProjections:
     task : int
         The Elk task, 21 to 24, that wrote the files
     irrep_basis : bool
-        Whether task 22 wrote the characters in the irreducible-representation basis
+        Whether task 22 wrote the characters in the irreducible-representation basis;
+        only the parser's task-22 check sets it
     """
 
     def __init__(
@@ -146,7 +147,7 @@ class ElkProjections:
     def orbital_names(self) -> list[str]:
         """Names of the orbital axis of ``projected`` for this task."""
         n_columns = self._characters.shape[-1]
-        if self._task == 22 and self._irrep_basis:
+        if self._irrep_basis:
             return irrep_names(n_columns)
         return _LAYOUTS[self._task][1](n_columns)
 
