@@ -8,6 +8,7 @@
 #   verify.sh worktree-setup                link data/, copy _version.py into a linked worktree
 #   verify.sh exec <cmd>...                 run a command (a CI gate) in the project env
 set -euo pipefail
+export PYTHONDONTWRITEBYTECODE=1
 
 REPO="$(git -C "$(dirname "${BASH_SOURCE[0]}")" rev-parse --show-toplevel)"
 MAIN="$(dirname "$(git -C "$REPO" rev-parse --path-format=absolute --git-common-dir)")"
@@ -19,9 +20,9 @@ cd "$REPO"
 # A linked worktree borrows the main checkout's env, because pixi would build a multi-GB env per worktree.
 in_worktree() { [ "$REPO" != "$MAIN" ]; }
 shared_env() {
-  PATH="$SHARED_ENV:$PATH" PYTHONPATH="$REPO${PYTHONPATH:+:$PYTHONPATH}" PYTHONDONTWRITEBYTECODE=1 "$@"
+  PATH="$SHARED_ENV:$PATH" PYTHONPATH="$REPO${PYTHONPATH:+:$PYTHONPATH}" "$@"
 }
-py() { if in_worktree; then shared_env python "$@"; else PYTHONDONTWRITEBYTECODE=1 pixi run -q --locked -e default python "$@"; fi; }
+py() { if in_worktree; then shared_env python "$@"; else pixi run -q --locked -e default python "$@"; fi; }
 require_shared_env() {
   [ -x "$SHARED_ENV/python" ] || { echo "missing $SHARED_ENV/python; run 'pixi install -e dev' in $MAIN" >&2; exit 2; }
 }
@@ -265,7 +266,7 @@ exec)
     mkdir -p .tmp
     TMPDIR="$REPO/.tmp" shared_env "$@"
   else
-    PYTHONDONTWRITEBYTECODE=1 pixi run -q --locked -e dev "$@"
+    pixi run -q --locked -e dev "$@"
   fi
   ;;
 *)

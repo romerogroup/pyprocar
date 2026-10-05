@@ -708,8 +708,7 @@ def test_verify_sh_writes_only_on_the_lines_its_census_reviewed():
     writes = _census(VERIFY_SH.read_text())
 
     assert writes == [
-        'PATH="$SHARED_ENV:$PATH" PYTHONPATH="$REPO${PYTHONPATH:+:$PYTHONPATH}" '
-        + 'PYTHONDONTWRITEBYTECODE=1 "$@"',
+        'PATH="$SHARED_ENV:$PATH" PYTHONPATH="$REPO${PYTHONPATH:+:$PYTHONPATH}" "$@"',
         '[ -x "$SHARED_ENV/python" ] || { echo "missing $SHARED_ENV/python; '
         + "run 'pixi install -e dev' in $MAIN\" >&2; exit 2; }",
         'find -P "$2" ! -type l \\( -type d -o -links 1 \\) -exec chmod "$1" {} +',
