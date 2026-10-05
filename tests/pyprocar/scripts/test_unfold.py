@@ -12,7 +12,7 @@ from matplotlib.collections import LineCollection, PathCollection, PolyCollectio
 
 import pyprocar
 from pyprocar.core import ElectronicBandStructurePath
-from tests.utils import DATA_DIR
+from tests.utils import DATA_DIR, writable_copy
 
 UNFOLDING = DATA_DIR / "examples" / "bands" / "unfolding"
 SUPERCELL = np.diag([2, 2, 2])
@@ -46,7 +46,7 @@ def _copy(tmp_path, name):
     if not src.exists():
         pytest.skip(f"fixture bands/unfolding/{name} not downloaded")
     dst = tmp_path / name
-    shutil.copytree(src, dst, ignore=shutil.ignore_patterns("CHG*", "*.pkl"))
+    writable_copy(src, dst, ignore=shutil.ignore_patterns("CHG*", "*.pkl"))
     return dst
 
 

@@ -23,6 +23,23 @@ There is nothing to keep alive. "Launch" means the env and fixtures exist:
 $H fetch data/examples/bands/non-spin-polarized     # idempotent; ~20-35 MB each, into ./data (gitignored)
 ```
 
+`fetch` downloads a missing fixture, then makes it read-only, so a stray write into a fixture fails with `PermissionError` whatever the code path. Rerun it on an existing fixture to lock it; that needs no download and no env, in a linked worktree too. It takes a fixture root, `data/examples/<category>/<name>` or `data/<name>`, spelled in plain names (letters, digits, `_`, `.` and `-`, not starting with `.` or `-`), and refuses a path whose real location is not a fixture inside `data/`. A download fetches exactly `<relpath>.zip` from the dataset into a staging dir next to the fixture, so a misspelt or partial name fails without downloading. A file with a second hard link stays writable, because its other link may be outside `data/`; `fetch` names each one on stderr. Code that must write next to a fixture works on a writable copy: `$H run` makes one, drivers call `writable_copy` from `verify_steps`, and tests call `writable_copy` from `tests.utils`.
+
+To refresh a locked fixture, the operator unlocks its directories from the main checkout's root, removes it, and fetches it again. `rm -rf` needs write permission on directories only, so the files keep their modes, and a file whose second hard link is outside `data/` is never unlocked:
+
+```bash
+find -P data/examples/<category>/<name> -type d -exec chmod u+w {} +
+rm -rf data/examples/<category>/<name>
+$H fetch data/examples/<category>/<name>
+```
+
+`doctor`, `fetch`, `run`, `clean` and `gc` act only inside the data root, apart from the writes listed below, and exit 2 unless `data` resolves to the main checkout's `data/` directory: the directory itself in the main checkout, a symlink to it in a linked worktree (`$H worktree-setup` makes it). `data/verify-runs` must be a directory in it, not a symlink. A `data` symlink in the main checkout, for example to another disk, is refused. Every chmod and delete stays strictly below the data root and never follows a symlink. `run` writes only into a run dir it has just created. These writes fall outside the data root:
+
+- `doctor`, a download in `fetch`, and the driver in `run` import `pyprocar` with the repo root as working directory, and the import appends to `<repo>/pyprocar.log`. The import also loads matplotlib, which creates `~/.config/matplotlib` and writes its font cache `~/.cache/matplotlib/fontlist-v<N>.json` when that file is missing or stale. With `MPLCONFIGDIR` set, both go there instead.
+- A download writes `<HF cache>/datasets--lllangWV--pyprocar_test_data/refs/main`, because `huggingface_hub` records the dataset's commit there even with `local_dir`. `hf_xet` also writes a log to `$HF_HOME/xet/logs/` and creates `chunk-cache/` and `staging/` in `$HF_HOME/xet/<endpoint>/` (`HF_HOME` defaults to `~/.cache/huggingface`). `fetch` sets `HF_XET_LOG_DIR_DISABLE_CLEANUP=1`, so the download deletes none of the older logs there.
+- In the main checkout, `doctor`, a download in `fetch` and `run` start python with `pixi run --locked -e default`, and `exec` uses `pixi run --locked -e dev`. `--locked` never rewrites `pixi.lock`, but pixi installs or updates the env when it does not match the lock. In a linked worktree they use the main checkout's env as it is. Both set `PYTHONDONTWRITEBYTECODE=1`, so python writes no `__pycache__` in either checkout.
+- `worktree-setup` and `exec` write their own worktree's `pyprocar/_version.py`, `.tmp` and `data` link. `worktree-setup`'s `git diff` can refresh that worktree's git index. `doctor` runs `git status` with `GIT_OPTIONAL_LOCKS=0`, so it leaves the index alone.
+
 Fixture relpaths (HF dataset `lllangWV/pyprocar_test_data`): `data/examples/{bands,dos,fermi3d,fermi2d}/{non-spin-polarized,spin-polarized,non-colinear}`, plus `bands/{atomic_levels,auto,compare_bands,ipr,unfolding,2d-bands}`, `fermi2d/bisb_monolayer`, `fermi3d/van-alphen`. All are VASP; Fermi energy for the SrVO3 sets is `5.3017`.
 
 Other codes are already extracted under `data/codes/`: `qe/7.2/SrVO3`, `elk/6.3/SrVO3` and `vasp/6.4/SrVO3` (spin variants), and `abinit/9.6/Fe`. Siesta has no fixture; its tests build synthetic dirs. `features/parsers.md` lists the proven end states. For an independent reference from another code, run it with `pixi exec -s qe` (or `-s abinit`, `-s gfortran`), and keep its inputs and outputs outside any worktree, because `git worktree remove --force` deletes them.
@@ -51,6 +68,7 @@ It copies `_version.py` from the main checkout and links `data` to the main chec
 In every worktree:
 
 - `data/` is shared and holds `.py` files. Give pytest an explicit test path, so it never collects them, and `-p no:cacheprovider`. Write under `data/` only through `$H fetch`, which adds fixtures to the shared cache, and `$H run`, which works on a per-run copy in `data/verify-runs/`.
+- Before `git worktree remove --force`, make the read-only copies inside the worktree writable by naming each one, for example `find -P .tmp -type d -exec chmod u+w {} +` for pytest temp copies of locked fixtures, or the removal fails with `Permission denied`. Name the copies only, never `data` or a path through it: in a worktree `data` is the shared fixture store, and a recursive chmod through it unlocks every fixture.
 - The `data`-marked tests take 10-12 minutes per checkout. Run the modules for the packages you touch in the background, at your head and at `origin/dev`, so a new failure stands apart from an old one.
 - CI has no `data/`. The conftest guard fails an unmarked test that opens or lists `data/`, but a read at import or collection time escapes it: it passes locally and fails in CI. Mark every test that needs a fixture `data`.
 - CI runs the lint and format gates on the PR merged into `dev`. Judge `ruff_new_violations.py` on your head merged with current `origin/dev` (in a detached scratch worktree), because on a head behind `dev` it also flags files that only `dev` changed.
@@ -62,7 +80,7 @@ In every worktree:
 $H doctor
 ```
 
-Read-only. It prints the branch/commit, the count of dirty tracked files, the python/pyprocar/pyvista/vtk versions, the import path (it must be this checkout's `pyprocar/`), and the fixtures present. It is worth driving when pyprocar imports from this repo and the fixture you need is listed. A `dirty` count you didn't cause means someone is mid-edit, so say so before trusting results.
+It changes nothing apart from the writes listed under Launch. It prints the branch/commit, the count of dirty tracked files, the python/pyprocar/pyvista/vtk versions, the import path (it must be this checkout's `pyprocar/`), and the fixtures present. `writable fixture paths` counts the files and dirs in each fixture root that still have a write bit, and a root that is a symlink counts its target; above 0, lock those fixtures with `$H fetch <relpath>`. `unlockable fixture roots` lists each entry of `data/` and `data/examples/<category>/` that `fetch` refuses, such as a name with a space or a leading `.`, or a symlink out of `data/`; rename or remove each one. It is worth driving when pyprocar imports from this repo and the fixture you need is listed. A `dirty` count you didn't cause means someone is mid-edit, so say so before trusting results.
 
 ## Drive
 
@@ -71,8 +89,8 @@ $H run <name> <fixture-relpath> <driver.py>
 ```
 
 What the harness does:
-1. Creates `data/verify-runs/<timestamp>-<name>/`.
-2. Copies the fixture to `work/calc` (a reflink copy where the filesystem supports it) and the driver to `evidence/driver.py`.
+1. Creates a new `data/verify-runs/<timestamp>-<name>/`. It refuses (exit 2) when anything already has that name, such as a second run with the same name in the same second, so rerun it.
+2. Copies the fixture to `work/calc`, following symlinks (a reflink copy where the filesystem supports it), makes the copy writable, and copies the driver to `evidence/driver.py`. `<name>` is one plain name, and the fixture must resolve to a fixture directory inside `data/`.
 3. Runs the driver with `TMPDIR=work/tmp`, `CALC=<calc copy>`, `EVIDENCE=<evidence dir>`, `REPO=<repo root>`, `MPLBACKEND=Agg`, `PYVISTA_OFF_SCREEN=true`, and `scripts/lib` on `PYTHONPATH`. pytest puts its `--basetemp` root under `TMPDIR`, so a driver that starts pytest also writes under the run.
 4. Records the exit code, `run.log` (stdout+stderr), and `side_effects.txt`, which lists files created or modified inside the calc copy.
 
@@ -140,7 +158,7 @@ This removes the `work/` copy of every run that started more than `hours` ago, f
 - `scripts/verify.sh`: `doctor | fetch <relpath>... | run <name> <fixture> <driver.py> | clean <run-dir> | gc [hours] | worktree-setup | exec <cmd>...`
 - `scripts/examples/bands_plain.py`: the minimal single-call template, which exits 0. Copy it for a one-off driver.
 - `scripts/examples/{bands,dos,fermi3d,fermi2d,bs2d,parsers,utilities}.py`: full per-feature drivers. Run them as shown under Drive.
-- `scripts/lib/verify_steps.py`: `step`, `png`, `distinct_colors` and `finish` for multi-step drivers. It is importable because the harness puts `scripts/lib` on `PYTHONPATH`.
+- `scripts/lib/verify_steps.py`: `step`, `png`, `distinct_colors`, `writable_copy` and `finish` for multi-step drivers. It is importable because the harness puts `scripts/lib` on `PYTHONPATH`.
 - `scripts/lib/references/`: independent references (unfolding weights, reduced spin mesh, tiled cut orbits), each with an analytic `validate()` and a `ref_*.py` driver. Compare against one of these before you write your own; `features/README.md` lists them.
 
 Known repo issues that affect verification (as of dev @ d6d4aaa7):

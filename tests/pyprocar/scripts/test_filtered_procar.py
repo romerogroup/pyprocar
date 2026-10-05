@@ -5,7 +5,6 @@ atom-filtered PROCAR is the sum of the rows of its group of atoms, and a column
 of an orbital-filtered PROCAR is the sum of its group of orbital columns.
 """
 
-import shutil
 from pathlib import Path
 from typing import Any
 
@@ -21,7 +20,7 @@ from matplotlib.collections import LineCollection
 import pyprocar
 from pyprocar.core import ElectronicBandStructure
 from pyprocar.io import get_parser
-from tests.utils import DATA_DIR
+from tests.utils import DATA_DIR, writable_copy
 
 pytestmark = pytest.mark.data
 
@@ -37,11 +36,8 @@ def close_figures():
 
 
 def _copy_calc(tmp_path: Path, src: Path = CALC, extra: tuple[str, ...] = ()) -> Path:
-    dst = tmp_path / "calc"
-    dst.mkdir()
-    for name in ("PROCAR", "OUTCAR", "POSCAR", "KPOINTS", *extra):
-        shutil.copy(src / name, dst / name)
-    return dst
+    wanted = {"PROCAR", "OUTCAR", "POSCAR", "KPOINTS", *extra}
+    return writable_copy(src, tmp_path / "calc", ignore=lambda _, names: set(names) - wanted)
 
 
 def _filtered_calc(

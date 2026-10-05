@@ -12,7 +12,7 @@ from pyprocar.core.atomic_orbital_index import orbital_shells
 from pyprocar.core.ebs import ElectronicBandStructure, ElectronicBandStructurePath
 from pyprocar.core.kpoints import KPath
 from pyprocar.io.elk import ElkParser
-from tests.utils import DATA_DIR, BaseTest
+from tests.utils import DATA_DIR, BaseTest, writable_copy
 from tests.utils.user_warning import user_warning
 
 logger = logging.getLogger(__name__)
@@ -859,12 +859,12 @@ def test_task_22_basis_that_cannot_be_told_apart_keeps_l_m_names_and_warns(tmp_p
 )
 def test_real_elk_6_3_bands_beside_a_task_10_elmirep_keep_their_l_m_names(tmp_path):
     calc_dir = tmp_path / "bands"
-    shutil.copytree(
+    writable_copy(
         ELK_BANDS_SP,
         calc_dir,
         ignore=shutil.ignore_patterns("EVEC*.OUT", "STATE.OUT", "VARIABLES.OUT"),
     )
-    shutil.copy(ELK_BANDS_SP.parent / "dos" / "ELMIREP.OUT", calc_dir)
+    writable_copy(ELK_BANDS_SP.parent / "dos" / "ELMIREP.OUT", calc_dir / "ELMIREP.OUT")
 
     with warnings.catch_warnings():
         warnings.filterwarnings("error", message=".*INFO.OUT")

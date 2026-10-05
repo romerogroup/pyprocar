@@ -6,6 +6,8 @@ and the next step still runs. finish() prints the summary and exits 1 if any ste
 
 import json
 import os
+import shutil
+import stat
 import sys
 import traceback
 import warnings
@@ -45,6 +47,14 @@ def step(name):
         return fn
 
     return deco
+
+
+def writable_copy(src, dst):
+    """Copy a read-only fixture tree into the run; return dst with user write on every entry."""
+    shutil.copytree(src, dst)
+    for path in [dst, *dst.rglob("*")]:
+        path.chmod(path.stat().st_mode | stat.S_IWUSR)
+    return dst
 
 
 def png(name, fig=None):
