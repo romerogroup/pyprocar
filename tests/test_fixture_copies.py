@@ -30,7 +30,7 @@ COPIES = {
     "os": {"link", "system", "popen"},
     "subprocess": {"run", "call", "check_call", "check_output", "Popen"},
 }
-SHELLS = {("os", "system"), ("os", "popen"), *(("subprocess", f) for f in COPIES["subprocess"])}
+SHELLS = {(m, f) for m in ("os", "subprocess") for f in COPIES[m]} - {("os", "link")}
 SHELL_COPIES = {"cp", "rsync"}
 HARDLINK = ("pathlib", "hardlink_to")
 REPO_ROOTS = {"__file__", "ROOT_DIR"}
@@ -162,11 +162,14 @@ class FixturePaths:
                     self._bind(target)
                 elif isinstance(function := self.function_of(node), ast.FunctionDef):
                     self.returning.add(function.name)
-            if isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef | ast.Lambda):
+            if isinstance(node, FUNCTIONS):
                 self._bind_defaults(node)
+            if isinstance(node, ast.FunctionDef) and node.name in self.returning:
+                if any("fixture" in ast.unparse(d) for d in node.decorator_list):
+                    self.fixtures.add(node.name)
             if isinstance(node, ast.Call):
                 self._bind_arguments(node)
-        return self._size() > before
+        return self._size() != before
 
     def _bind_defaults(self, function: Function) -> None:
         args = function.args
@@ -192,10 +195,6 @@ class FixturePaths:
             ):
                 for name in names.value.split(","):
                     self.bound[function].add(name.strip())
-        if function.name in self.returning and any(
-            "fixture" in ast.unparse(d) for d in function.decorator_list
-        ):
-            self.fixtures.add(function.name)
 
     def _bind_arguments(self, call: ast.Call) -> None:
         if not isinstance(call.func, ast.Name) or call.func.id not in self.functions:
@@ -237,12 +236,10 @@ class FixturePaths:
             self.holds(child) for child in ast.iter_child_nodes(node) if isinstance(child, ast.expr)
         )
 
-    @property
-    def exported(self) -> set[str]:
-        return self.bound[self.tree]
-
     def copy_call(self, node: ast.Call) -> tuple[str, str] | None:
         func = node.func
+        if isinstance(func, ast.Attribute) and func.attr == "hardlink_to":
+            return HARDLINK
         if isinstance(func, ast.Name):
             found = self.copy_functions.get(func.id)
         elif isinstance(func, ast.Attribute) and isinstance(func.value, ast.Name):
@@ -250,8 +247,6 @@ class FixturePaths:
             found = (module, func.attr) if module and func.attr in COPIES[module] else None
         else:
             found = None
-        if isinstance(func, ast.Attribute) and func.attr == "hardlink_to":
-            return HARDLINK
         if found in SHELLS and not (node.args and _shell_program(node.args[0]) in SHELL_COPIES):
             return None
         return found
@@ -266,7 +261,7 @@ def _parse(paths: list[Path], root: Path) -> dict[Path, FixturePaths]:
             path: FixturePaths(tree, module_parts(path, root), exports, fixtures)
             for path, tree in trees.items()
         }
-        found = {module_name(module_parts(path, root)): n.exported for path, n in names.items()}
+        found = {module_name(module_parts(path, root)): n.bound[n.tree] for path, n in names.items()}
         found_fixtures = {f for n in names.values() for f in n.fixtures}
         if found == exports and found_fixtures == fixtures:
             return names

@@ -21,6 +21,7 @@ def writable_copy(
     """Copy a fixture file or tree to ``dst`` with user write permission on every entry.
 
     ``verify.sh fetch`` makes fixtures read-only, and ``copytree`` keeps their modes.
+    For a file, ``dst`` is the new file's path and ``ignore`` is unused.
     """
     if not src.is_dir():
         return Path(shutil.copyfile(src, dst))
