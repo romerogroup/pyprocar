@@ -164,9 +164,12 @@ class FixturePaths:
                     self.returning.add(function.name)
             if isinstance(node, FUNCTIONS):
                 self._bind_defaults(node)
-            if isinstance(node, ast.FunctionDef) and node.name in self.returning:
-                if any("fixture" in ast.unparse(d) for d in node.decorator_list):
-                    self.fixtures.add(node.name)
+            if (
+                isinstance(node, ast.FunctionDef)
+                and node.name in self.returning
+                and any("fixture" in ast.unparse(d) for d in node.decorator_list)
+            ):
+                self.fixtures.add(node.name)
             if isinstance(node, ast.Call):
                 self._bind_arguments(node)
         return self._size() != before
@@ -261,7 +264,7 @@ def _parse(paths: list[Path], root: Path) -> dict[Path, FixturePaths]:
             path: FixturePaths(tree, module_parts(path, root), exports, fixtures)
             for path, tree in trees.items()
         }
-        found = {module_name(module_parts(path, root)): n.bound[n.tree] for path, n in names.items()}
+        found = {module_name(module_parts(p, root)): n.bound[n.tree] for p, n in names.items()}
         found_fixtures = {f for n in names.values() for f in n.fixtures}
         if found == exports and found_fixtures == fixtures:
             return names
