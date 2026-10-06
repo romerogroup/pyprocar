@@ -52,4 +52,36 @@ for mode, kw in {
         return {"distinct_colors": distinct_colors(out)}
 
 
+def handler():
+    return pyprocar.FermiHandler(
+        code="vasp", dirname=str(CALC), fermi=5.3017, use_cache=False, verbose=0
+    )
+
+
+@step("legacy_handler_save_3d")
+def _():
+    out = EV / "legacy_plain.vtp"
+    handler().plot_fermi_surface(mode="plain", show=False, save_3d=str(out), off_screen=True)
+    return {"vtp_bytes": out.stat().st_size}
+
+
+@step("legacy_box_widget")
+def _():
+    view, cut = EV / "legacy_box_widget.png", EV / "legacy_box_widget_slice.png"
+    returned = handler().plot_fermi_cross_section_box_widget(
+        mode="plain",
+        slice_normal=(0, 0, 1),
+        show_cross_section_area=True,
+        show=False,
+        save_2d=str(view),
+        save_2d_slice=str(cut),
+        off_screen=True,
+    )
+    return {
+        "returned": repr(returned),
+        "view_colors": distinct_colors(view),
+        "slice_colors": distinct_colors(cut),
+    }
+
+
 finish()

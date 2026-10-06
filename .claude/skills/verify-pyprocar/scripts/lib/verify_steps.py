@@ -25,6 +25,24 @@ def _write():
     (EV / "summary.json").write_text(json.dumps(SUMMARY, indent=2, default=str))
 
 
+def _where(e):
+    """The crash site, spelled the same in every checkout and run, for compare.py to match.
+
+    The innermost frame in this checkout's pyprocar/ as `pyprocar/<path>:<line>`, else the
+    innermost frame in the driver as `driver.py:<line>`, else the innermost frame.
+    """
+    frames = traceback.extract_tb(e.__traceback__)
+    package, driver = (REPO / "pyprocar").resolve(), (EV / "driver.py").resolve()
+    for f in reversed(frames):
+        path = Path(f.filename).resolve()
+        if path.is_relative_to(package):
+            return f"{path.relative_to(package.parent)}:{f.lineno}"
+    for f in reversed(frames):
+        if Path(f.filename).resolve() == driver:
+            return f"driver.py:{f.lineno}"
+    return f"{frames[-1].filename}:{frames[-1].lineno}"
+
+
 def step(name):
     def deco(fn):
         with warnings.catch_warnings(record=True) as caught:
@@ -32,12 +50,10 @@ def step(name):
             try:
                 SUMMARY[name] = {"ok": True, **(fn() or {})}
             except Exception as e:
-                frames = traceback.extract_tb(e.__traceback__)
-                own = [f for f in frames if "/pyprocar/pyprocar/" in f.filename] or frames
                 SUMMARY[name] = {
                     "ok": False,
                     "error": f"{type(e).__name__}: {e}"[:300],
-                    "where": f"{own[-1].filename.split('/pyprocar/')[-1]}:{own[-1].lineno}",
+                    "where": _where(e),
                 }
         user_warnings = [str(w.message) for w in caught if issubclass(w.category, UserWarning)]
         if user_warnings:
