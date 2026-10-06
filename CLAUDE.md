@@ -2,6 +2,8 @@
 
 Before you set up a git worktree or run tests, type checks, lint or the library, read the Launch section of `.claude/skills/verify-pyprocar/SKILL.md`: its gates paragraph and "Agents in worktrees".
 
+Agent follow-ups are GitHub issues labeled agent-queue; a backlog sweep ("sweep the backlog") works through them.
+
 ## Rules and what enforces them
 
 When a reviewer corrects a mistake, fix it and add its rule here. If the rule is already here with nothing enforcing it, the mistake is a repeat: enforce it in the same change, with a check whose error names what to use instead.
