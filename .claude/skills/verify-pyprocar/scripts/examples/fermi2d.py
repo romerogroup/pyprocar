@@ -50,6 +50,7 @@ def _():
 
 for label, mode, kw in [
     ("str_plain", "plain", {}),
+    ("str_plain_bands", "plain_bands", {}),
     ("enum_plain", Fermi2DMode.plain, {}),
     ("str_parametric", "parametric", dict(atoms=[1], orbitals=[4, 5, 6, 7, 8])),
 ]:

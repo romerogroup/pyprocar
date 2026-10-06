@@ -2,19 +2,27 @@
 
 One file per user-facing feature. Each lists every entry point a user can reach it by; a proof that covers one entry point is incomplete when the file lists others.
 
-Each feature has a reusable driver in `scripts/examples/<feature>.py`. It runs every entry point as an isolated step, records each step's result or crash in `summary.json`, and exits 1 if any step failed. Read `summary.json` per step instead of trusting the exit code alone.
+Each feature has a reusable driver in `scripts/examples/<feature>.py`. It runs every entry point as an isolated step, records each step's result or crash in `summary.json`, and exits 1 if any step failed. Each feature file ends with an `## Expected step status` table, one row per driver step: `ok`, or `known-defect` with the error type and crash site that `verify_steps` records as `where`. A `side_effects.txt` row lists the files the run must leave in the calc copy. `$H compare <run-dir>...` checks runs against these tables and exits 1 on any deviation, so read its output instead of the driver's exit code. When a deviation is a real change, update the row and the prose in the same edit.
 
-| Feature | File | Driver / fixture | Status (dev @ d6d4aaa7, re-driven 2026-10-04) |
+| Feature | File | Driver / fixture | Status (dev @ c13166ce, re-driven 2026-10-05) |
 |---|---|---|---|
-| Band structure along a k-path | [bands.md](bands.md) | `bands.py` / `data/examples/bands/non-spin-polarized` | Object API plain/parametric/scatter/`plot_quiver`/flip and legacy `bandsplot` plain/parametric/scatter/overlay_species and `bandsdosplot` work; `plot(vectors_mode=)` and `plot_overlay` crash |
-| Density of states | [dos.md](dos.md) | `dos.py` / `data/examples/dos/non-spin-polarized` | Object API and legacy `dosplot` plain/parametric work; other `dosplot` modes not driven |
-| 3D Fermi surface | [fermi3d.md](fermi3d.md) | `fermi3d.py` / `data/examples/fermi3d/non-spin-polarized` | Object API and legacy `FermiHandler` plain/parametric/fermi_speed work |
-| 2D Fermi slice | [fermi2d.md](fermi2d.md) | `fermi2d.py` / `data/examples/fermi2d/non-spin-polarized` | Legacy `fermi2D` plain/parametric and `FermiSlicePlotter` with and without scalars work; `plot(scalars_data=<Property>)` draws uncolored lines |
-| 2D band structure surface | [bs2d.md](bs2d.md) | `bs2d.py` / `data/examples/bands/2d-bands` | Object API and legacy `BandStructure2DHandler` work |
-| Code parsers (VASP, QE, Elk, Abinit, Siesta, Lobster, BXSF, FRMSF) | [parsers.md](parsers.md) | `parsers.py` / `data/examples/bands/non-spin-polarized` + `data/codes/qe` | VASP, QE and Elk bands proven; others not driven |
-| File utilities (`bandgap`, `kpath`, `filter`, `repair`, `cat`, `generate2dkmesh`) | [utilities.md](utilities.md) | `utilities.py` / `data/examples/bands/non-spin-polarized` | All six work |
+| Band structure along a k-path | [bands.md](bands.md) | `bands.py` / `data/examples/bands/non-spin-polarized` | Object API plain/parametric/scatter/`plot_quiver`/flip/`plot_overlay` with an array and legacy `bandsplot` plain/parametric/scatter/overlay_species/overlay_orbitals and `bandsdosplot` work; `plot(vectors_mode=)` and `plot_overlay`/`plot_quiver` given `ebs.bands` crash |
+| Density of states | [dos.md](dos.md) | `dos.py` / `data/examples/dos/non-spin-polarized` | Object API and every legacy `dosplot` mode work; `stack` without `items` crashes |
+| 3D Fermi surface | [fermi3d.md](fermi3d.md) | `fermi3d.py` / `data/examples/fermi3d/non-spin-polarized` | Object API and legacy `FermiHandler` plain/parametric/fermi_speed, `save_3d` and the box widget work |
+| 2D Fermi slice | [fermi2d.md](fermi2d.md) | `fermi2d.py` / `data/examples/fermi2d/non-spin-polarized` | Legacy `fermi2D` plain/plain_bands/parametric and `FermiSlicePlotter` with and without scalars work; `plot(scalars_data=<Property>)` draws uncolored lines |
+| 2D band structure surface | [bs2d.md](bs2d.md) | `bs2d.py` / `data/examples/bands/2d-bands` | Object API with and without the zone and legacy `BandStructure2DHandler` work |
+| Code parsers (VASP, QE, Elk, Abinit, Siesta, Lobster, BXSF, FRMSF) | [parsers.md](parsers.md) | `parsers.py` / `data/examples/bands/non-spin-polarized` + `data/codes` | VASP, QE (collinear and non-collinear), Elk and Abinit bands work; Siesta, Lobster, BXSF and FRMSF have no fixture |
+| File utilities, test-data download and the `procar.py` CLI | [utilities.md](utilities.md) | `utilities.py` / `data/examples/bands/non-spin-polarized` | `bandgap`/`kpath`/`filter`/`repair`/`cat`/`generate2dkmesh` and `procar.py cat`/`filter` work; `spin_asymmetry` is a stub; `download_from_hf` with a str path and `procar.py bandgap`/`generate2dkmesh` crash |
 
 Update the Status column whenever a run changes what is known.
+
+## Entry points outside the map
+
+`import pyprocar` and `pyproject.toml` expose these too. No feature file covers them:
+- `pyprocar.pyposcar` (POSCAR reading, defects, clusters, RDF) is in `docs/source/api/pyposcar/`, with fixtures in `data/examples/pyposcar/`. It needs `import pyprocar.pyposcar`; `import pyprocar` does not load it. Not driven.
+- `calculate_band_velocity`, `calculate_band_speed` and `calculate_avg_inv_effective_mass` are what `get_property("bands_velocity" | "bands_speed" | "avg_inv_effective_mass")` calls, which `bands.md`, `bs2d.md` and `fermi3d.md` drive.
+- `welcome` prints the banner that the legacy functions print. `Settings` has no caller.
+- `scripts/poscar.py`, `scripts/dftb+2procar.py` and `scripts/tmp.py` are uninstalled developer scripts.
 
 ## Independent references
 

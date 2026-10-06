@@ -71,6 +71,29 @@ def _():
     return {**facts(), "png": png("obj_overlay_species")}
 
 
+@step("obj_overlay_orbitals_array")  # the documented workaround: pass the band values as an array
+def _():
+    assert ebs.bands is not None
+    props = ebs.build_overlay_orbitals_weights(atoms=[2, 3, 4])
+    weights = [np.asarray(p.to_array()) for p in props]
+    labels = [p.label or "" for p in props]
+    P().plot_overlay(ebs.kpath, np.asarray(ebs.bands.value), weights, labels=labels)
+    return {
+        **facts(),
+        "labels": [p.label for p in props],
+        "weight_sums": [round(float(w.sum()), 3) for w in weights],
+        "png": png("obj_overlay_orbitals"),
+    }
+
+
+@step("obj_quiver_property")  # the plot_quiver call examples/general/new_bands_examples.py makes
+def _():
+    v = ebs.get_property("bands_velocity")
+    assert v is not None
+    P().plot_quiver(ebs.kpath, ebs.bands, vectors=np.asarray(v.to_array()))  # pyright: ignore[reportArgumentType]
+    return {"png": png("obj_quiver_property")}
+
+
 @step("obj_channel_flip")
 def _():
     P().plot(ebs.bands, scalars_mode="none", channel_mode="flip")
@@ -82,6 +105,7 @@ for mode, kw in {
     "parametric": dict(atoms=[1], orbitals=[4, 5, 6, 7, 8]),
     "scatter": dict(atoms=[1], orbitals=[4, 5, 6, 7, 8]),
     "overlay_species": dict(orbitals=[1, 2, 3]),
+    "overlay_orbitals": dict(atoms=[2, 3, 4]),
 }.items():
 
     @step(f"legacy_bandsplot_{mode}")

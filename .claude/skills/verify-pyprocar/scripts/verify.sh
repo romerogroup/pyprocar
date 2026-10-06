@@ -3,6 +3,7 @@
 #   verify.sh doctor
 #   verify.sh fetch <relpath>...            download if missing, then make read-only
 #   verify.sh run <name> <fixture-relpath> <driver.py>
+#   verify.sh compare <run-dir>...          check runs against the Expected step status tables
 #   verify.sh clean <run-dir>
 #   verify.sh gc [hours]                    remove work/ of runs older than hours (default 24)
 #   verify.sh worktree-setup                link data/, copy _version.py into a linked worktree
@@ -14,6 +15,7 @@ REPO="$(git -C "$(dirname "${BASH_SOURCE[0]}")" rev-parse --show-toplevel)"
 MAIN="$(dirname "$(git -C "$REPO" rev-parse --path-format=absolute --git-common-dir)")"
 SHARED_ENV="$MAIN/.pixi/envs/dev/bin"
 abs() { (cd "$(dirname "$1")" && echo "$PWD/$(basename "$1")"); }
+SELF="$(abs "${BASH_SOURCE[0]}")"
 [ "${1:-}" = run ] && [ $# -ge 4 ] && set -- "$1" "$2" "$3" "$(abs "$4")"
 cd "$REPO"
 
@@ -26,7 +28,7 @@ py() { if in_worktree; then shared_env python "$@"; else pixi run -q --locked -e
 require_shared_env() {
   [ -x "$SHARED_ENV/python" ] || { echo "missing $SHARED_ENV/python; run 'pixi install -e dev' in $MAIN" >&2; exit 2; }
 }
-case "${1:-}" in doctor | run | exec | worktree-setup) ! in_worktree || require_shared_env ;; esac
+case "${1:-}" in doctor | run | compare | exec | worktree-setup) ! in_worktree || require_shared_env ;; esac
 
 whole_number() {
   [[ "$2" =~ ^[0-9]+$ ]] || { echo "$1 must be a whole number, got '$2'" >&2; exit 2; }
@@ -220,6 +222,11 @@ run)
   echo "side effects in calc dir:"; sed 's/^/  /' "$run/evidence/side_effects.txt"
   exit "$code"
   ;;
+compare)
+  shift
+  [ $# -ge 1 ] || { echo "usage: verify.sh compare <run-dir>..." >&2; exit 2; }
+  py "$REPO/.claude/skills/verify-pyprocar/scripts/compare.py" "$@"
+  ;;
 clean)
   require_data
   run="$(real_path "$2")" && is_below "$run" "$RUNS" && [ -d "$run" ] && [[ "${run#"$RUNS"/}" =~ ^$PLAIN_NAME$ ]] ||
@@ -270,5 +277,5 @@ exec)
   fi
   ;;
 *)
-  sed -n '2,9p' "${BASH_SOURCE[0]}"; exit 2 ;;
+  sed -n '2,10p' "$SELF"; exit 2 ;;
 esac

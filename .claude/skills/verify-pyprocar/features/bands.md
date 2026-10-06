@@ -17,7 +17,7 @@ Plot E(k) along a high-symmetry path from a non-SCF bands calculation. Optionall
   $H run ref-unfold data/examples/bands/unfolding .claude/skills/verify-pyprocar/scripts/examples/ref_unfold.py
   ```
   - `validate()` unfolds plane-wave states in supercells of a two-atom cell under diag(2,2,2) and three sheared matrices, one of them not normal, to exactly 0 or 1 (error 1.1e-16, tolerance 1e-12). The same states with an exp(-2 pi i k.t) factor miss by at least 0.259.
-  - At d6d4aaa7 the reference matches `ebs.unfold` to 8.9e-16 over all 150 x 80 weights, and the `INDEPENDENT_WEIGHTS` literals to 2.1e-6.
+  - At c13166ce the reference matches `ebs.unfold` to 8.9e-16 over all 150 x 80 weights, and the `INDEPENDENT_WEIGHTS` literals to 2.1e-6.
   - Against `primitive/EIGENVAL`, the Mg 2p weights sum to between 2.999 and 3.002 at every k. No band with weight above 0.25 lies more than 0.375 eV from a primitive band.
   - With the k-phase factor, 806 such bands miss by up to 4.2 eV.
 
@@ -33,22 +33,54 @@ $H run bands data/examples/bands/non-spin-polarized .claude/skills/verify-pyproc
 $H run bands-plain data/examples/bands/non-spin-polarized .claude/skills/verify-pyprocar/scripts/examples/bands_plain.py   # single proven step, exits 0
 ```
 
-`bands.py` runs every object-API call and the legacy calls as separate steps. At d6d4aaa7 it exits 1 because of the two object-API crashes listed below.
+`bands.py` runs every object-API call and the legacy calls as separate steps. At c13166ce it exits 1 because of the three object-API crashes listed below; `$H compare` checks each step against the table at the end of this file.
 
-The proven end state (SrVO3, non-spin-polarized, d6d4aaa7) is:
-- `obj_plain`: 32 lines, xticklabels `Γ X M Γ R X`, ylim about `[-32.0, 13.6]` eV, meaning energies are already Fermi-shifted (by the parsed `ebs.fermi`, 4.9992). The PNG shows bands crossing 0 eV near Γ–M.
+The proven end state (SrVO3, non-spin-polarized, c13166ce) is:
+- `obj_plain`: 32 lines, xticklabels `Γ X M Γ R X`, ylim `[-31.97, 13.59]` eV. `from_code` does not shift the energies: that ylim is the raw PROCAR range, -29.06 to 10.69 eV, padded by 10% of the largest |E|. E_F (`ebs.fermi` 4.9992) sits near +5 eV, where the t2g bands cross it. Only the legacy functions subtract `fermi`.
 - `obj_parametric` / `obj_scatter`: 20 colored collections plus a colorbar axis. V-d weight is highest in the bands above 5 eV.
 - `obj_quiver_plot_quiver`: 20 quiver collections and a colorbar. The x axis shows raw k-distance, with no high-symmetry tick labels.
-- `legacy_bandsplot_plain`: 33 lines. `parametric` and `scatter`: 20 collections each. `overlay_species`: 60 collections, one band of O, Sr and V weight per band.
+- `obj_overlay_orbitals_array`: `plot_overlay` with `np.asarray(ebs.bands.value)` draws 60 collections labelled `s`, `p`, `d`. On O atoms 2-4 the weights sum to s 473.483, p 1153.606 and d 0.0, equal to `compute_projected_sum` over the same orbitals (#304, issue #285).
+- `legacy_bandsplot_plain`: 33 lines. `parametric` and `scatter`: 20 collections each. `overlay_species` and `overlay_orbitals` (atoms 2-4): 60 collections each, one band of weight per species or shell per band.
 - `legacy_bandsdosplot`: the band panel with ticks `Γ X M Γ R X` and a total-DOS panel on the same energy axis.
 - `side_effects.txt` is empty.
 
 ## Gotchas
 
-These crash at d6d4aaa7. They are product gaps: record them as failures, and don't route around them.
-- **Object `plot_overlay`**: `AttributeError: 'Property' object has no attribute 'ndim'` at `plotter/bs_plot.py:986` when given `ebs.bands`; pass `np.asarray(ebs.bands.value)`. The legacy `overlay_species` mode works. `build_overlay_orbitals_weights` and `build_overlay_weights({'V': ['d']})` work since #285 and take the shells from the orbital names: on SrVO3 O atoms 2-4 give s 473.483, p 1153.606 and d 0.0, equal to `compute_projected_sum` over the same orbitals.
-- **`plot(..., vectors_data=..., vectors_mode="quiver")`**, as written in `new_bands_examples.py`: `vectors_mode` falls through to `Line2D.set()` and raises `AttributeError`. Use `plot_quiver` instead.
+These crash at c13166ce. They are product gaps: record them as failures, and don't route around them.
+- **Object `plot_overlay` and `plot_quiver` given `ebs.bands`**: `AttributeError: 'Property' object has no attribute 'ndim'` at `pyprocar/plotter/bs_plot.py:986`, in `_validate_data`. Both take a band array; pass `np.asarray(ebs.bands.value)`. `examples/general/new_bands_examples.py` passes the `Property` in its overlay and multi-method examples, so those crash too. The legacy `overlay_*` modes work. `build_overlay_orbitals_weights` and `build_overlay_weights({'V': ['d']})` take the shells from the orbital names since #304.
+- **`plot(..., vectors_data=..., vectors_mode="quiver")`**, as written in `new_bands_examples.py`: `vectors_mode` falls through to `Line2D.set()` and raises `AttributeError` at `pyprocar/plotter/bs_plot.py:241`. Use `plot_quiver` instead.
 
 Other notes:
 - `BandStructurePlotter.plot` draws on the current matplotlib figure. Grab it with `plt.gcf()` to save.
 - The fixture ships a prebuilt `ebs.pkl`/`kpath.pkl`, which only `use_cache=True` reads.
+
+## Expected step status
+
+`$H compare <run-dir>` checks a run of these drivers against this table (see SKILL.md, Drive). Update a row when a run proves the step changed.
+
+| Driver | Step | Status | Site |
+|---|---|---|---|
+| `bands_plain.py` | `side_effects.txt` | ok | |
+| `bands.py` | `obj_plain` | ok | |
+| `bands.py` | `obj_parametric` | ok | |
+| `bands.py` | `obj_scatter` | ok | |
+| `bands.py` | `obj_quiver_plot_quiver` | ok | |
+| `bands.py` | `obj_quiver_vectors_mode` | known-defect | `AttributeError` at `pyprocar/plotter/bs_plot.py:241` |
+| `bands.py` | `obj_overlay_species` | known-defect | `AttributeError` at `pyprocar/plotter/bs_plot.py:986` |
+| `bands.py` | `obj_overlay_orbitals_array` | ok | |
+| `bands.py` | `obj_quiver_property` | known-defect | `AttributeError` at `pyprocar/plotter/bs_plot.py:986` |
+| `bands.py` | `obj_channel_flip` | ok | |
+| `bands.py` | `legacy_bandsplot_plain` | ok | |
+| `bands.py` | `legacy_bandsplot_parametric` | ok | |
+| `bands.py` | `legacy_bandsplot_scatter` | ok | |
+| `bands.py` | `legacy_bandsplot_overlay_species` | ok | |
+| `bands.py` | `legacy_bandsplot_overlay_orbitals` | ok | |
+| `bands.py` | `legacy_bandsdosplot` | ok | |
+| `bands.py` | `side_effects.txt` | ok | |
+| `ref_unfold.py` | `analytic_validation` | ok | |
+| `ref_unfold.py` | `reference_weights` | ok | |
+| `ref_unfold.py` | `reference_vs_pyprocar` | ok | |
+| `ref_unfold.py` | `reference_vs_test_literals` | ok | |
+| `ref_unfold.py` | `physics_vs_primitive` | ok | |
+| `ref_unfold.py` | `plot_reference_over_primitive` | ok | |
+| `ref_unfold.py` | `side_effects.txt` | ok | |

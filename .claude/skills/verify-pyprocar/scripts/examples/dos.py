@@ -1,6 +1,8 @@
 # Density of states: object API (total, line-colored projection, vertical + legend)
 # and legacy dosplot.
 # Fixture: data/examples/dos/non-spin-polarized
+from typing import Any
+
 import numpy as np
 from verify_steps import CALC, EV, SUMMARY, finish, png, step
 
@@ -64,10 +66,22 @@ def _():
 
 SUMMARY["obj_new_files_in_calc"] = sorted({p.name for p in CALC.iterdir()} - before)
 
-for mode, kw in {"plain": {}, "parametric": dict(atoms=[1], orbitals=[4, 5, 6, 7, 8])}.items():
+V_D: dict[str, Any] = dict(atoms=[1], orbitals=[4, 5, 6, 7, 8])
+MODES: list[tuple[str, str, dict[str, Any]]] = [
+    ("plain", "plain", {}),
+    ("parametric", "parametric", V_D),
+    ("parametric_line", "parametric_line", V_D),
+    ("stack_species", "stack_species", {}),
+    ("stack_orbitals", "stack_orbitals", dict(atoms=[1])),
+    ("stack_no_items", "stack", {}),  # the docstring says it falls back to stack_species
+    ("overlay_items", "overlay", dict(items={"O": [1, 2, 3], "V": [4, 5, 6, 7, 8]})),
+    ("overlay_species", "overlay_species", {}),
+    ("overlay_orbitals", "overlay_orbitals", dict(atoms=[1])),
+]
+for label, mode, kw in MODES:
 
-    @step(f"legacy_dosplot_{mode}")
-    def _(mode=mode, kw=kw):
+    @step(f"legacy_dosplot_{label}")
+    def _(label=label, mode=mode, kw=kw):
         _, ax = pyprocar.dosplot(
             code="vasp",
             dirname=str(CALC),
@@ -75,10 +89,16 @@ for mode, kw in {"plain": {}, "parametric": dict(atoms=[1], orbitals=[4, 5, 6, 7
             fermi=5.3017,
             elimit=[-6, 4],
             show=False,
-            savefig=str(EV / f"legacy_{mode}.png"),
+            savefig=str(EV / f"legacy_{label}.png"),
             **kw,
         )
-        return {"xlim": list(ax.get_xlim()), "n_lines": len(ax.lines)}
+        legend = ax.get_legend()
+        return {
+            "xlim": list(ax.get_xlim()),
+            "n_lines": len(ax.lines),
+            "n_coll": len(ax.collections),
+            "legend": [t.get_text() for t in legend.get_texts()] if legend else [],
+        }
 
 
 finish()

@@ -9,7 +9,7 @@ pyprocar is a Python library, not a server. The user surface is Python calls in 
 
 - **Object API (current):** `ElectronicBandStructurePath/Mesh.from_code`, `DensityOfStates.from_code`, `FermiSurface.from_code` → `BandStructurePlotter` / `DOSPlotter` / `FermiPlotter` / `FermiSlicePlotter`. See `examples/general/new_*_examples.py`.
 - **Legacy one-call functions:** `pyprocar.bandsplot`, `bandsdosplot`, `dosplot`, `fermi2D`, `FermiHandler`, `BandStructure2DHandler`, which the `examples/*/*.ipynb` notebooks use. They are mid-migration. The per-feature status is in `features/README.md`.
-- **File utilities:** `pyprocar.bandgap`, `kpath`, `filter`, `repair`, `cat`, `generate2dkmesh`. These read and write VASP files instead of plotting; see `features/utilities.md`.
+- **File utilities:** `pyprocar.bandgap`, `kpath`, `filter`, `repair`, `cat`, `generate2dkmesh`, the `scripts/procar.py` CLI and the `pyprocar-download` CLI. These read and write files instead of plotting; see `features/utilities.md`.
 
 "Driving" means: write a small driver script that makes those calls on a real calc dir, run it through the harness, and read the evidence.
 
@@ -105,18 +105,28 @@ $H run bands-plain data/examples/bands/non-spin-polarized .claude/skills/verify-
 ```
 
 Per-feature recipes are in `features/`. Each feature has a ready driver at `scripts/examples/<feature>.py` that exercises every entry point the feature file lists. It uses `scripts/lib/verify_steps.py`:
-- `@step(name)` runs one entry point in isolation and records `{ok, ...facts}` or `{ok: false, error, where}` into `summary.json`, so one crash doesn't hide the rest.
-- `finish()` exits 1 if any step failed. A step that records a known crash fails the run too, so read `summary.json` per step and compare it against the feature file's proven end state.
-
-To drive the whole map:
+- `@step(name)` runs one entry point in isolation and records `{ok, ...facts}` or `{ok: false, error, where}` into `summary.json`, so one crash doesn't hide the rest. `where` is the innermost frame in this checkout's `pyprocar/`, as `pyprocar/<path>:<line>`, else the driver's own line as `driver.py:<line>`. It reads the same in every worktree and run.
+- `finish()` exits 1 if any step failed. A step that records a known crash fails the run too, so the exit code alone says nothing. Check the run with `compare`:
 
 ```bash
-E=.claude/skills/verify-pyprocar/scripts/examples
+$H compare data/verify-runs/<run>...
+```
+
+It finds the `scripts/examples` driver whose bytes equal the run's `evidence/driver.py`, reads the run's `summary.json`, `side_effects.txt` and exit code against that driver's rows in the `## Expected step status` tables, prints `matches` or `DEVIATES` with one line per difference, and exits 1 when any run deviates. A deviation is a step whose status, error type or crash site differs from its row, a step missing from either side, an unexpected side-effect file, or an exit code other than 1 with a known defect and 0 without. Triage each one: a fix or a new crash in the library, or a stale row. A one-off driver, or a run of a driver that has changed since, matches no driver, so compare reports it as a deviation; read its `summary.json` instead, or rerun the current driver.
+
+To drive the whole map, then compare every run:
+
+```bash
+E=.claude/skills/verify-pyprocar/scripts/examples tag=map$(date +%H%M%S)
 for f in bands:bands/non-spin-polarized dos:dos/non-spin-polarized fermi3d:fermi3d/non-spin-polarized \
          fermi2d:fermi2d/non-spin-polarized bs2d:bands/2d-bands parsers:bands/non-spin-polarized \
-         utilities:bands/non-spin-polarized; do
-  $H run ${f%%:*} data/examples/${f#*:} $E/${f%%:*}.py; done
+         utilities:bands/non-spin-polarized bands_plain:bands/non-spin-polarized \
+         ref_unfold:bands/unfolding ref_orbits:fermi3d/van-alphen ref_spin_ibz:fermi2d/bisb_monolayer; do
+  $H run $tag-${f%%:*} data/examples/${f#*:} $E/${f%%:*}.py; done
+$H compare data/verify-runs/*-$tag-*
 ```
+
+The loop runs one driver at a time, which keeps the Fermi-surface builds apart.
 
 Headless rules:
 - Matplotlib: always `savefig` into `EVIDENCE`. Pass `show=False` to legacy functions.
@@ -130,7 +140,7 @@ Headless rules:
 Evidence lives at `data/verify-runs/<run>/evidence/` and survives cleanup. That directory is gitignored via `/data`. A proof includes:
 - **The rendered image.** Open it with the Read tool and look at it. Check for correct k-path labels, sensible energy window and non-empty curves. A blank axes still has a nonzero PNG size.
 - **`summary.json` with numbers that tie the image to the data.** Examples: array shapes, number of plotted artists, axis limits, tick labels, and projection sums.
-- **`side_effects.txt`.** Since #245, `from_code` and the legacy plotting functions write nothing into the calc dir without `use_cache=True`; the bands, dos, fermi3d, fermi2d and bs2d drivers listed nothing at d6d4aaa7. An `ebs.pkl` or any other file listed there is a regression. Only the file utilities write files, as `features/utilities.md` documents.
+- **`side_effects.txt`.** Since #245, `from_code` and the legacy plotting functions write nothing into the calc dir without `use_cache=True`; the bands, dos, fermi3d, fermi2d, bs2d and parsers drivers listed nothing at c13166ce. An `ebs.pkl` or any other file listed there is a regression. Only the file utilities write files, as `features/utilities.md` documents.
 - **Exit code and `run.log`**, including warnings.
 
 Proof standards:
@@ -145,7 +155,7 @@ Proof standards:
 $H clean data/verify-runs/<run>
 ```
 
-This removes only that run's `work/` scratch copy (including its `TMPDIR`) and keeps `evidence/`. It refuses paths outside `data/verify-runs/`. Clean every run you made before hand-back, and leave other agents' runs alone. There are no processes to kill.
+This removes only that run's `work/` scratch copy (including its `TMPDIR`) and keeps `evidence/`. It refuses paths outside `data/verify-runs/`. Clean every run you made before hand-back, and leave other agents' runs alone. Name your own run dirs, or glob on a tag only you used, such as the `map<HHMMSS>` tag above: a pattern such as `*-base-*` also matches other agents' runs. There are no processes to kill.
 
 ```bash
 $H gc [hours]     # default 24
@@ -155,13 +165,14 @@ This removes the `work/` copy of every run that started more than `hours` ago, f
 
 ## Helpers
 
-- `scripts/verify.sh`: `doctor | fetch <relpath>... | run <name> <fixture> <driver.py> | clean <run-dir> | gc [hours] | worktree-setup | exec <cmd>...`
+- `scripts/verify.sh`: `doctor | fetch <relpath>... | run <name> <fixture> <driver.py> | compare <run-dir>... | clean <run-dir> | gc [hours] | worktree-setup | exec <cmd>...`
+- `scripts/compare.py`: what `$H compare` runs; it parses the `## Expected step status` tables in `features/*.md`.
 - `scripts/examples/bands_plain.py`: the minimal single-call template, which exits 0. Copy it for a one-off driver.
 - `scripts/examples/{bands,dos,fermi3d,fermi2d,bs2d,parsers,utilities}.py`: full per-feature drivers. Run them as shown under Drive.
 - `scripts/lib/verify_steps.py`: `step`, `png`, `distinct_colors`, `writable_copy` and `finish` for multi-step drivers. It is importable because the harness puts `scripts/lib` on `PYTHONPATH`.
 - `scripts/lib/references/`: independent references (unfolding weights, reduced spin mesh, tiled cut orbits), each with an analytic `validate()` and a `ref_*.py` driver. Compare against one of these before you write your own; `features/README.md` lists them.
 
-Known repo issues that affect verification (as of dev @ d6d4aaa7):
-- `pyprocar.download_from_hf(relpath, output_path=".")` crashes when given a str; it needs a `Path`. The harness passes a `Path`.
+Known repo issues that affect verification (as of dev @ c13166ce):
+- `pyprocar.download_from_hf(relpath, output_path=".")` and the `pyprocar-download` CLI crash when the output path is a str; it needs a `Path`. The harness passes a `Path`. `utilities.md` has the details.
 
 A PR that changes a documented side effect updates this skill in the same PR. basedpyright type-checks `scripts/`, so a PR that breaks a driver's import or call fails CI's typecheck job until it fixes the driver.

@@ -10,15 +10,28 @@ from pyprocar.plotter.bs_2d_plot import BS2DPlotter
 G = CALC / "graphene"
 
 
+bs = BandStructure2D.from_code(code="vasp", dirpath=str(G), grid_interpolation=(20, 20))
+
+
 @step("obj_surface")
 def _():
-    bs = BandStructure2D.from_code(code="vasp", dirpath=str(G), grid_interpolation=(20, 20))
     p = BS2DPlotter(bs, off_screen=True)
     p.plot(scalars_data="bands", show_brillouin_zone=False)
     out = EV / "obj_bs2d.png"
     p.screenshot(str(out))
     p.close()
     return {"n_points": int(bs.n_points), "distinct_colors": distinct_colors(out)}
+
+
+@step("obj_surface_with_bz")
+def _():
+    p = BS2DPlotter(bs, off_screen=True)
+    p.plot(scalars_data="bands", show_brillouin_zone=True)
+    out = EV / "obj_bs2d_bz.png"
+    p.screenshot(str(out))
+    actors = sorted(p.actors)
+    p.close()
+    return {"actors": actors, "distinct_colors": distinct_colors(out)}
 
 
 for label, kw in {
