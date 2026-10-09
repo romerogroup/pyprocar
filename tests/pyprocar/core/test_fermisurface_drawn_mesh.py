@@ -76,7 +76,7 @@ def r_pocket(cart: np.ndarray) -> np.ndarray:
 
 def k_cylinders(cart: np.ndarray) -> np.ndarray:
     """Squared in-plane distance to the nearest hexagonal K or K' column."""
-    k_point = (HEX[0] + HEX[1]) / 3 if np.dot(HEX[0], HEX[1]) < 0 else (2 * HEX[0] - HEX[1]) / 3
+    k_point = (2 * HEX[0] - HEX[1]) / 3
     images = np.array(list(itertools.product(range(-3, 4), range(-3, 4), [0]))) @ HEX
     best = np.full(len(cart), np.inf)
     for centre in (k_point, -k_point):
@@ -92,9 +92,10 @@ def area(fs: FermiSurface) -> float:
     return float(sum(s.area for s in fs.band_isosurfaces.values()))
 
 
-def drawn(lattice, kgrid, band, iso, kshift=(0.0, 0.0, 0.0)) -> FermiSurface:
-    """The surface of ``band`` sampled on the [0,1) grid ``kgrid`` given in ``lattice``."""
-    f = grid_fracs(kgrid, kshift)
+def drawn(lattice, kgrid, band, iso, kshift=(0.0, 0.0, 0.0), centred=False) -> FermiSurface:
+    """The surface of ``band`` sampled on the [0,1) (or centred) grid ``kgrid`` given in
+    ``lattice``."""
+    f = grid_fracs(kgrid, kshift, centred)
     return FermiSurface.from_ebs(mesh(f, band(f @ lattice), lattice, kgrid, iso, kshift))
 
 
@@ -249,11 +250,8 @@ def two_band(lattice) -> FermiSurface:
     """A sphere |k| = 0.25 at Gamma and a pocket r = 0.08 at (0.4, 0.4, 0) on 24^3."""
     f = grid_fracs((24, 24, 24))
     cart = f @ lattice
-    d0 = (cart + 0.5) % 1.0 - 0.5
-    d1 = (cart - np.array([0.4, 0.4, 0.0]) + 0.5) % 1.0 - 0.5
-    bands = np.stack(
-        [np.sum(d0**2, 1) - 0.25**2, np.sum(d1**2, 1) - 0.08**2, np.full(len(f), 5.0)], 1
-    )
+    pocket = sphere(cart - np.array([0.4, 0.4, 0.0]))
+    bands = np.stack([sphere(cart) - 0.25**2, pocket - 0.08**2, np.full(len(f), 5.0)], 1)
     return FermiSurface.from_ebs(mesh(f, bands, lattice, (24, 24, 24), 0.0))
 
 
@@ -299,8 +297,7 @@ def test_reduced_basis_draws_todays_surface_bit_for_bit(lattice_name, centred):
         lattice, kgrid, band, iso = CUBIC, (16, 16, 16), sphere, 0.1
     else:
         lattice, kgrid, band, iso = HEX, (12, 12, 4), hex_band, 0.4
-    f = grid_fracs(kgrid, centred=centred)
-    fs = FermiSurface.from_ebs(mesh(f, band(f @ lattice), lattice, kgrid, iso))
+    fs = drawn(lattice, kgrid, band, iso, centred=centred)
 
     assert surface_digest(fs) == {(0, 0): R1_DIGESTS[(lattice_name, centred)]}
 
@@ -328,8 +325,7 @@ def test_drawn_box_on_a_dense_centred_grid_is_the_zone_box(lattice, points):
     """G1: the drawn box is the zone's bounding box plus one point each side; today 80^3 =
     512000 each. Zone corners reach 2/3 in-plane and 1/2 along c for hex (40 and 30 of 60
     points), and 3/4 for fcc and bcc (45)."""
-    f = grid_fracs((60, 60, 60), centred=True)
-    fs = FermiSurface.from_ebs(mesh(f, sphere(f @ lattice), lattice, (60, 60, 60), 0.05))
+    fs = drawn(lattice, (60, 60, 60), sphere, 0.05, centred=True)
 
     assert fs.ebs.n_kpoints == points
 
@@ -337,8 +333,7 @@ def test_drawn_box_on_a_dense_centred_grid_is_the_zone_box(lattice, points):
 @pytest.mark.guards_existing_behaviour(reason="a cubic box already covers the zone: today's pad")
 def test_drawn_box_on_a_dense_centred_cubic_grid_is_todays_pad():
     """G1, cubic: 80^3 = 512000, today's box."""
-    f = grid_fracs((60, 60, 60), centred=True)
-    fs = FermiSurface.from_ebs(mesh(f, sphere(f), CUBIC, (60, 60, 60), 0.1))
+    fs = drawn(CUBIC, (60, 60, 60), sphere, 0.1, centred=True)
 
     assert fs.ebs.n_kpoints == 512000
 
@@ -366,9 +361,8 @@ def test_tile_holds_one_period_of_the_drawn_grid():
 
     assert grid.n == (32, 32, 16)
     assert grid.tile_multiple == 2
-    m = np.stack(np.meshgrid(*[np.arange(n) for n in grid.n], indexing="ij"), axis=-1)
-    cart = ((m + grid.shift) / np.array(grid.n)) @ grid.lattice
-    np.testing.assert_allclose(tile, sphere(cart.reshape(-1, 3)).reshape(grid.n), atol=1e-12)
+    cart = grid_fracs(grid.n, grid.shift) @ grid.lattice
+    np.testing.assert_allclose(tile, sphere(cart).reshape(grid.n), atol=1e-12)
 
 
 BISB = np.array(

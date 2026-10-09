@@ -92,7 +92,7 @@ class PeriodicGrid:
         lo = np.where(live, zone_lo, self._start)
         hi = np.where(live, zone_hi, self._start + 1)
         m = _box_indices(lo, hi)
-        flat = np.stack([m[..., axis].reshape(-1, order="F") for axis in range(3)], axis=1)
+        flat = m.reshape(-1, 3, order="F")
         kgrid_info = KGridInfo(
             kgrid=self.n,
             kgrid_mode=self._source.kgrid_info.kgrid_mode,
@@ -145,39 +145,17 @@ def periodic_grid(ebs: ElectronicBandStructureMesh) -> PeriodicGrid | None:
 
     basis = np.asarray(ebs.reciprocal_lattice, dtype=np.float64)
     live = big_n > 1
-    start = nearest.min(axis=0).astype(int)
     if is_reduced_basis(basis, live):
-        identity = np.eye(3, dtype=int)
-        return PeriodicGrid(
-            basis,
-            basis,
-            _size3(big_n),
-            shift,
-            ebs,
-            identity,
-            np.zeros(3, dtype=int),
-            start,
-            rows,
-        )
-
-    # Reduce the k-point lattice, not the reciprocal lattice: for unequal N only it is diagonal.
-    k_lattice = basis / big_n[:, None]
-    to_source = _nearest_identity(_reducing_steps(k_lattice, live), k_lattice, live)
+        to_source = np.eye(3, dtype=int)
+    else:
+        # Reduce the k-point lattice, not the reciprocal lattice: for unequal N only it is diagonal.
+        k_lattice = basis / big_n[:, None]
+        to_source = _nearest_identity(_reducing_steps(k_lattice, live), k_lattice, live)
     from_source = np.rint(np.linalg.inv(to_source)).astype(int)
     drawn_shift = _snap_shift((shift @ from_source) % 1.0)
     offset = np.rint(drawn_shift @ to_source - shift).astype(int)
     # n_i is the order of drawn step i modulo the reciprocal lattice.
-    n = np.array(
-        [
-            math.lcm(
-                *(
-                    int(nj) // math.gcd(int(nj), abs(int(t)))
-                    for nj, t in zip(big_n, row, strict=True)
-                )
-            )
-            for row in to_source
-        ]
-    )
+    n = np.lcm.reduce(big_n // np.gcd(to_source, big_n), axis=1)
     steps = n[:, None] * to_source // big_n[None, :]
     return PeriodicGrid(
         basis,
@@ -187,7 +165,7 @@ def periodic_grid(ebs: ElectronicBandStructureMesh) -> PeriodicGrid | None:
         ebs,
         to_source,
         offset,
-        np.where(live, 0, start),
+        nearest.min(axis=0).astype(int),
         rows,
     )
 

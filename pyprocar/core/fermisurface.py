@@ -134,7 +134,7 @@ class FermiSurface(pv.PolyData):
         combined_surface, band_isosurfaces, drawn, point_set = generate_band_isosurfaces(
             drawn, np.asarray(ebs.reciprocal_lattice), isovalue
         )
-        return cls(
+        fs = cls(
             points=combined_surface.points,
             faces=combined_surface.faces,
             band_isosurfaces=band_isosurfaces,
@@ -143,6 +143,8 @@ class FermiSurface(pv.PolyData):
             ebs=drawn,
             point_set=point_set,
         )
+        fs.__dict__["_periodic_grid"] = grid  # the cached_property's value, already parsed
+        return fs
 
     @property
     def original_ebs(self):
@@ -1025,11 +1027,11 @@ def generate_band_isosurfaces(
     -------
     tuple
         The merged surface, the surface per (band, spin), ``drawn`` with a single-point axis
-        widened, and the point set carrying each point's spin and surface index.
+        widened in place, and the point set carrying each point's spin and surface index.
     """
     logger.info("___Generating all Fermi surfaces___")
 
-    padded_ebs = drawn.expand_single_dimension(inplace=False)
+    padded_ebs = drawn.expand_single_dimension(inplace=True)
 
     transform_matrix_to_cart = np.eye(4)
     transform_matrix_to_cart[:3, :3] = np.asarray(padded_ebs.reciprocal_lattice).T

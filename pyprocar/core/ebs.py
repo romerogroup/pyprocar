@@ -1888,7 +1888,9 @@ class ElectronicBandStructureMesh(
         The points fill ``kgrid`` in Fortran order, spaced by one period of
         ``kgrid_info.kgrid``. ``projected_phase`` is dropped, as in ``pad``.
         """
-        ebs = copy.deepcopy(self)
+        # Share the arrays the gather replaces instead of copying them first.
+        shared = {id(a): a for *_, a in self.iter_properties()}
+        ebs = copy.deepcopy(self, memo=shared)
         ebs.remove_property("projected_phase")
         for prop in ebs.property_store.values():
             for calc_name, gradient_order, value_array in list(prop.iter_arrays()):
