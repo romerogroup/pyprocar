@@ -10,6 +10,7 @@ import numpy as np
 import pyvista as pv
 from pyvista import ColorLike
 
+from pyprocar.core.brillouin_zone import reduced_basis_steps
 from pyprocar.plotter._periodic_cut import periodic_bands, plane_orbits
 from pyprocar.plotter._series import SurfaceSeries, finite_range
 from pyprocar.plotter.fs_slice_plot import FermiSlicePlotter
@@ -28,7 +29,8 @@ SNAP_ANGLE = 3e-4
 
 Rounding a lattice direction to 4 significant digits turns it by at most 7.4e-5 rad on
 cubic, hexagonal and fcc cells (3 digits: 7.7e-4, which random normals reach too);
-distinct directions with indices up to 4 are at least 2.4e-2 rad apart there.
+distinct directions with indices up to 4 in the reduced basis are at least 2.1e-2 rad
+apart there.
 """
 
 _DIRECTION_INDICES = np.array(
@@ -49,11 +51,14 @@ def snap_normal(
     translates sit at discrete offsets: for G = m1 b1 + m2 b2 + m3 b3, n . G =
     (u m1 + v m2 + w m3) / |t|. A normal typed with a few digits misses such a direction
     slightly and cuts an irrational plane, where near-copies of one orbit count
-    separately. Returns the indices when the normal was changed, otherwise None.
+    separately. The candidates have indices up to 4 in the Delaunay-reduced real basis, so
+    they do not depend on the basis the lattice is given in. Returns the indices in the
+    given basis when the normal was changed, otherwise None.
     """
     normal = np.asarray(normal, dtype=np.float64) / np.linalg.norm(normal)
     real = np.linalg.inv(np.asarray(reciprocal_lattice, dtype=np.float64)).T
-    directions = _DIRECTION_INDICES @ real
+    indices = _DIRECTION_INDICES @ reduced_basis_steps(real)
+    directions = indices @ real
     directions /= np.linalg.norm(directions, axis=1, keepdims=True)
     cosines = directions @ normal
     best = int(np.argmax(cosines))
@@ -61,7 +66,7 @@ def snap_normal(
     angle = float(np.arctan2(sine, cosines[best]))
     if angle > SNAP_ANGLE or angle < 1e-12:
         return normal, None
-    u, v, w = (int(i) for i in _DIRECTION_INDICES[best])
+    u, v, w = (int(i) for i in indices[best])
     return directions[best], (u, v, w)
 
 

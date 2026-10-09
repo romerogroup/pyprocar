@@ -14,6 +14,21 @@ _NEIGHBOURS = np.array(list(itertools.product(range(-1, 2), repeat=3)))
 _ORIGIN = len(_NEIGHBOURS) // 2
 
 
+def reduced_basis_steps(basis: np.ndarray) -> np.ndarray:
+    """Integer rows T for which ``T @ basis`` is the Delaunay-reduced basis of the lattice
+    spanned by the rows of ``basis``."""
+    lattice = np.asarray(basis, dtype=np.float64)
+    unit = lattice / abs(np.linalg.det(lattice)) ** (1 / 3)
+    with warnings.catch_warnings():
+        # spglib warns on every call while its process-wide OLD_ERROR_HANDLING is on; the
+        # None return below is the error check it asks for.
+        warnings.filterwarnings("ignore", "Set OLD_ERROR_HANDLING", DeprecationWarning)
+        reduced = spglib.delaunay_reduce(unit)
+    if reduced is None:
+        raise ValueError(f"spglib cannot Delaunay-reduce the lattice {lattice.tolist()}")
+    return np.rint(reduced @ np.linalg.inv(unit)).astype(int)
+
+
 def zone_face_steps(reciprocal_lattice: np.ndarray) -> np.ndarray:
     """Integer coefficients, in the rows of ``reciprocal_lattice``, of the lattice vectors
     whose bisector planes bound the first Brillouin zone.
@@ -24,15 +39,7 @@ def zone_face_steps(reciprocal_lattice: np.ndarray) -> np.ndarray:
     midpoint lies on or beyond the bisector plane of another.
     """
     lattice = np.asarray(reciprocal_lattice, dtype=np.float64)
-    unit = lattice / abs(np.linalg.det(lattice)) ** (1 / 3)
-    with warnings.catch_warnings():
-        # spglib warns on every call while its process-wide OLD_ERROR_HANDLING is on; the
-        # None return below is the error check it asks for.
-        warnings.filterwarnings("ignore", "Set OLD_ERROR_HANDLING", DeprecationWarning)
-        reduced = spglib.delaunay_reduce(unit)
-    if reduced is None:
-        raise ValueError(f"spglib cannot Delaunay-reduce the reciprocal lattice {lattice.tolist()}")
-    candidates = _FACE_CANDIDATES @ np.rint(reduced @ np.linalg.inv(unit)).astype(int)
+    candidates = _FACE_CANDIDATES @ reduced_basis_steps(lattice)
     zone = candidates @ lattice
     beyond = zone @ zone.T >= (zone * zone).sum(axis=1)[:, None] * (1 - 1e-9)
     np.fill_diagonal(beyond, False)
