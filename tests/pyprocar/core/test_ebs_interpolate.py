@@ -78,6 +78,24 @@ def test_a_complex_property_keeps_its_imaginary_part():
     assert not np.iscomplexobj(mesh.property_store["bands"].value)
 
 
+@pytest.mark.parametrize("kgrid", [(4, 1, 1), (6, 4, 2), (5, 3, 4)])
+def test_a_complex_property_interpolates_as_its_real_and_imaginary_parts(kgrid):
+    # Random values carry a Nyquist term on every even axis, the case where they could differ.
+    mesh = cosine_mesh(kgrid)
+    rng = np.random.default_rng(0)
+    shape = (mesh.n_kpoints, 2, 1)
+    values = rng.normal(size=shape) + 1j * rng.normal(size=shape)
+    mesh.add_property(name="phase", value=values)
+    mesh.add_property(name="phase_real", value=values.real)
+    mesh.add_property(name="phase_imag", value=values.imag)
+
+    mesh = mesh.interpolate(interpolation_factor=2, inplace=False)
+
+    store = mesh.property_store
+    parts = store["phase_real"].value + 1j * store["phase_imag"].value
+    np.testing.assert_allclose(store["phase"].value, parts, rtol=0, atol=1e-12)
+
+
 def test_interpolating_a_padded_mesh_halves_its_kpoint_spacing():
     # A 5-point axis padded by 2 has 9 points 1/5 apart; doubling gives 18 points 1/10 apart.
     padded = cosine_mesh((5, 5, 5)).pad(padding=2, inplace=False)
