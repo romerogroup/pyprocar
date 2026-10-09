@@ -1,3 +1,4 @@
+import itertools
 import logging
 
 import numpy as np
@@ -337,24 +338,21 @@ def fft_interpolate_mesh(function, interpolation_factor=2):
         nz * interpolation_factor,
     )
     new_fft = np.zeros(new_shape, dtype=complex)
-    # Calculate half-dimensions for proper frequency component placement
-    nx_half = nx // 2
-    ny_half = ny // 2
-    nz_half = nz // 2
-
-    # Copy low frequency components to the new array
     eigen_fft = np.fft.fftn(function_copy)
-    new_fft[:nx_half, :ny_half, :nz_half] = eigen_fft[:nx_half, :ny_half, :nz_half]
 
-    new_fft[-nx_half:, :ny_half, :nz_half] = eigen_fft[-nx_half:, :ny_half, :nz_half]
-    new_fft[:nx_half, -ny_half:, :nz_half] = eigen_fft[:nx_half, -ny_half:, :nz_half]
-    new_fft[:nx_half, :ny_half, -nz_half:] = eigen_fft[:nx_half, :ny_half, -nz_half:]
-
-    new_fft[:nx_half, -ny_half:, -nz_half:] = eigen_fft[:nx_half, -ny_half:, -nz_half:]
-    new_fft[-nx_half:, -ny_half:, :nz_half] = eigen_fft[-nx_half:, -ny_half:, :nz_half]
-    new_fft[-nx_half:, :ny_half, -nz_half:] = eigen_fft[-nx_half:, :ny_half, -nz_half:]
-
-    new_fft[-nx_half:, -ny_half:, -nz_half:] = eigen_fft[-nx_half:, -ny_half:, -nz_half:]
+    # Copy each frequency to the same frequency of the larger grid: the first (n + 1) // 2
+    # indices of an axis hold frequencies 0..ceil(n/2)-1, the last n // 2 the negative ones.
+    # Explicit stops, because a negative slice of length 0 ([-0:]) would take the whole axis.
+    for corner in itertools.product(*[(False, True)] * 3):
+        old_index, new_index = [], []
+        for negative, n, new_n in zip(corner, (nx, ny, nz), new_shape):
+            if negative:
+                old_index.append(slice((n + 1) // 2, n))
+                new_index.append(slice(new_n - n // 2, new_n))
+            else:
+                old_index.append(slice(0, (n + 1) // 2))
+                new_index.append(slice(0, (n + 1) // 2))
+        new_fft[tuple(new_index)] = eigen_fft[tuple(old_index)]
 
     # Perform inverse FFT to get the interpolated result
     interpolated = np.real(np.fft.ifftn(new_fft)) * interpolation_factor**3
