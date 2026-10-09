@@ -13,7 +13,8 @@ from pyvista.plotting.utilities.algorithms import (
 )
 from scipy.constants import elementary_charge, hbar
 
-from pyprocar.plotter._periodic_cut import PeriodicBand, periodic_bands, plane_orbits
+from pyprocar.core._periodic_grid import CUT_TILE_BUDGET
+from pyprocar.plotter._periodic_cut import PeriodicBands, periodic_bands, plane_orbits
 from pyprocar.plotter._series import SurfaceSeries, surface_series
 from pyprocar.plotter._surface_plot import (
     SurfacePlotter,
@@ -46,18 +47,20 @@ def dHvA_frequency(A_max_angstrom2):
 UNJOINED_NOTE = (
     " (k-points are not a uniform 3D grid; orbits crossing the zone boundary are not joined)"
 )
+LARGE_TILE_NOTE = (
+    " (one period of this k-grid in a reduced basis is {} grids, above the limit of {};"
+    " orbits crossing the zone boundary are not joined)"
+)
 
 
-def periodic_source(surface) -> tuple[np.ndarray, list[PeriodicBand]] | None:
-    """The reciprocal lattice and one period of each band of a FermiSurface, else None."""
-    lattice = getattr(surface, "reciprocal_lattice", None)
-    bands = periodic_bands(surface) if lattice is not None else None
-    return None if bands is None else (np.asarray(lattice, dtype=np.float64), bands)
-
-
-def unjoined_note(surface, periodic) -> str:
-    """UNJOINED_NOTE for a Fermi surface whose k-points give no periodic bands."""
-    return UNJOINED_NOTE if periodic is None and hasattr(surface, "reciprocal_lattice") else ""
+def unjoined_note(surface, periodic: PeriodicBands | None) -> str:
+    """Why a Fermi surface that gives no periodic bands has its orbits unjoined."""
+    if periodic is not None or not hasattr(surface, "reciprocal_lattice"):
+        return ""
+    grid = getattr(surface, "_periodic_grid", None)
+    if grid is not None and min(grid.n) > 1 and grid.tile_multiple > CUT_TILE_BUDGET:
+        return LARGE_TILE_NOTE.format(grid.tile_multiple, CUT_TILE_BUDGET)
+    return UNJOINED_NOTE
 
 
 def box_half_spaces(planes: vtk.vtkPlanes) -> tuple[np.ndarray, np.ndarray]:
@@ -342,7 +345,7 @@ class FermiPlotter(SurfacePlotter):
         if add_plane_widget_args is None:
             add_plane_widget_args = {}
         add_plane_widget_args["bounds"] = surface.bounds
-        periodic = periodic_source(surface)
+        periodic = periodic_bands(surface)
 
         add_surface_args["add_active_vectors"] = add_surface_args.get(
             "add_active_vectors", add_active_vectors
@@ -372,7 +375,7 @@ class FermiPlotter(SurfacePlotter):
         add_text_args=None,
         show_van_alphen_frequency=False,
         show_cross_section_area=False,
-        periodic=None,
+        periodic: PeriodicBands | None = None,
         note="",
     ):
         if add_surface_args is None:
@@ -390,7 +393,7 @@ class FermiPlotter(SurfacePlotter):
 
         snapped = None
         if periodic is not None:
-            normal, snapped = snap_normal(normal, periodic[0])
+            normal, snapped = snap_normal(normal, periodic.reciprocal_lattice)
         slc = mesh.slice(normal=normal, origin=origin)
         active_vector_name = slc.active_vectors_name
 
@@ -410,7 +413,7 @@ class FermiPlotter(SurfacePlotter):
 
         if show_van_alphen_frequency or show_cross_section_area:
             areas, n_open = (
-                plane_orbits(periodic[1], periodic[0], normal, origin, box=self._slice_box)
+                plane_orbits(periodic, normal, origin, box=self._slice_box)
                 if periodic is not None
                 else slice_loop_areas(cast(pv.PolyData, slc))
             )
@@ -527,7 +530,7 @@ class FermiPlotter(SurfacePlotter):
 
         add_text_args["color"] = add_text_args.get("color", "black")
 
-        periodic = periodic_source(surface)
+        periodic = periodic_bands(surface)
         note = unjoined_note(surface, periodic)
         mesh = pv.PolyData(surface)
         mesh, algo = algorithm_to_mesh_handler(
@@ -595,7 +598,7 @@ class FermiPlotter(SurfacePlotter):
         add_text_args=None,
         show_van_alphen_frequency=False,
         show_cross_section_area=False,
-        periodic=None,
+        periodic: PeriodicBands | None = None,
         note="",
     ):
         bounds = []

@@ -782,9 +782,9 @@ def test_cut_through_mesh_vertices_keeps_every_straddling_triangle(uvw):
     on both sides of the plane in a translate gives one segment, though the period's
     triangle heights, which pick the candidates, round differently from its own."""
     fcc = np.array([[-1, 1, 1], [1, -1, 1], [1, 1, -1]]) / 4.08
-    bands = periodic_bands(_periodic_surface(lambda k: _sum_of_cosines(k) + 0.05, fcc))
-    assert bands
-    band = bands[0]
+    periodic = periodic_bands(_periodic_surface(lambda k: _sum_of_cosines(k) + 0.05, fcc))
+    assert periodic is not None and periodic.bands
+    band = periodic.bands[0]
     normal = np.asarray(uvw, dtype=np.float64) @ np.linalg.inv(fcc).T
     normal /= np.linalg.norm(normal)
     steps = np.array(list(itertools.product(range(-2, 3), repeat=3)))

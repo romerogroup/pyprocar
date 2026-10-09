@@ -1,7 +1,8 @@
 """Closed orbits of a plane through a periodic band isosurface.
 
-Each band is marching-cubed once over one period: the (N+1)^3 periodic grid that spans the
-unit cell in fractional coordinates. A mesh vertex on an upper cell face is the lower-face
+Each band is marching-cubed once over one period: the (n+1)^3 periodic grid that spans the
+cell of the tile lattice, a reduced basis of the k-grid (see ``PeriodicGrid``), in its
+fractional coordinates. A mesh vertex on an upper cell face is the lower-face
 vertex of the next cell, so every vertex gets a class and an integer cell. A point where
 the plane cuts a mesh edge in some lattice translate of the cell is named by the edge's
 class (its two vertex classes and their relative cell) and the cell of its lower-class
@@ -22,18 +23,11 @@ from scipy.sparse import coo_matrix
 from scipy.sparse.csgraph import connected_components
 from scipy.spatial import HalfspaceIntersection
 
+from pyprocar.core._periodic_grid import CUT_TILE_BUDGET
 from pyprocar.core.brillouin_zone import zone_face_steps
 
 MAX_REACH = 16
-"""Cells from the origin within which an orbit through the zone must close."""
-
-GRID_TOLERANCE = 1e-2
-"""Grid spacings within which a k-point is taken as its uniform-grid point.
-
-k-points printed with 5 decimals stay inside it up to N = 2000 points per axis, with 4
-decimals up to N = 200. A grid stretched as k^1.05 on 16 points is 0.29 off, and falls back.
-Accepted k-points are treated as their exact grid points, as the drawn surface treats them.
-"""
+"""Tile cells from the origin within which an orbit through the zone must close."""
 
 _NEAR_VERTEX = np.array(list(itertools.product(range(-1, 3), repeat=3)))
 """Steps, relative to a vertex's cell, of the translates cut next at an open curve end.
@@ -103,38 +97,38 @@ def periodic_band(grid: np.ndarray, isovalue: float, shift: np.ndarray) -> Perio
     )
 
 
-def periodic_bands(surface) -> list[PeriodicBand] | None:
+@dataclass(frozen=True)
+class PeriodicBands:
+    """One period of each band, and the two lattices it is only correct beside.
+
+    The bands repeat by ``lattice``, the tile, which translates them and counts MAX_REACH.
+    ``reciprocal_lattice`` is the crystal's: it gives the first zone and which orbits are
+    translates of one another. They differ when the k-points are given in a sheared basis.
+    """
+
+    lattice: np.ndarray
+    reciprocal_lattice: np.ndarray
+    bands: list[PeriodicBand]
+
+
+def periodic_bands(surface) -> PeriodicBands | None:
     """One period of each band of a FermiSurface, or None for any other mesh, a 2D grid,
-    or k-points that do not fill the uniform kgrid once."""
+    k-points that do not fill the uniform kgrid once, or a tile above CUT_TILE_BUDGET grids."""
     ebs = getattr(surface, "original_ebs", None)
     keys = getattr(surface, "band_isosurfaces", None)
     isovalue = getattr(surface, "isovalue", None)
     if ebs is None or keys is None or isovalue is None:
         return None
-    n = np.asarray(ebs.kgrid, dtype=int)
-    if (n < 2).any():
-        return None
-    scaled = np.asarray(ebs.kpoints, dtype=np.float64) * n
-    shift = scaled[0] - np.floor(scaled[0])
-    nearest = np.rint(scaled - shift)
-    index = nearest.astype(int) % n
-    filled = np.zeros(tuple(n), dtype=bool)
-    filled[index[:, 0], index[:, 1], index[:, 2]] = True
-    if (
-        len(scaled) != filled.size
-        or not filled.all()
-        or np.abs(scaled - shift - nearest).max() > GRID_TOLERANCE
-    ):
+    grid = surface._periodic_grid
+    if grid is None or min(grid.n) < 2 or grid.tile_multiple > CUT_TILE_BUDGET:
         return None
     energies = np.asarray(ebs.get_property("bands").value)
     bands = []
     for iband, ispin in keys:
-        grid = np.empty(tuple(n))
-        grid[index[:, 0], index[:, 1], index[:, 2]] = energies[:, iband, ispin]
-        band = periodic_band(grid, float(isovalue), shift)
+        band = periodic_band(grid.tile(energies[:, iband, ispin]), float(isovalue), grid.shift)
         if band is not None:
             bands.append(band)
-    return bands
+    return PeriodicBands(grid.lattice, grid.reciprocal_lattice, bands)
 
 
 def _pack(cls, cells: np.ndarray) -> np.ndarray:
@@ -282,7 +276,7 @@ def _curves(found: list[tuple[np.ndarray, ...]]) -> _Curves:
 
 def _start_steps(zone: np.ndarray, half: np.ndarray, inverse: np.ndarray) -> np.ndarray:
     """_START_STEPS, then the other translates whose period meets the zone's bounding box in
-    fractional coordinates, which a sheared basis stretches beyond two cells."""
+    the tile's fractional coordinates (``inverse``), which can reach beyond two cells."""
     halfspaces = np.column_stack([zone, -half])
     corners = HalfspaceIntersection(halfspaces, np.zeros(3)).intersections @ inverse
     low = np.floor(corners.min(axis=0)).astype(int) - 1
@@ -319,8 +313,7 @@ def _band_curves(
 
 
 def plane_orbits(
-    bands: list[PeriodicBand],
-    lattice: np.ndarray,
+    periodic: PeriodicBands,
     normal,
     origin,
     box: tuple[np.ndarray, np.ndarray] | None = None,
@@ -329,22 +322,23 @@ def plane_orbits(
 
     With ``box`` = (normals, offsets), only orbits that also meet the box (normals @ k <=
     offsets) count, so the count follows the drawn, box-clipped slice. Orbits that are
-    lattice translates of one another count once: their area-weighted centroids differ by
-    a lattice vector.
+    reciprocal lattice translates of one another count once: their area-weighted centroids
+    differ by a reciprocal lattice vector.
     """
-    lattice = np.asarray(lattice, dtype=np.float64)
+    lattice = np.asarray(periodic.lattice, dtype=np.float64)
+    reciprocal = np.asarray(periodic.reciprocal_lattice, dtype=np.float64)
     normal = np.asarray(normal, dtype=np.float64) / np.linalg.norm(normal)
     d = float(np.asarray(origin, dtype=np.float64) @ normal)
-    zone = zone_face_steps(lattice) @ lattice
+    zone = zone_face_steps(reciprocal) @ reciprocal
     half = 0.5 * (zone * zone).sum(axis=1)
     region = (zone, half * (1 + 2e-9))
     if box is not None:
         region = (np.vstack([region[0], box[0]]), np.concatenate([region[1], box[1]]))
-    inverse = np.linalg.inv(lattice)
-    start = _start_steps(zone, half, inverse)
+    start = _start_steps(zone, half, np.linalg.inv(lattice))
+    inverse = np.linalg.inv(reciprocal)
     areas: list[float] = []
     n_open = 0
-    for band in bands:
+    for band in periodic.bands:
         curves = _band_curves(_BandCut(band, lattice, normal, d), region, start)
         if curves is None:
             continue

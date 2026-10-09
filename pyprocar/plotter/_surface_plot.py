@@ -80,11 +80,11 @@ def cross_section_areas(
     normal within SNAP_ANGLE of a low-index lattice direction is first replaced by it (see
     ``snap_normal``). Otherwise they are the closed loops of the plane's cut of the mesh.
     """
-    bands = periodic_bands(surface) if reciprocal_lattice is not None else None
-    if reciprocal_lattice is None or not bands:
+    periodic = periodic_bands(surface) if reciprocal_lattice is not None else None
+    if periodic is None or not periodic.bands:
         return slice_loop_areas(cast(pv.PolyData, surface.slice(normal=normal, origin=origin)))
-    normal, _ = snap_normal(normal, reciprocal_lattice)
-    return plane_orbits(bands, reciprocal_lattice, normal, origin)
+    normal, _ = snap_normal(normal, periodic.reciprocal_lattice)
+    return plane_orbits(periodic, normal, origin)
 
 
 def slice_loop_areas(slc: pv.PolyData) -> tuple[list[float], int]:

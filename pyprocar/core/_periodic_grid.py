@@ -27,6 +27,7 @@ GRID_TOLERANCE = 1e-2
 
 k-points printed with 5 decimals stay inside it up to N = 2000 points per axis, with 4
 decimals up to N = 200. A grid stretched as k^1.05 on 16 points is 0.29 off, and falls back.
+Accepted k-points are treated as their exact grid points, by the drawn surface and the cut.
 """
 
 REDUCED_TOLERANCE = 1e-4
@@ -34,6 +35,10 @@ REDUCED_TOLERANCE = 1e-4
 
 POSCAR rounding makes equal hexagonal rows differ: BiSb's |b1 - b2| is 3.2e-6 below |b1|.
 """
+
+CUT_TILE_BUDGET = 16
+"""Largest tile, in stored grids, that the plane cut marches. A grid coprime to its shear needs
+40 to 3600 (inferred: a 16x tile of a 60^3 grid holds 3.5M points)."""
 
 _ON_GRID = 1e-6
 """Grid spacings within which a zone corner is taken as the grid point it sits on."""
