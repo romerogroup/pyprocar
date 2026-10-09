@@ -369,3 +369,31 @@ def test_tile_holds_one_period_of_the_drawn_grid():
     m = np.stack(np.meshgrid(*[np.arange(n) for n in grid.n], indexing="ij"), axis=-1)
     cart = ((m + grid.shift) / np.array(grid.n)) @ grid.lattice
     np.testing.assert_allclose(tile, sphere(cart.reshape(-1, 3)).reshape(grid.n), atol=1e-12)
+
+
+BISB = np.array(
+    [
+        [0.235005607, 0.13568153, 1.89e-07],
+        [1.54e-07, 0.271361575, -1.35e-07],
+        [7e-09, -5e-09, 0.061080856],
+    ]
+)
+"""The BiSb monolayer fixture's reciprocal lattice: hexagonal, but |b1 - b2| is 3.2e-6 shorter
+than |b1| relative, from the rounding of its POSCAR."""
+
+
+@pytest.mark.guards_existing_behaviour(
+    reason="today every basis is drawn as given; a reduced one with rounded lengths stays so"
+)
+def test_hexagonal_basis_with_rounded_lengths_is_drawn_as_given():
+    """Both 60 and 120 degree settings of a hexagonal plane are reduced; POSCAR rounding must
+    not re-index the grid into the other one."""
+    f = grid_fracs((12, 12, 1), centred=True)
+    two_pi = 2 * np.pi
+    band = -(
+        np.cos(two_pi * f[:, 0]) + np.cos(two_pi * f[:, 1]) + np.cos(two_pi * (f[:, 0] - f[:, 1]))
+    )
+
+    fs = FermiSurface.from_ebs(mesh(f, band, BISB, (12, 12, 1), 0.0))
+
+    np.testing.assert_array_equal(fs.ebs.reciprocal_lattice, BISB)
