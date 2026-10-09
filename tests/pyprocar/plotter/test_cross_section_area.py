@@ -269,21 +269,19 @@ def test_rounded_111_normal_cuts_the_exact_111_plane():
     assert np.asarray(areas) == pytest.approx([np.pi * 0.1 * np.sqrt(3)], rel=0.02)
 
 
-A3_PLUS_6_A1 = np.array([[1, 0, 0], [0, 1, 0], [6, 0, 1]])
-"""Rows a1, a2, a3 + 6 a1 of the simple cubic lattice in units of a: the same lattice, where
-[1 1 1] is -5 a1' + a2' + a3'."""
+A3_PLUS_6_A1 = np.array([[1.0, 0.0, -6.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]])
+"""Reciprocal rows of the simple cubic lattice given as a1, a2, a3 + 6 a1 (units of a): the
+same lattice, where [1 1 1] is -5 a1' + a2' + a3'."""
 
 
 def test_rounded_111_normal_snaps_in_a_sheared_basis():
     """The cubic lattice given with a3' = a3 + 6 a1: the (1 1 1) plane through Gamma still
     cuts the cylinder around M in one ellipse of area pi 0.1 sqrt(3) per cell."""
-    reciprocal = np.linalg.inv(A3_PLUS_6_A1.astype(float)).T
-
     areas, n_open = cross_section_areas(
-        _periodic_surface(lambda k: _cylinder_around_m(k @ reciprocal), reciprocal),
+        _periodic_surface(lambda k: _cylinder_around_m(k @ A3_PLUS_6_A1), A3_PLUS_6_A1),
         ROUNDED_111,
         (0, 0, 0),
-        reciprocal,
+        A3_PLUS_6_A1,
     )
 
     assert n_open == 0
@@ -342,10 +340,8 @@ def _turned_by_1e_4_rad(direction) -> np.ndarray:
 
 
 def test_sheared_basis_snaps_to_111_and_names_it_in_the_given_basis():
-    reciprocal = np.linalg.inv(A3_PLUS_6_A1.astype(float)).T
-
     for normal in (_turned_by_1e_4_rad((1, 1, 1)), ROUNDED_111):
-        direction, uvw = snap_normal(normal, reciprocal)
+        direction, uvw = snap_normal(normal, A3_PLUS_6_A1)
 
         assert uvw == (-5, 1, 1)
         np.testing.assert_allclose(direction, np.ones(3) / np.sqrt(3), atol=1e-12)
@@ -362,15 +358,18 @@ def test_doubly_sheared_basis_snaps_every_direction_with_cubic_indices_up_to_2()
         if any(uvw) and np.gcd.reduce(np.abs(uvw)) == 1
     ]
 
-    snapped = []
+    missed = []
     for uvw in cubic:
         direction, indices = snap_normal(_turned_by_1e_4_rad(uvw), reciprocal)
-        if indices is not None and np.array_equal(np.array(indices) @ given, uvw):
-            np.testing.assert_allclose(direction, np.divide(uvw, np.linalg.norm(uvw)), atol=1e-12)
-            snapped.append(uvw)
+        if (
+            indices is None
+            or not np.array_equal(np.array(indices) @ given, uvw)
+            or not np.allclose(direction, np.divide(uvw, np.linalg.norm(uvw)), atol=1e-12)
+        ):
+            missed.append(uvw)
 
     assert len(cubic) == 98
-    assert snapped == cubic
+    assert missed == []
 
 
 def test_drawn_slice_uses_the_snapped_normal():

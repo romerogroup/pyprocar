@@ -132,13 +132,15 @@ def _directions(real: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
     reduced = spglib.delaunay_reduce(real)
     if reduced is None:
         raise ValueError(f"spglib cannot Delaunay-reduce {real.tolist()}")
-    indices = np.array(
+    reduced_in_given = np.rint(reduced @ np.linalg.inv(real)).astype(int)
+    reduced_indices = np.array(
         [
             uvw
             for uvw in itertools.product(range(-4, 5), repeat=3)
             if any(uvw) and np.gcd.reduce(np.abs(uvw)) == 1
         ]
-    ) @ np.rint(reduced @ np.linalg.inv(real)).astype(int)
+    )
+    indices = reduced_indices @ reduced_in_given
     vectors = indices @ real
     return indices, vectors / np.linalg.norm(vectors, axis=1, keepdims=True)
 
