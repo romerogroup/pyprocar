@@ -16,7 +16,7 @@ from abc import ABC, abstractmethod
 from collections.abc import Iterable, Mapping, Sequence
 from functools import cached_property
 from pathlib import Path
-from typing import Any
+from typing import Any, Literal
 
 import numpy as np
 import numpy.typing as npt
@@ -1890,7 +1890,7 @@ class ElectronicBandStructureMesh(
         ebs._mesh = ebs.to_mesh()
         return ebs
 
-    def interpolate(self, interpolation_factor=2, inplace=True, order="F"):
+    def interpolate(self, interpolation_factor=2, inplace=True, order: Literal["C", "F"] = "F"):
         """Interpolates the band structure meshes and properties using FFT interpolation.
         Creates and returns a new ElectronicBandStructure instance with interpolated data.
 
@@ -1919,7 +1919,7 @@ class ElectronicBandStructureMesh(
             for i, n in enumerate(ebs.kgrid)
         ]
         new_kpoints_mesh = np.stack(np.meshgrid(*new_axes, indexing="ij"), axis=-1)
-        new_kpoints = math.mesh_to_array(new_kpoints_mesh, order=order)
+        new_kpoints = new_kpoints_mesh.reshape(-1, 3, order=order)
 
         for prop_name, calc_name, gradient_order, value_array in ebs.iter_properties():
             property = ebs.get_property(prop_name)

@@ -2,7 +2,12 @@ import numpy as np
 import pytest
 
 from pyprocar.core.ebs import ElectronicBandStructureMesh
-from pyprocar.core.kpoints import KGRID_MODE, KGridInfo, generate_gamma_centered_kpoints, sort_kpoints
+from pyprocar.core.kpoints import (
+    KGRID_MODE,
+    KGridInfo,
+    generate_gamma_centered_kpoints,
+    sort_kpoints,
+)
 
 
 def band_energy(kpoints: np.ndarray) -> np.ndarray:
@@ -41,7 +46,9 @@ def test_interpolated_bands_match_the_band_at_each_returned_kpoint(kgrid, factor
     assert np.allclose(mesh.kgrid_spacing, 1 / new_kgrid)
 
     energy = band_energy(mesh.kpoints)
-    error = np.abs(mesh.bands.value[:, :, 0] - np.stack([energy, -0.5 * energy], axis=1))
+    error = np.abs(
+        mesh.property_store["bands"].value[:, :, 0] - np.stack([energy, -0.5 * energy], axis=1)
+    )
     assert error.max() < 1e-9
 
 
@@ -59,4 +66,6 @@ def test_interpolating_a_padded_mesh_halves_its_kpoint_spacing():
     coarse_steps = (mesh.kpoints - padded.kpoints[0]) / 0.2
     kept = np.all(np.isclose(coarse_steps, np.round(coarse_steps)), axis=1)
     assert np.allclose(mesh.kpoints[kept], padded.kpoints)
-    assert np.allclose(mesh.bands.value[kept], padded.bands.value, atol=1e-9)
+    assert np.allclose(
+        mesh.property_store["bands"].value[kept], padded.property_store["bands"].value, atol=1e-9
+    )
