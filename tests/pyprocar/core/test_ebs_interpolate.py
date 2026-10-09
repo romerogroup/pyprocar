@@ -43,3 +43,20 @@ def test_interpolated_bands_match_the_band_at_each_returned_kpoint(kgrid, factor
     energy = band_energy(mesh.kpoints)
     error = np.abs(mesh.bands.value[:, :, 0] - np.stack([energy, -0.5 * energy], axis=1))
     assert error.max() < 1e-9
+
+
+def test_interpolating_a_padded_mesh_halves_its_kpoint_spacing():
+    # A 5-point axis padded by 2 has 9 points 1/5 apart; doubling gives 18 points 1/10 apart.
+    padded = cosine_mesh((5, 5, 5)).pad(padding=2, inplace=False)
+
+    mesh = padded.interpolate(interpolation_factor=2, inplace=False)
+
+    assert np.array_equal(mesh.kgrid, [18, 18, 18])
+    assert np.allclose(mesh.kgrid_spacing, 0.1)
+    for axis in range(3):
+        assert np.allclose(np.diff(np.unique(mesh.kpoints[:, axis].round(9))), 0.1)
+    # FFT interpolation passes through its samples: every second point is a padded point.
+    coarse_steps = (mesh.kpoints - padded.kpoints[0]) / 0.2
+    kept = np.all(np.isclose(coarse_steps, np.round(coarse_steps)), axis=1)
+    assert np.allclose(mesh.kpoints[kept], padded.kpoints)
+    assert np.allclose(mesh.bands.value[kept], padded.bands.value, atol=1e-9)

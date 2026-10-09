@@ -908,7 +908,8 @@ def test_padded_then_interpolated_gradient_matches_finite_difference(ebs):
     expected = np.asarray(math.mesh_to_array(d_frac @ np.linalg.inv(angular_lattice).T))
     interior = np.asarray(math.mesh_to_array(np.pad(np.ones((n - 2,) * 3, dtype=bool), 1)))
     assert n == 82
-    assert np.isclose(spacing, 40 / (21 * 81), atol=1e-12)
+    # 21 points per axis padded by 10 are 1/21 apart; interpolating by 2 halves that.
+    assert np.isclose(spacing, 1 / 42, atol=1e-12)
     assert np.allclose(gradient[interior], expected[interior], rtol=1e-6, atol=1e-6)
 
 
