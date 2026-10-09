@@ -1204,13 +1204,16 @@ class ElectronicBandStructure(PointSet):
         return ebs
 
     def shift_kpoints_to_fbz(self, inplace=True):
-        # Shifting all kpoint to first Brillouin zone
+        """Move each k-point by a reciprocal lattice vector into the first Brillouin zone."""
+        reciprocal_lattice = self.reciprocal_lattice
+        if reciprocal_lattice is None:
+            raise ValueError("shift_kpoints_to_fbz needs the reciprocal lattice to find the zone")
         if inplace:
             ebs = self
         else:
             ebs = copy.deepcopy(self)
 
-        new_kpoints = kpoints.wrap_to_unit_cell(ebs.kpoints)
+        new_kpoints = kpoints.reduce_to_first_zone(ebs.kpoints, reciprocal_lattice)
         ebs.update_points(new_kpoints)
         return ebs
 
@@ -1814,6 +1817,11 @@ class ElectronicBandStructureMesh(
         logger.debug(f"Nkx: {self.n_kx}, Nky: {self.n_ky}, Nkz: {self.n_kz}")
         logger.debug(f"Property mesh shape: {property_mesh.shape}")
         return property_mesh
+
+    @override
+    def shift_kpoints_to_fbz(self, inplace=True):
+        """Refuse: points moved into the first zone no longer form the Mesh's box grid."""
+        raise ValueError("shift_kpoints_to_fbz would break an ElectronicBandStructureMesh's grid")
 
     def pad(self, padding=10, order="F", inplace=True):
         """Wrap the grid by ``padding`` k-points in each direction with more than one point.
