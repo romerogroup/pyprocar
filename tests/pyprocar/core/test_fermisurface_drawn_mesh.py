@@ -139,10 +139,12 @@ def test_sphere_on_a_general_shear_has_the_reduced_area(lattice):
 )
 def test_hexagonal_k_columns_on_a_unit_cell_grid_match_the_centred_grid(nk, expected):
     """D1: the hexagonal zone reaches -2/3; today the [0,1) grid draws 1.2677, 0.6767, 0.2849.
-    The literals are today's areas on the centred (-1/2, 1/2] grid."""
+    The literals are today's areas on the centred (-1/2, 1/2] grid. Clipped through the zone
+    corners, these columns sit on a wider float32 noise floor: today's own centred NK=18 area
+    moves by 1.4e-7 as its padding goes from 10 to 16."""
     fs = drawn(HEX, (nk, nk, max(6, nk // 3)), k_cylinders, HEX_RADIUS_SQ)
 
-    assert area(fs) == pytest.approx(expected, abs=AREA_TOL)
+    assert area(fs) == pytest.approx(expected, abs=1.5e-7)
 
 
 def wrapped_sq(cart: np.ndarray, centre: np.ndarray) -> np.ndarray:
@@ -308,11 +310,13 @@ def test_extend_surface_translates_by_the_given_basis():
 
 @pytest.mark.parametrize(
     ("lattice", "points"),
-    [(HEX, 451520), (BCC, 804357), (FCC, 804357)],
+    [(HEX, 83 * 83 * 63), (BCC, 93**3), (FCC, 93**3)],
     ids=["hex", "bcc", "fcc"],
 )
 def test_drawn_box_on_a_dense_centred_grid_is_the_zone_box(lattice, points):
-    """G1: the drawn box is the zone's bounding box plus one point; today 80^3 = 512000 each."""
+    """G1: the drawn box is the zone's bounding box plus one point each side; today 80^3 =
+    512000 each. Zone corners reach 2/3 in-plane and 1/2 along c for hex (40 and 30 of 60
+    points), and 3/4 for fcc and bcc (45)."""
     f = grid_fracs((60, 60, 60), centred=True)
     fs = FermiSurface.from_ebs(mesh(f, sphere(f @ lattice), lattice, (60, 60, 60), 0.05))
 
