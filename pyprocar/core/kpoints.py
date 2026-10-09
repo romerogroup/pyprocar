@@ -13,7 +13,7 @@ from typing import Literal
 import numpy as np
 import pyvista as pv
 
-from pyprocar.core.brillouin_zone import BrillouinZone
+from pyprocar.core.brillouin_zone import BrillouinZone, zone_face_steps
 from pyprocar.utils import math, np_utils
 from pyprocar.utils.log_utils import warn_user
 
@@ -35,9 +35,29 @@ class KGridInfo:
     kshift: tuple[float, float, float]
 
 
-def wrap_to_first_zone(kpoints: np.ndarray) -> np.ndarray:
+def wrap_to_unit_cell(kpoints: np.ndarray) -> np.ndarray:
     """Move each fractional k by a reciprocal lattice vector into (-1/2, 1/2]."""
     return kpoints - np.ceil(kpoints - 0.5)
+
+
+def reduce_to_first_zone(kpoints: np.ndarray, reciprocal_lattice: np.ndarray) -> np.ndarray:
+    """Move each fractional k by a reciprocal lattice vector into the Wigner-Seitz first zone.
+
+    Each step takes away the face vector G whose bisector k lies furthest beyond, which
+    shortens k, so the loop ends; k is in the zone once it lies beyond no bisector.
+    """
+    steps = zone_face_steps(reciprocal_lattice)
+    faces = steps @ reciprocal_lattice
+    # Maps fractional k to k.G / |G|^2 per face vector G; above 1/2, k is beyond its bisector.
+    to_reach = reciprocal_lattice @ faces.T / (faces * faces).sum(axis=1)
+    reduced = wrap_to_unit_cell(np.asarray(kpoints, dtype=np.float64))
+    while True:
+        reach = reduced @ to_reach
+        furthest = reach.argmax(axis=1)
+        beyond = reach[np.arange(len(reduced)), furthest] > 0.5 + 1e-12
+        if not beyond.any():
+            return reduced
+        reduced[beyond] -= steps[furthest[beyond]]
 
 
 def generate_gamma_centered_kpoints(
@@ -58,8 +78,8 @@ def generate_gamma_centered_kpoints(
     meshgrid = np.array(np.meshgrid(kx_vals, ky_vals, kz_vals, indexing="ij"))
     move_axis = np.swapaxes(meshgrid, 0, -1)
     grid_points = move_axis.reshape(-1, 3)
-    fbz_points = wrap_to_first_zone(grid_points)
-    sorted_kpoints = sort_kpoints(fbz_points, order="F")
+    cell_points = wrap_to_unit_cell(grid_points)
+    sorted_kpoints = sort_kpoints(cell_points, order="F")
 
     return sorted_kpoints
 

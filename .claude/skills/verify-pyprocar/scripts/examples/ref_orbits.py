@@ -34,8 +34,11 @@ FREQUENCY_TOLERANCE = 1e-5
 """Relative. The frequency text keeps every digit of the largest area. pyprocar's energies are
 5e-7 eV off EIGENVAL's, which moves the mesh vertices: measured 1.5e-6."""
 SNAP_ANGLE = 3e-4
-"""Radians, the documented snap_normal rule: a normal this close to a real-space lattice
-direction [u v w] with |indices| <= 4 becomes that direction."""
+"""Radians, the documented snap_normal rule: a normal this close to a direction with given-basis
+indices up to SNAP_REACH, or to a primitive real-space lattice vector no longer than SNAP_REACH
+times the sum of the successive minima, becomes that direction, and the note names it as
+[u v w] in the given basis."""
+SNAP_REACH = 4
 LATTICE_NOISE = 1e-6
 """Radians. pyprocar's reciprocal lattice is 4.6e-10 off POSCAR's, so an exact lattice direction
 built from POSCAR may or may not get a snap note; above this angle the note is required."""
@@ -124,14 +127,32 @@ def _():
     }
 
 
+def _lattice_vectors_within(real: np.ndarray, radius: float) -> np.ndarray:
+    """Every nonzero integer row m with |m @ real| <= radius: m_i = t . d_i for the dual
+    columns d_i, so the box |m_i| <= radius |d_i| holds them all."""
+    reach = np.floor(radius * np.linalg.norm(np.linalg.inv(real), axis=0) + 1e-9).astype(int)
+    m = np.array(list(itertools.product(*(range(-r, r + 1) for r in reach))))
+    return m[(np.linalg.norm(m @ real, axis=1) <= radius * (1 + 1e-9)) & m.any(axis=1)]
+
+
+def _successive_minima(real: np.ndarray) -> np.ndarray:
+    """Lengths of the shortest, then shortest independent, lattice vectors, by brute force
+    over every vector no longer than the longest given row."""
+    vectors = _lattice_vectors_within(real, float(np.linalg.norm(real, axis=1).max())) @ real
+    picked: list[np.ndarray] = []
+    for t in vectors[np.argsort(np.linalg.norm(vectors, axis=1))]:
+        if np.linalg.matrix_rank(np.array([*picked, t]), tol=1e-8) > len(picked):
+            picked.append(t)
+    return np.linalg.norm(picked, axis=1)
+
+
 def _directions(real: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
-    indices = np.array(
-        [
-            uvw
-            for uvw in itertools.product(range(-4, 5), repeat=3)
-            if any(uvw) and np.gcd.reduce(np.abs(uvw)) == 1
-        ]
-    )
+    """Given-basis indices and unit vectors of the primitive lattice vectors with indices up to
+    SNAP_REACH or no longer than SNAP_REACH times the sum of the successive minima."""
+    ball = _lattice_vectors_within(real, SNAP_REACH * float(_successive_minima(real).sum()))
+    given = np.array(list(itertools.product(range(-SNAP_REACH, SNAP_REACH + 1), repeat=3)))
+    m = np.vstack([given, ball])
+    indices = m[np.gcd.reduce(np.abs(m), axis=1) == 1]
     vectors = indices @ real
     return indices, vectors / np.linalg.norm(vectors, axis=1, keepdims=True)
 

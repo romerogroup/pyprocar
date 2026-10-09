@@ -10,9 +10,11 @@ import warnings
 
 import numpy as np
 import pytest
+import pyvista as pv
 from scipy.spatial import ConvexHull, Voronoi
 
-from pyprocar.core.brillouin_zone import BrillouinZone, BrillouinZone2D
+from pyprocar.core.brillouin_zone import BrillouinZone, BrillouinZone2D, clip_to_zone
+from tests.pyprocar.core.test_bandstructure2d_grid import HEXAGONAL
 
 
 @pytest.fixture
@@ -424,3 +426,54 @@ def test_building_a_zone_emits_no_warnings():
         BrillouinZone(lattice)
 
     assert [str(w.message) for w in record] == []
+
+
+def _outward(zone, inside: np.ndarray) -> np.ndarray:
+    """normal . (face center - interior point) for every face of ``zone``."""
+    return np.einsum("ij,ij->i", zone.face_normals, zone.centers - inside)
+
+
+@pytest.mark.parametrize(
+    ("e_min", "e_max"), [(-8.0, -2.0), (-3.0, 3.0), (2.0, 8.0)], ids=["below", "around", "above"]
+)
+def test_2d_zone_face_normals_point_out_of_the_prism_at_any_energy(e_min, e_max):
+    """The graphene zone is a hexagonal prism around Gamma from e_min to e_max, so its
+    centroid is (0, 0, (e_min + e_max) / 2) and all 8 face normals point away from it."""
+    zone = BrillouinZone2D(e_min=e_min, e_max=e_max, reciprocal_lattice=2 * np.pi * HEXAGONAL)
+
+    outward = _outward(zone, np.array([0.0, 0.0, (e_min + e_max) / 2]))
+
+    assert zone.n_cells == 8
+    assert (outward > 0).all(), outward
+
+
+CUBIC = 2 * np.pi * np.eye(3)
+# Keys name the real-space lattice whose reciprocal lattice the value is.
+ZONES_3D = {
+    "cubic": CUBIC,
+    "fcc": 2 * np.pi * np.array([[-1.0, 1.0, 1.0], [1.0, -1.0, 1.0], [1.0, 1.0, -1.0]]),
+    "bcc": 2 * np.pi * np.array([[0.0, 1.0, 1.0], [1.0, 0.0, 1.0], [1.0, 1.0, 0.0]]),
+    "hexagonal": 2 * np.pi * HEXAGONAL,
+    "sheared-cubic": SHEARS["b2+3b1,b3-2b1+2b2"] @ CUBIC,
+}
+
+
+@pytest.mark.guards_existing_behaviour(
+    reason="Gamma is inside every 3D zone, so the face-0 rule already orients these outward"
+)
+@pytest.mark.parametrize("lattice", list(ZONES_3D.values()), ids=list(ZONES_3D))
+def test_3d_zone_face_normals_point_away_from_gamma(lattice):
+    zone = BrillouinZone(lattice)
+
+    assert (_outward(zone, np.zeros(3)) > 0).all()
+
+
+def test_clip_to_zone_of_a_surface_outside_the_zone_is_empty():
+    """H3: a sphere wholly outside the cubic zone clips to no points and does not raise; one
+    wholly inside keeps every point."""
+    zone = BrillouinZone(np.eye(3))
+    outside = pv.Sphere(radius=0.2, center=(2.0, 2.0, 2.0))
+    inside = pv.Sphere(radius=0.2)
+
+    assert clip_to_zone(outside, zone).n_points == 0
+    assert clip_to_zone(inside, zone).n_points == inside.n_points

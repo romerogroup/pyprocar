@@ -1,6 +1,5 @@
 """PyVista plotter behaviour shared by FermiPlotter and BS2DPlotter."""
 
-import itertools
 import logging
 import os
 from typing import Any, cast
@@ -10,6 +9,8 @@ import numpy as np
 import pyvista as pv
 from pyvista import ColorLike
 
+from pyprocar.core._periodic_grid import box_indices
+from pyprocar.core.brillouin_zone import clip_to_zone, niggli_basis_steps, warn_clipped_away
 from pyprocar.plotter._periodic_cut import periodic_bands, plane_orbits
 from pyprocar.plotter._series import SurfaceSeries, finite_range
 from pyprocar.plotter.fs_slice_plot import FermiSlicePlotter
@@ -24,20 +25,45 @@ def find_nearest(array, value):
 
 
 SNAP_ANGLE = 3e-4
-"""Radians within which a slice normal is replaced by a low-index lattice direction.
+"""Radians within which a slice normal is replaced by a lattice direction (``snap_normal``).
 
-Rounding a lattice direction to 4 significant digits turns it by at most 7.4e-5 rad on
-cubic, hexagonal and fcc cells (3 digits: 7.7e-4, which random normals reach too);
-distinct directions with indices up to 4 are at least 2.4e-2 rad apart there.
+Rounding a candidate direction to 4 significant digits turns it by at most 8.4e-5 rad on
+cubic, hexagonal, fcc, bcc and Bi2Se3 rhombohedral cells (3 digits: 7.7e-4, which random
+normals reach too). Distinct candidates are at least 4.4e-3 rad apart on hexagonal cells
+with c/a = 1.633, 15 times this angle (fcc 7.1e-3, bcc 7.5e-3, cubic 9.0e-3, the Bi2Se3
+rhombohedral primitive cell 3.4e-3). A longer cell has more candidates: 2.4e-3 at c/a = 3,
+1.6e-3 at c/a = 4, 5.7e-4 at c/a = 8 and 1.9e-4 at c/a = 15, where a normal typed far from
+any low-index direction can snap to a high-index one. A call builds the candidates anew:
+about 1 ms on these cells up to c/a = 4, 8-10 ms at c/a = 8 and 15.
 """
 
-_DIRECTION_INDICES = np.array(
-    [
-        uvw
-        for uvw in itertools.product(range(-4, 5), repeat=3)
-        if any(uvw) and np.gcd.reduce(np.abs(uvw)) == 1
-    ]
-)
+SNAP_REACH = 4
+"""The snap candidates are the directions with indices up to SNAP_REACH in the given basis,
+the candidates before #302, and the primitive real-space lattice vectors no longer than
+SNAP_REACH times the sum of the lattice's successive minima. The second set depends on the
+lattice only, so a sheared basis snaps the directions its reduced basis does; the first keeps
+every direction dev snapped on a cell that is not reduced, such as a rhombohedral primitive
+cell with a small angle."""
+
+_GIVEN_BOX = box_indices(np.full(3, -SNAP_REACH), np.full(3, SNAP_REACH + 1)).reshape(-1, 3)
+
+
+def _snap_candidates(real: np.ndarray) -> np.ndarray:
+    """Indices, in the rows of ``real``, of the snap candidates (see SNAP_REACH): those up to
+    SNAP_REACH, and those of the primitive lattice vectors t with |t| <= SNAP_REACH
+    (lambda1 + lambda2 + lambda3)."""
+    steps = niggli_basis_steps(real)
+    niggli = steps @ real
+    radius = SNAP_REACH * float(np.linalg.norm(niggli, axis=1).sum())
+    # The coefficient of t on niggli row i is t . d_i, d_i the dual column, so at most
+    # radius |d_i|.
+    reach = np.floor(radius * np.linalg.norm(np.linalg.inv(niggli), axis=0) + 1e-9).astype(int)
+    box = box_indices(-reach, reach + 1).reshape(-1, 3)
+    box = box[np.linalg.norm(box @ niggli, axis=1) <= radius * (1 + 1e-9)]
+    # A direction in both sets appears twice, with the same indices: argmax takes either.
+    # The steps are unimodular, so they keep each row's gcd.
+    candidates = np.vstack([_GIVEN_BOX, box @ steps])
+    return candidates[np.gcd.reduce(np.abs(candidates), axis=1) == 1]
 
 
 def snap_normal(
@@ -49,11 +75,14 @@ def snap_normal(
     translates sit at discrete offsets: for G = m1 b1 + m2 b2 + m3 b3, n . G =
     (u m1 + v m2 + w m3) / |t|. A normal typed with a few digits misses such a direction
     slightly and cuts an irrational plane, where near-copies of one orbit count
-    separately. Returns the indices when the normal was changed, otherwise None.
+    separately. The candidates (see SNAP_REACH) hold the same lattice directions in every
+    basis and orientation, and in the given basis also those with indices up to SNAP_REACH.
+    Returns the indices in the given basis when the normal was changed, otherwise None.
     """
     normal = np.asarray(normal, dtype=np.float64) / np.linalg.norm(normal)
     real = np.linalg.inv(np.asarray(reciprocal_lattice, dtype=np.float64)).T
-    directions = _DIRECTION_INDICES @ real
+    indices = _snap_candidates(real)
+    directions = indices @ real
     directions /= np.linalg.norm(directions, axis=1, keepdims=True)
     cosines = directions @ normal
     best = int(np.argmax(cosines))
@@ -61,7 +90,7 @@ def snap_normal(
     angle = float(np.arctan2(sine, cosines[best]))
     if angle > SNAP_ANGLE or angle < 1e-12:
         return normal, None
-    u, v, w = (int(i) for i in _DIRECTION_INDICES[best])
+    u, v, w = (int(i) for i in indices[best])
     return directions[best], (u, v, w)
 
 
@@ -73,13 +102,14 @@ def cross_section_areas(
     For a FermiSurface and its ``reciprocal_lattice`` (rows are the b vectors), the orbits
     are those of the periodic surface that meet the first zone (see ``plane_orbits``), and a
     normal within SNAP_ANGLE of a low-index lattice direction is first replaced by it (see
-    ``snap_normal``). Otherwise they are the closed loops of the plane's cut of the mesh.
+    ``snap_normal``). Both use the surface's own lattice; the argument only asks for them.
+    Otherwise the orbits are the closed loops of the plane's cut of the mesh.
     """
-    bands = periodic_bands(surface) if reciprocal_lattice is not None else None
-    if reciprocal_lattice is None or not bands:
+    periodic = periodic_bands(surface) if reciprocal_lattice is not None else None
+    if periodic is None or not periodic.bands:
         return slice_loop_areas(cast(pv.PolyData, surface.slice(normal=normal, origin=origin)))
-    normal, _ = snap_normal(normal, reciprocal_lattice)
-    return plane_orbits(bands, reciprocal_lattice, normal, origin)
+    normal, _ = snap_normal(normal, periodic.reciprocal_lattice)
+    return plane_orbits(periodic, normal, origin)
 
 
 def slice_loop_areas(slc: pv.PolyData) -> tuple[list[float], int]:
@@ -142,15 +172,6 @@ def area_text(areas: list[float], n_open: int, scale: float = 1.0) -> str:
     return f"Cross sectional area : {sum(areas) * scale:.4f} Ang^-2" + open_curves_note(n_open)
 
 
-def clip_to_zone(surface: pv.PolyData, zone: pv.PolyData) -> pv.PolyData:
-    """Cut ``surface`` down to the part inside every face plane of ``zone``."""
-    for normal, center in zip(zone.face_normals, zone.centers, strict=True):
-        surface = cast(pv.PolyData, surface.clip(origin=center, normal=normal, inplace=False))
-        if surface.points.shape[0] == 0:
-            break
-    return surface
-
-
 def normalize_to_range(scalars, clim=(0, 1)):
     if clim is None:
         clim = (0, 1)
@@ -203,7 +224,7 @@ class SurfacePlotter(pv.Plotter):
         longest = finite_range(vector_norms)[1]
 
         meshes: dict[tuple[int, int], pv.PolyData] = {}
-        for i, series in enumerate(series_list):
+        for series in series_list:
             key = (series.band_index, series.spin_index)
             mesh = series.mesh.copy()
 
@@ -216,6 +237,9 @@ class SurfacePlotter(pv.Plotter):
 
             if clip_to is not None:
                 mesh = clip_to_zone(mesh, clip_to)
+                if mesh.n_points == 0:
+                    warn_clipped_away(f"band {series.band_index} spin {series.spin_index}")
+                    continue
 
             if series.vectors is not None and "vectors" in mesh.point_data:
                 mesh.set_active_vectors("vectors")
@@ -223,7 +247,7 @@ class SurfacePlotter(pv.Plotter):
             mesh_kwargs: dict[str, Any] = {
                 "cmap": scalars_cmap,
                 "clim": scalars_clim,
-                "show_scalar_bar": show_scalar_bar and i == 0,
+                "show_scalar_bar": show_scalar_bar and not meshes,
                 "name": f"surface_{series.band_index}_{series.spin_index}",
                 **(add_surface_kwargs or {}),
                 **series.kwargs,

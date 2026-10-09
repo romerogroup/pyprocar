@@ -16,14 +16,14 @@ from abc import ABC, abstractmethod
 from collections.abc import Iterable, Mapping, Sequence
 from functools import cached_property
 from pathlib import Path
-from typing import Any
+from typing import Any, SupportsInt
 
 import numpy as np
 import numpy.typing as npt
 import pyvista as pv
 from typing_extensions import override
 
-from pyprocar.core import kpoints
+import pyprocar.core.kpoints as kpoints
 from pyprocar.core.atomic_orbital_index import (
     CONVENTIONAL_CUBIC_ORBITAL_ORDER,
     ProjectionSelectionResolver,
@@ -1204,13 +1204,16 @@ class ElectronicBandStructure(PointSet):
         return ebs
 
     def shift_kpoints_to_fbz(self, inplace=True):
-        # Shifting all kpoint to first Brillouin zone
+        """Move each k-point by a reciprocal lattice vector into the first Brillouin zone."""
+        reciprocal_lattice = self.reciprocal_lattice
+        if reciprocal_lattice is None:
+            raise ValueError("shift_kpoints_to_fbz needs the reciprocal lattice to find the zone")
         if inplace:
             ebs = self
         else:
             ebs = copy.deepcopy(self)
 
-        new_kpoints = kpoints.wrap_to_first_zone(ebs.kpoints)
+        new_kpoints = kpoints.reduce_to_first_zone(ebs.kpoints, reciprocal_lattice)
         ebs.update_points(new_kpoints)
         return ebs
 
@@ -1648,11 +1651,19 @@ def edge_diff_ramp(vector, pad_width, iaxis, kwargs):
     vector[-pad_width[1] :] = right_pad
 
 
+def _grid_size(sizes: Iterable[SupportsInt]) -> tuple[int, int, int]:
+    n_kx, n_ky, n_kz = sizes
+    return (int(n_kx), int(n_ky), int(n_kz))
+
+
 class ElectronicBandStructureMesh(
     ElectronicBandStructure, DifferentiablePropertyInterface
 ):
     # Set by pad() and interpolate(): such grids span more than one zone, so 1/n is wrong.
     _kgrid_spacing: list[float] | None = None
+    # The current mesh size. None when the points form no known grid, and in ebs.pkl caches
+    # written before the Mesh carried it; kgrid then infers the size from the points.
+    _kgrid: tuple[int, int, int] | None = None
 
     def __init__(self, kgrid_info: kpoints.KGridInfo, **kwargs):
         super(ElectronicBandStructureMesh, self).__init__(**kwargs)
@@ -1666,6 +1677,7 @@ class ElectronicBandStructureMesh(
 
         if self.n_kpoints != np.prod(self.kgrid_info.kgrid):
             raise ValueError("n_kpoints must be equal to np.prod(kgrid) (number of kpoints)")
+        self._kgrid = _grid_size(self.kgrid_info.kgrid)
 
     @classmethod
     def from_code(
@@ -1686,8 +1698,10 @@ class ElectronicBandStructureMesh(
         return self._kgrid_info
 
     @property
-    def kgrid(self):
-        return self.get_kgrid()
+    def kgrid(self) -> tuple[int, int, int]:
+        if self._kgrid is not None:
+            return self._kgrid
+        return _grid_size(self.get_kgrid())
 
     def get_kgrid(self, num_bins: int = 1000, height: float = 1, coord_tol: float = 0.01):
         return math.get_grid_dims(
@@ -1732,11 +1746,11 @@ class ElectronicBandStructureMesh(
 
     @property
     def is_ibz(self):
-        return self.n_kpoints != np.prod(self.kgrid)
+        return self.n_kpoints < np.prod(self.kgrid_info.kgrid)
 
     @property
     def is_fbz(self):
-        return self.n_kpoints == np.prod(self.kgrid)
+        return self.n_kpoints == np.prod(self.kgrid_info.kgrid)
 
     @property
     def is2d(self):
@@ -1807,6 +1821,11 @@ class ElectronicBandStructureMesh(
         logger.debug(f"Property mesh shape: {property_mesh.shape}")
         return property_mesh
 
+    @override
+    def shift_kpoints_to_fbz(self, inplace=True):
+        """Refuse: points moved into the first zone no longer form the Mesh's box grid."""
+        raise ValueError("shift_kpoints_to_fbz would break an ElectronicBandStructureMesh's grid")
+
     def pad(self, padding=10, order="F", inplace=True):
         """Wrap the grid by ``padding`` k-points in each direction with more than one point.
 
@@ -1850,7 +1869,37 @@ class ElectronicBandStructureMesh(
 
         new_kpoints = math.mesh_to_array(padded_kpoints_mesh, order=order)
         ebs._kgrid_spacing = ebs.kgrid_spacing
+        ebs._kgrid = _grid_size(padded_kpoints_mesh.shape[:3])
         ebs.update_points(new_kpoints)
+        ebs._mesh = ebs.to_mesh()
+        return ebs
+
+    def _take(
+        self,
+        rows: np.ndarray,
+        points: np.ndarray,
+        kgrid: tuple[int, int, int],
+        kgrid_info: kpoints.KGridInfo,
+        reciprocal_lattice: np.ndarray,
+    ) -> ElectronicBandStructureMesh:
+        """A copy whose k-point j, ``points[j]`` fractional in ``reciprocal_lattice``, holds
+        every property of this mesh's row ``rows[j]``.
+
+        The points fill ``kgrid`` in Fortran order, spaced by one period of
+        ``kgrid_info.kgrid``. ``projected_phase`` is dropped, as in ``pad``.
+        """
+        # Share the arrays the gather replaces instead of copying them first.
+        shared = {id(a): a for *_, a in self.iter_properties()}
+        ebs = copy.deepcopy(self, memo=shared)
+        ebs.remove_property("projected_phase")
+        for prop in ebs.property_store.values():
+            for calc_name, gradient_order, value_array in list(prop.iter_arrays()):
+                prop[calc_name, gradient_order] = value_array[rows]
+        ebs._reciprocal_lattice = reciprocal_lattice
+        ebs._kgrid_info = kgrid_info
+        ebs._kgrid = kgrid
+        ebs._kgrid_spacing = [1 / n for n in kgrid_info.kgrid]
+        ebs.update_points(points)
         ebs._mesh = ebs.to_mesh()
         return ebs
 
@@ -1886,6 +1935,7 @@ class ElectronicBandStructureMesh(
 
                 ebs.add_property(prop_name, new_points, return_gradient_order=gradient_order)
 
+        ebs._kgrid = None
         ebs.update_points(new_kpoints)
         ebs._mesh = ebs.to_mesh()
         return ebs
@@ -1947,6 +1997,7 @@ class ElectronicBandStructureMesh(
                 np.ptp(axis) / (len(axis) - 1) if np.ptp(axis) > 0 else 1 / len(axis)
                 for axis in (new_x, new_y, new_z)
             ]
+        ebs._kgrid = (len(new_x), len(new_y), len(new_z))
         ebs.update_points(new_kpoints)
         ebs._mesh = ebs.to_mesh()
         return ebs
@@ -1983,6 +2034,9 @@ class ElectronicBandStructureMesh(
 
                     property[calc_name, gradient_order] = new_points
 
+        # Each flat axis adds two copies of the original points: a grid only for one flat axis.
+        kgrid = ebs.kgrid
+        ebs._kgrid = _grid_size(3 if n == 1 else n for n in kgrid) if kgrid.count(1) == 1 else None
         ebs.update_points(new_kpoints)
         sort_by_kpoints(ebs, inplace=True)
         ebs._mesh = ebs.to_mesh()
@@ -2010,6 +2064,7 @@ class ElectronicBandStructureMesh(
             new_points = initial_array[i_kpoints_near_z_0, ...][0]
             property[calc_name, gradient_order] = new_points
 
+        ebs._kgrid = None
         ebs.update_points(ebs.kpoints[i_kpoints_near_z_0, ...])
         ebs._mesh = ebs.to_mesh()
         return None
@@ -2256,7 +2311,7 @@ def ibz2fbz(ebs, rotations=None, kgrid_info=None, inplace=True, time_reversals=N
         new_kpoints = grid[row[reached]]
     else:
         _, chosen = np.unique(_cell_keys(images), axis=0, return_index=True)
-        new_kpoints = kpoints.wrap_to_first_zone(images[chosen])
+        new_kpoints = kpoints.wrap_to_unit_cell(images[chosen])
 
     operation, source = np.divmod(chosen, n_ibz)
     filled = int(np.count_nonzero(operation > n_listed))
