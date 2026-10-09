@@ -846,7 +846,12 @@ def test_reduced_basis_cut_is_unchanged(centred, normal, origin, areas, n_open):
         stored_kpoints=(lambda k: np.where(k > 0.5 + 1e-12, k - 1.0, k)) if centred else _same,
     )
 
-    assert cross_section_areas(surface, normal, origin, np.eye(3)) == (areas, n_open)
+    found, found_open = cross_section_areas(surface, normal, origin, np.eye(3))
+
+    # Another machine can round the last bit differently: a GitHub runner differed by one ulp.
+    assert found_open == n_open
+    assert len(found) == len(areas)
+    assert found == pytest.approx(areas, rel=1e-12, abs=0)
 
 
 def _sphere_and_cylinder(k: np.ndarray) -> np.ndarray:
