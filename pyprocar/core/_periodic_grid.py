@@ -66,7 +66,7 @@ class PeriodicGrid:
 
     @property
     def is_identity(self) -> bool:
-        """The given basis is already reduced, so the grid is drawn as it is stored."""
+        """The given basis is reduced or an obtuse superbase, so the grid is drawn as stored."""
         return bool((self._to_source == np.eye(3, dtype=int)).all())
 
     @property
@@ -172,7 +172,7 @@ def periodic_grid(ebs: ElectronicBandStructureMesh) -> PeriodicGrid | None:
 
     basis = np.asarray(ebs.reciprocal_lattice, dtype=np.float64)
     live = big_n > 1
-    if is_reduced_basis(basis, live):
+    if is_reduced_basis(basis, live) or _obtuse_superbase(basis[live]):
         to_source = np.eye(3, dtype=int)
     else:
         # Reduce the k-point lattice, not the reciprocal lattice: for unequal N only it is diagonal.
@@ -236,8 +236,8 @@ def _nearest_identity(steps: np.ndarray, lattice: np.ndarray, live: np.ndarray) 
     """Of the bases with the sorted row lengths of the reduced basis ``steps @ lattice``, the one
     closest to the identity in index space, so a shear of a reduced basis returns to it exactly.
     Ties go to the fewest changed entries, which undoes a single shear b2 + 3 b1 of an fcc basis
-    rather than reaching (b1, b1 + b2 + b3, b3), then to the drawn rows most parallel to the
-    given ones.
+    rather than reaching (b1, b1 + b2 + b3, b3), then to the first in the order of the entries:
+    integers only, so rounding noise in the lattice cannot change the choice.
 
     Candidate rows are the -1, 0, 1 combinations of the reduced rows. A hexagonal plane has
     reduced bases that are no signed permutation of each other, (b1, b2) and (b1, b2 - b1).
@@ -257,10 +257,23 @@ def _nearest_identity(steps: np.ndarray, lattice: np.ndarray, live: np.ndarray) 
     change = bases - np.eye(3, dtype=int)
     distance = np.abs(change).sum(axis=(1, 2))
     changed = np.count_nonzero(change, axis=(1, 2))
-    unit = lattice / np.linalg.norm(lattice, axis=1, keepdims=True)
-    cosine = (drawn / np.linalg.norm(drawn, axis=2, keepdims=True) * unit).sum(axis=(1, 2))
-    ranked = np.lexsort((-cosine, changed, distance))
+    ranked = np.lexsort((*bases.reshape(-1, 9).T[::-1], changed, distance))
     return bases[ranked[usable[ranked]][0]]
+
+
+def _obtuse_superbase(rows: np.ndarray) -> bool:
+    """The rows and minus their sum meet pairwise at angles whose cosine is below
+    -REDUCED_TOLERANCE: a Selling-reduced basis, of a lattice whose reduction is unique.
+
+    Such a basis is drawn as given, as before #302, though it may not be the shortest. The
+    rhombohedral primitive cell of Bi2Se3 is one; drawn in its reduced bases, (b1 + b2 + b3)
+    and two of the b_i, marching cubes on 16^3 cuts the orbit along hexagonal [1 0 3] as 0.357
+    or, 0.01 above, as two orbits; the analytic band has one of 0.283, the given basis 0.281.
+    """
+    superbase = np.vstack([rows, -rows.sum(axis=0)])
+    unit = superbase / np.linalg.norm(superbase, axis=1, keepdims=True)
+    cosines = unit @ unit.T
+    return bool((cosines[~np.eye(len(superbase), dtype=bool)] < -REDUCED_TOLERANCE).all())
 
 
 def _snap_shift(shift: np.ndarray) -> np.ndarray:
