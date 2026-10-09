@@ -413,12 +413,13 @@ def test_fcc_plane_through_grid_lines_counts_its_orbit_once():
     so its cut passes through mesh vertices. Lattice translates of the orbit then have
     different node sets but the same area-weighted centroid modulo a lattice vector; the
     plane 1e-10 above cuts no vertex and gives the same single orbit."""
-    surface = _periodic_surface(lambda k: _sum_of_cosines(k) + 0.05, FCC)
-    normal = np.linalg.inv(FCC).T[2]
+    fcc = np.array([[-1, 1, 1], [1, -1, 1], [1, 1, -1]]) / 4.08
+    surface = _periodic_surface(lambda k: _sum_of_cosines(k) + 0.05, fcc)
+    normal = np.linalg.inv(fcc).T[2]
     normal /= np.linalg.norm(normal)
 
-    areas, n_open = cross_section_areas(surface, normal, (0, 0, 0), FCC)
-    above, _ = cross_section_areas(surface, normal, 1e-10 * normal, FCC)
+    areas, n_open = cross_section_areas(surface, normal, (0, 0, 0), fcc)
+    above, _ = cross_section_areas(surface, normal, 1e-10 * normal, fcc)
 
     assert n_open == 0
     assert len(areas) == len(above) == 1
