@@ -1,6 +1,5 @@
 """PyVista plotter behaviour shared by FermiPlotter and BS2DPlotter."""
 
-import itertools
 import logging
 import os
 from typing import Any, cast
@@ -10,7 +9,7 @@ import numpy as np
 import pyvista as pv
 from pyvista import ColorLike
 
-from pyprocar.core.brillouin_zone import clip_to_zone, reduced_basis_steps, warn_clipped_away
+from pyprocar.core.brillouin_zone import clip_to_zone, niggli_basis_steps, warn_clipped_away
 from pyprocar.plotter._periodic_cut import periodic_bands, plane_orbits
 from pyprocar.plotter._series import SurfaceSeries, finite_range
 from pyprocar.plotter.fs_slice_plot import FermiSlicePlotter
@@ -25,21 +24,38 @@ def find_nearest(array, value):
 
 
 SNAP_ANGLE = 3e-4
-"""Radians within which a slice normal is replaced by a low-index lattice direction.
+"""Radians within which a slice normal is replaced by a lattice direction (``snap_normal``).
 
-Rounding a lattice direction to 4 significant digits turns it by at most 7.4e-5 rad on
-cubic, hexagonal and fcc cells (3 digits: 7.7e-4, which random normals reach too);
-distinct directions with indices up to 4 in the reduced basis are at least 2.1e-2 rad
-apart there.
+Rounding a candidate direction to 4 significant digits turns it by at most 8.4e-5 rad on
+cubic, hexagonal, fcc and bcc cells (3 digits: 7.7e-4, which random normals reach too).
+Distinct candidates are at least 4.4e-3 rad apart on hexagonal cells with c/a = 1.633,
+15 times this angle (fcc 7.1e-3, bcc 7.5e-3, cubic 9.0e-3). A longer cell has more
+candidates: 2.4e-3 at c/a = 3, 1.6e-3 at c/a = 4.
 """
 
-_DIRECTION_INDICES = np.array(
-    [
-        uvw
-        for uvw in itertools.product(range(-4, 5), repeat=3)
-        if any(uvw) and np.gcd.reduce(np.abs(uvw)) == 1
-    ]
-)
+SNAP_REACH = 4
+"""The snap candidates are the primitive real-space lattice vectors no longer than
+SNAP_REACH times the sum of the lattice's successive minima. A cell given in a reduced
+basis, as standard cells are, has basis vectors of those lengths, so its directions with
+indices up to SNAP_REACH, the candidates before #302, are all among them."""
+
+
+def _snap_candidates(real: np.ndarray) -> np.ndarray:
+    """Indices, in the rows of ``real``, of the primitive lattice vectors t with
+    |t| <= SNAP_REACH (lambda1 + lambda2 + lambda3): a set fixed by the lattice alone."""
+    steps = niggli_basis_steps(real)
+    niggli = steps @ real
+    radius = SNAP_REACH * float(np.linalg.norm(niggli, axis=1).sum())
+    # The coefficient of t on niggli row i is t . d_i, d_i the dual column, so at most
+    # radius |d_i|.
+    reach = np.floor(radius * np.linalg.norm(np.linalg.inv(niggli), axis=0) + 1e-9)
+    box = np.stack(
+        np.meshgrid(*(np.arange(-r, r + 1, dtype=int) for r in reach.astype(int)), indexing="ij"),
+        axis=-1,
+    ).reshape(-1, 3)
+    inside = np.linalg.norm(box @ niggli, axis=1) <= radius * (1 + 1e-9)
+    primitive = np.gcd.reduce(np.abs(box), axis=1) == 1
+    return box[inside & primitive] @ steps
 
 
 def snap_normal(
@@ -51,13 +67,13 @@ def snap_normal(
     translates sit at discrete offsets: for G = m1 b1 + m2 b2 + m3 b3, n . G =
     (u m1 + v m2 + w m3) / |t|. A normal typed with a few digits misses such a direction
     slightly and cuts an irrational plane, where near-copies of one orbit count
-    separately. The candidates have indices up to 4 in the Delaunay-reduced real basis, so
-    they do not depend on the basis the lattice is given in. Returns the indices in the
-    given basis when the normal was changed, otherwise None.
+    separately. The candidates (see SNAP_REACH) depend on the lattice only, not on the
+    basis or orientation it is given in. Returns the indices in the given basis when the
+    normal was changed, otherwise None.
     """
     normal = np.asarray(normal, dtype=np.float64) / np.linalg.norm(normal)
     real = np.linalg.inv(np.asarray(reciprocal_lattice, dtype=np.float64)).T
-    indices = _DIRECTION_INDICES @ reduced_basis_steps(real)
+    indices = _snap_candidates(real)
     directions = indices @ real
     directions /= np.linalg.norm(directions, axis=1, keepdims=True)
     cosines = directions @ normal
