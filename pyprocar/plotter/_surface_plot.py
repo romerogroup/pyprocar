@@ -10,11 +10,10 @@ import numpy as np
 import pyvista as pv
 from pyvista import ColorLike
 
-from pyprocar.core.brillouin_zone import clip_to_zone, reduced_basis_steps
+from pyprocar.core.brillouin_zone import clip_to_zone, reduced_basis_steps, warn_clipped_away
 from pyprocar.plotter._periodic_cut import periodic_bands, plane_orbits
 from pyprocar.plotter._series import SurfaceSeries, finite_range
 from pyprocar.plotter.fs_slice_plot import FermiSlicePlotter
-from pyprocar.utils.log_utils import warn_user
 
 logger = logging.getLogger(__name__)
 
@@ -215,10 +214,7 @@ class SurfacePlotter(pv.Plotter):
             if clip_to is not None:
                 mesh = clip_to_zone(mesh, clip_to)
                 if mesh.n_points == 0:
-                    warn_user(
-                        f"band {series.band_index} spin {series.spin_index} lies only outside"
-                        + " the Brillouin zone; it is not drawn"
-                    )
+                    warn_clipped_away(f"band {series.band_index} spin {series.spin_index}")
                     continue
 
             if series.vectors is not None and "vectors" in mesh.point_data:

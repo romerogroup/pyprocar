@@ -274,11 +274,12 @@ def test_a_band_crossing_only_outside_the_zone_is_dropped_with_a_warning():
     bands = np.stack([sphere(f) - 0.1, pocket - 0.1**2], 1)
     unpadded = mesh(f, bands, CUBIC, (16, 16, 16), 0.0)
 
-    with user_warning(__file__, match=r"band \d+ spin \d+") as record:
+    with user_warning(__file__, match="outside the first Brillouin zone") as record:
         _, surfaces, _, _ = generate_band_isosurfaces(unpadded, CUBIC, 0.0)
 
-    named = [str(w.message) for w in record if "spin" in str(w.message)]
-    assert len(named) == 1 and "band 1 spin 0 " in named[0], named
+    assert [str(w.message) for w in record if "Brillouin" in str(w.message)] == [
+        "band 1 spin 0 lies only outside the first Brillouin zone; it is not drawn"
+    ]
     assert sorted(surfaces) == [(0, 0)]
     assert surfaces[(0, 0)].n_points > 0
 

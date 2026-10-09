@@ -13,7 +13,7 @@ from pyvista.plotting.utilities.algorithms import (
     set_algorithm_input,
 )
 
-from pyprocar.core.brillouin_zone import clip_to_zone
+from pyprocar.core.brillouin_zone import clip_to_zone, warn_clipped_away
 from pyprocar.plotter._series import SurfaceSeries, surface_series
 from pyprocar.plotter._surface_plot import (
     SurfacePlotter,
@@ -21,7 +21,6 @@ from pyprocar.plotter._surface_plot import (
     normalize_to_range,
     slice_loop_areas,
 )
-from pyprocar.utils.log_utils import warn_user
 
 logger = logging.getLogger(__name__)
 
@@ -225,10 +224,7 @@ class BS2DPlotter(SurfacePlotter):
         if clip_surface and self._brillouin_zone is not None:
             surface = clip_to_zone(surface, self._brillouin_zone)
             if surface.n_points == 0:
-                warn_user(
-                    f"surface '{add_mesh_args['name']}' lies only outside the Brillouin zone;"
-                    + " it is not drawn"
-                )
+                warn_clipped_away(f"surface '{add_mesh_args['name']}'")
                 return
 
         self.add_mesh(surface, **add_mesh_args)

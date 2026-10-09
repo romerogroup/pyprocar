@@ -8,6 +8,8 @@ import pyvista as pv
 import spglib
 from scipy.spatial import Voronoi
 
+from pyprocar.utils.log_utils import warn_user
+
 logger = logging.getLogger(__name__)
 
 _FACE_CANDIDATES = np.array([s for s in itertools.product(range(-2, 3), repeat=3) if any(s)])
@@ -231,13 +233,14 @@ class BrillouinZone2D(pv.PolyData):
 
 
 def clip_to_zone(surface: pv.PolyData, zone: pv.PolyData) -> pv.PolyData:
-    """The part of ``surface`` inside every face plane of ``zone``; empty when none is.
-
-    The caller decides what an empty clip means: a band that crosses only outside the zone
-    is dropped with a warning naming it.
-    """
+    """The part of ``surface`` inside every face plane of ``zone``; empty when none is."""
     for normal, center in zip(zone.face_normals, zone.centers, strict=True):
         surface = cast(pv.PolyData, surface.clip(origin=center, normal=normal, inplace=False))
         if surface.n_points == 0:
             break
     return surface
+
+
+def warn_clipped_away(label: str) -> None:
+    """Tell the user that ``label`` lost every point to ``clip_to_zone`` and is not drawn."""
+    warn_user(f"{label} lies only outside the first Brillouin zone; it is not drawn")

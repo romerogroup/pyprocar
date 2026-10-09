@@ -13,7 +13,7 @@ import pyvista as pv
 
 from pyprocar.core._periodic_grid import PeriodicGrid, is_reduced_basis, periodic_grid
 from pyprocar.core.atomic_orbital_index import ProjectionSelectionResolver
-from pyprocar.core.brillouin_zone import BrillouinZone, clip_to_zone
+from pyprocar.core.brillouin_zone import BrillouinZone, clip_to_zone, warn_clipped_away
 from pyprocar.core.ebs import ElectronicBandStructureMesh
 from pyprocar.core.projection import NormMode, build_property, selection_resolver
 from pyprocar.core.projection import normalize as normalize_by_mode
@@ -1064,10 +1064,7 @@ def generate_band_isosurfaces(
 
             surface = clip_to_zone(surface, brillouin_zone)
             if surface.n_points == 0:
-                warn_user(
-                    f"band {iband} spin {ispin} crosses the isovalue only outside the first"
-                    + " Brillouin zone; it is not drawn"
-                )
+                warn_clipped_away(f"band {iband} spin {ispin}")
                 continue
 
             band_isosurfaces[(iband, ispin)] = surface
