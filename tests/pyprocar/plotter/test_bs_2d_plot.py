@@ -7,7 +7,11 @@ import numpy as np
 import pytest
 import pyvista as pv
 
+from pyprocar.core.bandstructure2D import BandStructure2D
+from pyprocar.core.ebs import ElectronicBandStructureMesh
+from pyprocar.core.kpoints import KGRID_MODE, KGridInfo
 from pyprocar.plotter.bs_2d_plot import BS2DPlotter
+from tests.pyprocar.core.test_bandstructure2d_grid import HEXAGONAL, N_K, tight_binding_graphene
 
 TRIANGLE_FACES = [3, 0, 1, 2]
 
@@ -139,6 +143,39 @@ class TestBS2DPlotterBrillouinZone:
         assert requested == {"e_min": -1.0, "e_max": 2.0}
         assert len(plotter.actors) == len(meshes) + 1
         plotter.close()
+
+    @pytest.mark.parametrize(
+        ("offset", "energy_range"),
+        [(-5.0, (-8.0, -2.0)), (0.0, (-3.0, 3.0)), (5.0, (2.0, 8.0))],
+        ids=["below-zero", "around-zero", "above-zero"],
+    )
+    def test_clipping_to_the_zone_keeps_graphene_bands_at_any_energy(self, offset, energy_range):
+        """The zone prism spans the band energies, so clipping must keep the same in-zone
+        part of each band wherever the energies sit relative to 0."""
+        axis = np.arange(N_K) / N_K
+        frac = np.stack(np.meshgrid(axis, axis, [0.0], indexing="ij"), axis=-1).reshape(-1, 3)
+        energies = tight_binding_graphene(frac)
+        ebs = ElectronicBandStructureMesh(
+            kgrid_info=KGridInfo(
+                kgrid=(N_K, N_K, 1), kgrid_mode=KGRID_MODE.GAMMA, kshift=(0.0, 0.0, 0.0)
+            ),
+            kpoints=frac,
+            bands=np.stack([offset - energies, offset + energies], axis=1)[:, :, None],
+            projected=np.ones((len(frac), 2, 1, 1, 1)),
+            fermi=0.0,
+            reciprocal_lattice=HEXAGONAL,
+            orbital_names=["s"],
+        )
+        bs2d = BandStructure2D.from_ebs(ebs, grid_interpolation=(40, 40), padding=3)
+        plotter = BS2DPlotter(bs2d, off_screen=True)
+
+        drawn = plotter.plot(show_brillouin_zone=False, clip_brillouin_zone=True)
+
+        plotter.close()
+        assert (bs2d.points[:, 2].min(), bs2d.points[:, 2].max()) == pytest.approx(
+            energy_range, abs=0.01
+        )
+        assert {key: mesh.n_points for key, mesh in drawn.items()} == {(0, 0): 401, (1, 0): 401}
 
 
 class TestBS2DPlotterExport:
