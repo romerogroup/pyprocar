@@ -8,13 +8,11 @@ from pyprocar.core.kpoints import KGRID_MODE, KGridInfo, get_kpoints_from_kgrid
 
 
 def grid_offset(mode: KGRID_MODE, n: int) -> float:
-    """k * n - offset is an integer on an axis of n points: Gamma grids hold j/n, Monkhorst-Pack (2j + 1 - n)/2n."""
+    """k * n - offset is an integer on an n-point axis: Gamma holds j/n, Monkhorst-Pack (2j+1-n)/2n."""
     return 0.0 if mode is KGRID_MODE.GAMMA else (1 - n) / 2
 
 
-def cell_code(
-    kpoints: np.ndarray, kgrid: tuple[int, int, int], mode: KGRID_MODE
-) -> np.ndarray:
+def cell_code(kpoints: np.ndarray, kgrid: tuple[int, int, int], mode: KGRID_MODE) -> np.ndarray:
     """An integer per k-point that names its grid point modulo a reciprocal lattice vector."""
     n = np.array(kgrid)
     offsets = np.array([grid_offset(mode, int(size)) for size in n])
@@ -79,9 +77,9 @@ def test_pad_arrays_are_unchanged(kgrid: tuple[int, int, int], mode: KGRID_MODE)
     padded = ebs.pad(10, inplace=False)
 
     np.testing.assert_allclose(padded.kpoints, expected_kpoints, rtol=0, atol=1e-12)
-    assert np.array_equal(
-        padded.bands[:, 0, 0], cell_code(expected_kpoints, kgrid, mode)
-    )
+    bands = padded.get_property("bands")
+    assert bands is not None
+    assert np.array_equal(bands.value[:, 0, 0], cell_code(expected_kpoints, kgrid, mode))
 
 
 def test_interpolate_carries_the_size():
