@@ -265,13 +265,12 @@ def fft_interpolate_nd_3dmesh(mesh, interpolation_factor):
     """
     scalar_dims = mesh.shape[3:]
 
-    new_mesh_shape = (*fft_interpolated_shape(mesh.shape[:3], interpolation_factor), *scalar_dims)
-
-    new_mesh = np.zeros(new_mesh_shape, dtype=complex if np.iscomplexobj(mesh) else float)
-
     # If this is just a 3D array, use fft_interpolate directly
     if len(scalar_dims) == 0:
         return fft_interpolate_mesh(mesh, interpolation_factor)
+
+    new_mesh_shape = (*fft_interpolated_shape(mesh.shape[:3], interpolation_factor), *scalar_dims)
+    new_mesh = np.zeros(new_mesh_shape, dtype=complex if np.iscomplexobj(mesh) else float)
 
     # For higher dimensional arrays, iterate through the scalar dimensions
 

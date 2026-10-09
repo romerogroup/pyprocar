@@ -1911,8 +1911,7 @@ class ElectronicBandStructureMesh(
             ebs = copy.deepcopy(self)
 
         # FFT interpolation treats the n samples of an axis as one period (a full zone; a
-        # padded mesh is not one) and returns n*f samples of it, spacing/f apart. An axis
-        # with one sample keeps it.
+        # padded mesh is not one) and resamples it on fft_interpolated_shape's grid.
         kgrid = ebs.kgrid
         new_kgrid = math.fft_interpolated_shape(kgrid, interpolation_factor)
         new_spacing = [
