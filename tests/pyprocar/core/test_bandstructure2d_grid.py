@@ -23,10 +23,14 @@ NEAR_SQUARE = np.array(
     ]
 )
 # c* tilted towards a* and b*, so planes at different kz sit at different (kx, ky). c* is tall
-# enough for the basis to stay reduced, so these grids are drawn as padded.
+# enough for the 24 x 24 x n_kz k-grids below to stay reduced, so they are drawn as padded.
 SKEWED = np.array([[0.25, 0.0, 0.0], [0.1, 0.22, 0.0], [0.03, -0.04, 0.2]])
 # SKEWED with a* tilted out of the kz = 0 plane, so a Cartesian kz plane crosses the kz layers.
-TILTED = SKEWED + [[0.0, 0.0, 0.05], [0.0, 0.0, 0.0], [0.0, 0.0, 0.0]]
+TILT = np.array([[0.0, 0.0, 0.05], [0.0, 0.0, 0.0], [0.0, 0.0, 0.0]])
+TILTED = SKEWED + TILT
+# SKEWED before #302. Its k-step c*/n_kz - a*/24 + b*/24 is shorter than c*/n_kz, so these
+# k-grids are not reduced and are drawn in another basis.
+SKEWED_SHORT_C = np.array([[0.25, 0.0, 0.0], [0.1, 0.22, 0.0], [0.03, -0.04, 0.12]])
 # The pad covers the first zone of each lattice here (a [0, 1) grid reaches fractional -2/3 on
 # the hexagonal ones), so the drawn mesh is the padded grid and the patch below.
 N_K, PADDING = 24, 20
@@ -181,3 +185,75 @@ def test_bs2d_on_a_non_square_grid_builds_every_point():
     n_points, n_off, n_quads, area = run.stdout.split()
     assert [n_points, n_off, n_quads] == [str(2 * 30 * 20), "0", str(29 * 19)]
     assert float(area) == pytest.approx(PATCH**2 * 0.25 * 0.25, rel=1e-9)
+
+
+SHORT_PADDING = 3
+"""The pad before #302. On the [0, 1) grids above it misses the first zone."""
+
+
+@pytest.mark.parametrize(
+    ("lattice", "band", "first", "as_cartesian"),
+    [
+        (HEXAGONAL, tight_binding_graphene, -17, True),
+        (HEXAGONAL, tight_binding_graphene, -17, False),
+        (SQUARE, square_band, -13, False),
+    ],
+    ids=["hexagonal-cartesian", "hexagonal-fractional", "square"],
+)
+def test_a_pad_short_of_the_zone_draws_the_zone_and_the_pad_with_the_analytic_bands(
+    lattice, band, first, as_cartesian
+):
+    """The drawn box runs from the zone's box, one point past the zone corner at fractional
+    -2/3 (16 points) on graphene and the edge at -1/2 (12 points) on the square, to the pad's
+    end at 23 + 3. A (u, v) grid of one sample per k-point then lands on the k-points."""
+    last = N_K - 1 + SHORT_PADDING
+    grid = last - first + 1
+    points, sheet, _, quads = bs2d_arrays(
+        lattice, band, (grid, grid), as_cartesian, padding=SHORT_PADDING
+    )
+
+    frac = np.column_stack([points[:, :2] / (2 * np.pi), np.zeros(len(points))]) @ np.linalg.inv(
+        lattice
+    )
+    sign = np.where(sheet == 1, 1.0, -1.0)
+    assert np.isfinite(points).all()
+    np.testing.assert_allclose(points[:, 2], sign * band(frac), atol=1e-9)
+    span = (last - first) / N_K
+    cell = abs(np.linalg.det(lattice[:2, :2]))
+    assert quad_area(quads) == pytest.approx(span**2 * cell, rel=1e-9)
+
+
+def linear_cell_band(frac: np.ndarray) -> np.ndarray:
+    """Linear inside the cell |f_i| < 1/2 and periodic."""
+    saw = frac - np.round(frac)
+    return saw[:, 0] + 2 * saw[:, 1] + 3 * saw[:, 2]
+
+
+@pytest.mark.parametrize(
+    ("lattice", "n_kz", "origin", "kz", "as_cartesian"),
+    [
+        (SKEWED_SHORT_C, 4, (0, 0, 0.25), 0.25 * 0.12, False),
+        (SKEWED_SHORT_C + TILT, 8, (0, 0, 0.036), 0.036, True),
+    ],
+    ids=["skewed-plane-off-the-origin", "tilted-plane-across-the-kz-layers"],
+)
+def test_a_k_grid_that_is_not_reduced_draws_the_band_wherever_its_cells_keep_it_linear(
+    lattice, n_kz, origin, kz, as_cartesian
+):
+    """A drawn cell spans at most 1/12 of a* and b* and 1/n_kz of c*, so a sample within 0.3 of
+    the cell centre interpolates only k-points where the band is linear, and must be exact.
+    The sheet reaches -0.3 along a* and b*, which today's pad from -3/24 does not."""
+    points, sheet, _, _ = bs2d_arrays(
+        lattice, linear_cell_band, (30, 30), as_cartesian, n_kz, origin, padding=SHORT_PADDING
+    )
+
+    k = np.column_stack([points[:, :2] / (2 * np.pi), np.full(len(points), kz)])
+    frac = np.linalg.solve(lattice.T, k.T).T
+    inner = (np.abs(frac) < 0.3).all(axis=1)
+    sign = np.where(sheet == 1, 1.0, -1.0)
+    assert np.isfinite(points).all()
+    assert (frac[:, :2].min(axis=0) <= -0.3).all()
+    assert (frac[:, :2].max(axis=0) >= 0.3).all()
+    np.testing.assert_allclose(
+        points[inner, 2], sign[inner] * linear_cell_band(frac[inner]), atol=1e-9
+    )

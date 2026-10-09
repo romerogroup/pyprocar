@@ -197,6 +197,23 @@ class TestBS2DPlotterBrillouinZone:
         for mesh in drawn.values():
             assert projected_area(mesh) == pytest.approx(HEXAGON_ZONE_AREA, rel=1e-9)
 
+    @pytest.mark.parametrize(
+        "offset", [-5.0, 0.0, 5.0], ids=["below-zero", "around-zero", "above-zero"]
+    )
+    def test_clipping_a_pad_short_of_the_zone_keeps_the_whole_graphene_zone(self, offset):
+        """A pad of 3 on the [0, 1) 24 x 24 grid starts at fractional -3/24, short of the zone
+        corner at -2/3; the drawn box reaches both, so each clipped band is the whole hexagon."""
+        ebs = two_band_mesh(HEXAGONAL, tight_binding_graphene, offset=offset)
+        bs2d = BandStructure2D.from_ebs(ebs, grid_interpolation=(40, 40), padding=3)
+        plotter = BS2DPlotter(bs2d, off_screen=True)
+
+        drawn = plotter.plot(show_brillouin_zone=False, clip_brillouin_zone=True)
+
+        plotter.close()
+        assert sorted(drawn) == [(0, 0), (1, 0)]
+        for mesh in drawn.values():
+            assert projected_area(mesh) == pytest.approx(HEXAGON_ZONE_AREA, rel=1e-9)
+
     def test_a_band_outside_the_zone_is_skipped_with_a_warning(self):
         """H3: the zone spans -1.5 to 1.5 on each axis, so band 2 at E = 2 clips to nothing;
         today it is drawn as an empty mesh without a warning."""
