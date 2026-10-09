@@ -9,6 +9,7 @@ from typing import cast
 import matplotlib.pyplot as plt
 import numpy as np
 import pyvista as pv
+import spglib
 from references.orbits import (
     SHELL,
     BandGrid,
@@ -35,7 +36,8 @@ FREQUENCY_TOLERANCE = 1e-5
 5e-7 eV off EIGENVAL's, which moves the mesh vertices: measured 1.5e-6."""
 SNAP_ANGLE = 3e-4
 """Radians, the documented snap_normal rule: a normal this close to a real-space lattice
-direction [u v w] with |indices| <= 4 becomes that direction."""
+direction with |indices| <= 4 in the Delaunay-reduced real basis becomes that direction, and
+the note names it as [u v w] in the given basis."""
 LATTICE_NOISE = 1e-6
 """Radians. pyprocar's reciprocal lattice is 4.6e-10 off POSCAR's, so an exact lattice direction
 built from POSCAR may or may not get a snap note; above this angle the note is required."""
@@ -125,13 +127,18 @@ def _():
 
 
 def _directions(real: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+    """Given-basis indices and unit vectors of the directions with |indices| <= 4 in the
+    Delaunay-reduced real basis."""
+    reduced = spglib.delaunay_reduce(real)
+    if reduced is None:
+        raise ValueError(f"spglib cannot Delaunay-reduce {real.tolist()}")
     indices = np.array(
         [
             uvw
             for uvw in itertools.product(range(-4, 5), repeat=3)
             if any(uvw) and np.gcd.reduce(np.abs(uvw)) == 1
         ]
-    )
+    ) @ np.rint(reduced @ np.linalg.inv(real)).astype(int)
     vectors = indices @ real
     return indices, vectors / np.linalg.norm(vectors, axis=1, keepdims=True)
 
