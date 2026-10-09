@@ -269,6 +269,27 @@ def test_rounded_111_normal_cuts_the_exact_111_plane():
     assert np.asarray(areas) == pytest.approx([np.pi * 0.1 * np.sqrt(3)], rel=0.02)
 
 
+A3_PLUS_6_A1 = np.array([[1, 0, 0], [0, 1, 0], [6, 0, 1]])
+"""Rows a1, a2, a3 + 6 a1 of the simple cubic lattice in units of a: the same lattice, where
+[1 1 1] is -5 a1' + a2' + a3'."""
+
+
+def test_rounded_111_normal_snaps_in_a_sheared_basis():
+    """The cubic lattice given with a3' = a3 + 6 a1: the (1 1 1) plane through Gamma still
+    cuts the cylinder around M in one ellipse of area pi 0.1 sqrt(3) per cell."""
+    reciprocal = np.linalg.inv(A3_PLUS_6_A1.astype(float)).T
+
+    areas, n_open = cross_section_areas(
+        _periodic_surface(lambda k: _cylinder_around_m(k @ reciprocal), reciprocal),
+        ROUNDED_111,
+        (0, 0, 0),
+        reciprocal,
+    )
+
+    assert n_open == 0
+    assert np.asarray(areas) == pytest.approx([np.pi * 0.1 * np.sqrt(3)], rel=0.02)
+
+
 def test_widget_says_when_it_snapped_the_normal():
     surface = _periodic_surface(_cylinder_around_m)
 
