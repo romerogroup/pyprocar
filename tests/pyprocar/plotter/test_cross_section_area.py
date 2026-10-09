@@ -546,6 +546,36 @@ def test_bi2se3_cut_typed_near_hexagonal_103_counts_the_gamma_orbit_once(turn):
     assert snap_normal(np.round(exact, 4), reciprocal)[1] == (4, 2, 3)
 
 
+BI2SE3_HEX_103_ORBIT = {0.0: 0.2828, 0.01: 0.2830}
+"""Area of the one orbit of _bi2se3_band's E = 0.8 contour in the plane along hexagonal [1 0 3]
+at these offsets from Gamma, that meets the first zone. Measured without pyprocar on the
+analytic band: the plane's 2D lattice cell sampled 800 x 800, components labelled, holes
+filled (400 x 400 gives 0.2829 and 0.2830)."""
+
+
+@pytest.mark.guards_existing_behaviour(
+    reason="dev cuts the Bi2Se3 cell on its given basis, one orbit within 1%; #302 must keep it"
+)
+@pytest.mark.parametrize("turn", [np.eye(3), TURN], ids=["given", "turned"])
+@pytest.mark.parametrize("rows", list(itertools.permutations(range(3))))
+def test_bi2se3_cut_along_hexagonal_103_does_not_depend_on_row_order_or_rounding(rows, turn):
+    """The cell given with its rows in any order, or turned so that its reciprocal lattice
+    carries 1e-16 of rounding, is the same crystal: the cut is one orbit within 1% of the
+    analytic area. On a 16^3 grid the grid it is marched on decides that: drawn in one
+    reduced basis it gave 0.357, and at 0.01 two orbits of 0.105 and 0.213."""
+    real = BI2SE3_RHOMBOHEDRAL[list(rows)] @ turn.T
+    reciprocal = np.linalg.inv(real).T
+    normal = BI2SE3_HEX_103 @ BI2SE3_RHOMBOHEDRAL @ turn.T
+    normal /= np.linalg.norm(normal)
+    surface = _periodic_surface(_bi2se3_band, reciprocal)
+
+    for offset, area in BI2SE3_HEX_103_ORBIT.items():
+        areas, n_open = cross_section_areas(surface, normal, offset * normal, reciprocal)
+
+        assert n_open == 0
+        assert areas == pytest.approx([area], rel=1e-2)
+
+
 def test_drawn_slice_uses_the_snapped_normal():
     plotter = FermiPlotter(off_screen=True)
     plotter.add_box_slicer(
