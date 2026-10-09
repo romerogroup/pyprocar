@@ -23,7 +23,7 @@ def cosine_mesh(kgrid: tuple[int, int, int]) -> ElectronicBandStructureMesh:
 
 
 @pytest.mark.parametrize("factor", [2, 3])
-@pytest.mark.parametrize("kgrid", [(4, 6, 2), (6, 6, 6)])
+@pytest.mark.parametrize("kgrid", [(4, 6, 2), (6, 6, 6), (5, 3, 4)])
 def test_interpolated_bands_match_the_band_at_each_returned_kpoint(kgrid, factor):
     new_kgrid = np.array(kgrid) * factor
 
