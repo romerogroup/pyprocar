@@ -1910,28 +1910,16 @@ class ElectronicBandStructureMesh(
         else:
             ebs = copy.deepcopy(self)
 
-        # Calculate new mesh dimensions
-        kpoints_mesh = ebs.get_kpoints_mesh()
-        nkx, nky, nkz = (
-            kpoints_mesh.shape[0],
-            kpoints_mesh.shape[1],
-            kpoints_mesh.shape[2],
-        )
-
-        unique_x = kpoints_mesh[:, 0, 0, 0]
-        unique_y = kpoints_mesh[0, :, 0, 1]
-        unique_z = kpoints_mesh[0, 0, :, 2]
-
-        xmin, xmax = np.min(unique_x), np.max(unique_x)
-        ymin, ymax = np.min(unique_y), np.max(unique_y)
-        zmin, zmax = np.min(unique_z), np.max(unique_z)
-
-        new_x = np.linspace(xmin, xmax, nkx * interpolation_factor)
-        new_y = np.linspace(ymin, ymax, nky * interpolation_factor)
-        new_z = np.linspace(zmin, zmax, nkz * interpolation_factor)
-
-        new_kpoints_mesh = np.array(np.meshgrid(new_z, new_y, new_x, indexing="ij"))
-        new_kpoints = new_kpoints_mesh.reshape(-1, 3)
+        # FFT interpolation treats the n samples of an axis as one period and returns n*f
+        # samples of that period, so the new points step by spacing/f from the first k-point.
+        kmin = ebs.get_kpoints_mesh()[0, 0, 0]
+        new_spacing = [spacing / interpolation_factor for spacing in ebs.kgrid_spacing]
+        new_axes = [
+            kmin[i] + np.arange(n * interpolation_factor) * new_spacing[i]
+            for i, n in enumerate(ebs.kgrid)
+        ]
+        new_kpoints_mesh = np.stack(np.meshgrid(*new_axes, indexing="ij"), axis=-1)
+        new_kpoints = math.mesh_to_array(new_kpoints_mesh, order=order)
 
         for prop_name, calc_name, gradient_order, value_array in ebs.iter_properties():
             property = ebs.get_property(prop_name)
@@ -1939,14 +1927,11 @@ class ElectronicBandStructureMesh(
                 array=value_array, nkx=ebs.n_kx, nky=ebs.n_ky, nkz=ebs.n_kz
             )
             interpolated_mesh = math.fft_interpolate_nd_3dmesh(value_mesh, interpolation_factor)
-            interpolated_value = math.mesh_to_array(interpolated_mesh)
+            interpolated_value = math.mesh_to_array(interpolated_mesh, order=order)
             property[calc_name, gradient_order] = interpolated_value
 
         if ebs._kgrid_spacing is not None:
-            ebs._kgrid_spacing = [
-                np.ptp(axis) / (len(axis) - 1) if np.ptp(axis) > 0 else 1 / len(axis)
-                for axis in (new_x, new_y, new_z)
-            ]
+            ebs._kgrid_spacing = new_spacing
         ebs.update_points(new_kpoints)
         ebs._mesh = ebs.to_mesh()
         return ebs
