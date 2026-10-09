@@ -84,23 +84,22 @@ fractional b1 = -1.45, beyond today's pad of 15 points on 16."""
 
 def test_bs2d_on_a_sheared_basis_has_the_reduced_bands_at_every_zone_point():
     """P2: the plane z = 0 given as fractions of the sheared basis."""
-    plane = dict(
-        normal=(0, 0, 1),
-        origin=(0, 0, 0),
-        as_cartesian=False,
-        grid_interpolation=(120, 120),
-    )
-    sheared = BandStructure2D.from_ebs(saw_mesh(SHEARED), **plane)
-    reduced = BandStructure2D.from_ebs(saw_mesh(CUBIC), **plane)
+
+    def build(lattice: np.ndarray) -> BandStructure2D:
+        return BandStructure2D.from_ebs(
+            saw_mesh(lattice),
+            normal=(0, 0, 1),
+            origin=(0, 0, 0),
+            as_cartesian=False,
+            grid_interpolation=(120, 120),
+        )
+
+    sheared, reduced = build(SHEARED), build(CUBIC)
 
     for band, offset in [(0, 0.0), (1, 5.0)]:
         got = values_at(sheared, IN_ZONE, band)
-        np.testing.assert_allclose(
-            got, values_at(reduced, IN_ZONE, band), rtol=0, atol=1e-9
-        )
-        np.testing.assert_allclose(
-            got, np.array([1.09, 0.35, -0.3]) + offset, rtol=0, atol=1e-9
-        )
+        np.testing.assert_allclose(got, values_at(reduced, IN_ZONE, band), rtol=0, atol=1e-9)
+        np.testing.assert_allclose(got, np.array([1.09, 0.35, -0.3]) + offset, rtol=0, atol=1e-9)
     np.testing.assert_array_equal(sheared.normal, [0, 0, 1])
     np.testing.assert_array_equal(sheared.origin, [0, 0, 0])
     assert sheared.as_cartesian is False
@@ -122,16 +121,12 @@ def test_fractional_plane_whose_normal_the_drawn_basis_changes_cuts_the_given_pl
     )
     on_plane = np.array([[0.25, 0.05, 0.2], [-0.14, -0.08, -0.3], [0.1, 0.0, 0.3]])
 
-    np.testing.assert_allclose(
-        values_at(bs, on_plane, 0), saw_band(on_plane), rtol=0, atol=1e-9
-    )
+    np.testing.assert_allclose(values_at(bs, on_plane, 0), saw_band(on_plane), rtol=0, atol=1e-9)
     np.testing.assert_array_equal(bs.normal, [1, 0, 0])
     np.testing.assert_array_equal(bs.origin, [0.1, 0, 0])
 
 
-@pytest.mark.guards_existing_behaviour(
-    reason="the zone is the user's lattice's, as today"
-)
+@pytest.mark.guards_existing_behaviour(reason="the zone is the user's lattice's, as today")
 def test_zone_of_a_grid_drawn_on_a_sublattice_is_the_crystals():
     """(16, 32, 16) on b2 = (3,1,0) is drawn on a sublattice tile twice the grid; the zone the
     plotter draws and clips to is still the cubic one, |kx|, |ky| <= pi with the 2 pi scale."""
@@ -139,15 +134,15 @@ def test_zone_of_a_grid_drawn_on_a_sublattice_is_the_crystals():
 
     zone = bs.get_2d_brillouin_zone(e_min=-1.0, e_max=1.0)
 
-    np.testing.assert_allclose(
-        zone.bounds, [-np.pi, np.pi, -np.pi, np.pi, -1.0, 1.0], atol=1e-12
-    )
+    np.testing.assert_allclose(zone.bounds, [-np.pi, np.pi, -np.pi, np.pi, -1.0, 1.0], atol=1e-12)
 
 
 def projected_area(surface: pv.PolyData) -> float:
+    points = np.array(surface.points)
+    points[:, 2] = 0.0
     flat = surface.copy()
-    flat.points[:, 2] = 0.0
-    return float(flat.compute_cell_sizes(length=False, volume=False)["Area"].sum())
+    flat.points = points
+    return float(flat.area)
 
 
 def test_bs2d_on_a_zero_to_one_hexagonal_grid_draws_the_whole_zone():
@@ -175,12 +170,10 @@ def test_bs2d_on_a_zero_to_one_hexagonal_grid_draws_the_whole_zone():
         assert projected_area(sheet) == pytest.approx(hexagon, rel=1e-9)
 
 
-def todays_pad_build(ebs, padding: int, **plane) -> BandStructure2D:
+def todays_pad_build(ebs, padding: int, normal, origin, as_cartesian: bool) -> BandStructure2D:
     """dev's from_ebs: pad the given grid, then cut the plane."""
-    padded = ebs.pad(padding=padding, inplace=False).expand_single_dimension(
-        inplace=False
-    )
-    info = compute_plane_info(ebs=padded, grid_interpolation=(40, 40), **plane)
+    padded = ebs.pad(padding=padding, inplace=False).expand_single_dimension(inplace=False)
+    info = compute_plane_info(padded, normal, origin, (40, 40), as_cartesian)
     surface, sheets, point_set = generate_band_2d_surfaces(
         ebs=padded, plane_info=info, original_ebs=ebs
     )
@@ -200,16 +193,17 @@ CENTRED_HEX = grid_fracs((24, 24, 1), centred=True)
 REDUCED_CASES = {
     "hexagonal-centred-cartesian": (
         mesh(CENTRED_HEX, tight_binding_graphene(CENTRED_HEX), HEXAGONAL, (24, 24, 1)),
-        dict(normal=(0, 0, 1), origin=(0, 0, 0), as_cartesian=True),
+        (0.0, 0.0, 1.0),
+        (0.0, 0.0, 0.0),
+        True,
     ),
     "hexagonal-centred-fractional": (
         mesh(CENTRED_HEX, tight_binding_graphene(CENTRED_HEX), HEXAGONAL, (24, 24, 1)),
-        dict(normal=(0, 0, 1), origin=(0, 0, 0), as_cartesian=False),
+        (0.0, 0.0, 1.0),
+        (0.0, 0.0, 0.0),
+        False,
     ),
-    "cubic-fractional-110": (
-        saw_mesh(CUBIC),
-        dict(normal=(1, 1, 0), origin=(0.1, 0, 0.2), as_cartesian=False),
-    ),
+    "cubic-fractional-110": (saw_mesh(CUBIC), (1.0, 1.0, 0.0), (0.1, 0.0, 0.2), False),
 }
 
 
@@ -218,31 +212,34 @@ REDUCED_CASES = {
 )
 @pytest.mark.parametrize("case", REDUCED_CASES)
 def test_bs2d_on_a_reduced_grid_whose_pad_covers_the_zone_is_todays_build(case):
-    ebs, plane = REDUCED_CASES[case]
+    ebs, normal, origin, as_cartesian = REDUCED_CASES[case]
 
-    bs = BandStructure2D.from_ebs(ebs, padding=15, grid_interpolation=(40, 40), **plane)
+    bs = BandStructure2D.from_ebs(
+        ebs,
+        normal=normal,
+        origin=origin,
+        grid_interpolation=(40, 40),
+        as_cartesian=as_cartesian,
+        padding=15,
+    )
 
-    today = todays_pad_build(ebs, 15, **plane)
+    today = todays_pad_build(ebs, 15, normal, origin, as_cartesian)
     np.testing.assert_array_equal(bs.points, today.points)
     np.testing.assert_array_equal(bs.faces, today.faces)
     assert bs.point_data.keys() == today.point_data.keys()
-    for name in today.point_data.keys():
+    for name in today.point_data:
         np.testing.assert_array_equal(bs.point_data[name], today.point_data[name])
-    np.testing.assert_array_equal(
-        bs.get_property("bands").value, today.get_property("bands").value
-    )
+    np.testing.assert_array_equal(bs.get_property("bands").value, today.get_property("bands").value)
     np.testing.assert_array_equal(bs.ebs.kpoints, today.ebs.kpoints)
-    np.testing.assert_array_equal(bs.normal, plane["normal"])
-    np.testing.assert_array_equal(bs.origin, plane["origin"])
+    np.testing.assert_array_equal(bs.normal, normal)
+    np.testing.assert_array_equal(bs.origin, origin)
 
 
 def test_stretched_grid_on_a_sheared_basis_warns_that_it_draws_the_given_basis():
     """Points that are not one uniform grid keep today's pad; on a sheared basis that can miss
     part of the zone, so the user is told."""
     axis = (np.arange(16) / 16) ** 1.05
-    frac = np.stack(np.meshgrid(axis, axis, axis, indexing="ij"), axis=-1).reshape(
-        -1, 3
-    )
+    frac = np.stack(np.meshgrid(axis, axis, axis, indexing="ij"), axis=-1).reshape(-1, 3)
     ebs = mesh(frac, saw_band(frac @ SHEARED), SHEARED, (16, 16, 16))
 
     with user_warning(__file__, match="not one uniform grid"):

@@ -23,7 +23,7 @@ import numpy.typing as npt
 import pyvista as pv
 from typing_extensions import override
 
-from pyprocar.core import kpoints
+import pyprocar.core.kpoints as kpoints
 from pyprocar.core.atomic_orbital_index import (
     CONVENTIONAL_CUBIC_ORBITAL_ORDER,
     ProjectionSelectionResolver,

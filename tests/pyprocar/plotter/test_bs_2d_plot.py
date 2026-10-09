@@ -12,9 +12,12 @@ from pyprocar.core.brillouin_zone import BrillouinZone
 from pyprocar.plotter.bs_2d_plot import BS2DPlotter
 from tests.pyprocar.core.test_bandstructure2d_grid import (
     HEXAGONAL,
+    N_K,
+    PADDING,
     tight_binding_graphene,
     two_band_mesh,
 )
+from tests.pyprocar.core.test_bandstructure2d_zone import projected_area
 from tests.utils.user_warning import user_warning
 
 TRIANGLE_FACES = [3, 0, 1, 2]
@@ -168,6 +171,9 @@ class TestBS2DPlotterBrillouinZone:
         assert len(plotter.actors) == len(meshes) + 1
         plotter.close()
 
+    @pytest.mark.guards_existing_behaviour(
+        reason="a pad that covers the zone keeps the whole zone at any energy, as today"
+    )
     @pytest.mark.parametrize(
         ("offset", "energy_range"),
         [(-5.0, (-8.0, -2.0)), (0.0, (-3.0, 3.0)), (5.0, (2.0, 8.0))],
@@ -177,7 +183,8 @@ class TestBS2DPlotterBrillouinZone:
         """The zone prism spans the band energies, so clipping must keep the same in-zone
         part of each band wherever the energies sit relative to 0."""
         ebs = two_band_mesh(HEXAGONAL, tight_binding_graphene, offset=offset)
-        bs2d = BandStructure2D.from_ebs(ebs, grid_interpolation=(40, 40), padding=3)
+        grid = N_K + 2 * PADDING
+        bs2d = BandStructure2D.from_ebs(ebs, grid_interpolation=(grid, grid), padding=PADDING)
         plotter = BS2DPlotter(bs2d, off_screen=True)
 
         drawn = plotter.plot(show_brillouin_zone=False, clip_brillouin_zone=True)
@@ -186,7 +193,10 @@ class TestBS2DPlotterBrillouinZone:
         assert (bs2d.points[:, 2].min(), bs2d.points[:, 2].max()) == pytest.approx(
             energy_range, abs=0.01
         )
-        assert {key: mesh.n_points for key, mesh in drawn.items()} == {(0, 0): 401, (1, 0): 401}
+        assert sorted(drawn) == [(0, 0), (1, 0)]
+        hexagon = 0.405231703 * 0.233960597 * 2 * (2 * np.pi) ** 2
+        for mesh in drawn.values():
+            assert projected_area(mesh) == pytest.approx(hexagon, rel=1e-9)
 
     def test_a_band_outside_the_zone_is_skipped_with_a_warning(self):
         """H3: the zone spans -1.5 to 1.5 on each axis, so band 2 at E = 2 clips to nothing;

@@ -22,11 +22,14 @@ NEAR_SQUARE = np.array(
         [7e-09, -5e-09, 0.061],
     ]
 )
-# c* tilted towards a* and b*, so planes at different kz sit at different (kx, ky).
-SKEWED = np.array([[0.25, 0.0, 0.0], [0.1, 0.22, 0.0], [0.03, -0.04, 0.12]])
+# c* tilted towards a* and b*, so planes at different kz sit at different (kx, ky). c* is tall
+# enough for the basis to stay reduced, so these grids are drawn as padded.
+SKEWED = np.array([[0.25, 0.0, 0.0], [0.1, 0.22, 0.0], [0.03, -0.04, 0.2]])
 # SKEWED with a* tilted out of the kz = 0 plane, so a Cartesian kz plane crosses the kz layers.
 TILTED = SKEWED + [[0.0, 0.0, 0.05], [0.0, 0.0, 0.0], [0.0, 0.0, 0.0]]
-N_K, PADDING = 24, 3
+# The pad covers the first zone of each lattice here (a [0, 1) grid reaches fractional -2/3 on
+# the hexagonal ones), so the drawn mesh is the padded grid and the patch below.
+N_K, PADDING = 24, 20
 PATCH = (N_K - 1 + 2 * PADDING) / N_K
 
 
@@ -139,7 +142,7 @@ def test_bs2d_plane_off_the_origin_on_a_skewed_lattice_has_the_bands_of_that_pla
 
 
 def test_cartesian_bs2d_plane_across_the_kz_layers_covers_its_patch():
-    # kz = 0.036 keeps the plane inside the padded mesh, which spans fractional kz -3/8 to 10/8.
+    # kz = 0.036 keeps the plane inside the padded mesh, which spans fractional kz -20/8 to 27/8.
     points, sheet, _, quads = bs2d_arrays(
         TILTED, layered_band, (30, 30), True, n_kz=8, origin=(0, 0, 0.036)
     )
