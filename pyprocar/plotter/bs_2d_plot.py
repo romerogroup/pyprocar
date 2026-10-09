@@ -13,11 +13,11 @@ from pyvista.plotting.utilities.algorithms import (
     set_algorithm_input,
 )
 
+from pyprocar.core.brillouin_zone import clip_to_zone, warn_clipped_away
 from pyprocar.plotter._series import SurfaceSeries, surface_series
 from pyprocar.plotter._surface_plot import (
     SurfacePlotter,
     area_text,
-    clip_to_zone,
     normalize_to_range,
     slice_loop_areas,
 )
@@ -222,7 +222,10 @@ class BS2DPlotter(SurfacePlotter):
         add_mesh_args["scalars"] = add_mesh_args.get("scalars")
 
         if clip_surface and self._brillouin_zone is not None:
-            surface = self.clip_surface(surface, self._brillouin_zone)
+            surface = clip_to_zone(surface, self._brillouin_zone)
+            if surface.n_points == 0:
+                warn_clipped_away(f"surface '{add_mesh_args['name']}'")
+                return
 
         self.add_mesh(surface, **add_mesh_args)
 
@@ -232,9 +235,6 @@ class BS2DPlotter(SurfacePlotter):
             add_texture_args["clim"] = add_texture_args.get("clim", clim)
 
             self.add_texture(surface, **add_texture_args)
-
-    def clip_surface(self, surface: pv.PolyData, brillouin_zone: pv.PolyData):
-        return clip_to_zone(surface, brillouin_zone)
 
     def add_slicer(
         self,

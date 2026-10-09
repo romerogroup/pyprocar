@@ -269,6 +269,25 @@ def test_rounded_111_normal_cuts_the_exact_111_plane():
     assert np.asarray(areas) == pytest.approx([np.pi * 0.1 * np.sqrt(3)], rel=0.02)
 
 
+A3_PLUS_6_A1 = np.array([[1.0, 0.0, -6.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]])
+"""Reciprocal rows of the simple cubic lattice given as a1, a2, a3 + 6 a1 (units of a): the
+same lattice, where [1 1 1] is -5 a1' + a2' + a3'."""
+
+
+def test_rounded_111_normal_snaps_in_a_sheared_basis():
+    """The cubic lattice given with a3' = a3 + 6 a1: the (1 1 1) plane through Gamma still
+    cuts the cylinder around M in one ellipse of area pi 0.1 sqrt(3) per cell."""
+    areas, n_open = cross_section_areas(
+        _periodic_surface(lambda k: _cylinder_around_m(k @ A3_PLUS_6_A1), A3_PLUS_6_A1),
+        ROUNDED_111,
+        (0, 0, 0),
+        A3_PLUS_6_A1,
+    )
+
+    assert n_open == 0
+    assert np.asarray(areas) == pytest.approx([np.pi * 0.1 * np.sqrt(3)], rel=0.02)
+
+
 def test_widget_says_when_it_snapped_the_normal():
     surface = _periodic_surface(_cylinder_around_m)
 
@@ -314,6 +333,268 @@ def test_exact_hexagonal_lattice_direction_is_not_reported_as_snapped():
         assert snap_normal(np.asarray(uvw, float) @ real, reciprocal)[1] is None
 
 
+def _turned_by(direction, angle: float = 1e-4, toward=(0.3, 0.5, 0.8)) -> np.ndarray:
+    unit = np.asarray(direction, dtype=float) / np.linalg.norm(direction)
+    away = np.cross(unit, toward)
+    return unit + angle * away / np.linalg.norm(away)
+
+
+def _primitive_indices(reach: int) -> list[tuple[int, ...]]:
+    return [
+        uvw
+        for uvw in itertools.product(range(-reach, reach + 1), repeat=3)
+        if any(uvw) and np.gcd.reduce(np.abs(uvw)) == 1
+    ]
+
+
+def test_sheared_basis_snaps_to_111_and_names_it_in_the_given_basis():
+    for normal in (_turned_by((1, 1, 1)), ROUNDED_111):
+        direction, uvw = snap_normal(normal, A3_PLUS_6_A1)
+
+        assert uvw == (-5, 1, 1)
+        np.testing.assert_allclose(direction, np.ones(3) / np.sqrt(3), atol=1e-12)
+
+
+def test_doubly_sheared_basis_snaps_every_direction_with_cubic_indices_up_to_2():
+    """Rows a1, a2 + 3 a1, a3 + 3 a1 + 3 a2 of the cubic lattice: the given indices of a
+    snapped direction, times these rows, are its cubic indices."""
+    given = np.array([[1, 0, 0], [3, 1, 0], [3, 3, 1]])
+    reciprocal = np.linalg.inv(given.astype(float)).T
+    cubic = _primitive_indices(2)
+
+    missed = []
+    for uvw in cubic:
+        direction, indices = snap_normal(_turned_by(uvw), reciprocal)
+        if (
+            indices is None
+            or not np.array_equal(np.array(indices) @ given, uvw)
+            or not np.allclose(direction, np.divide(uvw, np.linalg.norm(uvw)), atol=1e-12)
+        ):
+            missed.append(uvw)
+
+    assert len(cubic) == 98
+    assert missed == []
+
+
+_HEX_ROWS = np.array([[1.0, 0.0, 0.0], [-0.5, np.sqrt(3) / 2, 0.0], [0.0, 0.0, 1.0]])
+BI2SE3_RHOMBOHEDRAL = np.array(
+    [
+        [2.068734, -1.194384, 9.546678],
+        [0.0, 2.388768, 9.546678],
+        [-2.068734, -1.194384, 9.546678],
+    ]
+)
+"""The rhombohedral primitive cell of Bi2Se3 (a = 9.841 Angstrom, alpha = 24.27 degrees): not
+reduced, its successive minima are 4.14, 4.14 and 9.84 Angstrom."""
+STANDARD_CELLS = {
+    "SrVO3 cubic": 3.84652 * np.eye(3),
+    "Au fcc, van-alphen POSCAR": 2.949546
+    * np.array([[1.0, 0, 0], [0.5, np.sqrt(3) / 2, 0], [0.5, np.sqrt(3) / 6, np.sqrt(2 / 3)]]),
+    "fcc primitive": 2.04 * np.array([[0.0, 1, 1], [1, 0, 1], [1, 1, 0]]),
+    "bcc primitive": 1.65 * np.array([[-1.0, 1, 1], [1, -1, 1], [1, 1, -1]]),
+    "hexagonal c/a 2.72": _HEX_ROWS * [2.46, 2.46, 6.7],
+    "hexagonal c/a 1.62": _HEX_ROWS * [3.21, 3.21, 5.21],
+    "Bi2Se3 rhombohedral": BI2SE3_RHOMBOHEDRAL,
+}
+"""Real-space rows of cells as their POSCARs give them."""
+
+
+@pytest.mark.guards_existing_behaviour(
+    reason="dev snaps these from its given-basis candidates; #302 must not lose them"
+)
+def test_standard_cells_snap_every_direction_with_given_indices_up_to_4():
+    """Before #302 the candidates were the directions with indices up to 4 in the given
+    basis. On cells given in their usual basis, each still snaps, under the same name."""
+    given = _primitive_indices(4)
+
+    missed = {}
+    for name, real in STANDARD_CELLS.items():
+        reciprocal = np.linalg.inv(real).T
+        for uvw in given:
+            exact = np.array(uvw) @ real
+            direction, indices = snap_normal(_turned_by(exact), reciprocal)
+            if indices != uvw or not np.allclose(
+                direction, exact / np.linalg.norm(exact), atol=1e-12
+            ):
+                missed.setdefault(name, []).append(uvw)
+
+    assert len(given) == 578
+    assert missed == {}
+
+
+SHEARS = {
+    "given": np.eye(3, dtype=int),
+    "a3 + 6 a1": np.array([[1, 0, 0], [0, 1, 0], [6, 0, 1]]),
+    "doubly sheared": np.array([[1, 0, 0], [3, 1, 0], [3, 3, 1]]),
+    "a2 - 2 a1, a3 + a1 + 2 a2": np.array([[1, 0, 0], [-2, 1, 0], [1, 2, 1]]),
+}
+"""Changes of basis (unimodular): the given real rows are these times the cell's rows."""
+
+TURN = np.array(
+    [
+        [0.36, -0.48, 0.8],
+        [0.8, 0.6, 0.0],
+        [-0.48, 0.64, 0.6],
+    ]
+)
+"""A rotation (orthonormal rows, det 1), as a POSCAR in another orientation gives it."""
+
+
+def test_snapped_directions_do_not_depend_on_the_basis_or_the_orientation():
+    """Normals typed to 4 digits along directions with indices up to 2, and along four of
+    index 3 (cubic [1 1 3] and [2 2 3] on fcc), snap to the exact direction in every basis of
+    the lattice and orientation, and name it with integers in the basis given. Normals
+    far from low-index directions stay as given."""
+    standard = [*_primitive_indices(2), (3, 3, -1), (3, 3, 1), (-1, 3, 3), (1, 3, 3)]
+    unsnapped = np.random.default_rng(302).normal(size=(5, 3))
+    orientations = {"": np.eye(3), ", turned": TURN}
+
+    wrong = []
+    for (name, cell), (basis, shear), (orientation, turn) in itertools.product(
+        STANDARD_CELLS.items(), SHEARS.items(), orientations.items()
+    ):
+        frame = basis + orientation
+        real = shear @ cell @ turn.T
+        reciprocal = np.linalg.inv(real).T
+        for uvw in standard:
+            exact = np.array(uvw) @ cell @ turn.T
+            exact /= np.linalg.norm(exact)
+            direction, indices = snap_normal(np.round(exact, 4), reciprocal)
+            if not np.allclose(direction, exact, atol=1e-12):
+                wrong.append((name, frame, uvw))
+            # None: the rounded normal was already the exact direction, as for [2 1 0] on cubic.
+            elif indices is not None:
+                named = np.array(indices) @ real
+                if not np.allclose(named / np.linalg.norm(named), exact, atol=1e-12) or not all(
+                    type(i) is int for i in indices
+                ):
+                    wrong.append((name, frame, uvw))
+        for normal in unsnapped @ turn.T:
+            if snap_normal(normal, reciprocal)[1] is not None:
+                wrong.append((name, frame, tuple(normal)))
+
+    assert len(standard) == 102
+    assert wrong == []
+
+
+FCC_PRIMITIVE_RECIPROCAL = np.array([[-1.0, 1, 1], [1, -1, 1], [1, 1, -1]])
+"""Rows b1, b2, b3 of the fcc lattice with real rows (0 1 1)/2, (1 0 1)/2, (1 1 0)/2."""
+
+
+def _fcc_tight_binding(k: np.ndarray) -> np.ndarray:
+    """-(cx cy + cy cz + cz cx) at x, y, z = pi k_cart, whose E = 0.2 surface the plane cuts."""
+    x, y, z = (np.pi * (k @ FCC_PRIMITIVE_RECIPROCAL)).T
+    return -(np.cos(x) * np.cos(y) + np.cos(y) * np.cos(z) + np.cos(z) * np.cos(x)) - 0.1
+
+
+@pytest.mark.guards_existing_behaviour(
+    reason="dev snaps cubic [113] and [223] on the fcc primitive basis; #302 must keep it"
+)
+@pytest.mark.parametrize(
+    ("normal", "uvw", "exact_areas"),
+    [
+        (_turned_by((1, 1, 3), 1.5e-4, (0.3, 0.7, 0.1)), (3, 3, -1), [4.1373050]),
+        (np.round(np.divide((2, 2, 3), np.sqrt(17)), 4), (3, 3, 1), [6.7139492]),
+    ],
+)
+def test_fcc_cut_typed_near_cubic_113_or_223_counts_the_gamma_orbit_once(normal, uvw, exact_areas):
+    """The plane through Gamma along the exact cubic direction cuts one orbit, of the areas
+    given (the exact normal is not snapped). A normal within 1.5e-4 rad of it snaps to it, as
+    before #302; unsnapped, the irrational plane counts near-copies of the orbit twice."""
+    surface = _periodic_surface(_fcc_tight_binding, FCC_PRIMITIVE_RECIPROCAL, kgrid=(15, 15, 15))
+
+    areas, n_open = cross_section_areas(surface, normal, (0, 0, 0), FCC_PRIMITIVE_RECIPROCAL)
+
+    assert snap_normal(normal, FCC_PRIMITIVE_RECIPROCAL)[1] == uvw
+    assert n_open == 0
+    assert np.asarray(areas) == pytest.approx(exact_areas, rel=1e-6)
+
+
+def _bi2se3_band(k: np.ndarray) -> np.ndarray:
+    """Hops along the in-plane steps r1 - r2, r2 - r3, r3 - r1 and along each row r_i, at k
+    fractional on the reciprocal rows of BI2SE3_RHOMBOHEDRAL (k . r_i = k_i); the surface is
+    E = 0.8 of the band, which _periodic_surface puts at 0.1."""
+    two_pi = 2 * np.pi
+    steps = k[:, [0, 1, 2]] - k[:, [1, 2, 0]]
+    return -np.cos(two_pi * steps).sum(axis=1) - 0.35 * np.cos(two_pi * k).sum(axis=1) - 0.7
+
+
+BI2SE3_HEX_103 = np.array([4, 2, 3])
+"""Hexagonal [1 0 3], (r1 - r2) + 3 (r1 + r2 + r3), on the rhombohedral rows: 86 Angstrom long,
+beyond 4 times the sum of the successive minima (72.5 Angstrom)."""
+
+
+@pytest.mark.guards_existing_behaviour(
+    reason="dev snaps hexagonal [1 0 3] on the Bi2Se3 rhombohedral cell; #302 must keep it"
+)
+@pytest.mark.parametrize("turn", [np.eye(3), TURN], ids=["given", "turned"])
+def test_bi2se3_cut_typed_near_hexagonal_103_counts_the_gamma_orbit_once(turn):
+    """Typed to 4 digits, the normal snaps to [1 0 3] and the plane through Gamma cuts one
+    orbit, as the exact normal does; unsnapped, the irrational plane counts it twice."""
+    real = BI2SE3_RHOMBOHEDRAL @ turn.T
+    reciprocal = np.linalg.inv(real).T
+    exact = BI2SE3_HEX_103 @ real
+    exact /= np.linalg.norm(exact)
+    surface = _periodic_surface(_bi2se3_band, reciprocal)
+
+    typed, n_open = cross_section_areas(surface, np.round(exact, 4), (0, 0, 0), reciprocal)
+    exact_areas, _ = cross_section_areas(surface, exact, (0, 0, 0), reciprocal)
+
+    assert n_open == 0
+    assert len(exact_areas) == 1
+    assert np.asarray(typed) == pytest.approx(exact_areas, rel=1e-6)
+    assert snap_normal(np.round(exact, 4), reciprocal)[1] == (4, 2, 3)
+
+
+BI2SE3_HEX_103_ORBIT = {0.0: 0.2828, 0.01: 0.2830}
+"""Area of the one orbit of _bi2se3_band's E = 0.8 contour in the plane along hexagonal [1 0 3]
+at these offsets from Gamma, that meets the first zone. Measured without pyprocar on the
+analytic band: the plane's 2D lattice cell sampled 800 x 800, components labelled, holes
+filled (400 x 400 gives 0.2829 and 0.2830)."""
+
+
+@pytest.mark.guards_existing_behaviour(
+    reason="dev cuts the Bi2Se3 cell on its given basis, one orbit within 1%; #302 must keep it"
+)
+@pytest.mark.parametrize("turn", [np.eye(3), TURN], ids=["given", "turned"])
+@pytest.mark.parametrize("rows", list(itertools.permutations(range(3))))
+def test_bi2se3_cut_along_hexagonal_103_does_not_depend_on_row_order_or_rounding(rows, turn):
+    """The cell given with its rows in any order, or turned so that its reciprocal lattice
+    carries 1e-16 of rounding, is the same crystal: the cut is one orbit within 1% of the
+    analytic area. On a 16^3 grid the grid it is marched on decides that: drawn in one
+    reduced basis it gave 0.357, and at 0.01 two orbits of 0.105 and 0.213."""
+    real = BI2SE3_RHOMBOHEDRAL[list(rows)] @ turn.T
+    reciprocal = np.linalg.inv(real).T
+    normal = BI2SE3_HEX_103 @ BI2SE3_RHOMBOHEDRAL @ turn.T
+    normal /= np.linalg.norm(normal)
+    surface = _periodic_surface(_bi2se3_band, reciprocal)
+
+    for offset, area in BI2SE3_HEX_103_ORBIT.items():
+        areas, n_open = cross_section_areas(surface, normal, offset * normal, reciprocal)
+
+        assert n_open == 0
+        assert areas == pytest.approx([area], rel=1e-2)
+
+
+@pytest.mark.guards_existing_behaviour(
+    reason="dev cuts the Bi2Se3 cell on its given basis, one orbit within 1%; #302 must keep it"
+)
+@pytest.mark.parametrize("signs", [(-1, 1, 1), (1, -1, 1), (1, 1, -1)])
+def test_bi2se3_cut_along_hexagonal_103_does_not_depend_on_the_signs_of_the_rows(signs):
+    """A row and its negative span the same k-grid, so the cut is the analytic one orbit."""
+    flip = np.array(signs)
+    reciprocal = np.linalg.inv(BI2SE3_RHOMBOHEDRAL * flip[:, None]).T
+    normal = BI2SE3_HEX_103 @ BI2SE3_RHOMBOHEDRAL
+    normal /= np.linalg.norm(normal)
+    surface = _periodic_surface(lambda k: _bi2se3_band(k * flip), reciprocal)
+
+    for offset, area in BI2SE3_HEX_103_ORBIT.items():
+        areas, n_open = cross_section_areas(surface, normal, offset * normal, reciprocal)
+
+        assert n_open == 0
+        assert areas == pytest.approx([area], rel=1e-2)
+
+
 def test_drawn_slice_uses_the_snapped_normal():
     plotter = FermiPlotter(off_screen=True)
     plotter.add_box_slicer(
@@ -330,6 +611,9 @@ def test_drawn_slice_uses_the_snapped_normal():
 
 def _sum_of_cosines(k: np.ndarray) -> np.ndarray:
     return 0.1 - 0.3 * np.cos(2 * np.pi * k).sum(axis=1)
+
+
+FCC = FCC_PRIMITIVE_RECIPROCAL / 4.08
 
 
 def test_plane_tangent_to_the_surface_at_a_translate_closes_its_orbit():
@@ -456,6 +740,168 @@ def test_orbit_reaching_five_cells_from_the_zone_closes():
     assert np.asarray(areas) == pytest.approx([5.1506, 5.1506], rel=1e-4)
 
 
+SHEARED_TWICE = np.array([[1.0, 0.0, 0.0], [3.0, 1.0, 0.0], [-2.0, 2.0, 1.0]])
+"""b2 = (3, 1, 0), b3 = (-2, 2, 1): a basis of the cubic lattice."""
+
+
+def _cylinder_around_gamma(cartesian: np.ndarray) -> np.ndarray:
+    return np.sum(((cartesian[:, :2] + 0.5) % 1.0 - 0.5) ** 2, axis=1)
+
+
+def _sphere_around_gamma(cartesian: np.ndarray) -> np.ndarray:
+    return np.sum(((cartesian + 0.5) % 1.0 - 0.5) ** 2, axis=1)
+
+
+@pytest.mark.parametrize("azimuth", np.linspace(0, np.pi, 7))
+def test_sheared_basis_closes_an_orbit_longer_than_sixteen_given_cells(azimuth):
+    """#302: the plane through Gamma with n_z = 0.0953 cuts the cylinder kx^2 + ky^2 = 0.1 in
+    an ellipse 10 cubic cells long, which spans more than 16 cells of SHEARED_TWICE. The same
+    16^3 k-points given in the cubic basis give one closed orbit of 3.257701228581379
+    (analytic pi 0.1 / n_z = 3.2965)."""
+    n_z = 0.0953
+    normal = np.array(
+        [np.sqrt(1 - n_z**2) * np.cos(azimuth), np.sqrt(1 - n_z**2) * np.sin(azimuth), n_z]
+    )
+    surface = _periodic_surface(lambda k: _cylinder_around_gamma(k @ SHEARED_TWICE), SHEARED_TWICE)
+
+    areas, n_open = cross_section_areas(surface, normal, (0, 0, 0), SHEARED_TWICE)
+
+    assert n_open == 0
+    assert np.asarray(areas) == pytest.approx([3.257701228581379], abs=1e-9)
+
+
+def test_sheared_fcc_basis_cuts_the_orbits_of_the_reduced_one():
+    """#302: Au cut in b2' = b2 + 3 b1 gave 0.144 + 0.211 for 0.322, because marching cubes
+    ran on long thin sheared cells. The same 15^3 k-points and energies given in the reduced
+    fcc basis are an independent build of the same surface."""
+    n = 15
+
+    def sheared_band(k: np.ndarray) -> np.ndarray:
+        return _sum_of_cosines(np.rint(k @ SHEARED_CUBIC * n) % n / n) + 0.05
+
+    reduced = _periodic_surface(lambda k: _sum_of_cosines(k) + 0.05, FCC, kgrid=(n, n, n))
+    sheared = _periodic_surface(sheared_band, SHEARED_CUBIC @ FCC, kgrid=(n, n, n))
+    rng = np.random.default_rng(302)
+
+    for _ in range(6):
+        normal = rng.normal(size=3)
+        normal /= np.linalg.norm(normal)
+        origin = rng.uniform(-0.05, 0.05) * normal
+        expected, expected_open = cross_section_areas(reduced, normal, origin, FCC)
+
+        areas, n_open = cross_section_areas(sheared, normal, origin, SHEARED_CUBIC @ FCC)
+
+        assert n_open == expected_open
+        assert np.sort(areas) == pytest.approx(np.sort(expected), abs=1e-12)
+
+
+def test_unequal_grid_on_a_sheared_basis_cuts_one_closed_orbit():
+    """(16, 32, 16) on b2 = (3, 1, 0) repeats in the cubic basis every (32, 32, 16) points, a
+    tile twice the grid. The plane kz = 0 cuts the cylinder kx^2 + ky^2 = 0.1 in one circle of
+    area pi 0.1 = 0.31416, which a 1/32 mesh draws as 0.3123."""
+    basis = SHEARED_CUBIC
+    surface = _periodic_surface(
+        lambda k: _cylinder_around_gamma(k @ basis), basis, kgrid=(16, 32, 16)
+    )
+
+    areas, n_open = cross_section_areas(surface, (0, 0, 1), (0, 0, 0), basis)
+
+    assert n_open == 0
+    assert len(areas) == 1
+    assert 0.3105 < areas[0] < 0.3142
+
+
+def test_grid_without_a_small_reduced_period_says_orbits_are_not_joined():
+    """(15, 16, 16) on b2 = b1 + (0, 1, 0), b3 = b1 + (0, 0, 1) repeats in the cubic basis
+    only every 225 grids, more than the cut tiles."""
+    basis = np.array([[1.0, 0.0, 0.0], [1.0, 1.0, 0.0], [1.0, 0.0, 1.0]])
+    surface = _periodic_surface(
+        lambda k: _sphere_around_gamma(k @ basis), basis, kgrid=(15, 16, 16)
+    )
+
+    text = _slice_text(surface, show_cross_section_area=True)
+
+    assert periodic_bands(surface) is None
+    assert text.endswith(
+        " (one period of this k-grid in a reduced basis is 225 grids, above the limit of 16;"
+        + " orbits crossing the zone boundary are not joined)"
+    )
+
+
+REDUCED_BASIS_CUTS = [
+    ((0.0, 0.0, 1.0), (0.0, 0.0, 0.0), [0.1219794284848571, 0.3104589232663235], 0),
+    ((1.0, 1.0, 0.0), (0.0, 0.0, 0.0), [0.12019142569720472], 2),
+    ((1.0, 1.0, 1.0), (0.0, 0.0, 0.1), [0.10931585804103042, 0.5377306287604], 0),
+    (
+        (0.49297937126024555, -0.8307369262465643, 0.2585488326840085),
+        (-0.011760202276074922, 0.019817531646181004, -0.006167776478829283),
+        [0.11790441260189186, 1.20077480158558, 1.2007748015855804],
+        0,
+    ),
+    (
+        (0.576685966599314, 0.16869863281242276, 0.7993585348356731),
+        (-0.028682586460178974, -0.00839055118661883, -0.0397576352053604),
+        [
+            0.11206266966748896,
+            0.38838507345160916,
+            0.38838507345160894,
+            0.3883850734516094,
+            0.38838507345160905,
+        ],
+        0,
+    ),
+    (
+        (-0.5807403140526123, 0.6530255085566781, 0.48610531040955024),
+        (-0.018215565909975202, 0.020482871438698837, 0.015247233757827126),
+        [0.11642941896748725, 0.6386659775528019, 0.6386659775528019],
+        0,
+    ),
+    (
+        (-0.23854150276937688, 0.6939498918700379, 0.679361096200018),
+        (0.0021770887972934164, -0.006333449391127031, -0.006200302315039774),
+        [
+            0.11972267659522416,
+            0.45698660845147676,
+            0.45698660845147643,
+            0.45698660845147643,
+            0.4569866084514765,
+        ],
+        0,
+    ),
+    (
+        (-0.14744637733390775, -0.7244894061440224, 0.673331022748981),
+        (-0.004079637136077252, -0.020045618884934155, 0.01863013724005489),
+        [
+            0.1172354481984923,
+            0.4610791910327042,
+            0.46107919103270406,
+            0.4610791910327041,
+            0.4610791910327043,
+        ],
+        0,
+    ),
+]
+"""dev's cross_section_areas of _sphere_and_cylinder on the cubic 16^3 grid (70c86145)."""
+
+
+@pytest.mark.guards_existing_behaviour(
+    reason="on a reduced basis the cut is dev's, float for float (#302)"
+)
+@pytest.mark.parametrize("centred", [False, True])
+@pytest.mark.parametrize(("normal", "origin", "areas", "n_open"), REDUCED_BASIS_CUTS)
+def test_reduced_basis_cut_is_unchanged(centred, normal, origin, areas, n_open):
+    surface = _periodic_surface(
+        _sphere_and_cylinder,
+        stored_kpoints=(lambda k: np.where(k > 0.5 + 1e-12, k - 1.0, k)) if centred else _same,
+    )
+
+    found, found_open = cross_section_areas(surface, normal, origin, np.eye(3))
+
+    # Another machine can round the last bit differently: a GitHub runner differed by one ulp.
+    assert found_open == n_open
+    assert found == pytest.approx(areas, rel=1e-12, abs=0)
+
+
 def _sphere_and_cylinder(k: np.ndarray) -> np.ndarray:
     """A sphere of radius 0.2 around Gamma and a cylinder of radius sqrt(0.1) around M."""
     to_gamma = (k + 0.5) % 1.0 - 0.5
@@ -564,23 +1010,51 @@ def test_cut_through_mesh_vertices_keeps_every_straddling_triangle(uvw):
     """Planes along [u v w] of an fcc cell through mesh vertices: each triangle with vertices
     on both sides of the plane in a translate gives one segment, though the period's
     triangle heights, which pick the candidates, round differently from its own."""
-    fcc = np.array([[-1, 1, 1], [1, -1, 1], [1, 1, -1]]) / 4.08
-    bands = periodic_bands(_periodic_surface(lambda k: _sum_of_cosines(k) + 0.05, fcc))
-    assert bands
-    band = bands[0]
-    normal = np.asarray(uvw, dtype=np.float64) @ np.linalg.inv(fcc).T
+    periodic = periodic_bands(_periodic_surface(lambda k: _sum_of_cosines(k) + 0.05, FCC))
+    assert periodic is not None and periodic.bands
+    band = periodic.bands[0]
+    normal = np.asarray(uvw, dtype=np.float64) @ np.linalg.inv(FCC).T
     normal /= np.linalg.norm(normal)
     steps = np.array(list(itertools.product(range(-2, 3), repeat=3)))
 
     for vertex in range(0, len(band.canon), len(band.canon) // 16):
-        d = float(band.canon[vertex] @ fcc @ normal)
-        cut = _BandCut(band, fcc, normal, d)
+        d = float(band.canon[vertex] @ FCC @ normal)
+        cut = _BandCut(band, FCC, normal, d)
         s = cut.heights[band.tri_cls] + (band.tri_off[None] + steps[:, None, None]) @ cut.w - d
         straddling = int(((s > 0).any(axis=2) & ~(s > 0).all(axis=2)).sum())
         segments = cut.segments(steps)
 
         assert segments is not None
         assert len(segments[0]) == straddling
+
+
+@pytest.mark.guards_existing_behaviour(
+    reason="a surface loaded without its band structure has no grid; dev measures its slice"
+)
+def test_surface_loaded_without_its_band_structure_measures_the_drawn_slice(tmp_path):
+    path = tmp_path / "fs.pkl"
+    _periodic_surface(_sphere_around_gamma).save(str(path))
+    loaded = FermiSurface.load(str(path))
+
+    text = _slice_text(loaded, show_cross_section_area=True)
+
+    assert periodic_bands(loaded) is None
+    assert text.endswith(" Ang^-2")
+    assert _number(text) == pytest.approx(np.pi * 0.1 * (2 * np.pi) ** 2, rel=0.02)
+
+
+@pytest.mark.guards_existing_behaviour(
+    reason="dev joins orbits only on a 3D grid; the drawn grid now also parses a 2D one"
+)
+def test_two_dimensional_grid_says_orbits_are_not_joined():
+    surface = _periodic_surface(_cylinder_around_m, kgrid=(16, 16, 1))
+
+    text = _slice_text(surface, show_cross_section_area=True)
+
+    assert periodic_bands(surface) is None
+    assert text.endswith(
+        " (k-points are not a uniform 3D grid; orbits crossing the zone boundary are not joined)"
+    )
 
 
 def test_kpoints_off_a_uniform_grid_say_orbits_are_not_joined():

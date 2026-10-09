@@ -7,7 +7,18 @@ import numpy as np
 import pytest
 import pyvista as pv
 
+from pyprocar.core.bandstructure2D import BandStructure2D
+from pyprocar.core.brillouin_zone import BrillouinZone
 from pyprocar.plotter.bs_2d_plot import BS2DPlotter
+from tests.pyprocar.core.test_bandstructure2d_grid import (
+    HEXAGONAL,
+    N_K,
+    PADDING,
+    tight_binding_graphene,
+    two_band_mesh,
+)
+from tests.pyprocar.core.test_bandstructure2d_zone import HEXAGON_ZONE_AREA, projected_area
+from tests.utils.user_warning import user_warning
 
 TRIANGLE_FACES = [3, 0, 1, 2]
 
@@ -34,6 +45,26 @@ def _bandstructure2d(props=None):
 
 SCALARS = [3.0, 4.0, 5.0, 6.0, 7.0, 8.0]
 VECTORS = np.tile([0.0, 0.0, 2.0], (6, 1))
+
+
+OUTSIDE = "lies only outside the first Brillouin zone; it is not drawn"
+
+
+def _clipped_bandstructure2d(zone, props=None):
+    """``_bandstructure2d`` spanning E = -1 to 2, whose zone for any energy range is ``zone``."""
+    bs2d = _bandstructure2d(props)
+    bs2d.points = np.array([[0.0, 0.0, -1.0], [0.0, 0.0, 2.0]])
+
+    def get_2d_brillouin_zone(e_min: float, e_max: float):
+        assert e_min < e_max
+        return zone
+
+    bs2d.get_2d_brillouin_zone = get_2d_brillouin_zone
+    return bs2d
+
+
+def _outside_warnings(record: pytest.WarningsRecorder) -> list[str]:
+    return [str(w.message) for w in record if OUTSIDE in str(w.message)]
 
 
 @pytest.fixture
@@ -139,6 +170,93 @@ class TestBS2DPlotterBrillouinZone:
         assert requested == {"e_min": -1.0, "e_max": 2.0}
         assert len(plotter.actors) == len(meshes) + 1
         plotter.close()
+
+    @pytest.mark.guards_existing_behaviour(
+        reason="a pad that covers the zone keeps the whole zone at any energy, as today"
+    )
+    @pytest.mark.parametrize(
+        ("offset", "energy_range"),
+        [(-5.0, (-8.0, -2.0)), (0.0, (-3.0, 3.0)), (5.0, (2.0, 8.0))],
+        ids=["below-zero", "around-zero", "above-zero"],
+    )
+    def test_clipping_to_the_zone_keeps_graphene_bands_at_any_energy(self, offset, energy_range):
+        """The zone prism spans the band energies, so clipping must keep the same in-zone
+        part of each band wherever the energies sit relative to 0."""
+        ebs = two_band_mesh(HEXAGONAL, tight_binding_graphene, offset=offset)
+        grid = N_K + 2 * PADDING
+        bs2d = BandStructure2D.from_ebs(ebs, grid_interpolation=(grid, grid), padding=PADDING)
+        plotter = BS2DPlotter(bs2d, off_screen=True)
+
+        drawn = plotter.plot(show_brillouin_zone=False, clip_brillouin_zone=True)
+
+        plotter.close()
+        assert (bs2d.points[:, 2].min(), bs2d.points[:, 2].max()) == pytest.approx(
+            energy_range, abs=0.01
+        )
+        assert sorted(drawn) == [(0, 0), (1, 0)]
+        for mesh in drawn.values():
+            assert projected_area(mesh) == pytest.approx(HEXAGON_ZONE_AREA, rel=1e-9)
+
+    def test_clipping_a_pad_short_of_the_zone_keeps_the_whole_graphene_zone(self):
+        """A pad of 3 on the [0, 1) 24 x 24 grid starts at fractional -3/24, short of the zone
+        corner at -2/3; the drawn box reaches both, so each clipped band is the whole hexagon."""
+        ebs = two_band_mesh(HEXAGONAL, tight_binding_graphene)
+        bs2d = BandStructure2D.from_ebs(ebs, grid_interpolation=(40, 40), padding=3)
+        plotter = BS2DPlotter(bs2d, off_screen=True)
+
+        drawn = plotter.plot(show_brillouin_zone=False, clip_brillouin_zone=True)
+
+        plotter.close()
+        assert sorted(drawn) == [(0, 0), (1, 0)]
+        for mesh in drawn.values():
+            assert projected_area(mesh) == pytest.approx(HEXAGON_ZONE_AREA, rel=1e-9)
+
+    def test_a_band_outside_the_zone_is_skipped_with_a_warning(self):
+        """H3: the zone spans -1.5 to 1.5 on each axis, so band 2 at E = 2 clips to nothing;
+        today it is drawn as an empty mesh without a warning."""
+        plotter = BS2DPlotter(
+            _clipped_bandstructure2d(BrillouinZone(3 * np.eye(3))), off_screen=True
+        )
+
+        with user_warning(__file__, match=OUTSIDE) as record:
+            meshes = plotter.plot(show_brillouin_zone=False, clip_brillouin_zone=True)
+
+        actors = sorted(plotter.actors)
+        plotter.close()
+        assert _outside_warnings(record) == [f"band 2 spin 0 {OUTSIDE}"]
+        assert list(meshes) == [(1, 0)]
+        assert meshes[(1, 0)].n_points == 3
+        assert actors == ["surface_1_0"]
+
+    def test_the_first_drawn_band_carries_the_scalar_bar_when_band_one_is_skipped(self):
+        """The zone keeps E >= 0, so band 1 at E = -1 is skipped and band 2 shows the bar."""
+        upper_half = SimpleNamespace(
+            face_normals=np.array([[0.0, 0.0, -1.0]]), centers=np.zeros((1, 3))
+        )
+        bs2d = _clipped_bandstructure2d(upper_half, {"band_speed": _property(SCALARS)})
+        plotter = BS2DPlotter(bs2d, off_screen=True)
+
+        with user_warning(__file__, match=OUTSIDE) as record:
+            meshes = plotter.plot(
+                scalars_data="band_speed", show_brillouin_zone=False, clip_brillouin_zone=True
+            )
+
+        bars = list(plotter.scalar_bars.keys())
+        plotter.close()
+        assert _outside_warnings(record) == [f"band 1 spin 0 {OUTSIDE}"]
+        assert list(meshes) == [(2, 0)]
+        assert bars == ["Band speed"]
+
+    def test_add_surface_skips_a_surface_clipped_away_with_a_warning(self, plotter):
+        """H3: today the empty clip is drawn silently."""
+        plotter.add_brillouin_zone(BrillouinZone(np.eye(3)))
+        outside = pv.Sphere(radius=0.2, center=(2.0, 2.0, 2.0))
+
+        with user_warning(__file__, match=OUTSIDE) as record:
+            plotter.add_surface(outside, clip_surface=True, show_scalar_bar=False)
+
+        assert _outside_warnings(record) == [f"surface 'surface' {OUTSIDE}"]
+        assert "surface" not in plotter.actors
 
 
 class TestBS2DPlotterExport:

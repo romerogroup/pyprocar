@@ -22,11 +22,19 @@ NEAR_SQUARE = np.array(
         [7e-09, -5e-09, 0.061],
     ]
 )
-# c* tilted towards a* and b*, so planes at different kz sit at different (kx, ky).
-SKEWED = np.array([[0.25, 0.0, 0.0], [0.1, 0.22, 0.0], [0.03, -0.04, 0.12]])
+# c* tilted towards a* and b*, so planes at different kz sit at different (kx, ky). c* is tall
+# enough for the 24 x 24 x n_kz k-grids below to stay reduced, so they are drawn as padded.
+SKEWED = np.array([[0.25, 0.0, 0.0], [0.1, 0.22, 0.0], [0.03, -0.04, 0.2]])
 # SKEWED with a* tilted out of the kz = 0 plane, so a Cartesian kz plane crosses the kz layers.
-TILTED = SKEWED + [[0.0, 0.0, 0.05], [0.0, 0.0, 0.0], [0.0, 0.0, 0.0]]
-N_K, PADDING = 24, 3
+TILT = np.array([[0.0, 0.0, 0.05], [0.0, 0.0, 0.0], [0.0, 0.0, 0.0]])
+TILTED = SKEWED + TILT
+# SKEWED before #302. Its k-step c*/n_kz - a*/24 + b*/24 is shorter than c*/n_kz, so these
+# k-grids are not reduced and are drawn in another basis.
+SKEWED_SHORT_C = SKEWED.copy()
+SKEWED_SHORT_C[2, 2] = 0.12
+# The pad covers the first zone of each lattice here (a [0, 1) grid reaches fractional -2/3 on
+# the hexagonal ones), so the drawn mesh is the padded grid and the patch below.
+N_K, PADDING = 24, 20
 PATCH = (N_K - 1 + 2 * PADDING) / N_K
 
 
@@ -38,11 +46,22 @@ def square_band(frac: np.ndarray) -> np.ndarray:
     return np.cos(2 * np.pi * frac[:, 0]) + 2 * np.cos(2 * np.pi * frac[:, 1])
 
 
+def saw(x: np.ndarray) -> np.ndarray:
+    return x - np.round(x)
+
+
+def saw_band(x: np.ndarray) -> np.ndarray:
+    """x + 2y + 3z inside the cell |x_i| < 1/2, periodic over the unit lattice."""
+    return saw(x[:, 0]) + 2 * saw(x[:, 1]) + 3 * saw(x[:, 2])
+
+
 def layered_band(frac: np.ndarray) -> np.ndarray:
     return square_band(frac) + 0.5 * np.sin(2 * np.pi * frac[:, 2])
 
 
-def two_band_mesh(lattice: np.ndarray, band, n_kz: int = 1) -> ElectronicBandStructureMesh:
+def two_band_mesh(
+    lattice: np.ndarray, band, n_kz: int = 1, offset: float = 0.0
+) -> ElectronicBandStructureMesh:
     axis = np.arange(N_K) / N_K
     frac = np.stack(
         np.meshgrid(axis, axis, np.arange(n_kz) / n_kz, indexing="ij"), axis=-1
@@ -53,7 +72,7 @@ def two_band_mesh(lattice: np.ndarray, band, n_kz: int = 1) -> ElectronicBandStr
             kgrid=(N_K, N_K, n_kz), kgrid_mode=KGRID_MODE.GAMMA, kshift=(0.0, 0.0, 0.0)
         ),
         kpoints=frac,
-        bands=np.stack([-energies, energies], axis=1)[:, :, None],
+        bands=np.stack([offset - energies, offset + energies], axis=1)[:, :, None],
         projected=np.ones((len(frac), 2, 1, 1, 1)),
         fermi=0.0,
         reciprocal_lattice=lattice,
@@ -137,7 +156,7 @@ def test_bs2d_plane_off_the_origin_on_a_skewed_lattice_has_the_bands_of_that_pla
 
 
 def test_cartesian_bs2d_plane_across_the_kz_layers_covers_its_patch():
-    # kz = 0.036 keeps the plane inside the padded mesh, which spans fractional kz -3/8 to 10/8.
+    # kz = 0.036 keeps the plane inside the padded mesh, which spans fractional kz -20/8 to 27/8.
     points, sheet, _, quads = bs2d_arrays(
         TILTED, layered_band, (30, 30), True, n_kz=8, origin=(0, 0, 0.036)
     )
@@ -176,3 +195,68 @@ def test_bs2d_on_a_non_square_grid_builds_every_point():
     n_points, n_off, n_quads, area = run.stdout.split()
     assert [n_points, n_off, n_quads] == [str(2 * 30 * 20), "0", str(29 * 19)]
     assert float(area) == pytest.approx(PATCH**2 * 0.25 * 0.25, rel=1e-9)
+
+
+SHORT_PADDING = 3
+"""The pad before #302. On the [0, 1) grids above it misses the first zone."""
+
+
+@pytest.mark.parametrize(
+    ("lattice", "band", "first", "as_cartesian"),
+    [
+        (HEXAGONAL, tight_binding_graphene, -17, True),
+        (HEXAGONAL, tight_binding_graphene, -17, False),
+        (SQUARE, square_band, -13, False),
+    ],
+    ids=["hexagonal-cartesian", "hexagonal-fractional", "square"],
+)
+def test_a_pad_short_of_the_zone_draws_the_zone_and_the_pad_with_the_analytic_bands(
+    lattice, band, first, as_cartesian
+):
+    """The drawn box runs from the zone's box, one point past the zone corner at fractional
+    -2/3 (16 points) on graphene and the edge at -1/2 (12 points) on the square, to the pad's
+    end at 23 + 3. A (u, v) grid of one sample per k-point then lands on the k-points."""
+    last = N_K - 1 + SHORT_PADDING
+    grid = last - first + 1
+    points, sheet, _, quads = bs2d_arrays(
+        lattice, band, (grid, grid), as_cartesian, padding=SHORT_PADDING
+    )
+
+    frac = np.column_stack([points[:, :2] / (2 * np.pi), np.zeros(len(points))]) @ np.linalg.inv(
+        lattice
+    )
+    sign = np.where(sheet == 1, 1.0, -1.0)
+    assert np.isfinite(points).all()
+    np.testing.assert_allclose(points[:, 2], sign * band(frac), atol=1e-9)
+    span = (last - first) / N_K
+    cell = abs(np.linalg.det(lattice[:2, :2]))
+    assert quad_area(quads) == pytest.approx(span**2 * cell, rel=1e-9)
+
+
+@pytest.mark.parametrize(
+    ("lattice", "n_kz", "origin", "as_cartesian"),
+    [
+        (SKEWED_SHORT_C, 4, (0, 0, 0.25), False),
+        (SKEWED_SHORT_C + TILT, 8, (0, 0, 0.036), True),
+    ],
+    ids=["skewed-plane-off-the-origin", "tilted-plane-across-the-kz-layers"],
+)
+def test_a_k_grid_that_is_not_reduced_draws_the_band_wherever_its_cells_keep_it_linear(
+    lattice, n_kz, origin, as_cartesian
+):
+    """A drawn cell spans at most 1/12 of a* and b* and 1/n_kz of c*, so a sample within 0.3 of
+    the cell centre interpolates only k-points where the band is linear, and must be exact.
+    The sheet reaches -0.3 along a* and b*, which today's pad from -3/24 does not."""
+    points, sheet, _, _ = bs2d_arrays(
+        lattice, saw_band, (30, 30), as_cartesian, n_kz, origin, padding=SHORT_PADDING
+    )
+
+    kz = origin[2] if as_cartesian else (np.asarray(origin) @ lattice)[2]
+    k = np.column_stack([points[:, :2] / (2 * np.pi), np.full(len(points), kz)])
+    frac = np.linalg.solve(lattice.T, k.T).T
+    inner = (np.abs(frac) < 0.3).all(axis=1)
+    sign = np.where(sheet == 1, 1.0, -1.0)
+    assert np.isfinite(points).all()
+    assert (frac[:, :2].min(axis=0) <= -0.3).all()
+    assert (frac[:, :2].max(axis=0) >= 0.3).all()
+    np.testing.assert_allclose(points[inner, 2], sign[inner] * saw_band(frac[inner]), atol=1e-9)

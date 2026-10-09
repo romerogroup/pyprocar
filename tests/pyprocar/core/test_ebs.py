@@ -360,8 +360,8 @@ class TestElectronicBandStructure:
             assert np.allclose(reduced_ebs.projected.to_array(), expected_projected)
 
     def test_shift_kpoints_to_fbz(self, sample_ebs):
-        """Test shifting kpoints to first Brillouin zone."""
-        # Create kpoints outside the [-0.5, 0.5] range
+        """Test shifting kpoints to the Wigner-Seitz first Brillouin zone of a hexagonal lattice."""
+        real_lattice = np.array([[1.0, 0.0, 0.0], [-0.5, np.sqrt(3) / 2, 0.0], [0.0, 0.0, 1.6]])
         kpoints_outside_fbz = np.array(
             [
                 [0.7, 0.3, 0.1],  # x > 0.5
@@ -371,24 +371,23 @@ class TestElectronicBandStructure:
                 [0.3, 0.2, 1.2],  # z > 0.5
                 [0.4, 0.1, -0.9],  # z < -0.5
                 [0.0, 0.0, 0.0],  # Already in FBZ
-                [0.5, -0.5, 0.25],  # Edge cases
+                [0.4, 0.3, 0.2],  # In the unit cell, beyond the zone face normal to b1
+                [-0.3, 0.6, 0.2],  # Outside the unit cell, inside the zone
             ]
         )
 
         # Create a new EBS with these kpoints
         test_ebs = ElectronicBandStructure(
             kpoints=kpoints_outside_fbz,
-            bands=np.random.rand(8, 4, 2) * 10 - 5,
+            bands=np.random.rand(9, 4, 2) * 10 - 5,
             fermi=0.0,
+            reciprocal_lattice=np.linalg.inv(real_lattice).T,
         )
 
         # Shift to FBZ
         shifted_ebs = test_ebs.shift_kpoints_to_fbz(inplace=False)
 
-        # All kpoints should now be in [-0.5, 0.5] range
-        assert np.all(shifted_ebs.kpoints >= -0.5)
-        assert np.all(shifted_ebs.kpoints <= 0.5)
-
+        # Each image is the shortest of k - n over integer n in -4..4 (brute force)
         np.testing.assert_allclose(
             shifted_ebs.kpoints,
             [
@@ -399,7 +398,8 @@ class TestElectronicBandStructure:
                 [0.3, 0.2, 0.2],
                 [0.4, 0.1, 0.1],
                 [0.0, 0.0, 0.0],
-                [0.5, 0.5, 0.25],
+                [-0.6, 0.3, 0.2],
+                [-0.3, 0.6, 0.2],
             ],
             atol=1e-12,
         )

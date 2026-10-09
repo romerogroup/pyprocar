@@ -13,6 +13,7 @@ import numpy as np
 import pyvista as pv
 from scipy.interpolate import LinearNDInterpolator
 
+from pyprocar.core._periodic_grid import drawn_mesh
 from pyprocar.core.brillouin_zone import BrillouinZone2D
 from pyprocar.core.ebs import ElectronicBandStructureMesh
 from pyprocar.core.property_store import PointSet, Property
@@ -115,19 +116,60 @@ def get_transformation_matrix(u: np.ndarray, v: np.ndarray, normal: np.ndarray):
     return transformation_matrix
 
 
+def _reciprocal_lattice(ebs: ElectronicBandStructureMesh) -> np.ndarray:
+    lattice = ebs.reciprocal_lattice
+    if lattice is None:
+        raise ValueError("BandStructure2D needs the Mesh's reciprocal lattice")
+    return np.asarray(lattice)
+
+
+def _plane_in_frame(
+    normal: np.ndarray,
+    origin: np.ndarray,
+    as_cartesian: bool,
+    given_basis: np.ndarray,
+    mesh_basis: np.ndarray,
+) -> tuple[np.ndarray, np.ndarray]:
+    """The plane ``normal``, ``origin`` for slicing a mesh fractional in ``mesh_basis``.
+
+    A Cartesian plane is the same in every frame. A plane in fractions of ``given_basis`` is
+    re-expressed in fractions of ``mesh_basis = steps @ given_basis``, ``steps`` integer, where
+    f_given = f_mesh @ steps.
+    """
+    if as_cartesian or np.array_equal(given_basis, mesh_basis):
+        return normal, origin
+    steps = np.rint(mesh_basis @ np.linalg.inv(given_basis))
+    return steps @ normal, origin @ np.linalg.inv(steps)
+
+
+def _slice_plane(
+    ebs: ElectronicBandStructureMesh, plane_info: PlaneInfo, given_basis: np.ndarray, **kwargs
+):
+    """``ebs.slice`` through the plane of ``plane_info``, whose fractions are of ``given_basis``."""
+    normal, origin = _plane_in_frame(
+        plane_info.normal,
+        plane_info.origin,
+        plane_info.as_cartesian,
+        given_basis,
+        _reciprocal_lattice(ebs),
+    )
+    return ebs.slice(normal=normal, origin=origin, as_cartesian=plane_info.as_cartesian, **kwargs)
+
+
 def compute_plane_info(
     ebs: ElectronicBandStructureMesh,
     normal: tuple[float, float, float],
     origin: tuple[float, float, float],
     grid_interpolation: tuple[int, int],
     as_cartesian: bool,
+    given_basis: np.ndarray | None = None,
 ) -> PlaneInfo:
     """Compute plane parameters from EBS and plane specification.
 
     Parameters
     ----------
     ebs : ElectronicBandStructureMesh
-        The padded/expanded electronic band structure
+        The drawn (padded, expanded) electronic band structure
     normal : tuple[float, float, float]
         Normal vector defining the cutting plane
     origin : tuple[float, float, float]
@@ -136,16 +178,26 @@ def compute_plane_info(
         Number of grid points in (u, v) directions
     as_cartesian : bool
         Whether to interpret coordinates in Cartesian space
+    given_basis : np.ndarray | None
+        The reciprocal basis of a fractional ``normal`` and ``origin``; ``ebs``'s own when None
 
     Returns
     -------
     PlaneInfo
-        Computed plane parameters
+        Computed plane parameters, ``normal`` and ``origin`` as given
     """
     normal_arr = np.array(normal)
     origin_arr = np.array(origin)
+    lattice = np.asarray(ebs.reciprocal_lattice, dtype=float)
+    mesh_normal, mesh_origin = _plane_in_frame(
+        normal_arr,
+        origin_arr,
+        as_cartesian,
+        lattice if given_basis is None else given_basis,
+        lattice,
+    )
 
-    slice_mesh = ebs.slice(normal=normal_arr, origin=origin_arr, as_cartesian=as_cartesian)
+    slice_mesh = ebs.slice(normal=mesh_normal, origin=mesh_origin, as_cartesian=as_cartesian)
     u, v = get_orthonormal_basis(normal=normal_arr)
     plane_points = transform_points_to_uv(slice_mesh.points, u, v)
     u_limits, v_limits = find_plane_limits(plane_points)
@@ -153,9 +205,8 @@ def compute_plane_info(
     # Cartesian space; a grid over its bounding box puts up to half the points outside the data.
     # The grid is regular in the two fractional coordinates that span the plane instead, pulled in
     # from the edges by far more than rounding so no edge point falls outside the triangulation.
-    lattice = np.asarray(ebs.reciprocal_lattice, dtype=float)
     frac_points = slice_mesh.points @ np.linalg.inv(lattice)
-    frac_normal = lattice @ normal_arr if as_cartesian else normal_arr.astype(float)
+    frac_normal = lattice @ normal_arr if as_cartesian else mesh_normal.astype(float)
     across = int(np.argmax(np.abs(frac_normal)))
     along = [(across + 1) % 3, (across + 2) % 3]
     low, high = frac_points[:, along].min(axis=0), frac_points[:, along].max(axis=0)
@@ -272,6 +323,7 @@ def _compute_scalar_grid(
     ebs: ElectronicBandStructureMesh,
     scalars: np.ndarray,
     plane_info: PlaneInfo,
+    given_basis: np.ndarray,
 ) -> np.ndarray:
     """Interpolate scalar values onto the 2D grid.
 
@@ -283,6 +335,8 @@ def _compute_scalar_grid(
         Scalar values to interpolate
     plane_info : PlaneInfo
         Plane parameters
+    given_basis : np.ndarray
+        The reciprocal basis of the plane's fractions
 
     Returns
     -------
@@ -290,11 +344,11 @@ def _compute_scalar_grid(
         Interpolated scalar values on the grid
     """
     scalars_shape = scalars.shape
-    slice_mesh = ebs.slice(
-        normal=plane_info.normal,
-        origin=plane_info.origin,
+    slice_mesh = _slice_plane(
+        ebs,
+        plane_info,
+        given_basis,
         scalars=("scalars", scalars.reshape(scalars_shape[0], -1)),
-        as_cartesian=plane_info.as_cartesian,
     )
 
     # Get slice points in UV coordinates for interpolation
@@ -329,11 +383,11 @@ def generate_band_2d_surfaces(
     Parameters
     ----------
     ebs : ElectronicBandStructureMesh
-        The padded/expanded electronic band structure
+        The drawn (padded, expanded) electronic band structure
     plane_info : PlaneInfo
         Computed plane parameters
     original_ebs : ElectronicBandStructureMesh | None
-        Original EBS for value clipping (optional)
+        Original EBS for value clipping and the basis of a fractional plane (optional)
     scale_factor : float
         K-plane scale factor (default: 2π)
 
@@ -349,7 +403,8 @@ def generate_band_2d_surfaces(
     bands = ebs.get_property("bands")
     if bands is None:
         raise ValueError("bands property not found in EBS")
-    new_bands = _compute_scalar_grid(ebs, bands.value, plane_info)
+    given = _reciprocal_lattice(ebs if original_ebs is None else original_ebs)
+    new_bands = _compute_scalar_grid(ebs, bands.value, plane_info, given)
 
     # Clip to original range if provided
     if original_ebs is not None:
@@ -501,11 +556,12 @@ class BandStructure2D(pv.PolyData):
         if "spin_band_index" in self.point_data:
             self.set_active_scalars("spin_band_index", preference="point")
 
-        # Compute transformation matrices (for reciprocal space conversions)
+        # Compute transformation matrices (for reciprocal space conversions in the given basis)
         self.transform_to_cart = np.eye(4)
         self.transform_to_frac = np.eye(4)
-        self.transform_to_cart[:3, :3] = self._ebs.reciprocal_lattice.T
-        self.transform_to_frac[:3, :3] = np.linalg.inv(self._ebs.reciprocal_lattice.T)
+        given = _reciprocal_lattice(self._original_ebs)
+        self.transform_to_cart[:3, :3] = given.T
+        self.transform_to_frac[:3, :3] = np.linalg.inv(given.T)
 
         logger.info("___BandStructure2D initialization complete___")
 
@@ -525,7 +581,7 @@ class BandStructure2D(pv.PolyData):
         Create BandStructure2D from an ElectronicBandStructureMesh.
 
         This factory method performs all heavy computation:
-        - Pads the EBS
+        - Draws the EBS on a box that covers the first Brillouin zone
         - Computes plane parameters
         - Generates band surfaces
 
@@ -542,7 +598,8 @@ class BandStructure2D(pv.PolyData):
         as_cartesian : bool
             Whether to interpret coordinates in Cartesian space
         padding : int
-            Number of k-points to pad in each direction
+            Number of k-points to pad in each direction. A full uniform grid whose pad misses
+            part of the first zone is drawn on the pad and the zone's box together.
         scale_factor : float
             Scale factor for k-plane (default: 2π)
 
@@ -552,8 +609,8 @@ class BandStructure2D(pv.PolyData):
             The constructed 2D band structure surface
         """
         original_ebs = copy.copy(ebs)
-        padded_ebs = ebs.pad(padding=padding, inplace=False)
-        padded_ebs = padded_ebs.expand_single_dimension(inplace=False)
+        _, drawn = drawn_mesh(ebs, padding, "2D band structure", keep_pad=True)
+        padded_ebs = drawn.expand_single_dimension(inplace=True)
 
         plane_info = compute_plane_info(
             ebs=padded_ebs,
@@ -561,6 +618,7 @@ class BandStructure2D(pv.PolyData):
             origin=origin,
             grid_interpolation=grid_interpolation,
             as_cartesian=as_cartesian,
+            given_basis=_reciprocal_lattice(ebs),
         )
 
         combined_surface, band_surfaces, point_set = generate_band_2d_surfaces(
@@ -589,7 +647,8 @@ class BandStructure2D(pv.PolyData):
 
     @property
     def ebs(self) -> ElectronicBandStructureMesh:
-        """The padded electronic band structure mesh."""
+        """The drawn mesh: the user's Mesh padded, or on the box around the first zone,
+        fractional in its own ``reciprocal_lattice``, which on a sheared basis is a reduced one."""
         return self._ebs
 
     @property
@@ -685,10 +744,13 @@ class BandStructure2D(pv.PolyData):
     @property
     def plane_points(self) -> np.ndarray:
         """Points on the slice plane in UV coordinates."""
-        slice_mesh = self._ebs.slice(
-            normal=self.normal, origin=self.origin, as_cartesian=self.as_cartesian
+        return transform_points_to_uv(self._slice().points, self.u, self.v)
+
+    def _slice(self, **kwargs):
+        """The drawn mesh's slice through the user's plane."""
+        return _slice_plane(
+            self._ebs, self._plane_info, _reciprocal_lattice(self._original_ebs), **kwargs
         )
-        return transform_points_to_uv(slice_mesh.points, self.u, self.v)
 
     # -------------------------------------------------------------------------
     # Core methods
@@ -762,7 +824,7 @@ class BandStructure2D(pv.PolyData):
             e_min=e_min,
             e_max=e_max,
             axis=2,
-            reciprocal_lattice=self.ebs.reciprocal_lattice * scale_factor,
+            reciprocal_lattice=_reciprocal_lattice(self.original_ebs) * scale_factor,
         )
 
     def set_surface_point_data(self, name: str, values: np.ndarray) -> None:
@@ -799,12 +861,7 @@ class BandStructure2D(pv.PolyData):
 
     def compute_scalar_grid(self, scalars: np.ndarray, **kwargs):
         scalars_shape = scalars.shape
-        slice = self.ebs.slice(
-            normal=self.normal,
-            origin=self.origin,
-            scalars=("scalars", scalars.reshape(scalars_shape[0], -1)),
-            as_cartesian=self.as_cartesian,
-        )
+        slice = self._slice(scalars=("scalars", scalars.reshape(scalars_shape[0], -1)))
 
         scalar_grid_points_flat = slice.active_scalars
         new_scalars_grid_points_flat = np.zeros(

@@ -23,7 +23,9 @@ def test_fermi_surface_pads_the_projections_but_not_the_phases() -> None:
 
     assert fs.ebs.projected_phase is None
     assert fs.ebs.projected is not None
-    assert fs.ebs.projected.value.shape == (14**3, 1, 1, 1, 1)
+    # A pad of 2 on the [0,1) grid misses the zone at -1/2, so the drawn box is the zone's
+    # +-5 points of the 10-point grid plus one on each side.
+    assert fs.ebs.projected.value.shape == (13**3, 1, 1, 1, 1)
     assert ebs.projected_phase is not None
     np.testing.assert_allclose(
         ebs.projected_phase.value.ravel(), np.exp(2j * np.pi * ebs.kpoints[:, 0]), atol=1e-12

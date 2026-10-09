@@ -1,17 +1,49 @@
 import itertools
 import logging
 import warnings
+from collections.abc import Callable
+from typing import cast
 
 import numpy as np
 import pyvista as pv
 import spglib
 from scipy.spatial import Voronoi
 
+from pyprocar.utils.log_utils import warn_user
+
 logger = logging.getLogger(__name__)
 
 _FACE_CANDIDATES = np.array([s for s in itertools.product(range(-2, 3), repeat=3) if any(s)])
 _NEIGHBOURS = np.array(list(itertools.product(range(-1, 2), repeat=3)))
 _ORIGIN = len(_NEIGHBOURS) // 2
+
+
+def reduced_basis_steps(basis: np.ndarray) -> np.ndarray:
+    """Integer rows T for which ``T @ basis`` is the Delaunay-reduced basis of the lattice
+    spanned by the rows of ``basis``."""
+    return _spglib_reduction_steps(basis, spglib.delaunay_reduce)
+
+
+def niggli_basis_steps(basis: np.ndarray) -> np.ndarray:
+    """Integer rows T for which ``T @ basis`` is the Niggli-reduced basis of the lattice
+    spanned by the rows of ``basis``: three shortest linearly independent lattice vectors,
+    whose lengths are the lattice's successive minima."""
+    return _spglib_reduction_steps(basis, spglib.niggli_reduce)
+
+
+def _spglib_reduction_steps(
+    basis: np.ndarray, reduce: Callable[[np.ndarray], np.ndarray | None]
+) -> np.ndarray:
+    lattice = np.asarray(basis, dtype=np.float64)
+    unit = lattice / abs(np.linalg.det(lattice)) ** (1 / 3)
+    with warnings.catch_warnings():
+        # spglib warns on every call while its process-wide OLD_ERROR_HANDLING is on; the
+        # None return below is the error check it asks for.
+        warnings.filterwarnings("ignore", "Set OLD_ERROR_HANDLING", DeprecationWarning)
+        reduced = reduce(unit)
+    if reduced is None:
+        raise ValueError(f"spglib {reduce.__name__} fails on the lattice {lattice.tolist()}")
+    return np.rint(reduced @ np.linalg.inv(unit)).astype(int)
 
 
 def zone_face_steps(reciprocal_lattice: np.ndarray) -> np.ndarray:
@@ -24,15 +56,7 @@ def zone_face_steps(reciprocal_lattice: np.ndarray) -> np.ndarray:
     midpoint lies on or beyond the bisector plane of another.
     """
     lattice = np.asarray(reciprocal_lattice, dtype=np.float64)
-    unit = lattice / abs(np.linalg.det(lattice)) ** (1 / 3)
-    with warnings.catch_warnings():
-        # spglib warns on every call while its process-wide OLD_ERROR_HANDLING is on; the
-        # None return below is the error check it asks for.
-        warnings.filterwarnings("ignore", "Set OLD_ERROR_HANDLING", DeprecationWarning)
-        reduced = spglib.delaunay_reduce(unit)
-    if reduced is None:
-        raise ValueError(f"spglib cannot Delaunay-reduce the reciprocal lattice {lattice.tolist()}")
-    candidates = _FACE_CANDIDATES @ np.rint(reduced @ np.linalg.inv(unit)).astype(int)
+    candidates = _FACE_CANDIDATES @ reduced_basis_steps(lattice)
     zone = candidates @ lattice
     beyond = zone @ zone.T >= (zone * zone).sum(axis=1)[:, None] * (1 - 1e-9)
     np.fill_diagonal(beyond, False)
@@ -70,22 +94,11 @@ class BrillouinZone(pv.PolyData):
         self.reciprocal = reciprocal_lattice
         verts, faces = self.wigner_seitz()
 
-        # Format faces for pv.PolyData
-        new_faces = []
-        for iface in faces:
-            new_faces.append(len(iface))
-            for ivert in iface:
-                new_faces.append(ivert)
-
-        # Initialize with the properly formatted faces array
-        super().__init__(verts, new_faces)
+        super().__init__(verts, [i for face in faces for i in (len(face), *face)])
+        self.compute_normals(point_normals=False, auto_orient_normals=True, inplace=True)
 
         logger.debug(f"BrillouinZone faces: {len(faces)}")
         logger.debug(f"BrillouinZone verts: {verts.shape}")
-
-        self._fix_normals_direction()
-
-        return None
 
     @property
     def centers(self):
@@ -138,24 +151,6 @@ class BrillouinZone(pv.PolyData):
         logger.info("___Calculating Wigner Seitz cell___")
         return _wigner_seitz(self.reciprocal)
 
-    def _fix_normals_direction(self):
-        """
-        Helper method that calculates the normals of the Wigner seits cell
-        """
-        logger.info("___Fixing normals direction___")
-        cell_centers = self.cell_centers().points
-        if len(cell_centers) == 0:
-            logger.warning("___No centers found___")
-            return None
-
-        center = cell_centers[0]
-        n1 = center / np.linalg.norm(center)
-        n2 = self.face_normals[0]
-        correction = np.sign(np.dot(n1, n2))
-        if correction == -1:
-            self.compute_normals(flip_normals=True, inplace=True)
-        return None
-
 
 class BrillouinZone2D(pv.PolyData):
     """
@@ -197,17 +192,8 @@ class BrillouinZone2D(pv.PolyData):
             if np.isclose(vert_z, max_val, atol=1e-2):
                 vert[axis] = e_max
 
-        new_faces = []
-        for iface in faces:
-            new_faces.append(len(iface))
-            for ivert in iface:
-                new_faces.append(ivert)
-
-        # Initialize with the properly formatted faces array
-        super().__init__(verts, new_faces)
-
-        self._fix_normals_direction()
-        return None
+        super().__init__(verts, [i for face in faces for i in (len(face), *face)])
+        self.compute_normals(point_normals=False, auto_orient_normals=True, inplace=True)
 
     @property
     def centers(self):
@@ -259,14 +245,16 @@ class BrillouinZone2D(pv.PolyData):
         """
         return _wigner_seitz(self.reciprocal)
 
-    def _fix_normals_direction(self):
-        """
-        Helper method that calculates the normals of the Wigner seits cell
-        """
-        center = self.centers[0]
-        n1 = center / np.linalg.norm(center)
-        n2 = self.face_normals[0]
-        correction = np.sign(np.dot(n1, n2))
-        if correction == -1:
-            self.compute_normals(flip_normals=True, inplace=True)
-        return None
+
+def clip_to_zone(surface: pv.PolyData, zone: pv.PolyData) -> pv.PolyData:
+    """The part of ``surface`` inside every face plane of ``zone``; empty when none is."""
+    for normal, center in zip(zone.face_normals, zone.centers, strict=True):
+        surface = cast(pv.PolyData, surface.clip(origin=center, normal=normal, inplace=False))
+        if surface.n_points == 0:
+            break
+    return surface
+
+
+def warn_clipped_away(label: str) -> None:
+    """Tell the user that ``label`` lost every point to ``clip_to_zone`` and is not drawn."""
+    warn_user(f"{label} lies only outside the first Brillouin zone; it is not drawn")
