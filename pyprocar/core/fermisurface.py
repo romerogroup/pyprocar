@@ -130,7 +130,11 @@ class FermiSurface(pv.PolyData):
         if isovalue_shift is not None:
             isovalue += isovalue_shift
         grid = periodic_grid(ebs)
-        drawn = grid.drawn_mesh(padding) if grid is not None else _given_basis_pad(ebs, padding)
+        drawn = (
+            grid.drawn_mesh(padding, clipped_to_zone=True)
+            if grid is not None
+            else _given_basis_pad(ebs, padding)
+        )
         combined_surface, band_isosurfaces, drawn, point_set = generate_band_isosurfaces(
             drawn, np.asarray(ebs.reciprocal_lattice), isovalue
         )

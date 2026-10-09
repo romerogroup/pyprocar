@@ -599,7 +599,7 @@ class BandStructure2D(pv.PolyData):
             Whether to interpret coordinates in Cartesian space
         padding : int
             Number of k-points to pad in each direction. A full uniform grid whose pad misses
-            part of the first zone is drawn on the zone's box instead.
+            part of the first zone is drawn on the pad and the zone's box together.
         scale_factor : float
             Scale factor for k-plane (default: 2π)
 
@@ -609,7 +609,7 @@ class BandStructure2D(pv.PolyData):
             The constructed 2D band structure surface
         """
         original_ebs = copy.copy(ebs)
-        _, drawn = drawn_mesh(ebs, padding, drawing="2D band structure")
+        _, drawn = drawn_mesh(ebs, padding, "2D band structure", clipped_to_zone=False)
         padded_ebs = drawn.expand_single_dimension(inplace=True)
 
         plane_info = compute_plane_info(
