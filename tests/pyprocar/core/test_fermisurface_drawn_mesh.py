@@ -419,3 +419,35 @@ def test_hexagonal_basis_with_rounded_lengths_is_drawn_as_given():
     fs = FermiSurface.from_ebs(mesh(f, band, BISB, (12, 12, 1), 0.0))
 
     np.testing.assert_array_equal(fs.ebs.reciprocal_lattice, BISB)
+
+
+def rhombohedral(a: float, alpha: float) -> np.ndarray:
+    """Real rows of the rhombohedral primitive cell with edge a and angle alpha (degrees),
+    its threefold axis along z."""
+    c = math.cos(math.radians(alpha))
+    tx, ty, tz = math.sqrt((1 - c) / 2), math.sqrt((1 - c) / 6), math.sqrt((1 + 2 * c) / 3)
+    return a * np.array([[tx, -ty, tz], [0, 2 * ty, tz], [-tx, -ty, tz]])
+
+
+TURN = np.array([[0.36, -0.48, 0.8], [0.8, 0.6, 0.0], [-0.48, 0.64, 0.6]])
+"""A rotation (orthonormal rows, det 1), as a POSCAR in another orientation gives it."""
+
+
+def test_drawn_basis_does_not_move_with_rounding_noise_in_the_reciprocal_lattice():
+    """At alpha = 110 degrees the primitive reciprocal basis is not reduced, and several of its
+    reduced bases are equally near it in index space. Turning the cell first, as a POSCAR in
+    another orientation does, puts 1e-16 of rounding into the reciprocal lattice; the drawn
+    basis is still the turned one."""
+    real = rhombohedral(5.0, 110.0)
+    exact = np.linalg.inv(real).T @ TURN.T
+    rounded = np.linalg.inv(real @ TURN.T).T
+
+    def band(cart: np.ndarray) -> np.ndarray:
+        return -np.cos(2 * np.pi * cart @ np.linalg.inv(exact)).sum(axis=1)
+
+    drawn_exact = drawn(exact, (16, 16, 16), band, 0.0).ebs.reciprocal_lattice
+    drawn_rounded = drawn(rounded, (16, 16, 16), band, 0.0).ebs.reciprocal_lattice
+
+    assert 0 < np.abs(exact - rounded).max() < 1e-15
+    assert drawn_exact is not None and drawn_rounded is not None
+    np.testing.assert_allclose(drawn_rounded, drawn_exact, rtol=0, atol=1e-12)
