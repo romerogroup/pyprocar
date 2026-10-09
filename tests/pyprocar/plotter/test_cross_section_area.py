@@ -377,6 +377,15 @@ def test_doubly_sheared_basis_snaps_every_direction_with_cubic_indices_up_to_2()
 
 
 _HEX_ROWS = np.array([[1.0, 0.0, 0.0], [-0.5, np.sqrt(3) / 2, 0.0], [0.0, 0.0, 1.0]])
+BI2SE3_RHOMBOHEDRAL = np.array(
+    [
+        [2.068734, -1.194384, 9.546678],
+        [0.0, 2.388768, 9.546678],
+        [-2.068734, -1.194384, 9.546678],
+    ]
+)
+"""The rhombohedral primitive cell of Bi2Se3 (a = 9.841 Angstrom, alpha = 24.27 degrees): not
+reduced, its successive minima are 4.14, 4.14 and 9.84 Angstrom."""
 STANDARD_CELLS = {
     "SrVO3 cubic": 3.84652 * np.eye(3),
     "Au fcc, van-alphen POSCAR": 2.949546
@@ -385,6 +394,7 @@ STANDARD_CELLS = {
     "bcc primitive": 1.65 * np.array([[-1.0, 1, 1], [1, -1, 1], [1, 1, -1]]),
     "hexagonal c/a 2.72": _HEX_ROWS * [2.46, 2.46, 6.7],
     "hexagonal c/a 1.62": _HEX_ROWS * [3.21, 3.21, 5.21],
+    "Bi2Se3 rhombohedral": BI2SE3_RHOMBOHEDRAL,
 }
 """Real-space rows of cells as their POSCARs give them."""
 
@@ -498,6 +508,42 @@ def test_fcc_cut_typed_near_cubic_113_or_223_counts_the_gamma_orbit_once(normal,
     assert snap_normal(normal, FCC_PRIMITIVE_RECIPROCAL)[1] == uvw
     assert n_open == 0
     assert np.asarray(areas) == pytest.approx(exact_areas, rel=1e-6)
+
+
+def _bi2se3_band(k: np.ndarray) -> np.ndarray:
+    """Hops along the in-plane steps r1 - r2, r2 - r3, r3 - r1 and along each row r_i, at k
+    fractional on the reciprocal rows of BI2SE3_RHOMBOHEDRAL (k . r_i = k_i); the surface is
+    E = 0.8 of the band, which _periodic_surface puts at 0.1."""
+    two_pi = 2 * np.pi
+    steps = k[:, [0, 1, 2]] - k[:, [1, 2, 0]]
+    return -np.cos(two_pi * steps).sum(axis=1) - 0.35 * np.cos(two_pi * k).sum(axis=1) - 0.7
+
+
+BI2SE3_HEX_103 = np.array([4, 2, 3])
+"""Hexagonal [1 0 3], (r1 - r2) + 3 (r1 + r2 + r3), on the rhombohedral rows: 86 Angstrom long,
+beyond 4 times the sum of the successive minima (72.5 Angstrom)."""
+
+
+@pytest.mark.guards_existing_behaviour(
+    reason="dev snaps hexagonal [1 0 3] on the Bi2Se3 rhombohedral cell; #302 must keep it"
+)
+@pytest.mark.parametrize("turn", [np.eye(3), TURN], ids=["given", "turned"])
+def test_bi2se3_cut_typed_near_hexagonal_103_counts_the_gamma_orbit_once(turn):
+    """Typed to 4 digits, the normal snaps to [1 0 3] and the plane through Gamma cuts one
+    orbit, as the exact normal does; unsnapped, the irrational plane counts it twice."""
+    real = BI2SE3_RHOMBOHEDRAL @ turn.T
+    reciprocal = np.linalg.inv(real).T
+    exact = BI2SE3_HEX_103 @ real
+    exact /= np.linalg.norm(exact)
+    surface = _periodic_surface(_bi2se3_band, reciprocal)
+
+    typed, n_open = cross_section_areas(surface, np.round(exact, 4), (0, 0, 0), reciprocal)
+    exact_areas, _ = cross_section_areas(surface, exact, (0, 0, 0), reciprocal)
+
+    assert n_open == 0
+    assert len(exact_areas) == 1
+    assert np.asarray(typed) == pytest.approx(exact_areas, rel=1e-6)
+    assert snap_normal(np.round(exact, 4), reciprocal)[1] == (4, 2, 3)
 
 
 def test_drawn_slice_uses_the_snapped_normal():
