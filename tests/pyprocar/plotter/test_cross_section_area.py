@@ -372,6 +372,146 @@ def test_doubly_sheared_basis_snaps_every_direction_with_cubic_indices_up_to_2()
     assert missed == []
 
 
+_HEX_ROWS = np.array([[1.0, 0.0, 0.0], [-0.5, np.sqrt(3) / 2, 0.0], [0.0, 0.0, 1.0]])
+STANDARD_CELLS = {
+    "SrVO3 cubic": 3.84652 * np.eye(3),
+    "Au fcc, van-alphen POSCAR": 2.949546
+    * np.array([[1.0, 0, 0], [0.5, np.sqrt(3) / 2, 0], [0.5, np.sqrt(3) / 6, np.sqrt(2 / 3)]]),
+    "fcc primitive": 2.04 * np.array([[0.0, 1, 1], [1, 0, 1], [1, 1, 0]]),
+    "bcc primitive": 1.65 * np.array([[-1.0, 1, 1], [1, -1, 1], [1, 1, -1]]),
+    "hexagonal c/a 2.72": _HEX_ROWS * [2.46, 2.46, 6.7],
+    "hexagonal c/a 1.62": _HEX_ROWS * [3.21, 3.21, 5.21],
+}
+"""Real-space rows of cells as their POSCARs give them."""
+
+
+def _primitive_indices(reach: int) -> list[tuple[int, ...]]:
+    return [
+        uvw
+        for uvw in itertools.product(range(-reach, reach + 1), repeat=3)
+        if any(uvw) and np.gcd.reduce(np.abs(uvw)) == 1
+    ]
+
+
+@pytest.mark.guards_existing_behaviour(
+    reason="dev snaps these from its given-basis candidates; #302 must not lose them"
+)
+def test_standard_cells_snap_every_direction_with_given_indices_up_to_4():
+    """Before #302 the candidates were the directions with indices up to 4 in the given
+    basis. On cells given in their usual basis, each still snaps, under the same name."""
+    given = _primitive_indices(4)
+
+    missed = {}
+    for name, real in STANDARD_CELLS.items():
+        reciprocal = np.linalg.inv(real).T
+        for uvw in given:
+            exact = np.array(uvw) @ real
+            direction, indices = snap_normal(_turned_by_1e_4_rad(exact), reciprocal)
+            if indices != uvw or not np.allclose(
+                direction, exact / np.linalg.norm(exact), atol=1e-12
+            ):
+                missed.setdefault(name, []).append(uvw)
+
+    assert len(given) == 578
+    assert missed == {}
+
+
+SHEARS = {
+    "a3 + 6 a1": np.array([[1, 0, 0], [0, 1, 0], [6, 0, 1]]),
+    "doubly sheared": np.array([[1, 0, 0], [3, 1, 0], [3, 3, 1]]),
+    "a2 - 2 a1, a3 + a1 + 2 a2": np.array([[1, 0, 0], [-2, 1, 0], [1, 2, 1]]),
+}
+"""Unimodular changes of basis: the given real rows are these times the cell's rows."""
+
+TURN = np.array(
+    [
+        [0.36, -0.48, 0.8],
+        [0.8, 0.6, 0.0],
+        [-0.48, 0.64, 0.6],
+    ]
+)
+"""A rotation (orthonormal rows, det 1), as a POSCAR in another orientation gives it."""
+
+
+def test_snapped_directions_do_not_depend_on_the_basis_or_the_orientation():
+    """Normals typed to 4 digits along directions with indices up to 2, and along four of
+    index 3 (cubic [1 1 3] and [2 2 3] on fcc), snap to the exact direction in every basis of
+    the lattice and orientation, and name it with integers in the basis given. Normals
+    far from low-index directions stay as given."""
+    standard = [*_primitive_indices(2), (3, 3, -1), (3, 3, 1), (-1, 3, 3), (1, 3, 3)]
+    unsnapped = np.random.default_rng(302).normal(size=(5, 3))
+    frames = {"given": (np.eye(3, dtype=int), np.eye(3))}
+    for shear_name, shear in SHEARS.items():
+        frames[shear_name] = (shear, np.eye(3))
+        frames[f"{shear_name}, turned"] = (shear, TURN)
+    frames["turned"] = (np.eye(3, dtype=int), TURN)
+
+    wrong = []
+    for (name, cell), (frame, (shear, turn)) in itertools.product(
+        STANDARD_CELLS.items(), frames.items()
+    ):
+        real = shear @ cell @ turn.T
+        reciprocal = np.linalg.inv(real).T
+        for uvw in standard:
+            exact = np.array(uvw) @ cell @ turn.T
+            exact /= np.linalg.norm(exact)
+            direction, indices = snap_normal(np.round(exact, 4), reciprocal)
+            if not np.allclose(direction, exact, atol=1e-12):
+                wrong.append((name, frame, uvw))
+            # None: the rounded normal was already the exact direction, as for [2 1 0] on cubic.
+            elif indices is not None:
+                named = np.array(indices) @ real
+                if not np.allclose(named / np.linalg.norm(named), exact, atol=1e-12) or not all(
+                    type(i) is int for i in indices
+                ):
+                    wrong.append((name, frame, uvw))
+        for normal in unsnapped @ turn.T:
+            if snap_normal(normal, reciprocal)[1] is not None:
+                wrong.append((name, frame, tuple(normal)))
+
+    assert len(standard) == 102
+    assert wrong == []
+
+
+FCC_PRIMITIVE_RECIPROCAL = np.array([[-1.0, 1, 1], [1, -1, 1], [1, 1, -1]])
+"""Rows b1, b2, b3 of the fcc lattice with real rows (0 1 1)/2, (1 0 1)/2, (1 1 0)/2."""
+
+
+def _fcc_tight_binding(k: np.ndarray) -> np.ndarray:
+    """-(cx cy + cy cz + cz cx) at x, y, z = pi k_cart, whose E = 0.2 surface the plane cuts."""
+    x, y, z = (np.pi * (k @ FCC_PRIMITIVE_RECIPROCAL)).T
+    return -(np.cos(x) * np.cos(y) + np.cos(y) * np.cos(z) + np.cos(z) * np.cos(x)) - 0.1
+
+
+def _turned_by(direction, angle: float, toward) -> np.ndarray:
+    unit = np.asarray(direction, dtype=float) / np.linalg.norm(direction)
+    away = np.cross(unit, toward)
+    return unit + angle * away / np.linalg.norm(away)
+
+
+@pytest.mark.guards_existing_behaviour(
+    reason="dev snaps cubic [113] and [223] on the fcc primitive basis; #302 must keep it"
+)
+@pytest.mark.parametrize(
+    ("normal", "uvw", "exact_areas"),
+    [
+        (_turned_by((1, 1, 3), 1.5e-4, (0.3, 0.7, 0.1)), (3, 3, -1), [4.1373050]),
+        (np.round(np.divide((2, 2, 3), np.sqrt(17)), 4), (3, 3, 1), [6.7139492]),
+    ],
+)
+def test_fcc_cut_typed_near_cubic_113_or_223_counts_the_gamma_orbit_once(normal, uvw, exact_areas):
+    """The plane through Gamma along the exact cubic direction cuts one orbit, of the areas
+    given (the exact normal is not snapped). A normal within 1.5e-4 rad of it snaps to it, as
+    before #302; unsnapped, the irrational plane counts near-copies of the orbit twice."""
+    surface = _periodic_surface(_fcc_tight_binding, FCC_PRIMITIVE_RECIPROCAL, kgrid=(15, 15, 15))
+
+    areas, n_open = cross_section_areas(surface, normal, (0, 0, 0), FCC_PRIMITIVE_RECIPROCAL)
+
+    assert snap_normal(normal, FCC_PRIMITIVE_RECIPROCAL)[1] == uvw
+    assert n_open == 0
+    assert np.asarray(areas) == pytest.approx(exact_areas, rel=1e-6)
+
+
 def test_drawn_slice_uses_the_snapped_normal():
     plotter = FermiPlotter(off_screen=True)
     plotter.add_box_slicer(
