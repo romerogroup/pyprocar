@@ -800,6 +800,38 @@ def test_cut_through_mesh_vertices_keeps_every_straddling_triangle(uvw):
         assert len(segments[0]) == straddling
 
 
+@pytest.mark.guards_existing_behaviour(
+    reason="a surface loaded without its band structure has no grid; dev measures its slice"
+)
+def test_surface_loaded_without_its_band_structure_measures_the_drawn_slice(tmp_path):
+    def sphere_around_gamma(k):
+        return np.sum(((k + 0.5) % 1.0 - 0.5) ** 2, axis=1)
+
+    path = tmp_path / "fs.pkl"
+    _periodic_surface(sphere_around_gamma).save(str(path))
+    loaded = FermiSurface.load(str(path))
+
+    text = _slice_text(loaded, show_cross_section_area=True)
+
+    assert periodic_bands(loaded) is None
+    assert text.endswith(" Ang^-2")
+    assert _number(text) == pytest.approx(np.pi * 0.1 * (2 * np.pi) ** 2, rel=0.02)
+
+
+@pytest.mark.guards_existing_behaviour(
+    reason="dev joins orbits only on a 3D grid; the drawn grid now also parses a 2D one"
+)
+def test_two_dimensional_grid_says_orbits_are_not_joined():
+    surface = _periodic_surface(_cylinder_around_m, kgrid=(16, 16, 1))
+
+    text = _slice_text(surface, show_cross_section_area=True)
+
+    assert periodic_bands(surface) is None
+    assert text.endswith(
+        " (k-points are not a uniform 3D grid; orbits crossing the zone boundary are not joined)"
+    )
+
+
 def test_kpoints_off_a_uniform_grid_say_orbits_are_not_joined():
     stretched = _periodic_surface(
         _cylinder_around_m,
