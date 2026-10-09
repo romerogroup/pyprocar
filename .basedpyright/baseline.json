@@ -3204,14 +3204,6 @@
                     "endColumn": 18,
                     "lineCount": 1
                 }
-            },
-            {
-                "code": "reportAssignmentType",
-                "range": {
-                    "startColumn": 18,
-                    "endColumn": 75,
-                    "lineCount": 1
-                }
             }
         ],
         "./pyprocar/core/kpoints.py": [
