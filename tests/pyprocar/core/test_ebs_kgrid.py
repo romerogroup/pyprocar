@@ -8,7 +8,7 @@ from pyprocar.core.kpoints import KGRID_MODE, KGridInfo, get_kpoints_from_kgrid
 
 
 def grid_offset(mode: KGRID_MODE, n: int) -> float:
-    """k * n - offset is an integer on an n-point axis: Gamma holds j/n, Monkhorst-Pack (2j+1-n)/2n."""
+    """k * n - offset is an integer on an n-point axis: Gamma j/n, Monkhorst-Pack (2j+1-n)/2n."""
     return 0.0 if mode is KGRID_MODE.GAMMA else (1 - n) / 2
 
 
@@ -54,7 +54,7 @@ def test_is_fbz_compares_with_the_known_grid():
 
 
 @pytest.mark.guards_existing_behaviour(
-    reason="carrying the size must leave pad's arrays as they were on grids the histogram reads correctly"
+    reason="carrying the size leaves pad's arrays as they were where the histogram reads the grid"
 )
 @pytest.mark.parametrize(
     ("kgrid", "mode"),
@@ -69,7 +69,7 @@ def test_pad_arrays_are_unchanged(kgrid: tuple[int, int, int], mode: KGRID_MODE)
     ]
     axes = [
         (np.arange(low - 10, low + n + 10) + grid_offset(mode, n)) / n
-        for low, n in zip(lows, kgrid)
+        for low, n in zip(lows, kgrid, strict=True)
     ]
     z, y, x = np.meshgrid(axes[2], axes[1], axes[0], indexing="ij")
     expected_kpoints = np.stack([x.ravel(), y.ravel(), z.ravel()], axis=1)
@@ -95,7 +95,7 @@ def test_expand_single_dimension_carries_the_size():
 
 
 @pytest.mark.guards_existing_behaviour(
-    reason="an ebs.pkl cache written before the Mesh carried its size must still load and read its grid"
+    reason="an ebs.pkl cache written before the Mesh carried its size still reads its grid"
 )
 def test_cache_without_a_carried_size_falls_back_to_the_histogram():
     ebs = grid_mesh((6, 4, 2))

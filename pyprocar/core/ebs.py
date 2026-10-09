@@ -1858,7 +1858,7 @@ class ElectronicBandStructureMesh(
 
         new_kpoints = math.mesh_to_array(padded_kpoints_mesh, order=order)
         ebs._kgrid_spacing = ebs.kgrid_spacing
-        n_kx, n_ky, n_kz = (n + before + after for n, (before, after) in zip(ebs.kgrid, padding_dims))
+        n_kx, n_ky, n_kz = (n + sum(pad) for n, pad in zip(ebs.kgrid, padding_dims, strict=True))
         ebs._kgrid = (n_kx, n_ky, n_kz)
         ebs.update_points(new_kpoints)
         ebs._mesh = ebs.to_mesh()
