@@ -1,6 +1,7 @@
 import itertools
 import logging
 import warnings
+from typing import cast
 
 import numpy as np
 import pyvista as pv
@@ -227,3 +228,16 @@ class BrillouinZone2D(pv.PolyData):
             Returns the wigner Seitz cell in the form of a tuple containing the verts and faces of the cell
         """
         return _wigner_seitz(self.reciprocal)
+
+
+def clip_to_zone(surface: pv.PolyData, zone: pv.PolyData) -> pv.PolyData:
+    """The part of ``surface`` inside every face plane of ``zone``; empty when none is.
+
+    The caller decides what an empty clip means: a band that crosses only outside the zone
+    is dropped with a warning naming it.
+    """
+    for normal, center in zip(zone.face_normals, zone.centers, strict=True):
+        surface = cast(pv.PolyData, surface.clip(origin=center, normal=normal, inplace=False))
+        if surface.n_points == 0:
+            break
+    return surface

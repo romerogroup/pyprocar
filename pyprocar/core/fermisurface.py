@@ -13,7 +13,7 @@ import pyvista as pv
 
 from pyprocar.core._periodic_grid import PeriodicGrid, is_reduced_basis, periodic_grid
 from pyprocar.core.atomic_orbital_index import ProjectionSelectionResolver
-from pyprocar.core.brillouin_zone import BrillouinZone
+from pyprocar.core.brillouin_zone import BrillouinZone, clip_to_zone
 from pyprocar.core.ebs import ElectronicBandStructureMesh
 from pyprocar.core.projection import NormMode, build_property, selection_resolver
 from pyprocar.core.projection import normalize as normalize_by_mode
@@ -1019,6 +1019,7 @@ def generate_band_isosurfaces(
 ):
     """
     Isosurfaces of every band and spin that crosses ``isovalue``, clipped to the first zone.
+    A band that crosses only outside the zone is dropped with a warning naming it.
 
     ``drawn`` is the mesh to contour (a pad or a ``PeriodicGrid.drawn_mesh``), fractional in
     its own reciprocal lattice; the zone is that of ``reciprocal_lattice``, the user's basis.
@@ -1061,8 +1062,13 @@ def generate_band_isosurfaces(
                 transform_matrix_to_cart, transform_all_input_vectors=False, inplace=False
             )
 
-            # Clip the surface with the Brillouin zone to keep only the points inside the first Brillouin zone
-            surface = clip_surface(surface, brillouin_zone)
+            surface = clip_to_zone(surface, brillouin_zone)
+            if surface.n_points == 0:
+                warn_user(
+                    f"band {iband} spin {ispin} crosses the isovalue only outside the first"
+                    + " Brillouin zone; it is not drawn"
+                )
+                continue
 
             band_isosurfaces[(iband, ispin)] = surface
 
@@ -1114,31 +1120,4 @@ def generate_isosurface(
     """
     # Generate isosurface
     surface = grid.contour([isovalue], scalars, method=method)
-    return surface
-
-
-def clip_surface(surface: pv.PolyData, brillouin_zone: BrillouinZone):
-    """
-    Clip the surface with the Brillouin zone to keep only the points inside the first Brillouin zone
-
-    Parameters
-    ----------
-    surface : pv.PolyData
-        Surface to be clipped
-    brillouin_zone : BrillouinZone
-        Brillouin zone to clip the surface with
-
-    Returns
-    -------
-    pv.PolyData
-        Clipped surface
-
-    """
-    # Clip surface with each face of the Brillouin zone
-    for normal, center in zip(brillouin_zone.face_normals, brillouin_zone.centers):
-        surface = surface.clip(origin=center, normal=normal, inplace=False)
-        if surface.points.shape[0] == 0:
-            raise ValueError(
-                f"Surface is empty after clipping with normal {normal} and center {center}"
-            )
     return surface

@@ -10,10 +10,11 @@ import numpy as np
 import pyvista as pv
 from pyvista import ColorLike
 
-from pyprocar.core.brillouin_zone import reduced_basis_steps
+from pyprocar.core.brillouin_zone import clip_to_zone, reduced_basis_steps
 from pyprocar.plotter._periodic_cut import periodic_bands, plane_orbits
 from pyprocar.plotter._series import SurfaceSeries, finite_range
 from pyprocar.plotter.fs_slice_plot import FermiSlicePlotter
+from pyprocar.utils.log_utils import warn_user
 
 logger = logging.getLogger(__name__)
 
@@ -148,15 +149,6 @@ def area_text(areas: list[float], n_open: int, scale: float = 1.0) -> str:
     return f"Cross sectional area : {sum(areas) * scale:.4f} Ang^-2" + open_curves_note(n_open)
 
 
-def clip_to_zone(surface: pv.PolyData, zone: pv.PolyData) -> pv.PolyData:
-    """Cut ``surface`` down to the part inside every face plane of ``zone``."""
-    for normal, center in zip(zone.face_normals, zone.centers, strict=True):
-        surface = cast(pv.PolyData, surface.clip(origin=center, normal=normal, inplace=False))
-        if surface.points.shape[0] == 0:
-            break
-    return surface
-
-
 def normalize_to_range(scalars, clim=(0, 1)):
     if clim is None:
         clim = (0, 1)
@@ -209,7 +201,7 @@ class SurfacePlotter(pv.Plotter):
         longest = finite_range(vector_norms)[1]
 
         meshes: dict[tuple[int, int], pv.PolyData] = {}
-        for i, series in enumerate(series_list):
+        for series in series_list:
             key = (series.band_index, series.spin_index)
             mesh = series.mesh.copy()
 
@@ -222,6 +214,12 @@ class SurfacePlotter(pv.Plotter):
 
             if clip_to is not None:
                 mesh = clip_to_zone(mesh, clip_to)
+                if mesh.n_points == 0:
+                    warn_user(
+                        f"band {series.band_index} spin {series.spin_index} lies only outside"
+                        + " the Brillouin zone; it is not drawn"
+                    )
+                    continue
 
             if series.vectors is not None and "vectors" in mesh.point_data:
                 mesh.set_active_vectors("vectors")
@@ -229,7 +227,7 @@ class SurfacePlotter(pv.Plotter):
             mesh_kwargs: dict[str, Any] = {
                 "cmap": scalars_cmap,
                 "clim": scalars_clim,
-                "show_scalar_bar": show_scalar_bar and i == 0,
+                "show_scalar_bar": show_scalar_bar and not meshes,
                 "name": f"surface_{series.band_index}_{series.spin_index}",
                 **(add_surface_kwargs or {}),
                 **series.kwargs,
