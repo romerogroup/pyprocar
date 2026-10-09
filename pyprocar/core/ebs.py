@@ -1874,6 +1874,32 @@ class ElectronicBandStructureMesh(
         ebs._mesh = ebs.to_mesh()
         return ebs
 
+    def _take(
+        self,
+        rows: np.ndarray,
+        points: np.ndarray,
+        kgrid: tuple[int, int, int],
+        kgrid_info: kpoints.KGridInfo,
+        reciprocal_lattice: np.ndarray,
+    ) -> ElectronicBandStructureMesh:
+        """A copy whose k-point j, ``points[j]`` fractional in ``reciprocal_lattice``, holds
+        every property of this mesh's row ``rows[j]``.
+
+        The points fill ``kgrid`` in Fortran order, spaced by one period of
+        ``kgrid_info.kgrid``. ``projected_phase`` is dropped, as in ``pad``.
+        """
+        ebs = copy.deepcopy(self)
+        ebs.remove_property("projected_phase")
+        for prop_name, calc_name, gradient_order, value_array in ebs.iter_properties():
+            ebs.get_property(prop_name)[calc_name, gradient_order] = value_array[rows]
+        ebs._reciprocal_lattice = reciprocal_lattice
+        ebs._kgrid_info = kgrid_info
+        ebs._kgrid = kgrid
+        ebs._kgrid_spacing = [1 / n for n in kgrid_info.kgrid]
+        ebs.update_points(points)
+        ebs._mesh = ebs.to_mesh()
+        return ebs
+
     def expand_kpoints_to_supercell_by_axes(self, axes_to_expand=[0, 1, 2], inplace=True, **kwargs):
         logger.info(f"Expanding kpoints to supercell by axes: {axes_to_expand}")
         if inplace:

@@ -11,12 +11,14 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pyvista as pv
 
+from pyprocar.core._periodic_grid import PeriodicGrid, is_reduced_basis, periodic_grid
 from pyprocar.core.atomic_orbital_index import ProjectionSelectionResolver
 from pyprocar.core.brillouin_zone import BrillouinZone
 from pyprocar.core.ebs import ElectronicBandStructureMesh
 from pyprocar.core.projection import NormMode, build_property, selection_resolver
 from pyprocar.core.projection import normalize as normalize_by_mode
 from pyprocar.core.property_store import PointSet, Property
+from pyprocar.utils.log_utils import warn_user
 from pyprocar.utils.physics import *
 
 logger = logging.getLogger(__name__)
@@ -127,20 +129,18 @@ class FermiSurface(pv.PolyData):
             isovalue = ebs.fermi
         if isovalue_shift is not None:
             isovalue += isovalue_shift
-        results = generate_band_isosurfaces(ebs, isovalue=isovalue, padding=padding)
-        combined_surface = results[0]
-        band_isosurfaces = results[1]
-        isovalue = results[2]
-        ebs = results[3]
-        padded_ebs = results[4]
-        point_set = results[5]
+        grid = periodic_grid(ebs)
+        drawn = grid.drawn_mesh(padding) if grid is not None else _given_basis_pad(ebs, padding)
+        combined_surface, band_isosurfaces, drawn, point_set = generate_band_isosurfaces(
+            drawn, ebs.reciprocal_lattice, isovalue
+        )
         return cls(
             points=combined_surface.points,
             faces=combined_surface.faces,
             band_isosurfaces=band_isosurfaces,
             isovalue=isovalue,
             original_ebs=ebs,
-            ebs=padded_ebs,
+            ebs=drawn,
             point_set=point_set,
         )
 
@@ -150,22 +150,24 @@ class FermiSurface(pv.PolyData):
 
     @property
     def ebs(self):
+        """The drawn mesh: the user's Mesh on the box around the first zone, fractional in its
+        own ``reciprocal_lattice``, which on a sheared basis is a reduced one."""
         return self._ebs
 
     @property
     def grid(self):
-        return padded_image_grid(self.ebs, self.original_ebs.kgrid)
+        return padded_image_grid(self.ebs)
 
     @property
     def transform_matrix_to_cart(self):
         transform_to_cart = np.eye(4)
-        transform_to_cart[:3, :3] = self.reciprocal_lattice.T
+        transform_to_cart[:3, :3] = self.ebs.reciprocal_lattice.T
         return transform_to_cart
 
     @property
     def transform_matrix_to_frac(self):
         transform_to_frac = np.eye(4)
-        transform_to_frac[:3, :3] = np.linalg.inv(self.reciprocal_lattice.T)
+        transform_to_frac[:3, :3] = np.linalg.inv(self.ebs.reciprocal_lattice.T)
         return transform_to_frac
 
     @property
@@ -182,7 +184,8 @@ class FermiSurface(pv.PolyData):
 
     @property
     def reciprocal_lattice(self):
-        return self.ebs.reciprocal_lattice
+        """The user's reciprocal basis: zone directions and supercells count in it."""
+        return self.original_ebs.reciprocal_lattice
 
     @property
     def n_points(self):
@@ -242,6 +245,10 @@ class FermiSurface(pv.PolyData):
     @property
     def is2d(self):
         return self.original_ebs.is2d
+
+    @cached_property
+    def _periodic_grid(self) -> PeriodicGrid | None:
+        return periodic_grid(self.original_ebs) if self.original_ebs is not None else None
 
     @cached_property
     def _selection_resolver(self) -> ProjectionSelectionResolver:
@@ -857,7 +864,7 @@ class FermiSurface(pv.PolyData):
         for direction in zone_directions:
             surface = copy.deepcopy(initial_surface)
             translated_surface = surface.translate(
-                np.dot(direction, self.ebs.reciprocal_lattice), inplace=True
+                np.dot(direction, self.reciprocal_lattice), inplace=True
             )
             new_surface = new_surface.merge(translated_surface, merge_points=False)
 
@@ -865,7 +872,7 @@ class FermiSurface(pv.PolyData):
             for (iband, ispin), initial_band_surface in initial_band_surfaces.items():
                 new_band_surface = copy.deepcopy(initial_band_surface)
                 new_band_surface += initial_band_surface.translate(
-                    np.dot(direction, self.ebs.reciprocal_lattice), inplace=True
+                    np.dot(direction, self.reciprocal_lattice), inplace=True
                 )
                 new_band_surfaces[(iband, ispin)] += new_band_surface
 
@@ -973,62 +980,64 @@ class FermiSurface(pv.PolyData):
         return interpolated_surface
 
 
-def padded_image_grid(padded_ebs: ElectronicBandStructureMesh, kgrid) -> pv.ImageData:
+def padded_image_grid(padded_ebs: ElectronicBandStructureMesh) -> pv.ImageData:
     """Image grid on the padded k-points, in fractional coordinates.
 
-    An axis with ``kgrid[axis]`` points is spaced exactly 1/kgrid[axis], because
-    parsers round the k-points they read. A single-point axis, which
-    ``expand_single_dimension`` widened by a fill offset, takes its spacing from
-    the points.
+    An axis is spaced exactly one ``kgrid_spacing``, 1/n for n points per period, because
+    parsers round the k-points they read. A single-point axis (spacing a whole period), which
+    ``expand_single_dimension`` widened by a fill offset, takes its spacing from the points.
     """
     coords = padded_ebs.kpoints
     dims = (padded_ebs.n_kx, padded_ebs.n_ky, padded_ebs.n_kz)
     spacing = tuple(
-        1 / kgrid[axis] if kgrid[axis] > 1 else float(np.ptp(coords[:, axis])) / max(n - 1, 1)
-        for axis, n in enumerate(dims)
+        step if step < 1 else float(np.ptp(coords[:, axis])) / max(n - 1, 1)
+        for axis, (step, n) in enumerate(zip(padded_ebs.kgrid_spacing, dims, strict=True))
     )
     return pv.ImageData(dimensions=dims, spacing=spacing, origin=tuple(coords.min(axis=0)))
 
 
-def generate_band_isosurfaces(ebs: ElectronicBandStructureMesh, isovalue: float, padding: int = 10):
+def _given_basis_pad(ebs: ElectronicBandStructureMesh, padding: int) -> ElectronicBandStructureMesh:
+    """Today's pad of k-points that are not one full uniform grid, in the basis they are given in."""
+    lattice = ebs.reciprocal_lattice
+    if lattice is not None and not is_reduced_basis(np.asarray(lattice), np.asarray(ebs.kgrid) > 1):
+        warn_user(
+            "The k-points are not one uniform grid, so the Fermi surface is drawn in the given "
+            "reciprocal basis, which is not reduced; parts of the first Brillouin zone beyond "
+            f"{padding} padded k-points are missing. Give the full uniform k-grid to draw all of it."
+        )
+    return ebs.pad(padding=padding, inplace=False)
+
+
+def generate_band_isosurfaces(
+    drawn: ElectronicBandStructureMesh, reciprocal_lattice: np.ndarray, isovalue: float
+):
     """
-    Generate isosurfaces for all bands and spins that cross the Fermi level.
+    Isosurfaces of every band and spin that crosses ``isovalue``, clipped to the first zone.
 
-    This method iterates through all bands and spins in the electronic band structure,
-    generating Fermi surface isosurfaces for each band-spin combination that crosses
-    the Fermi level. It then merges all valid surfaces into a single combined surface.
-
-    The method creates mappings between band-spin pairs and their corresponding surface
-    indices, which are stored in the class attributes band_spin_surface_map and
-    surface_band_spin_map.
-
-    If a surface generation fails for any band-spin combination, the error is logged
-    and the method continues with the next combination.
+    ``drawn`` is the mesh to contour (a pad or a ``PeriodicGrid.drawn_mesh``), fractional in
+    its own reciprocal lattice; the zone is that of ``reciprocal_lattice``, the user's basis.
 
     Returns
     -------
-    None
-        The generated surfaces are stored in the class instance, updating its points,
-        faces, point_data, and cell_data attributes.
+    tuple
+        The merged surface, the surface per (band, spin), ``drawn`` with a single-point axis
+        widened, and the point set carrying each point's spin and surface index.
     """
     logger.info("___Generating all Fermi surfaces___")
 
-    padded_ebs = ebs.pad(padding=padding, inplace=False)
-    padded_ebs = padded_ebs.expand_single_dimension(inplace=False)
+    padded_ebs = drawn.expand_single_dimension(inplace=False)
 
     transform_matrix_to_cart = np.eye(4)
-    transform_matrix_to_cart[:3, :3] = np.asarray(ebs.reciprocal_lattice).T
+    transform_matrix_to_cart[:3, :3] = np.asarray(padded_ebs.reciprocal_lattice).T
 
-    grid = padded_image_grid(padded_ebs, ebs.kgrid)
-    brillouin_zone = BrillouinZone(
-        ebs.reciprocal_lattice, transformation_matrix=np.array([1, 1, 1])
-    )
+    grid = padded_image_grid(padded_ebs)
+    brillouin_zone = BrillouinZone(reciprocal_lattice, transformation_matrix=np.array([1, 1, 1]))
 
     bands_mesh = padded_ebs.get_property_mesh("bands", order="F")
     # Get dimensions from bands_mesh
     _, _, _, nbands, nspins = bands_mesh.shape
     # Non-collinear energies repeat across the 4 spin components; they are one channel.
-    if ebs.is_non_collinear:
+    if drawn.is_non_collinear:
         nspins = 1
 
     band_isosurfaces = {}
@@ -1072,7 +1081,7 @@ def generate_band_isosurfaces(ebs: ElectronicBandStructureMesh, isovalue: float,
     point_set = PointSet(combined_surface.points)
     point_set.add_property(name="spin_index", value=spin_index)
     point_set.add_property(name="spin_band_index", value=spin_band_index)
-    return combined_surface, band_isosurfaces, isovalue, ebs, padded_ebs, point_set
+    return combined_surface, band_isosurfaces, padded_ebs, point_set
 
 
 def generate_isosurface(
