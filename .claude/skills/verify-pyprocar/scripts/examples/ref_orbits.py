@@ -34,9 +34,10 @@ FREQUENCY_TOLERANCE = 1e-5
 """Relative. The frequency text keeps every digit of the largest area. pyprocar's energies are
 5e-7 eV off EIGENVAL's, which moves the mesh vertices: measured 1.5e-6."""
 SNAP_ANGLE = 3e-4
-"""Radians, the documented snap_normal rule: a normal this close to a primitive real-space
-lattice vector no longer than SNAP_REACH times the sum of the successive minima becomes that
-direction, and the note names it as [u v w] in the given basis."""
+"""Radians, the documented snap_normal rule: a normal this close to a direction with given-basis
+indices up to SNAP_REACH, or to a primitive real-space lattice vector no longer than SNAP_REACH
+times the sum of the successive minima, becomes that direction, and the note names it as
+[u v w] in the given basis."""
 SNAP_REACH = 4
 LATTICE_NOISE = 1e-6
 """Radians. pyprocar's reciprocal lattice is 4.6e-10 off POSCAR's, so an exact lattice direction
@@ -146,9 +147,11 @@ def _successive_minima(real: np.ndarray) -> np.ndarray:
 
 
 def _directions(real: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
-    """Given-basis indices and unit vectors of the primitive lattice vectors no longer than
-    SNAP_REACH times the sum of the successive minima."""
-    m = _lattice_vectors_within(real, SNAP_REACH * float(_successive_minima(real).sum()))
+    """Given-basis indices and unit vectors of the primitive lattice vectors with indices up to
+    SNAP_REACH or no longer than SNAP_REACH times the sum of the successive minima."""
+    ball = _lattice_vectors_within(real, SNAP_REACH * float(_successive_minima(real).sum()))
+    given = np.array(list(itertools.product(range(-SNAP_REACH, SNAP_REACH + 1), repeat=3)))
+    m = np.vstack([given[np.abs(given).sum(axis=1) > 0], ball])
     indices = m[np.gcd.reduce(np.abs(m), axis=1) == 1]
     vectors = indices @ real
     return indices, vectors / np.linalg.norm(vectors, axis=1, keepdims=True)
