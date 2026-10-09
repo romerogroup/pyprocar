@@ -514,6 +514,165 @@ def test_orbit_reaching_five_cells_from_the_zone_closes():
     assert np.asarray(areas) == pytest.approx([5.1506, 5.1506], rel=1e-4)
 
 
+SHEARED_TWICE = np.array([[1.0, 0.0, 0.0], [3.0, 1.0, 0.0], [-2.0, 2.0, 1.0]])
+"""b2 = (3, 1, 0), b3 = (-2, 2, 1): a basis of the cubic lattice."""
+
+
+def _cylinder_around_gamma(cartesian: np.ndarray) -> np.ndarray:
+    return np.sum(((cartesian[:, :2] + 0.5) % 1.0 - 0.5) ** 2, axis=1)
+
+
+@pytest.mark.parametrize("azimuth", np.linspace(0, np.pi, 7))
+def test_sheared_basis_closes_an_orbit_longer_than_sixteen_given_cells(azimuth):
+    """#302: the plane through Gamma with n_z = 0.0953 cuts the cylinder kx^2 + ky^2 = 0.1 in
+    an ellipse 10 cubic cells long, which spans more than 16 cells of SHEARED_TWICE. The same
+    16^3 k-points given in the cubic basis give one closed orbit of 3.257701228581379
+    (analytic pi 0.1 / n_z = 3.2965)."""
+    n_z = 0.0953
+    normal = np.array(
+        [np.sqrt(1 - n_z**2) * np.cos(azimuth), np.sqrt(1 - n_z**2) * np.sin(azimuth), n_z]
+    )
+    surface = _periodic_surface(lambda k: _cylinder_around_gamma(k @ SHEARED_TWICE), SHEARED_TWICE)
+
+    areas, n_open = cross_section_areas(surface, normal, (0, 0, 0), SHEARED_TWICE)
+
+    assert n_open == 0
+    assert np.asarray(areas) == pytest.approx([3.257701228581379], abs=1e-9)
+
+
+FCC = np.array([[-1, 1, 1], [1, -1, 1], [1, 1, -1]]) / 4.08
+SHEAR_B2 = np.array([[1, 0, 0], [3, 1, 0], [0, 0, 1]])
+"""b2' = b2 + 3 b1."""
+
+
+def test_sheared_fcc_basis_cuts_the_orbits_of_the_reduced_one():
+    """#302: Au cut in b2' = b2 + 3 b1 gave 0.144 + 0.211 for 0.322, because marching cubes
+    ran on long thin sheared cells. The same 15^3 k-points and energies given in the reduced
+    fcc basis are an independent build of the same surface."""
+    n = 15
+
+    def sheared_band(k: np.ndarray) -> np.ndarray:
+        return _sum_of_cosines(np.rint(k @ SHEAR_B2 * n) % n / n) + 0.05
+
+    reduced = _periodic_surface(lambda k: _sum_of_cosines(k) + 0.05, FCC, kgrid=(n, n, n))
+    sheared = _periodic_surface(sheared_band, SHEAR_B2 @ FCC, kgrid=(n, n, n))
+    rng = np.random.default_rng(302)
+
+    for _ in range(6):
+        normal = rng.normal(size=3)
+        normal /= np.linalg.norm(normal)
+        origin = rng.uniform(-0.05, 0.05) * normal
+        expected, expected_open = cross_section_areas(reduced, normal, origin, FCC)
+
+        areas, n_open = cross_section_areas(sheared, normal, origin, SHEAR_B2 @ FCC)
+
+        assert n_open == expected_open
+        assert np.sort(areas) == pytest.approx(np.sort(expected), abs=1e-12)
+
+
+def test_unequal_grid_on_a_sheared_basis_cuts_one_closed_orbit():
+    """(16, 32, 16) on b2 = (3, 1, 0) repeats in the cubic basis every (32, 32, 16) points, a
+    tile twice the grid. The plane kz = 0 cuts the cylinder kx^2 + ky^2 = 0.1 in one circle of
+    area pi 0.1 = 0.31416, which a 1/32 mesh draws as 0.3123."""
+    basis = SHEARED_CUBIC
+    surface = _periodic_surface(
+        lambda k: _cylinder_around_gamma(k @ basis), basis, kgrid=(16, 32, 16)
+    )
+
+    areas, n_open = cross_section_areas(surface, (0, 0, 1), (0, 0, 0), basis)
+
+    assert n_open == 0
+    assert len(areas) == 1
+    assert 0.3105 < areas[0] < 0.3142
+
+
+def test_grid_without_a_small_reduced_period_says_orbits_are_not_joined():
+    """(15, 16, 16) on b2 = b1 + (0, 1, 0), b3 = b1 + (0, 0, 1) repeats in the cubic basis
+    only every 225 grids, more than the cut tiles."""
+    basis = np.array([[1.0, 0.0, 0.0], [1.0, 1.0, 0.0], [1.0, 0.0, 1.0]])
+    surface = _periodic_surface(
+        lambda k: np.sum(((k @ basis + 0.5) % 1.0 - 0.5) ** 2, axis=1), basis, kgrid=(15, 16, 16)
+    )
+
+    text = _slice_text(surface, show_cross_section_area=True)
+
+    assert periodic_bands(surface) is None
+    assert text.endswith(
+        " (one period of this k-grid in a reduced basis is 225 grids, above the limit of 16;"
+        + " orbits crossing the zone boundary are not joined)"
+    )
+
+
+REDUCED_BASIS_CUTS = [
+    ((0.0, 0.0, 1.0), (0.0, 0.0, 0.0), [0.1219794284848571, 0.3104589232663235], 0),
+    ((1.0, 1.0, 0.0), (0.0, 0.0, 0.0), [0.12019142569720472], 2),
+    ((1.0, 1.0, 1.0), (0.0, 0.0, 0.1), [0.10931585804103042, 0.5377306287604], 0),
+    (
+        (0.49297937126024555, -0.8307369262465643, 0.2585488326840085),
+        (-0.011760202276074922, 0.019817531646181004, -0.006167776478829283),
+        [0.11790441260189186, 1.20077480158558, 1.2007748015855804],
+        0,
+    ),
+    (
+        (0.576685966599314, 0.16869863281242276, 0.7993585348356731),
+        (-0.028682586460178974, -0.00839055118661883, -0.0397576352053604),
+        [
+            0.11206266966748896,
+            0.38838507345160916,
+            0.38838507345160894,
+            0.3883850734516094,
+            0.38838507345160905,
+        ],
+        0,
+    ),
+    (
+        (-0.5807403140526123, 0.6530255085566781, 0.48610531040955024),
+        (-0.018215565909975202, 0.020482871438698837, 0.015247233757827126),
+        [0.11642941896748725, 0.6386659775528019, 0.6386659775528019],
+        0,
+    ),
+    (
+        (-0.23854150276937688, 0.6939498918700379, 0.679361096200018),
+        (0.0021770887972934164, -0.006333449391127031, -0.006200302315039774),
+        [
+            0.11972267659522416,
+            0.45698660845147676,
+            0.45698660845147643,
+            0.45698660845147643,
+            0.4569866084514765,
+        ],
+        0,
+    ),
+    (
+        (-0.14744637733390775, -0.7244894061440224, 0.673331022748981),
+        (-0.004079637136077252, -0.020045618884934155, 0.01863013724005489),
+        [
+            0.1172354481984923,
+            0.4610791910327042,
+            0.46107919103270406,
+            0.4610791910327041,
+            0.4610791910327043,
+        ],
+        0,
+    ),
+]
+"""dev's cross_section_areas of _sphere_and_cylinder on the cubic 16^3 grid (70c86145)."""
+
+
+@pytest.mark.guards_existing_behaviour(
+    reason="on a reduced basis the cut is dev's, float for float (#302)"
+)
+@pytest.mark.parametrize("centred", [False, True])
+@pytest.mark.parametrize(("normal", "origin", "areas", "n_open"), REDUCED_BASIS_CUTS)
+def test_reduced_basis_cut_is_unchanged(centred, normal, origin, areas, n_open):
+    surface = _periodic_surface(
+        _sphere_and_cylinder,
+        stored_kpoints=(lambda k: np.where(k > 0.5 + 1e-12, k - 1.0, k)) if centred else _same,
+    )
+
+    assert cross_section_areas(surface, normal, origin, np.eye(3)) == (areas, n_open)
+
+
 def _sphere_and_cylinder(k: np.ndarray) -> np.ndarray:
     """A sphere of radius 0.2 around Gamma and a cylinder of radius sqrt(0.1) around M."""
     to_gamma = (k + 0.5) % 1.0 - 0.5
