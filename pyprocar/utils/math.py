@@ -265,14 +265,9 @@ def fft_interpolate_nd_3dmesh(mesh, interpolation_factor):
     """
     scalar_dims = mesh.shape[3:]
 
-    new_mesh_shape = (
-        mesh.shape[0] * interpolation_factor,
-        mesh.shape[1] * interpolation_factor,
-        mesh.shape[2] * interpolation_factor,
-        *scalar_dims,
-    )
+    new_mesh_shape = (*fft_interpolated_shape(mesh.shape[:3], interpolation_factor), *scalar_dims)
 
-    new_mesh = np.zeros(new_mesh_shape)
+    new_mesh = np.zeros(new_mesh_shape, dtype=complex if np.iscomplexobj(mesh) else float)
 
     # If this is just a 3D array, use fft_interpolate directly
     if len(scalar_dims) == 0:
@@ -303,7 +298,7 @@ def fft_interpolate_mesh(function, interpolation_factor=2):
 
     if I = interpolation_factor
     This function will receive f(x,y,z) with dimensions of (nx,ny,nz)
-    and returns f(x,y,z) with dimensions of (nx*I,ny*I,nz*I)
+    and returns f(x,y,z) with dimensions of (nx*I,ny*I,nz*I); an axis of length 1 stays 1.
 
     Parameters
     ----------
@@ -315,7 +310,7 @@ def fft_interpolate_mesh(function, interpolation_factor=2):
     Returns
     -------
     np.ndarray
-        The interpolated points
+        The interpolated points, complex only when ``function`` is complex
     """
     # Handle NaN values if present
     has_nan = np.isnan(function).any()
@@ -327,16 +322,24 @@ def fft_interpolate_mesh(function, interpolation_factor=2):
 
     # Zero-pad the centred spectrum, so each frequency keeps its value on the larger grid.
     spectrum = np.fft.fftshift(np.fft.fftn(function_copy))
+    new_shape = fft_interpolated_shape(spectrum.shape, interpolation_factor)
     pad = []
-    for n in spectrum.shape:
-        new_n = n * interpolation_factor
+    for n, new_n in zip(spectrum.shape, new_shape, strict=True):
         before = new_n // 2 - n // 2
         pad.append((before, new_n - n - before))
     new_fft = np.fft.ifftshift(np.pad(spectrum, pad))
 
-    # Perform inverse FFT to get the interpolated result
-    interpolated = np.real(np.fft.ifftn(new_fft)) * interpolation_factor**3
-    return interpolated
+    interpolated = np.fft.ifftn(new_fft) * (np.prod(new_shape) / np.prod(spectrum.shape))
+    return interpolated if np.iscomplexobj(function) else interpolated.real
+
+
+def fft_interpolated_shape(shape, interpolation_factor):
+    """Return the grid shape FFT interpolation produces.
+
+    An axis with one sample has no frequency to resolve beyond a constant, so it keeps its one
+    sample instead of repeating it.
+    """
+    return tuple(n * interpolation_factor if n > 1 else n for n in shape)
 
 
 def calculate_central_differences_on_meshgrid_axis(scalar_mesh, axis):
