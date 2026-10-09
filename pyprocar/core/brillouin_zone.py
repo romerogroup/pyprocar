@@ -57,6 +57,24 @@ def _wigner_seitz(reciprocal_lattice: np.ndarray) -> tuple[np.ndarray, list[list
     return brill.vertices[used], [np.searchsorted(used, face).tolist() for face in cell]
 
 
+def _outward_faces(verts: np.ndarray, faces: list[list[int]]) -> list[int]:
+    """``faces`` in ``pv.PolyData``'s flat layout, each wound so that its normal points away
+    from the centroid of ``verts``.
+
+    The zone is convex, so the vertex centroid lies inside it and on the inner side of every
+    face plane: ``normal . (face_center - centroid) > 0`` holds exactly for outward normals.
+    """
+    centroid = verts.mean(axis=0)
+    flat: list[int] = []
+    for face in faces:
+        corners = verts[face]
+        center = corners.mean(axis=0)
+        area_vector = np.cross(corners - center, np.roll(corners, -1, axis=0) - center).sum(axis=0)
+        wound = face if area_vector @ (center - centroid) > 0 else face[::-1]
+        flat.extend([len(wound), *wound])
+    return flat
+
+
 class BrillouinZone(pv.PolyData):
     """
     A Surface object with verts, faces and line representation, representing the BrillouinZone.
@@ -77,20 +95,10 @@ class BrillouinZone(pv.PolyData):
         self.reciprocal = reciprocal_lattice
         verts, faces = self.wigner_seitz()
 
-        # Format faces for pv.PolyData
-        new_faces = []
-        for iface in faces:
-            new_faces.append(len(iface))
-            for ivert in iface:
-                new_faces.append(ivert)
-
-        # Initialize with the properly formatted faces array
-        super().__init__(verts, new_faces)
+        super().__init__(verts, _outward_faces(verts, faces))
 
         logger.debug(f"BrillouinZone faces: {len(faces)}")
         logger.debug(f"BrillouinZone verts: {verts.shape}")
-
-        self._fix_normals_direction()
 
         return None
 
@@ -145,24 +153,6 @@ class BrillouinZone(pv.PolyData):
         logger.info("___Calculating Wigner Seitz cell___")
         return _wigner_seitz(self.reciprocal)
 
-    def _fix_normals_direction(self):
-        """
-        Helper method that calculates the normals of the Wigner seits cell
-        """
-        logger.info("___Fixing normals direction___")
-        cell_centers = self.cell_centers().points
-        if len(cell_centers) == 0:
-            logger.warning("___No centers found___")
-            return None
-
-        center = cell_centers[0]
-        n1 = center / np.linalg.norm(center)
-        n2 = self.face_normals[0]
-        correction = np.sign(np.dot(n1, n2))
-        if correction == -1:
-            self.compute_normals(flip_normals=True, inplace=True)
-        return None
-
 
 class BrillouinZone2D(pv.PolyData):
     """
@@ -204,16 +194,7 @@ class BrillouinZone2D(pv.PolyData):
             if np.isclose(vert_z, max_val, atol=1e-2):
                 vert[axis] = e_max
 
-        new_faces = []
-        for iface in faces:
-            new_faces.append(len(iface))
-            for ivert in iface:
-                new_faces.append(ivert)
-
-        # Initialize with the properly formatted faces array
-        super().__init__(verts, new_faces)
-
-        self._fix_normals_direction()
+        super().__init__(verts, _outward_faces(verts, faces))
         return None
 
     @property
@@ -265,15 +246,3 @@ class BrillouinZone2D(pv.PolyData):
             Returns the wigner Seitz cell in the form of a tuple containing the verts and faces of the cell
         """
         return _wigner_seitz(self.reciprocal)
-
-    def _fix_normals_direction(self):
-        """
-        Helper method that calculates the normals of the Wigner seits cell
-        """
-        center = self.centers[0]
-        n1 = center / np.linalg.norm(center)
-        n2 = self.face_normals[0]
-        correction = np.sign(np.dot(n1, n2))
-        if correction == -1:
-            self.compute_normals(flip_normals=True, inplace=True)
-        return None
