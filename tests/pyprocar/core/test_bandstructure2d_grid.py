@@ -30,7 +30,8 @@ TILT = np.array([[0.0, 0.0, 0.05], [0.0, 0.0, 0.0], [0.0, 0.0, 0.0]])
 TILTED = SKEWED + TILT
 # SKEWED before #302. Its k-step c*/n_kz - a*/24 + b*/24 is shorter than c*/n_kz, so these
 # k-grids are not reduced and are drawn in another basis.
-SKEWED_SHORT_C = np.array([[0.25, 0.0, 0.0], [0.1, 0.22, 0.0], [0.03, -0.04, 0.12]])
+SKEWED_SHORT_C = SKEWED.copy()
+SKEWED_SHORT_C[2, 2] = 0.12
 # The pad covers the first zone of each lattice here (a [0, 1) grid reaches fractional -2/3 on
 # the hexagonal ones), so the drawn mesh is the padded grid and the patch below.
 N_K, PADDING = 24, 20
@@ -43,6 +44,15 @@ def tight_binding_graphene(frac: np.ndarray) -> np.ndarray:
 
 def square_band(frac: np.ndarray) -> np.ndarray:
     return np.cos(2 * np.pi * frac[:, 0]) + 2 * np.cos(2 * np.pi * frac[:, 1])
+
+
+def saw(x: np.ndarray) -> np.ndarray:
+    return x - np.round(x)
+
+
+def saw_band(x: np.ndarray) -> np.ndarray:
+    """x + 2y + 3z inside the cell |x_i| < 1/2, periodic over the unit lattice."""
+    return saw(x[:, 0]) + 2 * saw(x[:, 1]) + 3 * saw(x[:, 2])
 
 
 def layered_band(frac: np.ndarray) -> np.ndarray:
@@ -223,30 +233,25 @@ def test_a_pad_short_of_the_zone_draws_the_zone_and_the_pad_with_the_analytic_ba
     assert quad_area(quads) == pytest.approx(span**2 * cell, rel=1e-9)
 
 
-def linear_cell_band(frac: np.ndarray) -> np.ndarray:
-    """Linear inside the cell |f_i| < 1/2 and periodic."""
-    saw = frac - np.round(frac)
-    return saw[:, 0] + 2 * saw[:, 1] + 3 * saw[:, 2]
-
-
 @pytest.mark.parametrize(
-    ("lattice", "n_kz", "origin", "kz", "as_cartesian"),
+    ("lattice", "n_kz", "origin", "as_cartesian"),
     [
-        (SKEWED_SHORT_C, 4, (0, 0, 0.25), 0.25 * 0.12, False),
-        (SKEWED_SHORT_C + TILT, 8, (0, 0, 0.036), 0.036, True),
+        (SKEWED_SHORT_C, 4, (0, 0, 0.25), False),
+        (SKEWED_SHORT_C + TILT, 8, (0, 0, 0.036), True),
     ],
     ids=["skewed-plane-off-the-origin", "tilted-plane-across-the-kz-layers"],
 )
 def test_a_k_grid_that_is_not_reduced_draws_the_band_wherever_its_cells_keep_it_linear(
-    lattice, n_kz, origin, kz, as_cartesian
+    lattice, n_kz, origin, as_cartesian
 ):
     """A drawn cell spans at most 1/12 of a* and b* and 1/n_kz of c*, so a sample within 0.3 of
     the cell centre interpolates only k-points where the band is linear, and must be exact.
     The sheet reaches -0.3 along a* and b*, which today's pad from -3/24 does not."""
     points, sheet, _, _ = bs2d_arrays(
-        lattice, linear_cell_band, (30, 30), as_cartesian, n_kz, origin, padding=SHORT_PADDING
+        lattice, saw_band, (30, 30), as_cartesian, n_kz, origin, padding=SHORT_PADDING
     )
 
+    kz = origin[2] if as_cartesian else (np.asarray(origin) @ lattice)[2]
     k = np.column_stack([points[:, :2] / (2 * np.pi), np.full(len(points), kz)])
     frac = np.linalg.solve(lattice.T, k.T).T
     inner = (np.abs(frac) < 0.3).all(axis=1)
@@ -254,6 +259,4 @@ def test_a_k_grid_that_is_not_reduced_draws_the_band_wherever_its_cells_keep_it_
     assert np.isfinite(points).all()
     assert (frac[:, :2].min(axis=0) <= -0.3).all()
     assert (frac[:, :2].max(axis=0) >= 0.3).all()
-    np.testing.assert_allclose(
-        points[inner, 2], sign[inner] * linear_cell_band(frac[inner]), atol=1e-9
-    )
+    np.testing.assert_allclose(points[inner, 2], sign[inner] * saw_band(frac[inner]), atol=1e-9)

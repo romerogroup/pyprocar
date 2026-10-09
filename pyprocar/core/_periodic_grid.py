@@ -79,13 +79,13 @@ class PeriodicGrid:
         """One period of per-k-point ``values``, shaped (n1, n2, n3, ...)."""
         return values[self._rows_at(_box_indices(np.zeros(3, dtype=int), np.asarray(self.n)))]
 
-    def drawn_mesh(self, padding: int, *, clipped_to_zone: bool) -> ElectronicBandStructureMesh:
-        """The source Mesh on the zone's bounding box plus one point on each side. A drawing
-        not ``clipped_to_zone`` also keeps the pad box: one drawn period from the stored grid's
-        first point, ``padding`` points beyond it on each side, today's pad on the identity map.
+    def drawn_mesh(self, padding: int, *, keep_pad: bool) -> ElectronicBandStructureMesh:
+        """The source Mesh on the zone's bounding box plus one point on each side, joined with
+        the pad box when ``keep_pad``: one drawn period from the stored grid's first point and
+        ``padding`` points beyond it on each side, ``pad(padding)``'s box on the identity map.
 
-        On the identity map whose pad already holds the zone's box this is
-        ``pad(padding)``, today's mesh bit for bit.
+        On the identity map whose pad already holds the zone's box this is ``pad(padding)``,
+        today's mesh bit for bit.
         """
         n = np.asarray(self.n)
         live = n > 1
@@ -93,7 +93,7 @@ class PeriodicGrid:
         pad_lo, pad_hi = self._start - padding, self._start + n + padding
         if self.is_identity and ((pad_lo <= zone_lo) & (pad_hi >= zone_hi))[live].all():
             return self._source.pad(padding=padding, inplace=False)
-        if not clipped_to_zone:
+        if keep_pad:
             zone_lo, zone_hi = np.minimum(zone_lo, pad_lo), np.maximum(zone_hi, pad_hi)
         lo = np.where(live, zone_lo, self._start)
         hi = np.where(live, zone_hi, self._start + 1)
@@ -128,14 +128,15 @@ class PeriodicGrid:
 
 
 def drawn_mesh(
-    ebs: ElectronicBandStructureMesh, padding: int, drawing: str, *, clipped_to_zone: bool
+    ebs: ElectronicBandStructureMesh, padding: int, drawing: str, *, keep_pad: bool
 ) -> tuple[PeriodicGrid | None, ElectronicBandStructureMesh]:
     """The grid of ``ebs`` and the mesh to draw ``drawing`` on: ``PeriodicGrid.drawn_mesh``, or
     today's pad in the given basis when the k-points are not one full uniform grid. A sheared
-    given basis then warns that part of the zone is missing."""
+    given basis then warns that part of the zone is missing. A drawing that may be shown
+    unclipped sets ``keep_pad``; one always clipped to the zone needs only the zone's box."""
     grid = periodic_grid(ebs)
     if grid is not None:
-        return grid, grid.drawn_mesh(padding, clipped_to_zone=clipped_to_zone)
+        return grid, grid.drawn_mesh(padding, keep_pad=keep_pad)
     lattice = ebs.reciprocal_lattice
     live = np.asarray(ebs.kgrid) > 1
     if lattice is not None and not is_reduced_basis(np.asarray(lattice), live):
@@ -183,8 +184,7 @@ def periodic_grid(ebs: ElectronicBandStructureMesh) -> PeriodicGrid | None:
     # n_i is the order of drawn step i modulo the reciprocal lattice.
     n = np.lcm.reduce(big_n // np.gcd(to_source, big_n), axis=1)
     steps = n[:, None] * to_source // big_n[None, :]
-    first = (nearest.min(axis=0) + shift) / big_n @ np.linalg.inv(steps)
-    start = np.rint(first * n - drawn_shift).astype(int)
+    start = np.rint((nearest.min(axis=0) + shift) @ from_source - drawn_shift).astype(int)
     return PeriodicGrid(
         basis,
         steps @ basis,

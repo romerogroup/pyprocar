@@ -22,6 +22,7 @@ from pyprocar.core.kpoints import KGRID_MODE, KGridInfo
 from pyprocar.plotter.bs_2d_plot import BS2DPlotter
 from tests.pyprocar.core.test_bandstructure2d_grid import (
     HEXAGONAL,
+    saw_band,
     tight_binding_graphene,
 )
 from tests.utils.user_warning import user_warning
@@ -29,15 +30,6 @@ from tests.utils.user_warning import user_warning
 CUBIC = np.eye(3)
 SHEARED = np.array([[1.0, 0, 0], [3.0, 1, 0], [0, 0, 1]])
 """The cubic reciprocal lattice in the basis b1, b2 + 3 b1, b3."""
-
-
-def saw(x: np.ndarray) -> np.ndarray:
-    return x - np.round(x)
-
-
-def saw_band(cart: np.ndarray) -> np.ndarray:
-    """x + 2y + 3z inside the cubic zone, periodic over the cubic lattice."""
-    return saw(cart[:, 0]) + 2 * saw(cart[:, 1]) + 3 * saw(cart[:, 2])
 
 
 def grid_fracs(kgrid, centred: bool = False) -> np.ndarray:
@@ -149,6 +141,13 @@ def projected_area(surface: pv.PolyData) -> float:
     return float(flat.area)
 
 
+def sheet_holds(bs: BandStructure2D, points: np.ndarray) -> np.ndarray:
+    """Whether the drawn sheet covers each point's (x, y)."""
+    surface = np.asarray(bs.points)
+    extent = Delaunay(surface[np.isfinite(surface).all(axis=1), :2])
+    return extent.find_simplex(points[:, :2]) >= 0
+
+
 def test_bs2d_on_a_zero_to_one_hexagonal_grid_draws_the_whole_zone():
     """P1: graphene on a [0, 1) 30 x 30 grid. The zone corner at fractional -2/3 lies 20 points
     below the grid, beyond the default pad of 15."""
@@ -165,9 +164,7 @@ def test_bs2d_on_a_zero_to_one_hexagonal_grid_draws_the_whole_zone():
 
     plotter.close()
     zone = bs.get_2d_brillouin_zone(e_min=-1.0, e_max=10.0)
-    surface = np.asarray(bs.points)
-    extent = Delaunay(surface[np.isfinite(surface).all(axis=1), :2])
-    assert (extent.find_simplex(np.asarray(zone.points)[:, :2]) >= 0).all()
+    assert sheet_holds(bs, np.asarray(zone.points)).all()
     assert sorted(drawn) == [(0, 0), (1, 0)]
     for sheet in drawn.values():
         assert projected_area(sheet) == pytest.approx(HEXAGON_ZONE_AREA, rel=1e-9)
@@ -182,7 +179,6 @@ def test_unclipped_bs2d_on_a_zero_to_one_grid_holds_the_zone_and_todays_pad(padd
     bs = BandStructure2D.from_ebs(
         mesh(frac, tight_binding_graphene(frac), HEXAGONAL, (30, 30, 1)),
         normal=(0, 0, 1),
-        grid_interpolation=(80, 80),
         padding=padding,
     )
 
@@ -191,24 +187,23 @@ def test_unclipped_bs2d_on_a_zero_to_one_grid_holds_the_zone_and_todays_pad(padd
     # A hair inside the box, so a corner on the sheet's edge counts as held.
     pad = pad + 1e-6 * (pad.mean(axis=0) - pad)
     zone = bs.get_2d_brillouin_zone(e_min=-1.0, e_max=1.0)
-    surface = np.asarray(bs.points)
-    extent = Delaunay(surface[np.isfinite(surface).all(axis=1), :2])
-    assert (extent.find_simplex(np.asarray(zone.points)[:, :2]) >= 0).all()
-    assert (extent.find_simplex((2 * np.pi * pad @ HEXAGONAL)[:, :2]) >= 0).all()
+    assert sheet_holds(bs, np.asarray(zone.points)).all()
+    assert sheet_holds(bs, 2 * np.pi * pad @ HEXAGONAL).all()
 
 
 def test_unclipped_bs2d_on_a_sheared_basis_draws_the_pad_of_its_reduced_basis():
     """The [0, 1) 16^3 grid on b2 = (3,1,0) is the cubic [0, 1) grid. Given in the cubic basis,
-    today's pad of 15 holds the zone, so that is the mesh both bases draw."""
-    sheared = BandStructure2D.from_ebs(saw_mesh(SHEARED), normal=(0, 0, 1), padding=15)
-    cubic = saw_mesh(CUBIC).pad(padding=15, inplace=False)
+    a pad of 9 reaches the zone's box, one point past the face at -8, so that pad is the mesh
+    both bases draw."""
+    sheared = BandStructure2D.from_ebs(saw_mesh(SHEARED), normal=(0, 0, 1), padding=9)
+    cubic = saw_mesh(CUBIC).pad(padding=9, inplace=False)
 
     def cartesian(ebs: ElectronicBandStructureMesh) -> np.ndarray:
         points = np.asarray(ebs.kpoints) @ np.asarray(ebs.reciprocal_lattice)
         return np.round(points[np.lexsort(points.T)], 9)
 
     # expand_single_dimension leaves a three-dimensional grid as it is.
-    assert sheared.ebs.kgrid == cubic.kgrid == (46, 46, 46)
+    assert sheared.ebs.kgrid == cubic.kgrid == (34, 34, 34)
     np.testing.assert_array_equal(cartesian(sheared.ebs), cartesian(cubic))
 
 

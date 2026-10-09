@@ -609,7 +609,7 @@ class BandStructure2D(pv.PolyData):
             The constructed 2D band structure surface
         """
         original_ebs = copy.copy(ebs)
-        _, drawn = drawn_mesh(ebs, padding, "2D band structure", clipped_to_zone=False)
+        _, drawn = drawn_mesh(ebs, padding, "2D band structure", keep_pad=True)
         padded_ebs = drawn.expand_single_dimension(inplace=True)
 
         plane_info = compute_plane_info(
