@@ -365,6 +365,17 @@ def test_tile_holds_one_period_of_the_drawn_grid():
     np.testing.assert_allclose(tile, sphere(cart).reshape(grid.n), atol=1e-12)
 
 
+def test_shear_of_a_reduced_fcc_basis_draws_in_that_basis():
+    """b2' = b2 + 3 b1 of the fcc basis: (b1, b2, b3) and (b1, b1 + b2 + b3, b3) are both
+    reduced and both 3 index steps from the given basis, but only the first undoes the one
+    shear. Drawn in it, the surface and its cuts are the unsheared build's (#302 B)."""
+    shear = np.array([[1, 0, 0], [3, 1, 0], [0, 0, 1]])
+
+    fs = drawn(shear @ FCC, (15, 15, 15), sphere, 0.1)
+
+    np.testing.assert_allclose(fs.ebs.reciprocal_lattice, FCC, rtol=0, atol=1e-12)
+
+
 BISB = np.array(
     [
         [0.235005607, 0.13568153, 1.89e-07],
