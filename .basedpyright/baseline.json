@@ -2420,6 +2420,14 @@
                 }
             },
             {
+                "code": "reportUnusedParameter",
+                "range": {
+                    "startColumn": 64,
+                    "endColumn": 69,
+                    "lineCount": 1
+                }
+            },
+            {
                 "code": "reportArgumentType",
                 "range": {
                     "startColumn": 12,

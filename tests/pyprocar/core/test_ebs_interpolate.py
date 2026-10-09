@@ -10,19 +10,19 @@ from pyprocar.core.kpoints import (
 )
 
 
-def band_energy(kpoints: np.ndarray) -> np.ndarray:
-    """A band with a few low Fourier components, which FFT interpolation reproduces exactly."""
+def band_energies(kpoints: np.ndarray) -> np.ndarray:
+    """Two bands with a few low Fourier components, which FFT interpolation reproduces exactly."""
     k = 2 * np.pi * kpoints
-    return np.cos(k[:, 0]) + 0.5 * np.cos(k[:, 1]) + 0.25 * np.cos(k[:, 2])
+    energy = np.cos(k[:, 0]) + 0.5 * np.cos(k[:, 1]) + 0.25 * np.cos(k[:, 2])
+    return np.stack([energy, -0.5 * energy], axis=1)
 
 
 def cosine_mesh(kgrid: tuple[int, int, int]) -> ElectronicBandStructureMesh:
     kpoints = generate_gamma_centered_kpoints(kgrid)
-    energy = band_energy(kpoints)
     return ElectronicBandStructureMesh(
         kgrid_info=KGridInfo(kgrid=kgrid, kgrid_mode=KGRID_MODE.GAMMA, kshift=(0, 0, 0)),
         kpoints=kpoints,
-        bands=np.stack([energy, -0.5 * energy], axis=1)[:, :, None],
+        bands=band_energies(kpoints)[:, :, None],
         reciprocal_lattice=np.eye(3),
     )
 
@@ -45,10 +45,7 @@ def test_interpolated_bands_match_the_band_at_each_returned_kpoint(kgrid, factor
     assert np.array_equal(mesh.kpoints, sort_kpoints(mesh.kpoints, order="F"))
     assert np.allclose(mesh.kgrid_spacing, 1 / new_kgrid)
 
-    energy = band_energy(mesh.kpoints)
-    error = np.abs(
-        mesh.property_store["bands"].value[:, :, 0] - np.stack([energy, -0.5 * energy], axis=1)
-    )
+    error = np.abs(mesh.property_store["bands"].value[:, :, 0] - band_energies(mesh.kpoints))
     assert error.max() < 1e-9
 
 
