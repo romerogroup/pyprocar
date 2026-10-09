@@ -880,7 +880,6 @@ def test_reduced_basis_cut_is_unchanged(centred, normal, origin, areas, n_open):
 
     # Another machine can round the last bit differently: a GitHub runner differed by one ulp.
     assert found_open == n_open
-    assert len(found) == len(areas)
     assert found == pytest.approx(areas, rel=1e-12, abs=0)
 
 

@@ -151,7 +151,7 @@ def _directions(real: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
     SNAP_REACH or no longer than SNAP_REACH times the sum of the successive minima."""
     ball = _lattice_vectors_within(real, SNAP_REACH * float(_successive_minima(real).sum()))
     given = np.array(list(itertools.product(range(-SNAP_REACH, SNAP_REACH + 1), repeat=3)))
-    m = np.vstack([given[np.abs(given).sum(axis=1) > 0], ball])
+    m = np.vstack([given, ball])
     indices = m[np.gcd.reduce(np.abs(m), axis=1) == 1]
     vectors = indices @ real
     return indices, vectors / np.linalg.norm(vectors, axis=1, keepdims=True)

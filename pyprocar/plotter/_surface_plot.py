@@ -45,8 +45,7 @@ lattice only, so a sheared basis snaps the directions its reduced basis does; th
 every direction dev snapped on a cell that is not reduced, such as a rhombohedral primitive
 cell with a small angle."""
 
-_GIVEN_INDICES = box_indices(np.full(3, -SNAP_REACH), np.full(3, SNAP_REACH + 1)).reshape(-1, 3)
-_GIVEN_INDICES = _GIVEN_INDICES[np.gcd.reduce(np.abs(_GIVEN_INDICES), axis=1) == 1]
+_GIVEN_BOX = box_indices(np.full(3, -SNAP_REACH), np.full(3, SNAP_REACH + 1)).reshape(-1, 3)
 
 
 def _snap_candidates(real: np.ndarray) -> np.ndarray:
@@ -62,7 +61,9 @@ def _snap_candidates(real: np.ndarray) -> np.ndarray:
     box = box_indices(-reach, reach + 1).reshape(-1, 3)
     box = box[np.linalg.norm(box @ niggli, axis=1) <= radius * (1 + 1e-9)]
     # A direction in both sets appears twice, with the same indices: argmax takes either.
-    return np.vstack([_GIVEN_INDICES, box[np.gcd.reduce(np.abs(box), axis=1) == 1] @ steps])
+    # The steps are unimodular, so they keep each row's gcd.
+    candidates = np.vstack([_GIVEN_BOX, box @ steps])
+    return candidates[np.gcd.reduce(np.abs(candidates), axis=1) == 1]
 
 
 def snap_normal(
@@ -74,9 +75,9 @@ def snap_normal(
     translates sit at discrete offsets: for G = m1 b1 + m2 b2 + m3 b3, n . G =
     (u m1 + v m2 + w m3) / |t|. A normal typed with a few digits misses such a direction
     slightly and cuts an irrational plane, where near-copies of one orbit count
-    separately. The candidates (see SNAP_REACH) depend on the lattice only, not on the
-    basis or orientation it is given in. Returns the indices in the given basis when the
-    normal was changed, otherwise None.
+    separately. The candidates (see SNAP_REACH) hold the same lattice directions in every
+    basis and orientation, and in the given basis also those with indices up to SNAP_REACH.
+    Returns the indices in the given basis when the normal was changed, otherwise None.
     """
     normal = np.asarray(normal, dtype=np.float64) / np.linalg.norm(normal)
     real = np.linalg.inv(np.asarray(reciprocal_lattice, dtype=np.float64)).T

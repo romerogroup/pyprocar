@@ -257,8 +257,9 @@ def _nearest_identity(steps: np.ndarray, lattice: np.ndarray, live: np.ndarray) 
     change = bases - np.eye(3, dtype=int)
     distance = np.abs(change).sum(axis=(1, 2))
     changed = np.count_nonzero(change, axis=(1, 2))
-    ranked = np.lexsort((*bases.reshape(-1, 9).T[::-1], changed, distance))
-    return bases[ranked[usable[ranked]][0]]
+    keep = np.flatnonzero(usable)
+    entries = bases[keep].reshape(-1, 9).T[::-1]
+    return bases[keep[np.lexsort((*entries, changed[keep], distance[keep]))[0]]]
 
 
 def _obtuse_superbase(rows: np.ndarray) -> bool:
