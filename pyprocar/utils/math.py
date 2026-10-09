@@ -311,6 +311,12 @@ def fft_interpolate_mesh(function, interpolation_factor=2):
     np.ndarray
         The interpolated points, complex only when ``function`` is complex
     """
+    if np.iscomplexobj(function):
+        # The padding below puts an even axis's Nyquist term at -n/2 only, which the real path
+        # makes symmetric by taking .real; interpolating each part keeps that for complex input.
+        real = fft_interpolate_mesh(function.real, interpolation_factor)
+        return real + 1j * fft_interpolate_mesh(function.imag, interpolation_factor)
+
     # Handle NaN values if present
     has_nan = np.isnan(function).any()
     if has_nan:
@@ -329,7 +335,7 @@ def fft_interpolate_mesh(function, interpolation_factor=2):
     new_fft = np.fft.ifftshift(np.pad(spectrum, pad))
 
     interpolated = np.fft.ifftn(new_fft) * (np.prod(new_shape) / np.prod(spectrum.shape))
-    return interpolated if np.iscomplexobj(function) else interpolated.real
+    return interpolated.real
 
 
 def fft_interpolated_shape(shape, interpolation_factor):
