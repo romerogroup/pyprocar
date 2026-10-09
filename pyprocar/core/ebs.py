@@ -16,7 +16,7 @@ from abc import ABC, abstractmethod
 from collections.abc import Iterable, Mapping, Sequence
 from functools import cached_property
 from pathlib import Path
-from typing import Any
+from typing import Any, SupportsInt
 
 import numpy as np
 import numpy.typing as npt
@@ -1651,6 +1651,11 @@ def edge_diff_ramp(vector, pad_width, iaxis, kwargs):
     vector[-pad_width[1] :] = right_pad
 
 
+def _grid_size(sizes: Iterable[SupportsInt]) -> tuple[int, int, int]:
+    n_kx, n_ky, n_kz = sizes
+    return (int(n_kx), int(n_ky), int(n_kz))
+
+
 class ElectronicBandStructureMesh(
     ElectronicBandStructure, DifferentiablePropertyInterface
 ):
@@ -1672,8 +1677,7 @@ class ElectronicBandStructureMesh(
 
         if self.n_kpoints != np.prod(self.kgrid_info.kgrid):
             raise ValueError("n_kpoints must be equal to np.prod(kgrid) (number of kpoints)")
-        n_kx, n_ky, n_kz = self.kgrid_info.kgrid
-        self._kgrid = (int(n_kx), int(n_ky), int(n_kz))
+        self._kgrid = _grid_size(self.kgrid_info.kgrid)
 
     @classmethod
     def from_code(
@@ -1697,8 +1701,7 @@ class ElectronicBandStructureMesh(
     def kgrid(self) -> tuple[int, int, int]:
         if self._kgrid is not None:
             return self._kgrid
-        n_kx, n_ky, n_kz = self.get_kgrid()
-        return (int(n_kx), int(n_ky), int(n_kz))
+        return _grid_size(self.get_kgrid())
 
     def get_kgrid(self, num_bins: int = 1000, height: float = 1, coord_tol: float = 0.01):
         return math.get_grid_dims(
@@ -1866,8 +1869,7 @@ class ElectronicBandStructureMesh(
 
         new_kpoints = math.mesh_to_array(padded_kpoints_mesh, order=order)
         ebs._kgrid_spacing = ebs.kgrid_spacing
-        n_kx, n_ky, n_kz = (n + sum(pad) for n, pad in zip(ebs.kgrid, padding_dims, strict=True))
-        ebs._kgrid = (n_kx, n_ky, n_kz)
+        ebs._kgrid = _grid_size(padded_kpoints_mesh.shape[:3])
         ebs.update_points(new_kpoints)
         ebs._mesh = ebs.to_mesh()
         return ebs
@@ -2004,8 +2006,8 @@ class ElectronicBandStructureMesh(
                     property[calc_name, gradient_order] = new_points
 
         # Each flat axis adds two copies of the original points: a grid only for one flat axis.
-        n_kx, n_ky, n_kz = (3 if n == 1 else n for n in ebs.kgrid)
-        ebs._kgrid = (n_kx, n_ky, n_kz) if ebs.kgrid.count(1) == 1 else None
+        kgrid = ebs.kgrid
+        ebs._kgrid = _grid_size(3 if n == 1 else n for n in kgrid) if kgrid.count(1) == 1 else None
         ebs.update_points(new_kpoints)
         sort_by_kpoints(ebs, inplace=True)
         ebs._mesh = ebs.to_mesh()

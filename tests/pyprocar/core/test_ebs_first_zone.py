@@ -37,11 +37,11 @@ def test_shifted_points_lie_in_the_first_zone(lattice: np.ndarray):
 
     shifted = plain_ebs(kpoints, lattice).shift_kpoints_to_fbz(inplace=False).kpoints
 
+    # |k|^2 > |k - G|^2 exactly when 2 k.G > |G|^2.
     cartesian = shifted @ lattice
     translates = LATTICE_STEPS @ lattice
-    squared = (cartesian**2).sum(axis=1)
-    translated_squared = ((cartesian[:, None, :] - translates[None, :, :]) ** 2).sum(axis=2)
-    outside = np.any(squared[:, None] > translated_squared + 1e-9, axis=1)
+    closer = 2 * cartesian @ translates.T > (translates**2).sum(axis=1) + 1e-9
+    outside = closer.any(axis=1)
     assert not outside.any(), f"{outside.mean():.1%} of the shifted points lie outside the zone"
     moved_by = shifted - kpoints
     np.testing.assert_allclose(moved_by, np.rint(moved_by), rtol=0, atol=1e-9)

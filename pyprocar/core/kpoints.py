@@ -48,11 +48,11 @@ def reduce_to_first_zone(kpoints: np.ndarray, reciprocal_lattice: np.ndarray) ->
     """
     steps = zone_face_steps(reciprocal_lattice)
     faces = steps @ reciprocal_lattice
-    face_squared = (faces * faces).sum(axis=1)
+    # Maps fractional k to k.G / |G|^2 per face vector G; above 1/2, k is beyond its bisector.
+    to_reach = reciprocal_lattice @ faces.T / (faces * faces).sum(axis=1)
     reduced = wrap_to_unit_cell(np.asarray(kpoints, dtype=np.float64))
     while True:
-        # k.G / |G|^2 for each face vector G; above 1/2, k lies beyond that bisector.
-        reach = (reduced @ reciprocal_lattice) @ faces.T / face_squared
+        reach = reduced @ to_reach
         furthest = reach.argmax(axis=1)
         beyond = reach[np.arange(len(reduced)), furthest] > 0.5 + 1e-12
         if not beyond.any():
