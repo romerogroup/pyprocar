@@ -335,6 +335,44 @@ def test_exact_hexagonal_lattice_direction_is_not_reported_as_snapped():
         assert snap_normal(np.asarray(uvw, float) @ real, reciprocal)[1] is None
 
 
+def _turned_by_1e_4_rad(direction) -> np.ndarray:
+    unit = np.asarray(direction, dtype=float) / np.linalg.norm(direction)
+    away = np.cross(unit, [0.3, 0.5, 0.8])
+    return unit + 1e-4 * away / np.linalg.norm(away)
+
+
+def test_sheared_basis_snaps_to_111_and_names_it_in_the_given_basis():
+    reciprocal = np.linalg.inv(A3_PLUS_6_A1.astype(float)).T
+
+    for normal in (_turned_by_1e_4_rad((1, 1, 1)), ROUNDED_111):
+        direction, uvw = snap_normal(normal, reciprocal)
+
+        assert uvw == (-5, 1, 1)
+        np.testing.assert_allclose(direction, np.ones(3) / np.sqrt(3), atol=1e-12)
+
+
+def test_doubly_sheared_basis_snaps_every_direction_with_cubic_indices_up_to_2():
+    """Rows a1, a2 + 3 a1, a3 + 3 a1 + 3 a2 of the cubic lattice: the given indices of a
+    snapped direction, times these rows, are its cubic indices."""
+    given = np.array([[1, 0, 0], [3, 1, 0], [3, 3, 1]])
+    reciprocal = np.linalg.inv(given.astype(float)).T
+    cubic = [
+        uvw
+        for uvw in itertools.product(range(-2, 3), repeat=3)
+        if any(uvw) and np.gcd.reduce(np.abs(uvw)) == 1
+    ]
+
+    snapped = []
+    for uvw in cubic:
+        direction, indices = snap_normal(_turned_by_1e_4_rad(uvw), reciprocal)
+        if indices is not None and np.array_equal(np.array(indices) @ given, uvw):
+            np.testing.assert_allclose(direction, uvw / np.linalg.norm(uvw), atol=1e-12)
+            snapped.append(uvw)
+
+    assert len(cubic) == 98
+    assert snapped == cubic
+
+
 def test_drawn_slice_uses_the_snapped_normal():
     plotter = FermiPlotter(off_screen=True)
     plotter.add_box_slicer(
