@@ -15,7 +15,7 @@ import numpy as np
 import pytest
 
 from pyprocar.core.ebs import ElectronicBandStructureMesh
-from pyprocar.core.fermisurface import FermiSurface
+from pyprocar.core.fermisurface import FermiSurface, generate_band_isosurfaces
 from pyprocar.core.kpoints import KGRID_MODE, KGridInfo
 from tests.utils.user_warning import user_warning
 
@@ -264,6 +264,23 @@ def test_both_bands_survive_the_clip_on_a_sheared_basis(k):
     assert sorted(areas) == [(0, 0), (1, 0)]
     assert areas[(0, 0)] == pytest.approx(0.7762758114909112, abs=AREA_TOL)
     assert areas[(1, 0)] == pytest.approx(0.07144548061251052, abs=AREA_TOL)
+
+
+def test_a_band_crossing_only_outside_the_zone_is_dropped_with_a_warning():
+    """H2: on an unpadded [0,1) grid a pocket r = 0.1 at (0.75, 0.75, 0.75) lies outside the
+    zone, so its clip is empty; today the build raises "Surface is empty after clipping"."""
+    f = grid_fracs((16, 16, 16))
+    pocket = np.sum((f - 0.75) ** 2, axis=1)
+    bands = np.stack([sphere(f) - 0.1, pocket - 0.1**2], 1)
+    unpadded = mesh(f, bands, CUBIC, (16, 16, 16), 0.0)
+
+    with user_warning(__file__, match=r"band \d+ spin \d+") as record:
+        _, surfaces, _, _ = generate_band_isosurfaces(unpadded, CUBIC, 0.0)
+
+    named = [str(w.message) for w in record if "spin" in str(w.message)]
+    assert len(named) == 1 and "band 1 spin 0 " in named[0], named
+    assert sorted(surfaces) == [(0, 0)]
+    assert surfaces[(0, 0)].n_points > 0
 
 
 def surface_digest(fs: FermiSurface) -> dict[tuple[int, int], str]:

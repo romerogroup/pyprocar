@@ -10,9 +10,10 @@ import warnings
 
 import numpy as np
 import pytest
+import pyvista as pv
 from scipy.spatial import ConvexHull, Voronoi
 
-from pyprocar.core.brillouin_zone import BrillouinZone, BrillouinZone2D
+from pyprocar.core.brillouin_zone import BrillouinZone, BrillouinZone2D, clip_to_zone
 from tests.pyprocar.core.test_bandstructure2d_grid import HEXAGONAL
 
 
@@ -465,3 +466,14 @@ def test_3d_zone_face_normals_point_away_from_gamma(lattice):
     zone = BrillouinZone(lattice)
 
     assert (_outward(zone, np.zeros(3)) > 0).all()
+
+
+def test_clip_to_zone_of_a_surface_outside_the_zone_is_empty():
+    """H3: a sphere wholly outside the cubic zone clips to no points and does not raise; one
+    wholly inside keeps every point."""
+    zone = BrillouinZone(np.eye(3))
+    outside = pv.Sphere(radius=0.2, center=(2.0, 2.0, 2.0))
+    inside = pv.Sphere(radius=0.2)
+
+    assert clip_to_zone(outside, zone).n_points == 0
+    assert clip_to_zone(inside, zone).n_points == inside.n_points

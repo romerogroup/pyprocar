@@ -8,12 +8,14 @@ import pytest
 import pyvista as pv
 
 from pyprocar.core.bandstructure2D import BandStructure2D
+from pyprocar.core.brillouin_zone import BrillouinZone
 from pyprocar.plotter.bs_2d_plot import BS2DPlotter
 from tests.pyprocar.core.test_bandstructure2d_grid import (
     HEXAGONAL,
     tight_binding_graphene,
     two_band_mesh,
 )
+from tests.utils.user_warning import user_warning
 
 TRIANGLE_FACES = [3, 0, 1, 2]
 
@@ -165,6 +167,35 @@ class TestBS2DPlotterBrillouinZone:
             energy_range, abs=0.01
         )
         assert {key: mesh.n_points for key, mesh in drawn.items()} == {(0, 0): 401, (1, 0): 401}
+
+    def test_a_band_outside_the_zone_is_skipped_with_a_warning(self):
+        """H3: the zone spans -1.5 to 1.5 on each axis, so band 2 at E = 2 clips to nothing;
+        today it is drawn as an empty mesh without a warning."""
+        bs2d = _bandstructure2d()
+        bs2d.points = np.array([[0.0, 0.0, -1.0], [0.0, 0.0, 2.0]])
+        bs2d.get_2d_brillouin_zone = lambda e_min, e_max: BrillouinZone(3 * np.eye(3))
+        plotter = BS2DPlotter(bs2d, off_screen=True)
+
+        with user_warning(__file__, match=r"band \d+ spin \d+") as record:
+            meshes = plotter.plot(show_brillouin_zone=False, clip_brillouin_zone=True)
+
+        actors = sorted(plotter.actors)
+        plotter.close()
+        named = [str(w.message) for w in record if "spin" in str(w.message)]
+        assert len(named) == 1 and "band 2 spin 0 " in named[0], named
+        assert list(meshes) == [(1, 0)]
+        assert meshes[(1, 0)].n_points == 3
+        assert actors == ["surface_1_0"]
+
+    def test_add_surface_skips_a_surface_clipped_away_with_a_warning(self, plotter):
+        """H3: today the empty clip is drawn silently."""
+        plotter.add_brillouin_zone(BrillouinZone(np.eye(3)))
+        outside = pv.Sphere(radius=0.2, center=(2.0, 2.0, 2.0))
+
+        with user_warning(__file__, match="outside the Brillouin zone"):
+            plotter.add_surface(outside, clip_surface=True, show_scalar_bar=False)
+
+        assert "surface" not in plotter.actors
 
 
 class TestBS2DPlotterExport:
