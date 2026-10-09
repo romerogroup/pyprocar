@@ -49,6 +49,35 @@ def test_interpolated_bands_match_the_band_at_each_returned_kpoint(kgrid, factor
     assert error.max() < 1e-9
 
 
+def test_a_single_kpoint_axis_stays_a_single_kpoint():
+    # A 2D calculation samples one kz plane; interpolation has nothing to resolve along kz.
+    mesh = cosine_mesh((6, 4, 1)).interpolate(interpolation_factor=2, inplace=False)
+
+    assert np.array_equal(mesh.kgrid, [12, 8, 1])
+    assert mesh.n_kpoints == 12 * 8
+    assert np.all(mesh.kpoints[:, 2] == 0)
+    assert np.allclose(mesh.kgrid_spacing, [1 / 12, 1 / 8, 1])
+    error = np.abs(mesh.property_store["bands"].value[:, :, 0] - band_energies(mesh.kpoints))
+    assert error.max() < 1e-9
+
+
+def test_a_complex_property_keeps_its_imaginary_part():
+    # exp(2 pi i kx) times a real cosine: complex, and band-limited on a (4, 6, 2) grid.
+    def phase(kpoints: np.ndarray) -> np.ndarray:
+        values = np.exp(2j * np.pi * kpoints[:, 0]) * np.cos(2 * np.pi * kpoints[:, 1])
+        return values[:, None, None, None, None]
+
+    mesh = cosine_mesh((4, 6, 2))
+    mesh.add_property(name="projected_phase", value=phase(mesh.kpoints))
+
+    mesh = mesh.interpolate(interpolation_factor=2, inplace=False)
+
+    phase_values = mesh.property_store["projected_phase"].value
+    assert np.iscomplexobj(phase_values)
+    assert np.abs(phase_values - phase(mesh.kpoints)).max() < 1e-9
+    assert not np.iscomplexobj(mesh.property_store["bands"].value)
+
+
 def test_interpolating_a_padded_mesh_halves_its_kpoint_spacing():
     # A 5-point axis padded by 2 has 9 points 1/5 apart; doubling gives 18 points 1/10 apart.
     padded = cosine_mesh((5, 5, 5)).pad(padding=2, inplace=False)
