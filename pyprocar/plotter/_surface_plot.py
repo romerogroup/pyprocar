@@ -9,6 +9,7 @@ import numpy as np
 import pyvista as pv
 from pyvista import ColorLike
 
+from pyprocar.core._periodic_grid import box_indices
 from pyprocar.core.brillouin_zone import clip_to_zone, niggli_basis_steps, warn_clipped_away
 from pyprocar.plotter._periodic_cut import periodic_bands, plane_orbits
 from pyprocar.plotter._series import SurfaceSeries, finite_range
@@ -30,7 +31,8 @@ Rounding a candidate direction to 4 significant digits turns it by at most 8.4e-
 cubic, hexagonal, fcc and bcc cells (3 digits: 7.7e-4, which random normals reach too).
 Distinct candidates are at least 4.4e-3 rad apart on hexagonal cells with c/a = 1.633,
 15 times this angle (fcc 7.1e-3, bcc 7.5e-3, cubic 9.0e-3). A longer cell has more
-candidates: 2.4e-3 at c/a = 3, 1.6e-3 at c/a = 4.
+candidates: 2.4e-3 at c/a = 3, 1.6e-3 at c/a = 4, 5.7e-4 at c/a = 8 and 1.9e-4 at c/a = 15,
+where a normal typed far from any low-index direction can snap to a high-index one.
 """
 
 SNAP_REACH = 4
@@ -48,14 +50,10 @@ def _snap_candidates(real: np.ndarray) -> np.ndarray:
     radius = SNAP_REACH * float(np.linalg.norm(niggli, axis=1).sum())
     # The coefficient of t on niggli row i is t . d_i, d_i the dual column, so at most
     # radius |d_i|.
-    reach = np.floor(radius * np.linalg.norm(np.linalg.inv(niggli), axis=0) + 1e-9)
-    box = np.stack(
-        np.meshgrid(*(np.arange(-r, r + 1, dtype=int) for r in reach.astype(int)), indexing="ij"),
-        axis=-1,
-    ).reshape(-1, 3)
-    inside = np.linalg.norm(box @ niggli, axis=1) <= radius * (1 + 1e-9)
-    primitive = np.gcd.reduce(np.abs(box), axis=1) == 1
-    return box[inside & primitive] @ steps
+    reach = np.floor(radius * np.linalg.norm(np.linalg.inv(niggli), axis=0) + 1e-9).astype(int)
+    box = box_indices(-reach, reach + 1).reshape(-1, 3)
+    box = box[np.linalg.norm(box @ niggli, axis=1) <= radius * (1 + 1e-9)]
+    return box[np.gcd.reduce(np.abs(box), axis=1) == 1] @ steps
 
 
 def snap_normal(

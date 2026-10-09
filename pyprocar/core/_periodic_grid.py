@@ -77,7 +77,7 @@ class PeriodicGrid:
 
     def tile(self, values: np.ndarray) -> np.ndarray:
         """One period of per-k-point ``values``, shaped (n1, n2, n3, ...)."""
-        return values[self._rows_at(_box_indices(np.zeros(3, dtype=int), np.asarray(self.n)))]
+        return values[self._rows_at(box_indices(np.zeros(3, dtype=int), np.asarray(self.n)))]
 
     def drawn_mesh(self, padding: int, *, keep_pad: bool) -> ElectronicBandStructureMesh:
         """The source Mesh on the zone's bounding box plus one point on each side, joined with
@@ -97,7 +97,7 @@ class PeriodicGrid:
             zone_lo, zone_hi = np.minimum(zone_lo, pad_lo), np.maximum(zone_hi, pad_hi)
         lo = np.where(live, zone_lo, self._start)
         hi = np.where(live, zone_hi, self._start + 1)
-        m = _box_indices(lo, hi)
+        m = box_indices(lo, hi)
         flat = m.reshape(-1, 3, order="F")
         kgrid_info = KGridInfo(
             kgrid=self.n,
@@ -268,7 +268,7 @@ def _snap_shift(shift: np.ndarray) -> np.ndarray:
     return np.where((shift < GRID_TOLERANCE) | (shift > 1 - GRID_TOLERANCE), 0.0, shift)
 
 
-def _box_indices(lo: np.ndarray, hi: np.ndarray) -> np.ndarray:
+def box_indices(lo: np.ndarray, hi: np.ndarray) -> np.ndarray:
     """Integer points lo <= m < hi, shaped (hi - lo) + (3,)."""
     axes = [np.arange(a, b) for a, b in zip(lo, hi, strict=True)]
     return np.stack(np.meshgrid(*axes, indexing="ij"), axis=-1)

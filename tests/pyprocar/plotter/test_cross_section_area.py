@@ -333,14 +333,22 @@ def test_exact_hexagonal_lattice_direction_is_not_reported_as_snapped():
         assert snap_normal(np.asarray(uvw, float) @ real, reciprocal)[1] is None
 
 
-def _turned_by_1e_4_rad(direction) -> np.ndarray:
+def _turned_by(direction, angle: float = 1e-4, toward=(0.3, 0.5, 0.8)) -> np.ndarray:
     unit = np.asarray(direction, dtype=float) / np.linalg.norm(direction)
-    away = np.cross(unit, [0.3, 0.5, 0.8])
-    return unit + 1e-4 * away / np.linalg.norm(away)
+    away = np.cross(unit, toward)
+    return unit + angle * away / np.linalg.norm(away)
+
+
+def _primitive_indices(reach: int) -> list[tuple[int, ...]]:
+    return [
+        uvw
+        for uvw in itertools.product(range(-reach, reach + 1), repeat=3)
+        if any(uvw) and np.gcd.reduce(np.abs(uvw)) == 1
+    ]
 
 
 def test_sheared_basis_snaps_to_111_and_names_it_in_the_given_basis():
-    for normal in (_turned_by_1e_4_rad((1, 1, 1)), ROUNDED_111):
+    for normal in (_turned_by((1, 1, 1)), ROUNDED_111):
         direction, uvw = snap_normal(normal, A3_PLUS_6_A1)
 
         assert uvw == (-5, 1, 1)
@@ -352,15 +360,11 @@ def test_doubly_sheared_basis_snaps_every_direction_with_cubic_indices_up_to_2()
     snapped direction, times these rows, are its cubic indices."""
     given = np.array([[1, 0, 0], [3, 1, 0], [3, 3, 1]])
     reciprocal = np.linalg.inv(given.astype(float)).T
-    cubic = [
-        uvw
-        for uvw in itertools.product(range(-2, 3), repeat=3)
-        if any(uvw) and np.gcd.reduce(np.abs(uvw)) == 1
-    ]
+    cubic = _primitive_indices(2)
 
     missed = []
     for uvw in cubic:
-        direction, indices = snap_normal(_turned_by_1e_4_rad(uvw), reciprocal)
+        direction, indices = snap_normal(_turned_by(uvw), reciprocal)
         if (
             indices is None
             or not np.array_equal(np.array(indices) @ given, uvw)
@@ -385,14 +389,6 @@ STANDARD_CELLS = {
 """Real-space rows of cells as their POSCARs give them."""
 
 
-def _primitive_indices(reach: int) -> list[tuple[int, ...]]:
-    return [
-        uvw
-        for uvw in itertools.product(range(-reach, reach + 1), repeat=3)
-        if any(uvw) and np.gcd.reduce(np.abs(uvw)) == 1
-    ]
-
-
 @pytest.mark.guards_existing_behaviour(
     reason="dev snaps these from its given-basis candidates; #302 must not lose them"
 )
@@ -406,7 +402,7 @@ def test_standard_cells_snap_every_direction_with_given_indices_up_to_4():
         reciprocal = np.linalg.inv(real).T
         for uvw in given:
             exact = np.array(uvw) @ real
-            direction, indices = snap_normal(_turned_by_1e_4_rad(exact), reciprocal)
+            direction, indices = snap_normal(_turned_by(exact), reciprocal)
             if indices != uvw or not np.allclose(
                 direction, exact / np.linalg.norm(exact), atol=1e-12
             ):
@@ -417,11 +413,12 @@ def test_standard_cells_snap_every_direction_with_given_indices_up_to_4():
 
 
 SHEARS = {
+    "given": np.eye(3, dtype=int),
     "a3 + 6 a1": np.array([[1, 0, 0], [0, 1, 0], [6, 0, 1]]),
     "doubly sheared": np.array([[1, 0, 0], [3, 1, 0], [3, 3, 1]]),
     "a2 - 2 a1, a3 + a1 + 2 a2": np.array([[1, 0, 0], [-2, 1, 0], [1, 2, 1]]),
 }
-"""Unimodular changes of basis: the given real rows are these times the cell's rows."""
+"""Changes of basis (unimodular): the given real rows are these times the cell's rows."""
 
 TURN = np.array(
     [
@@ -440,16 +437,13 @@ def test_snapped_directions_do_not_depend_on_the_basis_or_the_orientation():
     far from low-index directions stay as given."""
     standard = [*_primitive_indices(2), (3, 3, -1), (3, 3, 1), (-1, 3, 3), (1, 3, 3)]
     unsnapped = np.random.default_rng(302).normal(size=(5, 3))
-    frames = {"given": (np.eye(3, dtype=int), np.eye(3))}
-    for shear_name, shear in SHEARS.items():
-        frames[shear_name] = (shear, np.eye(3))
-        frames[f"{shear_name}, turned"] = (shear, TURN)
-    frames["turned"] = (np.eye(3, dtype=int), TURN)
+    orientations = {"": np.eye(3), ", turned": TURN}
 
     wrong = []
-    for (name, cell), (frame, (shear, turn)) in itertools.product(
-        STANDARD_CELLS.items(), frames.items()
+    for (name, cell), (basis, shear), (orientation, turn) in itertools.product(
+        STANDARD_CELLS.items(), SHEARS.items(), orientations.items()
     ):
+        frame = basis + orientation
         real = shear @ cell @ turn.T
         reciprocal = np.linalg.inv(real).T
         for uvw in standard:
@@ -481,12 +475,6 @@ def _fcc_tight_binding(k: np.ndarray) -> np.ndarray:
     """-(cx cy + cy cz + cz cx) at x, y, z = pi k_cart, whose E = 0.2 surface the plane cuts."""
     x, y, z = (np.pi * (k @ FCC_PRIMITIVE_RECIPROCAL)).T
     return -(np.cos(x) * np.cos(y) + np.cos(y) * np.cos(z) + np.cos(z) * np.cos(x)) - 0.1
-
-
-def _turned_by(direction, angle: float, toward) -> np.ndarray:
-    unit = np.asarray(direction, dtype=float) / np.linalg.norm(direction)
-    away = np.cross(unit, toward)
-    return unit + angle * away / np.linalg.norm(away)
 
 
 @pytest.mark.guards_existing_behaviour(
@@ -530,7 +518,7 @@ def _sum_of_cosines(k: np.ndarray) -> np.ndarray:
     return 0.1 - 0.3 * np.cos(2 * np.pi * k).sum(axis=1)
 
 
-FCC = np.array([[-1, 1, 1], [1, -1, 1], [1, 1, -1]]) / 4.08
+FCC = FCC_PRIMITIVE_RECIPROCAL / 4.08
 
 
 def test_plane_tangent_to_the_surface_at_a_translate_closes_its_orbit():

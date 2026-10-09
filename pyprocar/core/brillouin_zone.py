@@ -1,6 +1,7 @@
 import itertools
 import logging
 import warnings
+from collections.abc import Callable
 from typing import cast
 
 import numpy as np
@@ -20,17 +21,19 @@ _ORIGIN = len(_NEIGHBOURS) // 2
 def reduced_basis_steps(basis: np.ndarray) -> np.ndarray:
     """Integer rows T for which ``T @ basis`` is the Delaunay-reduced basis of the lattice
     spanned by the rows of ``basis``."""
-    return _spglib_reduction_steps(basis, spglib.delaunay_reduce, "Delaunay")
+    return _spglib_reduction_steps(basis, spglib.delaunay_reduce)
 
 
 def niggli_basis_steps(basis: np.ndarray) -> np.ndarray:
     """Integer rows T for which ``T @ basis`` is the Niggli-reduced basis of the lattice
     spanned by the rows of ``basis``: three shortest linearly independent lattice vectors,
     whose lengths are the lattice's successive minima."""
-    return _spglib_reduction_steps(basis, spglib.niggli_reduce, "Niggli")
+    return _spglib_reduction_steps(basis, spglib.niggli_reduce)
 
 
-def _spglib_reduction_steps(basis: np.ndarray, reduce, name: str) -> np.ndarray:
+def _spglib_reduction_steps(
+    basis: np.ndarray, reduce: Callable[[np.ndarray], np.ndarray | None]
+) -> np.ndarray:
     lattice = np.asarray(basis, dtype=np.float64)
     unit = lattice / abs(np.linalg.det(lattice)) ** (1 / 3)
     with warnings.catch_warnings():
@@ -39,7 +42,7 @@ def _spglib_reduction_steps(basis: np.ndarray, reduce, name: str) -> np.ndarray:
         warnings.filterwarnings("ignore", "Set OLD_ERROR_HANDLING", DeprecationWarning)
         reduced = reduce(unit)
     if reduced is None:
-        raise ValueError(f"spglib cannot {name}-reduce the lattice {lattice.tolist()}")
+        raise ValueError(f"spglib {reduce.__name__} fails on the lattice {lattice.tolist()}")
     return np.rint(reduced @ np.linalg.inv(unit)).astype(int)
 
 
