@@ -1890,8 +1890,9 @@ class ElectronicBandStructureMesh(
         """
         ebs = copy.deepcopy(self)
         ebs.remove_property("projected_phase")
-        for prop_name, calc_name, gradient_order, value_array in ebs.iter_properties():
-            ebs.get_property(prop_name)[calc_name, gradient_order] = value_array[rows]
+        for prop in ebs.property_store.values():
+            for calc_name, gradient_order, value_array in list(prop.iter_arrays()):
+                prop[calc_name, gradient_order] = value_array[rows]
         ebs._reciprocal_lattice = reciprocal_lattice
         ebs._kgrid_info = kgrid_info
         ebs._kgrid = kgrid

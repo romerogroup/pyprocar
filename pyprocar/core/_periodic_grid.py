@@ -12,12 +12,15 @@ from __future__ import annotations
 import itertools
 import math
 from dataclasses import dataclass
+from typing import TYPE_CHECKING
 
 import numpy as np
 
 from pyprocar.core.brillouin_zone import BrillouinZone, reduced_basis_steps
-from pyprocar.core.ebs import ElectronicBandStructureMesh, _grid_size
 from pyprocar.core.kpoints import KGridInfo
+
+if TYPE_CHECKING:
+    from pyprocar.core.ebs import ElectronicBandStructureMesh
 
 GRID_TOLERANCE = 1e-2
 """Grid spacings within which a k-point is taken as its uniform-grid point.
@@ -95,7 +98,7 @@ class PeriodicGrid:
         return self._source._take(
             rows=self._rows_at(flat),
             points=(flat + self.shift) / n,
-            kgrid=_grid_size(hi - lo),
+            kgrid=_size3(hi - lo),
             kgrid_info=kgrid_info,
             reciprocal_lattice=self.lattice,
         )
@@ -143,7 +146,15 @@ def periodic_grid(ebs: ElectronicBandStructureMesh) -> PeriodicGrid | None:
     if is_reduced_basis(basis, live):
         identity = np.eye(3, dtype=int)
         return PeriodicGrid(
-            basis, basis, _grid_size(big_n), shift, ebs, identity, np.zeros(3, dtype=int), start, rows
+            basis,
+            basis,
+            _size3(big_n),
+            shift,
+            ebs,
+            identity,
+            np.zeros(3, dtype=int),
+            start,
+            rows,
         )
 
     # Reduce the k-point lattice, not the reciprocal lattice: for unequal N only it is diagonal.
@@ -155,7 +166,12 @@ def periodic_grid(ebs: ElectronicBandStructureMesh) -> PeriodicGrid | None:
     # n_i is the order of drawn step i modulo the reciprocal lattice.
     n = np.array(
         [
-            math.lcm(*(int(nj) // math.gcd(int(nj), abs(int(t))) for nj, t in zip(big_n, row, strict=True)))
+            math.lcm(
+                *(
+                    int(nj) // math.gcd(int(nj), abs(int(t)))
+                    for nj, t in zip(big_n, row, strict=True)
+                )
+            )
             for row in to_source
         ]
     )
@@ -163,7 +179,7 @@ def periodic_grid(ebs: ElectronicBandStructureMesh) -> PeriodicGrid | None:
     return PeriodicGrid(
         basis,
         steps @ basis,
-        _grid_size(n),
+        _size3(n),
         drawn_shift,
         ebs,
         to_source,
@@ -243,3 +259,7 @@ def _box_indices(lo: np.ndarray, hi: np.ndarray) -> np.ndarray:
     """Integer points lo <= m < hi, shaped (hi - lo) + (3,)."""
     axes = [np.arange(a, b) for a, b in zip(lo, hi, strict=True)]
     return np.stack(np.meshgrid(*axes, indexing="ij"), axis=-1)
+
+
+def _size3(n: np.ndarray) -> tuple[int, int, int]:
+    return (int(n[0]), int(n[1]), int(n[2]))

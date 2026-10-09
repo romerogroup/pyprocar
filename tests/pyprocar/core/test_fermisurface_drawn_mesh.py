@@ -46,7 +46,9 @@ def grid_fracs(kgrid, kshift=(0.0, 0.0, 0.0), centred: bool = False) -> np.ndarr
     return np.stack(np.meshgrid(*axes, indexing="ij"), axis=-1).reshape(-1, 3)
 
 
-def mesh(kpoints, bands, lattice, kgrid, fermi, kshift=(0.0, 0.0, 0.0)) -> ElectronicBandStructureMesh:
+def mesh(
+    kpoints, bands, lattice, kgrid, fermi, kshift=(0.0, 0.0, 0.0)
+) -> ElectronicBandStructureMesh:
     """A one-spin Mesh; ``bands`` is (n_k,) or (n_k, n_bands)."""
     bands = np.asarray(bands, dtype=float)
     if bands.ndim == 1:
@@ -159,7 +161,11 @@ def fcc_dense():
     cart = f @ FCC
     w_corner = np.array([-1.0, -0.5, 0.0])
     bands = np.stack(
-        [wrapped_sq(cart, np.zeros(3)) - 0.09, wrapped_sq(cart, w_corner) - 0.01, np.full(len(f), 50.0)],
+        [
+            wrapped_sq(cart, np.zeros(3)) - 0.09,
+            wrapped_sq(cart, w_corner) - 0.01,
+            np.full(len(f), 50.0),
+        ],
         axis=1,
     )
     return FermiSurface.from_ebs(mesh(f, bands, FCC, (60, 60, 60), 0.0))
@@ -216,12 +222,14 @@ def test_two_dimensional_grid_on_a_sheared_plane_has_the_unsheared_area(nk, expe
     assert area(fs) == pytest.approx(expected, abs=AREA_TOL)
 
 
-def interior_gradients(ebs: ElectronicBandStructureMesh) -> dict[tuple[int, int, int], np.ndarray]:
+def interior_gradients(ebs: ElectronicBandStructureMesh) -> dict[tuple[int, ...], np.ndarray]:
     """Band 0's gradient at each 1/16 cubic grid point whose six cubic neighbours lie inside the
     cube |k|_inf <= 1/2, where E = |k|^2 holds without a wrap, keyed by 16 k."""
     cart = np.asarray(ebs.kpoints_cartesian)
     gradient = np.asarray(ebs.get_property(("bands", "gradients", 1)))[:, 0, 0, :]
-    inside = (np.abs(cart).max(axis=1) <= 0.5 - 1 / 16 + 1e-9) & (np.linalg.norm(cart, axis=1) > 1e-9)
+    inside = (np.abs(cart).max(axis=1) <= 0.5 - 1 / 16 + 1e-9) & (
+        np.linalg.norm(cart, axis=1) > 1e-9
+    )
     keys = np.rint(cart[inside] * 16).astype(int)
     return {tuple(int(x) for x in key): g for key, g in zip(keys, gradient[inside], strict=True)}
 
@@ -243,13 +251,16 @@ def two_band(lattice) -> FermiSurface:
     cart = f @ lattice
     d0 = (cart + 0.5) % 1.0 - 0.5
     d1 = (cart - np.array([0.4, 0.4, 0.0]) + 0.5) % 1.0 - 0.5
-    bands = np.stack([np.sum(d0**2, 1) - 0.25**2, np.sum(d1**2, 1) - 0.08**2, np.full(len(f), 5.0)], 1)
+    bands = np.stack(
+        [np.sum(d0**2, 1) - 0.25**2, np.sum(d1**2, 1) - 0.08**2, np.full(len(f), 5.0)], 1
+    )
     return FermiSurface.from_ebs(mesh(f, bands, lattice, (24, 24, 24), 0.0))
 
 
 @pytest.mark.parametrize("k", [3, 4])
 def test_both_bands_survive_the_clip_on_a_sheared_basis(k):
-    """H1: today the pocket clips to empty and the build raises; the literals are the cubic build's."""
+    """H1: today the pocket clips to empty and the build raises; the literals are the cubic
+    build's."""
     areas = {key: float(s.area) for key, s in two_band(sheared(k)).band_isosurfaces.items()}
 
     assert sorted(areas) == [(0, 0), (1, 0)]
@@ -348,8 +359,10 @@ def test_tile_holds_one_period_of_the_drawn_grid():
     each tile point holds the band at its own Cartesian k."""
     fs = drawn(sheared(3), (16, 32, 16), sphere, 0.1)
     grid = fs._periodic_grid
+    bands = fs.original_ebs.bands
+    assert grid is not None and bands is not None
 
-    tile = grid.tile(fs.original_ebs.get_property("bands").value[:, 0, 0])
+    tile = grid.tile(bands.value[:, 0, 0])
 
     assert grid.n == (32, 32, 16)
     assert grid.tile_multiple == 2

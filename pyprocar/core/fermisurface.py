@@ -132,7 +132,7 @@ class FermiSurface(pv.PolyData):
         grid = periodic_grid(ebs)
         drawn = grid.drawn_mesh(padding) if grid is not None else _given_basis_pad(ebs, padding)
         combined_surface, band_isosurfaces, drawn, point_set = generate_band_isosurfaces(
-            drawn, ebs.reciprocal_lattice, isovalue
+            drawn, np.asarray(ebs.reciprocal_lattice), isovalue
         )
         return cls(
             points=combined_surface.points,
@@ -161,13 +161,13 @@ class FermiSurface(pv.PolyData):
     @property
     def transform_matrix_to_cart(self):
         transform_to_cart = np.eye(4)
-        transform_to_cart[:3, :3] = self.ebs.reciprocal_lattice.T
+        transform_to_cart[:3, :3] = np.asarray(self.ebs.reciprocal_lattice).T
         return transform_to_cart
 
     @property
     def transform_matrix_to_frac(self):
         transform_to_frac = np.eye(4)
-        transform_to_frac[:3, :3] = np.linalg.inv(self.ebs.reciprocal_lattice.T)
+        transform_to_frac[:3, :3] = np.linalg.inv(np.asarray(self.ebs.reciprocal_lattice).T)
         return transform_to_frac
 
     @property
@@ -183,9 +183,12 @@ class FermiSurface(pv.PolyData):
         return self.isovalue - self.ebs.fermi
 
     @property
-    def reciprocal_lattice(self):
+    def reciprocal_lattice(self) -> np.ndarray:
         """The user's reciprocal basis: zone directions and supercells count in it."""
-        return self.original_ebs.reciprocal_lattice
+        lattice = self.original_ebs.reciprocal_lattice
+        if lattice is None:
+            raise ValueError("this Fermi surface's band structure has no reciprocal lattice")
+        return lattice
 
     @property
     def n_points(self):
@@ -248,7 +251,7 @@ class FermiSurface(pv.PolyData):
 
     @cached_property
     def _periodic_grid(self) -> PeriodicGrid | None:
-        return periodic_grid(self.original_ebs) if self.original_ebs is not None else None
+        return periodic_grid(self.original_ebs)
 
     @cached_property
     def _selection_resolver(self) -> ProjectionSelectionResolver:
@@ -997,13 +1000,14 @@ def padded_image_grid(padded_ebs: ElectronicBandStructureMesh) -> pv.ImageData:
 
 
 def _given_basis_pad(ebs: ElectronicBandStructureMesh, padding: int) -> ElectronicBandStructureMesh:
-    """Today's pad of k-points that are not one full uniform grid, in the basis they are given in."""
+    """Today's pad of k-points that are not one full uniform grid, in their given basis."""
     lattice = ebs.reciprocal_lattice
-    if lattice is not None and not is_reduced_basis(np.asarray(lattice), np.asarray(ebs.kgrid) > 1):
+    live = np.asarray(ebs.kgrid) > 1
+    if lattice is not None and not is_reduced_basis(np.asarray(lattice), live):
         warn_user(
             "The k-points are not one uniform grid, so the Fermi surface is drawn in the given "
-            "reciprocal basis, which is not reduced; parts of the first Brillouin zone beyond "
-            f"{padding} padded k-points are missing. Give the full uniform k-grid to draw all of it."
+            + "reciprocal basis, which is not reduced; parts of the first Brillouin zone beyond "
+            + f"{padding} padded k-points are missing. Give the full uniform k-grid to draw it all."
         )
     return ebs.pad(padding=padding, inplace=False)
 
@@ -1031,7 +1035,7 @@ def generate_band_isosurfaces(
     transform_matrix_to_cart[:3, :3] = np.asarray(padded_ebs.reciprocal_lattice).T
 
     grid = padded_image_grid(padded_ebs)
-    brillouin_zone = BrillouinZone(reciprocal_lattice, transformation_matrix=np.array([1, 1, 1]))
+    brillouin_zone = BrillouinZone(reciprocal_lattice)
 
     bands_mesh = padded_ebs.get_property_mesh("bands", order="F")
     # Get dimensions from bands_mesh
