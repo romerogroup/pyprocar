@@ -11,14 +11,13 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pyvista as pv
 
-from pyprocar.core._periodic_grid import PeriodicGrid, is_reduced_basis, periodic_grid
+from pyprocar.core._periodic_grid import PeriodicGrid, drawn_mesh, periodic_grid
 from pyprocar.core.atomic_orbital_index import ProjectionSelectionResolver
 from pyprocar.core.brillouin_zone import BrillouinZone, clip_to_zone, warn_clipped_away
 from pyprocar.core.ebs import ElectronicBandStructureMesh
 from pyprocar.core.projection import NormMode, build_property, selection_resolver
 from pyprocar.core.projection import normalize as normalize_by_mode
 from pyprocar.core.property_store import PointSet, Property
-from pyprocar.utils.log_utils import warn_user
 from pyprocar.utils.physics import *
 
 logger = logging.getLogger(__name__)
@@ -129,12 +128,7 @@ class FermiSurface(pv.PolyData):
             isovalue = ebs.fermi
         if isovalue_shift is not None:
             isovalue += isovalue_shift
-        grid = periodic_grid(ebs)
-        drawn = (
-            grid.drawn_mesh(padding, clipped_to_zone=True)
-            if grid is not None
-            else _given_basis_pad(ebs, padding)
-        )
+        grid, drawn = drawn_mesh(ebs, padding, "Fermi surface", clipped_to_zone=True)
         combined_surface, band_isosurfaces, drawn, point_set = generate_band_isosurfaces(
             drawn, np.asarray(ebs.reciprocal_lattice), isovalue
         )
@@ -1003,19 +997,6 @@ def padded_image_grid(padded_ebs: ElectronicBandStructureMesh) -> pv.ImageData:
         for axis, (step, n) in enumerate(zip(padded_ebs.kgrid_spacing, dims, strict=True))
     )
     return pv.ImageData(dimensions=dims, spacing=spacing, origin=tuple(coords.min(axis=0)))
-
-
-def _given_basis_pad(ebs: ElectronicBandStructureMesh, padding: int) -> ElectronicBandStructureMesh:
-    """Today's pad of k-points that are not one full uniform grid, in their given basis."""
-    lattice = ebs.reciprocal_lattice
-    live = np.asarray(ebs.kgrid) > 1
-    if lattice is not None and not is_reduced_basis(np.asarray(lattice), live):
-        warn_user(
-            "The k-points are not one uniform grid, so the Fermi surface is drawn in the given "
-            + "reciprocal basis, which is not reduced; parts of the first Brillouin zone beyond "
-            + f"{padding} padded k-points are missing. Give the full uniform k-grid to draw it all."
-        )
-    return ebs.pad(padding=padding, inplace=False)
 
 
 def generate_band_isosurfaces(
