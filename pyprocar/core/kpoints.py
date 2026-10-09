@@ -35,7 +35,7 @@ class KGridInfo:
     kshift: tuple[float, float, float]
 
 
-def wrap_to_first_zone(kpoints: np.ndarray) -> np.ndarray:
+def wrap_to_unit_cell(kpoints: np.ndarray) -> np.ndarray:
     """Move each fractional k by a reciprocal lattice vector into (-1/2, 1/2]."""
     return kpoints - np.ceil(kpoints - 0.5)
 
@@ -58,8 +58,8 @@ def generate_gamma_centered_kpoints(
     meshgrid = np.array(np.meshgrid(kx_vals, ky_vals, kz_vals, indexing="ij"))
     move_axis = np.swapaxes(meshgrid, 0, -1)
     grid_points = move_axis.reshape(-1, 3)
-    fbz_points = wrap_to_first_zone(grid_points)
-    sorted_kpoints = sort_kpoints(fbz_points, order="F")
+    cell_points = wrap_to_unit_cell(grid_points)
+    sorted_kpoints = sort_kpoints(cell_points, order="F")
 
     return sorted_kpoints
 

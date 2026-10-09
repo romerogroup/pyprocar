@@ -1210,7 +1210,7 @@ class ElectronicBandStructure(PointSet):
         else:
             ebs = copy.deepcopy(self)
 
-        new_kpoints = kpoints.wrap_to_first_zone(ebs.kpoints)
+        new_kpoints = kpoints.wrap_to_unit_cell(ebs.kpoints)
         ebs.update_points(new_kpoints)
         return ebs
 
@@ -2272,7 +2272,7 @@ def ibz2fbz(ebs, rotations=None, kgrid_info=None, inplace=True, time_reversals=N
         new_kpoints = grid[row[reached]]
     else:
         _, chosen = np.unique(_cell_keys(images), axis=0, return_index=True)
-        new_kpoints = kpoints.wrap_to_first_zone(images[chosen])
+        new_kpoints = kpoints.wrap_to_unit_cell(images[chosen])
 
     operation, source = np.divmod(chosen, n_ibz)
     filled = int(np.count_nonzero(operation > n_listed))
