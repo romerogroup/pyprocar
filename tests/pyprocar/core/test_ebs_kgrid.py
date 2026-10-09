@@ -88,6 +88,27 @@ def test_interpolate_carries_the_size():
     assert tuple(ebs.interpolate(2, inplace=False).kgrid) == (500, 4, 4)
 
 
+@pytest.mark.parametrize(
+    ("kgrid", "new_kgrid"),
+    [((4, 6, 2), (8, 12, 4)), ((5, 3, 4), (10, 6, 8)), ((6, 4, 1), (12, 8, 1))],
+)
+def test_interpolate_carries_the_size_of_its_kpoints(
+    kgrid: tuple[int, int, int], new_kgrid: tuple[int, int, int]
+):
+    """Every axis doubles except a single-point one, and the carried size is the k-points' grid."""
+    mesh = grid_mesh(kgrid).interpolate(2, inplace=False)
+
+    assert tuple(mesh.kgrid) == new_kgrid
+    assert mesh.n_kpoints == np.prod(new_kgrid)
+    for axis, n in enumerate(new_kgrid):
+        assert len(np.unique(mesh.kpoints[:, axis].round(9))) == n
+    # Reshaped kx fastest, mesh axis i varies only k-component i.
+    kpoints_mesh = mesh.kpoints.reshape(*new_kgrid, 3, order="F")
+    for axis in range(3):
+        assert np.allclose(np.diff(kpoints_mesh[..., axis], axis=(axis + 1) % 3), 0)
+        assert np.allclose(np.diff(kpoints_mesh[..., axis], axis=(axis + 2) % 3), 0)
+
+
 def test_expand_single_dimension_carries_the_size():
     ebs = grid_mesh((500, 2, 1))
 
