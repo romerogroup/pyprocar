@@ -28,23 +28,31 @@ SNAP_ANGLE = 3e-4
 """Radians within which a slice normal is replaced by a lattice direction (``snap_normal``).
 
 Rounding a candidate direction to 4 significant digits turns it by at most 8.4e-5 rad on
-cubic, hexagonal, fcc and bcc cells (3 digits: 7.7e-4, which random normals reach too).
-Distinct candidates are at least 4.4e-3 rad apart on hexagonal cells with c/a = 1.633,
-15 times this angle (fcc 7.1e-3, bcc 7.5e-3, cubic 9.0e-3). A longer cell has more
-candidates: 2.4e-3 at c/a = 3, 1.6e-3 at c/a = 4, 5.7e-4 at c/a = 8 and 1.9e-4 at c/a = 15,
-where a normal typed far from any low-index direction can snap to a high-index one.
+cubic, hexagonal, fcc, bcc and Bi2Se3 rhombohedral cells (3 digits: 7.7e-4, which random
+normals reach too). Distinct candidates are at least 4.4e-3 rad apart on hexagonal cells
+with c/a = 1.633, 15 times this angle (fcc 7.1e-3, bcc 7.5e-3, cubic 9.0e-3, the Bi2Se3
+rhombohedral primitive cell 3.4e-3). A longer cell has more candidates: 2.4e-3 at c/a = 3,
+1.6e-3 at c/a = 4, 5.7e-4 at c/a = 8 and 1.9e-4 at c/a = 15, where a normal typed far from
+any low-index direction can snap to a high-index one. A call builds the candidates anew:
+about 1 ms on these cells up to c/a = 4, 8-10 ms at c/a = 8 and 15.
 """
 
 SNAP_REACH = 4
-"""The snap candidates are the primitive real-space lattice vectors no longer than
-SNAP_REACH times the sum of the lattice's successive minima. A cell given in a reduced
-basis, as standard cells are, has basis vectors of those lengths, so its directions with
-indices up to SNAP_REACH, the candidates before #302, are all among them."""
+"""The snap candidates are the directions with indices up to SNAP_REACH in the given basis,
+the candidates before #302, and the primitive real-space lattice vectors no longer than
+SNAP_REACH times the sum of the lattice's successive minima. The second set depends on the
+lattice only, so a sheared basis snaps the directions its reduced basis does; the first keeps
+every direction dev snapped on a cell that is not reduced, such as a rhombohedral primitive
+cell with a small angle."""
+
+_GIVEN_INDICES = box_indices(np.full(3, -SNAP_REACH), np.full(3, SNAP_REACH + 1)).reshape(-1, 3)
+_GIVEN_INDICES = _GIVEN_INDICES[np.gcd.reduce(np.abs(_GIVEN_INDICES), axis=1) == 1]
 
 
 def _snap_candidates(real: np.ndarray) -> np.ndarray:
-    """Indices, in the rows of ``real``, of the primitive lattice vectors t with
-    |t| <= SNAP_REACH (lambda1 + lambda2 + lambda3): a set fixed by the lattice alone."""
+    """Indices, in the rows of ``real``, of the snap candidates (see SNAP_REACH): those up to
+    SNAP_REACH, and those of the primitive lattice vectors t with |t| <= SNAP_REACH
+    (lambda1 + lambda2 + lambda3)."""
     steps = niggli_basis_steps(real)
     niggli = steps @ real
     radius = SNAP_REACH * float(np.linalg.norm(niggli, axis=1).sum())
@@ -53,7 +61,8 @@ def _snap_candidates(real: np.ndarray) -> np.ndarray:
     reach = np.floor(radius * np.linalg.norm(np.linalg.inv(niggli), axis=0) + 1e-9).astype(int)
     box = box_indices(-reach, reach + 1).reshape(-1, 3)
     box = box[np.linalg.norm(box @ niggli, axis=1) <= radius * (1 + 1e-9)]
-    return box[np.gcd.reduce(np.abs(box), axis=1) == 1] @ steps
+    # A direction in both sets appears twice, with the same indices: argmax takes either.
+    return np.vstack([_GIVEN_INDICES, box[np.gcd.reduce(np.abs(box), axis=1) == 1] @ steps])
 
 
 def snap_normal(
