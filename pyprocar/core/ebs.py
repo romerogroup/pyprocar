@@ -1916,7 +1916,7 @@ class ElectronicBandStructureMesh(
         new_spacing = [spacing / interpolation_factor for spacing in ebs.kgrid_spacing]
         new_axes = [
             k0 + np.arange(n * interpolation_factor) * step
-            for k0, n, step in zip(ebs.kpoints[0], kgrid, new_spacing)
+            for k0, n, step in zip(ebs.kpoints[0], kgrid, new_spacing, strict=True)
         ]
         new_kpoints_mesh = np.stack(np.meshgrid(*new_axes, indexing="ij"), axis=-1)
         new_kpoints = new_kpoints_mesh.reshape(-1, 3, order="F")
