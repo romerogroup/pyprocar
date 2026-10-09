@@ -187,6 +187,25 @@ class TestBS2DPlotterBrillouinZone:
         assert meshes[(1, 0)].n_points == 3
         assert actors == ["surface_1_0"]
 
+    def test_the_first_drawn_band_carries_the_scalar_bar_when_band_one_is_skipped(self):
+        """The zone keeps E >= 0, so band 1 at E = -1 is skipped and band 2 shows the bar."""
+        bs2d = _bandstructure2d({"band_speed": _property(SCALARS)})
+        bs2d.points = np.array([[0.0, 0.0, -1.0], [0.0, 0.0, 2.0]])
+        bs2d.get_2d_brillouin_zone = lambda e_min, e_max: SimpleNamespace(
+            face_normals=np.array([[0.0, 0.0, -1.0]]), centers=np.zeros((1, 3))
+        )
+        plotter = BS2DPlotter(bs2d, off_screen=True)
+
+        with user_warning(__file__, match="band 1 spin 0 "):
+            meshes = plotter.plot(
+                scalars_data="band_speed", show_brillouin_zone=False, clip_brillouin_zone=True
+            )
+
+        bars = list(plotter.scalar_bars.keys())
+        plotter.close()
+        assert list(meshes) == [(2, 0)]
+        assert bars == ["Band speed"]
+
     def test_add_surface_skips_a_surface_clipped_away_with_a_warning(self, plotter):
         """H3: today the empty clip is drawn silently."""
         plotter.add_brillouin_zone(BrillouinZone(np.eye(3)))
