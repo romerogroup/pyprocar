@@ -78,7 +78,8 @@ def cross_section_areas(
     For a FermiSurface and its ``reciprocal_lattice`` (rows are the b vectors), the orbits
     are those of the periodic surface that meet the first zone (see ``plane_orbits``), and a
     normal within SNAP_ANGLE of a low-index lattice direction is first replaced by it (see
-    ``snap_normal``). Otherwise they are the closed loops of the plane's cut of the mesh.
+    ``snap_normal``). Both use the surface's own lattice; the argument only asks for them.
+    Otherwise the orbits are the closed loops of the plane's cut of the mesh.
     """
     periodic = periodic_bands(surface) if reciprocal_lattice is not None else None
     if periodic is None or not periodic.bands:

@@ -13,8 +13,13 @@ from pyvista.plotting.utilities.algorithms import (
 )
 from scipy.constants import elementary_charge, hbar
 
-from pyprocar.core._periodic_grid import CUT_TILE_BUDGET
-from pyprocar.plotter._periodic_cut import PeriodicBands, periodic_bands, plane_orbits
+from pyprocar.plotter._periodic_cut import (
+    CUT_TILE_BUDGET,
+    PeriodicBands,
+    oversized_tile,
+    periodic_bands,
+    plane_orbits,
+)
 from pyprocar.plotter._series import SurfaceSeries, surface_series
 from pyprocar.plotter._surface_plot import (
     SurfacePlotter,
@@ -57,9 +62,9 @@ def unjoined_note(surface, periodic: PeriodicBands | None) -> str:
     """Why a Fermi surface that gives no periodic bands has its orbits unjoined."""
     if periodic is not None or not hasattr(surface, "reciprocal_lattice"):
         return ""
-    grid = getattr(surface, "_periodic_grid", None)
-    if grid is not None and min(grid.n) > 1 and grid.tile_multiple > CUT_TILE_BUDGET:
-        return LARGE_TILE_NOTE.format(grid.tile_multiple, CUT_TILE_BUDGET)
+    multiple = oversized_tile(surface)
+    if multiple is not None:
+        return LARGE_TILE_NOTE.format(multiple, CUT_TILE_BUDGET)
     return UNJOINED_NOTE
 
 

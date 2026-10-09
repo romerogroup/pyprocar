@@ -23,11 +23,15 @@ from scipy.sparse import coo_matrix
 from scipy.sparse.csgraph import connected_components
 from scipy.spatial import HalfspaceIntersection
 
-from pyprocar.core._periodic_grid import CUT_TILE_BUDGET
+from pyprocar.core._periodic_grid import PeriodicGrid
 from pyprocar.core.brillouin_zone import zone_face_steps
 
 MAX_REACH = 16
 """Tile cells from the origin within which an orbit through the zone must close."""
+
+CUT_TILE_BUDGET = 16
+"""Largest tile, in stored grids, that the cut marches. A grid coprime to its shear needs 40
+to 3600 (inferred: a 16x tile of a 60^3 grid holds 3.5M points)."""
 
 _NEAR_VERTEX = np.array(list(itertools.product(range(-1, 3), repeat=3)))
 """Steps, relative to a vertex's cell, of the translates cut next at an open curve end.
@@ -111,21 +115,35 @@ class PeriodicBands:
     bands: list[PeriodicBand]
 
 
+def _grid_3d(surface) -> PeriodicGrid | None:
+    """The surface's k-grid when it is one full uniform 3D grid."""
+    grid = getattr(surface, "_periodic_grid", None)
+    return grid if grid is not None and min(grid.n) > 1 else None
+
+
+def oversized_tile(surface) -> int | None:
+    """Stored grids in one tile of the surface's 3D grid, when that is above CUT_TILE_BUDGET
+    and the cut refuses it."""
+    grid = _grid_3d(surface)
+    return grid.tile_multiple if grid is not None and grid.tile_multiple > CUT_TILE_BUDGET else None
+
+
 def periodic_bands(surface) -> PeriodicBands | None:
-    """One period of each band of a FermiSurface, or None for any other mesh, a 2D grid,
-    k-points that do not fill the uniform kgrid once, or a tile above CUT_TILE_BUDGET grids."""
+    """One period of each band of a FermiSurface, or None for any other mesh, k-points that
+    are no full uniform 3D grid (see ``periodic_grid``), or an ``oversized_tile``."""
     ebs = getattr(surface, "original_ebs", None)
     keys = getattr(surface, "band_isosurfaces", None)
     isovalue = getattr(surface, "isovalue", None)
     if ebs is None or keys is None or isovalue is None:
         return None
-    grid = surface._periodic_grid
-    if grid is None or min(grid.n) < 2 or grid.tile_multiple > CUT_TILE_BUDGET:
+    grid = _grid_3d(surface)
+    if grid is None or oversized_tile(surface) is not None:
         return None
-    energies = np.asarray(ebs.get_property("bands").value)
+    ibands, ispins = np.array(list(keys), dtype=int).reshape(-1, 2).T
+    tiles = grid.tile(np.asarray(ebs.get_property("bands").value)[:, ibands, ispins])
     bands = []
-    for iband, ispin in keys:
-        band = periodic_band(grid.tile(energies[:, iband, ispin]), float(isovalue), grid.shift)
+    for j in range(len(ibands)):
+        band = periodic_band(tiles[..., j], float(isovalue), grid.shift)
         if band is not None:
             bands.append(band)
     return PeriodicBands(grid.lattice, grid.reciprocal_lattice, bands)
@@ -335,7 +353,7 @@ def plane_orbits(
     if box is not None:
         region = (np.vstack([region[0], box[0]]), np.concatenate([region[1], box[1]]))
     start = _start_steps(zone, half, np.linalg.inv(lattice))
-    inverse = np.linalg.inv(reciprocal)
+    reciprocal_inverse = np.linalg.inv(reciprocal)
     areas: list[float] = []
     n_open = 0
     for band in periodic.bands:
@@ -350,7 +368,7 @@ def plane_orbits(
         moment = np.zeros((n_comp, 3))
         np.add.at(moment, label, (curves.q1 + curves.q2) * signed[:, None])
         with np.errstate(divide="ignore", invalid="ignore"):
-            centre = moment / (3 * total[:, None]) @ inverse
+            centre = moment / (3 * total[:, None]) @ reciprocal_inverse
         kept: list[tuple[float, np.ndarray]] = []
         for c in np.flatnonzero(curves.meets_region):
             if curves.is_open[c]:

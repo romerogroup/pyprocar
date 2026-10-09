@@ -369,9 +369,7 @@ def test_shear_of_a_reduced_fcc_basis_draws_in_that_basis():
     """b2' = b2 + 3 b1 of the fcc basis: (b1, b2, b3) and (b1, b1 + b2 + b3, b3) are both
     reduced and both 3 index steps from the given basis, but only the first undoes the one
     shear. Drawn in it, the surface and its cuts are the unsheared build's (#302 B)."""
-    shear = np.array([[1, 0, 0], [3, 1, 0], [0, 0, 1]])
-
-    lattice = drawn(shear @ FCC, (15, 15, 15), sphere, 0.1).ebs.reciprocal_lattice
+    lattice = drawn(sheared(3) @ FCC, (15, 15, 15), sphere, 0.1).ebs.reciprocal_lattice
 
     assert lattice is not None
     np.testing.assert_allclose(lattice, FCC, rtol=0, atol=1e-12)

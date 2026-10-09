@@ -390,6 +390,9 @@ def _sum_of_cosines(k: np.ndarray) -> np.ndarray:
     return 0.1 - 0.3 * np.cos(2 * np.pi * k).sum(axis=1)
 
 
+FCC = np.array([[-1, 1, 1], [1, -1, 1], [1, 1, -1]]) / 4.08
+
+
 def test_plane_tangent_to_the_surface_at_a_translate_closes_its_orbit():
     """E = 0.1 - 0.3 sum cos(2 pi k), normal (1, 1, 1), through a mesh vertex one zone over,
     where a translate of the plane touches the surface at its highest point. Marching the
@@ -410,13 +413,12 @@ def test_fcc_plane_through_grid_lines_counts_its_orbit_once():
     so its cut passes through mesh vertices. Lattice translates of the orbit then have
     different node sets but the same area-weighted centroid modulo a lattice vector; the
     plane 1e-10 above cuts no vertex and gives the same single orbit."""
-    fcc = np.array([[-1, 1, 1], [1, -1, 1], [1, 1, -1]]) / 4.08
-    surface = _periodic_surface(lambda k: _sum_of_cosines(k) + 0.05, fcc)
-    normal = np.linalg.inv(fcc).T[2]
+    surface = _periodic_surface(lambda k: _sum_of_cosines(k) + 0.05, FCC)
+    normal = np.linalg.inv(FCC).T[2]
     normal /= np.linalg.norm(normal)
 
-    areas, n_open = cross_section_areas(surface, normal, (0, 0, 0), fcc)
-    above, _ = cross_section_areas(surface, normal, 1e-10 * normal, fcc)
+    areas, n_open = cross_section_areas(surface, normal, (0, 0, 0), FCC)
+    above, _ = cross_section_areas(surface, normal, 1e-10 * normal, FCC)
 
     assert n_open == 0
     assert len(areas) == len(above) == 1
@@ -522,6 +524,10 @@ def _cylinder_around_gamma(cartesian: np.ndarray) -> np.ndarray:
     return np.sum(((cartesian[:, :2] + 0.5) % 1.0 - 0.5) ** 2, axis=1)
 
 
+def _sphere_around_gamma(cartesian: np.ndarray) -> np.ndarray:
+    return np.sum(((cartesian + 0.5) % 1.0 - 0.5) ** 2, axis=1)
+
+
 @pytest.mark.parametrize("azimuth", np.linspace(0, np.pi, 7))
 def test_sheared_basis_closes_an_orbit_longer_than_sixteen_given_cells(azimuth):
     """#302: the plane through Gamma with n_z = 0.0953 cuts the cylinder kx^2 + ky^2 = 0.1 in
@@ -540,11 +546,6 @@ def test_sheared_basis_closes_an_orbit_longer_than_sixteen_given_cells(azimuth):
     assert np.asarray(areas) == pytest.approx([3.257701228581379], abs=1e-9)
 
 
-FCC = np.array([[-1, 1, 1], [1, -1, 1], [1, 1, -1]]) / 4.08
-SHEAR_B2 = np.array([[1, 0, 0], [3, 1, 0], [0, 0, 1]])
-"""b2' = b2 + 3 b1."""
-
-
 def test_sheared_fcc_basis_cuts_the_orbits_of_the_reduced_one():
     """#302: Au cut in b2' = b2 + 3 b1 gave 0.144 + 0.211 for 0.322, because marching cubes
     ran on long thin sheared cells. The same 15^3 k-points and energies given in the reduced
@@ -552,10 +553,10 @@ def test_sheared_fcc_basis_cuts_the_orbits_of_the_reduced_one():
     n = 15
 
     def sheared_band(k: np.ndarray) -> np.ndarray:
-        return _sum_of_cosines(np.rint(k @ SHEAR_B2 * n) % n / n) + 0.05
+        return _sum_of_cosines(np.rint(k @ SHEARED_CUBIC * n) % n / n) + 0.05
 
     reduced = _periodic_surface(lambda k: _sum_of_cosines(k) + 0.05, FCC, kgrid=(n, n, n))
-    sheared = _periodic_surface(sheared_band, SHEAR_B2 @ FCC, kgrid=(n, n, n))
+    sheared = _periodic_surface(sheared_band, SHEARED_CUBIC @ FCC, kgrid=(n, n, n))
     rng = np.random.default_rng(302)
 
     for _ in range(6):
@@ -564,7 +565,7 @@ def test_sheared_fcc_basis_cuts_the_orbits_of_the_reduced_one():
         origin = rng.uniform(-0.05, 0.05) * normal
         expected, expected_open = cross_section_areas(reduced, normal, origin, FCC)
 
-        areas, n_open = cross_section_areas(sheared, normal, origin, SHEAR_B2 @ FCC)
+        areas, n_open = cross_section_areas(sheared, normal, origin, SHEARED_CUBIC @ FCC)
 
         assert n_open == expected_open
         assert np.sort(areas) == pytest.approx(np.sort(expected), abs=1e-12)
@@ -591,7 +592,7 @@ def test_grid_without_a_small_reduced_period_says_orbits_are_not_joined():
     only every 225 grids, more than the cut tiles."""
     basis = np.array([[1.0, 0.0, 0.0], [1.0, 1.0, 0.0], [1.0, 0.0, 1.0]])
     surface = _periodic_surface(
-        lambda k: np.sum(((k @ basis + 0.5) % 1.0 - 0.5) ** 2, axis=1), basis, kgrid=(15, 16, 16)
+        lambda k: _sphere_around_gamma(k @ basis), basis, kgrid=(15, 16, 16)
     )
 
     text = _slice_text(surface, show_cross_section_area=True)
@@ -781,17 +782,16 @@ def test_cut_through_mesh_vertices_keeps_every_straddling_triangle(uvw):
     """Planes along [u v w] of an fcc cell through mesh vertices: each triangle with vertices
     on both sides of the plane in a translate gives one segment, though the period's
     triangle heights, which pick the candidates, round differently from its own."""
-    fcc = np.array([[-1, 1, 1], [1, -1, 1], [1, 1, -1]]) / 4.08
-    periodic = periodic_bands(_periodic_surface(lambda k: _sum_of_cosines(k) + 0.05, fcc))
+    periodic = periodic_bands(_periodic_surface(lambda k: _sum_of_cosines(k) + 0.05, FCC))
     assert periodic is not None and periodic.bands
     band = periodic.bands[0]
-    normal = np.asarray(uvw, dtype=np.float64) @ np.linalg.inv(fcc).T
+    normal = np.asarray(uvw, dtype=np.float64) @ np.linalg.inv(FCC).T
     normal /= np.linalg.norm(normal)
     steps = np.array(list(itertools.product(range(-2, 3), repeat=3)))
 
     for vertex in range(0, len(band.canon), len(band.canon) // 16):
-        d = float(band.canon[vertex] @ fcc @ normal)
-        cut = _BandCut(band, fcc, normal, d)
+        d = float(band.canon[vertex] @ FCC @ normal)
+        cut = _BandCut(band, FCC, normal, d)
         s = cut.heights[band.tri_cls] + (band.tri_off[None] + steps[:, None, None]) @ cut.w - d
         straddling = int(((s > 0).any(axis=2) & ~(s > 0).all(axis=2)).sum())
         segments = cut.segments(steps)
@@ -804,11 +804,8 @@ def test_cut_through_mesh_vertices_keeps_every_straddling_triangle(uvw):
     reason="a surface loaded without its band structure has no grid; dev measures its slice"
 )
 def test_surface_loaded_without_its_band_structure_measures_the_drawn_slice(tmp_path):
-    def sphere_around_gamma(k):
-        return np.sum(((k + 0.5) % 1.0 - 0.5) ** 2, axis=1)
-
     path = tmp_path / "fs.pkl"
-    _periodic_surface(sphere_around_gamma).save(str(path))
+    _periodic_surface(_sphere_around_gamma).save(str(path))
     loaded = FermiSurface.load(str(path))
 
     text = _slice_text(loaded, show_cross_section_area=True)
