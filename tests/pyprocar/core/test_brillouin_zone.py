@@ -13,7 +13,7 @@ import pytest
 from scipy.spatial import ConvexHull, Voronoi
 
 from pyprocar.core.brillouin_zone import BrillouinZone, BrillouinZone2D
-from tests.pyprocar.core.test_bandstructure2d_grid import HEXAGONAL as GRAPHENE
+from tests.pyprocar.core.test_bandstructure2d_grid import HEXAGONAL
 
 
 @pytest.fixture
@@ -438,7 +438,7 @@ def _outward(zone, inside: np.ndarray) -> np.ndarray:
 def test_2d_zone_face_normals_point_out_of_the_prism_at_any_energy(e_min, e_max):
     """The graphene zone is a hexagonal prism around Gamma from e_min to e_max, so its
     centroid is (0, 0, (e_min + e_max) / 2) and all 8 face normals point away from it."""
-    zone = BrillouinZone2D(e_min=e_min, e_max=e_max, reciprocal_lattice=2 * np.pi * GRAPHENE)
+    zone = BrillouinZone2D(e_min=e_min, e_max=e_max, reciprocal_lattice=2 * np.pi * HEXAGONAL)
 
     outward = _outward(zone, np.array([0.0, 0.0, (e_min + e_max) / 2]))
 
@@ -452,7 +452,7 @@ ZONES_3D = {
     "cubic": CUBIC,
     "fcc": 2 * np.pi * np.array([[-1.0, 1.0, 1.0], [1.0, -1.0, 1.0], [1.0, 1.0, -1.0]]),
     "bcc": 2 * np.pi * np.array([[0.0, 1.0, 1.0], [1.0, 0.0, 1.0], [1.0, 1.0, 0.0]]),
-    "hexagonal": 2 * np.pi * GRAPHENE,
+    "hexagonal": 2 * np.pi * HEXAGONAL,
     "sheared-cubic": SHEARS["b2+3b1,b3-2b1+2b2"] @ CUBIC,
 }
 

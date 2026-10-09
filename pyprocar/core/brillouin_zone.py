@@ -57,24 +57,6 @@ def _wigner_seitz(reciprocal_lattice: np.ndarray) -> tuple[np.ndarray, list[list
     return brill.vertices[used], [np.searchsorted(used, face).tolist() for face in cell]
 
 
-def _outward_faces(verts: np.ndarray, faces: list[list[int]]) -> list[int]:
-    """``faces`` in ``pv.PolyData``'s flat layout, each wound so that its normal points away
-    from the centroid of ``verts``.
-
-    The zone is convex, so the vertex centroid lies inside it and on the inner side of every
-    face plane: ``normal . (face_center - centroid) > 0`` holds exactly for outward normals.
-    """
-    centroid = verts.mean(axis=0)
-    flat: list[int] = []
-    for face in faces:
-        corners = verts[face]
-        center = corners.mean(axis=0)
-        area_vector = np.cross(corners - center, np.roll(corners, -1, axis=0) - center).sum(axis=0)
-        wound = face if area_vector @ (center - centroid) > 0 else face[::-1]
-        flat.extend([len(wound), *wound])
-    return flat
-
-
 class BrillouinZone(pv.PolyData):
     """
     A Surface object with verts, faces and line representation, representing the BrillouinZone.
@@ -95,12 +77,11 @@ class BrillouinZone(pv.PolyData):
         self.reciprocal = reciprocal_lattice
         verts, faces = self.wigner_seitz()
 
-        super().__init__(verts, _outward_faces(verts, faces))
+        super().__init__(verts, [i for face in faces for i in (len(face), *face)])
+        self.compute_normals(point_normals=False, auto_orient_normals=True, inplace=True)
 
         logger.debug(f"BrillouinZone faces: {len(faces)}")
         logger.debug(f"BrillouinZone verts: {verts.shape}")
-
-        return None
 
     @property
     def centers(self):
@@ -194,8 +175,8 @@ class BrillouinZone2D(pv.PolyData):
             if np.isclose(vert_z, max_val, atol=1e-2):
                 vert[axis] = e_max
 
-        super().__init__(verts, _outward_faces(verts, faces))
-        return None
+        super().__init__(verts, [i for face in faces for i in (len(face), *face)])
+        self.compute_normals(point_normals=False, auto_orient_normals=True, inplace=True)
 
     @property
     def centers(self):

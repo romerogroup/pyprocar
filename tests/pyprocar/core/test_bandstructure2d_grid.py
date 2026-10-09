@@ -42,7 +42,9 @@ def layered_band(frac: np.ndarray) -> np.ndarray:
     return square_band(frac) + 0.5 * np.sin(2 * np.pi * frac[:, 2])
 
 
-def two_band_mesh(lattice: np.ndarray, band, n_kz: int = 1) -> ElectronicBandStructureMesh:
+def two_band_mesh(
+    lattice: np.ndarray, band, n_kz: int = 1, offset: float = 0.0
+) -> ElectronicBandStructureMesh:
     axis = np.arange(N_K) / N_K
     frac = np.stack(
         np.meshgrid(axis, axis, np.arange(n_kz) / n_kz, indexing="ij"), axis=-1
@@ -53,7 +55,7 @@ def two_band_mesh(lattice: np.ndarray, band, n_kz: int = 1) -> ElectronicBandStr
             kgrid=(N_K, N_K, n_kz), kgrid_mode=KGRID_MODE.GAMMA, kshift=(0.0, 0.0, 0.0)
         ),
         kpoints=frac,
-        bands=np.stack([-energies, energies], axis=1)[:, :, None],
+        bands=np.stack([offset - energies, offset + energies], axis=1)[:, :, None],
         projected=np.ones((len(frac), 2, 1, 1, 1)),
         fermi=0.0,
         reciprocal_lattice=lattice,
