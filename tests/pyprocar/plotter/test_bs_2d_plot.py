@@ -17,7 +17,7 @@ from tests.pyprocar.core.test_bandstructure2d_grid import (
     tight_binding_graphene,
     two_band_mesh,
 )
-from tests.pyprocar.core.test_bandstructure2d_zone import projected_area
+from tests.pyprocar.core.test_bandstructure2d_zone import HEXAGON_ZONE_AREA, projected_area
 from tests.utils.user_warning import user_warning
 
 TRIANGLE_FACES = [3, 0, 1, 2]
@@ -194,9 +194,8 @@ class TestBS2DPlotterBrillouinZone:
             energy_range, abs=0.01
         )
         assert sorted(drawn) == [(0, 0), (1, 0)]
-        hexagon = 0.405231703 * 0.233960597 * 2 * (2 * np.pi) ** 2
         for mesh in drawn.values():
-            assert projected_area(mesh) == pytest.approx(hexagon, rel=1e-9)
+            assert projected_area(mesh) == pytest.approx(HEXAGON_ZONE_AREA, rel=1e-9)
 
     def test_a_band_outside_the_zone_is_skipped_with_a_warning(self):
         """H3: the zone spans -1.5 to 1.5 on each axis, so band 2 at E = 2 clips to nothing;

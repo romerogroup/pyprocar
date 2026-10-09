@@ -137,6 +137,10 @@ def test_zone_of_a_grid_drawn_on_a_sublattice_is_the_crystals():
     np.testing.assert_allclose(zone.bounds, [-np.pi, np.pi, -np.pi, np.pi, -1.0, 1.0], atol=1e-12)
 
 
+HEXAGON_ZONE_AREA = 0.405231703 * 0.233960597 * 2 * (2 * np.pi) ** 2
+"""Graphene's zone, |b1 x b2| of HEXAGONAL, with the plot's 2 pi scale."""
+
+
 def projected_area(surface: pv.PolyData) -> float:
     points = np.array(surface.points)
     points[:, 2] = 0.0
@@ -165,9 +169,8 @@ def test_bs2d_on_a_zero_to_one_hexagonal_grid_draws_the_whole_zone():
     extent = Delaunay(surface[np.isfinite(surface).all(axis=1), :2])
     assert (extent.find_simplex(np.asarray(zone.points)[:, :2]) >= 0).all()
     assert sorted(drawn) == [(0, 0), (1, 0)]
-    hexagon = 0.405231703 * 0.233960597 * 2 * (2 * np.pi) ** 2
     for sheet in drawn.values():
-        assert projected_area(sheet) == pytest.approx(hexagon, rel=1e-9)
+        assert projected_area(sheet) == pytest.approx(HEXAGON_ZONE_AREA, rel=1e-9)
 
 
 def todays_pad_build(ebs, padding: int, normal, origin, as_cartesian: bool) -> BandStructure2D:
@@ -190,15 +193,16 @@ def todays_pad_build(ebs, padding: int, normal, origin, as_cartesian: bool) -> B
 
 
 CENTRED_HEX = grid_fracs((24, 24, 1), centred=True)
+CENTRED_HEX_MESH = mesh(CENTRED_HEX, tight_binding_graphene(CENTRED_HEX), HEXAGONAL, (24, 24, 1))
 REDUCED_CASES = {
     "hexagonal-centred-cartesian": (
-        mesh(CENTRED_HEX, tight_binding_graphene(CENTRED_HEX), HEXAGONAL, (24, 24, 1)),
+        CENTRED_HEX_MESH,
         (0.0, 0.0, 1.0),
         (0.0, 0.0, 0.0),
         True,
     ),
     "hexagonal-centred-fractional": (
-        mesh(CENTRED_HEX, tight_binding_graphene(CENTRED_HEX), HEXAGONAL, (24, 24, 1)),
+        CENTRED_HEX_MESH,
         (0.0, 0.0, 1.0),
         (0.0, 0.0, 0.0),
         False,

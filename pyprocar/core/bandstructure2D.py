@@ -13,11 +13,10 @@ import numpy as np
 import pyvista as pv
 from scipy.interpolate import LinearNDInterpolator
 
-from pyprocar.core._periodic_grid import is_reduced_basis, periodic_grid
+from pyprocar.core._periodic_grid import drawn_mesh
 from pyprocar.core.brillouin_zone import BrillouinZone2D
 from pyprocar.core.ebs import ElectronicBandStructureMesh
 from pyprocar.core.property_store import PointSet, Property
-from pyprocar.utils.log_utils import warn_user
 
 np.set_printoptions(threshold=sys.maxsize)
 
@@ -500,20 +499,6 @@ def generate_band_2d_surfaces(
     return combined_surface, band_surfaces_dict, point_set
 
 
-def _given_basis_pad(ebs: ElectronicBandStructureMesh, padding: int) -> ElectronicBandStructureMesh:
-    """Today's pad of k-points that are not one full uniform grid, in their given basis."""
-    lattice = ebs.reciprocal_lattice
-    live = np.asarray(ebs.kgrid) > 1
-    if lattice is not None and not is_reduced_basis(np.asarray(lattice), live):
-        warn_user(
-            "The k-points are not one uniform grid, so the 2D band structure is drawn in the "
-            + "given reciprocal basis, which is not reduced; parts of the first Brillouin zone "
-            + f"beyond {padding} padded k-points are missing. Give the full uniform k-grid to "
-            + "draw it all."
-        )
-    return ebs.pad(padding=padding, inplace=False)
-
-
 class BandStructure2D(pv.PolyData):
     """
     2D band structure visualization from a plane cut through k-space.
@@ -624,8 +609,7 @@ class BandStructure2D(pv.PolyData):
             The constructed 2D band structure surface
         """
         original_ebs = copy.copy(ebs)
-        grid = periodic_grid(ebs)
-        drawn = grid.drawn_mesh(padding) if grid is not None else _given_basis_pad(ebs, padding)
+        _, drawn = drawn_mesh(ebs, padding, drawing="2D band structure")
         padded_ebs = drawn.expand_single_dimension(inplace=True)
 
         plane_info = compute_plane_info(

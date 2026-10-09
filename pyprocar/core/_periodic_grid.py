@@ -18,6 +18,7 @@ import numpy as np
 
 from pyprocar.core.brillouin_zone import BrillouinZone, reduced_basis_steps
 from pyprocar.core.kpoints import KGridInfo
+from pyprocar.utils.log_utils import warn_user
 
 if TYPE_CHECKING:
     from pyprocar.core.ebs import ElectronicBandStructureMesh
@@ -120,6 +121,26 @@ class PeriodicGrid:
     def _rows_at(self, m: np.ndarray) -> np.ndarray:
         index = (m @ self._to_source + self._offset) % np.asarray(self._rows.shape)
         return self._rows[index[..., 0], index[..., 1], index[..., 2]]
+
+
+def drawn_mesh(
+    ebs: ElectronicBandStructureMesh, padding: int, drawing: str
+) -> tuple[PeriodicGrid | None, ElectronicBandStructureMesh]:
+    """The grid of ``ebs`` and the mesh to draw ``drawing`` on: ``PeriodicGrid.drawn_mesh``, or
+    today's pad in the given basis when the k-points are not one full uniform grid. A sheared
+    given basis then warns that part of the zone is missing."""
+    grid = periodic_grid(ebs)
+    if grid is not None:
+        return grid, grid.drawn_mesh(padding)
+    lattice = ebs.reciprocal_lattice
+    live = np.asarray(ebs.kgrid) > 1
+    if lattice is not None and not is_reduced_basis(np.asarray(lattice), live):
+        warn_user(
+            f"The k-points are not one uniform grid, so the {drawing} is drawn in the given "
+            + "reciprocal basis, which is not reduced; parts of the first Brillouin zone beyond "
+            + f"{padding} padded k-points are missing. Give the full uniform k-grid to draw it all."
+        )
+    return None, ebs.pad(padding=padding, inplace=False)
 
 
 def periodic_grid(ebs: ElectronicBandStructureMesh) -> PeriodicGrid | None:
