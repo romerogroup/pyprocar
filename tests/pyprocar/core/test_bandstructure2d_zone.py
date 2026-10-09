@@ -173,6 +173,30 @@ def test_bs2d_on_a_zero_to_one_hexagonal_grid_draws_the_whole_zone():
         assert projected_area(sheet) == pytest.approx(HEXAGON_ZONE_AREA, rel=1e-9)
 
 
+@pytest.mark.parametrize("padding", [3, 15])
+def test_unclipped_bs2d_on_a_zero_to_one_grid_holds_the_zone_and_todays_pad(padding):
+    """A pad of p points on a [0, 1) 30 x 30 grid spans fractional -p/30 to (29 + p)/30. Both
+    pads miss the zone corner at -2/3, and both reach past the zone's far corner at 2/3 on the
+    far side, so the drawn sheet must hold the zone and the whole pad."""
+    frac = grid_fracs((30, 30, 1))
+    bs = BandStructure2D.from_ebs(
+        mesh(frac, tight_binding_graphene(frac), HEXAGONAL, (30, 30, 1)),
+        normal=(0, 0, 1),
+        grid_interpolation=(80, 80),
+        padding=padding,
+    )
+
+    lo, hi = -padding / 30, (29 + padding) / 30
+    pad = np.array([[lo, lo, 0.0], [hi, lo, 0.0], [lo, hi, 0.0], [hi, hi, 0.0]])
+    # A hair inside the box, so a corner on the sheet's edge counts as held.
+    pad = pad + 1e-6 * (pad.mean(axis=0) - pad)
+    zone = bs.get_2d_brillouin_zone(e_min=-1.0, e_max=1.0)
+    surface = np.asarray(bs.points)
+    extent = Delaunay(surface[np.isfinite(surface).all(axis=1), :2])
+    assert (extent.find_simplex(np.asarray(zone.points)[:, :2]) >= 0).all()
+    assert (extent.find_simplex((2 * np.pi * pad @ HEXAGONAL)[:, :2]) >= 0).all()
+
+
 def todays_pad_build(ebs, padding: int, normal, origin, as_cartesian: bool) -> BandStructure2D:
     """dev's from_ebs: pad the given grid, then cut the plane."""
     padded = ebs.pad(padding=padding, inplace=False).expand_single_dimension(inplace=False)
