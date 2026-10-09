@@ -433,6 +433,9 @@ TURN = np.array([[0.36, -0.48, 0.8], [0.8, 0.6, 0.0], [-0.48, 0.64, 0.6]])
 """A rotation (orthonormal rows, det 1), as a POSCAR in another orientation gives it."""
 
 
+@pytest.mark.guards_existing_behaviour(
+    reason="dev draws every basis as given, so rounding cannot move it; #302's choice must not"
+)
 def test_drawn_basis_does_not_move_with_rounding_noise_in_the_reciprocal_lattice():
     """At alpha = 110 degrees the primitive reciprocal basis is not reduced, and several of its
     reduced bases are equally near it in index space. Turning the cell first, as a POSCAR in
