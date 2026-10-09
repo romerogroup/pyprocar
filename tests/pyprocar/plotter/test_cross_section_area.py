@@ -576,6 +576,25 @@ def test_bi2se3_cut_along_hexagonal_103_does_not_depend_on_row_order_or_rounding
         assert areas == pytest.approx([area], rel=1e-2)
 
 
+@pytest.mark.guards_existing_behaviour(
+    reason="dev cuts the Bi2Se3 cell on its given basis, one orbit within 1%; #302 must keep it"
+)
+@pytest.mark.parametrize("signs", [(-1, 1, 1), (1, -1, 1), (1, 1, -1)])
+def test_bi2se3_cut_along_hexagonal_103_does_not_depend_on_the_signs_of_the_rows(signs):
+    """A row and its negative span the same k-grid, so the cut is the analytic one orbit."""
+    flip = np.array(signs)
+    reciprocal = np.linalg.inv(BI2SE3_RHOMBOHEDRAL * flip[:, None]).T
+    normal = BI2SE3_HEX_103 @ BI2SE3_RHOMBOHEDRAL
+    normal /= np.linalg.norm(normal)
+    surface = _periodic_surface(lambda k: _bi2se3_band(k * flip), reciprocal)
+
+    for offset, area in BI2SE3_HEX_103_ORBIT.items():
+        areas, n_open = cross_section_areas(surface, normal, offset * normal, reciprocal)
+
+        assert n_open == 0
+        assert areas == pytest.approx([area], rel=1e-2)
+
+
 def test_drawn_slice_uses_the_snapped_normal():
     plotter = FermiPlotter(off_screen=True)
     plotter.add_box_slicer(
