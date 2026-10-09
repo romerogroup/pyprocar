@@ -197,6 +197,21 @@ def test_unclipped_bs2d_on_a_zero_to_one_grid_holds_the_zone_and_todays_pad(padd
     assert (extent.find_simplex((2 * np.pi * pad @ HEXAGONAL)[:, :2]) >= 0).all()
 
 
+def test_unclipped_bs2d_on_a_sheared_basis_draws_the_pad_of_its_reduced_basis():
+    """The [0, 1) 16^3 grid on b2 = (3,1,0) is the cubic [0, 1) grid. Given in the cubic basis,
+    today's pad of 15 holds the zone, so that is the mesh both bases draw."""
+    sheared = BandStructure2D.from_ebs(saw_mesh(SHEARED), normal=(0, 0, 1), padding=15)
+    cubic = saw_mesh(CUBIC).pad(padding=15, inplace=False)
+
+    def cartesian(ebs: ElectronicBandStructureMesh) -> np.ndarray:
+        points = np.asarray(ebs.kpoints) @ np.asarray(ebs.reciprocal_lattice)
+        return np.round(points[np.lexsort(points.T)], 9)
+
+    # expand_single_dimension leaves a three-dimensional grid as it is.
+    assert sheared.ebs.kgrid == cubic.kgrid == (46, 46, 46)
+    np.testing.assert_array_equal(cartesian(sheared.ebs), cartesian(cubic))
+
+
 def todays_pad_build(ebs, padding: int, normal, origin, as_cartesian: bool) -> BandStructure2D:
     """dev's from_ebs: pad the given grid, then cut the plane."""
     padded = ebs.pad(padding=padding, inplace=False).expand_single_dimension(inplace=False)
