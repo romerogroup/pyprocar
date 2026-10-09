@@ -366,7 +366,7 @@ def test_doubly_sheared_basis_snaps_every_direction_with_cubic_indices_up_to_2()
     for uvw in cubic:
         direction, indices = snap_normal(_turned_by_1e_4_rad(uvw), reciprocal)
         if indices is not None and np.array_equal(np.array(indices) @ given, uvw):
-            np.testing.assert_allclose(direction, uvw / np.linalg.norm(uvw), atol=1e-12)
+            np.testing.assert_allclose(direction, np.divide(uvw, np.linalg.norm(uvw)), atol=1e-12)
             snapped.append(uvw)
 
     assert len(cubic) == 98
