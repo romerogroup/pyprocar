@@ -211,8 +211,10 @@ def _gauss_steps(rows: np.ndarray) -> np.ndarray:
 
 def _nearest_identity(steps: np.ndarray, lattice: np.ndarray, live: np.ndarray) -> np.ndarray:
     """Of the bases with the sorted row lengths of the reduced basis ``steps @ lattice``, the one
-    closest to the identity in index space, so a shear of a reduced basis returns to it exactly;
-    ties go to the drawn rows most parallel to the given ones.
+    closest to the identity in index space, so a shear of a reduced basis returns to it exactly.
+    Ties go to the fewest changed entries, which undoes a single shear b2 + 3 b1 of an fcc basis
+    rather than reaching (b1, b1 + b2 + b3, b3), then to the drawn rows most parallel to the
+    given ones.
 
     Candidate rows are the -1, 0, 1 combinations of the reduced rows. A hexagonal plane has
     reduced bases that are no signed permutation of each other, (b1, b2) and (b1, b2 - b1).
@@ -229,10 +231,12 @@ def _nearest_identity(steps: np.ndarray, lattice: np.ndarray, live: np.ndarray) 
     usable = (np.abs(np.rint(np.linalg.det(bases))) == 1) & (
         lengths <= reduced_lengths * (1 + REDUCED_TOLERANCE)
     ).all(axis=1)
-    distance = np.abs(bases - np.eye(3, dtype=int)).sum(axis=(1, 2))
+    change = bases - np.eye(3, dtype=int)
+    distance = np.abs(change).sum(axis=(1, 2))
+    changed = np.count_nonzero(change, axis=(1, 2))
     unit = lattice / np.linalg.norm(lattice, axis=1, keepdims=True)
     cosine = (drawn / np.linalg.norm(drawn, axis=2, keepdims=True) * unit).sum(axis=(1, 2))
-    ranked = np.lexsort((-cosine, distance))
+    ranked = np.lexsort((-cosine, changed, distance))
     return bases[ranked[usable[ranked]][0]]
 
 
