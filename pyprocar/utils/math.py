@@ -265,18 +265,12 @@ def fft_interpolate_nd_3dmesh(mesh, interpolation_factor):
     """
     scalar_dims = mesh.shape[3:]
 
-    new_mesh_shape = (
-        mesh.shape[0] * interpolation_factor,
-        mesh.shape[1] * interpolation_factor,
-        mesh.shape[2] * interpolation_factor,
-        *scalar_dims,
-    )
-
-    new_mesh = np.zeros(new_mesh_shape)
-
     # If this is just a 3D array, use fft_interpolate directly
     if len(scalar_dims) == 0:
         return fft_interpolate_mesh(mesh, interpolation_factor)
+
+    new_mesh_shape = (*fft_interpolated_shape(mesh.shape[:3], interpolation_factor), *scalar_dims)
+    new_mesh = np.zeros(new_mesh_shape, dtype=complex if np.iscomplexobj(mesh) else float)
 
     # For higher dimensional arrays, iterate through the scalar dimensions
 
@@ -303,7 +297,7 @@ def fft_interpolate_mesh(function, interpolation_factor=2):
 
     if I = interpolation_factor
     This function will receive f(x,y,z) with dimensions of (nx,ny,nz)
-    and returns f(x,y,z) with dimensions of (nx*I,ny*I,nz*I)
+    and returns f(x,y,z) with dimensions of (nx*I,ny*I,nz*I); an axis of length 1 stays 1.
 
     Parameters
     ----------
@@ -315,8 +309,14 @@ def fft_interpolate_mesh(function, interpolation_factor=2):
     Returns
     -------
     np.ndarray
-        The interpolated points
+        The interpolated points, complex only when ``function`` is complex
     """
+    if np.iscomplexobj(function):
+        # The padding below puts an even axis's Nyquist term at -n/2 only, which the real path
+        # makes symmetric by taking .real; interpolating each part keeps that for complex input.
+        real = fft_interpolate_mesh(function.real, interpolation_factor)
+        return real + 1j * fft_interpolate_mesh(function.imag, interpolation_factor)
+
     # Handle NaN values if present
     has_nan = np.isnan(function).any()
     if has_nan:
@@ -325,40 +325,26 @@ def fft_interpolate_mesh(function, interpolation_factor=2):
     else:
         function_copy = function.copy()
 
-    # Perform FFT
+    # Zero-pad the centred spectrum, so each frequency keeps its value on the larger grid.
+    spectrum = np.fft.fftshift(np.fft.fftn(function_copy))
+    new_shape = fft_interpolated_shape(spectrum.shape, interpolation_factor)
+    pad = []
+    for n, new_n in zip(spectrum.shape, new_shape, strict=True):
+        before = new_n // 2 - n // 2
+        pad.append((before, new_n - n - before))
+    new_fft = np.fft.ifftshift(np.pad(spectrum, pad))
 
-    # Get dimensions of the input array
-    nx, ny, nz = function_copy.shape
+    interpolated = np.fft.ifftn(new_fft) * (np.prod(new_shape) / np.prod(spectrum.shape))
+    return interpolated.real
 
-    # Create larger output array filled with zeros
-    new_shape = (
-        nx * interpolation_factor,
-        ny * interpolation_factor,
-        nz * interpolation_factor,
-    )
-    new_fft = np.zeros(new_shape, dtype=complex)
-    # Calculate half-dimensions for proper frequency component placement
-    nx_half = nx // 2
-    ny_half = ny // 2
-    nz_half = nz // 2
 
-    # Copy low frequency components to the new array
-    eigen_fft = np.fft.fftn(function_copy)
-    new_fft[:nx_half, :ny_half, :nz_half] = eigen_fft[:nx_half, :ny_half, :nz_half]
+def fft_interpolated_shape(shape, interpolation_factor):
+    """Return the grid shape FFT interpolation produces.
 
-    new_fft[-nx_half:, :ny_half, :nz_half] = eigen_fft[-nx_half:, :ny_half, :nz_half]
-    new_fft[:nx_half, -ny_half:, :nz_half] = eigen_fft[:nx_half, -ny_half:, :nz_half]
-    new_fft[:nx_half, :ny_half, -nz_half:] = eigen_fft[:nx_half, :ny_half, -nz_half:]
-
-    new_fft[:nx_half, -ny_half:, -nz_half:] = eigen_fft[:nx_half, -ny_half:, -nz_half:]
-    new_fft[-nx_half:, -ny_half:, :nz_half] = eigen_fft[-nx_half:, -ny_half:, :nz_half]
-    new_fft[-nx_half:, :ny_half, -nz_half:] = eigen_fft[-nx_half:, :ny_half, -nz_half:]
-
-    new_fft[-nx_half:, -ny_half:, -nz_half:] = eigen_fft[-nx_half:, -ny_half:, -nz_half:]
-
-    # Perform inverse FFT to get the interpolated result
-    interpolated = np.real(np.fft.ifftn(new_fft)) * interpolation_factor**3
-    return interpolated
+    An axis with one sample has no frequency to resolve beyond a constant, so it keeps its one
+    sample instead of repeating it.
+    """
+    return tuple(n * interpolation_factor if n > 1 else n for n in shape)
 
 
 def calculate_central_differences_on_meshgrid_axis(scalar_mesh, axis):
